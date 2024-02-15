@@ -1,4 +1,4 @@
-from units import ureg
+from .units import ureg
 from typing import List
 import numpy as np
 
