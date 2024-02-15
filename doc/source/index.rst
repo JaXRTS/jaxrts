@@ -9,7 +9,6 @@ A python Package for x-ray Thomson Scattering, using jax.
    :caption: Contents:
 
    installing.rst
-   usage.rst
    development.rst
    auto_examples/index.rst
 

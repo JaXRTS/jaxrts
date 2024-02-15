@@ -19,11 +19,14 @@ flake8 = "^7.0.0"
 black = "^24.2.0"
 ipython = "^8.21.0"
 pytest = "^8.0.0"
+mkinit = "^1.1.0"
 
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.2.6"
 sphinx-rtd-theme = "^2.0.0"
+sphinx-gallery = "^0.15.0"
+sphinx-toolbox = "^3.5.0"
 
 [build-system]
 requires = ["poetry-core"]
