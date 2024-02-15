@@ -1,5 +1,5 @@
 """
-This submodule contains is dedicated to form factors.
+This submodule is dedicated to form factors.
 """
 
 import logging
