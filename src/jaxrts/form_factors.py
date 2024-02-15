@@ -10,23 +10,23 @@ from .units import ureg, Quantity
 
 logger = logging.getLogger(__name__)
 
-jit
+@jit
 def pauling_xf(k: Quantity, Zeff: Quantity) -> Quantity:
     return (k * ureg.a_0) / (2 * Zeff)
 
 
-jit
+@jit
 def pauling_f10(k: Quantity, Zeff: Quantity) -> Quantity:
     x = pauling_xf(k, Zeff)
     return 1 / (1 + x**2) ** 2
 
-jit
+@jit
 def pauling_f21(k: Quantity, Zeff: Quantity) -> Quantity:
     x = 2 * pauling_xf(k, Zeff)
     return (1 - x**2) / ((1 + x**2) ** 4)
 
 
-jit
+@jit
 def pauling_f20(k: Quantity, Zeff: Quantity) -> Quantity:
     x = 2 * pauling_xf(k, Zeff)
     return (1 - 2 * x**2) * _f21(k, Zeff)
