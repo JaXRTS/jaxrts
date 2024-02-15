@@ -29,7 +29,7 @@ def pauling_f21(k: Quantity, Zeff: Quantity) -> Quantity:
 @jit
 def pauling_f20(k: Quantity, Zeff: Quantity) -> Quantity:
     x = 2 * pauling_xf(k, Zeff)
-    return (1 - 2 * x**2) * _f21(k, Zeff)
+    return (1 - 2 * x**2) * pauling_f21(k, Zeff)
 
 
 def pauling_atomic_ff(
