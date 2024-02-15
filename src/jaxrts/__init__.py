@@ -15,6 +15,7 @@ from . import instrument_function
 from . import ion_feature
 from . import plasmastate
 from . import plotting
+from . import units
 
 __all__ = ['bound_free', 'core_electron', 'free_bound', 'helpers',
            'instrument_function', 'ion_feature', 'plasmastate', 'plotting']
