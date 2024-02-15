@@ -2,7 +2,7 @@
 This submodule is dedicated to the calculation of the free electron dynamic structure
 """
 
-from units import ureg, Quantity
+from .units import ureg, Quantity
 from typing import List
 
 import jax
@@ -105,7 +105,7 @@ def eps_k_w(
 def S0_ee(k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List) -> jnp.ndarray:
 
     """
-    Calculated the free electron dynamics structure using the quantum corrected Salpeter 
+    Calculates the free electron dynamics structure using the quantum corrected Salpeter 
     approximation of the electron dielectric response function.
     
     Parameters
