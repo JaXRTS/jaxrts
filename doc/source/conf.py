@@ -17,6 +17,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",
+    "sphinxcontrib.bibtex",
     "sphinx_toolbox.collapse",
     "sphinx_gallery.gen_gallery",
 ]
@@ -58,6 +59,9 @@ sphinx_gallery_conf = {
     # To exclude everything, use: '.*'
     "exclude_implicit_doc": {},
 }
+
+# bibtex
+bibtex_bibfiles = ["literature.bib"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
