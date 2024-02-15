@@ -21,9 +21,7 @@ ureg = jaxrts.units.ureg
 
 k = np.linspace(0, 10, 100) / ureg.angstrom
 
-CZ1s = 6 - 0.19
-CZ2s = 6 - 2.04
-CZ2p = 6 - 2.91
+CZ1s, CZ2s, CZ2p = ff.pauling_effective_charge(6)[:3]
 
 fC10 = ff.pauling_f10(k, CZ1s).m_as(ureg.dimensionless)
 fC20 = ff.pauling_f20(k, CZ2s).m_as(ureg.dimensionless)
