@@ -1,4 +1,4 @@
-from .units import ureg
+from .units import ureg, Quantity
 from typing import List
 import numpy as np
 
@@ -37,6 +37,7 @@ class PlasmaState:
         pass
     
     def probe(energy : Quantity, theta : float):
-        pass
+        
+        lambda_0 = (energy.to(ureg.joule) / (1 * ureg.planck_constant)).to_base_units()
         
         
