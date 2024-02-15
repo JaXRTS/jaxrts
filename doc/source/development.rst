@@ -28,7 +28,7 @@ Creating a new version
 
 To bump a new version
 
-1. Change ``__version__`` in the ``src/logbook_4463/__init__.py`` file
+1. Change ``__version__`` in the ``src/jaxrts/__init__.py`` file
 2. Change the ``version`` in ``pyproject.toml``
 3. Commit your changes
 4. Create a new git tag via ``git tag 0.3.0``
