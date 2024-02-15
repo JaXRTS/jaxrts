@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "jaxtrs"
+version = "0.1.0"
+description = ""
+authors = ["J. Lütgert, S. Schumacher"]
+readme = "README.md"
+packages = [{include = "jaxtrs", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+jax = "^0.4.24"
+jpu = "^0.0.3"
+numpy = "^1.26.4"
+matplotlib = "^3.8.3"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.0.0"
+black = "^24.2.0"
+ipython = "^8.21.0"
+pytest = "^8.0.0"
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.2.6"
+sphinx-rtd-theme = "^2.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
