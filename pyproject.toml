@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "jaxtrs"
+name = "jaxrts"
 version = "0.1.0"
 description = ""
 authors = ["J. Lütgert, S. Schumacher"]
 readme = "README.md"
-packages = [{include = "jaxtrs", from = "src"}]
+packages = [{include = "jaxrts", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
