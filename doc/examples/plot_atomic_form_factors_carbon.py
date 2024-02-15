@@ -25,29 +25,29 @@ CZ1s = 6 - 0.19
 CZ2s = 6 - 2.04
 CZ2p = 6 - 2.91
 
-fC10 = ff.pauling_f10(k, CZ1s)
-fC20 = ff.pauling_f20(k, CZ2s)
-fC21 = ff.pauling_f21(k, CZ2s)
+fC10 = ff.pauling_f10(k, CZ1s).m_as(ureg.dimensionless)
+fC20 = ff.pauling_f20(k, CZ2s).m_as(ureg.dimensionless)
+fC21 = ff.pauling_f21(k, CZ2s).m_as(ureg.dimensionless)
 
 plt.style.use("science")
-plt.plot(k, fC10 + fC20 + fC21, label="Full form factor")
+plt.plot(k.m_as(1/ureg.angstrom), fC10 + fC20 + fC21, label="Full form factor")
 
 plt.plot(
-    k,
+    k.m_as(1/ureg.angstrom),
     fC10,
     label=r"$1s$ electrons",
     color="grey",
     linestyle=((0, (1, 1))),
 )
 plt.plot(
-    k,
+    k.m_as(1/ureg.angstrom),
     fC20,
     label=r"$2s$ electrons",
     color="grey",
     linestyle=((0, (5, 1))),
 )
 plt.plot(
-    k,
+    k.m_as(1/ureg.angstrom),
     fC21,
     label=r"$2p$ electrons",
     color="grey",
