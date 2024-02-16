@@ -73,3 +73,16 @@ def orbital_array(
             n4f,
         ]
     )
+
+
+def invert_dict(dictionary: dict) -> dict:
+    """
+    Invert a dictionary, so that it's keys become values, and the values are
+    the keys of the returned dict.
+    """
+    out_dir = {v: k for k, v in dictionary.items()}
+    if len(dictionary) != len(out_dir):
+        raise ValueError(
+            f"Dict {dictionary} cannot be inverted because it contains non-unique entries."  # noqa: E501
+        )
+    return out_dir
