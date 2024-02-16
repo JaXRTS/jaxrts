@@ -44,7 +44,7 @@ exclude_patterns = []
 # Sphinx gallery
 sphinx_gallery_conf = {
     "examples_dirs": ["../examples"],
-    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
+    "gallery_dirs": "gen_examples",  # path to where to save gallery generated output
     "reference_url": {
         # The module you locally document uses None
         "jaxrts": None,

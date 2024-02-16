@@ -17,8 +17,7 @@ help:
 clean:
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	rm -r -f source/_autosummary/
-	rm -r -f source/auto_examples/
-	rm -r -f source/gen_modules/
+	rm -r -f source/gen_*
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
