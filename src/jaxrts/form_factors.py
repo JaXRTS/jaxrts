@@ -40,25 +40,25 @@ def pauling_size_screening_constants(Z: int | Quantity) -> jnp.array:
         Z, onp.array([39, 48, 57, 71]), onp.array([31.8, 34.0, 34.0, 39.6])
     )
     S4f = jnpu.interp(Z, onp.array([58, 71]), onp.array([43, 49.8]))
-    S5s = jnpu.interp(
-        Z,
-        onp.array([37, 38, 39, 48, 54, 56, 71, 80]),
-        onp.array([30.4, 30.8, 31.3, 37.0, 38.8, 38.8, 47.8, 50]),
-    )
-    S5p = jnpu.interp(
-        Z,
-        onp.array([49, 54, 56, 71, 80]),
-        onp.array([39.4, 41.8, 41.8, 51.4, 54]),
-    )
-    S5d = jnpu.interp(Z, onp.array([57, 71, 80]), onp.array([48.6, 59, 62]))
-    S6s = jnpu.interp(
-        Z,
-        onp.array([54, 55, 56, 71, 80, 86, 92]),
-        onp.array([47, 47.4, 48, 62, 66, 67, 68]),
-    )
-    S6p = jnpu.interp(Z, onp.array([81, 86, 92]), onp.array([71.0, 72, 73]))
-    S6d = jnpu.interp(Z, onp.array([89, 92]), onp.array([81.0, 82]))
-    S7s = jnpu.interp(Z, onp.array([87, 92]), onp.array([80, 82.4]))
+    # S5s = jnpu.interp(
+    #     Z,
+    #     onp.array([37, 38, 39, 48, 54, 56, 71, 80]),
+    #     onp.array([30.4, 30.8, 31.3, 37.0, 38.8, 38.8, 47.8, 50]),
+    # )
+    # S5p = jnpu.interp(
+    #     Z,
+    #     onp.array([49, 54, 56, 71, 80]),
+    #     onp.array([39.4, 41.8, 41.8, 51.4, 54]),
+    # )
+    # S5d = jnpu.interp(Z, onp.array([57, 71, 80]), onp.array([48.6, 59, 62]))
+    # S6s = jnpu.interp(
+    #     Z,
+    #     onp.array([54, 55, 56, 71, 80, 86, 92]),
+    #     onp.array([47, 47.4, 48, 62, 66, 67, 68]),
+    # )
+    # S6p = jnpu.interp(Z, onp.array([81, 86, 92]), onp.array([71.0, 72, 73]))
+    # S6d = jnpu.interp(Z, onp.array([89, 92]), onp.array([81.0, 82]))
+    # S7s = jnpu.interp(Z, onp.array([87, 92]), onp.array([80, 82.4]))
     return jnp.array(
         [
             S1s,
@@ -71,13 +71,13 @@ def pauling_size_screening_constants(Z: int | Quantity) -> jnp.array:
             S4p,
             S4d,
             S4f,
-            S5s,
-            S5p,
-            S5d,
-            S6s,
-            S6p,
-            S6d,
-            S7s,
+            # S5s,
+            # S5p,
+            # S5d,
+            # S6s,
+            # S6p,
+            # S6d,
+            # S7s,
         ]
     )
 
