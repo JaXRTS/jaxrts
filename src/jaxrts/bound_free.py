@@ -8,46 +8,53 @@ from typing import List
 import jax
 from jax import jit
 import jax.numpy as jnp
+import jpu.numpy as jnpu
 import numpy as onp
 
 import logging
+
 logger = logging.getLogger(__name__)
 
+from .form_factors import pauling_atomic_ff
 import jpu
 
-def S_ce(k : Quantity, E : Quantity | List):
-    pass
+
+def thomson_momentum_transfer(energy: Quantity, angle: Quantity):
+    """
+    Momentum transfer :math:`k = \\mid\\vec{k}\\mid`, assuming that the
+    absolute value of the momentum for incoming and scattered light is only
+    slightly changed.
+    """
+    return (2 * energy) / (ureg.hbar * ureg.c) * onp.sin(angle / 2)
 
 
 # This set of hydrogenic wave functions for bound electrons are taken from
 # [Bloch.1975]
-def _q(omega: Quantity, k: Quantity):
+
+
+def _xi(Zeff: Quantity, omega: Quantity, k: Quantity):
     omega_c = (ureg.hbar * k**2) / (2 * ureg.m_e)
-    return (omega - omega_c) / (ureg.c * k)
-
-
-def _xi(n: int, Zeff: Quantity, omega: Quantity, k: Quantity):
-    return (n * _q(omega, k)) / (Zeff * ureg.alpha)
+    return (omega - omega_c) / (ureg.c * k * ureg.alpha)
 
 
 def _J10_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
-    xi = _xi(1, Zeff, omega, k)
-    return 8 / (3 * jnp.pi * Zeff * ureg.alpha * (1 + xi**2) ** 3)
+    xi = _xi(Zeff, omega, k)
+    return 8 / (3 * jnp.pi * Zeff * (1 + xi**2 / Zeff**2) ** 3)
 
 
 def _J20_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
-    xi = _xi(2, Zeff, omega, k)
-    return (64 / (jnp.pi * Zeff * ureg.alpha)) * (
-        (1 / (3 * (1 + xi**2) ** 3))
-        - (1 / (1 + xi**2) ** 4)
-        + (4 / (5 * (1 + xi**2) ** 5))
+    xi = _xi(Zeff, omega, k)
+    return (64 / (jnp.pi * Zeff)) * (
+        (1 / (3 * (1 + 4 * xi**2 / Zeff**2) ** 3))
+        - (1 / (1 + 4 * xi**2 / Zeff**2) ** 4)
+        + (4 / (5 * (1 + 4 * xi**2 / Zeff**2) ** 5))
     )
 
 
 def _J21_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
-    xi = _xi(2, Zeff, omega, k)
-    return (64 / (15 * jnp.pi * Zeff * ureg.alpha)) * (
-        (1 + 5 * xi**2) / (1 + xi**2) ** 5
+    xi = _xi(Zeff, omega, k)
+    return (64 / (15 * jnp.pi * Zeff)) * (
+        (1 + 5 * 4 * xi**2 / Zeff**2) / (1 + 4 * xi**2 / Zeff**2) ** 5
     )
 
 
@@ -56,31 +63,23 @@ def _J10_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
     [Gregori.2004], eqn (16)
     """
-    xi = _xi(1, Zeff, omega, k)
+    xi = _xi(Zeff, omega, k)
     J10BM = _J10_BM(omega, k, Zeff)
-    return (
-        J10BM
-        * (Zeff / (k * ureg.a_0))
-        * (3 / 2 * xi - 2 * jnp.arctan(xi))
-    )
+    return J10BM * (Zeff / (k * ureg.a_0)) * (3 / 2 * xi - 2 * jnpu.arctan(xi))
 
 
 def _J20_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
     [Gregori.2004], eqn (17)
     """
-    xi = _xi(2, Zeff, omega, k)
+    xi = _xi(Zeff, omega, k)
     J20BM = _J20_BM(omega, k, Zeff)
     return (
         J20BM
         * (Zeff / (k * ureg.a_0))
         * (
-            5
-            * xi
-            * (1 + 3 * xi**4)
-            / (1 - 2.5 * xi**2 + 2.5 * xi**4)
-            / 8
-            - 2 * jnp.arctan(xi)
+            5 / 4 * (1 + 48 * xi**4) / (1 - 10 * xi**2 + 40 * xi**4) * xi
+            - 2 * jnpu.arctan(2 * xi)
         )
     )
 
@@ -89,14 +88,14 @@ def _J21_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
     [Gregori.2004], eqn (18)
     """
-    xi = _xi(2, Zeff, omega, k)
+    xi = _xi(Zeff, omega, k)
     J21BM = _J21_BM(omega, k, Zeff)
     return (
         J21BM
         * (Zeff / (k * ureg.a_0))
         * (
-            (1 / 3) * ((10 + 15 * xi**2) / (1 + 5 * xi**2)) * xi
-            - jnp.arctan(xi)
+            (2 / 3) * ((10 + 60 * xi**2) / (1 + 20 * xi**2)) * xi
+            - 2 * jnpu.arctan(2 * xi)
         )
     )
 
@@ -191,7 +190,7 @@ def inelastic_structure_factor(
     **kwargs,
 ) -> Quantity:
     """
-    [Gregori.2004], eqn (21)
+    [Gregori.2004], eqn (20)
     """
     valid_approx = ["impulse"]
     if J_approx not in valid_approx:
