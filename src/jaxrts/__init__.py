@@ -1,7 +1,6 @@
 __version__ = "0.1.0"
 
 from . import bound_free
-from . import core_electron
 from . import elements
 from . import form_factors
 from . import free_bound
@@ -26,7 +25,6 @@ __all__ = [
     "elements",
     "Element",
     "bound_free",
-    "core_electron",
     "electron_feature",
     "form_factors",
     "free_bound",
