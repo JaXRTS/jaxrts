@@ -18,7 +18,7 @@ import jpu
 
 jax.config.update("jax_enable_x64", True)
 
-
+@jit
 def k_D(n_e: Quantity, T_e: Quantity, Z_f: float = 1.0):
 
     T_q = 0.0
@@ -29,7 +29,7 @@ def k_D(n_e: Quantity, T_e: Quantity, Z_f: float = 1.0):
         / ((1 * ureg.vacuum_permittivity) * ureg.boltzmann_constant * T_cf)
     ).to_base_units()
 
-
+@jit
 def reduced_mass(m1: Quantity, m2: Quantity) -> Quantity:
     """
     Calculates the reduced mass of two interacting particles.
@@ -48,7 +48,7 @@ def reduced_mass(m1: Quantity, m2: Quantity) -> Quantity:
     """
     return m1 * m2 / (m1 + m2)
 
-
+@jit
 def Delta(
     k: Quantity,
     m_ion: Quantity,
@@ -124,7 +124,7 @@ def Delta(
         * jpu.numpy.exp(-(k**2) / (4 * b))
     )
 
-
+@jit
 def phi_ee(
     k: Quantity,
     m_ion: Quantity,
@@ -229,7 +229,7 @@ def phi_ee(
         * (k**2 + k_Di**2 / (1 + k**2 * therm_dbwl_ii**2))
     )
 
-
+@jit
 def phi_ii(
     k: Quantity,
     m_ion: Quantity,
@@ -335,7 +335,7 @@ def phi_ii(
         / (1 + k**2 * therm_dbwl_ii**2)
     )
 
-
+@jit
 def phi_ei(
     k: Quantity,
     m_ion: Quantity,
@@ -394,7 +394,7 @@ def phi_ei(
         )
     ) * (k**2 / (1 + k**2 * therm_dbwl_ei**2))
 
-
+@jit
 def S_ee(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
 ) -> Quantity:
@@ -435,7 +435,7 @@ def S_ee(
         k, m_ion, n_e, T_e, T_cf, Z_f
     )
 
-
+@jit
 def S_ii(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
 ) -> Quantity:
@@ -478,7 +478,7 @@ def S_ii(
         k, m_ion, n_e, T_e, T_cf, Z_f
     )
 
-
+@jit
 def S_ei(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
 ) -> Quantity:
@@ -521,7 +521,7 @@ def S_ei(
         jpu.numpy.sqrt(n_i * n_e) / (1 * ureg.boltzmann_constant * T_cf)
     ) * phi_ei(k, m_ion, n_e, T_e, T_cf, Z_f)
 
-
+@jit
 def q(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
 ) -> Quantity:
@@ -584,7 +584,7 @@ if __name__ == "__main__":
             ),
         )
 
-    plt.xlabel(r"$k$ [1 / nm]")
+    plt.xlabel(r"$k$ [1/nm]")
     plt.ylabel(r"$q(k)$")
 
     plt.legend()
