@@ -1,6 +1,6 @@
 """
 Comparison of free electron dynamic structures as calculated by Gregori et al. (Reproduction of Fig. 1b of Gregori.2003)
-================================================
+========================================================================================================================
 """
 
 # TO-DO: Add also Fig. 1 a+c
