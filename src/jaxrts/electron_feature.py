@@ -137,7 +137,7 @@ def S0_ee(k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List) -> jnp.
             / (jnp.pi * (1 * ureg.elementary_charge) ** 2 * n_e)
         )
         * jnp.imag(1 / eps_k_w(k, T_e, n_e, E).magnitude)
-    ).to_base_units()
+    ).to_base_units()[::-1]
 
 
 if __name__ == "__main__":
