@@ -2,7 +2,7 @@
 This submodule is dedicated to the calculation of the ion-feature.
 """
 
-from units import ureg, Quantity
+from .units import ureg, Quantity
 from typing import List
 
 import jax
@@ -31,7 +31,6 @@ def k_D(n_e: Quantity, T_e: Quantity, Z_f: float = 1.0):
 
 
 def reduced_mass(m1: Quantity, m2: Quantity) -> Quantity:
-        
     """
     Calculates the reduced mass of two interacting particles.
 
@@ -41,7 +40,7 @@ def reduced_mass(m1: Quantity, m2: Quantity) -> Quantity:
             The mass of the first particle.
     m2  :   Quantity
             The mass of the second particle.
-            
+
     Returns
     -------
     mu:    Quantity
@@ -49,37 +48,52 @@ def reduced_mass(m1: Quantity, m2: Quantity) -> Quantity:
     """
     return m1 * m2 / (m1 + m2)
 
+
 def Delta(
-    k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, T_cf : Quantity, Z_f: float
+    k: Quantity,
+    m_ion: Quantity,
+    n_e: Quantity,
+    T_e: Quantity,
+    T_cf: Quantity,
+    Z_f: float,
 ) -> Quantity:
 
     k_De = k_D(n_e, T_e)
     k_Di = k_D(n_e, T_e, Z_f=Z_f)
 
-    therm_dbwl_ee = ((1 * ureg.planck_constant / (2 * jnp.pi)) / jpu.numpy.sqrt(
-        2
-        * jnp.pi
-        * reduced_mass(1 * ureg.electron_mass, 1 * ureg.electron_mass)
-        * 1
-        * ureg.boltzmann_constant
-        * T_cf
-    )).to_base_units()
-    therm_dbwl_ii = ((1 * ureg.planck_constant / (2 * jnp.pi)) / jpu.numpy.sqrt(
-        2
-        * jnp.pi
-        * reduced_mass(m_ion, m_ion)
-        * 1
-        * ureg.boltzmann_constant
-        * T_cf
-    )).to_base_units()
-    therm_dbwl_ei = ((1 * ureg.planck_constant / (2 * jnp.pi)) / jpu.numpy.sqrt(
-        2
-        * jnp.pi
-        * reduced_mass(1 * ureg.electron_mass, m_ion)
-        * 1
-        * ureg.boltzmann_constant
-        * T_cf
-    )).to_base_units()
+    therm_dbwl_ee = (
+        (1 * ureg.planck_constant / (2 * jnp.pi))
+        / jpu.numpy.sqrt(
+            2
+            * jnp.pi
+            * reduced_mass(1 * ureg.electron_mass, 1 * ureg.electron_mass)
+            * 1
+            * ureg.boltzmann_constant
+            * T_cf
+        )
+    ).to_base_units()
+    therm_dbwl_ii = (
+        (1 * ureg.planck_constant / (2 * jnp.pi))
+        / jpu.numpy.sqrt(
+            2
+            * jnp.pi
+            * reduced_mass(m_ion, m_ion)
+            * 1
+            * ureg.boltzmann_constant
+            * T_cf
+        )
+    ).to_base_units()
+    therm_dbwl_ei = (
+        (1 * ureg.planck_constant / (2 * jnp.pi))
+        / jpu.numpy.sqrt(
+            2
+            * jnp.pi
+            * reduced_mass(1 * ureg.electron_mass, m_ion)
+            * 1
+            * ureg.boltzmann_constant
+            * T_cf
+        )
+    ).to_base_units()
 
     b = 1.0 / (therm_dbwl_ee**2 * jnp.pi * jnp.log(2))
     A = (
@@ -112,10 +126,13 @@ def Delta(
 
 
 def phi_ee(
-    k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, T_cf : Quantity, Z_f: float
+    k: Quantity,
+    m_ion: Quantity,
+    n_e: Quantity,
+    T_e: Quantity,
+    T_cf: Quantity,
+    Z_f: float,
 ) -> Quantity:
-    
-        
     """
     Calculates the coefficient for the electron-electron static structure and corresponds to
     the Fourier transform of the screened Coulomb potential.
@@ -148,30 +165,39 @@ def phi_ee(
     k_De = k_D(n_e, T_e)
     k_Di = k_D(n_e, T_e, Z_f=Z_f)
 
-    therm_dbwl_ee = ((1 * ureg.planck_constant / (2 * jnp.pi)) / jpu.numpy.sqrt(
-        2
-        * jnp.pi
-        * reduced_mass(1 * ureg.electron_mass, 1 * ureg.electron_mass)
-        * 1
-        * ureg.boltzmann_constant
-        * T_cf
-    )).to_base_units()
-    therm_dbwl_ii = ((1 * ureg.planck_constant / (2 * jnp.pi)) / jpu.numpy.sqrt(
-        2
-        * jnp.pi
-        * reduced_mass(m_ion, m_ion)
-        * 1
-        * ureg.boltzmann_constant
-        * T_cf
-    )).to_base_units()
-    therm_dbwl_ei = ((1 * ureg.planck_constant / (2 * jnp.pi)) / jpu.numpy.sqrt(
-        2
-        * jnp.pi
-        * reduced_mass(1 * ureg.electron_mass, m_ion)
-        * 1
-        * ureg.boltzmann_constant
-        * T_cf
-    )).to_base_units()
+    therm_dbwl_ee = (
+        (1 * ureg.planck_constant / (2 * jnp.pi))
+        / jpu.numpy.sqrt(
+            2
+            * jnp.pi
+            * reduced_mass(1 * ureg.electron_mass, 1 * ureg.electron_mass)
+            * 1
+            * ureg.boltzmann_constant
+            * T_cf
+        )
+    ).to_base_units()
+    therm_dbwl_ii = (
+        (1 * ureg.planck_constant / (2 * jnp.pi))
+        / jpu.numpy.sqrt(
+            2
+            * jnp.pi
+            * reduced_mass(m_ion, m_ion)
+            * 1
+            * ureg.boltzmann_constant
+            * T_cf
+        )
+    ).to_base_units()
+    therm_dbwl_ei = (
+        (1 * ureg.planck_constant / (2 * jnp.pi))
+        / jpu.numpy.sqrt(
+            2
+            * jnp.pi
+            * reduced_mass(1 * ureg.electron_mass, m_ion)
+            * 1
+            * ureg.boltzmann_constant
+            * T_cf
+        )
+    ).to_base_units()
 
     b = 1.0 / (therm_dbwl_ee**2 * jnp.pi * jnp.log(2))
     A = (
@@ -186,7 +212,10 @@ def phi_ee(
 
     return (
         ((1 * ureg.elementary_charge) ** 2)
-        / ((1 * ureg.vacuum_permittivity).to_base_units() * Delta(k, m_ion, n_e, T_e, T_cf, Z_f))
+        / (
+            (1 * ureg.vacuum_permittivity).to_base_units()
+            * Delta(k, m_ion, n_e, T_e, T_cf, Z_f)
+        )
     ) * (
         k**2 / (1 + k**2 * therm_dbwl_ee**2)
         + k_Di**2
@@ -202,9 +231,13 @@ def phi_ee(
 
 
 def phi_ii(
-    k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, T_cf : Quantity, Z_f: float
+    k: Quantity,
+    m_ion: Quantity,
+    n_e: Quantity,
+    T_e: Quantity,
+    T_cf: Quantity,
+    Z_f: float,
 ) -> Quantity:
-    
     """
     Calculates the coefficient for the ion-ion static structure and corresponds to
     the Fourier transform of the screened Coulomb potential.
@@ -233,34 +266,43 @@ def phi_ii(
     phi_ei: Quantity
             The electron-ion static structure coefficient.
     """
-    
+
     k_De = k_D(n_e, T_e)
     k_Di = k_D(n_e, T_e, Z_f=Z_f)
 
-    therm_dbwl_ee = ((1 * ureg.planck_constant / (2 * jnp.pi)) / jpu.numpy.sqrt(
-        2
-        * jnp.pi
-        * reduced_mass(1 * ureg.electron_mass, 1 * ureg.electron_mass)
-        * 1
-        * ureg.boltzmann_constant
-        * T_cf
-    )).to_base_units()
-    therm_dbwl_ii = ((1 * ureg.planck_constant / (2 * jnp.pi)) / jpu.numpy.sqrt(
-        2
-        * jnp.pi
-        * reduced_mass(m_ion, m_ion)
-        * 1
-        * ureg.boltzmann_constant
-        * T_cf
-    )).to_base_units()
-    therm_dbwl_ei = ((1 * ureg.planck_constant / (2 * jnp.pi)) / jpu.numpy.sqrt(
-        2
-        * jnp.pi
-        * reduced_mass(1 * ureg.electron_mass, m_ion)
-        * 1
-        * ureg.boltzmann_constant
-        * T_cf
-    )).to_base_units()
+    therm_dbwl_ee = (
+        (1 * ureg.planck_constant / (2 * jnp.pi))
+        / jpu.numpy.sqrt(
+            2
+            * jnp.pi
+            * reduced_mass(1 * ureg.electron_mass, 1 * ureg.electron_mass)
+            * 1
+            * ureg.boltzmann_constant
+            * T_cf
+        )
+    ).to_base_units()
+    therm_dbwl_ii = (
+        (1 * ureg.planck_constant / (2 * jnp.pi))
+        / jpu.numpy.sqrt(
+            2
+            * jnp.pi
+            * reduced_mass(m_ion, m_ion)
+            * 1
+            * ureg.boltzmann_constant
+            * T_cf
+        )
+    ).to_base_units()
+    therm_dbwl_ei = (
+        (1 * ureg.planck_constant / (2 * jnp.pi))
+        / jpu.numpy.sqrt(
+            2
+            * jnp.pi
+            * reduced_mass(1 * ureg.electron_mass, m_ion)
+            * 1
+            * ureg.boltzmann_constant
+            * T_cf
+        )
+    ).to_base_units()
 
     b = 1.0 / (therm_dbwl_ee**2 * jnp.pi * jnp.log(2))
     A = (
@@ -272,8 +314,14 @@ def phi_ii(
         * (1 * ureg.vacuum_permittivity)
         / (1 * ureg.elementary_charge) ** 2
     ).to_base_units()
-    
-    return ((Z_f**2 * (1 * ureg.elementary_charge)**2) / ((1 * ureg.vacuum_permittivity).to_base_units() * Delta(k, m_ion, n_e, T_e, T_cf, Z_f))) * (
+
+    return (
+        (Z_f**2 * (1 * ureg.elementary_charge) ** 2)
+        / (
+            (1 * ureg.vacuum_permittivity).to_base_units()
+            * Delta(k, m_ion, n_e, T_e, T_cf, Z_f)
+        )
+    ) * (
         k**2 / (1 + k**2 * therm_dbwl_ii**2)
         + k_De**2
         * (
@@ -286,11 +334,16 @@ def phi_ii(
         * jpu.numpy.exp(-(k**2) / (4 * b))
         / (1 + k**2 * therm_dbwl_ii**2)
     )
-    
+
+
 def phi_ei(
-    k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, T_cf : Quantity, Z_f: float
+    k: Quantity,
+    m_ion: Quantity,
+    n_e: Quantity,
+    T_e: Quantity,
+    T_cf: Quantity,
+    Z_f: float,
 ) -> Quantity:
-    
     """
     Calculates the coefficient for the electro-ion static structure and corresponds to
     the Fourier transform of the screened Coulomb potential.
@@ -319,25 +372,32 @@ def phi_ei(
     phi_ii: Quantity
             The ion-ion static structure coefficient.
     """
-    
-    therm_dbwl_ei = ((1 * ureg.planck_constant / (2 * jnp.pi)) / jpu.numpy.sqrt(
-    2
-    * jnp.pi
-    * reduced_mass(1 * ureg.electron_mass, m_ion)
-    * 1
-    * ureg.boltzmann_constant
-    * T_cf
-)).to_base_units()
-    
-    return (-Z_f * (1 * ureg.elementary_charge)**2 / ((1 * ureg.vacuum_permittivity).to_base_units() * Delta(k, m_ion, n_e, T_e, T_cf, Z_f))) * (
-        k**2 / (1 + k**2 * therm_dbwl_ei**2)
-    )
-    
+
+    therm_dbwl_ei = (
+        (1 * ureg.planck_constant / (2 * jnp.pi))
+        / jpu.numpy.sqrt(
+            2
+            * jnp.pi
+            * reduced_mass(1 * ureg.electron_mass, m_ion)
+            * 1
+            * ureg.boltzmann_constant
+            * T_cf
+        )
+    ).to_base_units()
+
+    return (
+        -Z_f
+        * (1 * ureg.elementary_charge) ** 2
+        / (
+            (1 * ureg.vacuum_permittivity).to_base_units()
+            * Delta(k, m_ion, n_e, T_e, T_cf, Z_f)
+        )
+    ) * (k**2 / (1 + k**2 * therm_dbwl_ei**2))
+
 
 def S_ee(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
 ) -> Quantity:
-    
     """
     Calculates the electro-electron static structure factor.
 
@@ -360,19 +420,25 @@ def S_ee(
     S_ee:   Quantity
             The electron-electron static structure factor.
     """
-    
-    T_F = (1 * ureg.planck_constant / (2 * jnp.pi)) ** 2 * (3 * jnp.pi ** 2 * n_e) ** (2.0/3.0) / (2 * ureg.boltzmann_constant * 1 * ureg.electron_mass)
-    d = (3 / (4 * jnp.pi * n_e))**(1.0/3.0)
+
+    T_F = (
+        (1 * ureg.planck_constant / (2 * jnp.pi)) ** 2
+        * (3 * jnp.pi**2 * n_e) ** (2.0 / 3.0)
+        / (2 * ureg.boltzmann_constant * 1 * ureg.electron_mass)
+    )
+    d = (3 / (4 * jnp.pi * n_e)) ** (1.0 / 3.0)
     r_s = (d / (1 * ureg.bohr_radius)).to_base_units()
     T_q = T_F / (1.3251 - 0.1779 * jpu.numpy.sqrt(r_s))
     T_cf = jpu.numpy.sqrt(T_e**2 + T_q**2)
-    
-    return 1.0 - ((n_e) / (1 * ureg.boltzmann_constant * T_cf)) * phi_ee(k, m_ion, n_e, T_e, T_cf, Z_f)
+
+    return 1.0 - ((n_e) / (1 * ureg.boltzmann_constant * T_cf)) * phi_ee(
+        k, m_ion, n_e, T_e, T_cf, Z_f
+    )
+
 
 def S_ii(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
 ) -> Quantity:
-    
     """
     Calculates the ion-ion static structure factor.
 
@@ -395,21 +461,27 @@ def S_ii(
     S_ii:   Quantity
             The ion-ion static structure factor.
     """
-    
-    T_F = (1 * ureg.planck_constant / (2 * jnp.pi)) ** 2 * (3 * jnp.pi ** 2 * n_e) ** (2.0/3.0) / (2 * ureg.boltzmann_constant * 1 * ureg.electron_mass)
-    d = (3 / (4 * jnp.pi * n_e))**(1.0/3.0)
+
+    T_F = (
+        (1 * ureg.planck_constant / (2 * jnp.pi)) ** 2
+        * (3 * jnp.pi**2 * n_e) ** (2.0 / 3.0)
+        / (2 * ureg.boltzmann_constant * 1 * ureg.electron_mass)
+    )
+    d = (3 / (4 * jnp.pi * n_e)) ** (1.0 / 3.0)
     r_s = (d / (1 * ureg.bohr_radius)).to_base_units()
     T_q = T_F / (1.3251 - 0.1779 * jpu.numpy.sqrt(r_s))
     T_cf = jpu.numpy.sqrt(T_e**2 + T_q**2)
-    
+
     n_i = n_e / Z_f
-    
-    return 1.0 - ((n_i) / (1 * ureg.boltzmann_constant * T_cf)) * phi_ii(k, m_ion, n_e, T_e, T_cf, Z_f)
+
+    return 1.0 - ((n_i) / (1 * ureg.boltzmann_constant * T_cf)) * phi_ii(
+        k, m_ion, n_e, T_e, T_cf, Z_f
+    )
+
 
 def S_ei(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
 ) -> Quantity:
-    
     """
     Calculates the electro-ion static structure factor.
 
@@ -432,21 +504,27 @@ def S_ei(
     S_ei:   Quantity
             The electron-ion static structure factor.
     """
-    
-    T_F = (1 * ureg.planck_constant / (2 * jnp.pi)) ** 2 * (3 * jnp.pi ** 2 * n_e) ** (2.0/3.0) / (2 * ureg.boltzmann_constant * 1 * ureg.electron_mass)
-    d = (3 / (4 * jnp.pi * n_e))**(1.0/3.0)
+
+    T_F = (
+        (1 * ureg.planck_constant / (2 * jnp.pi)) ** 2
+        * (3 * jnp.pi**2 * n_e) ** (2.0 / 3.0)
+        / (2 * ureg.boltzmann_constant * 1 * ureg.electron_mass)
+    )
+    d = (3 / (4 * jnp.pi * n_e)) ** (1.0 / 3.0)
     r_s = (d / (1 * ureg.bohr_radius)).to_base_units()
     T_q = T_F / (1.3251 - 0.1779 * jpu.numpy.sqrt(r_s))
     T_cf = jpu.numpy.sqrt(T_e**2 + T_q**2)
-    
+
     n_i = n_e / Z_f
-    
-    return (jpu.numpy.sqrt(n_i * n_e) / (1 * ureg.boltzmann_constant * T_cf)) * phi_ei(k, m_ion, n_e, T_e, T_cf, Z_f)
+
+    return (
+        jpu.numpy.sqrt(n_i * n_e) / (1 * ureg.boltzmann_constant * T_cf)
+    ) * phi_ei(k, m_ion, n_e, T_e, T_cf, Z_f)
+
 
 def q(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
 ) -> Quantity:
-    
     """
     Calculates the screening charge.
 
@@ -469,11 +547,16 @@ def q(
     q(k):  Quantity
            The screening charge.
     """
-    
-    return jpu.numpy.sqrt(Z_f) * S_ei(k, m_ion, n_e, T_e, Z_f) / S_ii(k, m_ion, n_e, T_e, Z_f)
+
+    return (
+        jpu.numpy.sqrt(Z_f)
+        * S_ei(k, m_ion, n_e, T_e, Z_f)
+        / S_ii(k, m_ion, n_e, T_e, Z_f)
+    )
+
 
 if __name__ == "__main__":
-    
+
     import matplotlib.pyplot as plt
     import numpy as onp
     import scienceplots
@@ -489,11 +572,20 @@ if __name__ == "__main__":
     k_int = (4 * jnp.pi / lambda_0) * jnp.sin(jnp.deg2rad(theta_int) / 2.0)
     E = jnp.linspace(-10, 10, 500) * ureg.electron_volts
 
-    for Z_f in [1,2,3]:    
-        plt.plot(k_int, q(k_int, 2E-26 * ureg.kilogram, 1E21 / ureg.centimeter**3, 8 * ureg.electron_volts / (1 * ureg.boltzmann_constant), Z_f = Z_f))
+    for Z_f in [1, 2, 3]:
+        plt.plot(
+            k_int,
+            q(
+                k_int,
+                2e-26 * ureg.kilogram,
+                1e21 / ureg.centimeter**3,
+                8 * ureg.electron_volts / (1 * ureg.boltzmann_constant),
+                Z_f=Z_f,
+            ),
+        )
 
     plt.xlabel(r"$k$ [1 / nm]")
-    plt.ylabel(r"$q(k)$ [C]")
+    plt.ylabel(r"$q(k)$")
 
     plt.legend()
     plt.tight_layout()
