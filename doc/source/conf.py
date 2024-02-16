@@ -59,6 +59,9 @@ sphinx_gallery_conf = {
     # The default option is an empty set, i.e. exclude nothing.
     # To exclude everything, use: '.*'
     "exclude_implicit_doc": {},
+    # Regexes to match the fully qualified names of objects where the full
+    # module name should be used. To use full names for all objects use: '.*'
+    "prefer_full_module": {r"module\.submodule"},
 }
 
 # bibtex

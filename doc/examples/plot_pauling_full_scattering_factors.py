@@ -21,7 +21,7 @@ plt.style.use("science")
 k = onp.linspace(0, 1.5, 400) * (4 * onp.pi) / ureg.angstrom
 
 for Z in range(1, 37):
-    element = jaxrts.Element(Z)
+    element = jaxrts.elements.Element(Z)
     Zstar = jaxrts.form_factors.pauling_effective_charge(Z)
     F = jnpu.sum(
         jaxrts.form_factors.pauling_all_ff(k, Zstar)
