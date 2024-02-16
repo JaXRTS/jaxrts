@@ -3,6 +3,7 @@ This submodule is dedicated to the calculation of the ion-feature.
 """
 
 from .units import ureg, Quantity
+from .electron_feature import eps_k_w
 from typing import List
 
 import jax
@@ -18,6 +19,7 @@ import jpu
 
 jax.config.update("jax_enable_x64", True)
 
+
 @jit
 def k_D(n_e: Quantity, T_e: Quantity, Z_f: float = 1.0):
 
@@ -28,6 +30,7 @@ def k_D(n_e: Quantity, T_e: Quantity, Z_f: float = 1.0):
         (Z_f * n_e * (1 * ureg.elementary_charge) ** 2)
         / ((1 * ureg.vacuum_permittivity) * ureg.boltzmann_constant * T_cf)
     ).to_base_units()
+
 
 @jit
 def reduced_mass(m1: Quantity, m2: Quantity) -> Quantity:
@@ -47,6 +50,7 @@ def reduced_mass(m1: Quantity, m2: Quantity) -> Quantity:
            The reduced mass of the interacting pair of particles.
     """
     return m1 * m2 / (m1 + m2)
+
 
 @jit
 def Delta(
@@ -123,6 +127,7 @@ def Delta(
         * (k**2 + k_Di**2 / (1 + k**2 * therm_dbwl_ii**2))
         * jpu.numpy.exp(-(k**2) / (4 * b))
     )
+
 
 @jit
 def phi_ee(
@@ -228,6 +233,7 @@ def phi_ee(
         * jpu.numpy.exp(-(k**2) / (4 * b))
         * (k**2 + k_Di**2 / (1 + k**2 * therm_dbwl_ii**2))
     )
+
 
 @jit
 def phi_ii(
@@ -335,6 +341,7 @@ def phi_ii(
         / (1 + k**2 * therm_dbwl_ii**2)
     )
 
+
 @jit
 def phi_ei(
     k: Quantity,
@@ -394,6 +401,7 @@ def phi_ei(
         )
     ) * (k**2 / (1 + k**2 * therm_dbwl_ei**2))
 
+
 @jit
 def S_ee(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
@@ -434,6 +442,7 @@ def S_ee(
     return 1.0 - ((n_e) / (1 * ureg.boltzmann_constant * T_cf)) * phi_ee(
         k, m_ion, n_e, T_e, T_cf, Z_f
     )
+
 
 @jit
 def S_ii(
@@ -478,6 +487,7 @@ def S_ii(
         k, m_ion, n_e, T_e, T_cf, Z_f
     )
 
+
 @jit
 def S_ei(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
@@ -521,6 +531,7 @@ def S_ei(
         jpu.numpy.sqrt(n_i * n_e) / (1 * ureg.boltzmann_constant * T_cf)
     ) * phi_ei(k, m_ion, n_e, T_e, T_cf, Z_f)
 
+
 @jit
 def q(
     k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
@@ -548,11 +559,21 @@ def q(
            The screening charge.
     """
 
-    return (
-        jpu.numpy.sqrt(Z_f)
-        * S_ei(k, m_ion, n_e, T_e, Z_f)
-        / S_ii(k, m_ion, n_e, T_e, Z_f)
+    # Way to calculate it given by Gregori.2004:
+    
+    C_ei = (jpu.numpy.sqrt(Z_f) * S_ei(k, m_ion, n_e, T_e, Z_f)) / (
+        S_ee(k, m_ion, n_e, T_e, Z_f) * S_ii(k, m_ion, n_e, T_e, Z_f)
+        - S_ei(k, m_ion, n_e, T_e, Z_f) ** 2
     )
+
+    return (C_ei / (eps_k_w(k, T_e=T_e, n_e=n_e, E=0 * ureg.electron_volts))).to_base_units()
+
+    # This is the version as given by Gregori.2003 giving different results ...
+    # return (
+    #     jpu.numpy.sqrt(Z_f)
+    #     * S_ei(k, m_ion, n_e, T_e, Z_f)
+    #     / S_ii(k, m_ion, n_e, T_e, Z_f)
+    # ).to_base_units()
 
 
 if __name__ == "__main__":

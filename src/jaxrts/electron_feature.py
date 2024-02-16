@@ -168,6 +168,11 @@ if __name__ == "__main__":
         if count == 1:
             norm = onp.max(vals)
         plt.plot(E, vals / norm, label="T = " + str(T.magnitude) + " eV")
+    
+    #theta_int = jnp.linspace(0, 90, 400)
+    #k_int = (4 * jnp.pi / lambda_0) * jnp.sin(jnp.deg2rad(theta_int) / 2.0)
+    
+    #plt.plot(k_int, eps_k_w(k_int, T_e = 10 * ureg.electron_volts / (1 * ureg.boltzmann_constant), n_e = 1E21 / ureg.centimeter ** 3, E = 0 * ureg.electron_volts))
 
     plt.xlabel(r"$\omega$ [eV]")
     plt.ylabel(r"$S^0_{\text{ee}}$ [arb. units]")
