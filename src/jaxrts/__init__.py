@@ -14,6 +14,7 @@ from . import free_bound
 from . import helpers
 from . import instrument_function
 from . import ion_feature
+from . import electron_feature
 from . import plasmastate
 from . import plotting
 from . import units
