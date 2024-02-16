@@ -20,6 +20,7 @@ extensions = [
     "sphinxcontrib.bibtex",
     "sphinx_toolbox.collapse",
     "sphinx_gallery.gen_gallery",
+    "sphinx.ext.viewcode",
 ]
 
 
