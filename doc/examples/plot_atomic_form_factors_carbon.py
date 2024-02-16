@@ -59,7 +59,7 @@ plt.plot(
 
 plt.title("Atomic form factors for Carbon\n(Pauling and Sherman)")
 
-plt.xlabel(r"$q$ [1/$\AA$]")
+plt.xlabel(r"$k$ [1/$\AA$]")
 plt.ylabel(r"$f_i$")
 
 plt.legend()

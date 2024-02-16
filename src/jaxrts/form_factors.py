@@ -16,7 +16,7 @@ def pauling_size_screening_constants(Z: int | Quantity) -> jnp.array:
     """
     See Table I in :cite:`Pauling.1932`.
     """
-    S1s = jnpu.interp(Z, onp.array([0, 1]), onp.array([0, 0.19]))
+    S1s = jnpu.interp(Z, onp.array([1, 2]), onp.array([0, 0.19]))
     S2s = jnpu.interp(Z, onp.array([3, 10]), onp.array([1.25, 3.10]))
     S2p = jnpu.interp(Z, onp.array([5, 10]), onp.array([2.50, 4.57]))
     S3s = jnpu.interp(
@@ -184,3 +184,21 @@ def pauling_atomic_ff(
     # Find the correct _fxx function and execute it
     form_factor = globals()["pauling_f{:1d}{:1d}".format(n, l)](k, Zeff)
     return form_factor
+
+
+@jit
+def pauling_all_ff(k: Quantity, Zeff: Quantity | jnp.ndarray) -> Quantity:
+    return jnp.array(
+        [
+            pauling_f10(k, Zeff[0]).m_as(ureg.dimensionless),
+            pauling_f20(k, Zeff[1]).m_as(ureg.dimensionless),
+            pauling_f21(k, Zeff[2]).m_as(ureg.dimensionless),
+            pauling_f30(k, Zeff[3]).m_as(ureg.dimensionless),
+            pauling_f31(k, Zeff[4]).m_as(ureg.dimensionless),
+            pauling_f32(k, Zeff[5]).m_as(ureg.dimensionless),
+            pauling_f40(k, Zeff[6]).m_as(ureg.dimensionless),
+            pauling_f41(k, Zeff[7]).m_as(ureg.dimensionless),
+            pauling_f42(k, Zeff[8]).m_as(ureg.dimensionless),
+            pauling_f43(k, Zeff[9]).m_as(ureg.dimensionless),
+        ]
+    )
