@@ -29,7 +29,7 @@ norm = 1.0
 for T in [
     0.5 * ureg.electron_volts,
     2.0 * ureg.electron_volts,
-    13.0 * ureg.electron_volts,
+    8.0 * ureg.electron_volts,
 ]:
     E = jnp.linspace(-10, 10, 500) * ureg.electron_volts
     vals = ef.S0_ee(
