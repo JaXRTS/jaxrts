@@ -4,6 +4,13 @@ import numpy as np
 import logging
 import jpu
 
+from .bound_free import *
+from .electron_feature import *
+from .ion_feature import *
+from .form_factors import *
+from .free_bound import *
+from .instrument_function import *
+
 logger = logging.getLogger(__name__)
 
 class PlasmaState:
@@ -118,48 +125,60 @@ class PlasmaState:
                 )
 
     def _jSii(self, k: Quantity, E: np.ndarray | List | Quantity):
-        pass
+        return 1.0
 
     def Sii(self, k: Quantity, E: np.ndarray | List | Quantity):
         return np.array(self._jSii(k, E))
 
     def _jSee(self, k: Quantity, E: np.ndarray | List | Quantity):
-        pass
+        return 1.0
 
     def See(self, k: Quantity, E: np.ndarray | List | Quantity):
         return np.array(self._jSee(k, E))
 
     def _jSee(self, k: Quantity, E: np.ndarray | List | Quantity):
-        pass
+        return 1.0
 
     def Sce(self, k: Quantity, E: np.ndarray | List | Quantity):
         return np.array(self._jSce(k, E))
 
     def _jSce(self, k: Quantity, E: np.ndarray | List | Quantity):
-        pass
+        return 1.0
 
     def Ss(self, k: Quantity, E: np.ndarray | List | Quantity):
         return np.array(self._jSs(k, E))
 
     def _jSs(self, k: Quantity, E: np.ndarray | List | Quantity):
-        pass
+        return 1.0
+    
+    def _jf_I(self, k: Quantity):
+        return 1.0
+    
+    def f_I(self, k: Quantity):
+        return np.array(self._jf_I(k))
+    
+    def _jq(self, k: Quantity):
+        return 1.0
+    
+    def q(self, k : Quantity):
+        return np.array(self._jq(k))
 
-    def probe(self, energy: Quantity, theta: float):
+    def probe(self, E: Quantity, theta: float):
 
         # Calculate probe wavelength from probe energy
 
         lambda_0 = (
             1
             * ureg.speed_of_light
-            / (energy.to(ureg.joule) / (1 * ureg.planck_constant))
+            / (E.to(ureg.joule) / (1 * ureg.planck_constant))
         ).to_base_units()
 
         # Calculate wavenumber for choice of probe energy and scattering angle
 
         k = (4 * np.pi / lambda_0) * np.sin(np.deg2rad(theta) / 2.0)
 
-        # Calculate S(k,w) and return it (maybe normalize it?)
+        # Calculate S(k,w) using the Chihara decomposition (normalization?)
 
-        S_k_w = 1.0
+        S_k_w = (self._jf_I(k) + self._jq(k)) ** 2 * self._jSii(k, E) + self.Z_free * self._jSee(k, E) + self.Z_core * 1.0
 
         return S_k_w

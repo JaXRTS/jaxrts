@@ -439,9 +439,9 @@ def S_ee(
     T_q = T_F / (1.3251 - 0.1779 * jpu.numpy.sqrt(r_s))
     T_cf = jpu.numpy.sqrt(T_e**2 + T_q**2)
 
-    return 1.0 - ((n_e) / (1 * ureg.boltzmann_constant * T_cf)) * phi_ee(
+    return (1.0 - ((n_e) / (1 * ureg.boltzmann_constant * T_cf)) * phi_ee(
         k, m_ion, n_e, T_e, T_cf, Z_f
-    )
+    )).to_base_units()
 
 
 @jit
@@ -483,9 +483,9 @@ def S_ii(
 
     n_i = n_e / Z_f
 
-    return 1.0 - ((n_i) / (1 * ureg.boltzmann_constant * T_cf)) * phi_ii(
+    return (1.0 - ((n_i) / (1 * ureg.boltzmann_constant * T_cf)) * phi_ii(
         k, m_ion, n_e, T_e, T_cf, Z_f
-    )
+    )).to_base_units()
 
 
 @jit
@@ -527,9 +527,9 @@ def S_ei(
 
     n_i = n_e / Z_f
 
-    return (
+    return ((
         jpu.numpy.sqrt(n_i * n_e) / (1 * ureg.boltzmann_constant * T_cf)
-    ) * phi_ei(k, m_ion, n_e, T_e, T_cf, Z_f)
+    ) * phi_ei(k, m_ion, n_e, T_e, T_cf, Z_f)).to_base_units()
 
 
 @jit
