@@ -42,5 +42,5 @@ def thomson_momentum_transfer(energy: Quantity, angle: Quantity):
     absolute value of the momentum for incoming and scattered light is only
     slightly changed.
     """
-    return (2 * energy) / (ureg.hbar * ureg.c) * onp.sin(angle / 2)
+    return (2 * energy) / (ureg.hbar * ureg.c) * jnpu.sin(angle / 2)
 

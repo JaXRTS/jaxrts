@@ -4,6 +4,7 @@ structure.
 """
 
 from .units import ureg, Quantity
+import pint
 from typing import List
 
 import jax
@@ -102,10 +103,12 @@ def dielectric_function_salpeter(
         / ((1 * ureg.electron_mass) * (1 * ureg.vacuum_permittivity))
     )
 
-    return 1 + ((w_p_sq) / (k**2 * v_t**2)) * (1 / (4 * kappa)) * (
+    eps = 1 + ((w_p_sq) / (k**2 * v_t**2)) * (1 / (4 * kappa)) * (
         (1 - W((x_e + kappa).to_base_units())) / (x_e + kappa)
         - (1 - W((x_e - kappa).to_base_units())) / (x_e - kappa)
     )
+
+    return eps.m_as(ureg.dimensionless)
 
 
 def S0ee_from_dielectric_func_FDT(
@@ -140,7 +143,7 @@ def S0ee_from_dielectric_func_FDT(
         The energy shift for which the free electron dynamic structure is
         calculated.
         Can be an interval of values.
-    dielectric_function: Quantity | List:
+    dielectric_function: List:
         The dielectric function, normally dependent on :math:`k` and :math:`E`.
         Several aproximations for this are given in this submodule, e.g.
         :py:func:`~.dielectric_function_salpeter`.
@@ -150,8 +153,6 @@ def S0ee_from_dielectric_func_FDT(
     S0_ee: jnp.ndarray
          The free electron dynamic structure.
     """
-    if isinstance(dielectric_function, Quantity):
-        dielectric_function = dielectric_function.m_as(ureg.dimensionless)
     return -(
         (1 * ureg.planck_constant / (2 * jnp.pi))
         / (1 - jpu.numpy.exp(-(E / (1 * ureg.boltzmann_constant * T_e))))
@@ -160,7 +161,7 @@ def S0ee_from_dielectric_func_FDT(
             / (jnp.pi * (1 * ureg.elementary_charge) ** 2 * n_e)
         )
         * jnp.imag(1 / dielectric_function)
-    ).to_base_units()[::-1]
+    ).to_base_units()
 
 
 @jit
@@ -190,5 +191,5 @@ def S0_ee_Salpeter(
     S0_ee: jnp.ndarray
            The free electron dynamic structure.
     """
-    eps = dielectric_function_salpeter(k, T_e, n_e, E).magnitude
+    eps = dielectric_function_salpeter(k, T_e, n_e, E)
     return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)

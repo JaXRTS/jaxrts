@@ -53,7 +53,7 @@ def _J10_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
     xi = _xi(1, Zeff, omega, k)
     J10BM = _J10_BM(omega, k, Zeff)
-    return J10BM * (Zeff * ureg.alpha / (k * ureg.a_0)) * (3 / 2 * xi - 2 * np.arctan(xi))
+    return J10BM * (Zeff * ureg.alpha / (k * ureg.a_0)) * (3 / 2 * xi - 2 * jnpu.arctan(xi))
 
 def _J20_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
@@ -70,7 +70,7 @@ def _J20_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
             * (1 + 3 * xi**4)
             / (1 - 2.5 * xi**2 + 2.5 * xi**4)
             / 8
-            - 2 * np.arctan(xi)
+            - 2 * jnpu.arctan(xi)
         )
     )
 
@@ -85,7 +85,7 @@ def _J21_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
         * (Zeff * ureg.alpha / (k * ureg.a_0))
         * (
             (1 / 3) * ((10 + 15 * xi**2) / (1 + 5 * xi**2)) * xi
-            - np.arctan(xi)
+            - jnpu.arctan(xi)
         )
     )
 
