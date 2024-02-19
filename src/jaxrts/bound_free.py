@@ -28,12 +28,12 @@ def _xi(n: int, Zeff: Quantity, omega: Quantity, k: Quantity):
 
 def _J10_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     xi = _xi(1, Zeff, omega, k)
-    return 8 / (3 * np.pi * Zeff * ureg.alpha * (1 + xi**2) ** 3)
+    return 8 / (3 * jnp.pi * Zeff * ureg.alpha * (1 + xi**2) ** 3)
 
 
 def _J20_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     xi = _xi(2, Zeff, omega, k)
-    return (64 / (np.pi * Zeff * ureg.alpha)) * (
+    return (64 / (jnp.pi * Zeff * ureg.alpha)) * (
         (1 / (3 * (1 + xi**2) ** 3))
         - (1 / (1 + xi**2) ** 4)
         + (4 / (5 * (1 + xi**2) ** 5))
@@ -42,7 +42,7 @@ def _J20_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
 
 def _J21_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     xi = _xi(2, Zeff, omega, k)
-    return (64 / (15 * np.pi * Zeff * ureg.alpha)) * (
+    return (64 / (15 * jnp.pi * Zeff * ureg.alpha)) * (
         (1 + 5 * xi**2) / (1 + xi**2) ** 5
     )
 
