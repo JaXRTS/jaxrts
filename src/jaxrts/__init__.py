@@ -9,6 +9,7 @@ from . import instrument_function
 from . import ion_feature
 from . import electron_feature
 from . import plasmastate
+from . import plasma_physics
 from . import plotting
 from . import units
 
@@ -32,6 +33,7 @@ __all__ = [
     "instrument_function",
     "ion_feature",
     "plasmastate",
+    "plasma_physics",
     "plotting",
     "units",
     "ureg",
