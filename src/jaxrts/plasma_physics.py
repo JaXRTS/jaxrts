@@ -33,3 +33,14 @@ def plasma_frequency(electron_density: Quantity) -> Quantity:
         (ureg.elementary_charge**2 * electron_density)
         / (ureg.vacuum_permittivity * ureg.electron_mass)
     ).to(ureg.Hz)
+
+
+
+def thomson_momentum_transfer(energy: Quantity, angle: Quantity):
+    """
+    Momentum transfer :math:`k = \\mid\\vec{k}\\mid`, assuming that the
+    absolute value of the momentum for incoming and scattered light is only
+    slightly changed.
+    """
+    return (2 * energy) / (ureg.hbar * ureg.c) * onp.sin(angle / 2)
+
