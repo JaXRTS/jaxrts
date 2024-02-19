@@ -191,5 +191,7 @@ def S0_ee_Salpeter(
     S0_ee: jnp.ndarray
            The free electron dynamic structure.
     """
+    # Perform the sign flip
+    E = -E
     eps = dielectric_function_salpeter(k, T_e, n_e, E)
     return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
