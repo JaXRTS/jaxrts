@@ -32,7 +32,7 @@ def test_gregori2023_fig1_reprduction() -> None:
         )
         # Read the temperature from the filename
         T = ureg(datafile.stem[2:])
-        calc_See = jaxrts.electron_feature.S0_ee(
+        calc_See = jaxrts.electron_feature.S0_ee_Salpeter(
             k,
             T_e=T / (ureg.boltzmann_constant),
             n_e=n_e,

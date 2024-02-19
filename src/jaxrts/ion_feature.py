@@ -3,7 +3,7 @@ This submodule is dedicated to the calculation of the ion-feature.
 """
 
 from .units import ureg, Quantity
-from .electron_feature import eps_k_w
+from .electron_feature import dielectric_function_salpeter
 from typing import List
 
 import jax
@@ -566,7 +566,7 @@ def q(
         - S_ei(k, m_ion, n_e, T_e, Z_f) ** 2
     )
 
-    return (C_ei / (eps_k_w(k, T_e=T_e, n_e=n_e, E=0 * ureg.electron_volts))).to_base_units()
+    return (C_ei / (dielectric_function_salpeter(k, T_e=T_e, n_e=n_e, E=0 * ureg.electron_volts))).to_base_units()
 
     # This is the version as given by Gregori.2003 giving different results ...
     # return (

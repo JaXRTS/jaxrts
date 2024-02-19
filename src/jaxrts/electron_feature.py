@@ -1,5 +1,6 @@
 """
-This submodule is dedicated to the calculation of the free electron dynamic structure
+This submodule is dedicated to the calculation of the free electron dynamic
+structure.
 """
 
 from .units import ureg, Quantity
@@ -11,6 +12,7 @@ import jax.numpy as jnp
 import numpy as onp
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 import jpu
@@ -21,7 +23,8 @@ jax.config.update("jax_enable_x64", True)
 @jit
 def W(x: jnp.ndarray | float) -> jnp.ndarray:
     """
-    Convenience function for the electron dielectric response function as defined in :cite:`Gregori.2003`.
+    Convenience function for the electron dielectric response function as
+    defined in :cite:`Gregori.2003`.
 
     Parameters
     ----------
@@ -51,25 +54,26 @@ def W(x: jnp.ndarray | float) -> jnp.ndarray:
 
 
 @jit
-def eps_k_w(
+def dielectric_function_salpeter(
     k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List
 ) -> jnp.ndarray:
     """
-
-    Implementation of the quantum corrected Salpeter approximation of the electron dielectric response function.
+    Implementation of the quantum corrected Salpeter approximation of the
+    electron dielectric response function.
 
     Parameters
     ----------
-    k :  Quantity
-         Length of the scattering number (given by the scattering angle and the
-         energies of the incident photons (unit: 1 / [length]).
-    E :  Quantity | List
-         The energy shift for which the free electron dynamic structure is calculated.
-         Can be an interval of values.
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
     T_e: Quantity
-         The electron temperature.
+        The electron temperature.
     n_e: Quantity
-         The electron number density.
+        The electron number density.
+    E : Quantity | List
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+        Can be an interval of values.
 
     Returns
     -------
@@ -104,31 +108,50 @@ def eps_k_w(
     )
 
 
-@jit
-def S0_ee_Salpeter(k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List) -> jnp.ndarray:
+def S0ee_from_dielectric_func_FDT(
+    k: Quantity,
+    T_e: Quantity,
+    n_e: Quantity,
+    E: Quantity | List,
+    dielectric_function: Quantity | List,
+) -> Quantity:
     """
-    Calculates the free electron dynamics structure using the quantum corrected Salpeter
-    approximation of the electron dielectric response function.
+    Links the dielectric function to S0_ee via the fluctuation dissipation
+    theorem, see, e.g., eqn (9) in :cite:`Gregori.2004`.
+
+    .. math::
+
+        S_{\\mathrm{ee}}^{0}(k,\\omega) =
+        -\\frac{\\hbar}{1-\\exp(-\\hbar\\omega/k_{B}T_{e})}
+        \\frac{\\epsilon_{0}k^{2}}{\\pi e^{2}n_{e}}
+        \\mathrm{Im}\\left[\\frac{1}{\\epsilon(k,\\omega)}\\right]
+
 
     Parameters
     ----------
     k :  Quantity
-         Length of the scattering number (given by the scattering angle and the
-         energies of the incident photons (unit: 1 / [length]).
-    E :  Quantity | List
-         The energy shift for which the free electron dynamic structure is calculated.
-         Can be an interval of values.
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
     T_e: Quantity
-         The electron temperature.
+        The electron temperature.
     n_e: Quantity
-         The electron number density.
+        The electron number density.
+    E : Quantity | List
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+        Can be an interval of values.
+    dielectric_function: Quantity | List:
+        The dielectric function, normally dependent on :math:`k` and :math:`E`.
+        Several aproximations for this are given in this submodule, e.g.
+        :py:func:`~.dielectric_function_salpeter`.
 
     Returns
     -------
     S0_ee: jnp.ndarray
-           The free electron dynamic structure.
+         The free electron dynamic structure.
     """
-
+    if isinstance(dielectric_function, Quantity):
+        dielectric_function = dielectric_function.m_as(ureg.dimensionless)
     return -(
         (1 * ureg.planck_constant / (2 * jnp.pi))
         / (1 - jpu.numpy.exp(-(E / (1 * ureg.boltzmann_constant * T_e))))
@@ -136,47 +159,36 @@ def S0_ee_Salpeter(k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List
             ((1 * ureg.vacuum_permittivity) * k**2)
             / (jnp.pi * (1 * ureg.elementary_charge) ** 2 * n_e)
         )
-        * jnp.imag(1 / eps_k_w(k, T_e, n_e, E).magnitude)
+        * jnp.imag(1 / dielectric_function)
     ).to_base_units()[::-1]
 
 
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    import numpy as onp
-    import scienceplots
+@jit
+def S0_ee_Salpeter(
+    k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List
+) -> jnp.ndarray:
+    """
+    Calculates the free electron dynamics structure using the quantum corrected
+    Salpeter approximation of the electron dielectric response function.
 
-    import jax.numpy as jnp
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    T_e: Quantity
+        The electron temperature.
+    n_e: Quantity
+        The electron number density.
+    E : Quantity | List
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+        Can be an interval of values.
 
-    plt.style.use("science")
-
-    lambda_0 = 4.13 * ureg.nanometer
-    theta = 160
-    k = (4 * jnp.pi / lambda_0) * jnp.sin(jnp.deg2rad(theta) / 2.0)
-
-    count = 0
-    norm = 1.0
-    for T in [
-        0.5 * ureg.electron_volts,
-        2.0 * ureg.electron_volts,
-        8.0 * ureg.electron_volts,
-    ]:
-        E = jnp.linspace(-10, 10, 500) * ureg.electron_volts
-        vals = S0_ee_Salpeter(
-            k, T_e=T / (1 * ureg.boltzmann_constant), n_e=1e21 / ureg.centimeter**3, E=E
-        )
-        count += 1
-        if count == 1:
-            norm = onp.max(vals)
-        plt.plot(E, vals / norm, label="T = " + str(T.magnitude) + " eV")
-    
-    #theta_int = jnp.linspace(0, 90, 400)
-    #k_int = (4 * jnp.pi / lambda_0) * jnp.sin(jnp.deg2rad(theta_int) / 2.0)
-    
-    #plt.plot(k_int, eps_k_w(k_int, T_e = 10 * ureg.electron_volts / (1 * ureg.boltzmann_constant), n_e = 1E21 / ureg.centimeter ** 3, E = 0 * ureg.electron_volts))
-
-    plt.xlabel(r"$\omega$ [eV]")
-    plt.ylabel(r"$S^0_{\text{ee}}$ [arb. units]")
-
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+    Returns
+    -------
+    S0_ee: jnp.ndarray
+           The free electron dynamic structure.
+    """
+    eps = dielectric_function_salpeter(k, T_e, n_e, E).magnitude
+    return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
