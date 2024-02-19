@@ -1,3 +1,7 @@
+"""
+This submodule contains basic formulas used in plasma physics.
+"""
+
 from .units import ureg, Quantity
 
 from jpu import numpy as jnpu
