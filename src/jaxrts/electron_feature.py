@@ -105,7 +105,7 @@ def eps_k_w(
 
 
 @jit
-def S0_ee(k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List) -> jnp.ndarray:
+def S0_ee_Salpeter(k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List) -> jnp.ndarray:
     """
     Calculates the free electron dynamics structure using the quantum corrected Salpeter
     approximation of the electron dielectric response function.
@@ -161,7 +161,7 @@ if __name__ == "__main__":
         8.0 * ureg.electron_volts,
     ]:
         E = jnp.linspace(-10, 10, 500) * ureg.electron_volts
-        vals = S0_ee(
+        vals = S0_ee_Salpeter(
             k, T_e=T / (1 * ureg.boltzmann_constant), n_e=1e21 / ureg.centimeter**3, E=E
         )
         count += 1

@@ -32,7 +32,7 @@ for T in [
     8.0 * ureg.electron_volts,
 ]:
     E = jnp.linspace(-10, 10, 500) * ureg.electron_volts
-    vals = ef.S0_ee(
+    vals = ef.S0_ee_Salpeter(
         k,
         T_e=T / (1 * ureg.boltzmann_constant),
         n_e=1e21 / ureg.centimeter**3,
