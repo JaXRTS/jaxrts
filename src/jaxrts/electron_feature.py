@@ -4,12 +4,15 @@ structure.
 """
 
 from .units import ureg, Quantity
+from .plasma_physics import coulomb_potential_fourier, kin_energy, fermi_dirac
+
 import pint
 from typing import List
 
 import jax
 from jax import jit
-import jax.numpy as jnp
+from jax import numpy as jnp
+from jpu import numpy as jnpu
 import numpy as onp
 
 import logging
@@ -40,15 +43,15 @@ def W(x: jnp.ndarray | float) -> jnp.ndarray:
 
     x_v = jnp.linspace(0, x.magnitude, 3000).T
 
-    y_v = jpu.numpy.exp(x_v**2)
+    y_v = jnpu.exp(x_v**2)
 
     res = (
         1
         - 2
         * x
-        * jpu.numpy.exp(-(x**2))
+        * jnpu.exp(-(x**2))
         * jax.scipy.integrate.trapezoid(y_v, x_v, axis=1)
-        + (jpu.numpy.sqrt(jnp.pi) * x * jpu.numpy.exp(-(x**2))) * 1j
+        + (jnpu.sqrt(jnp.pi) * x * jnpu.exp(-(x**2))) * 1j
     ).to_base_units()
 
     return res
@@ -177,9 +180,9 @@ def S0_ee_Salpeter(
     k : Quantity
         Length of the scattering number (given by the scattering angle and the
         energies of the incident photons (unit: 1 / [length]).
-    T_e: Quantity
+    T_e : Quantity
         The electron temperature.
-    n_e: Quantity
+    n_e : Quantity
         The electron number density.
     E : Quantity | List
         The energy shift for which the free electron dynamic structure is
@@ -195,3 +198,191 @@ def S0_ee_Salpeter(
     E = -E
     eps = dielectric_function_salpeter(k, T_e, n_e, E)
     return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
+
+
+def _imag_diel_func_RPA_no_damping(
+    k: Quantity, E: Quantity, chem_pot: Quantity, T: Quantity
+) -> Quantity:
+    """
+    The imaginary part of the dielectric function without damping (i.e., in the
+    limit nu → 0) from Bonitz's 'dielectric theory' script, Eqn 1.122,
+    assuming a Fermi function for the particles' velocity distribution.
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    E: Quantity
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+    chem_pot : Quantity
+        The chemical potential in units of energy.
+    T : Quantity
+        The plasma temperature in Kelvin.
+
+    Returns
+    -------
+    Quantity
+        The imaginary part of the dielectric function
+    """
+    # Calculate the frequency shift
+    w = E / ureg.hbar
+    kappa = w * ureg.m_e / (ureg.hbar * k)
+    prefactor = (
+        ureg.k_B * T * ureg.m_e**2 * ureg.elementary_charge**2
+    ) / (2 * jnp.pi * ureg.epsilon_0 * ureg.hbar**4 * k**3)
+    exponent1 = (chem_pot - kin_energy(-k / 2 - kappa)) / (ureg.k_B * T)
+    exponent2 = (chem_pot - kin_energy(+k / 2 - kappa)) / (ureg.k_B * T)
+    return -prefactor * jnpu.log(
+        (1 + jnpu.exp(exponent1)) / (1 + jnpu.exp(exponent2))
+    )
+
+
+def _real_diel_func_RPA_no_damping(
+    k: Quantity, E: Quantity, chem_pot: Quantity, T: Quantity
+) -> Quantity:
+    """
+    The real part of the dielectric function without damping (i.e., in the
+    limit nu → 0) from Bonitz's 'dielectric theory' script, Eqn 1.120,
+    assuming a Fermi function for the particles' velocity distribution.
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    E: Quantity
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+    chem_pot : Quantity
+        The chemical potential in units of energy.
+    T : Quantity
+        The plasma temperature in Kelvin.
+
+    Returns
+    -------
+    Quantity
+        The real part of the dielectric function
+    """
+    # Calculate the frequency shift
+    w = E / ureg.hbar
+
+    kappa = w * ureg.m_e / (ureg.hbar * k)
+    prefactor = (
+        ureg.e**2
+        * ureg.m_e
+        / (2 * jnp.pi**2 * ureg.epsilon_0 * ureg.hbar**2 * k**3)
+    )
+    # note from MAX: previous line may be missing a factor 2
+    prec = 100000
+    limit = (
+        ((jnp.log(1e100) * ureg.k_B * T + chem_pot) * 2 * ureg.m_e) ** 0.5
+    ) / ureg.hbar
+
+    Q = jnp.linspace(0, limit.m_as(1 / ureg.meter), prec) / (1 * ureg.meter)
+    alph_min = kappa[:, jnp.newaxis] - k / 2 - Q[jnp.newaxis, :]
+    alph_plu = kappa[:, jnp.newaxis] + k / 2 + Q[jnp.newaxis, :]
+    numerator = jnpu.absolute(alph_min) * jnpu.absolute(alph_plu)
+    denominator = jnpu.absolute(alph_min) * jnpu.absolute(alph_plu)
+    ln_arg = numerator / denominator
+    f_0 = fermi_dirac(Q, chem_pot, T)
+    integrand = Q[jnp.newaxis, :] * f_0[jnp.newaxis, :] * jnpu.log(ln_arg)
+
+    # SMALL = 1e-60
+    # if integrand[-1] > SMALL:
+    #     logger.error(
+    #         "Integrand did not fall off fast enough. "
+    #         + f"Value reached was {integrand[-1]}. Value required is {SMALL}."
+    #     )
+    integrated = jax.scipy.integrate.trapezoid(
+        integrand.m_as(1 / ureg.meter),
+        dx=(Q[1] - Q[0]).m_as(1 / ureg.meter),
+        axis=1,
+    ) * (1 / ureg.meter**2)
+
+    return 1 + (prefactor * integrated).to_base_units()
+
+
+def dielectric_function_RPA_no_damping(
+    k: Quantity, E: Quantity, chem_pot: Quantity, T: Quantity
+) -> Quantity:
+    """
+    The the dielectric function without damping (i.e., in the limit nu → 0)
+    from Bonitz's 'dielectric theory' script, Eqn 1.120 and Eqn 1.122,
+    assuming a Fermi function for the particles' velocity distribution.
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    E: Quantity
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+    chem_pot : Quantity
+        The chemical potential in units of energy.
+    T : Quantity
+        The plasma temperature in Kelvin.
+
+    Returns
+    -------
+    Quantity
+        The full dielectric function (complex number)
+    """
+    real = _real_diel_func_RPA_no_damping(k, E, chem_pot, T)
+    imag = _imag_diel_func_RPA_no_damping(k, E, chem_pot, T)
+    return real.m_as(ureg.dimensionless) + 1j * imag.m_as(ureg.dimensionless)
+
+
+@jit
+def S0_ee_RPA_no_damping(
+    k: Quantity,
+    T_e: Quantity,
+    n_e: Quantity,
+    E: Quantity | List,
+    chem_pot: Quantity,
+) -> jnp.ndarray:
+    """
+    Calculates the free electron dynamics structure using the quantum corrected
+    Salpeter approximation of the electron dielectric response function.
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    T_e : Quantity
+        The electron temperature.
+    n_e : Quantity
+        The electron number density.
+    E : Quantity | List
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+        Can be an interval of values.
+    chem_pot : Quantity
+        The chemical potential in units of energy.
+
+    Returns
+    -------
+    S0_ee: jnp.ndarray
+           The free electron dynamic structure.
+    """
+    E = -E
+    eps = dielectric_function_RPA_no_damping(k, E, chem_pot, T_e)
+    return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
+
+
+# def ret_diel_func_DPA(k: Quantity, Z: jnp.ndarray) -> Quantity:
+#     """
+#     Retarded dielectric funciton in diagonalised polarization approximation DPA
+#     See :cite:`Chapman.2015`, (Eqn. 2.80), by inserting a Kronecker delta.
+#     """
+
+#     # The electron part
+#     eps = 1 - PiR_e_e * coulomb_potential_fourier(
+#         -1, -1, k
+#     )
+#     # The ion part
+#     eps -= jnpu.sum(PiR_ion_ion(Z, ) * coulomb_potential_fourier(Z, Z, k))
+#     return eps
