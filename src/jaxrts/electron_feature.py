@@ -281,10 +281,12 @@ def _real_diel_func_RPA_no_damping(
     ) / ureg.hbar
 
     Q = jnp.linspace(0, limit.m_as(1 / ureg.meter), prec) / (1 * ureg.meter)
-    alph_min = kappa[:, jnp.newaxis] - k / 2 - Q[jnp.newaxis, :]
-    alph_plu = kappa[:, jnp.newaxis] + k / 2 + Q[jnp.newaxis, :]
-    numerator = jnpu.absolute(alph_min) * jnpu.absolute(alph_plu)
-    denominator = jnpu.absolute(alph_min) * jnpu.absolute(alph_plu)
+    alph_min_min = kappa[:, jnp.newaxis] - k / 2 - Q[jnp.newaxis, :]
+    alph_min_plu = kappa[:, jnp.newaxis] - k / 2 + Q[jnp.newaxis, :]
+    alph_plu_min = kappa[:, jnp.newaxis] + k / 2 - Q[jnp.newaxis, :]
+    alph_plu_plu = kappa[:, jnp.newaxis] + k / 2 + Q[jnp.newaxis, :]
+    numerator = jnpu.absolute(alph_min_min) * jnpu.absolute(alph_plu_plu)
+    denominator = jnpu.absolute(alph_min_plu) * jnpu.absolute(alph_plu_min)
     ln_arg = numerator / denominator
     f_0 = fermi_dirac(Q, chem_pot, T)
     integrand = Q[jnp.newaxis, :] * f_0[jnp.newaxis, :] * jnpu.log(ln_arg)
