@@ -3,7 +3,7 @@ Plot See0 using the RPA approximation
 =====================================
 
 This script reprocudes :cite:`Gregori.2003`, Fig. 1c. showing the calculation
-of  :math:`S_\\text{ee}^{0, \\text{RPA}`.
+of :math:`S_\\text{ee}^{0, \\text{RPA}}`.
 """
 
 import matplotlib.pyplot as plt
