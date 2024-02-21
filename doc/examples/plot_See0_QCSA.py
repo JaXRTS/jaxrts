@@ -1,6 +1,6 @@
 """
-Comparison of free electron dynamic structures as calculated by Gregori et al.
-==============================================================================
+Plot See0 using the Quantum corrected Salpetera approximation
+=============================================================
 
 The following plot is a reproduction of Fig 1b in :cite:`Gregori.2003`.
 """

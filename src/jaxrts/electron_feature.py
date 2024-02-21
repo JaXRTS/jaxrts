@@ -25,7 +25,7 @@ jax.config.update("jax_enable_x64", True)
 
 
 @jit
-def W(x: jnp.ndarray | float) -> jnp.ndarray:
+def _W_salpeter(x: jnp.ndarray | float) -> jnp.ndarray:
     """
     Convenience function for the electron dielectric response function as
     defined in :cite:`Gregori.2003`.
@@ -107,8 +107,8 @@ def dielectric_function_salpeter(
     )
 
     eps = 1 + ((w_p_sq) / (k**2 * v_t**2)) * (1 / (4 * kappa)) * (
-        (1 - W((x_e + kappa).to_base_units())) / (x_e + kappa)
-        - (1 - W((x_e - kappa).to_base_units())) / (x_e - kappa)
+        (1 - _W_salpeter((x_e + kappa).to_base_units())) / (x_e + kappa)
+        - (1 - _W_salpeter((x_e - kappa).to_base_units())) / (x_e - kappa)
     )
 
     return eps.m_as(ureg.dimensionless)
