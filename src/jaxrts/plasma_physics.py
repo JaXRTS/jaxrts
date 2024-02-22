@@ -138,6 +138,33 @@ def fermi_energy(n_e: Quantity) -> Quantity:
     return E_F
 
 
+def wiegner_seitz_radius(n_e: Quantity) -> Quantity:
+    """
+    Return the Wiegner Seitz Radius :math:`r_s`.
+
+    .. math::
+
+        r_s = \\sqrt[3]{\\frac{3}{4} \\pi n_e}
+
+    .. note::
+
+        Some authors use the Wiegner Seits radius as a dimensionless unit by
+        dividing by the Bohr radius. This is not done here, rather :math:`r_s`
+        has the dimensionality of a length.
+
+    Parameters
+    ----------
+    n_e
+        Electron density. Units of 1/[length]**3.
+
+    Returns
+    -------
+    Quantity
+        The Wiegner Seitz Radius :math:`r_s` in units of a length.
+    """
+    return (3 / 4 * jnp.pi * n_e) ** (1 / 3)
+
+
 def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:
     """
     Interpolation function for the chemical potential between the classical and
