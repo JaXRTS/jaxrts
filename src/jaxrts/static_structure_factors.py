@@ -90,7 +90,7 @@ def _Delta_AD(
     p5 = (
         (A * k**2 * kDe**2)
         * (k**2 + kDi**2 / (1 * k**2 * lamii**2))
-        * jnpu.exp(-k**2 / 4 * b)
+        * jnpu.exp(-(k**2) / 4 * b)
     )
 
     return p1 + p2 + p3 + p4 + p5
@@ -103,4 +103,82 @@ def _Phi_ee_AD(
     See :cite:`Gregori.2003`, eqn (8) for the coefficient
     :math:`\\Phi_ee(k)` in the approach by Arkhipov and Davletov.
     """
-    Tcf = _T_cf_AD(T_e, n_e)
+    # Set up all the variables
+    T_cf = _T_cf_AD(T_e, n_e)
+    lam_ee = _lambda_AD(T_cf, ureg.electron_mass, ureg.electron_mass)
+    lam_ei = _lambda_AD(T_cf, ureg.electron_mass, m_i)
+    lam_ii = _lambda_AD(T_cf, m_i, m_i)
+    b = _b_AD(lam_ee)
+    A = _A_AD(T_cf, b)
+    k_De = _k_De_AD(T_e, n_e)
+    k_Di = _k_Di_AD(T_e, n_e, Zf)
+    Delta = _Delta_AD(k, k_De, k_Di, lam_ee, lam_ii, lam_ei, b, A)
+
+    pref = ureg.electron_charge**2 / (ureg.vacuum_permittivity * Delta)
+    sum1 = k**2 / (1 + k**2 * lam_ee**2)
+    sum2 = k_Di**2 * (
+        1 / ((1 + k**2 * lam_ee**2) * (1 + k**2 * lam_ii**2))
+        - 1 / ((1 + k**2 * lam_ei**2) ** 2)
+    )
+    sum3 = (
+        A
+        * (k**2 + k_Di**2 / (1 + k**2 * lam_ii**2))
+        * k**2
+        * jnpu.exp(-(k**2) / (4 * b))
+    )
+    return pref * (sum1 + sum2 + sum3)
+
+
+def _Phi_ii_AD(
+    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Zf: float
+) -> Quantity:
+    """
+    See :cite:`Gregori.2003`, eqn (9) for the coefficient
+    :math:`\\Phi_ii(k)` in the approach by Arkhipov and Davletov.
+    """
+    # Set up all the variables
+    T_cf = _T_cf_AD(T_e, n_e)
+    lam_ee = _lambda_AD(T_cf, ureg.electron_mass, ureg.electron_mass)
+    lam_ei = _lambda_AD(T_cf, ureg.electron_mass, m_i)
+    lam_ii = _lambda_AD(T_cf, m_i, m_i)
+    b = _b_AD(lam_ee)
+    A = _A_AD(T_cf, b)
+    k_De = _k_De_AD(T_e, n_e)
+    k_Di = _k_Di_AD(T_e, n_e, Zf)
+    Delta = _Delta_AD(k, k_De, k_Di, lam_ee, lam_ii, lam_ei, b, A)
+
+    pref = Zf**2 * ureg.electron_charge**2 / (ureg.vacuum_permittivity * Delta)
+    sum1 = k**2 / (1 + k**2 * lam_ii**2)
+    sum2 = k_De**2 * (
+        1 / ((1 + k**2 * lam_ee**2) * (1 + k**2 * lam_ii**2))
+        - 1 / ((1 + k**2 * lam_ei**2) ** 2)
+    )
+    sum3 = (
+        (A * k**2 * k_De**2)
+        / (1 + k**2 * lam_ii**2)
+        * jnpu.exp(-(k**2) / (4 * b))
+    )
+    return pref * (sum1 + sum2 + sum3)
+
+
+def _Phi_ei_AD(
+    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Zf: float
+) -> Quantity:
+    """
+    See :cite:`Gregori.2003`, eqn (10) for the coefficient
+    :math:`\\Phi_ee(k)` in the approach by Arkhipov and Davletov.
+    """
+    # Set up all the variables
+    T_cf = _T_cf_AD(T_e, n_e)
+    lam_ee = _lambda_AD(T_cf, ureg.electron_mass, ureg.electron_mass)
+    lam_ei = _lambda_AD(T_cf, ureg.electron_mass, m_i)
+    lam_ii = _lambda_AD(T_cf, m_i, m_i)
+    b = _b_AD(lam_ee)
+    A = _A_AD(T_cf, b)
+    k_De = _k_De_AD(T_e, n_e)
+    k_Di = _k_Di_AD(T_e, n_e, Zf)
+    Delta = _Delta_AD(k, k_De, k_Di, lam_ee, lam_ii, lam_ei, b, A)
+
+    return -(Zf * ureg.elementary_charge**2 / (ureg.epsilon_0 * Delta)) * (
+        k**2 / (1 + k**2 * lam_ei**2)
+    )
