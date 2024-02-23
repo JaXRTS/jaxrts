@@ -12,7 +12,7 @@ from .plasma_physics import fermi_energy, wiegner_seitz_radius
 def _T_cf_AD(T_e: Quantity, n_e: Quantity) -> Quantity:
     """
     The effective temperature in the approach by Arkhipov and Davletov, see
-    :cite:`Gregori.2003`.
+    :cite:`Arkhipov.1998` and :cite:`Gregori.2003`.
     """
     # The fermi temperature
     T_f = fermi_energy(n_e) / ureg.k_B
@@ -23,9 +23,9 @@ def _T_cf_AD(T_e: Quantity, n_e: Quantity) -> Quantity:
 
 def _lambda_AD(T: Quantity, m1: Quantity, m2: Quantity) -> Quantity:
     """
-    :cite:`Gregori.2003` state tihs as the thermal de Broglie Wavelength, but
-    this is not reproducing the known formula for ``m1 == m2``. Doublecheck,
-    maybe in the original paper by Arkhipov and Davletov.
+    :cite:`Gregori.2003` states this as the thermal de Broglie Wavelength, but
+    this is not reproducing the known formula for ``m1 == m2``.
+    However, both :cite:`Arkhipov.1998` and :cite:`Gregori` use this notation.
     """
     # The 1 * m1 is required so allow this function to handle Units, too.
     mu = (m1 * m2) / (1 * m1 + 1 * m2)
@@ -52,7 +52,7 @@ def _b_AD(lam_ee: Quantity) -> Quantity:
 def _A_AD(T_cf: Quantity, b: Quantity) -> Quantity:
     """
     A helper function for the approach by Arkhipov and Davletov, see
-    :cite:`Gregori.2003`.
+    :cite:`Arkhipov.1998` and :cite:`Gregori.2003`.
     """
     return (
         ureg.k_B
@@ -103,7 +103,8 @@ def _Phi_ee_AD(
 ) -> Quantity:
     """
     See :cite:`Gregori.2003`, eqn (8) for the coefficient
-    :math:`\\Phi_ee(k)` in the approach by Arkhipov and Davletov.
+    :math:`\\Phi_ee(k)` in the approach by Arkhipov and Davletov
+    :cite:`Arkhipov.1998`.
     """
     # Set up all the variables
     T_cf = _T_cf_AD(T_e, n_e)
@@ -128,7 +129,7 @@ def _Phi_ee_AD(
         * k**2
         * jnpu.exp(-(k**2) / (4 * b))
     )
-    return pref * (sum1 + sum2 + sum3)
+    return pref * (sum1 + sum2 + sum3).to_base_units()
 
 
 def _Phi_ii_AD(
@@ -136,7 +137,8 @@ def _Phi_ii_AD(
 ) -> Quantity:
     """
     See :cite:`Gregori.2003`, eqn (9) for the coefficient
-    :math:`\\Phi_ii(k)` in the approach by Arkhipov and Davletov.
+    :math:`\\Phi_ii(k)` in the approach by Arkhipov and Davletov
+    :cite:`Arkhipov.1998`.
     """
     # Set up all the variables
     T_cf = _T_cf_AD(T_e, n_e)
@@ -162,7 +164,7 @@ def _Phi_ii_AD(
         / (1 + k**2 * lam_ii**2)
         * jnpu.exp(-(k**2) / (4 * b))
     )
-    return pref * (sum1 + sum2 + sum3)
+    return pref * (sum1 + sum2 + sum3).to_base_units()
 
 
 def _Phi_ei_AD(
@@ -170,7 +172,8 @@ def _Phi_ei_AD(
 ) -> Quantity:
     """
     See :cite:`Gregori.2003`, eqn (10) for the coefficient
-    :math:`\\Phi_ee(k)` in the approach by Arkhipov and Davletov.
+    :math:`\\Phi_ee(k)` in the approach by Arkhipov and Davletov
+    :cite:`Arkhipov.1998`.
     """
     # Set up all the variables
     T_cf = _T_cf_AD(T_e, n_e)
@@ -185,7 +188,7 @@ def _Phi_ei_AD(
 
     return -(Zf * ureg.elementary_charge**2 / (ureg.epsilon_0 * Delta)) * (
         k**2 / (1 + k**2 * lam_ei**2)
-    )
+    ).to_base_units()
 
 
 def S_ii_AD(
@@ -193,7 +196,8 @@ def S_ii_AD(
 ) -> Quantity:
     """
     The static ion-ion structure factor, in the approach by Arkhipov
-    and Davletov, as presented by :cite:`Gregori.2003` in equation (7).
+    and Davletov :cite:`Arkhipov.1998`, as presented by :cite:`Gregori.2003` in
+    equation (7).
 
     The method is using the Random Phase Approximation, treating the problem
     semi-classically and uses a pseudopotential between charged particles to
@@ -220,7 +224,7 @@ def S_ii_AD(
     T_cf = _T_cf_AD(T_e, n_e)
     n_i = Zf * n_e
     Phi_ii = _Phi_ii_AD(k, T_e, n_e, m_i, Zf)
-    return 1 - n_i / (ureg.k_B - T_cf) * Phi_ii
+    return 1 - n_i / (ureg.k_B * T_cf) * Phi_ii
 
 
 def S_ei_AD(
@@ -228,7 +232,8 @@ def S_ei_AD(
 ) -> Quantity:
     """
     The static electron-ion structure factor, in the approach by Arkhipov
-    and Davletov, as presented by :cite:`Gregori.2003` in equation (7).
+    and Davletov :cite:`Arkhipov.1998`, as presented by :cite:`Gregori.2003` in
+    equation (7).
 
     The method is using the Random Phase Approximation, treating the problem
     semi-classically and uses a pseudopotential between charged particles to
@@ -263,7 +268,8 @@ def S_ee_AD(
 ) -> Quantity:
     """
     The static electron-electron structure factor, in the approach by Arkhipov
-    and Davletov, as presented by :cite:`Gregori.2003` in equation (7).
+    and Davletov :cite:`Arkhipov.1998`, as presented by :cite:`Gregori.2003` in
+    equation (7).
 
     The method is using the Random Phase Approximation, treating the problem
     semi-classically and uses a pseudopotential between charged particles to
