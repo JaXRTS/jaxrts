@@ -182,3 +182,107 @@ def _Phi_ei_AD(
     return -(Zf * ureg.elementary_charge**2 / (ureg.epsilon_0 * Delta)) * (
         k**2 / (1 + k**2 * lam_ei**2)
     )
+
+
+def S_ii_AD(
+    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Zf: float
+) -> Quantity:
+    """
+    The static ion-ion structure factor, in the approach by Arkhipov
+    and Davletov, as presented by :cite:`Gregori.2003` in equation (7).
+
+    The method is using the Random Phase Approximation, treating the problem
+    semi-classically and uses a pseudopotential between charged particles to
+    account for quantum diffraction effects and symmetry
+
+    Parameters
+    ----------
+    k: Quantity
+        The scattering vector length (units of 1/[length])
+    T_e: Quantity
+        The electron temperature in Kelvin
+    n_e: Quantity
+        The electron density in 1/[volume]
+    m_i: Quantity
+        The mass of the ion
+    Zf: float
+        Number of free electrons per ion.
+
+    Returns
+    -------
+    Quantity
+        See, the static electron electron structure factor
+    """
+    T_cf = _T_cf_AD(T_e, n_e)
+    n_i = Zf * n_e
+    Phi_ii = _Phi_ii_AD(k, T_e, n_e, m_i, Zf)
+    return 1 - n_i / (ureg.k_B - T_cf) * Phi_ii
+
+
+def S_ei_AD(
+    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Zf: float
+) -> Quantity:
+    """
+    The static electron-ion structure factor, in the approach by Arkhipov
+    and Davletov, as presented by :cite:`Gregori.2003` in equation (7).
+
+    The method is using the Random Phase Approximation, treating the problem
+    semi-classically and uses a pseudopotential between charged particles to
+    account for quantum diffraction effects and symmetry
+
+    Parameters
+    ----------
+    k: Quantity
+        The scattering vector length (units of 1/[length])
+    T_e: Quantity
+        The electron temperature in Kelvin
+    n_e: Quantity
+        The electron density in 1/[volume]
+    m_i: Quantity
+        The mass of the ion
+    Zf: float
+        Number of free electrons per ion.
+
+    Returns
+    -------
+    Quantity
+        See, the static electron electron structure factor
+    """
+    T_cf = _T_cf_AD(T_e, n_e)
+    n_i = Zf * n_e
+    Phi_ei = _Phi_ei_AD(k, T_e, n_e, m_i, Zf)
+    return -jnpu.sqrt(n_i * n_e) / (ureg.k_B - T_cf) * Phi_ei
+
+
+def S_ee_AD(
+    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Zf: float
+) -> Quantity:
+    """
+    The static electron-electron structure factor, in the approach by Arkhipov
+    and Davletov, as presented by :cite:`Gregori.2003` in equation (7).
+
+    The method is using the Random Phase Approximation, treating the problem
+    semi-classically and uses a pseudopotential between charged particles to
+    account for quantum diffraction effects and symmetry
+
+    Parameters
+    ----------
+    k: Quantity
+        The scattering vector length (units of 1/[length])
+    T_e: Quantity
+        The electron temperature in Kelvin
+    n_e: Quantity
+        The electron density in 1/[volume]
+    m_i: Quantity
+        The mass of the ion
+    Zf: float
+        Number of free electrons per ion.
+
+    Returns
+    -------
+    Quantity
+        See, the static electron electron structure factor
+    """
+    T_cf = _T_cf_AD(T_e, n_e)
+    Phi_ee = _Phi_ee_AD(k, T_e, n_e, m_i, Zf)
+    return 1 - n_e / (ureg.k_B - T_cf) * Phi_ee
