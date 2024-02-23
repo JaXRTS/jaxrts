@@ -144,7 +144,7 @@ def wiegner_seitz_radius(n_e: Quantity) -> Quantity:
 
     .. math::
 
-        r_s = \\sqrt[3]{\\frac{3}{4} \\pi n_e}
+        r_s = \\sqrt[3]{\\frac{3}{4\\pi n_e}}
 
     .. note::
 
@@ -162,7 +162,7 @@ def wiegner_seitz_radius(n_e: Quantity) -> Quantity:
     Quantity
         The Wiegner Seitz Radius :math:`r_s` in units of a length.
     """
-    return (3 / 4 * jnp.pi * n_e) ** (1 / 3)
+    return (3 / (4 * jnp.pi * n_e)) ** (1 / 3)
 
 
 def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:

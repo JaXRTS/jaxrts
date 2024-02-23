@@ -16,7 +16,8 @@ def _T_cf_AD(T_e: Quantity, n_e: Quantity) -> Quantity:
     """
     # The fermi temperature
     T_f = fermi_energy(n_e) / ureg.k_B
-    T_q = T_f / (1.3251 - 0.1779 * jnpu.sqrt(wiegner_seitz_radius / ureg.a_0))
+    dimless_rs = wiegner_seitz_radius(n_e) / ureg.a_0
+    T_q = T_f / (1.3251 - 0.1779 * jnpu.sqrt(dimless_rs))
     return jnpu.sqrt(T_e**2 + T_q**2)
 
 
@@ -26,19 +27,20 @@ def _lambda_AD(T: Quantity, m1: Quantity, m2: Quantity) -> Quantity:
     this is not reproducing the known formula for ``m1 == m2``. Doublecheck,
     maybe in the original paper by Arkhipov and Davletov.
     """
-    mu = (m1 * m2) / (m1 + m2)
+    # The 1 * m1 is required so allow this function to handle Units, too.
+    mu = (m1 * m2) / (1 * m1 + 1 * m2)
     denumerator = 2 * jnp.pi * mu * ureg.k_B * T
     return ureg.hbar / jnpu.sqrt(denumerator)
 
 
 def _k_De_AD(T: Quantity, n_e: Quantity) -> Quantity:
-    numerator = n_e * ureg.electron_charge**2
+    numerator = n_e * ureg.elementary_charge**2
     denumerator = ureg.epsilon_0 * ureg.k_B * T
     return jnpu.sqrt(numerator / denumerator)
 
 
 def _k_Di_AD(T: Quantity, n_e: Quantity, Zf: float) -> Quantity:
-    numerator = Zf * n_e * ureg.electron_charge**2
+    numerator = Zf * n_e * ureg.elementary_charge**2
     denumerator = ureg.epsilon_0 * ureg.k_B * T
     return jnpu.sqrt(numerator / denumerator)
 
@@ -90,7 +92,7 @@ def _Delta_AD(
     p5 = (
         (A * k**2 * kDe**2)
         * (k**2 + kDi**2 / (1 * k**2 * lamii**2))
-        * jnpu.exp(-(k**2) / 4 * b)
+        * jnpu.exp(-(k**2) / (4 * b))
     )
 
     return p1 + p2 + p3 + p4 + p5
@@ -114,7 +116,7 @@ def _Phi_ee_AD(
     k_Di = _k_Di_AD(T_e, n_e, Zf)
     Delta = _Delta_AD(k, k_De, k_Di, lam_ee, lam_ii, lam_ei, b, A)
 
-    pref = ureg.electron_charge**2 / (ureg.vacuum_permittivity * Delta)
+    pref = ureg.elementary_charge**2 / (ureg.vacuum_permittivity * Delta)
     sum1 = k**2 / (1 + k**2 * lam_ee**2)
     sum2 = k_Di**2 * (
         1 / ((1 + k**2 * lam_ee**2) * (1 + k**2 * lam_ii**2))
@@ -147,7 +149,9 @@ def _Phi_ii_AD(
     k_Di = _k_Di_AD(T_e, n_e, Zf)
     Delta = _Delta_AD(k, k_De, k_Di, lam_ee, lam_ii, lam_ei, b, A)
 
-    pref = Zf**2 * ureg.electron_charge**2 / (ureg.vacuum_permittivity * Delta)
+    pref = (
+        Zf**2 * ureg.elementary_charge**2 / (ureg.vacuum_permittivity * Delta)
+    )
     sum1 = k**2 / (1 + k**2 * lam_ii**2)
     sum2 = k_De**2 * (
         1 / ((1 + k**2 * lam_ee**2) * (1 + k**2 * lam_ii**2))
@@ -251,7 +255,7 @@ def S_ei_AD(
     T_cf = _T_cf_AD(T_e, n_e)
     n_i = Zf * n_e
     Phi_ei = _Phi_ei_AD(k, T_e, n_e, m_i, Zf)
-    return -jnpu.sqrt(n_i * n_e) / (ureg.k_B - T_cf) * Phi_ei
+    return -jnpu.sqrt(n_i * n_e) / (ureg.k_B * T_cf) * Phi_ei
 
 
 def S_ee_AD(
@@ -285,4 +289,4 @@ def S_ee_AD(
     """
     T_cf = _T_cf_AD(T_e, n_e)
     Phi_ee = _Phi_ee_AD(k, T_e, n_e, m_i, Zf)
-    return 1 - n_e / (ureg.k_B - T_cf) * Phi_ee
+    return 1 - n_e / (ureg.k_B * T_cf) * Phi_ee
