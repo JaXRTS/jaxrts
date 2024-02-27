@@ -60,7 +60,7 @@ class PlasmaState:
         ).to_base_units()
 
     def n_e(self):
-        return (jpu.numpy.sum(self.ion_number_densities())).to_base_units()
+        return (jpu.numpy.sum(self.n_i() * self.Z_free)).to_base_units()
 
     def ee_coupling(self):
 
@@ -163,7 +163,7 @@ class PlasmaState:
     def q(self, k : Quantity):
         return np.array(self._jq(k))
 
-    def probe(self, E: Quantity, theta: float):
+    def probe(self, E: Quantity, theta: float, instrument : jnp.ndarray):
 
         # Calculate probe wavelength from probe energy
 

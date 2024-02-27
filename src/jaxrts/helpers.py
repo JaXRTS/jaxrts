@@ -5,6 +5,10 @@ Miscellaneous helper functions.
 from jax import numpy as jnp
 from .units import Quantity
 
+from functools import partial, wraps
+from time import time
+import logging
+
 #: Typically, we return quantities that differ per orbital in an
 #: :py:class:`jax.numpy.ndarray` with 10 entries, the orbitals with n<=4.
 #: This dictionary contains the orbitals as keys and the corresponding indices
@@ -86,3 +90,23 @@ def invert_dict(dictionary: dict) -> dict:
             f"Dict {dictionary} cannot be inverted because it contains non-unique entries."  # noqa: E501
         )
     return out_dir
+
+def timer(func, custom_prefix=None, loglevel=logging.INFO):
+    
+    """
+    Simple timer wrapper.
+    """
+    
+    print("Starting ", func.__name__, "...\n")
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        t1 = time()
+        result = func(*args, **kwargs)
+        t2 = time()
+        print(f"Executed {func.__name__!r} ...", end="")
+        print(f"in {(t2-t1):.4f} s\n")
+
+        return result
+
+    return wrapper
