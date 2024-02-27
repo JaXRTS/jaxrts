@@ -19,25 +19,33 @@ ureg = jaxrts.units.ureg
 
 plt.style.use("science")
 
-k = jnp.linspace(0.5, 6) / (1 * ureg.angstrom)
+k = jnp.linspace(0.0, 6, 200) / (1 * ureg.angstrom)
 n_e = 1e22 / ureg.centimeter**3
 T_e = 13.0 * ureg.electron_volts / ureg.k_B
-Zf = 4.5
+Z_f = 4.5
 m_i = 12 * ureg.atomic_mass_constant
 
-See = jaxrts.static_structure_factors.S_ee_AD(k, T_e, n_e, m_i, Zf)
-Sei = jaxrts.static_structure_factors.S_ei_AD(k, T_e, n_e, m_i, Zf)
-Sii = jaxrts.static_structure_factors.S_ii_AD(k, T_e, n_e, m_i, Zf)
-
+See = jaxrts.static_structure_factors.S_ee_AD(k, T_e, n_e, m_i, Z_f)
+Sei = jaxrts.static_structure_factors.S_ei_AD(k, T_e, n_e, m_i, Z_f)
+Sii = jaxrts.static_structure_factors.S_ii_AD(k, T_e, n_e, m_i, Z_f)
 
 plt.plot(
-    k.m_as(1 / ureg.angstrom), See.m_as(ureg.dimensionless), label="$S_{ee}$"
+    k.m_as(1 / ureg.angstrom),
+    See.m_as(ureg.dimensionless),
+    label="$S_{ee}$",
+    color="C0",
 )
 plt.plot(
-    k.m_as(1 / ureg.angstrom), Sei.m_as(ureg.dimensionless), label="$S_{ei}$"
+    k.m_as(1 / ureg.angstrom),
+    Sii.m_as(ureg.dimensionless),
+    label="$S_{ii}$",
+    color="C1",
 )
 plt.plot(
-    k.m_as(1 / ureg.angstrom), Sii.m_as(ureg.dimensionless), label="$S_{ii}$"
+    k.m_as(1 / ureg.angstrom),
+    Sei.m_as(ureg.dimensionless),
+    label="$S_{ei}$",
+    color="C2",
 )
 
 plt.xlabel(r"$k$ [1/$\AA$]")
