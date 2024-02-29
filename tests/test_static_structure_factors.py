@@ -8,7 +8,7 @@ from jax import numpy as jnp
 ureg = jaxrts.ureg
 
 
-def test_arkhipov_literature(mock_Tcf_AD):
+def test_arkhipov_literature():
     """
     Test the calculations against the data displayed in Fig. 3 and Fig. 4
     of :cite:`Arkhipov`
@@ -16,7 +16,6 @@ def test_arkhipov_literature(mock_Tcf_AD):
     r_s = 0.1
     Z_f = 1
     m_i = 1 * ureg.atomic_mass_constant
-    prefactor = 4 * jnp.pi * ureg.epsilon_0
     a = r_s * ureg.a_0
     n_e = 3 / (4 * jnp.pi * a**3)
 
@@ -33,8 +32,14 @@ def test_arkhipov_literature(mock_Tcf_AD):
         k_See = ka_See / a
         k_Sei = ka_Sei / a
 
-        #T_e = ureg.elementary_charge**2 / (a * ureg.k_B * gam) / prefactor
-        T_e = ureg.elementary_charge ** 2 / (4 * gam * jnp.pi * ureg.boltzmann_constant * ureg.vacuum_permittivity * a)
+        T_e = ureg.elementary_charge**2 / (
+            4
+            * gam
+            * jnp.pi
+            * ureg.boltzmann_constant
+            * ureg.vacuum_permittivity
+            * a
+        )
 
         calc_See = jaxrts.static_structure_factors.S_ee_AD(
             k_See, T_e, n_e, m_i, Z_f
