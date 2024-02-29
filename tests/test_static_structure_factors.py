@@ -2,6 +2,10 @@ import pathlib
 
 from unittest.mock import patch
 
+import sys
+sys.path.append("c:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src")
+sys.path.append("c:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts")
+
 import pytest
 import numpy as onp
 import jaxrts
@@ -44,7 +48,8 @@ def test_arkhipov_literature(mock_Tcf_AD):
         k_See = ka_See / a
         k_Sei = ka_Sei / a
 
-        T_e = ureg.elementary_charge**2 / (a * ureg.k_B * gam) / prefactor
+        #T_e = ureg.elementary_charge**2 / (a * ureg.k_B * gam) / prefactor
+        T_e = ureg.elementary_charge ** 2 / (4 * gam * jnp.pi * ureg.boltzmann_constant * ureg.vacuum_permittivity * a)
 
         calc_See = jaxrts.static_structure_factors.S_ee_AD(
             k_See, T_e, n_e, m_i, Z_f
@@ -56,15 +61,15 @@ def test_arkhipov_literature(mock_Tcf_AD):
             k_Sei, T_e, n_e, m_i, Z_f
         ).m_as(ureg.dimensionless)
 
-        # import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt
 
-        # plt.plot(ka_See, lit_S_ee, color="C0")
-        # plt.plot(ka_See, calc_See, color="C0", ls="dashed")
-        # plt.plot(ka_Sei, lit_S_ei, color="C1")
-        # plt.plot(ka_Sei, calc_Sei, color="C1", ls="dashed")
-        # plt.plot(ka_See, calc_Sii, color="C2", ls="dashed")
+        plt.plot(ka_See, lit_S_ee, color="C0")
+        plt.plot(ka_See, calc_See, color="C0", ls="dashed")
+        plt.plot(ka_Sei, lit_S_ei, color="C1")
+        plt.plot(ka_Sei, calc_Sei, color="C1", ls="dashed")
+        plt.plot(ka_See, calc_Sii, color="C2", ls="dashed")
 
-        # plt.show()
+        plt.show()
 
 
-# test_arkhipov_literature()
+test_arkhipov_literature()

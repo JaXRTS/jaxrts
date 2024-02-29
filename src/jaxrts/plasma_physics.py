@@ -7,7 +7,6 @@ from .units import ureg, Quantity
 from jax import numpy as jnp
 from jpu import numpy as jnpu
 
-
 def plasma_frequency(electron_density: Quantity) -> Quantity:
     """
     Calculate the plasma frequency :math:`\\omega_\\text{pe}`

@@ -5,6 +5,7 @@ structure.
 
 from .units import ureg, Quantity
 from .plasma_physics import coulomb_potential_fourier, kin_energy, fermi_dirac
+from .static_structure_factors import S_ii_AD
 
 import pint
 from typing import List
@@ -374,6 +375,37 @@ def S0_ee_RPA_no_damping(
     eps = dielectric_function_RPA_no_damping(k, E, chem_pot, T_e)
     return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
 
+def collision_frequency_BA(E: Quantity,
+                            T_e: Quantity,
+                            m_ion : Quantity,
+                            n_e: Quantity,
+                            Zf : float):
+    
+    k_intervall = jnp.linspace(0, 50, 100)
+    integrand = k_intervall ** 4 * S_ii_AD(k_intervall, T_e, n_e, m_ion, Zf)
+    
+    
+    pass
+
+def dielectric_function_BMA(k: Quantity,
+                                    chem_pot : Quantity,
+                                    T: Quantity,
+                                    n_e: Quantity,
+                                    E: Quantity | List
+) -> jnp.ndarray:
+    
+    """
+    Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions
+    into account.
+    
+    """
+    w = E / ureg.hbar
+    coll_freq = collision_frequency_roepke()
+    
+    numerator = (w + 1j * coll_freq) * dielectric_function_RPA_no_damping(k, 0, chem_pot, T) * dielectric_function_RPA_no_damping(k, E + 1j * ureg.hbar * coll_freq, chem_pot, T)
+    denumerator = w * dielectric_function_RPA_no_damping(k, E, chem_pot, T) + 1j * coll_freq * dielectric_function_RPA_no_damping(k, E + 1j * ureg.hbar * coll_freq, chem_pot, T)
+    
+    return numerator / denumerator
 
 # def ret_diel_func_DPA(k: Quantity, Z: jnp.ndarray) -> Quantity:
 #     """

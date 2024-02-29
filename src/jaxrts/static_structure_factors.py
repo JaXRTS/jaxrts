@@ -35,6 +35,7 @@ def _lambda_AD(T: Quantity, m1: Quantity, m2: Quantity) -> Quantity:
     # The 1 * m1 is required so allow this function to handle Units, too.
     mu = (m1 * m2) / (m1 + m2)
     denumerator = 2 * jnp.pi * mu * ureg.k_B * T
+
     return ureg.hbar / jnpu.sqrt(denumerator)
 
 
