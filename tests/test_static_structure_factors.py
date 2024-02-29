@@ -1,11 +1,5 @@
 import pathlib
 
-from unittest.mock import patch
-
-import sys
-sys.path.append("c:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src")
-sys.path.append("c:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts")
-
 import pytest
 import numpy as onp
 import jaxrts
@@ -13,16 +7,7 @@ from jax import numpy as jnp
 
 ureg = jaxrts.ureg
 
-def mock_Tcf(T_e,n_e):
-    """
-    Arkhipov does not use an effective temperature as Gregori does.
-    Hence, replace jaxrts.static_structure_factors._T_cf_AD for this test to
-    just return T_e.
-    """
-    return T_e
 
-
-@patch("jaxrts.static_structure_factors._T_cf_AD", side_effect=mock_Tcf)
 def test_arkhipov_literature(mock_Tcf_AD):
     """
     Test the calculations against the data displayed in Fig. 3 and Fig. 4
