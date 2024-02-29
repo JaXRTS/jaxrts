@@ -6,7 +6,7 @@ structure.
 from .units import ureg, Quantity
 from .plasma_physics import coulomb_potential_fourier, kin_energy, fermi_dirac
 from .static_structure_factors import S_ii_AD
-from .math import inverse_fermi_12_rational_approximation
+from .math import inverse_fermi_12_rational_approximation, inverse_fermi_12_fukushima_single_prec
 
 import pint
 from typing import List
@@ -389,17 +389,18 @@ def zeta_e_squared(k : Quantity, n_e : Quantity, T_e : Quantity) -> jnp.ndarray:
     p_e = jpu.numpy.sqrt(ureg.electron_mass * ureg.boltzmann_constant * T_e)
     v_e = ureg.hbar * (k / 2) / jnp.sqrt(2) * p_e
     
-    w_e = ureg.electron_mass * (w / k) / (jnp.sqrt(2) * p_e)
     kappa_De = w_pe / v_e
     kappa_e = ureg.hbar * (k / 2) / (jnp.sqrt(2) * p_e)    
     gamma_e = jnp.sqrt(2 * jnp.pi) * ureg.hbar / p_e
     D_e = (n_e * gamma_e ** 3).to_base_units()
     
-    eta_e = inverse_fermi_12_rational_approximation(D_e / 2)
+    eta_e = inverse_fermi_12_fukushima_single_prec(D_e / 2)
     
     prefactor = kappa_De ** 2 / (jnp.sqrt(jnp.pi) * kappa_e * D_e)
     
     w_intervall = jnp.linspace(1E-6 * w_e.magnitude, 1E6 * w_e.magnitude, 1E6)
+    
+    w_e = ureg.electron_mass * (w_intervall / k) / (jnp.sqrt(2) * p_e)
     integrand = (1 / w_intervall) * jnp.log((1 + jnp.exp(eta_e - (w_intervall - kappa_e) ** 2))/(1 + jnp.exp(eta_e - (w_intervall + kappa_e) ** 2)))
     
     integral = jax.scipy.integrate.trapezoid(w_intervall.T, integrand, axis=1)
