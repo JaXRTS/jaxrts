@@ -5,11 +5,18 @@ import numpy as np
 
 def fermi_integral(x, n):
     
-    t = jnp.linspace(0, 1E8, 100000).T
+    # norm = jax.scipy.special.gamma(n+1)
+    t = jnp.linspace(0, 10 * jnp.max(x), int(1E5))
     
-    integrand = t ** n / (jnp.exp(t-x[:, jnp.newaxis]) + 1)
+    integrand = jnp.power(t, n) / (jnp.exp(t-x[:, jnp.newaxis]) + 1)
     
-    return jax.scipy.integrate.trapezoid(t, integrand)
+    # Test integrand
+    # integrand = 1 * (t-jnp.zeros_like(x)[:, jnp.newaxis])
+    
+    return jax.scipy.integrate.trapezoid(integrand, t)
+
+def numerical_inverse_fermi_integral(x, n):
+    pass
 
 def R1_mk(a, b, x):
     
@@ -60,14 +67,15 @@ def inverse_fermi_12_rational_approximation(x):
                     -6.067091689181E-2])
     
     return jnp.where(x < 4, jnp.log(x * R1_mk(a, b, x)),
-                    x ** (2/3) * R1_mk(c, d, x))
+                    x ** (2/3) * R1_mk(c, d, x ** (-2/3)))
     
     
 if __name__ == "__main__":
     
     import matplotlib.pyplot as plt
-    x = jnp.linspace(0, 200)
-    plt.plot(x, fermi_integral(x, 1/2))
-    # plt.plot(x, inverse_fermi_12_rational_approximation(x))
-    
+    x = jnp.linspace(0, 40, 1000)
+    plt.plot(x, fermi_integral(x, 0.5))
+    plt.plot(x,x)
+    plt.plot(x, inverse_fermi_12_rational_approximation(x))
+    # plt.yscale('log')
     plt.show()

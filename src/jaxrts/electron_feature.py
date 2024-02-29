@@ -6,6 +6,7 @@ structure.
 from .units import ureg, Quantity
 from .plasma_physics import coulomb_potential_fourier, kin_energy, fermi_dirac
 from .static_structure_factors import S_ii_AD
+from .math import inverse_fermi_12_rational_approximation
 
 import pint
 from typing import List
@@ -375,37 +376,111 @@ def S0_ee_RPA_no_damping(
     eps = dielectric_function_RPA_no_damping(k, E, chem_pot, T_e)
     return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
 
-def collision_frequency_BA(E: Quantity,
-                            T_e: Quantity,
-                            m_ion : Quantity,
-                            n_e: Quantity,
-                            Zf : float):
+def zeta_e_squared(k : Quantity, n_e : Quantity, T_e : Quantity) -> jnp.ndarray:
     
-    k_intervall = jnp.linspace(0, 50, 100)
-    integrand = k_intervall ** 4 * S_ii_AD(k_intervall, T_e, n_e, m_ion, Zf)
+    """
+    Calculates the k-dependent inverse screening length.
+    """
     
-    
-    pass
+    k = k[:, jnp.newaxis]
 
-def dielectric_function_BMA(k: Quantity,
-                                    chem_pot : Quantity,
-                                    T: Quantity,
-                                    n_e: Quantity,
-                                    E: Quantity | List
-) -> jnp.ndarray:
+    w_pe = jpu.numpy.sqrt((4 * jnp.pi * n_e * ureg.elementary_charge ** 2) / (ureg.electron_mass))
     
+    p_e = jpu.numpy.sqrt(ureg.electron_mass * ureg.boltzmann_constant * T_e)
+    v_e = ureg.hbar * (k / 2) / jnp.sqrt(2) * p_e
+    
+    w_e = ureg.electron_mass * (w / k) / (jnp.sqrt(2) * p_e)
+    kappa_De = w_pe / v_e
+    kappa_e = ureg.hbar * (k / 2) / (jnp.sqrt(2) * p_e)    
+    gamma_e = jnp.sqrt(2 * jnp.pi) * ureg.hbar / p_e
+    D_e = (n_e * gamma_e ** 3).to_base_units()
+    
+    eta_e = inverse_fermi_12_rational_approximation(D_e / 2)
+    
+    prefactor = kappa_De ** 2 / (jnp.sqrt(jnp.pi) * kappa_e * D_e)
+    
+    w_intervall = jnp.linspace(1E-6 * w_e.magnitude, 1E6 * w_e.magnitude, 1E6)
+    integrand = (1 / w_intervall) * jnp.log((1 + jnp.exp(eta_e - (w_intervall - kappa_e) ** 2))/(1 + jnp.exp(eta_e - (w_intervall + kappa_e) ** 2)))
+    
+    integral = jax.scipy.integrate.trapezoid(w_intervall.T, integrand, axis=1)
+
+    return prefactor * integral
+
+
+def collision_frequency_BA(
+    E: Quantity,
+    T: Quantity,
+    m_ion: Quantity,
+    n_e: Quantity,
+    chem_pot: Quantity,
+    Z: float,
+    Zf: float,
+):
+
+    w = (E / ureg.hbar)[:, jnp.newaxis]
+
+    T_e = T
+
+    k_intervall = jnp.linspace(0, 1000, 2000)
+
+    eps_ee_f = dielectric_function_RPA_no_damping(k_intervall, E, chem_pot, T)
+
+    integrand = (
+        k_intervall**4
+        * S_ii_AD(k_intervall, T_e, n_e, m_ion, Zf)
+        * (zeta_e_squared(k_intervall) - k_intervall**2 * (eps_ee_f - 1))
+        / (k_intervall**2 + zeta_e_squared) ** 2
+    )
+
+    integral = jax.scipy.integrate.trapezoid(k_intervall.T, integrand, axis=1)
+
+    # Calculate ion density and the ionic plasma frequency
+    n_i = n_e / Zf
+    w_pi = jpu.numpy.sqrt((4 * jnp.pi * n_i * Z ** 2 * ureg.elementary_charge ** 2) / (m_ion))
+
+    prefactor = (
+        1j
+        * (2 * jnp.pi / 3)
+        * (w_pi**2 / w)
+        * (1 / n_e)
+        * (m_ion / ureg.electron_mass)
+    )
+
+    return prefactor * integral
+
+
+def dielectric_function_BMA(
+    k: Quantity,
+    chem_pot: Quantity,
+    T: Quantity,
+    n_e: Quantity,
+    m_ion: Quantity,
+    Zf: float,
+    E: Quantity | List,
+) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions
     into account.
-    
+
     """
     w = E / ureg.hbar
-    coll_freq = collision_frequency_roepke()
-    
-    numerator = (w + 1j * coll_freq) * dielectric_function_RPA_no_damping(k, 0, chem_pot, T) * dielectric_function_RPA_no_damping(k, E + 1j * ureg.hbar * coll_freq, chem_pot, T)
-    denumerator = w * dielectric_function_RPA_no_damping(k, E, chem_pot, T) + 1j * coll_freq * dielectric_function_RPA_no_damping(k, E + 1j * ureg.hbar * coll_freq, chem_pot, T)
-    
+    coll_freq = collision_frequency_BA(E, T, m_ion, n_e, Zf)
+
+    numerator = (
+        (w + 1j * coll_freq)
+        * dielectric_function_RPA_no_damping(k, 0, chem_pot, T)
+        * dielectric_function_RPA_no_damping(
+            k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+        )
+    )
+    denumerator = w * dielectric_function_RPA_no_damping(
+        k, E, chem_pot, T
+    ) + 1j * coll_freq * dielectric_function_RPA_no_damping(
+        k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+    )
+
     return numerator / denumerator
+
 
 # def ret_diel_func_DPA(k: Quantity, Z: jnp.ndarray) -> Quantity:
 #     """
