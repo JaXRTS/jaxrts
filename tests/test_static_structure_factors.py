@@ -1,5 +1,7 @@
 import pathlib
 
+from unittest.mock import patch
+
 import pytest
 import numpy as onp
 import jaxrts
@@ -7,8 +9,17 @@ from jax import numpy as jnp
 
 ureg = jaxrts.ureg
 
+def mock_Tcf(T_e,n_e):
+    """
+    Arkhipov does not use an effective temperature as Gregori does.
+    Hence, replace jaxrts.static_structure_factors._T_cf_AD for this test to
+    just return T_e.
+    """
+    return T_e
 
-def test_arkhipov_literature():
+
+@patch("jaxrts.static_structure_factors._T_cf_AD", side_effect=mock_Tcf)
+def test_arkhipov_literature(mock_Tcf_AD):
     """
     Test the calculations against the data displayed in Fig. 3 and Fig. 4
     of :cite:`Arkhipov`
@@ -17,12 +28,7 @@ def test_arkhipov_literature():
     Z_f = 1
     m_i = 1 * ureg.atomic_mass_constant
     prefactor = 4 * jnp.pi * ureg.epsilon_0
-    a = (
-        prefactor
-        * r_s
-        * ureg.hbar**2
-        / (ureg.elementary_charge**2 * ureg.electron_mass)
-    )
+    a = r_s * ureg.a_0
     n_e = 3 / (4 * jnp.pi * a**3)
 
     for fig, gam in zip([3, 4], [0.1, 1]):
