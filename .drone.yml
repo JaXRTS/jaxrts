@@ -1,0 +1,55 @@
+---
+kind: pipeline
+type: docker
+name: release-on-tag
+
+steps:
+  - name: build_and_docs
+    image: python:3.11
+    commands:
+      - curl -sSL https://install.python-poetry.org | python -
+      - /root/.local/bin/poetry install
+      - /root/.local/bin/poetry build
+      - cd doc
+      - /root/.local/bin/poetry run sphinx-build -M html source build
+  - name: gitea_release
+    image: plugins/gitea-release
+    settings:
+      base_url: http://gitea.hed.physik.uni-rostock.de
+      api_key:
+        from_secret: gitea_token
+      files: dist/*
+      note: "[Documentation](http://aghed.hed.physik.uni-rostock.de/EuXFEL-Experiments/jaxrts/${DRONE_TAG})"
+  - name: deploy_docs
+    image: drillster/drone-rsync
+    settings:
+      hosts:
+        - aghed.hed.physik.uni-rostock.de
+      user: drone
+      port: 22001
+      key:
+        from_secret: key
+      source: doc/build/html/
+      target: /data/pages/EuXFEL-Experiments/jaxrts/$DRONE_TAG
+
+trigger:
+  event:
+    - tag
+---
+kind: pipeline
+type: docker
+name: tests
+
+steps:
+  - name: test
+    image: python:3.11
+    commands:
+      - curl -sSL https://install.python-poetry.org | python -
+      - /root/.local/bin/poetry install
+      - /root/.local/bin/poetry run pytest
+trigger:
+  branch:
+    - main
+  event: 
+    - push
+    - pull_request
