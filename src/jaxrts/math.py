@@ -3,7 +3,6 @@ import jax
 
 import numpy as np
 
-
 def fermi_integral(x, n):
     """
     The Fermi integral of order n.
