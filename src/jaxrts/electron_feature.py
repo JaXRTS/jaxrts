@@ -17,6 +17,8 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 import numpy as onp
 
+from quadax import quadgk
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -42,17 +44,22 @@ def _W_salpeter(x: jnp.ndarray | float) -> jnp.ndarray:
         The value of the convenience function.
 
     """
-
-    x_v = jnp.linspace(0, x.magnitude, 3000).T
-
-    y_v = jnpu.exp(x_v**2)
+    
+    def integrand(_x):
+        return jnpu.exp(_x**2)
+    
+    integral = quadgk(integrand, [0, x], epsabs = 1E-20, epsrel = 1E-20)[0]
+    
+    # x_v = jnp.linspace(0, x.magnitude, 3000).T
+    # y_v = jnpu.exp(x_v**2)
+    # integral = jax.scipy.integrate.trapezoid(y_v, x_v, axis=1)
 
     res = (
         1
         - 2
         * x
         * jnpu.exp(-(x**2))
-        * jax.scipy.integrate.trapezoid(y_v, x_v, axis=1)
+        * integral
         + (jnpu.sqrt(jnp.pi) * x * jnpu.exp(-(x**2))) * 1j
     ).to_base_units()
 
@@ -382,7 +389,7 @@ def zeta_e_squared(k : Quantity, n_e : Quantity, T_e : Quantity) -> jnp.ndarray:
     Calculates the k-dependent inverse screening length.
     """
     
-    k = k[:, jnp.newaxis]
+    # k = k[:, jnp.newaxis]
 
     w_pe = jpu.numpy.sqrt((4 * jnp.pi * n_e * ureg.elementary_charge ** 2) / (ureg.electron_mass))
     
@@ -397,13 +404,15 @@ def zeta_e_squared(k : Quantity, n_e : Quantity, T_e : Quantity) -> jnp.ndarray:
     eta_e = inverse_fermi_12_fukushima_single_prec(D_e / 2)
     
     prefactor = kappa_De ** 2 / (jnp.sqrt(jnp.pi) * kappa_e * D_e)
+
+    def integrand(_w):
+        # w_e = ureg.electron_mass * (_w / k) / (jnp.sqrt(2) * p_e)
+        return (1 / _w) * jnp.log((1 + jnp.exp(eta_e - (_w - kappa_e) ** 2))/(1 + jnp.exp(eta_e - (_w + kappa_e) ** 2)))
     
-    w_intervall = jnp.linspace(1E-6 * w_e.magnitude, 1E6 * w_e.magnitude, 1E6)
+    # integrand = (1 / w_intervall) * jnp.log((1 + jnp.exp(eta_e - (w_intervall - kappa_e) ** 2))/(1 + jnp.exp(eta_e - (w_intervall + kappa_e) ** 2)))
+    # integral = jax.scipy.integrate.trapezoid(w_intervall.T, integrand, axis=1)
     
-    w_e = ureg.electron_mass * (w_intervall / k) / (jnp.sqrt(2) * p_e)
-    integrand = (1 / w_intervall) * jnp.log((1 + jnp.exp(eta_e - (w_intervall - kappa_e) ** 2))/(1 + jnp.exp(eta_e - (w_intervall + kappa_e) ** 2)))
-    
-    integral = jax.scipy.integrate.trapezoid(w_intervall.T, integrand, axis=1)
+    integral, err = quadgk(integrand, [0, jnp.inf], epsabs = 1E-20, epsrel = 1E-20)
 
     return prefactor * integral
 
@@ -422,18 +431,27 @@ def collision_frequency_BA(
 
     T_e = T
 
-    k_intervall = jnp.linspace(0, 1000, 2000)
+    # k_intervall = jnp.linspace(0, 1000, 2000)
 
-    eps_ee_f = dielectric_function_RPA_no_damping(k_intervall, E, chem_pot, T)
+    # eps_ee_f = dielectric_function_RPA_no_damping(k_intervall, E, chem_pot, T)
 
-    integrand = (
-        k_intervall**4
-        * S_ii_AD(k_intervall, T_e, n_e, m_ion, Zf)
-        * (zeta_e_squared(k_intervall) - k_intervall**2 * (eps_ee_f - 1))
-        / (k_intervall**2 + zeta_e_squared) ** 2
-    )
+    def integrand(k):
+        return (
+        k*4
+        * S_ii_AD(k, T_e, n_e, m_ion, Zf)
+        * (zeta_e_squared(k) - k**2 * (dielectric_function_RPA_no_damping(k, E, chem_pot, T) - 1))
+        / (k**2 + zeta_e_squared) ** 2
+    ).to_base_units()
 
-    integral = jax.scipy.integrate.trapezoid(k_intervall.T, integrand, axis=1)
+    integral, errl = quadgk(integrand, [0, jnp.inf], epsabs = 1E-20, epsrel = 1E-20)
+    # integrand = (
+    #     k_intervall**4
+    #     * S_ii_AD(k_intervall, T_e, n_e, m_ion, Zf)
+    #     * (zeta_e_squared(k_intervall) - k_intervall**2 * (eps_ee_f - 1))
+    #     / (k_intervall**2 + zeta_e_squared) ** 2
+    # )
+
+    # integral = jax.scipy.integrate.trapezoid(k_intervall.T, integrand, axis=1)
 
     # Calculate ion density and the ionic plasma frequency
     n_i = n_e / Zf
