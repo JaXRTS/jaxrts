@@ -13,6 +13,9 @@ from . import plasma_physics
 from . import plotting
 from . import static_structure_factors
 from . import units
+from . import math
+from . import models
+from . import setup
 
 from .elements import Element
 from .plasmastate import (
@@ -36,6 +39,9 @@ __all__ = [
     "plasmastate",
     "plasma_physics",
     "plotting",
+    "setup",
+    "math",
+    "models",
     "static_structure_factors",
     "units",
     "ureg",

@@ -1,9 +1,8 @@
 import jax.numpy as jnp
 
 import jpu
-from jpu import Quantity
 
-from .units import ureg
+from .units import ureg, Quantity
 
 class Setup:
     

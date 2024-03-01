@@ -1,7 +1,7 @@
 import jax.numpy as jnp
 import jax
 
-from .setup import *
+from .setup import Setup
 
 class Model:
     
