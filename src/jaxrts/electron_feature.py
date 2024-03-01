@@ -48,7 +48,7 @@ def _W_salpeter(x: jnp.ndarray | float) -> jnp.ndarray:
     def integrand(_x):
         return jnpu.exp(_x**2)
     
-    integral = quadgk(integrand, [0, x], epsabs = 1E-20, epsrel = 1E-20)[0]
+    integral, errl = quadgk(integrand, [0, x], epsabs = 1E-20, epsrel = 1E-20)
     
     # x_v = jnp.linspace(0, x.magnitude, 3000).T
     # y_v = jnpu.exp(x_v**2)
@@ -412,7 +412,7 @@ def zeta_e_squared(k : Quantity, n_e : Quantity, T_e : Quantity) -> jnp.ndarray:
     # integrand = (1 / w_intervall) * jnp.log((1 + jnp.exp(eta_e - (w_intervall - kappa_e) ** 2))/(1 + jnp.exp(eta_e - (w_intervall + kappa_e) ** 2)))
     # integral = jax.scipy.integrate.trapezoid(w_intervall.T, integrand, axis=1)
     
-    integral, err = quadgk(integrand, [0, jnp.inf], epsabs = 1E-20, epsrel = 1E-20)
+    integral, errl = quadgk(integrand, [0, jnp.inf], epsabs = 1E-20, epsrel = 1E-20)
 
     return prefactor * integral
 
@@ -427,13 +427,11 @@ def collision_frequency_BA(
     Zf: float,
 ):
 
-    w = (E / ureg.hbar)[:, jnp.newaxis]
+    w = (E / ureg.hbar)
 
     T_e = T
 
     # k_intervall = jnp.linspace(0, 1000, 2000)
-
-    # eps_ee_f = dielectric_function_RPA_no_damping(k_intervall, E, chem_pot, T)
 
     def integrand(k):
         return (
