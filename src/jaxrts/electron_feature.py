@@ -46,9 +46,9 @@ def _W_salpeter(x: jnp.ndarray | float) -> jnp.ndarray:
     """
     
     def integrand(_x):
-        return jnpu.exp(_x**2)
+        return jnpu.exp(_x**2).m_as(ureg.dimensionless)
     
-    integral, errl = quadgk(integrand, [0, x], epsabs = 1E-20, epsrel = 1E-20)
+    integral, errl = quadgk(integrand, [0, x.m_as(ureg.dimensionless)], epsabs = 1E-20, epsrel = 1E-20)
     
     # x_v = jnp.linspace(0, x.magnitude, 3000).T
     # y_v = jnpu.exp(x_v**2)
@@ -423,7 +423,6 @@ def collision_frequency_BA(
     m_ion: Quantity,
     n_e: Quantity,
     chem_pot: Quantity,
-    Z: float,
     Zf: float,
 ):
 
@@ -437,9 +436,9 @@ def collision_frequency_BA(
         return (
         k*4
         * S_ii_AD(k, T_e, n_e, m_ion, Zf)
-        * (zeta_e_squared(k) - k**2 * (dielectric_function_RPA_no_damping(k, E, chem_pot, T) - 1))
-        / (k**2 + zeta_e_squared) ** 2
-    ).to_base_units()
+        * (zeta_e_squared(k, n_e, T_e) - k**2 * (dielectric_function_RPA_no_damping(k, E, chem_pot, T) - 1))
+        / (k**2 + zeta_e_squared(k, n_e, T_e)) ** 2
+    ).to_base_units().magnitude
 
     integral, errl = quadgk(integrand, [0, jnp.inf], epsabs = 1E-20, epsrel = 1E-20)
     # integrand = (
@@ -453,7 +452,7 @@ def collision_frequency_BA(
 
     # Calculate ion density and the ionic plasma frequency
     n_i = n_e / Zf
-    w_pi = jpu.numpy.sqrt((4 * jnp.pi * n_i * Z ** 2 * ureg.elementary_charge ** 2) / (m_ion))
+    w_pi = jpu.numpy.sqrt((4 * jnp.pi * n_i * Zf ** 2 * ureg.elementary_charge ** 2) / (m_ion))
 
     prefactor = (
         1j
@@ -468,12 +467,12 @@ def collision_frequency_BA(
 
 def dielectric_function_BMA(
     k: Quantity,
+    E: Quantity | List,
     chem_pot: Quantity,
     T: Quantity,
     n_e: Quantity,
     m_ion: Quantity,
-    Zf: float,
-    E: Quantity | List,
+    Zf: float
 ) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions
@@ -497,6 +496,12 @@ def dielectric_function_BMA(
     )
 
     return numerator / denumerator
+
+def S0_ee_BMA(k: Quantity, T: Quantity, chem_pot : Quantity, m_ion : Quantity, n_e: Quantity, Zf : float, E: Quantity | List) -> jnp.ndarray:
+    
+    E = -E
+    eps = dielectric_function_BMA(k, E, chem_pot, T, n_e, m_ion, Zf)
+    return S0ee_from_dielectric_func_FDT(k, T, n_e, E, eps)
 
 
 # def ret_diel_func_DPA(k: Quantity, Z: jnp.ndarray) -> Quantity:
