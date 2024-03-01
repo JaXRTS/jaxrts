@@ -80,7 +80,8 @@ def _Delta_AD(
     A: Quantity,
 ) -> Quantity:
     """
-    :cite:`Gregori.2003`, Eqn. (11)
+    See :cite:`Gregori.2003`, Eqn. (11) or :cite:`Arkhipov.2000` (Eqn 10, which
+    is this equation, divided by :math:`k^4`.
     """
     return (
         k**4
@@ -95,6 +96,8 @@ def _Delta_AD(
         + A
         * k**2
         * k_De**2
+        # The original paper :cite:`Arkhipov.1998` differs in the subsequent
+        # line. This has beed rectified by the authors their paper from 2000.
         * (k**2 + k_Di**2 / (1 + k**2 * lamii**2))
         * jnpu.exp(-(k**2) / (4 * b))
     )
