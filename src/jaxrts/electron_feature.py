@@ -6,7 +6,7 @@ structure.
 from .units import ureg, Quantity
 from .plasma_physics import coulomb_potential_fourier, kin_energy, fermi_dirac
 from .static_structure_factors import S_ii_AD
-from .math import inverse_fermi_12_rational_approximation, inverse_fermi_12_fukushima_single_prec
+from .math import inverse_fermi_12_fukushima_single_prec
 
 import pint
 from typing import List
