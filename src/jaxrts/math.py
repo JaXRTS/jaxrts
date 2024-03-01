@@ -5,6 +5,10 @@ import numpy as np
 
 
 def fermi_integral(x, n):
+    
+    """
+    The Fermi integral of order n.
+    """
 
     # norm = jax.scipy.special.gamma(n+1)
     t = jnp.arange(0, 1000, 0.01)
@@ -20,6 +24,7 @@ def fermi_integral(x, n):
 def numerical_inverse_fermi_integral(x, n):
     pass
 
+@jax.jit
 def R1_mk(a, b, x):
 
     upper_max_power = jnp.size(a)
@@ -37,7 +42,7 @@ def R1_mk(a, b, x):
 
     return numerator / denumerator
 
-
+@jax.jit
 def F_n(x, a, b, c, d, n):
     return jnp.where(
         x < 2,
@@ -45,7 +50,7 @@ def F_n(x, a, b, c, d, n):
         x ** (n + 1) * R1_mk(c, d, x ** (-2)),
     )
 
-
+@jax.jit
 def X_n(x, a, b, c, d, n):
     return jnp.where(
         x < 4,
@@ -53,6 +58,7 @@ def X_n(x, a, b, c, d, n):
         x ** (1 / (1 + n)) * R1_mk(c, d, x ** (-1 / (1 + n))),
     )
 
+@jax.jit
 def inverse_fermi_12_fukushima_single_prec(x):
 
     """
@@ -128,7 +134,8 @@ def inverse_fermi_12_fukushima_single_prec(x):
 
     return term1 + term2 + term3 + term4 + term5 + term6
 
-def fermi_12_rational_approximation(x):
+@jax.jit
+def fermi_12_rational_approximation_antia(x):
 
     a = jnp.array(
         [
@@ -191,8 +198,8 @@ def fermi_12_rational_approximation(x):
 
     return F_n(x, a, b, c, d, 0.5)
 
-
-def inverse_fermi_12_rational_approximation(x):
+@jax.jit
+def inverse_fermi_12_rational_approximation_antia(x):
     """
     Calculates F_{1/2} using a rational function approximation as described in Antia 1993.
 
@@ -255,8 +262,10 @@ def inverse_fermi_12_rational_approximation(x):
 if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
+    plt.style.use("science")
 
-    xmin, xmax = 0, 100
+    fig, _ = plt.subplots(figsize = (6,6))
+    xmin, xmax = 0, 200
     x = jnp.linspace(xmin, xmax, 1000)
     y = fermi_integral(x, 0.5)
     # plt.plot(x, y, color="C0")
@@ -268,8 +277,8 @@ if __name__ == "__main__":
     #     alpha=0.4,
     # )
     #plt.plot(x, x, color = "green", label = "f(x) = x")
-    plt.plot(x, np.abs(inverse_fermi_12_rational_approximation(y)-x), color = 'blue', linestyle = 'dashed', label = r"$\vert\mathcal{F}^{-1}(\mathcal{F}(x))-x\vert$, Antia 1993 approximation")
-    plt.plot(x, np.abs(inverse_fermi_12_fukushima_single_prec(y)-x), color = 'red', alpha = 1.0, label = r"$\vert\mathcal{F}^{-1}(\mathcal{F}(x))-x\vert$, Fukushima 2015 approximation")
+    plt.plot(x, np.abs(inverse_fermi_12_rational_approximation_antia(y)-x), color = 'blue', linestyle = 'dashed', label = r"$\vert\mathcal{F}^{-1}(\mathcal{F}_{real}(x))-x\vert$, Antia 1993 approximation")
+    plt.plot(x, np.abs(inverse_fermi_12_fukushima_single_prec(y)-x), color = 'red', label = r"$\vert\mathcal{F}^{-1}(\mathcal{F}_{real}(x))-x\vert$, Fukushima 2015 approximation")
     #plt.plot(x, np.zeros_like(x), color = 'black', linestyle = "dashed")
     plt.xlim(xmin, xmax)
     plt.legend()
