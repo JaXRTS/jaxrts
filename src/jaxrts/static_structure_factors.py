@@ -5,11 +5,16 @@ Static structure factors.
 import jax
 from jax import numpy as jnp
 from jpu import numpy as jnpu
+from quadax import quadts as quad
+
+import logging
 
 from .units import ureg, Quantity
 from .plasma_physics import fermi_energy, wiegner_seitz_radius
 
 jax.config.update("jax_enable_x64", True)
+
+logger = logging.getLogger("__name__")
 
 
 @jax.jit
@@ -93,9 +98,7 @@ def _Delta_AD(
             1.0 / ((1 + k**2 * lamee**2) * (1 + k**2 * lamii**2))
             - 1 / (1 + k**2 * lamei**2) ** 2
         )
-        + A
-        * k**2
-        * k_De**2
+        + A * k**2 * k_De**2
         # The original paper :cite:`Arkhipov.1998` differs in the subsequent
         # line. This has beed rectified by the authors their paper from 2000.
         * (k**2 + k_Di**2 / (1 + k**2 * lamii**2))
@@ -347,3 +350,51 @@ def S_ee_AD(
     """
     Phi_ee = _Phi_ee_AD(k, T_e, n_e, m_i, Z_f)
     return (1 - n_e / (ureg.k_B * T_e) * Phi_ee).to_base_units()
+
+
+def g_ee_ABD(
+    r: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+) -> Quantity:
+    """
+    The radial distribution function, in the approach by Arkhipov, Baimbetov
+    and Davletov :cite:`Arkhipov.2000` (Eqn. 17)
+
+    The method is using the Random Phase Approximation, treating the problem
+    semi-classically and uses a pseudopotential between charged particles to
+    account for quantum diffraction effects and symmetry
+
+    Parameters
+    ----------
+    r: Quantity
+        Distance in [length] units.
+    T_e: Quantity
+        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
+        effective temperature used in :cite:`Gregori.2003`.
+    n_e: Quantity
+        The electron density in 1/[volume]
+    m_i: Quantity
+        The mass of the ion
+    Z_f: float
+        Number of free electrons per ion.
+
+    Returns
+    -------
+    Quantity
+        The radial electron-electron distribution function in the pair
+        correlation approximation.
+    """
+
+    def to_integrate(k):
+        k = k / (1 * ureg.angstrom)
+        Phi_ee_k = _Phi_ee_AD(k, T_e, n_e, m_i, Z_f)
+        fac = jnpu.sin(k * r[:, jnp.newaxis]) * k
+        return (Phi_ee_k * fac).m_as(ureg.joule * ureg.angstrom**2)
+
+    integ, err = quad(to_integrate, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20)
+
+    integ *= 1 * ureg.joule * ureg.angstrom
+    integ /= (2 * jnp.pi) ** 3
+
+    Phi_ee_r = 4 * jnp.pi / r * integ
+
+    return jnpu.exp(-Phi_ee_r / (ureg.k_B * T_e)) * (1 * ureg.dimensionless)
