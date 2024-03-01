@@ -28,6 +28,9 @@ import jpu
 jax.config.update("jax_enable_x64", True)
 
 
+from .helpers import timer
+
+
 @jit
 def _W_salpeter(x: jnp.ndarray | float) -> jnp.ndarray:
     """
@@ -44,22 +47,25 @@ def _W_salpeter(x: jnp.ndarray | float) -> jnp.ndarray:
         The value of the convenience function.
 
     """
-    
+
     def integrand(_x):
-        return jnpu.exp(_x**2).m_as(ureg.dimensionless)
-    
-    integral, errl = quadgk(integrand, [0, x.m_as(ureg.dimensionless)], epsabs = 1E-20, epsrel = 1E-20)
-    
-    # x_v = jnp.linspace(0, x.magnitude, 3000).T
-    # y_v = jnpu.exp(x_v**2)
-    # integral = jax.scipy.integrate.trapezoid(y_v, x_v, axis=1)
+        return jnp.exp(_x**2)
+
+    @jax.vmap
+    def integ(xi):
+        integral, errl = quadgk(
+            integrand,
+            [0, xi.m_as(ureg.dimensionless)],
+            epsabs=1e-20,
+            epsrel=1e-20,
+        )
+        return integral
+
+    integral = integ(x)
 
     res = (
         1
-        - 2
-        * x
-        * jnpu.exp(-(x**2))
-        * integral
+        - 2 * x * jnpu.exp(-(x**2)) * integral
         + (jnpu.sqrt(jnp.pi) * x * jnpu.exp(-(x**2))) * 1j
     ).to_base_units()
 
@@ -286,7 +292,7 @@ def _real_diel_func_RPA_no_damping(
     # note from MAX: previous line may be missing a factor 2
 
     def integrand(Q):
-        Q /= (1 * ureg.meter)
+        Q /= 1 * ureg.meter
         alph_min_min = kappa - k / 2 - Q
         alph_min_plu = kappa - k / 2 + Q
         alph_plu_min = kappa + k / 2 - Q
@@ -298,8 +304,10 @@ def _real_diel_func_RPA_no_damping(
         res = Q * f_0 * jnpu.log(ln_arg)
         return res.m_as(1 / ureg.meter)
 
-    integral, errl = quadgk(integrand, [0, jnp.inf], epsabs = 1E-20, epsrel = 1E-20)
-    integral /= (1 * ureg.meter)**2
+    integral, errl = quadgk(
+        integrand, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20
+    )
+    integral /= (1 * ureg.meter) ** 2
 
     return 1 + (prefactor * integral).to_base_units()
 
@@ -372,36 +380,43 @@ def S0_ee_RPA_no_damping(
     eps = dielectric_function_RPA_no_damping(k, E, chem_pot, T_e)
     return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
 
-def zeta_e_squared(k : Quantity, n_e : Quantity, T_e : Quantity) -> jnp.ndarray:
-    
+
+def zeta_e_squared(k: Quantity, n_e: Quantity, T_e: Quantity) -> jnp.ndarray:
     """
     Calculates the k-dependent inverse screening length.
     """
-    
+
     # k = k[:, jnp.newaxis]
 
-    w_pe = jpu.numpy.sqrt((4 * jnp.pi * n_e * ureg.elementary_charge ** 2) / (ureg.electron_mass))
-    
+    w_pe = jpu.numpy.sqrt(
+        (4 * jnp.pi * n_e * ureg.elementary_charge**2) / (ureg.electron_mass)
+    )
+
     p_e = jpu.numpy.sqrt(ureg.electron_mass * ureg.boltzmann_constant * T_e)
     v_e = ureg.hbar * (k / 2) / jnp.sqrt(2) * p_e
-    
+
     kappa_De = w_pe / v_e
-    kappa_e = ureg.hbar * (k / 2) / (jnp.sqrt(2) * p_e)    
+    kappa_e = ureg.hbar * (k / 2) / (jnp.sqrt(2) * p_e)
     gamma_e = jnp.sqrt(2 * jnp.pi) * ureg.hbar / p_e
-    D_e = (n_e * gamma_e ** 3).to_base_units()
-    
+    D_e = (n_e * gamma_e**3).to_base_units()
+
     eta_e = inverse_fermi_12_fukushima_single_prec(D_e / 2)
-    
-    prefactor = kappa_De ** 2 / (jnp.sqrt(jnp.pi) * kappa_e * D_e)
+
+    prefactor = kappa_De**2 / (jnp.sqrt(jnp.pi) * kappa_e * D_e)
 
     def integrand(_w):
         # w_e = ureg.electron_mass * (_w / k) / (jnp.sqrt(2) * p_e)
-        return (1 / _w) * jnp.log((1 + jnp.exp(eta_e - (_w - kappa_e) ** 2))/(1 + jnp.exp(eta_e - (_w + kappa_e) ** 2)))
-    
+        return (1 / _w) * jnp.log(
+            (1 + jnp.exp(eta_e - (_w - kappa_e) ** 2))
+            / (1 + jnp.exp(eta_e - (_w + kappa_e) ** 2))
+        )
+
     # integrand = (1 / w_intervall) * jnp.log((1 + jnp.exp(eta_e - (w_intervall - kappa_e) ** 2))/(1 + jnp.exp(eta_e - (w_intervall + kappa_e) ** 2)))
     # integral = jax.scipy.integrate.trapezoid(w_intervall.T, integrand, axis=1)
-    
-    integral, errl = quadgk(integrand, [0, jnp.inf], epsabs = 1E-20, epsrel = 1E-20)
+
+    integral, errl = quadgk(
+        integrand, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20
+    )
 
     return prefactor * integral
 
@@ -415,7 +430,7 @@ def collision_frequency_BA(
     Zf: float,
 ):
 
-    w = (E / ureg.hbar)
+    w = E / ureg.hbar
 
     T_e = T
 
@@ -423,13 +438,27 @@ def collision_frequency_BA(
 
     def integrand(k):
         return (
-        k*4
-        * S_ii_AD(k, T_e, n_e, m_ion, Zf)
-        * (zeta_e_squared(k, n_e, T_e) - k**2 * (dielectric_function_RPA_no_damping(k, E, chem_pot, T) - 1))
-        / (k**2 + zeta_e_squared(k, n_e, T_e)) ** 2
-    ).to_base_units().magnitude
+            (
+                k
+                * 4
+                * S_ii_AD(k, T_e, n_e, m_ion, Zf)
+                * (
+                    zeta_e_squared(k, n_e, T_e)
+                    - k**2
+                    * (
+                        dielectric_function_RPA_no_damping(k, E, chem_pot, T)
+                        - 1
+                    )
+                )
+                / (k**2 + zeta_e_squared(k, n_e, T_e)) ** 2
+            )
+            .to_base_units()
+            .magnitude
+        )
 
-    integral, errl = quadgk(integrand, [0, jnp.inf], epsabs = 1E-20, epsrel = 1E-20)
+    integral, errl = quadgk(
+        integrand, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20
+    )
     # integrand = (
     #     k_intervall**4
     #     * S_ii_AD(k_intervall, T_e, n_e, m_ion, Zf)
@@ -441,7 +470,9 @@ def collision_frequency_BA(
 
     # Calculate ion density and the ionic plasma frequency
     n_i = n_e / Zf
-    w_pi = jpu.numpy.sqrt((4 * jnp.pi * n_i * Zf ** 2 * ureg.elementary_charge ** 2) / (m_ion))
+    w_pi = jpu.numpy.sqrt(
+        (4 * jnp.pi * n_i * Zf**2 * ureg.elementary_charge**2) / (m_ion)
+    )
 
     prefactor = (
         1j
@@ -461,7 +492,7 @@ def dielectric_function_BMA(
     T: Quantity,
     n_e: Quantity,
     m_ion: Quantity,
-    Zf: float
+    Zf: float,
 ) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions
@@ -486,8 +517,17 @@ def dielectric_function_BMA(
 
     return numerator / denumerator
 
-def S0_ee_BMA(k: Quantity, T: Quantity, chem_pot : Quantity, m_ion : Quantity, n_e: Quantity, Zf : float, E: Quantity | List) -> jnp.ndarray:
-    
+
+def S0_ee_BMA(
+    k: Quantity,
+    T: Quantity,
+    chem_pot: Quantity,
+    m_ion: Quantity,
+    n_e: Quantity,
+    Zf: float,
+    E: Quantity | List,
+) -> jnp.ndarray:
+
     E = -E
     eps = dielectric_function_BMA(k, E, chem_pot, T, n_e, m_ion, Zf)
     return S0ee_from_dielectric_func_FDT(k, T, n_e, E, eps)
