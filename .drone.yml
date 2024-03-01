@@ -5,7 +5,7 @@ name: release-on-tag
 
 steps:
   - name: build_and_docs
-    image: python:3.11
+    image: latexandpython
     commands:
       - curl -sSL https://install.python-poetry.org | python -
       - /root/.local/bin/poetry install
