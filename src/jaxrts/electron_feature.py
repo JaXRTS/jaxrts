@@ -284,35 +284,24 @@ def _real_diel_func_RPA_no_damping(
         / (2 * jnp.pi**2 * ureg.epsilon_0 * ureg.hbar**2 * k**3)
     )
     # note from MAX: previous line may be missing a factor 2
-    prec = 100000
-    limit = (
-        ((jnp.log(1e100) * ureg.k_B * T + chem_pot) * 2 * ureg.m_e) ** 0.5
-    ) / ureg.hbar
 
-    Q = jnp.linspace(0, limit.m_as(1 / ureg.meter), prec) / (1 * ureg.meter)
-    alph_min_min = kappa[:, jnp.newaxis] - k / 2 - Q[jnp.newaxis, :]
-    alph_min_plu = kappa[:, jnp.newaxis] - k / 2 + Q[jnp.newaxis, :]
-    alph_plu_min = kappa[:, jnp.newaxis] + k / 2 - Q[jnp.newaxis, :]
-    alph_plu_plu = kappa[:, jnp.newaxis] + k / 2 + Q[jnp.newaxis, :]
-    numerator = jnpu.absolute(alph_min_min) * jnpu.absolute(alph_plu_plu)
-    denominator = jnpu.absolute(alph_min_plu) * jnpu.absolute(alph_plu_min)
-    ln_arg = numerator / denominator
-    f_0 = fermi_dirac(Q, chem_pot, T)
-    integrand = Q[jnp.newaxis, :] * f_0[jnp.newaxis, :] * jnpu.log(ln_arg)
+    def integrand(Q):
+        Q /= (1 * ureg.meter)
+        alph_min_min = kappa - k / 2 - Q
+        alph_min_plu = kappa - k / 2 + Q
+        alph_plu_min = kappa + k / 2 - Q
+        alph_plu_plu = kappa + k / 2 + Q
+        numerator = jnpu.absolute(alph_min_min) * jnpu.absolute(alph_plu_plu)
+        denominator = jnpu.absolute(alph_min_plu) * jnpu.absolute(alph_plu_min)
+        ln_arg = numerator / denominator
+        f_0 = fermi_dirac(Q, chem_pot, T)
+        res = Q * f_0 * jnpu.log(ln_arg)
+        return res.m_as(1 / ureg.meter)
 
-    # SMALL = 1e-60
-    # if integrand[-1] > SMALL:
-    #     logger.error(
-    #         "Integrand did not fall off fast enough. "
-    #         + f"Value reached was {integrand[-1]}. Value required is {SMALL}."
-    #     )
-    integrated = jax.scipy.integrate.trapezoid(
-        integrand.m_as(1 / ureg.meter),
-        dx=(Q[1] - Q[0]).m_as(1 / ureg.meter),
-        axis=1,
-    ) * (1 / ureg.meter**2)
+    integral, errl = quadgk(integrand, [0, jnp.inf], epsabs = 1E-20, epsrel = 1E-20)
+    integral /= (1 * ureg.meter)**2
 
-    return 1 + (prefactor * integrated).to_base_units()
+    return 1 + (prefactor * integral).to_base_units()
 
 
 def dielectric_function_RPA_no_damping(
