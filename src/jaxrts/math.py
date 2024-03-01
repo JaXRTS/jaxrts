@@ -20,6 +20,7 @@ def fermi_integral(x, n):
 def numerical_inverse_fermi_integral(x, n):
     pass
 
+
 def R1_mk(a, b, x):
 
     upper_max_power = jnp.size(a)
@@ -53,12 +54,13 @@ def X_n(x, a, b, c, d, n):
         x ** (1 / (1 + n)) * R1_mk(c, d, x ** (-1 / (1 + n))),
     )
 
-def inverse_fermi_12_fukushima_single_prec(x):
 
+def inverse_fermi_12_fukushima_single_prec(x):
     """
-    Calculates an approximation of the Fermi integral of order 1/2 using a rational approximation
-    as described in http://dx.doi.org/10.1016/j.amc.2015.03.015
-    Approximation is improved compared to Antia 1993.
+    Calculates an approximation of the Fermi integral of order 1/2 using a
+    rational approximation as described in
+    :cite:`Fukushima.2015`. The approximation is improved
+    compared to :cite:`Antia.1993`.
     """
 
     # Boundaries for the approximation
@@ -107,26 +109,37 @@ def inverse_fermi_12_fukushima_single_prec(x):
     )
     term2 = jnp.where(
         (x >= u_sgl[0]) * (x < u_sgl[1]),
-        R1_mk(r1_coeff_upper, r1_coeff_lower, alpha[1] + beta[1] * x), 0
+        R1_mk(r1_coeff_upper, r1_coeff_lower, alpha[1] + beta[1] * x),
+        0,
     )
     term3 = jnp.where(
         (x >= u_sgl[1]) * (x < u_sgl[2]),
-        R1_mk(r2_coeff_upper, r2_coeff_lower, alpha[2] + beta[2] * x), 0
+        R1_mk(r2_coeff_upper, r2_coeff_lower, alpha[2] + beta[2] * x),
+        0,
     )
     term4 = jnp.where(
         (x >= u_sgl[2]) * (x < u_sgl[3]),
-        R1_mk(r3_coeff_upper, r3_coeff_lower, alpha[3] + beta[3] * x), 0
+        R1_mk(r3_coeff_upper, r3_coeff_lower, alpha[3] + beta[3] * x),
+        0,
     )
     term5 = jnp.where(
         (x >= u_sgl[3]) * (x < u_sgl[4]),
-        R1_mk(r4_coeff_upper, r4_coeff_lower, alpha[4] + beta[4] * x), 0
+        R1_mk(r4_coeff_upper, r4_coeff_lower, alpha[4] + beta[4] * x),
+        0,
     )
     term6 = jnp.where(
         (x >= u_sgl[4]),
-        jnp.sqrt(R1_mk(rS_coeff_upper, rS_coeff_lower, 1.0 + beta[5] * x ** (-4 / 3)) / (-beta[5] * x ** (-4 / 3))), 0
+        jnp.sqrt(
+            R1_mk(
+                rS_coeff_upper, rS_coeff_lower, 1.0 + beta[5] * x ** (-4 / 3)
+            )
+            / (-beta[5] * x ** (-4 / 3))
+        ),
+        0,
     )
 
     return term1 + term2 + term3 + term4 + term5 + term6
+
 
 def fermi_12_rational_approximation(x):
 
@@ -267,10 +280,24 @@ if __name__ == "__main__":
     #     linestyle="dashed",
     #     alpha=0.4,
     # )
-    #plt.plot(x, x, color = "green", label = "f(x) = x")
-    plt.plot(x, np.abs(inverse_fermi_12_rational_approximation(y)-x), color = 'blue', linestyle = 'dashed', label = r"$\vert\mathcal{F}^{-1}(\mathcal{F}(x))-x\vert$, Antia 1993 approximation")
-    plt.plot(x, np.abs(inverse_fermi_12_fukushima_single_prec(y)-x), color = 'red', alpha = 1.0, label = r"$\vert\mathcal{F}^{-1}(\mathcal{F}(x))-x\vert$, Fukushima 2015 approximation")
-    #plt.plot(x, np.zeros_like(x), color = 'black', linestyle = "dashed")
+    # plt.plot(x, x, color = "green", label = "f(x) = x")
+    plt.plot(
+        x,
+        np.abs(inverse_fermi_12_rational_approximation(y) - x),
+        color="blue",
+        linestyle="dashed",
+        label=r"$\vert\mathcal{F}^{-1}(\mathcal{F}(x))-x\vert$, "
+        + "Antia 1993 approximation",
+    )
+    plt.plot(
+        x,
+        np.abs(inverse_fermi_12_fukushima_single_prec(y) - x),
+        color="red",
+        alpha=1.0,
+        label=r"$\vert\mathcal{F}^{-1}(\mathcal{F}(x))-x\vert$, "
+        + "Fukushima 2015 approximation",
+    )
+    # plt.plot(x, np.zeros_like(x), color = 'black', linestyle = "dashed")
     plt.xlim(xmin, xmax)
     plt.legend()
     plt.show()
