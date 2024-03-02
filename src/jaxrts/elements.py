@@ -7,6 +7,7 @@ from typing import Any
 from jax import numpy as jnp
 
 from .helpers import orbital_array, invert_dict
+from .units import ureg, Quantity
 
 _element_symbols = {
     1: "H",  # Hydrogen
@@ -84,6 +85,44 @@ _element_names = {
     35: "Bromine",
     36: "Krypton",
 }
+_element_masses = {
+    1: 1.008,
+    2: 4.002602,
+    3: 6.94,
+    4: 9.0121831,
+    5: 10.81,
+    6: 12.011,
+    7: 14.007,
+    8: 15.999,
+    9: 18.998403163,
+    10: 20.1797,
+    11: 22.98976928,
+    12: 24.305,
+    13: 26.9815385,
+    14: 28.085,
+    15: 30.973761998,
+    16: 32.06,
+    17: 35.45,
+    18: 39.948,
+    19: 39.0983,
+    20: 40.078,
+    21: 44.955908,
+    22: 47.867,
+    23: 50.9415,
+    24: 51.9961,
+    25: 54.938044,
+    26: 55.845,
+    27: 58.933194,
+    28: 58.6934,
+    29: 63.546,
+    30: 65.38,
+    31: 69.723,
+    32: 72.63,
+    33: 74.921595,
+    34: 78.971,
+    35: 79.904,
+    36: 83.798,
+}
 
 
 def electron_distribution(atomic_number: int) -> jnp.ndarray:
@@ -141,9 +180,14 @@ class Element:
             self.symbol = _element_symbols[self.Z]
 
         #: The name of the element
-        self.name = _element_names[self.Z]
+        self.name: str = _element_names[self.Z]
         #: The electron distribution, retuned as a flat array
         self.electron_distribution = electron_distribution(self.Z)
+
+        #: The atomic mass of this element
+        self.atomic_mass: Quantity = (
+            _element_masses * ureg.atomic_mass_constant
+        )
 
     def __eq__(self, other: Any) -> bool:
         """

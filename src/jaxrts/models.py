@@ -1,20 +1,17 @@
+import abc
+
 import jax.numpy as jnp
-import jax
 
 from .setup import Setup
+from .plasmastate import PlasmaState
 
-class Model:
-    
-    def __init__(self, model_func):
-        self.model_func = model_func
-    
-    @jax.jit
-    def evaluate(self, setup : Setup) -> jnp.ndarray:
-        return self.model_func(setup)
-    
-    
+
+class Model(metaclass=abc.ABCMeta):
+    def __init__(self, state: PlasmaState):
+        self.plasma_state = state
+
+    @abc.abstractmethod
+    def evaluate(self, setup: Setup) -> jnp.ndarray: ...
+
+
 # Here list of Models ...
-
-    
-    
-     
