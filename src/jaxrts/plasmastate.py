@@ -6,6 +6,7 @@ import jpu
 from jax import numpy as jnp
 
 from .elements import Element
+from .setup import Setup
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ class PlasmaState:
         density_fractions: List | float,
         mass_density: List | Quantity,
         T_e: List | Quantity,
-        T_i: List | Quantity,
+        T_i: List | Quantity | None,
     ):
 
         assert (
@@ -42,16 +43,32 @@ class PlasmaState:
         self.T_e = T_e
         self.T_i = T_i if T_i else T_e
 
+        # Set some default models
+        self.ionic_model = None
+        self.free_free_model = None
+        self.bound_free_model = None
+        self.free_bound_model = None
+
+
     @property
     def Z_A(self) -> jnp.ndarray:
+        """
+        The atomic number of the atom-species.
+        """
         return jnp.array([i.Z for i in self.ions])
 
     @property
     def Z_core(self) -> jnp.ndarray:
+        """
+        The number of electrons still bound to the ion.
+        """
         return self.Z_A - self.Z_free
 
     @property
     def atomic_masses(self) -> Quantity:
+        """
+        The atomic weight of the atoms.
+        """
         return jnp.array(
             [i.atomic_mass.m_as(ureg.atomic_mass_constant) for i in self.ions]
         ) * (1 * ureg.atomic_mass_constant)
@@ -130,62 +147,10 @@ class PlasmaState:
                     ).to_base_units()
                 )
 
-    def _jSii(self, k: Quantity, E: np.ndarray | List | Quantity):
-        return 1.0
+    def probe(self, setup: Setup) -> Quantity:
+        ionic = self.ionic_model.evaluate(setup)
+        free_free = self.free_free_model.evaluate(setup)
+        bound_free = self.bound_free_model.evaluate(setup)
+        free_bound = self.free_bound_model.evaluate(setup)
 
-    def Sii(self, k: Quantity, E: np.ndarray | List | Quantity):
-        return np.array(self._jSii(k, E))
-
-    def _jSee(self, k: Quantity, E: np.ndarray | List | Quantity):
-        return 1.0
-
-    def See(self, k: Quantity, E: np.ndarray | List | Quantity):
-        return np.array(self._jSee(k, E))
-
-    def Sce(self, k: Quantity, E: np.ndarray | List | Quantity):
-        return np.array(self._jSce(k, E))
-
-    def _jSce(self, k: Quantity, E: np.ndarray | List | Quantity):
-        return 1.0
-
-    def Ss(self, k: Quantity, E: np.ndarray | List | Quantity):
-        return np.array(self._jSs(k, E))
-
-    def _jSs(self, k: Quantity, E: np.ndarray | List | Quantity):
-        return 1.0
-
-    def _jf_I(self, k: Quantity):
-        return 1.0
-
-    def f_I(self, k: Quantity):
-        return np.array(self._jf_I(k))
-
-    def _jq(self, k: Quantity):
-        return 1.0
-
-    def q(self, k: Quantity):
-        return np.array(self._jq(k))
-
-    def probe(self, E: Quantity, theta: float, instrument: jnp.ndarray):
-
-        # Calculate probe wavelength from probe energy
-
-        lambda_0 = (
-            1
-            * ureg.speed_of_light
-            / (E.to(ureg.joule) / (1 * ureg.planck_constant))
-        ).to_base_units()
-
-        # Calculate wavenumber for choice of probe energy and scattering angle
-
-        k = (4 * np.pi / lambda_0) * np.sin(np.deg2rad(theta) / 2.0)
-
-        # Calculate S(k,w) using the Chihara decomposition (normalization?)
-
-        S_k_w = (
-            (self._jf_I(k) + self._jq(k)) ** 2 * self._jSii(k, E)
-            + self.Z_free * self._jSee(k, E)
-            + self.Z_core * 1.0
-        )
-
-        return S_k_w
+        return ionic + free_free + bound_free + free_bonud
