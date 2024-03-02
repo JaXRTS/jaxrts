@@ -186,7 +186,7 @@ class Element:
 
         #: The atomic mass of this element
         self.atomic_mass: Quantity = (
-            _element_masses * ureg.atomic_mass_constant
+            _element_masses[self.Z] * (1 * ureg.atomic_mass_constant)
         )
 
     def __eq__(self, other: Any) -> bool:
