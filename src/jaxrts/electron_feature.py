@@ -17,7 +17,7 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 import numpy as onp
 
-from quadax import quadgk
+from quadax import quadgk, quadts
 
 import logging
 
@@ -29,7 +29,6 @@ jax.config.update("jax_enable_x64", True)
 
 
 from .helpers import timer
-
 
 @jit
 def _W_salpeter(x: jnp.ndarray | float) -> jnp.ndarray:
@@ -128,7 +127,7 @@ def dielectric_function_salpeter(
 
     return eps.m_as(ureg.dimensionless)
 
-
+# @jit
 def S0ee_from_dielectric_func_FDT(
     k: Quantity,
     T_e: Quantity,
@@ -178,7 +177,7 @@ def S0ee_from_dielectric_func_FDT(
             ((1 * ureg.vacuum_permittivity) * k**2)
             / (jnp.pi * (1 * ureg.elementary_charge) ** 2 * n_e)
         )
-        * jnp.imag(1 / dielectric_function)
+        * jnp.imag((1 / dielectric_function))
     ).to_base_units()
 
 
@@ -381,46 +380,7 @@ def S0_ee_RPA_no_damping(
     return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
 
 
-def zeta_e_squared(k: Quantity, n_e: Quantity, T_e: Quantity) -> jnp.ndarray:
-    """
-    Calculates the k-dependent inverse screening length.
-    """
-
-    # k = k[:, jnp.newaxis]
-
-    w_pe = jpu.numpy.sqrt(
-        (4 * jnp.pi * n_e * ureg.elementary_charge**2) / (ureg.electron_mass)
-    )
-
-    p_e = jpu.numpy.sqrt(ureg.electron_mass * ureg.boltzmann_constant * T_e)
-    v_e = ureg.hbar * (k / 2) / jnp.sqrt(2) * p_e
-
-    kappa_De = w_pe / v_e
-    kappa_e = ureg.hbar * (k / 2) / (jnp.sqrt(2) * p_e)
-    gamma_e = jnp.sqrt(2 * jnp.pi) * ureg.hbar / p_e
-    D_e = (n_e * gamma_e**3).to_base_units()
-
-    eta_e = inverse_fermi_12_fukushima_single_prec(D_e / 2)
-
-    prefactor = kappa_De**2 / (jnp.sqrt(jnp.pi) * kappa_e * D_e)
-
-    def integrand(_w):
-        # w_e = ureg.electron_mass * (_w / k) / (jnp.sqrt(2) * p_e)
-        return (1 / _w) * jnp.log(
-            (1 + jnp.exp(eta_e - (_w - kappa_e) ** 2))
-            / (1 + jnp.exp(eta_e - (_w + kappa_e) ** 2))
-        )
-
-    # integrand = (1 / w_intervall) * jnp.log((1 + jnp.exp(eta_e - (w_intervall - kappa_e) ** 2))/(1 + jnp.exp(eta_e - (w_intervall + kappa_e) ** 2)))
-    # integral = jax.scipy.integrate.trapezoid(w_intervall.T, integrand, axis=1)
-
-    integral, errl = quadgk(
-        integrand, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20
-    )
-
-    return prefactor * integral
-
-
+@jax.jit
 def collision_frequency_BA(
     E: Quantity,
     T: Quantity,
@@ -431,60 +391,103 @@ def collision_frequency_BA(
 ):
 
     w = E / ureg.hbar
-
     T_e = T
 
-    # k_intervall = jnp.linspace(0, 1000, 2000)
+    prefactor_debye = (
+        ureg.elementary_charge**2 * ureg.electron_mass ** (3 / 2)
+    ) / (jnp.sqrt(2) * jnp.pi**2 * ureg.epsilon_0 * ureg.hbar**3)
 
-    def integrand(k):
-        return (
-            (
-                k
-                * 4
-                * S_ii_AD(k, T_e, n_e, m_ion, Zf)
-                * (
-                    zeta_e_squared(k, n_e, T_e)
-                    - k**2
-                    * (
-                        dielectric_function_RPA_no_damping(k, E, chem_pot, T)
-                        - 1
-                    )
+    def integrand_debye(Ep):
+
+        Ep *= 1 * ureg.electron_volt
+
+        res = Ep ** (-1 / 2) * (
+            jnp.exp(
+                ((Ep - chem_pot) / (ureg.boltzmann_constant * T)).m_as(
+                    ureg.dimensionless
                 )
-                / (k**2 + zeta_e_squared(k, n_e, T_e)) ** 2
             )
-            .to_base_units()
-            .magnitude
-        )
+            + 1
+        ) ** (-1)
 
-    integral, errl = quadgk(
-        integrand, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20
-    )
-    # integrand = (
-    #     k_intervall**4
-    #     * S_ii_AD(k_intervall, T_e, n_e, m_ion, Zf)
-    #     * (zeta_e_squared(k_intervall) - k_intervall**2 * (eps_ee_f - 1))
-    #     / (k_intervall**2 + zeta_e_squared) ** 2
+        return res.m_as(ureg.electron_volt ** (-1 / 2))
+
+    # integral_debye, errl_debye = quadts(
+    #     integrand_debye, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20
     # )
+    # integral_debye *= (1 * ureg.electron_volt) ** (1 / 2)
 
-    # integral = jax.scipy.integrate.trapezoid(k_intervall.T, integrand, axis=1)
-
-    # Calculate ion density and the ionic plasma frequency
-    n_i = n_e / Zf
-    w_pi = jpu.numpy.sqrt(
-        (4 * jnp.pi * n_i * Zf**2 * ureg.elementary_charge**2) / (m_ion)
+    # kappa_sqr = prefactor_debye * integral_debye
+    kappa_sqr_non_deg = (
+        n_e
+        * ureg.elementary_charge**2
+        / (ureg.epsilon_0 * ureg.boltzmann_constant * T)
     )
+    kappa_sqr = kappa_sqr_non_deg
+    # print(kappa_sqr.to_base_units())
 
     prefactor = (
-        1j
-        * (2 * jnp.pi / 3)
-        * (w_pi**2 / w)
-        * (1 / n_e)
-        * (m_ion / ureg.electron_mass)
+        -1j
+        * (ureg.epsilon_0 * (n_e / Zf))
+        / (
+            6
+            * jnp.pi**2
+            * ureg.elementary_charge**2
+            * n_e
+            * ureg.electron_mass
+        )
+        * (1 / w)
     )
+
+    def integrand(q):
+
+        q /= 1 * ureg.angstrom
+        res = (
+            q**6
+            * (
+                -Zf
+                * ureg.elementary_charge**2
+                / (ureg.epsilon_0 * (q**2 + kappa_sqr))
+            )
+            ** 2
+            * S_ii_AD(q, T_e, n_e, m_ion, Zf)
+            * jnp.imag(
+                dielectric_function_RPA_no_damping(q, E, chem_pot, T)
+                - dielectric_function_RPA_no_damping(
+                    q, 0 * ureg.electron_volt, chem_pot, T
+                )
+            )
+        )
+
+        return jnp.array(
+            [
+                jnp.real(
+                    res.m_as(
+                        ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**4
+                    )
+                ),
+                jnp.imag(
+                    res.m_as(
+                        ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**4
+                    )
+                ),
+            ]
+        )
+        
+    integral, errl = quadts(
+        integrand, [0, jnp.inf], epsabs=1e-12, epsrel=1e-12
+    )
+
+    integral_real, integral_imag = integral
+
+    integral = integral_real + 1j * integral_imag
+
+    integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**4
 
     return prefactor * integral
 
 
+@jit
 def dielectric_function_BMA(
     k: Quantity,
     E: Quantity | List,
@@ -500,23 +503,29 @@ def dielectric_function_BMA(
 
     """
     w = E / ureg.hbar
-    coll_freq = collision_frequency_BA(E, T, m_ion, n_e, Zf)
+    coll_freq = collision_frequency_BA(E, T, m_ion, n_e, chem_pot, Zf)
 
-    numerator = (
-        (w + 1j * coll_freq)
-        * dielectric_function_RPA_no_damping(k, 0, chem_pot, T)
-        * dielectric_function_RPA_no_damping(
+    numerator = (1 + 1j * (coll_freq) / (w)) * (
+        dielectric_function_RPA_no_damping(
             k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
         )
+        - 1
     )
-    denumerator = w * dielectric_function_RPA_no_damping(
-        k, E, chem_pot, T
-    ) + 1j * coll_freq * dielectric_function_RPA_no_damping(
-        k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+    denumerator = 1 + 1j * (coll_freq / w) * (
+        (
+            dielectric_function_RPA_no_damping(
+                k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+            )
+            - 1
+        )
+    ) / (
+        dielectric_function_RPA_no_damping(
+            k, 0 * ureg.electron_volt, chem_pot, T
+        )
+        - 1
     )
 
-    return numerator / denumerator
-
+    return (1 + numerator / denumerator).m_as(ureg.dimensionless)
 
 def S0_ee_BMA(
     k: Quantity,
