@@ -26,7 +26,7 @@ lambda_0 = 4.13 * ureg.nanometer
 theta = 160
 n_e = 1e21 / ureg.centimeter**3
 
-E = jnp.linspace(-15, 15, 500) * ureg.electron_volts
+E = jnp.linspace(-15, 15, 200) * ureg.electron_volts
 
 k = (4 * jnp.pi / lambda_0) * jnp.sin(jnp.deg2rad(theta) / 2.0)
 

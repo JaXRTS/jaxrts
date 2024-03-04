@@ -30,6 +30,7 @@ jax.config.update("jax_enable_x64", True)
 
 from .helpers import timer
 
+
 @jit
 def _W_salpeter(x: jnp.ndarray | float) -> jnp.ndarray:
     """
@@ -127,7 +128,8 @@ def dielectric_function_salpeter(
 
     return eps.m_as(ureg.dimensionless)
 
-# @jit
+
+@jit
 def S0ee_from_dielectric_func_FDT(
     k: Quantity,
     T_e: Quantity,
@@ -214,6 +216,7 @@ def S0_ee_Salpeter(
     return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
 
 
+@jit
 def _imag_diel_func_RPA_no_damping(
     k: Quantity, E: Quantity, chem_pot: Quantity, T: Quantity
 ) -> Quantity:
@@ -253,6 +256,7 @@ def _imag_diel_func_RPA_no_damping(
     )
 
 
+@jit
 def _real_diel_func_RPA_no_damping(
     k: Quantity, E: Quantity, chem_pot: Quantity, T: Quantity
 ) -> Quantity:
@@ -311,6 +315,7 @@ def _real_diel_func_RPA_no_damping(
     return 1 + (prefactor * integral).to_base_units()
 
 
+@jit
 def dielectric_function_RPA_no_damping(
     k: Quantity, E: Quantity, chem_pot: Quantity, T: Quantity
 ) -> Quantity:
@@ -380,19 +385,8 @@ def S0_ee_RPA_no_damping(
     return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
 
 
-@jax.jit
-def collision_frequency_BA(
-    E: Quantity,
-    T: Quantity,
-    m_ion: Quantity,
-    n_e: Quantity,
-    chem_pot: Quantity,
-    Zf: float,
-):
-
-    w = E / ureg.hbar
-    T_e = T
-
+@jit
+def inverse_screening_length_exact(T: Quantity, chem_pot: Quantity):
     prefactor_debye = (
         ureg.elementary_charge**2 * ureg.electron_mass ** (3 / 2)
     ) / (jnp.sqrt(2) * jnp.pi**2 * ureg.epsilon_0 * ureg.hbar**3)
@@ -412,30 +406,50 @@ def collision_frequency_BA(
 
         return res.m_as(ureg.electron_volt ** (-1 / 2))
 
-    # integral_debye, errl_debye = quadts(
-    #     integrand_debye, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20
-    # )
-    # integral_debye *= (1 * ureg.electron_volt) ** (1 / 2)
+    integral_debye, errl_debye = quadts(
+        integrand_debye, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20
+    )
+    integral_debye *= (1 * ureg.electron_volt) ** (1 / 2)
 
-    # kappa_sqr = prefactor_debye * integral_debye
-    kappa_sqr_non_deg = (
+    return jpu.numpy.sqrt(prefactor_debye * integral_debye)
+
+
+@jit
+def inverse_screening_length_non_degenerate(n_e: Quantity, T: Quantity):
+
+    return jpu.numpy.sqrt(
         n_e
         * ureg.elementary_charge**2
         / (ureg.epsilon_0 * ureg.boltzmann_constant * T)
     )
-    kappa_sqr = kappa_sqr_non_deg
-    # print(kappa_sqr.to_base_units())
+
+
+@jit
+def statically_screened_ie_debye_potential(
+    q: Quantity, kappa: Quantity, Zf: float
+):
+    return (
+        -Zf * ureg.elementary_charge**2 / (ureg.epsilon_0 * (q**2 + kappa**2))
+    )
+
+@jit
+def collision_frequency_BA(
+    E: Quantity,
+    T: Quantity,
+    m_ion: Quantity,
+    n_e: Quantity,
+    chem_pot: Quantity,
+    Zf: float,
+):
+
+    w = E / ureg.hbar
+    T_e = T
+    kappa = inverse_screening_length_non_degenerate(n_e, T)
 
     prefactor = (
         -1j
-        * (ureg.epsilon_0 * (n_e / Zf))
-        / (
-            6
-            * jnp.pi**2
-            * ureg.elementary_charge**2
-            * n_e
-            * ureg.electron_mass
-        )
+        * (ureg.epsilon_0)
+        / (6 * jnp.pi**2 * Zf * ureg.elementary_charge**2 * ureg.electron_mass)
         * (1 / w)
     )
 
@@ -444,14 +458,9 @@ def collision_frequency_BA(
         q /= 1 * ureg.angstrom
         res = (
             q**6
-            * (
-                -Zf
-                * ureg.elementary_charge**2
-                / (ureg.epsilon_0 * (q**2 + kappa_sqr))
-            )
-            ** 2
+            * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
             * S_ii_AD(q, T_e, n_e, m_ion, Zf)
-            * jnp.imag(
+            * (
                 dielectric_function_RPA_no_damping(q, E, chem_pot, T)
                 - dielectric_function_RPA_no_damping(
                     q, 0 * ureg.electron_volt, chem_pot, T
@@ -473,10 +482,8 @@ def collision_frequency_BA(
                 ),
             ]
         )
-        
-    integral, errl = quadts(
-        integrand, [0, jnp.inf], epsabs=1e-12, epsrel=1e-12
-    )
+
+    integral, errl = quadts(integrand, [0, jnp.inf], epsabs=1e-12, epsrel=1e-12)
 
     integral_real, integral_imag = integral
 
@@ -484,7 +491,7 @@ def collision_frequency_BA(
 
     integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**4
 
-    return prefactor * integral
+    return (prefactor * integral).to(1 / ureg.second)
 
 
 @jit
@@ -505,7 +512,7 @@ def dielectric_function_BMA(
     w = E / ureg.hbar
     coll_freq = collision_frequency_BA(E, T, m_ion, n_e, chem_pot, Zf)
 
-    numerator = (1 + 1j * (coll_freq) / (w)) * (
+    numerator = (1 + 1j * coll_freq / w) * (
         dielectric_function_RPA_no_damping(
             k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
         )
@@ -527,6 +534,7 @@ def dielectric_function_BMA(
 
     return (1 + numerator / denumerator).m_as(ureg.dimensionless)
 
+@jit
 def S0_ee_BMA(
     k: Quantity,
     T: Quantity,
