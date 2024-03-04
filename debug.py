@@ -13,7 +13,19 @@ from functools import partial
 ureg = jaxrts.ureg
 Quantity = jaxrts.units.Quantity
 
-# Form Factor Models
+
+def conv_dync_stucture_with_instrument(
+    Sfac: Quantity, setup: Setup
+) -> Quantity:
+    return (
+        jnp.convolve(
+            Sfac.m_as(ureg.second),
+            setup.instrument(setup.measured_energy - setup.energy).magnitude,
+            mode="same",
+        )
+        * ureg.second
+        * (jnpu.diff(setup.measured_energy)[0] / ureg.hbar)
+    )
 
 
 class PaulingFormFactors(Model):
@@ -82,7 +94,7 @@ class BornMermin(Model):
             self.plasma_state.n_e(),
             self.plasma_state.ions[0].atomic_mass,
             self.plasma_state.Z_free[0],
-            )
+        )
         See_0 = jaxrts.electron_feature.S0ee_from_dielectric_func_FDT(
             setup.k(),
             self.plasma_state.T_e[0],
@@ -90,18 +102,13 @@ class BornMermin(Model):
             setup.measured_energy,
             epsilon,
         )
-        free_free = See_0.m_as(ureg.second) * self.plasma_state.Z_free[0]
-        return (
-            jnp.convolve(
-                free_free,
-                setup.instrument(
-                    setup.measured_energy - setup.energy
-                ).magnitude,
-                mode="same",
-            )
-            * ureg.second
-            * (jnpu.diff(setup.measured_energy)[0] / ureg.hbar)
-        )
+        free_free = See_0 * self.plasma_state.Z_free[0]
+        return conv_dync_stucture_with_instrument(free_free, setup)
+
+
+# class SchumacherImpulse(Model):
+#     def evaluate(self, setup: Setup) -> jnp.ndarray:
+#         Sce = jaxrts.bound_free.inelastic_structure_factor(setup.measured_energy, setup.energy, setup.angle, self.plasma_state.Z_core()[0], 
 
 
 class QCSAFreeFree(Model):
@@ -114,18 +121,8 @@ class QCSAFreeFree(Model):
             setup.measured_energy - setup.energy,
         )
 
-        free_free = See_0.m_as(ureg.second) * self.plasma_state.Z_free[0]
-        return (
-            jnp.convolve(
-                free_free,
-                setup.instrument(
-                    setup.measured_energy - setup.energy
-                ).magnitude,
-                mode="same",
-            )
-            * ureg.second
-            * (jnpu.diff(setup.measured_energy)[0] / ureg.hbar)
-        )
+        free_free = See_0 * self.plasma_state.Z_free[0]
+        return conv_dync_stucture_with_instrument(free_free, setup)
 
 
 class RPAFreeFree(Model):
@@ -145,18 +142,8 @@ class RPAFreeFree(Model):
             mu,
         )
 
-        free_free = See_0.m_as(ureg.second) * self.plasma_state.Z_free[0]
-        return (
-            jnp.convolve(
-                free_free,
-                setup.instrument(
-                    setup.measured_energy - setup.energy
-                ).magnitude,
-                mode="same",
-            )
-            * ureg.second
-            * (jnpu.diff(setup.measured_energy)[0] / ureg.hbar)
-        )
+        free_free = See_0 * self.plasma_state.Z_free[0]
+        return conv_dync_stucture_with_instrument(free_free, setup)
 
 
 class Neglect(Model):
