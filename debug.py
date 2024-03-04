@@ -104,6 +104,29 @@ class BornMermin(Model):
         )
 
 
+class QCSAFreeFree(Model):
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        See_0 = jaxrts.electron_feature.S0_ee_Salpeter(
+            setup.k(),
+            self.plasma_state.T_e[0],
+            self.plasma_state.n_e(),
+            setup.measured_energy - setup.energy,
+        )
+
+        free_free = See_0.m_as(ureg.second) * self.plasma_state.Z_free[0]
+        return (
+            jnp.convolve(
+                free_free,
+                setup.instrument(
+                    setup.measured_energy - setup.energy
+                ).magnitude,
+                mode="same",
+            )
+            * ureg.second
+            * (jnpu.diff(setup.measured_energy)[0] / ureg.hbar)
+        )
+
 
 class RPAFreeFree(Model):
     def __init__(self, state: PlasmaState) -> None:
@@ -159,7 +182,7 @@ setup = Setup(
 )
 
 state.ionic_model = ArphipovIonFeat(state)
-state.free_free_model = RPAFreeFree(state)
+state.free_free_model = QCSAFreeFree(state)
 state.bound_free_model = Neglect(state)
 state.free_bound_model = Neglect(state)
 
