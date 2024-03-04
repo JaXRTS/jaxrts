@@ -65,6 +65,46 @@ class GregoriChemPotential(Model):
         )
 
 
+class BornMermin(Model):
+    def __init__(self, state: PlasmaState) -> None:
+        super().__init__(state)
+        if not hasattr(state, "chem_potential_model"):
+            print("Setting Default chem_potential_model")
+            state.chem_potential_model = GregoriChemPotential(state)
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        mu = self.plasma_state.chem_potential_model.evaluate(setup)
+        epsilon = jaxrts.electron_feature.dielectric_function_BMA(
+            setup.k(),
+            setup.measured_energy,
+            mu,
+            self.plasma_state.T_e[0],
+            self.plasma_state.n_e(),
+            self.plasma_state.ions[0].atomic_mass,
+            self.plasma_state.Z_free[0],
+            )
+        See_0 = jaxrts.electron_feature.S0ee_from_dielectric_func_FDT(
+            setup.k(),
+            self.plasma_state.T_e[0],
+            self.plasma_state.n_e(),
+            setup.measured_energy,
+            epsilon,
+        )
+        free_free = See_0.m_as(ureg.second) * self.plasma_state.Z_free[0]
+        return (
+            jnp.convolve(
+                free_free,
+                setup.instrument(
+                    setup.measured_energy - setup.energy
+                ).magnitude,
+                mode="same",
+            )
+            * ureg.second
+            * (jnpu.diff(setup.measured_energy)[0] / ureg.hbar)
+        )
+
+
+
 class RPAFreeFree(Model):
     def __init__(self, state: PlasmaState) -> None:
         super().__init__(state)
@@ -73,7 +113,7 @@ class RPAFreeFree(Model):
             state.chem_potential_model = GregoriChemPotential(state)
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
-        mu = self.plasma_state.chem_potential_model.evaluate(Setup)
+        mu = self.plasma_state.chem_potential_model.evaluate(setup)
         See_0 = jaxrts.electron_feature.S0_ee_RPA_no_damping(
             setup.k(),
             self.plasma_state.T_e[0],
@@ -124,11 +164,18 @@ state.bound_free_model = Neglect(state)
 state.free_bound_model = Neglect(state)
 
 import matplotlib.pyplot as plt
+import time
+
+for _ in range(5):
+    t0 = time.time()
+    state.probe(setup)
+    print(time.time() - t0)
 
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
     state.probe(setup),
 )
+
 setup.measured_energy = (
     ureg("4768.6230 eV") + jnp.linspace(-250, 100, 100) * ureg.electron_volt
 )
