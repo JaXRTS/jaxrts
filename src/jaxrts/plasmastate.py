@@ -62,7 +62,7 @@ class PlasmaState:
         """
         The number of electrons still bound to the ion.
         """
-        return self.Z_A - self.Z_free
+        return self.Z_A() - self.Z_free
 
     def atomic_masses(self) -> Quantity:
         """

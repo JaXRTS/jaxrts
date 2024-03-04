@@ -15,7 +15,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from .form_factors import pauling_atomic_ff
+from .form_factors import pauling_all_ff
 from .plasma_physics import thomson_momentum_transfer
 import jpu
 
@@ -53,7 +53,12 @@ def _J10_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
     xi = _xi(1, Zeff, omega, k)
     J10BM = _J10_BM(omega, k, Zeff)
-    return J10BM * (Zeff * ureg.alpha / (k * ureg.a_0)) * (3 / 2 * xi - 2 * jnpu.arctan(xi))
+    return (
+        J10BM
+        * (Zeff * ureg.alpha / (k * ureg.a_0))
+        * (3 / 2 * xi - 2 * jnpu.arctan(xi))
+    )
+
 
 def _J20_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
@@ -65,14 +70,11 @@ def _J20_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
         J20BM
         * (Zeff * ureg.alpha / (k * ureg.a_0))
         * (
-            5
-            * xi
-            * (1 + 3 * xi**4)
-            / (1 - 2.5 * xi**2 + 2.5 * xi**4)
-            / 8
+            5 * xi * (1 + 3 * xi**4) / (1 - 2.5 * xi**2 + 2.5 * xi**4) / 8
             - 2 * jnpu.arctan(xi)
         )
     )
+
 
 def _J21_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
@@ -88,6 +90,7 @@ def _J21_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
             - jnpu.arctan(xi)
         )
     )
+
 
 def bm_bound_wavefunction(
     n: int,
@@ -133,66 +136,63 @@ def bm_bound_wavefunction(
     return Jxx0
 
 
+@jit
+def all_J_BM(
+    omega: Quantity, k: Quantity, Zeff: Quantity | jnp.ndarray
+) -> Quantity:
+    return jnp.array(
+        [
+            _J10_BM(omega, k, Zeff[0, :]).m_as(ureg.dimensionless),
+            _J20_BM(omega, k, Zeff[1, :]).m_as(ureg.dimensionless),
+            _J21_BM(omega, k, Zeff[2, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J30_BM(omega, k, Zeff[3]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J31_BM(omega, k, Zeff[4]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J32_BM(omega, k, Zeff[5]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J40_BM(omega, k, Zeff[6]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J41_BM(omega, k, Zeff[7]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J42_BM(omega, k, Zeff[8]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J43_BM(omega, k, Zeff[9]).m_as(ureg.dimensionless),
+        ]
+    )
+
+
+@jit
+def all_J_HR(
+    omega: Quantity, k: Quantity, Zeff: Quantity | jnp.ndarray
+) -> Quantity:
+    return jnp.array(
+        [
+            _J10_HR(omega, k, Zeff[0, :]).m_as(ureg.dimensionless),
+            _J20_HR(omega, k, Zeff[1, :]).m_as(ureg.dimensionless),
+            _J21_HR(omega, k, Zeff[2, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J30_HR(omega, k, Zeff[3, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J31_HR(omega, k, Zeff[4, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J32_HR(omega, k, Zeff[5, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J40_HR(omega, k, Zeff[6, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J41_HR(omega, k, Zeff[7, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J42_HR(omega, k, Zeff[8, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(omega),  # _J43_HR(omega, k, Zeff[9, :]).m_as(ureg.dimensionless),
+        ]
+    )
+
+
 def J_impulse_approx(
     omega: Quantity,
     k: Quantity,
-    pop: dict[int, dict[int, float]],
-    Zeff: dict[int, dict[int, Quantity]],
-    E_b: dict[int, Quantity],
-    HR_Correction: bool = True,
+    pop: jnp.ndarray,
+    Zeff: jnp.ndarray,
+    E_b: Quantity,
 ) -> Quantity:
-    intensity = 0 * ureg.dimensionless
-    for n in pop.keys():
-        for l in pop[n].keys():  # noqa E741
-            intensity += (
-                pop[n][l]
-                * bm_bound_wavefunction(
-                    n, l, omega, k, Zeff[n][l], HR_Correction
-                )
-                * jnp.heaviside(
-                    (omega * ureg.hbar - E_b[n]).m_as(ureg.electron_volt), 0.5
-                )
-            )
-    return intensity
 
-
-def inelastic_structure_factor(
-    E: Quantity,
-    Eprobe: Quantity,
-    angle: Quantity,
-    Z_c: float,
-    pop: dict[int, dict[int, float]],
-    Zeff: dict[int, dict[int, Quantity]],
-    E_b: dict[int, Quantity],
-    J_approx: str = "impulse",
-    *args,
-    **kwargs,
-) -> Quantity:
-    """
-    [Gregori.2004], eqn (20)
-    """
-    valid_approx = ["impulse"]
-    if J_approx not in valid_approx:
-        raise ValueError(
-            "{} Is not an implemented approximation.\n".format(J_approx)
-            + "\n"
-            + "Possible options are {}".format(valid_approx)
+    intensity = (
+        pop[:, jnp.newaxis]
+        * (all_J_BM(omega, k, Zeff[:, jnp.newaxis]) + all_J_HR(omega, k, Zeff[:, jnp.newaxis]))
+        * jnp.heaviside(
+            (omega * ureg.hbar - E_b[:, jnp.newaxis]).m_as(
+                ureg.electron_volt
+            ),
+            0.5,
         )
-
-    k = thomson_momentum_transfer(Eprobe, angle)
-    omega = E / ureg.hbar
-    omega_0 = Eprobe / ureg.hbar
-
-    r_k = 1 * ureg.dimensionless
-    for n in pop.keys():
-        for l in pop[n].keys():  # noqa E741
-            r_k -= (
-                pop[n][l] / Z_c * (pauling_atomic_ff(n, l, k, Zeff[n][l]) ** 2)
-            )
-    B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
-    sbe = (
-        r_k
-        / (Z_c * B**3)
-        * J_impulse_approx(omega, k, pop, Zeff, E_b, *args, **kwargs)
     )
-    return sbe
+
+    return jnp.sum(intensity, axis=0)
