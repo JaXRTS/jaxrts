@@ -20,7 +20,7 @@ class PlasmaState:
         density_fractions: List | float,
         mass_density: List | Quantity,
         T_e: List | Quantity,
-        T_i: List | Quantity | None,
+        T_i: List | Quantity | None = None,
     ):
 
         assert (
@@ -28,8 +28,11 @@ class PlasmaState:
             and (len(ions) == len(density_fractions))
             and (len(ions) == len(mass_density))
             and (len(ions) == len(T_e))
-            and (len(ions) == len(T_i))
         ), "WARNING: Input parameters should be the same shape as <ions>!"
+        if T_i is not None:
+            assert len(ions) == len(
+                T_i
+            ), "WARNING: Input parameters should be the same shape as <ions>!"
 
         self.ions = ions
         self.nions = len(ions)
@@ -49,22 +52,18 @@ class PlasmaState:
         self.bound_free_model = None
         self.free_bound_model = None
 
-
-    @property
     def Z_A(self) -> jnp.ndarray:
         """
         The atomic number of the atom-species.
         """
         return jnp.array([i.Z for i in self.ions])
 
-    @property
     def Z_core(self) -> jnp.ndarray:
         """
         The number of electrons still bound to the ion.
         """
         return self.Z_A - self.Z_free
 
-    @property
     def atomic_masses(self) -> Quantity:
         """
         The atomic weight of the atoms.
@@ -73,21 +72,18 @@ class PlasmaState:
             [i.atomic_mass.m_as(ureg.atomic_mass_constant) for i in self.ions]
         ) * (1 * ureg.atomic_mass_constant)
 
-    @property
     def n_i(self):
         return (
             self.mass_density
-            * self.density_fraction
-            / jpu.numpy.sum(self.atomic_masses * self.density_fraction)
+            * self.density_fractions
+            / jpu.numpy.sum(self.atomic_masses() * self.density_fractions)
         ).to_base_units()
 
-    @property
     def n_e(self):
-        return (jpu.numpy.sum(self.n_i * self.Z_free)).to_base_units()
+        return (jpu.numpy.sum(self.n_i() * self.Z_free)).to_base_units()
 
-    @property
     def ee_coupling(self):
-        d = (3 / (4 * np.pi * self.n_e)) ** (1.0 / 3.0)
+        d = (3 / (4 * np.pi * self.n_e())) ** (1.0 / 3.0)
 
         return (
             (1 * ureg.elementary_charge) ** 2
@@ -137,7 +133,7 @@ class PlasmaState:
                             2.0
                             * np.pi
                             * 1
-                            * ureg.atomic_masses[
+                            * self.atomic_masses[
                                 np.argwhere(np.array(self.ions == par))
                             ]
                             * 1
@@ -153,4 +149,4 @@ class PlasmaState:
         bound_free = self.bound_free_model.evaluate(setup)
         free_bound = self.free_bound_model.evaluate(setup)
 
-        return ionic + free_free + bound_free + free_bonud
+        return ionic + free_free + bound_free + free_bound
