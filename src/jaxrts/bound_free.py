@@ -193,6 +193,7 @@ def J_impulse_approx(
             ),
             0.5,
         )
-    )
+    ) / (1 * ureg.c * k)
+    # Doublecheck this unit
 
-    return jnp.sum(intensity, axis=0)
+    return jnpu.sum(intensity, axis=0)

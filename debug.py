@@ -151,8 +151,7 @@ class SchumacherImpulse(Model):
             * jaxrts.bound_free.J_impulse_approx(
                 omega, k, population, Zeff, E_b
             )
-        ) * (1 * ureg.second) * 1e-19
-        # TODO: This needs a real unit
+        )
 
         return conv_dync_stucture_with_instrument(sbe * Z_c, setup)
 
