@@ -67,7 +67,7 @@ class ArphipovIonFeat(Model):
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         fi = self.plasma_state.form_factor_model.evaluate(setup)
-        polulation = electron_distribution_ionized_state(self.plasma_state)
+        population = electron_distribution_ionized_state(self.plasma_state)
 
         f = jnp.sum(fi * population)
         q = jaxrts.ion_feature.q(
@@ -142,7 +142,7 @@ class SchumacherImpulse(Model):
         Zeff = jaxrts.form_factors.pauling_effective_charge(
             self.plasma_state.ions[0].Z
         )
-        polulation = electron_distribution_ionized_state(self.plasma_state)
+        population = electron_distribution_ionized_state(self.plasma_state)
         # Gregori.2004, Eqn 20
         fi = self.plasma_state.form_factor_model.evaluate(setup)
         r_k = 1 - jnp.sum(population / Z_c * fi**2)
@@ -211,9 +211,6 @@ state = jaxrts.PlasmaState(
     T_e=jnp.array([1]) * ureg.electron_volt / ureg.k_B,
 )
 
-print(state.n_e())
-
-
 setup = Setup(
     ureg("160°"),
     ureg("4768.6230 eV"),
@@ -245,7 +242,6 @@ state.Z_free = jnp.array([2.5])
 state.mass_density = (
     jnp.array([3e23]) / (1 * ureg.centimeter**3) * element.atomic_mass / 2.5
 )
-print(state.n_e())
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
     state.probe(setup),
@@ -254,7 +250,6 @@ state.Z_free = jnp.array([3.0])
 state.mass_density = (
     jnp.array([3e23]) / (1 * ureg.centimeter**3) * element.atomic_mass / 3
 )
-print(state.n_e())
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
     state.probe(setup),
