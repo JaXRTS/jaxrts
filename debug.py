@@ -52,7 +52,20 @@ class ArphipovIonFeat(Model):
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         fi = self.plasma_state.form_factor_model.evaluate(setup)
-        population = self.plasma_state.ions[0].electron_distribution
+        # population = self.plasma_state.ions[0].electron_distribution
+        # Assume the popolation of electrons be behave like a neutral atom with
+        # reduced number of electrons. I.e., a 1.5 times ionized carbon is like
+        # Beryllium (and half a step to Boron).
+        core_electron_floor = int(jnp.floor(self.plasma_state.Z_core()[0]))
+        pop_floor = jaxrts.elements.electron_distribution(core_electron_floor)
+        pop_ceil = jaxrts.elements.electron_distribution(
+            core_electron_floor + 1
+        )
+
+        population = pop_floor + (
+            (self.plasma_state.Z_core()[0] - core_electron_floor)
+            * (pop_ceil - pop_floor)
+        )
         f = jnp.sum(fi * population)
         q = jaxrts.ion_feature.q(
             setup.k()[jnp.newaxis],
@@ -203,38 +216,40 @@ state = jaxrts.PlasmaState(
     mass_density=jnp.array([4.48943]) * ureg.gram / ureg.centimeter**3,
     T_e=jnp.array([10]) * ureg.electron_volt / ureg.k_B,
 )
-state.electron_distribution = jnp.array([2, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
 setup = Setup(
     ureg("160°"),
     ureg("4768.6230 eV"),
     ureg("4768.6230 eV") + jnp.linspace(-250, 100, 500) * ureg.electron_volt,
     partial(
-        jaxrts.instrument_function.instrument_gaussian, sigma=ureg("10.0eV")
+        jaxrts.instrument_function.instrument_gaussian,
+        sigma=ureg("50.0eV") / (2 * jnp.sqrt(2 * jnp.log(2))),
     ),
 )
 
 state.ionic_model = ArphipovIonFeat(state)
-state.free_free_model = RPAFreeFree(state)
-state.bound_free_model = SchumacherImpulse(state)
+state.free_free_model = QCSAFreeFree(state)
+# state.bound_free_model = SchumacherImpulse(state)
+state.bound_free_model = Neglect(state)
 state.free_bound_model = Neglect(state)
 
 import matplotlib.pyplot as plt
 import time
-
-for _ in range(3):
-    t0 = time.time()
-    state.probe(setup)
-    print(time.time() - t0)
 
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
     state.probe(setup),
 )
 
-setup.measured_energy = (
-    ureg("4768.6230 eV") + jnp.linspace(-250, 100, 100) * ureg.electron_volt
+# setup.measured_energy = (
+#     ureg("4768.6230 eV") + jnp.linspace(-250, 100, 100) * ureg.electron_volt
+# )
+state.Z_free = jnp.array([2.5])
+plt.plot(
+    (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
+    state.probe(setup),
 )
+state.Z_free = jnp.array([3.0])
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
     state.probe(setup),
