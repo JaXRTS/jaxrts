@@ -32,14 +32,13 @@ def electron_distribution_ionized_state(plasma_state):
 def conv_dync_stucture_with_instrument(
     Sfac: Quantity, setup: Setup
 ) -> Quantity:
-    conv_grid = setup.measured_energy - jnpu.mean(setup.measured_energy)
+    conv_grid = (setup.measured_energy - jnpu.mean(setup.measured_energy))/ureg.hbar
     return (
         jnp.convolve(
             Sfac.m_as(ureg.second),
-            setup.instrument(conv_grid).magnitude,
+            setup.instrument(conv_grid).m_as(ureg.second),
             mode="same",
-        )
-        * ureg.second
+        ) * (1 * ureg.second **2)
         * (jnpu.diff(setup.measured_energy)[0] / ureg.hbar)
     )
 
@@ -85,8 +84,8 @@ class ArphipovIonFeat(Model):
             self.plasma_state.Z_free[0],
         )
         w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
-        res = w_R * setup.instrument(setup.measured_energy - setup.energy)
-        return res.magnitude
+        res = w_R * setup.instrument((setup.measured_energy - setup.energy)/ureg.hbar)
+        return res
 
 
 class GregoriChemPotential(Model):
@@ -195,7 +194,7 @@ class RPAFreeFree(Model):
 
 class Neglect(Model):
     def evaluate(self, setup: Setup) -> jnp.ndarray:
-        return jnp.zeros_like(setup.measured_energy)
+        return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
 
 
 element = jaxrts.elements.Element("Be")
@@ -217,7 +216,7 @@ setup = Setup(
     ureg("4768.6230 eV") + jnp.linspace(-250, 100, 500) * ureg.electron_volt,
     partial(
         jaxrts.instrument_function.instrument_gaussian,
-        sigma=ureg("50.0eV") / (2 * jnp.sqrt(2 * jnp.log(2))),
+        sigma=ureg("50.0eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
     ),
 )
 
