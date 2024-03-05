@@ -1,5 +1,6 @@
 import jaxrts
 
+import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
@@ -15,7 +16,7 @@ Quantity = jaxrts.units.Quantity
 
 
 def electron_distribution_ionized_state(plasma_state):
-    # Assume the popolation of electrons be behave like a neutral atom with
+    # Assume the population of electrons be behave like a neutral atom with
     # reduced number of electrons. I.e., a 1.5 times ionized carbon is like
     # Beryllium (and half a step to Boron).
     core_electron_floor = int(jnp.floor(plasma_state.Z_core()[0]))
@@ -32,13 +33,16 @@ def electron_distribution_ionized_state(plasma_state):
 def conv_dync_stucture_with_instrument(
     Sfac: Quantity, setup: Setup
 ) -> Quantity:
-    conv_grid = (setup.measured_energy - jnpu.mean(setup.measured_energy))/ureg.hbar
+    conv_grid = (
+        setup.measured_energy - jnpu.mean(setup.measured_energy)
+    ) / ureg.hbar
     return (
         jnp.convolve(
             Sfac.m_as(ureg.second),
             setup.instrument(conv_grid).m_as(ureg.second),
             mode="same",
-        ) * (1 * ureg.second **2)
+        )
+        * (1 * ureg.second**2)
         * (jnpu.diff(setup.measured_energy)[0] / ureg.hbar)
     )
 
@@ -84,7 +88,45 @@ class ArphipovIonFeat(Model):
             self.plasma_state.Z_free[0],
         )
         w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
-        res = w_R * setup.instrument((setup.measured_energy - setup.energy)/ureg.hbar)
+        res = w_R * setup.instrument(
+            (setup.measured_energy - setup.energy) / ureg.hbar
+        )
+        return res
+
+
+class Gregori2003IonFeat(Model):
+    def __init__(self, state: PlasmaState) -> None:
+        super().__init__(state)
+        if not hasattr(state, "form_factor_model"):
+            print("Setting Default form_factor_model")
+            state.form_factor_model = PaulingFormFactors(state)
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        fi = self.plasma_state.form_factor_model.evaluate(setup)
+        population = electron_distribution_ionized_state(self.plasma_state)
+
+        T_eff = jaxrts.static_structure_factors.T_cf_Greg(
+            self.plasma_state.T_e[0], self.plasma_state.n_e()
+        )
+        f = jnp.sum(fi * population)
+        q = jaxrts.ion_feature.q(
+            setup.k()[jnp.newaxis],
+            self.plasma_state.ions[0].atomic_mass,
+            self.plasma_state.n_e(),
+            T_eff,
+            self.plasma_state.Z_free[0],
+        )
+        S_ii = jaxrts.ion_feature.S_ii_AD(
+            setup.k(),
+            T_eff,
+            self.plasma_state.n_e(),
+            self.plasma_state.ions[0].atomic_mass,
+            self.plasma_state.Z_free[0],
+        )
+        w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
+        res = w_R * setup.instrument(
+            (setup.measured_energy - setup.energy) / ureg.hbar
+        )
         return res
 
 
@@ -220,7 +262,7 @@ setup = Setup(
     ),
 )
 
-state.ionic_model = ArphipovIonFeat(state)
+state.ionic_model = Gregori2003IonFeat(state)
 state.free_free_model = QCSAFreeFree(state)
 # state.bound_free_model = SchumacherImpulse(state)
 state.bound_free_model = Neglect(state)
