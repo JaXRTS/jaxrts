@@ -14,6 +14,21 @@ ureg = jaxrts.ureg
 Quantity = jaxrts.units.Quantity
 
 
+def electron_distribution_ionized_state(plasma_state):
+    # Assume the popolation of electrons be behave like a neutral atom with
+    # reduced number of electrons. I.e., a 1.5 times ionized carbon is like
+    # Beryllium (and half a step to Boron).
+    core_electron_floor = int(jnp.floor(plasma_state.Z_core()[0]))
+    pop_floor = jaxrts.elements.electron_distribution(core_electron_floor)
+    pop_ceil = jaxrts.elements.electron_distribution(core_electron_floor + 1)
+
+    population = pop_floor + (
+        (plasma_state.Z_core()[0] - core_electron_floor)
+        * (pop_ceil - pop_floor)
+    )
+    return population
+
+
 def conv_dync_stucture_with_instrument(
     Sfac: Quantity, setup: Setup
 ) -> Quantity:
@@ -52,20 +67,8 @@ class ArphipovIonFeat(Model):
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         fi = self.plasma_state.form_factor_model.evaluate(setup)
-        # population = self.plasma_state.ions[0].electron_distribution
-        # Assume the popolation of electrons be behave like a neutral atom with
-        # reduced number of electrons. I.e., a 1.5 times ionized carbon is like
-        # Beryllium (and half a step to Boron).
-        core_electron_floor = int(jnp.floor(self.plasma_state.Z_core()[0]))
-        pop_floor = jaxrts.elements.electron_distribution(core_electron_floor)
-        pop_ceil = jaxrts.elements.electron_distribution(
-            core_electron_floor + 1
-        )
+        polulation = electron_distribution_ionized_state(self.plasma_state)
 
-        population = pop_floor + (
-            (self.plasma_state.Z_core()[0] - core_electron_floor)
-            * (pop_ceil - pop_floor)
-        )
         f = jnp.sum(fi * population)
         q = jaxrts.ion_feature.q(
             setup.k()[jnp.newaxis],
@@ -130,7 +133,6 @@ class SchumacherImpulse(Model):
             state.form_factor_model = PaulingFormFactors(state)
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
-
         k = setup.k()
         omega_0 = setup.energy / ureg.hbar
         omega = omega_0 - setup.measured_energy / ureg.hbar
@@ -140,20 +142,7 @@ class SchumacherImpulse(Model):
         Zeff = jaxrts.form_factors.pauling_effective_charge(
             self.plasma_state.ions[0].Z
         )
-
-        # Assume the popolation of electrons be behave like a neutral atom with
-        # reduced number of electrons. I.e., a 1.5 times ionized carbon is like
-        # Beryllium (and half a step to Boron).
-        core_electron_floor = int(jnp.floor(self.plasma_state.Z_core()[0]))
-        pop_floor = jaxrts.elements.electron_distribution(core_electron_floor)
-        pop_ceil = jaxrts.elements.electron_distribution(
-            core_electron_floor + 1
-        )
-
-        population = pop_floor + (
-            (self.plasma_state.Z_core()[0] - core_electron_floor)
-            * (pop_ceil - pop_floor)
-        )
+        polulation = electron_distribution_ionized_state(self.plasma_state)
         # Gregori.2004, Eqn 20
         fi = self.plasma_state.form_factor_model.evaluate(setup)
         r_k = 1 - jnp.sum(population / Z_c * fi**2)
@@ -209,13 +198,21 @@ class Neglect(Model):
         return jnp.zeros_like(setup.measured_energy)
 
 
+element = jaxrts.elements.Element("Be")
+
 state = jaxrts.PlasmaState(
-    ions=[jaxrts.elements.Element("Be")],
+    ions=[element],
     Z_free=jnp.array([2]),
     density_fractions=jnp.array([1]),
-    mass_density=jnp.array([4.48943]) * ureg.gram / ureg.centimeter**3,
-    T_e=jnp.array([10]) * ureg.electron_volt / ureg.k_B,
+    mass_density=jnp.array([3e23])
+    / (1 * ureg.centimeter**3)
+    * element.atomic_mass
+    / 2,
+    T_e=jnp.array([1]) * ureg.electron_volt / ureg.k_B,
 )
+
+print(state.n_e())
+
 
 setup = Setup(
     ureg("160°"),
@@ -245,11 +242,19 @@ plt.plot(
 #     ureg("4768.6230 eV") + jnp.linspace(-250, 100, 100) * ureg.electron_volt
 # )
 state.Z_free = jnp.array([2.5])
+state.mass_density = (
+    jnp.array([3e23]) / (1 * ureg.centimeter**3) * element.atomic_mass / 2.5
+)
+print(state.n_e())
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
     state.probe(setup),
 )
 state.Z_free = jnp.array([3.0])
+state.mass_density = (
+    jnp.array([3e23]) / (1 * ureg.centimeter**3) * element.atomic_mass / 3
+)
+print(state.n_e())
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
     state.probe(setup),
