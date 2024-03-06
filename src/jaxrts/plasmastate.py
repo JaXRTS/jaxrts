@@ -74,9 +74,7 @@ class PlasmaState:
 
     def n_i(self):
         return (
-            self.mass_density
-            * self.density_fractions
-            / jpu.numpy.sum(self.atomic_masses() * self.density_fractions)
+            self.mass_density / self.atomic_masses()
         ).to_base_units()
 
     def n_e(self):

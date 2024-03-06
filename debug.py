@@ -61,7 +61,7 @@ class PaulingFormFactors(Model):
 # -----------------
 
 
-class ArphipovIonFeat(Model):
+class ArkhipovIonFeat(Model):
     def __init__(self, state: PlasmaState) -> None:
         super().__init__(state)
         if not hasattr(state, "form_factor_model"):
@@ -254,8 +254,8 @@ state = jaxrts.PlasmaState(
 
 setup = Setup(
     ureg("160°"),
-    ureg("4768.6230 eV"),
-    ureg("4768.6230 eV") + jnp.linspace(-250, 100, 500) * ureg.electron_volt,
+    ureg("4750 eV"),
+    ureg("4750 eV") + jnp.linspace(-250, 100, 500) * ureg.electron_volt,
     partial(
         jaxrts.instrument_function.instrument_gaussian,
         sigma=ureg("50.0eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
@@ -263,7 +263,8 @@ setup = Setup(
 )
 
 state.ionic_model = Gregori2003IonFeat(state)
-state.free_free_model = QCSAFreeFree(state)
+# state.free_free_model = QCSAFreeFree(state)
+state.free_free_model = RPAFreeFree(state)
 # state.bound_free_model = SchumacherImpulse(state)
 state.bound_free_model = Neglect(state)
 state.free_bound_model = Neglect(state)
@@ -281,15 +282,15 @@ plt.plot(
 # )
 state.Z_free = jnp.array([2.5])
 state.mass_density = (
-    jnp.array([3e23]) / (1 * ureg.centimeter**3) * element.atomic_mass / 2.5
+    jnp.array([3e23]) / (1 * ureg.centimeter**3) * element.atomic_mass / state.Z_free[0]
 )
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
     state.probe(setup),
 )
-state.Z_free = jnp.array([3.0])
+state.Z_free = jnp.array([3])
 state.mass_density = (
-    jnp.array([3e23]) / (1 * ureg.centimeter**3) * element.atomic_mass / 3
+    jnp.array([3e23]) / (1 * ureg.centimeter**3) * element.atomic_mass / state.Z_free[0]
 )
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),

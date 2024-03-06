@@ -56,6 +56,9 @@ def q(
 
     C_ei = (jpu.numpy.sqrt(Z_f) * S_ei) / (S_ee * S_ii - S_ei**2)
 
+    # This would be the q given by Glenzer.2009, instead
+    # return jpu.numpy.sqrt(Z_f) * S_ei / S_ii
+
     return (
         C_ei
         / (
