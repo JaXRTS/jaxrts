@@ -52,18 +52,21 @@ class PlasmaState:
         self.bound_free_model = None
         self.free_bound_model = None
 
+    @property
     def Z_A(self) -> jnp.ndarray:
         """
         The atomic number of the atom-species.
         """
         return jnp.array([i.Z for i in self.ions])
 
+    @property
     def Z_core(self) -> jnp.ndarray:
         """
         The number of electrons still bound to the ion.
         """
-        return self.Z_A() - self.Z_free
+        return self.Z_A - self.Z_free
 
+    @property
     def atomic_masses(self) -> Quantity:
         """
         The atomic weight of the atoms.
@@ -72,16 +75,19 @@ class PlasmaState:
             [i.atomic_mass.m_as(ureg.atomic_mass_constant) for i in self.ions]
         ) * (1 * ureg.atomic_mass_constant)
 
+    @property
     def n_i(self):
         return (
-            self.mass_density / self.atomic_masses()
+            self.mass_density / self.atomic_masses
         ).to_base_units()
 
+    @property
     def n_e(self):
-        return (jpu.numpy.sum(self.n_i() * self.Z_free)).to_base_units()
+        return (jpu.numpy.sum(self.n_i * self.Z_free)).to_base_units()
 
+    @property
     def ee_coupling(self):
-        d = (3 / (4 * np.pi * self.n_e())) ** (1.0 / 3.0)
+        d = (3 / (4 * np.pi * self.n_e)) ** (1.0 / 3.0)
 
         return (
             (1 * ureg.elementary_charge) ** 2
@@ -95,6 +101,7 @@ class PlasmaState:
             )
         ).to_base_units()
 
+    @property
     def ii_coupling(self):
         pass
 

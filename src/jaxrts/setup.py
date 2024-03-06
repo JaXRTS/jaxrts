@@ -24,10 +24,12 @@ class Setup:
         self.measured_energy = measured_energy
         self.instrument = instrument
 
+    @property
     def k(self) -> Quantity:
-        return (4 * jnp.pi / self.lambda0()) * jnpu.sin(
+        return (4 * jnp.pi / self.lambda0) * jnpu.sin(
             jnpu.deg2rad(self.scattering_angle) / 2.0
         )
 
+    @property
     def lambda0(self) -> Quantity:
         return ureg.planck_constant * ureg.c / self.energy

@@ -19,12 +19,12 @@ def electron_distribution_ionized_state(plasma_state):
     # Assume the population of electrons be behave like a neutral atom with
     # reduced number of electrons. I.e., a 1.5 times ionized carbon is like
     # Beryllium (and half a step to Boron).
-    core_electron_floor = int(jnp.floor(plasma_state.Z_core()[0]))
+    core_electron_floor = int(jnp.floor(plasma_state.Z_core[0]))
     pop_floor = jaxrts.elements.electron_distribution(core_electron_floor)
     pop_ceil = jaxrts.elements.electron_distribution(core_electron_floor + 1)
 
     population = pop_floor + (
-        (plasma_state.Z_core()[0] - core_electron_floor)
+        (plasma_state.Z_core[0] - core_electron_floor)
         * (pop_ceil - pop_floor)
     )
     return population
@@ -50,9 +50,9 @@ def conv_dync_stucture_with_instrument(
 class PaulingFormFactors(Model):
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         Zstar = jaxrts.form_factors.pauling_effective_charge(
-            self.plasma_state.Z_A()[0]
+            self.plasma_state.Z_A[0]
         )
-        form_factors = jaxrts.form_factors.pauling_all_ff(setup.k(), Zstar)
+        form_factors = jaxrts.form_factors.pauling_all_ff(setup.k, Zstar)
         population = self.plasma_state.ions[0].electron_distribution
         return jnp.where(population > 0, form_factors, 0)
 
@@ -74,16 +74,16 @@ class ArkhipovIonFeat(Model):
 
         f = jnp.sum(fi * population)
         q = jaxrts.ion_feature.q(
-            setup.k()[jnp.newaxis],
+            setup.k[jnp.newaxis],
             self.plasma_state.ions[0].atomic_mass,
-            self.plasma_state.n_e(),
+            self.plasma_state.n_e,
             self.plasma_state.T_e[0],
             self.plasma_state.Z_free[0],
         )
         S_ii = jaxrts.ion_feature.S_ii_AD(
-            setup.k(),
+            setup.k,
             self.plasma_state.T_e[0],
-            self.plasma_state.n_e(),
+            self.plasma_state.n_e,
             self.plasma_state.ions[0].atomic_mass,
             self.plasma_state.Z_free[0],
         )
@@ -106,20 +106,20 @@ class Gregori2003IonFeat(Model):
         population = electron_distribution_ionized_state(self.plasma_state)
 
         T_eff = jaxrts.static_structure_factors.T_cf_Greg(
-            self.plasma_state.T_e[0], self.plasma_state.n_e()
+            self.plasma_state.T_e[0], self.plasma_state.n_e
         )
         f = jnp.sum(fi * population)
         q = jaxrts.ion_feature.q(
-            setup.k()[jnp.newaxis],
+            setup.k[jnp.newaxis],
             self.plasma_state.ions[0].atomic_mass,
-            self.plasma_state.n_e(),
+            self.plasma_state.n_e,
             T_eff,
             self.plasma_state.Z_free[0],
         )
         S_ii = jaxrts.ion_feature.S_ii_AD(
-            setup.k(),
+            setup.k,
             T_eff,
-            self.plasma_state.n_e(),
+            self.plasma_state.n_e,
             self.plasma_state.ions[0].atomic_mass,
             self.plasma_state.Z_free[0],
         )
@@ -133,7 +133,7 @@ class Gregori2003IonFeat(Model):
 class GregoriChemPotential(Model):
     def evaluate(self, setup: Setup) -> Quantity:
         return jaxrts.plasma_physics.chem_pot_interpolation(
-            self.plasma_state.T_e[0], self.plasma_state.n_e()
+            self.plasma_state.T_e[0], self.plasma_state.n_e
         )
 
 
@@ -147,18 +147,18 @@ class BornMermin(Model):
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state.chem_potential_model.evaluate(setup)
         epsilon = jaxrts.electron_feature.dielectric_function_BMA(
-            setup.k(),
+            setup.k,
             setup.measured_energy,
             mu,
             self.plasma_state.T_e[0],
-            self.plasma_state.n_e(),
+            self.plasma_state.n_e,
             self.plasma_state.ions[0].atomic_mass,
             self.plasma_state.Z_free[0],
         )
         See_0 = jaxrts.electron_feature.S0ee_from_dielectric_func_FDT(
-            setup.k(),
+            setup.k,
             self.plasma_state.T_e[0],
-            self.plasma_state.n_e(),
+            self.plasma_state.n_e,
             setup.measured_energy,
             epsilon,
         )
@@ -174,10 +174,10 @@ class SchumacherImpulse(Model):
             state.form_factor_model = PaulingFormFactors(state)
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
-        k = setup.k()
+        k = setup.k
         omega_0 = setup.energy / ureg.hbar
         omega = omega_0 - setup.measured_energy / ureg.hbar
-        Z_c = self.plasma_state.Z_core()[0]
+        Z_c = self.plasma_state.Z_core[0]
         E_b = self.plasma_state.ions[0].binding_energies
 
         Zeff = jaxrts.form_factors.pauling_effective_charge(
@@ -203,9 +203,9 @@ class QCSAFreeFree(Model):
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         See_0 = jaxrts.electron_feature.S0_ee_Salpeter(
-            setup.k(),
+            setup.k,
             self.plasma_state.T_e[0],
-            self.plasma_state.n_e(),
+            self.plasma_state.n_e,
             setup.measured_energy - setup.energy,
         )
 
@@ -223,9 +223,9 @@ class RPAFreeFree(Model):
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state.chem_potential_model.evaluate(setup)
         See_0 = jaxrts.electron_feature.S0_ee_RPA_no_damping(
-            setup.k(),
+            setup.k,
             self.plasma_state.T_e[0],
-            self.plasma_state.n_e(),
+            self.plasma_state.n_e,
             setup.measured_energy - setup.energy,
             mu,
         )
