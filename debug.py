@@ -5,7 +5,7 @@ import jax.numpy as jnp
 from jpu import numpy as jnpu
 
 from jaxrts.models import Model, Neglect, Gregori2003IonFeat, ArkhipovIonFeat, PaulingFormFactors
-from jaxrts.setup import Setup
+from jaxrts.setup import Setup, convolve_stucture_factor_with_instrument
 from jaxrts.elements import electron_distribution_ionized_state
 from jaxrts.plasmastate import PlasmaState
 
@@ -16,33 +16,18 @@ ureg = jaxrts.ureg
 Quantity = jaxrts.units.Quantity
 
 
-def conv_dync_stucture_with_instrument(
-    Sfac: Quantity, setup: Setup
-) -> Quantity:
-    conv_grid = (
-        setup.measured_energy - jnpu.mean(setup.measured_energy)
-    ) / ureg.hbar
-    return (
-        jnp.convolve(
-            Sfac.m_as(ureg.second),
-            setup.instrument(conv_grid).m_as(ureg.second),
-            mode="same",
-        )
-        * (1 * ureg.second**2)
-        * (jnpu.diff(setup.measured_energy)[0] / ureg.hbar)
-    )
-
-
-
-
 # The ion-feature
 # -----------------
 
 
 class GregoriChemPotential(Model):
+    """
+    A fitting formula for the chemical potential of a plasma between the
+    classical and the quantum regime, given by :cite:`Gregori.2003`.
+    """
     def evaluate(self, setup: Setup) -> Quantity:
         return jaxrts.plasma_physics.chem_pot_interpolation(
-            self.plasma_state.T_e[0], self.plasma_state.n_e
+            self.plasma_state.T_e, self.plasma_state.n_e
         )
 
 
@@ -57,20 +42,20 @@ class BornMermin(Model):
             setup.k,
             setup.measured_energy,
             mu,
-            self.plasma_state.T_e[0],
+            self.plasma_state.T_e,
             self.plasma_state.n_e,
-            self.plasma_state.ions[0].atomic_mass,
-            self.plasma_state.Z_free[0],
+            self.plasma_state.atomic_masses,
+            self.plasma_state.Z_free,
         )
         See_0 = jaxrts.free_free.S0ee_from_dielectric_func_FDT(
             setup.k,
-            self.plasma_state.T_e[0],
+            self.plasma_state.T_e,
             self.plasma_state.n_e,
             setup.measured_energy,
             epsilon,
         )
-        free_free = See_0 * self.plasma_state.Z_free[0]
-        return conv_dync_stucture_with_instrument(free_free, setup)
+        free_free = See_0 * self.plasma_state.Z_free
+        return convolve_stucture_factor_with_instrument(free_free, setup)
 
 
 class SchumacherImpulse(Model):
@@ -103,7 +88,7 @@ class SchumacherImpulse(Model):
             )
         )
 
-        return conv_dync_stucture_with_instrument(sbe * Z_c, setup)
+        return convolve_stucture_factor_with_instrument(sbe * Z_c, setup)
 
 
 class QCSAFreeFree(Model):
@@ -117,7 +102,7 @@ class QCSAFreeFree(Model):
         )
 
         free_free = See_0 * self.plasma_state.Z_free[0]
-        return conv_dync_stucture_with_instrument(free_free, setup)
+        return convolve_stucture_factor_with_instrument(free_free, setup)
 
 
 class RPAFreeFree(Model):
@@ -136,7 +121,7 @@ class RPAFreeFree(Model):
         )
 
         free_free = See_0 * self.plasma_state.Z_free[0]
-        return conv_dync_stucture_with_instrument(free_free, setup)
+        return convolve_stucture_factor_with_instrument(free_free, setup)
 
 
 element = jaxrts.elements.Element("Be")
@@ -162,10 +147,9 @@ setup = Setup(
     ),
 )
 
-state["ionic scattering"] = Gregori2003IonFeat
-state["ionic scattering"] = ArkhipovIonFeat
+state["ionic scattering"] = Neglect
 # state["free-free scattering"] = QCSAFreeFree
-state["free-free scattering"] = RPAFreeFree
+state["free-free scattering"] = BornMermin
 # state["bound-free scattering"] = SchumacherImpulse
 state["bound-free scattering"] = Neglect
 state["free-bound scattering"] = Neglect
@@ -178,31 +162,36 @@ plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
     state.probe(setup).m_as(ureg.second),
 )
+state["free-free scattering"] = RPAFreeFree
+plt.plot(
+    (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
+    state.probe(setup).m_as(ureg.second),
+)
 
 # setup.measured_energy = (
 #     ureg("4768.6230 eV") + jnp.linspace(-250, 100, 100) * ureg.electron_volt
 # )
-state.Z_free = jnp.array([2.5])
-state.mass_density = (
-    jnp.array([3e23])
-    / (1 * ureg.centimeter**3)
-    * element.atomic_mass
-    / state.Z_free[0]
-)
-plt.plot(
-    (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
-    state.probe(setup).m_as(ureg.second),
-)
-state.Z_free = jnp.array([3])
-state.mass_density = (
-    jnp.array([3e23])
-    / (1 * ureg.centimeter**3)
-    * element.atomic_mass
-    / state.Z_free[0]
-)
-plt.plot(
-    (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
-    state.probe(setup).m_as(ureg.second),
-)
+# state.Z_free = jnp.array([2.5])
+# state.mass_density = (
+#     jnp.array([3e23])
+#     / (1 * ureg.centimeter**3)
+#     * element.atomic_mass
+#     / state.Z_free[0]
+# )
+# plt.plot(
+#     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
+#     state.probe(setup).m_as(ureg.second),
+# )
+# state.Z_free = jnp.array([3])
+# state.mass_density = (
+#     jnp.array([3e23])
+#     / (1 * ureg.centimeter**3)
+#     * element.atomic_mass
+#     / state.Z_free[0]
+# )
+# plt.plot(
+#     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
+#     state.probe(setup).m_as(ureg.second),
+# )
 
 plt.show()
