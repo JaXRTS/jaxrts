@@ -24,8 +24,7 @@ def electron_distribution_ionized_state(plasma_state):
     pop_ceil = jaxrts.elements.electron_distribution(core_electron_floor + 1)
 
     population = pop_floor + (
-        (plasma_state.Z_core[0] - core_electron_floor)
-        * (pop_ceil - pop_floor)
+        (plasma_state.Z_core[0] - core_electron_floor) * (pop_ceil - pop_floor)
     )
     return population
 
@@ -63,10 +62,8 @@ class PaulingFormFactors(Model):
 
 class ArkhipovIonFeat(Model):
     def __init__(self, state: PlasmaState) -> None:
+        state.update_default_model("form-factors", PaulingFormFactors)
         super().__init__(state)
-        if "form-factors" not in state.models.keys():
-            print("Setting Default form-factors model")
-            state["form-factors"] = PaulingFormFactors
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         fi = self.plasma_state["form-factors"].evaluate(setup)
@@ -95,33 +92,41 @@ class ArkhipovIonFeat(Model):
 
 
 class Gregori2003IonFeat(Model):
+    """
+    This model is identical to :py:class:`~ArkhipovIonFeat`, but uses an
+    effective temperature ~:py:func:`jaxtrs.static_structure_factors.T_cf_Greg`
+    rather than the electron Temperature throughout the calculation.
+    """
+
     def __init__(self, state: PlasmaState) -> None:
+        if len(state) > 1:
+            logger.critical(
+                "'Gregori2003IonFeat' is only implemented for a one-component plasma"  # noqa: E501
+            )
+        state.update_default_model("form-factors", PaulingFormFactors)
         super().__init__(state)
-        if "form-factors" not in state.models.keys():
-            print("Setting default 'form-factors' model")
-            state["form-factors"] = PaulingFormFactors
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         fi = self.plasma_state["form-factors"].evaluate(setup)
         population = electron_distribution_ionized_state(self.plasma_state)
 
         T_eff = jaxrts.static_structure_factors.T_cf_Greg(
-            self.plasma_state.T_e[0], self.plasma_state.n_e
+            self.plasma_state.T_e, self.plasma_state.n_e
         )
         f = jnp.sum(fi * population)
         q = jaxrts.ion_feature.q(
             setup.k[jnp.newaxis],
-            self.plasma_state.ions[0].atomic_mass,
+            self.plasma_state.atomic_masses,
             self.plasma_state.n_e,
             T_eff,
-            self.plasma_state.Z_free[0],
+            self.plasma_state.Z_free,
         )
         S_ii = jaxrts.ion_feature.S_ii_AD(
             setup.k,
             T_eff,
             self.plasma_state.n_e,
-            self.plasma_state.ions[0].atomic_mass,
-            self.plasma_state.Z_free[0],
+            self.plasma_state.atomic_masses,
+            self.plasma_state.Z_free,
         )
         w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
         res = w_R * setup.instrument(
@@ -139,10 +144,8 @@ class GregoriChemPotential(Model):
 
 class BornMermin(Model):
     def __init__(self, state: PlasmaState) -> None:
+        state.update_default_model("chemical potential", GregoriChemPotential)
         super().__init__(state)
-        if "chemical potential" not in state.models.keys():
-            print("Setting default 'chemical potential' model")
-            state["chemical potential"] = GregoriChemPotential
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state["chemical potential"].evaluate(setup)
@@ -168,10 +171,8 @@ class BornMermin(Model):
 
 class SchumacherImpulse(Model):
     def __init__(self, state: PlasmaState) -> None:
+        state.update_default_model("form-factors", PaulingFormFactors)
         super().__init__(state)
-        if "form-factors" not in state.models.keys():
-            print("Setting default 'form-factors' model")
-            state["form-factors"] = PaulingFormFactors
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         k = setup.k
@@ -215,10 +216,8 @@ class QCSAFreeFree(Model):
 
 class RPAFreeFree(Model):
     def __init__(self, state: PlasmaState) -> None:
+        state.update_default_model("chemical potential", GregoriChemPotential)
         super().__init__(state)
-        if "chemical potential" not in state.models.keys():
-            print("Setting default 'chemical potential' model")
-            state["chemical potential"] = GregoriChemPotential
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state["chemical potential"].evaluate(setup)
@@ -269,12 +268,13 @@ state["free-free scattering"] = RPAFreeFree
 state["bound-free scattering"] = Neglect
 state["free-bound scattering"] = Neglect
 
+
 import matplotlib.pyplot as plt
 import time
 
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
-    state.probe(setup),
+    state.probe(setup).m_as(ureg.second),
 )
 
 # setup.measured_energy = (
@@ -282,19 +282,25 @@ plt.plot(
 # )
 state.Z_free = jnp.array([2.5])
 state.mass_density = (
-    jnp.array([3e23]) / (1 * ureg.centimeter**3) * element.atomic_mass / state.Z_free[0]
+    jnp.array([3e23])
+    / (1 * ureg.centimeter**3)
+    * element.atomic_mass
+    / state.Z_free[0]
 )
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
-    state.probe(setup),
+    state.probe(setup).m_as(ureg.second),
 )
 state.Z_free = jnp.array([3])
 state.mass_density = (
-    jnp.array([3e23]) / (1 * ureg.centimeter**3) * element.atomic_mass / state.Z_free[0]
+    jnp.array([3e23])
+    / (1 * ureg.centimeter**3)
+    * element.atomic_mass
+    / state.Z_free[0]
 )
 plt.plot(
     (setup.measured_energy - setup.energy).m_as(ureg.electron_volt),
-    state.probe(setup),
+    state.probe(setup).m_as(ureg.second),
 )
 
 plt.show()

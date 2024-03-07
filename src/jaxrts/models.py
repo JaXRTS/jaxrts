@@ -4,12 +4,15 @@ implemented.
 """
 
 import abc
+import logging
 
 import jax.numpy as jnp
 
 from .setup import Setup
 from .plasmastate import PlasmaState
 from .ion_feature import q
+
+logger = logging.getLogger(__name__)
 
 # This defines a Model, abstractly.
 class Model(metaclass=abc.ABCMeta):

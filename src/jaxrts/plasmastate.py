@@ -1,4 +1,4 @@
-from .units import ureg, Quantity
+from abc import ABCMeta
 from typing import List
 import numpy as np
 import logging
@@ -6,6 +6,7 @@ import jpu
 from jax import numpy as jnp
 
 from .elements import Element
+from .units import ureg, Quantity
 from .setup import Setup
 
 logger = logging.getLogger(__name__)
@@ -48,11 +49,56 @@ class PlasmaState:
 
         self.models = {}
 
-    def __getitem__(self, key):
+    def __len__(self) -> int:
+        return len(self.ions)
+
+    def __getitem__(self, key: str):
         return self.models[key]
 
-    def __setitem__(self, key, model_class):
+    def __setitem__(self, key: str, model_class: ABCMeta) -> None:
         self.models[key] = model_class(self)
+
+    def update_default_model(
+        self, model_name: str, model_class: ABCMeta
+    ) -> None:
+        """
+        Add a model to the ``PlasmaState``, if it does not exist, already.
+        If a new Model is appended to this state, issue a warning.
+
+        This function is intended to be used by a
+        :py:class:`jaxrts.models.Model` if it relies on having other models
+        set. An example would be models for ionic scattering, which normally
+        require some notion for the form-factors, for which different models
+        exist. To allow a user to get to some reasonable spectra fast, a
+        :py:class:`jaxrts.models.Model` can modify the ``PlasmaState`` and set
+        defaults. This should, however, be non-destructive, i.e., if a user
+        specifically selected a value, this should not be overwritten. Hence,
+        this convenience-function only adds the model if the given
+        ``model_name`` is not in use, already and will inform a user about the
+        automatically selected model.
+
+        Parameters
+        ----------
+        model_name : str
+            Key under that the model should be saved.
+        model_class ABCMeta
+            The ModelClass that should be a sane default.
+
+        Warns
+        -----
+        Warning
+            If a default was set to inform a user about the "default choice".
+
+        Examples
+        --------
+        >> s.update_default_model("form-factors", PaulingFormFactors)
+        """
+        if model_name not in self.models.keys():
+            logger.warning(
+                f"Setting default '{model_name}' model to '{model_class.__name__}'."
+                + " You can suppress this warning by setting the model manually."
+            )
+            self[model_name] = model_class
 
     @property
     def Z_A(self) -> jnp.ndarray:
@@ -79,9 +125,7 @@ class PlasmaState:
 
     @property
     def n_i(self):
-        return (
-            self.mass_density / self.atomic_masses
-        ).to_base_units()
+        return (self.mass_density / self.atomic_masses).to_base_units()
 
     @property
     def n_e(self):
@@ -102,7 +146,6 @@ class PlasmaState:
                 * d
             )
         ).to_base_units()
-
 
     @property
     def ii_coupling(self):
