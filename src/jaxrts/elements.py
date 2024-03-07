@@ -211,6 +211,35 @@ def electron_distribution(atomic_number: int) -> jnp.ndarray:
     return orbital_array(*occupancy)
 
 
+def electron_distribution_ionized_state(Z_core: float) -> jnp.ndarray:
+    """
+    Interpolate between electron populations if the number of core electrons is
+    not an integer.
+
+    Assume the population of electrons be behave like a neutral atom with
+    reduced number of electrons. I.e., a 1.5 times ionized carbon is like
+    Beryllium (and half a step to Boron).
+
+    Parameters
+    ------------
+    Z_core: float
+        Number of electrons still bound to the core
+
+    Returns
+    -------
+    jnp.ndarray
+        An array of populations.
+    """
+    core_electron_floor = int(jnp.floor(Z_core))
+    pop_floor = electron_distribution(core_electron_floor)
+    pop_ceil = electron_distribution(core_electron_floor + 1)
+
+    population = pop_floor + (
+        (Z_core - core_electron_floor) * (pop_ceil - pop_floor)
+    )
+    return population
+
+
 class Element:
     def __init__(self, identifier: str | int) -> None:
         if isinstance(identifier, str):

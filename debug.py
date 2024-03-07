@@ -4,8 +4,9 @@ import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
-from jaxrts.models import Model
+from jaxrts.models import Model, Neglect, Gregori2003IonFeat, ArkhipovIonFeat, PaulingFormFactors
 from jaxrts.setup import Setup
+from jaxrts.elements import electron_distribution_ionized_state
 from jaxrts.plasmastate import PlasmaState
 
 from functools import partial
@@ -13,20 +14,6 @@ from functools import partial
 
 ureg = jaxrts.ureg
 Quantity = jaxrts.units.Quantity
-
-
-def electron_distribution_ionized_state(plasma_state):
-    # Assume the population of electrons be behave like a neutral atom with
-    # reduced number of electrons. I.e., a 1.5 times ionized carbon is like
-    # Beryllium (and half a step to Boron).
-    core_electron_floor = int(jnp.floor(plasma_state.Z_core[0]))
-    pop_floor = jaxrts.elements.electron_distribution(core_electron_floor)
-    pop_ceil = jaxrts.elements.electron_distribution(core_electron_floor + 1)
-
-    population = pop_floor + (
-        (plasma_state.Z_core[0] - core_electron_floor) * (pop_ceil - pop_floor)
-    )
-    return population
 
 
 def conv_dync_stucture_with_instrument(
@@ -46,93 +33,10 @@ def conv_dync_stucture_with_instrument(
     )
 
 
-class PaulingFormFactors(Model):
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
-        Zstar = jaxrts.form_factors.pauling_effective_charge(
-            self.plasma_state.Z_A[0]
-        )
-        form_factors = jaxrts.form_factors.pauling_all_ff(setup.k, Zstar)
-        population = self.plasma_state.ions[0].electron_distribution
-        return jnp.where(population > 0, form_factors, 0)
 
 
 # The ion-feature
 # -----------------
-
-
-class ArkhipovIonFeat(Model):
-    def __init__(self, state: PlasmaState) -> None:
-        state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state)
-
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
-        fi = self.plasma_state["form-factors"].evaluate(setup)
-        population = electron_distribution_ionized_state(self.plasma_state)
-
-        f = jnp.sum(fi * population)
-        q = jaxrts.ion_feature.q(
-            setup.k[jnp.newaxis],
-            self.plasma_state.ions[0].atomic_mass,
-            self.plasma_state.n_e,
-            self.plasma_state.T_e[0],
-            self.plasma_state.Z_free[0],
-        )
-        S_ii = jaxrts.ion_feature.S_ii_AD(
-            setup.k,
-            self.plasma_state.T_e[0],
-            self.plasma_state.n_e,
-            self.plasma_state.ions[0].atomic_mass,
-            self.plasma_state.Z_free[0],
-        )
-        w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
-        res = w_R * setup.instrument(
-            (setup.measured_energy - setup.energy) / ureg.hbar
-        )
-        return res
-
-
-class Gregori2003IonFeat(Model):
-    """
-    This model is identical to :py:class:`~ArkhipovIonFeat`, but uses an
-    effective temperature ~:py:func:`jaxtrs.static_structure_factors.T_cf_Greg`
-    rather than the electron Temperature throughout the calculation.
-    """
-
-    def __init__(self, state: PlasmaState) -> None:
-        if len(state) > 1:
-            logger.critical(
-                "'Gregori2003IonFeat' is only implemented for a one-component plasma"  # noqa: E501
-            )
-        state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state)
-
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
-        fi = self.plasma_state["form-factors"].evaluate(setup)
-        population = electron_distribution_ionized_state(self.plasma_state)
-
-        T_eff = jaxrts.static_structure_factors.T_cf_Greg(
-            self.plasma_state.T_e, self.plasma_state.n_e
-        )
-        f = jnp.sum(fi * population)
-        q = jaxrts.ion_feature.q(
-            setup.k[jnp.newaxis],
-            self.plasma_state.atomic_masses,
-            self.plasma_state.n_e,
-            T_eff,
-            self.plasma_state.Z_free,
-        )
-        S_ii = jaxrts.ion_feature.S_ii_AD(
-            setup.k,
-            T_eff,
-            self.plasma_state.n_e,
-            self.plasma_state.atomic_masses,
-            self.plasma_state.Z_free,
-        )
-        w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
-        res = w_R * setup.instrument(
-            (setup.measured_energy - setup.energy) / ureg.hbar
-        )
-        return res
 
 
 class GregoriChemPotential(Model):
@@ -184,7 +88,9 @@ class SchumacherImpulse(Model):
         Zeff = jaxrts.form_factors.pauling_effective_charge(
             self.plasma_state.ions[0].Z
         )
-        population = electron_distribution_ionized_state(self.plasma_state)
+        population = electron_distribution_ionized_state(
+            self.plasma_state.Z_core
+        )
         # Gregori.2004, Eqn 20
         fi = self.plasma_state["form-factors"].evaluate(setup)
         r_k = 1 - jnp.sum(population / Z_c * fi**2)
@@ -233,11 +139,6 @@ class RPAFreeFree(Model):
         return conv_dync_stucture_with_instrument(free_free, setup)
 
 
-class Neglect(Model):
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
-        return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
-
-
 element = jaxrts.elements.Element("Be")
 
 state = jaxrts.PlasmaState(
@@ -262,6 +163,7 @@ setup = Setup(
 )
 
 state["ionic scattering"] = Gregori2003IonFeat
+state["ionic scattering"] = ArkhipovIonFeat
 # state["free-free scattering"] = QCSAFreeFree
 state["free-free scattering"] = RPAFreeFree
 # state["bound-free scattering"] = SchumacherImpulse
