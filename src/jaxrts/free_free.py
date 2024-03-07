@@ -461,8 +461,8 @@ def collision_frequency_BA(
             * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
             * S_ii_AD(q, T_e, n_e, m_ion, Zf)
             * (
-                dielectric_function_RPA_no_damping(q, E, chem_pot, T)
-                - dielectric_function_RPA_no_damping(
+                1 / dielectric_function_RPA_no_damping(q, E, chem_pot, T)
+                - 1 / dielectric_function_RPA_no_damping(
                     q, 0 * ureg.electron_volt, chem_pot, T
                 )
             )
