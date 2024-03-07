@@ -46,11 +46,13 @@ class PlasmaState:
         self.T_e = T_e
         self.T_i = T_i if T_i else T_e
 
-        # Set some default models
-        self.ionic_model = None
-        self.free_free_model = None
-        self.bound_free_model = None
-        self.free_bound_model = None
+        self.models = {}
+
+    def __getitem__(self, key):
+        return self.models[key]
+
+    def __setitem__(self, key, model_class):
+        self.models[key] = model_class(self)
 
     @property
     def Z_A(self) -> jnp.ndarray:
@@ -101,6 +103,7 @@ class PlasmaState:
             )
         ).to_base_units()
 
+
     @property
     def ii_coupling(self):
         pass
@@ -149,9 +152,9 @@ class PlasmaState:
                 )
 
     def probe(self, setup: Setup) -> Quantity:
-        ionic = self.ionic_model.evaluate(setup)
-        free_free = self.free_free_model.evaluate(setup)
-        bound_free = self.bound_free_model.evaluate(setup)
-        free_bound = self.free_bound_model.evaluate(setup)
+        ionic = self["ionic scattering"].evaluate(setup)
+        free_free = self["free-free scattering"].evaluate(setup)
+        bound_free = self["bound-free scattering"].evaluate(setup)
+        free_bound = self["free-bound scattering"].evaluate(setup)
 
         return ionic + free_free + bound_free + free_bound
