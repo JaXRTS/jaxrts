@@ -9,10 +9,17 @@ import logging
 import jax.numpy as jnp
 
 from .units import ureg
-from .setup import Setup
+from .setup import Setup, convolve_stucture_factor_with_instrument
 from .plasmastate import PlasmaState
 from .elements import electron_distribution_ionized_state
-from . import ion_feature, static_structure_factors, form_factors
+from . import (
+    free_free,
+    bound_free,
+    ion_feature,
+    static_structure_factors,
+    form_factors,
+    plasma_physics,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +70,7 @@ class Neglect(Model):
 class ArkhipovIonFeat(Model):
     """
     Model for the ion feature of the scatting, presented in
-    :cite:`Arkhipov.1998` and :cite:Arkhipov.2000`.
+    :cite:`Arkhipov.1998` and :cite:`Arkhipov.2000`.
 
     The structure factors are obtained by using an effective potential
     (pseudopotential) model of the particle interaction of semiclassical
@@ -107,7 +114,7 @@ class ArkhipovIonFeat(Model):
         fi = self.plasma_state["form-factors"].evaluate(setup)
         population = electron_distribution_ionized_state(
             self.plasma_state.Z_core
-        )
+        )[:, jnp.newaxis]
 
         f = jnp.sum(fi * population)
         q = ion_feature.q(
@@ -161,7 +168,7 @@ class Gregori2003IonFeat(Model):
         fi = self.plasma_state["form-factors"].evaluate(setup)
         population = electron_distribution_ionized_state(
             self.plasma_state.Z_core
-        )
+        )[:, jnp.newaxis]
 
         T_eff = static_structure_factors.T_cf_Greg(
             self.plasma_state.T_e, self.plasma_state.n_e
@@ -188,8 +195,180 @@ class Gregori2003IonFeat(Model):
         return res
 
 
+# Free-free models
+# ----------------
+
+
+class QCSalpeterApproximation(Model):
+    """
+    Quantum Corrected Salpeter Approximation for free-free scattering.
+    Presented in :cite:`Gregori.2003`, which provide a quantum correction to
+    the results by Salpeter (:cite:`Salpeter.1960`), increasing the range of
+    applicability.
+
+    However, this model might be rather considered to be educational, as it is
+    only valid for small(er) densities and probing energies. Instead, one might
+    use :py:class:~RPA_NoDamping`, which should give more accurate results
+    (according to, e.g., "cite:`Gregori.2003`) at a comparable computation
+    time.
+
+    See Also
+    --------
+    jaxtrs.free_free.S0_ee_Salpeter(
+        Function used to calculate the dynamic free electron-electron structure
+        factor.
+    """
+
+    def check(self) -> None:
+        if len(self.plasma_state) > 1:
+            logger.critical(
+                "'QCSalpeterApproximation' is only implemented for a one-component plasma"  # noqa: E501
+            )
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        See_0 = free_free.S0_ee_Salpeter(
+            setup.k,
+            self.plasma_state.T_e,
+            self.plasma_state.n_e,
+            setup.measured_energy - setup.energy,
+        )
+
+        ff = See_0 * self.plasma_state.Z_free
+        return convolve_stucture_factor_with_instrument(ff, setup)
+
+
+class RPA_NoDamping(Model):
+    """
+    Model for elastic free-free scattering based on the Random Phase
+    Approximation
+
+    Calculates the dielectic function in RPA and obtain a Structure factor via
+    the fluctuation dissipation theorem. Based on lecture notes from M. Bonitz.
+
+    Requires a 'chemical potential' model (defaults to
+    :py:class:`~GregoriChemPotential`).
+
+    See Also
+    --------
+    jaxtrs.free_free.S0_ee_RPA_no_damping
+        Function used to calculate the dynamic free-free electron structure
+        facotr.
+    """
+
+    def __init__(self, state: PlasmaState) -> None:
+        state.update_default_model("chemical potential", GregoriChemPotential)
+        super().__init__(state)
+
+    def check(self) -> None:
+        if len(self.plasma_state) > 1:
+            logger.critical(
+                "'RPA_NoDamping' is only implemented for a one-component plasma"  # noqa: E501
+            )
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        mu = self.plasma_state["chemical potential"].evaluate(setup)
+        See_0 = free_free.S0_ee_RPA_no_damping(
+            setup.k,
+            self.plasma_state.T_e,
+            self.plasma_state.n_e,
+            setup.measured_energy - setup.energy,
+            mu,
+        )
+
+        ff = See_0 * self.plasma_state.Z_free
+        return convolve_stucture_factor_with_instrument(ff, setup)
+
+
+class BornMermin(Model):
+    """
+    Modell of the free-free scattering, based on the Born Mermin Approximation
+    (:cite:`Mermin.1970`).
+
+    Requires a 'chemical potential' model (defaults to
+    :py:class:`~GregoriChemPotential`).
+
+    See Also
+    --------
+
+    jaxrts.free_free.S0_ee_BMA(
+        Function used to calculate the dynamic structure factor
+    """
+
+    def __init__(self, state: PlasmaState) -> None:
+        state.update_default_model("chemical potential", GregoriChemPotential)
+        super().__init__(state)
+
+    def check(self) -> None:
+        if len(self.plasma_state) > 1:
+            logger.critical(
+                "'BornMermin' is only implemented for a one-component plasma"  # noqa: E501
+            )
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        mu = self.plasma_state["chemical potential"].evaluate(setup)
+        See_0 = free_free.S0_ee_BMA(
+            setup.k,
+            self.plasma_state.T_e,
+            mu,
+            self.plasma_state.atomic_masses,
+            self.plasma_state.n_e,
+            self.plasma_state.Z_free,
+            setup.measured_energy - setup.energy,
+        )
+        ff = See_0 * self.plasma_state.Z_free
+        return convolve_stucture_factor_with_instrument(ff, setup)
+
+
+# bound-free Models
+# -----------------
+
+
+class SchumacherImpulse(Model):
+    """
+    Bound-free scattering based on the Schumacher Impulse Approximation
+    :cite:`Schumacher.1975`. The implementation considers the first order
+    asymmetric correction to the impulse approximation, as given in the
+    aforementioned paper.
+
+    Requires a 'form-factors' model (defaults to
+    :py:class:`~PaulingFormFactors`).
+    """
+
+    def __init__(self, state: PlasmaState) -> None:
+        state.update_default_model("form-factors", PaulingFormFactors)
+        super().__init__(state)
+
+    def check(self) -> None:
+        if len(self.plasma_state) > 1:
+            logger.critical(
+                "'SchumacherImpulse' is only implemented for a one-component plasma"  # noqa: E501
+            )
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        k = setup.k
+        omega_0 = setup.energy / ureg.hbar
+        omega = omega_0 - setup.measured_energy / ureg.hbar
+        Z_c = self.plasma_state.Z_core[0]
+        E_b = self.plasma_state.ions[0].binding_energies
+
+        Zeff = form_factors.pauling_effective_charge(
+            self.plasma_state.ions[0].Z
+        )
+        population = electron_distribution_ionized_state(Z_c)
+        # Gregori.2004, Eqn 20
+        fi = self.plasma_state["form-factors"].evaluate(setup)
+        r_k = 1 - jnp.sum(population[:, jnp.newaxis] / Z_c * fi**2)
+        B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
+        sbe = (
+            r_k
+            / (Z_c * B**3)
+            * bound_free.J_impulse_approx(omega, k, population, Zeff, E_b)
+        )
+        return convolve_stucture_factor_with_instrument(sbe * Z_c, setup)
+
+
 # Form Factor Models
-# ------------------
+# ==================
 
 
 class PaulingFormFactors(Model):
@@ -209,3 +388,20 @@ class PaulingFormFactors(Model):
         # population = self.plasma_state.ions[0].electron_distribution
         # return jnp.where(population > 0, ff, 0)
         return ff
+
+
+# Chemical Potential Models
+# =========================
+
+
+class GregoriChemPotential(Model):
+    """
+    A fitting formula for the chemical potential of a plasma between the
+    classical and the quantum regime, given by :cite:`Gregori.2003`.
+    Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
+    """
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        return plasma_physics.chem_pot_interpolation(
+            self.plasma_state.T_e, self.plasma_state.n_e
+        )

@@ -1,4 +1,4 @@
-from units import ureg, Quantity
+from .units import ureg, Quantity
 
 from typing import List
 

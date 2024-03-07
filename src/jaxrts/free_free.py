@@ -244,7 +244,7 @@ def _imag_diel_func_RPA_no_damping(
         The imaginary part of the dielectric function
     """
     # Calculate the frequency shift
-    w = E / ureg.hbar
+    w = E / (1 * ureg.hbar)
     kappa = w * ureg.m_e / (ureg.hbar * k)
     prefactor = (
         ureg.k_B * T * ureg.m_e**2 * ureg.elementary_charge**2
@@ -284,7 +284,7 @@ def _real_diel_func_RPA_no_damping(
         The real part of the dielectric function
     """
     # Calculate the frequency shift
-    w = E / ureg.hbar
+    w = E / (1 * ureg.hbar)
 
     kappa = w * ureg.m_e / (ureg.hbar * k)
     prefactor = (
@@ -442,7 +442,7 @@ def collision_frequency_BA(
     Zf: float,
 ):
 
-    w = E / ureg.hbar
+    w = E / (1 * ureg.hbar)
     T_e = T
     kappa = inverse_screening_length_non_degenerate(n_e, T)
 
@@ -481,7 +481,7 @@ def collision_frequency_BA(
             ]
         )
 
-    integral, errl = quadts(integrand, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20)
+    integral, errl = quadts(integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10)
 
     integral_real, integral_imag = integral
 
@@ -507,7 +507,7 @@ def dielectric_function_BMA(
     into account.
 
     """
-    w = E / ureg.hbar
+    w = E / (1 * ureg.hbar)
     coll_freq = collision_frequency_BA(E, T, m_ion, n_e, chem_pot, Zf)
 
     numerator = (1 + 1j * coll_freq / w) * (
