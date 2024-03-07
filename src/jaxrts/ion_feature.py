@@ -3,7 +3,7 @@ This submodule is dedicated to the calculation of the ion-feature.
 """
 
 from .units import ureg, Quantity
-from .electron_feature import dielectric_function_salpeter
+from .free_free import dielectric_function_salpeter
 from .static_structure_factors import S_ee_AD, S_ei_AD, S_ii_AD
 from typing import List
 

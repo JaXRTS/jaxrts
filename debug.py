@@ -146,7 +146,7 @@ class BornMermin(Model):
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state.chem_potential_model.evaluate(setup)
-        epsilon = jaxrts.electron_feature.dielectric_function_BMA(
+        epsilon = jaxrts.free_free.dielectric_function_BMA(
             setup.k,
             setup.measured_energy,
             mu,
@@ -155,7 +155,7 @@ class BornMermin(Model):
             self.plasma_state.ions[0].atomic_mass,
             self.plasma_state.Z_free[0],
         )
-        See_0 = jaxrts.electron_feature.S0ee_from_dielectric_func_FDT(
+        See_0 = jaxrts.free_free.S0ee_from_dielectric_func_FDT(
             setup.k,
             self.plasma_state.T_e[0],
             self.plasma_state.n_e,
@@ -202,7 +202,7 @@ class SchumacherImpulse(Model):
 class QCSAFreeFree(Model):
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
-        See_0 = jaxrts.electron_feature.S0_ee_Salpeter(
+        See_0 = jaxrts.free_free.S0_ee_Salpeter(
             setup.k,
             self.plasma_state.T_e[0],
             self.plasma_state.n_e,
@@ -222,7 +222,7 @@ class RPAFreeFree(Model):
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state.chem_potential_model.evaluate(setup)
-        See_0 = jaxrts.electron_feature.S0_ee_RPA_no_damping(
+        See_0 = jaxrts.free_free.S0_ee_RPA_no_damping(
             setup.k,
             self.plasma_state.T_e[0],
             self.plasma_state.n_e,

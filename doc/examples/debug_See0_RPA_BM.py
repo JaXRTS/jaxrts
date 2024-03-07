@@ -14,7 +14,7 @@ import sys
 sys.path.append('C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src')
 
 import jaxrts
-import jaxrts.electron_feature as ef
+import jaxrts.free_free as free_free
 
 import jax.numpy as jnp
 
@@ -42,7 +42,7 @@ for T in [
         T / (1 * ureg.boltzmann_constant), n_e
     )
     
-    vals2 = ef.S0_ee_RPA_no_damping(
+    vals2 = free_free.S0_ee_RPA_no_damping(
         k,
         T_e=T / (1 * ureg.boltzmann_constant),
         n_e=n_e,
@@ -50,7 +50,7 @@ for T in [
         chem_pot=mu,
     ).m_as(ureg.second)
 
-    vals = ef.S0_ee_BMA(
+    vals = free_free.S0_ee_BMA(
         k,
         T=T / (1 * ureg.boltzmann_constant),
         n_e=n_e,

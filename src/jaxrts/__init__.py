@@ -7,7 +7,7 @@ from . import free_bound
 from . import helpers
 from . import instrument_function
 from . import ion_feature
-from . import electron_feature
+from . import free_free
 from . import plasmastate
 from . import plasma_physics
 from . import plotting
@@ -30,7 +30,7 @@ __all__ = [
     "elements",
     "Element",
     "bound_free",
-    "electron_feature",
+    "free_free",
     "form_factors",
     "free_bound",
     "helpers",

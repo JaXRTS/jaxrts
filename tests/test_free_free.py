@@ -32,7 +32,7 @@ def test_gregori2023_fig1b_reprduction() -> None:
         )
         # Read the temperature from the filename
         T = ureg(datafile.stem[2:])
-        calc_See = jaxrts.electron_feature.S0_ee_Salpeter(
+        calc_See = jaxrts.free_free.S0_ee_Salpeter(
             k,
             T_e=T / (ureg.boltzmann_constant),
             n_e=n_e,
@@ -79,7 +79,7 @@ def test_gregori2023_fig1c_reprduction() -> None:
         mu = jaxrts.plasma_physics.chem_pot_interpolation(
             T / (1 * ureg.boltzmann_constant), n_e
         )
-        calc_See = jaxrts.electron_feature.S0_ee_RPA_no_damping(
+        calc_See = jaxrts.free_free.S0_ee_RPA_no_damping(
             k,
             T_e=T / (1 * ureg.boltzmann_constant),
             n_e=n_e,
