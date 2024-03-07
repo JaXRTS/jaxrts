@@ -453,6 +453,7 @@ def collision_frequency_BA(
         * (1 / w)
     )
 
+    @jit
     def integrand(q):
 
         q /= 1 * ureg.angstrom
@@ -460,12 +461,9 @@ def collision_frequency_BA(
             q**6
             * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
             * S_ii_AD(q, T_e, n_e, m_ion, Zf)
-            * (
-                1 / dielectric_function_RPA_no_damping(q, E, chem_pot, T)
-                - 1 / dielectric_function_RPA_no_damping(
-                    q, 0 * ureg.electron_volt, chem_pot, T
-                )
-            )
+            * jnp.conjugate(
+                dielectric_function_RPA_no_damping(q, E, chem_pot, T) - dielectric_function_RPA_no_damping(q, 0 * ureg.electron_volt, chem_pot, T)
+        ) / jnp.abs(dielectric_function_RPA_no_damping(q, 0 * ureg.electron_volt, chem_pot, T)) ** 2
         )
 
         return jnp.array(
@@ -483,7 +481,7 @@ def collision_frequency_BA(
             ]
         )
 
-    integral, errl = quadts(integrand, [0, jnp.inf], epsabs=1e-12, epsrel=1e-12)
+    integral, errl = quadts(integrand, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20)
 
     integral_real, integral_imag = integral
 
