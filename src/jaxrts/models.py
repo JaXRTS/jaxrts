@@ -122,10 +122,12 @@ class ArkhipovIonFeat(Model):
             self.plasma_state.atomic_masses,
             self.plasma_state.n_e,
             self.plasma_state.T_e,
+            self.plasma_state.T_e,
             self.plasma_state.Z_free,
         )
         S_ii = static_structure_factors.S_ii_AD(
             setup.k,
+            self.plasma_state.T_e,
             self.plasma_state.T_e,
             self.plasma_state.n_e,
             self.plasma_state.atomic_masses,
@@ -179,10 +181,12 @@ class Gregori2003IonFeat(Model):
             self.plasma_state.atomic_masses,
             self.plasma_state.n_e,
             T_eff,
+            T_eff,
             self.plasma_state.Z_free,
         )
         S_ii = ion_feature.S_ii_AD(
             setup.k,
+            T_eff,
             T_eff,
             self.plasma_state.n_e,
             self.plasma_state.atomic_masses,

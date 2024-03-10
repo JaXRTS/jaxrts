@@ -108,12 +108,22 @@ def _Delta_AD(
 
 @jax.jit
 def _Phi_ee_AD(
-    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+    k: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
 ) -> Quantity:
     """
     See :cite:`Gregori.2003`, eqn (8) for the coefficient
     :math:`\\Phi_ee(k)` in the approach by Arkhipov and Davletov
     :cite:`Arkhipov.1998`.
+
+    While the seminal papers treated the electron- and ion temperature to be
+    equal, we follow the work of :cite:`Gregori.2006` to allow for different
+    temperatures of the two components. The results of :cite:`Arkhipov.1998`
+    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``
 
     Parameters
     ----------
@@ -122,6 +132,8 @@ def _Phi_ee_AD(
     T_e: Quantity
         The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
         effective temperature used in :cite:`Gregori.2003`.
+    T_i: Quantity
+        The ion temperature in Kelvin.
     n_e: Quantity
         The electron density in 1/[volume]
     m_i: Quantity
@@ -156,12 +168,22 @@ def _Phi_ee_AD(
 
 @jax.jit
 def _Phi_ii_AD(
-    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+    k: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
 ) -> Quantity:
     """
     See :cite:`Gregori.2003`, eqn (9) for the coefficient
     :math:`\\Phi_ii(k)` in the approach by Arkhipov and Davletov
     :cite:`Arkhipov.1998`.
+
+    While the seminal papers treated the electron- and ion temperature to be
+    equal, we follow the work of :cite:`Gregori.2006` to allow for different
+    temperatures of the two components. The results of :cite:`Arkhipov.1998`
+    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``
 
     Parameters
     ----------
@@ -205,12 +227,22 @@ def _Phi_ii_AD(
 
 @jax.jit
 def _Phi_ei_AD(
-    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+    k: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
 ) -> Quantity:
     """
     See :cite:`Gregori.2003`, eqn (10) for the coefficient
     :math:`\\Phi_ee(k)` in the approach by Arkhipov and Davletov
     :cite:`Arkhipov.1998`.
+
+    While the seminal papers treated the electron- and ion temperature to be
+    equal, we follow the work of :cite:`Gregori.2006` to allow for different
+    temperatures of the two components. The results of :cite:`Arkhipov.1998`
+    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``
 
     Parameters
     ----------
@@ -219,6 +251,8 @@ def _Phi_ei_AD(
     T_e: Quantity
         The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
         effective temperature used in :cite:`Gregori.2003`.
+    T_i: Quantity
+        The ion temperature in Kelvin.
     n_e: Quantity
         The electron density in 1/[volume]
     m_i: Quantity
@@ -244,7 +278,12 @@ def _Phi_ei_AD(
 
 @jax.jit
 def S_ii_AD(
-    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+    k: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
 ) -> Quantity:
     """
     The static ion-ion structure factor, in the approach by Arkhipov
@@ -262,6 +301,8 @@ def S_ii_AD(
     T_e: Quantity
         The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
         effective temperature used in :cite:`Gregori.2003`.
+    T_i: Quantity
+        The ion temperature in Kelvin.
     n_e: Quantity
         The electron density in 1/[volume]
     m_i: Quantity
@@ -275,13 +316,18 @@ def S_ii_AD(
         See, the static electron electron structure factor
     """
     n_i = n_e / Z_f
-    Phi_ii = _Phi_ii_AD(k, T_e, n_e, m_i, Z_f)
+    Phi_ii = _Phi_ii_AD(k, T_e, T_i, n_e, m_i, Z_f)
     return (1 - n_i / (ureg.k_B * T_e) * Phi_ii).to_base_units()
 
 
 @jax.jit
 def S_ei_AD(
-    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+    k: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
 ) -> Quantity:
     """
     The static electron-ion structure factor, in the approach by Arkhipov
@@ -292,6 +338,11 @@ def S_ei_AD(
     semi-classically and uses a pseudopotential between charged particles to
     account for quantum diffraction effects and symmetry
 
+    While the seminal papers treated the electron- and ion temperature to be
+    equal, we follow the work of :cite:`Gregori.2006` to allow for different
+    temperatures of the two components. The results of :cite:`Arkhipov.1998`
+    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``
+
     Parameters
     ----------
     k: Quantity
@@ -299,6 +350,8 @@ def S_ei_AD(
     T_e: Quantity
         The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
         effective temperature used in :cite:`Gregori.2003`.
+    T_i: Quantity
+        The ion temperature in Kelvin.
     n_e: Quantity
         The electron density in 1/[volume]
     m_i: Quantity
@@ -312,13 +365,18 @@ def S_ei_AD(
         See, the static electron electron structure factor
     """
     n_i = n_e / Z_f
-    Phi_ei = _Phi_ei_AD(k, T_e, n_e, m_i, Z_f)
+    Phi_ei = _Phi_ei_AD(k, T_e, T_i, n_e, m_i, Z_f)
     return (-jnpu.sqrt(n_i * n_e) / (ureg.k_B * T_e) * Phi_ei).to_base_units()
 
 
 @jax.jit
 def S_ee_AD(
-    k: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+    k: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
 ) -> Quantity:
     """
     The static electron-electron structure factor, in the approach by Arkhipov
@@ -329,6 +387,11 @@ def S_ee_AD(
     semi-classically and uses a pseudopotential between charged particles to
     account for quantum diffraction effects and symmetry
 
+    While the seminal papers treated the electron- and ion temperature to be
+    equal, we follow the work of :cite:`Gregori.2006` to allow for different
+    temperatures of the two components. The results of :cite:`Arkhipov.1998`
+    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``
+
     Parameters
     ----------
     k: Quantity
@@ -336,6 +399,8 @@ def S_ee_AD(
     T_e: Quantity
         The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
         effective temperature used in :cite:`Gregori.2003`.
+    T_i: Quantity
+        The ion temperature in Kelvin.
     n_e: Quantity
         The electron density in 1/[volume]
     m_i: Quantity
@@ -348,13 +413,18 @@ def S_ee_AD(
     Quantity
         See, the static electron electron structure factor
     """
-    Phi_ee = _Phi_ee_AD(k, T_e, n_e, m_i, Z_f)
+    Phi_ee = _Phi_ee_AD(k, T_e, T_i, n_e, m_i, Z_f)
     return (1 - n_e / (ureg.k_B * T_e) * Phi_ee).to_base_units()
 
 
 @jax.jit
 def g_ee_ABD(
-    r: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+    r: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
 ) -> Quantity:
     """
     The radial electron-electron distribution function, in the approach by
@@ -364,6 +434,11 @@ def g_ee_ABD(
     semi-classically and uses a pseudopotential between charged particles to
     account for quantum diffraction effects and symmetry
 
+    While the seminal papers treated the electron- and ion temperature to be
+    equal, we follow the work of :cite:`Gregori.2006` to allow for different
+    temperatures of the two components. The results of :cite:`Arkhipov.1998`
+    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``
+
     Parameters
     ----------
     r: Quantity
@@ -371,6 +446,8 @@ def g_ee_ABD(
     T_e: Quantity
         The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
         effective temperature used in :cite:`Gregori.2003`.
+    T_i: Quantity
+        The ion temperature in Kelvin.
     n_e: Quantity
         The electron density in 1/[volume]
     m_i: Quantity
@@ -387,7 +464,7 @@ def g_ee_ABD(
 
     def to_integrate(k):
         k = k / (1 * ureg.angstrom)
-        Phi_ee_k = _Phi_ee_AD(k, T_e, n_e, m_i, Z_f)
+        Phi_ee_k = _Phi_ee_AD(k, T_e, T_i, n_e, m_i, Z_f)
         fac = jnpu.sin(k * r[:, jnp.newaxis]) * k
         return (Phi_ee_k * fac).m_as(ureg.joule * ureg.angstrom**2)
 
@@ -403,7 +480,12 @@ def g_ee_ABD(
 
 @jax.jit
 def g_ii_ABD(
-    r: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+    r: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
 ) -> Quantity:
     """
     The radial ion-ion distribution function, in the approach by Arkhipov,
@@ -413,6 +495,11 @@ def g_ii_ABD(
     semi-classically and uses a pseudopotential between charged particles to
     account for quantum diffraction effects and symmetry
 
+    While the seminal papers treated the electron- and ion temperature to be
+    equal, we follow the work of :cite:`Gregori.2006` to allow for different
+    temperatures of the two components. The results of :cite:`Arkhipov.1998`
+    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``
+
     Parameters
     ----------
     r: Quantity
@@ -420,6 +507,8 @@ def g_ii_ABD(
     T_e: Quantity
         The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
         effective temperature used in :cite:`Gregori.2003`.
+    T_i: Quantity
+        The ion temperature in Kelvin.
     n_e: Quantity
         The electron density in 1/[volume]
     m_i: Quantity
@@ -436,7 +525,7 @@ def g_ii_ABD(
 
     def to_integrate(k):
         k = k / (1 * ureg.angstrom)
-        Phi_ii_k = _Phi_ii_AD(k, T_e, n_e, m_i, Z_f)
+        Phi_ii_k = _Phi_ii_AD(k, T_e, T_i, n_e, m_i, Z_f)
         fac = jnpu.sin(k * r[:, jnp.newaxis]) * k
         return (Phi_ii_k * fac).m_as(ureg.joule * ureg.angstrom**2)
 
@@ -452,7 +541,12 @@ def g_ii_ABD(
 
 @jax.jit
 def g_ei_ABD(
-    r: Quantity, T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+    r: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
 ) -> Quantity:
     """
     The radial electron-ion distribution function, in the approach by Arkhipov,
@@ -462,6 +556,11 @@ def g_ei_ABD(
     semi-classically and uses a pseudopotential between charged particles to
     account for quantum diffraction effects and symmetry.
 
+    While the seminal papers treated the electron- and ion temperature to be
+    equal, we follow the work of :cite:`Gregori.2006` to allow for different
+    temperatures of the two components. The results of :cite:`Arkhipov.1998`
+    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``
+
     Parameters
     ----------
     r: Quantity
@@ -469,6 +568,8 @@ def g_ei_ABD(
     T_e: Quantity
         The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
         effective temperature used in :cite:`Gregori.2003`.
+    T_i: Quantity
+        The ion temperature in Kelvin.
     n_e: Quantity
         The electron density in 1/[volume]
     m_i: Quantity
@@ -485,7 +586,7 @@ def g_ei_ABD(
 
     def to_integrate(k):
         k = k / (1 * ureg.angstrom)
-        Phi_ei_k = _Phi_ei_AD(k, T_e, n_e, m_i, Z_f)
+        Phi_ei_k = _Phi_ei_AD(k, T_e, T_i, n_e, m_i, Z_f)
         fac = jnpu.sin(k * r[:, jnp.newaxis]) * k
         return (Phi_ei_k * fac).m_as(ureg.joule * ureg.angstrom**2)
 

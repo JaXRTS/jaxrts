@@ -23,7 +23,12 @@ jax.config.update("jax_enable_x64", True)
 
 @jit
 def q(
-    k: Quantity, m_ion: Quantity, n_e: Quantity, T_e: Quantity, Z_f: float
+    k: Quantity,
+    m_ion: Quantity,
+    n_e: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    Z_f: float,
 ) -> Quantity:
     """
     Calculates the screening charge.
@@ -39,6 +44,8 @@ def q(
         The electron number density.
     T_e : Quantity
         The electron temperature.
+    T_i : Quantity
+        The ion temperature.
     Z_f : float
         The number of electrons not tightly bound to the atom = valence
         electrons
@@ -50,9 +57,9 @@ def q(
     """
 
     # Way to calculate it given by Gregori.2004:
-    S_ei = S_ei_AD(k, T_e, n_e, m_ion, Z_f)
-    S_ee = S_ee_AD(k, T_e, n_e, m_ion, Z_f)
-    S_ii = S_ii_AD(k, T_e, n_e, m_ion, Z_f)
+    S_ei = S_ei_AD(k, T_e, T_i, n_e, m_ion, Z_f)
+    S_ee = S_ee_AD(k, T_e, T_i, n_e, m_ion, Z_f)
+    S_ii = S_ii_AD(k, T_e, T_i, n_e, m_ion, Z_f)
 
     C_ei = (jpu.numpy.sqrt(Z_f) * S_ei) / (S_ee * S_ii - S_ei**2)
 

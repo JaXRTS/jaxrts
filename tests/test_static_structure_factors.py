@@ -43,10 +43,10 @@ def test_arkhipov_static_structure_factors_literature():
         )
 
         calc_See = jaxrts.static_structure_factors.S_ee_AD(
-            k_See, T_e, n_e, m_i, Z_f
+            k_See, T_e, T_e, n_e, m_i, Z_f
         ).m_as(ureg.dimensionless)
         calc_Sei = jaxrts.static_structure_factors.S_ei_AD(
-            k_Sei, T_e, n_e, m_i, Z_f
+            k_Sei, T_e, T_e, n_e, m_i, Z_f
         ).m_as(ureg.dimensionless)
 
         assert jnp.max(jnp.abs(lit_See - calc_See)) < 0.05
@@ -78,7 +78,7 @@ def test_arkhipov_electron_electron_pair_correlation_function_literature():
     )
     R_gee = R_over_a_gee * a
     calc_gee = jaxrts.static_structure_factors.g_ee_ABD(
-        R_gee, T_e, n_e, m_i, Z_f
+        R_gee, T_e, T_e, n_e, m_i, Z_f
     ).m_as(ureg.dimensionless)
 
     assert jnp.max(jnp.abs(lit_gee - calc_gee)) < 0.015

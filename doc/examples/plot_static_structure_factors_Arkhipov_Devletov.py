@@ -26,9 +26,9 @@ T_cf = jaxrts.static_structure_factors.T_cf_Greg(T_e, n_e)
 Z_f = 4.5
 m_i = 12 * ureg.atomic_mass_constant
 
-See = jaxrts.static_structure_factors.S_ee_AD(k, T_cf, n_e, m_i, Z_f)
-Sei = jaxrts.static_structure_factors.S_ei_AD(k, T_cf, n_e, m_i, Z_f)
-Sii = jaxrts.static_structure_factors.S_ii_AD(k, T_cf, n_e, m_i, Z_f)
+See = jaxrts.static_structure_factors.S_ee_AD(k, T_cf, T_cf, n_e, m_i, Z_f)
+Sei = jaxrts.static_structure_factors.S_ei_AD(k, T_cf, T_cf, n_e, m_i, Z_f)
+Sii = jaxrts.static_structure_factors.S_ii_AD(k, T_cf, T_cf, n_e, m_i, Z_f)
 
 plt.plot(
     k.m_as(1 / ureg.angstrom),
