@@ -212,13 +212,14 @@ def _Phi_ee_AD(
         Number of free electrons per ion.
     """
     # Set up all the variables
+    T_ei = _T_rs_Greg2006(T_e, T_i, 1 * ureg.electron_mass, m_i)
     lam_ee = _lambda_AD(T_e, 1 * ureg.electron_mass, 1 * ureg.electron_mass)
-    lam_ei = _lambda_AD(T_e, 1 * ureg.electron_mass, m_i)
-    lam_ii = _lambda_AD(T_e, m_i, m_i)
+    lam_ei = _lambda_AD(T_ei, 1 * ureg.electron_mass, m_i)
+    lam_ii = _lambda_AD(T_i, m_i, m_i)
     b = _b_AD(lam_ee)
     A = _A_AD(T_e, b)
     k_De = _k_D_AD(T_e, n_e)
-    k_Di = _k_D_AD(T_e, n_e, Z_f)
+    k_Di = _k_D_AD(T_i, n_e, Z_f)
     Delta = _Delta_AD(k, k_De, k_Di, lam_ee, lam_ii, lam_ei, b, A)
 
     pref = ureg.elementary_charge**2 / (ureg.vacuum_permittivity * Delta)
@@ -270,13 +271,14 @@ def _Phi_ii_AD(
         Number of free electrons per ion.
     """
     # Set up all the variables
+    T_ei = _T_rs_Greg2006(T_e, T_i, 1 * ureg.electron_mass, m_i)
     lam_ee = _lambda_AD(T_e, 1 * ureg.electron_mass, 1 * ureg.electron_mass)
-    lam_ei = _lambda_AD(T_e, 1 * ureg.electron_mass, m_i)
-    lam_ii = _lambda_AD(T_e, m_i, m_i)
+    lam_ei = _lambda_AD(T_ei, 1 * ureg.electron_mass, m_i)
+    lam_ii = _lambda_AD(T_i, m_i, m_i)
     b = _b_AD(lam_ee)
     A = _A_AD(T_e, b)
     k_De = _k_D_AD(T_e, n_e)
-    k_Di = _k_D_AD(T_e, n_e, Z_f)
+    k_Di = _k_D_AD(T_i, n_e, Z_f)
     Delta = _Delta_AD(k, k_De, k_Di, lam_ee, lam_ii, lam_ei, b, A)
 
     pref = (
@@ -331,13 +333,14 @@ def _Phi_ei_AD(
         Number of free electrons per ion.
     """
     # Set up all the variables
+    T_ei = _T_rs_Greg2006(T_e, T_i, 1 * ureg.electron_mass, m_i)
     lam_ee = _lambda_AD(T_e, 1 * ureg.electron_mass, 1 * ureg.electron_mass)
-    lam_ei = _lambda_AD(T_e, 1 * ureg.electron_mass, m_i)
-    lam_ii = _lambda_AD(T_e, m_i, m_i)
+    lam_ei = _lambda_AD(T_ei, 1 * ureg.electron_mass, m_i)
+    lam_ii = _lambda_AD(T_i, m_i, m_i)
     b = _b_AD(lam_ee)
     A = _A_AD(T_e, b)
     k_De = _k_D_AD(T_e, n_e)
-    k_Di = _k_D_AD(T_e, n_e, Z_f)
+    k_Di = _k_D_AD(T_i, n_e, Z_f)
     Delta = _Delta_AD(k, k_De, k_Di, lam_ee, lam_ii, lam_ei, b, A)
 
     return (
@@ -387,7 +390,7 @@ def S_ii_AD(
     """
     n_i = n_e / Z_f
     Phi_ii = _Phi_ii_AD(k, T_e, T_i, n_e, m_i, Z_f)
-    return (1 - n_i / (ureg.k_B * T_e) * Phi_ii).to_base_units()
+    return (1 - n_i / (ureg.k_B * T_i) * Phi_ii).to_base_units()
 
 
 @jax.jit
@@ -434,9 +437,10 @@ def S_ei_AD(
     Quantity
         See, the static electron electron structure factor
     """
+    T_ei = _T_rs_Greg2006(T_e, T_i, 1 * ureg.electron_mass, m_i)
     n_i = n_e / Z_f
     Phi_ei = _Phi_ei_AD(k, T_e, T_i, n_e, m_i, Z_f)
-    return (-jnpu.sqrt(n_i * n_e) / (ureg.k_B * T_e) * Phi_ei).to_base_units()
+    return (-jnpu.sqrt(n_i * n_e) / (ureg.k_B * T_ei) * Phi_ei).to_base_units()
 
 
 @jax.jit
@@ -606,7 +610,7 @@ def g_ii_ABD(
 
     Phi_ii_r = 4 * jnp.pi / r * integ
 
-    return jnpu.exp(-Phi_ii_r / (ureg.k_B * T_e)) * (1 * ureg.dimensionless)
+    return jnpu.exp(-Phi_ii_r / (ureg.k_B * T_i)) * (1 * ureg.dimensionless)
 
 
 @jax.jit
@@ -653,6 +657,7 @@ def g_ei_ABD(
         The radial electron-ion distribution function in the pair correlation
         approximation.
     """
+    T_ei = _T_rs_Greg2006(T_e, T_i, 1 * ureg.electron_mass, m_i)
 
     def to_integrate(k):
         k = k / (1 * ureg.angstrom)
@@ -667,4 +672,4 @@ def g_ei_ABD(
 
     Phi_ei_r = 4 * jnp.pi / r * integ
 
-    return jnpu.exp(-Phi_ei_r / (ureg.k_B * T_e)) * (1 * ureg.dimensionless)
+    return jnpu.exp(-Phi_ei_r / (ureg.k_B * T_ei)) * (1 * ureg.dimensionless)
