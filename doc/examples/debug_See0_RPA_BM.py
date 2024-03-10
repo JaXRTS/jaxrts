@@ -9,6 +9,7 @@ of :math:`S_\\text{ee}^{0, \\text{RPA}}`.
 import matplotlib.pyplot as plt
 import numpy as onp
 import scienceplots
+import time
 
 import time
 import sys
@@ -27,7 +28,7 @@ lambda_0 = 4.13 * ureg.nanometer
 theta = 160
 n_e = 1e21 / ureg.centimeter**3
 
-E = jnp.linspace(-15, 1, 100) * ureg.electron_volts
+E = jnp.linspace(-15, 15, 250) * ureg.electron_volts
 
 k = (4 * jnp.pi / lambda_0) * jnp.sin(jnp.deg2rad(theta) / 2.0)
 
@@ -43,6 +44,7 @@ for T in [
         T / (1 * ureg.boltzmann_constant), n_e
     )
     
+    t0 = time.time()
     vals2 = free_free.S0_ee_RPA_no_damping(
         k,
         T_e=T / (1 * ureg.boltzmann_constant),
@@ -50,8 +52,10 @@ for T in [
         E=E,
         chem_pot=mu,
     ).m_as(ureg.second)
+    print(f"RPA: {time.time() - t0}")
+    
 
-    t1 = time.time()
+    t0 = time.time()
     vals = free_free.S0_ee_BMA(
         k,
         T=T / (1 * ureg.boltzmann_constant),
@@ -61,8 +65,7 @@ for T in [
         m_ion = 1 * ureg.proton_mass,
         Zf = 1.0
     ).m_as(ureg.second)
-    
-    print("Time elapsed: ", str(time.time()-t1))
+    print(f"BMA: {time.time() - t0}")
 
     if count == 0:
         norm = onp.max(vals)
@@ -73,9 +76,6 @@ for T in [
         label="T = " + str(T.m_as(ureg.electron_volt)) + " eV, BM",
         color=f"C{count}",
     )
-    
-    if count == 0:
-        norm = onp.max(vals)
 
     plt.plot(
         E.m_as(ureg.electron_volt),
