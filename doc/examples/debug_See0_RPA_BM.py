@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as onp
 import scienceplots
 
+import time
 import sys
 sys.path.append('C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src')
 
@@ -26,7 +27,7 @@ lambda_0 = 4.13 * ureg.nanometer
 theta = 160
 n_e = 1e21 / ureg.centimeter**3
 
-E = jnp.linspace(-15, 15, 100) * ureg.electron_volts
+E = jnp.linspace(-15, 1, 100) * ureg.electron_volts
 
 k = (4 * jnp.pi / lambda_0) * jnp.sin(jnp.deg2rad(theta) / 2.0)
 
@@ -50,6 +51,7 @@ for T in [
         chem_pot=mu,
     ).m_as(ureg.second)
 
+    t1 = time.time()
     vals = free_free.S0_ee_BMA(
         k,
         T=T / (1 * ureg.boltzmann_constant),
@@ -59,6 +61,8 @@ for T in [
         m_ion = 1 * ureg.proton_mass,
         Zf = 1.0
     ).m_as(ureg.second)
+    
+    print("Time elapsed: ", str(time.time()-t1))
 
     if count == 0:
         norm = onp.max(vals)
