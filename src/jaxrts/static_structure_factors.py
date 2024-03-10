@@ -466,6 +466,10 @@ def S_ee_AD(
     temperatures of the two components. The results of :cite:`Arkhipov.1998`
     and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``
 
+    The function is amended compared to the earlier paper by a summand given in
+    :Gregori.2006`, which cite Seuferling at al. For both temperatures being
+    equal, this second term vanishes.
+
     Parameters
     ----------
     k: Quantity
@@ -488,7 +492,15 @@ def S_ee_AD(
         See, the static electron electron structure factor
     """
     Phi_ee = _Phi_ee_AD(k, T_e, T_i, n_e, m_i, Z_f)
-    return (1 - n_e / (ureg.k_B * T_e) * Phi_ee).to_base_units()
+    S_ee_AD = (1 - n_e / (ureg.k_B * T_e) * Phi_ee).to_base_units()
+    # This the addition by Gregori.2006:
+    S_ei = S_ei_AD(k, T_e, T_i, n_e, m_i, Z_f)
+    S_ii = S_ii_AD(k, T_e, T_i, n_e, m_i, Z_f)
+    q = jnpu.sqrt(Z_f) * S_ei / S_ii
+    S_ee_Greg_addition = (
+        (T_e / T_i - 1) * jnp.abs(q.m_as(ureg.dimensionless)) ** 2 / Z_f * S_ii
+    )
+    return S_ee_AD + S_ee_Greg_addition
 
 
 @jax.jit
