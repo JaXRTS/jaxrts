@@ -30,6 +30,47 @@ def T_cf_Greg(T_e: Quantity, n_e: Quantity) -> Quantity:
     return jnpu.sqrt(T_e**2 + T_q**2)
 
 
+def T_i_eff_Greg(T_i: Quantity, T_D: Quantity) -> Quantity:
+    """
+    The effective ion temperature as it is proposed by :cite:`Gregori.2006`.
+
+    Parameters
+    ----------
+    T_i: Quantity
+        Ion temperature.
+    T_D: Quantity
+        The Debye temperature.
+    """
+    y0 = 3 / 2 * jnp.pi**2
+    return jnp.sqrt(T_i**2 + y0 * T_D**2)
+
+
+def T_Debye_Bohm_Staver(
+    T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+) -> Quantity:
+    """
+    Bohm Staver relation, as presented in eqn (3) of :cite:`Gregori.2006`. An
+    approximation function for the Debye temperature of 'simple metals'.
+
+    T_e: Quantity
+        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
+        effective temperature used in :cite:`Gregori.2003`.
+    n_e: Quantity
+        The electron density in 1/[volume].
+    m_i: Quantity
+        The mass of the ion.
+    Z_f: float
+        Number of free electrons per ion.
+    """
+    kmax = (6 * jnp.pi**2 * n_e / Z_f) ** (1 / 3)
+    k_De = _k_D_AD(T_e, n_e)
+    omega = jnpu.sqrt(
+        (Z_f * ureg.elementary_charge**2 * n_e) / (ureg.epsilon_0 * m_i)
+    )
+    Omega = jnpu.sqrt(omega**2 / (1 + k_De**2 / kmax**2))
+    ureg.hbar / ureg.k_B * Omega
+
+
 @jax.jit
 def _lambda_AD(T: Quantity, m1: Quantity, m2: Quantity) -> Quantity:
     """
@@ -104,6 +145,35 @@ def _Delta_AD(
         * (k**2 + k_Di**2 / (1 + k**2 * lamii**2))
         * jnpu.exp(-(k**2) / (4 * b))
     )
+
+
+@jax.jit
+def _T_rs_Greg2006(
+    T_r: Quantity, T_s: Quantity, m_r: Quantity, m_s: Quantity
+) -> Quantity:
+    """
+    Calculate the effective temperature between an interacting pair of species
+    ``r`` and ``s`` (ions and / or electrons). See eqn 4 in
+    :cite:`Gregori.2006`.
+
+    Parameters
+    ----------
+    T_r: Quantity
+        Temperature of species ``r``
+    T_s: Quantity
+        Temperature of species ``s``
+    m_r: Quantity
+        Mass of species ``r``
+    m_s: Quantity
+        Mass of species ``s``
+
+    Returns
+    -------
+    Quantity
+        The effecive temperature. If both temperatures are identical, than the
+        result is this temperature.
+    """
+    return (m_r * T_r + m_s * T_s) / (m_r + m_s)
 
 
 @jax.jit
