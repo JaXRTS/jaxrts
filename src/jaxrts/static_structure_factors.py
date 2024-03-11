@@ -55,13 +55,13 @@ def T_Debye_Bohm_Staver(
     T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
 ) -> Quantity:
     """
-    T_Debye_Bohm_Staver(
-        T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
-    ) -> Quantity
+    T_Debye_Bohm_Staver(T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float) -> Quantity
 
     Bohm Staver relation, as presented in eqn (3) of :cite:`Gregori.2006`. An
     approximation function for the Debye temperature of 'simple metals'.
 
+    Parameters
+    ----------
     T_e: Quantity
         The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the
         effective temperature used in :cite:`Gregori.2003`.
