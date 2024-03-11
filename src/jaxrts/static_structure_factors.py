@@ -20,6 +20,8 @@ logger = logging.getLogger("__name__")
 @jax.jit
 def T_cf_Greg(T_e: Quantity, n_e: Quantity) -> Quantity:
     """
+    T_cf_Greg(T_e: Quantity, n_e: Quantity) -> Quantity
+
     The effective temperature to be inserted in the approach by Arkhipov and
     Davletov, see :cite:`Arkhipov.1998` according to :cite:`Gregori.2003`.
     """
@@ -30,8 +32,11 @@ def T_cf_Greg(T_e: Quantity, n_e: Quantity) -> Quantity:
     return jnpu.sqrt(T_e**2 + T_q**2)
 
 
+@jax.jit
 def T_i_eff_Greg(T_i: Quantity, T_D: Quantity) -> Quantity:
     """
+    T_i_eff_Greg(T_i: Quantity, T_D: Quantity) -> Quantity
+
     The effective ion temperature as it is proposed by :cite:`Gregori.2006`.
 
     Parameters
@@ -41,14 +46,19 @@ def T_i_eff_Greg(T_i: Quantity, T_D: Quantity) -> Quantity:
     T_D: Quantity
         The Debye temperature.
     """
-    y0 = 3 / 2 * jnp.pi**2
-    return jnp.sqrt(T_i**2 + y0 * T_D**2)
+    y0 = 3 / (2 * jnp.pi**2)
+    return jnpu.sqrt(T_i**2 + y0 * T_D**2)
 
 
+@jax.jit
 def T_Debye_Bohm_Staver(
     T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
 ) -> Quantity:
     """
+    T_Debye_Bohm_Staver(
+        T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
+    ) -> Quantity
+
     Bohm Staver relation, as presented in eqn (3) of :cite:`Gregori.2006`. An
     approximation function for the Debye temperature of 'simple metals'.
 
@@ -68,12 +78,14 @@ def T_Debye_Bohm_Staver(
         (Z_f * ureg.elementary_charge**2 * n_e) / (ureg.epsilon_0 * m_i)
     )
     Omega = jnpu.sqrt(omega**2 / (1 + k_De**2 / kmax**2))
-    ureg.hbar / ureg.k_B * Omega
+    return ureg.hbar / ureg.k_B * Omega
 
 
 @jax.jit
 def _lambda_AD(T: Quantity, m1: Quantity, m2: Quantity) -> Quantity:
     """
+    _lambda_AD(T: Quantity, m1: Quantity, m2: Quantity) -> Quantity
+
     :cite:`Gregori.2003` states this as the thermal de Broglie Wavelength, but
     this is not reproducing the known formula for ``m1 == m2``.
     However, both :cite:`Arkhipov.1998` and :cite:`Gregori` use this notation.
@@ -87,6 +99,9 @@ def _lambda_AD(T: Quantity, m1: Quantity, m2: Quantity) -> Quantity:
 
 @jax.jit
 def _k_D_AD(T: Quantity, n_e: Quantity, Z_f: float = 1.0) -> Quantity:
+    """
+    _k_D_AD(T: Quantity, n_e: Quantity, Z_f: float = 1.0) -> Quantity
+    """
     numerator = Z_f * n_e * ureg.elementary_charge**2
     denumerator = ureg.epsilon_0 * ureg.k_B * T
     return jnpu.sqrt(numerator / denumerator)
@@ -173,7 +188,7 @@ def _T_rs_Greg2006(
         The effecive temperature. If both temperatures are identical, than the
         result is this temperature.
     """
-    return (m_r * T_r + m_s * T_s) / (m_r + m_s)
+    return (m_s * T_r + m_r * T_s) / (m_r + m_s)
 
 
 @jax.jit
@@ -500,7 +515,7 @@ def S_ee_AD(
     S_ee_Greg_addition = (
         (T_e / T_i - 1) * jnp.abs(q.m_as(ureg.dimensionless)) ** 2 / Z_f * S_ii
     )
-    return S_ee_AD + S_ee_Greg_addition
+    return S_ee_AD - S_ee_Greg_addition
 
 
 @jax.jit
