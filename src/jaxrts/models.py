@@ -122,10 +122,12 @@ class ArkhipovIonFeat(Model):
             self.plasma_state.atomic_masses,
             self.plasma_state.n_e,
             self.plasma_state.T_e,
+            self.plasma_state.T_e,
             self.plasma_state.Z_free,
         )
         S_ii = static_structure_factors.S_ii_AD(
             setup.k,
+            self.plasma_state.T_e,
             self.plasma_state.T_e,
             self.plasma_state.n_e,
             self.plasma_state.atomic_masses,
@@ -179,11 +181,83 @@ class Gregori2003IonFeat(Model):
             self.plasma_state.atomic_masses,
             self.plasma_state.n_e,
             T_eff,
+            T_eff,
             self.plasma_state.Z_free,
         )
         S_ii = ion_feature.S_ii_AD(
             setup.k,
             T_eff,
+            T_eff,
+            self.plasma_state.n_e,
+            self.plasma_state.atomic_masses,
+            self.plasma_state.Z_free,
+        )
+        w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
+        res = w_R * setup.instrument(
+            (setup.measured_energy - setup.energy) / ureg.hbar
+        )
+        return res
+
+
+class Gregori2006IonFeat(Model):
+    """
+    Model for the ion feature of the scatting, presented in
+    :cite:`Gregori.2006`.
+
+    This model extends :py:class:`~ArkhipovIonFeat`, to allow for different
+    ion-and electron temperatures.
+
+    .. note::
+
+       :cite:`Gregori.2006` uses effective temperatures for the ion and
+       electron temperatures to obtain sane limits to :math:`T\\rightarrow 0`.
+       This is done by calling
+       :py:func:`jaxtrs.static_structure_factors.T_cf_Greg` for the electron
+       temperature and :py:func:`jaxrts.static_structure_factors.T_i_eff_Greg`,
+       for the ionic temperatures. The latter requires a 'Debye temperature'
+       model.
+
+    Requires a 'Debye temperature' model (defaults to :py:class:`~BohmStaver`).
+    """
+
+    def __init__(self, state: PlasmaState) -> None:
+        state.update_default_model("form-factors", PaulingFormFactors)
+        state.update_default_model("Debye temperature", BohmStaver)
+        super().__init__(state)
+
+    def check(self) -> None:
+        if len(self.plasma_state) > 1:
+            logger.critical(
+                "'Gregori2006IonFeat' is only implemented for a one-component plasma"  # noqa: E501
+            )
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        fi = self.plasma_state["form-factors"].evaluate(setup)
+        population = electron_distribution_ionized_state(
+            self.plasma_state.Z_core
+        )[:, jnp.newaxis]
+
+        T_D = self.plasma_state["Debye temperature"].evaluate(setup)
+
+        T_e_eff = static_structure_factors.T_cf_Greg(
+            self.plasma_state.T_e, self.plasma_state.n_e
+        )
+        T_i_eff = static_structure_factors.T_i_eff_Greg(
+            self.plasma_state.T_i, T_D
+        )
+        f = jnp.sum(fi * population)
+        q = ion_feature.q(
+            setup.k[jnp.newaxis],
+            self.plasma_state.atomic_masses,
+            self.plasma_state.n_e,
+            T_e_eff,
+            T_i_eff,
+            self.plasma_state.Z_free,
+        )
+        S_ii = ion_feature.S_ii_AD(
+            setup.k,
+            T_e_eff,
+            T_i_eff,
             self.plasma_state.n_e,
             self.plasma_state.atomic_masses,
             self.plasma_state.Z_free,
@@ -404,4 +478,27 @@ class GregoriChemPotential(Model):
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         return plasma_physics.chem_pot_interpolation(
             self.plasma_state.T_e, self.plasma_state.n_e
+        )
+
+
+# Debye Temperature Models
+# ========================
+
+
+class BohmStaver(Model):
+    """
+    The Bohm-Staver relation for the Debye temperature, valid for 'simple
+    metals', as it is presented in Eqn (3) of :cite:`Gregori.2006`.
+
+    See Also
+    --------
+    jaxrts.static_structure_factors.T_Debye_Bohm_Staver
+        The function used for calculating the Debye temperature.
+    """
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        return static_structure_factors.T_Debye_Bohm_Staver(
+            self.plasma_state.T_e,
+            self.plasma_state.n_e,
+            self.plasma_state.atomic_masses,
+            self.plasma_state.Z_free,
         )
