@@ -4,8 +4,10 @@ This submodule contains basic formulas used in plasma physics.
 
 from .units import ureg, Quantity
 
+import jax
 from jax import numpy as jnp
 from jpu import numpy as jnpu
+
 
 def plasma_frequency(electron_density: Quantity) -> Quantity:
     """
@@ -114,6 +116,7 @@ def fermi_dirac(k: Quantity, chem_pot: Quantity, T: Quantity) -> Quantity:
     return 1 / (jnpu.exp(exponent) + 1)
 
 
+@jax.jit
 def fermi_energy(n_e: Quantity) -> Quantity:
     """
     Calculate the Fermi energy of an ideal fermi gas from a given electron
@@ -133,8 +136,12 @@ def fermi_energy(n_e: Quantity) -> Quantity:
     E_F : Quantity
         Fermi energy
     """
-    E_F = ureg.hbar**2 / (2 * ureg.m_e) * (3 * jnp.pi**2 * n_e) ** (2 / 3)
-    return E_F
+    factor1 = ureg.hbar**2 / (2 * ureg.m_e)
+    factor2 = (3 * jnp.pi**2 * n_e) ** (2 / 3)
+    E_F = factor1.to(
+        ureg.centimeter**4 * ureg.gram / ureg.second**2
+    ) * factor2.to(1 / ureg.centimeter**2)
+    return E_F.to(ureg.electron_volt)
 
 
 def wiegner_seitz_radius(n_e: Quantity) -> Quantity:
