@@ -10,7 +10,7 @@ packages = [{include = "jaxrts", from = "src"}]
 python = "^3.11"
 jax = "^0.4.24"
 jpu = "^0.0.3"
-numpy = "^1.26.4"
+numpy = "^1.25.0"
 matplotlib = "^3.8.3"
 sphinxcontrib-bibtex = "^2.6.2"
 scienceplots = "^2.1.1"
