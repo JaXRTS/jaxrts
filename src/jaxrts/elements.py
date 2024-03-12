@@ -4,7 +4,9 @@ This submodule contains data for different chemical elements.
 
 from typing import Any
 
+import jax
 from jax import numpy as jnp
+import jpu.numpy as jnpu
 
 from .helpers import orbital_array, invert_dict
 from .units import ureg, Quantity
@@ -186,7 +188,7 @@ def electron_distribution(atomic_number: int) -> jnp.ndarray:
         To find the corresponding indices for individual orbitals, one can use
         :py:data:`~.helpers.orbital_map`
     """
-    electrons_remaining = atomic_number
+    electrons_remaining = jnp.array(atomic_number)
     occupancy = []
 
     while electrons_remaining > 0:
@@ -196,7 +198,9 @@ def electron_distribution(atomic_number: int) -> jnp.ndarray:
 
                 if electrons_remaining >= max_electrons:
                     occupancy.append(max_electrons)
-                    electrons_remaining -= max_electrons
+                    electrons_remaining = jnp.maximum(
+                        0, electrons_remaining - max_electrons
+                    )
                 else:
                     occupancy.append(electrons_remaining)
                     electrons_remaining = 0
@@ -210,7 +214,7 @@ def electron_distribution(atomic_number: int) -> jnp.ndarray:
 
     return orbital_array(*occupancy)
 
-
+@jax.jit
 def electron_distribution_ionized_state(Z_core: float) -> jnp.ndarray:
     """
     Interpolate between electron populations if the number of core electrons is
@@ -230,14 +234,30 @@ def electron_distribution_ionized_state(Z_core: float) -> jnp.ndarray:
     jnp.ndarray
         An array of populations.
     """
-    core_electron_floor = int(jnp.floor(Z_core))
-    pop_floor = electron_distribution(core_electron_floor)
-    pop_ceil = electron_distribution(core_electron_floor + 1)
-
-    population = pop_floor + (
-        (Z_core - core_electron_floor) * (pop_ceil - pop_floor)
+    S1s = jnpu.interp(Z_core, jnp.array([1, 2]), jnp.array([1, 2]))
+    S2s = jnpu.interp(Z_core, jnp.array([2, 4]), jnp.array([0, 2]))
+    S2p = jnpu.interp(Z_core, jnp.array([4, 10]), jnp.array([0, 6]))
+    S3s = jnpu.interp(Z_core, jnp.array([10, 12]), jnp.array([0, 2]))
+    S3p = jnpu.interp(Z_core, jnp.array([12, 18]), jnp.array([0, 6]))
+    S3d = jnpu.interp(Z_core, jnp.array([18, 28]), jnp.array([0, 10]))
+    S4s = jnpu.interp(Z_core, jnp.array([28, 30]), jnp.array([0, 2]))
+    S4p = jnpu.interp(Z_core, jnp.array([30, 36]), jnp.array([0, 6]))
+    S4d = 0
+    S4f = 0
+    return jnp.array(
+        [
+            S1s,
+            S2s,
+            S2p,
+            S3s,
+            S3p,
+            S3d,
+            S4s,
+            S4p,
+            S4d,
+            S4f,
+        ]
     )
-    return population
 
 
 class Element:
