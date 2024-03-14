@@ -169,7 +169,7 @@ class Gregori2003IonFeat(Model):
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         fi = self.plasma_state["form-factors"].evaluate(setup)
         population = electron_distribution_ionized_state(
-            self.plasma_state.Z_core
+            self.plasma_state.Z_core[0]
         )[:, jnp.newaxis]
 
         T_eff = static_structure_factors.T_cf_Greg(

@@ -274,7 +274,7 @@ class Element:
         #: The name of the element
         self.name: str = _element_names[self.Z]
         #: The electron distribution, retuned as a flat array
-        self.electron_distribution = electron_distribution(self.Z)
+        self.electron_distribution = electron_distribution_ionized_state(self.Z)
 
         #: The atomic mass of this element
         self.atomic_mass: Quantity = _element_masses[self.Z] * (
