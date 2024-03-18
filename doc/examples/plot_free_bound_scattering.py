@@ -1,6 +1,6 @@
 """
-Showcase the :py:class:`jaxrts.models.DetailedBalace` free-bound scattering Model
-=================================================================================
+Showcase the DetailedBalace free-bound scattering Model
+=======================================================
 
 This plot is comparable to the target analzed by :cite:`Doppner.2023`, is this
 example is one of the dataset revisited by :Bohme.2023`.

@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class Model(metaclass=abc.ABCMeta):
     def __init__(self, state: PlasmaState):
         """
-        As not different prerequisites exist for different models, make sure to
+        As different prerequisites exist for different models, make sure to
         test that all relevant information is given in the PlasmaState, amend
         defaults if necessary in the ``__init__``, rather than the ``evaluate``
         method. Please log assumtpions, properly
@@ -465,7 +465,7 @@ class DetailedBalance(Model):
     intensity.
     See :cite:`Bohme.2023`, introducing the idea.
 
-    ..note::
+    .. note::
 
        We would recommend to have an `evaluate_raw` for the bound-free model,
        which should return the bound-free scattering intensity **not
