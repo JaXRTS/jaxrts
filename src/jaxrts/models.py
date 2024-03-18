@@ -7,6 +7,7 @@ import abc
 import logging
 
 import jax.numpy as jnp
+from jpu import numpy as jnpu
 
 from .units import ureg
 from .setup import Setup, convolve_stucture_factor_with_instrument
@@ -395,6 +396,14 @@ class BornMermin(Model):
 
 # bound-free Models
 # -----------------
+#
+# ..note::
+#
+#    We would recommend to have a evaluate_raw function, here, for every
+#    bound-free model, which should return the structure factor **not
+#    convolved** with an instrument function.
+#    This is used preferably in the :py:class:`~.DetailedBalance` free-bound
+#    model.
 
 
 class SchumacherImpulse(Model):
@@ -418,7 +427,7 @@ class SchumacherImpulse(Model):
                 "'SchumacherImpulse' is only implemented for a one-component plasma"  # noqa: E501
             )
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         k = setup.k
         omega_0 = setup.energy / ureg.hbar
         omega = omega_0 - setup.measured_energy / ureg.hbar
@@ -438,7 +447,57 @@ class SchumacherImpulse(Model):
             / (Z_c * B**3)
             * bound_free.J_impulse_approx(omega, k, population, Zeff, E_b)
         )
-        return convolve_stucture_factor_with_instrument(sbe * Z_c, setup)
+        return sbe * Z_c
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        raw = self.evaluate_raw(setup)
+        return convolve_stucture_factor_with_instrument(raw, setup)
+
+
+# free-bound Models
+# -----------------
+
+
+class DetailedBalance(Model):
+    """
+    Calculate the free-bound scattering by mirroring the free-bound scattering
+    around the probing energy and applying a detailed balance factor to the
+    intensity.
+    See :cite:`Bohme.2023`, introducing the idea.
+
+    ..note::
+
+       We would recommend to have an `evaluate_raw` for the bound-free model,
+       which should return the bound-free scattering intensity **not
+       convolved** with an instrument function.
+       While this Model works in any way, a model as described above should be
+       numerically more stable.
+
+    """
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        energy_shift = setup.measured_energy - setup.energy
+        mirrored_setup = Setup(
+            setup.scattering_angle,
+            setup.energy,
+            setup.energy - energy_shift,
+            setup.instrument,
+        )
+        db_factor = jnpu.exp(
+            -energy_shift / (self.plasma_state.T_e * ureg.k_B)
+        )
+        if hasattr(self.plasma_state["bound-free scattering"], "evaluate_raw"):
+            raw = self.plasma_state["bound-free scattering"].evaluate_raw(
+                mirrored_setup
+            )
+            return convolve_stucture_factor_with_instrument(
+                raw * db_factor, setup
+            )
+        else:
+            bound_free_mirrored = self.plasma_state[
+                "bound-free scattering"
+            ].evaluate(mirrored_setup)
+            return bound_free_mirrored * raw
 
 
 # Form Factor Models
@@ -495,6 +554,7 @@ class BohmStaver(Model):
     jaxrts.static_structure_factors.T_Debye_Bohm_Staver
         The function used for calculating the Debye temperature.
     """
+
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         return static_structure_factors.T_Debye_Bohm_Staver(
             self.plasma_state.T_e,
