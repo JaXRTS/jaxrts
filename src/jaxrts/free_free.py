@@ -445,6 +445,7 @@ def collision_frequency_BA(
     w = E / (1 * ureg.hbar)
     w = E / (1 * ureg.hbar)
     T_e = T
+    T_i = T
     kappa = inverse_screening_length_non_degenerate(n_e, T)
 
     prefactor = (
@@ -471,7 +472,7 @@ def collision_frequency_BA(
         res = (
             q**6
             * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
-            * S_ii_AD(q, T_e, n_e, m_ion, Zf)
+            * S_ii_AD(q, T_e, T_i, n_e, m_ion, Zf)
             * eps_part
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**4
                     )
