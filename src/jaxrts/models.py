@@ -9,7 +9,7 @@ import logging
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
-from .units import ureg
+from .units import ureg, Quantity
 from .setup import Setup, convolve_stucture_factor_with_instrument
 from .plasmastate import PlasmaState
 from .elements import electron_distribution_ionized_state
@@ -27,7 +27,10 @@ logger = logging.getLogger(__name__)
 
 # This defines a Model, abstractly.
 class Model(metaclass=abc.ABCMeta):
-    def __init__(self, state: PlasmaState):
+    #: A list of keywords where this model is adequate for
+    allowed_keys: list[str] = []
+
+    def __init__(self, state: PlasmaState, model_key: str):
         """
         As different prerequisites exist for different models, make sure to
         test that all relevant information is given in the PlasmaState, amend
@@ -35,6 +38,7 @@ class Model(metaclass=abc.ABCMeta):
         method. Please log assumtpions, properly
         """
         self.plasma_state = state
+        self.model_key = model_key
         self.check()
 
     @abc.abstractmethod
@@ -47,21 +51,110 @@ class Model(metaclass=abc.ABCMeta):
         """
 
 
+class ScatteringModel(Model):
+    """
+    A subset of :py:class:`Model`'s, used to provide some extra functionalities
+    to (mainly elastic) scattering models.
+    These models have a pre-defined :py:meth:`~.evaluate` method, which is
+    performing a convolution with the instrument function, and now requires a
+    user to define :py:meth:`.evaluate_raw` which is giving the scattered
+    energy **without the instrument function**.
+
+    .. note::
+
+       As these extra functionalities are only relevant when re-sampling and
+       convolution with an instrument function is reasonable, the
+       :py:class:`~.Model` s used to decribe ionic scattering are currently not
+       instances of :py:class:`~.ScatteringModel` as the convolution with a
+       delta function would just result in numerical issues.
+
+    It furthermore allows a user to set the :py:attr:`~.sample_points`
+    attribute, which is initialized as ``None``.
+    If set, the model is evaluated only on `sample_points` points, rather than
+    all :math:`k` that are probed and is then evaluated. Afterwards, the result
+    is extrapolated to match the :py:class:`~.setup.Setup`'s :math:`k`.
+    """
+
+    def __init__(self, state: PlasmaState, model_key: str):
+        super().__init__(state, model_key)
+
+        #: The number of points for re-sampeling the model. If ``None``, no
+        #: resampeling is none and every of the :py:class:`~.setup.Setup`'s
+        #: :math:`k` s is evaluated when calling :py:meth:`~.evaluate`.
+        #: However, as the computation might be expensive, you can reduce the
+        #: number of relevant :math:`k` s by setting this attribute. After the
+        #: evaluation, the resulting scatting signal is interpolated to the
+        #: relevant :math:`k` s and then convolved with the instument function.
+        self.sample_points: int | None = None
+
+    @abc.abstractmethod
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray: ...
+
+    def sample_grid(self, setup) -> Quantity:
+        """
+        Define the sample-grid if :py:attr:`~.sample_points` is not ``None``.
+        By default, we just divide the :py:attr:`~.setup.Setup.measured_energy`
+        in :py:attr:`~sample_points` equidistant energies. However, one could
+        overwrite this function if the expected signal is within a certain
+        range to achieve faster computation time.
+        """
+        min_E = setup.measured_energy[0]
+        max_E = setup.measured_energy[-1]
+        return jnpu.linspace(min_E, max_E, self.sample_points)
+
+    def evaluate(self, setup) -> jnp.ndarray:
+        """
+        If :py:attr:`~.sample_points` is not ``None``, generate a
+        low-resulution :py:class`~.setup.Setup`. Calculate the
+        instrument-function free scattering intensity with this or the given
+        ``setup``, interpolate it, if needed and then convolve it with the
+        instument function.
+        """
+        if self.sample_points is None:
+            raw = self.evaluate_raw(setup)
+        else:
+            low_res_setup = Setup(
+                setup.scattering_angle,
+                setup.energy,
+                self.sample_grid(setup),
+                setup.instrument,
+            )
+            low_res = self.evaluate_raw(low_res_setup)
+            raw = jnpu.interp(
+                setup.measured_energy,
+                low_res_setup.measured_energy,
+                low_res,
+                left=0,
+                right=0,
+            )
+        return convolve_stucture_factor_with_instrument(raw, setup)
+
+
 # HERE LIST OF MODELS
 # ===================
 
 # Scattering
 # ==========
+scattering_models = [
+    "free-free scattering",
+    "bound-free scattering",
+    "free-bound scattering",
+    "ionic scattering",
+]
 
 
 class Neglect(Model):
+    allowed_keys = [*scattering_models, "ipd"]
     """
     A model that returns an empty with zeros in (units of seconds) for every
     energy probed.
     """
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
-        return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
+        if self.model_key in scattering_models:
+            return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
+        elif self.model_key == "ipd":
+            return jnp.zeros(10) * (1 * ureg.electron_volt)
 
 
 # ion-feature
@@ -94,10 +187,12 @@ class ArkhipovIonFeat(Model):
         The default model for the atomic form factors
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["ionic scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         # Set sane defaults
         state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if self.plasma_state.T_e != self.plasma_state.T_i:
@@ -151,9 +246,11 @@ class Gregori2003IonFeat(Model):
     rather than the electron Temperature throughout the calculation.
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["ionic scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if self.plasma_state.T_e != self.plasma_state.T_i:
@@ -221,10 +318,12 @@ class Gregori2006IonFeat(Model):
     Requires a 'Debye temperature' model (defaults to :py:class:`~BohmStaver`).
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["ionic scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         state.update_default_model("form-factors", PaulingFormFactors)
         state.update_default_model("Debye temperature", BohmStaver)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if len(self.plasma_state) > 1:
@@ -274,7 +373,7 @@ class Gregori2006IonFeat(Model):
 # ----------------
 
 
-class QCSalpeterApproximation(Model):
+class QCSalpeterApproximation(ScatteringModel):
     """
     Quantum Corrected Salpeter Approximation for free-free scattering.
     Presented in :cite:`Gregori.2003`, which provide a quantum correction to
@@ -294,13 +393,15 @@ class QCSalpeterApproximation(Model):
         factor.
     """
 
+    allowed_keys = ["free-free scattering"]
+
     def check(self) -> None:
         if len(self.plasma_state) > 1:
             logger.critical(
                 "'QCSalpeterApproximation' is only implemented for a one-component plasma"  # noqa: E501
             )
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         See_0 = free_free.S0_ee_Salpeter(
             setup.k,
             self.plasma_state.T_e,
@@ -308,11 +409,10 @@ class QCSalpeterApproximation(Model):
             setup.measured_energy - setup.energy,
         )
 
-        ff = See_0 * self.plasma_state.Z_free
-        return convolve_stucture_factor_with_instrument(ff, setup)
+        return See_0 * self.plasma_state.Z_free
 
 
-class RPA_NoDamping(Model):
+class RPA_NoDamping(ScatteringModel):
     """
     Model for elastic free-free scattering based on the Random Phase
     Approximation
@@ -327,12 +427,14 @@ class RPA_NoDamping(Model):
     --------
     jaxtrs.free_free.S0_ee_RPA_no_damping
         Function used to calculate the dynamic free-free electron structure
-        facotr.
+        factor.
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["free-free scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         state.update_default_model("chemical potential", GregoriChemPotential)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if len(self.plasma_state) > 1:
@@ -340,7 +442,7 @@ class RPA_NoDamping(Model):
                 "'RPA_NoDamping' is only implemented for a one-component plasma"  # noqa: E501
             )
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state["chemical potential"].evaluate(setup)
         See_0 = free_free.S0_ee_RPA_no_damping(
             setup.k,
@@ -350,11 +452,10 @@ class RPA_NoDamping(Model):
             mu,
         )
 
-        ff = See_0 * self.plasma_state.Z_free
-        return convolve_stucture_factor_with_instrument(ff, setup)
+        return See_0 * self.plasma_state.Z_free
 
 
-class BornMermin(Model):
+class BornMermin(ScatteringModel):
     """
     Modell of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
@@ -369,9 +470,11 @@ class BornMermin(Model):
         Function used to calculate the dynamic structure factor
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["free-free scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         state.update_default_model("chemical potential", GregoriChemPotential)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if len(self.plasma_state) > 1:
@@ -379,7 +482,7 @@ class BornMermin(Model):
                 "'BornMermin' is only implemented for a one-component plasma"  # noqa: E501
             )
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state["chemical potential"].evaluate(setup)
         See_0 = free_free.S0_ee_BMA(
             setup.k,
@@ -390,23 +493,14 @@ class BornMermin(Model):
             self.plasma_state.Z_free,
             setup.measured_energy - setup.energy,
         )
-        ff = See_0 * self.plasma_state.Z_free
-        return convolve_stucture_factor_with_instrument(ff, setup)
+        return See_0 * self.plasma_state.Z_free
 
 
 # bound-free Models
 # -----------------
-#
-# ..note::
-#
-#    We would recommend to have a evaluate_raw function, here, for every
-#    bound-free model, which should return the structure factor **not
-#    convolved** with an instrument function.
-#    This is used preferably in the :py:class:`~.DetailedBalance` free-bound
-#    model.
 
 
-class SchumacherImpulse(Model):
+class SchumacherImpulse(ScatteringModel):
     """
     Bound-free scattering based on the Schumacher Impulse Approximation
     :cite:`Schumacher.1975`. The implementation considers the first order
@@ -417,9 +511,11 @@ class SchumacherImpulse(Model):
     :py:class:`~PaulingFormFactors`).
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["bound-free scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if len(self.plasma_state) > 1:
@@ -449,16 +545,12 @@ class SchumacherImpulse(Model):
         )
         return sbe * Z_c
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
-        raw = self.evaluate_raw(setup)
-        return convolve_stucture_factor_with_instrument(raw, setup)
-
 
 # free-bound Models
 # -----------------
 
 
-class DetailedBalance(Model):
+class DetailedBalance(ScatteringModel):
     """
     Calculate the free-bound scattering by mirroring the free-bound scattering
     around the probing energy and applying a detailed balance factor to the
@@ -475,7 +567,9 @@ class DetailedBalance(Model):
 
     """
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    allowed_keys = ["free-bound scattering"]
+
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         energy_shift = setup.measured_energy - setup.energy
         mirrored_setup = Setup(
             setup.scattering_angle,
@@ -486,18 +580,10 @@ class DetailedBalance(Model):
         db_factor = jnpu.exp(
             -energy_shift / (self.plasma_state.T_e * ureg.k_B)
         )
-        if hasattr(self.plasma_state["bound-free scattering"], "evaluate_raw"):
-            raw = self.plasma_state["bound-free scattering"].evaluate_raw(
-                mirrored_setup
-            )
-            return convolve_stucture_factor_with_instrument(
-                raw * db_factor, setup
-            )
-        else:
-            bound_free_mirrored = self.plasma_state[
-                "bound-free scattering"
-            ].evaluate(mirrored_setup)
-            return bound_free_mirrored * raw
+        free_bound = self.plasma_state["bound-free scattering"].evaluate_raw(
+            mirrored_setup
+        )
+        return free_bound * db_factor
 
 
 # Form Factor Models
@@ -514,6 +600,8 @@ class PaulingFormFactors(Model):
     the effective charge of the atom's core and then calculates form factors
     with :py:func:`jaxrts.form_factors.pauling_all_ff`.
     """
+
+    allowed_keys = ["form-factors"]
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         Zstar = form_factors.pauling_effective_charge(self.plasma_state.Z_A)
@@ -533,6 +621,8 @@ class GregoriChemPotential(Model):
     classical and the quantum regime, given by :cite:`Gregori.2003`.
     Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
     """
+
+    allowed_keys = ["chemical potential"]
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         return plasma_physics.chem_pot_interpolation(
@@ -554,6 +644,8 @@ class BohmStaver(Model):
     jaxrts.static_structure_factors.T_Debye_Bohm_Staver
         The function used for calculating the Debye temperature.
     """
+
+    allowed_keys = ["Debye temperature"]
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         return static_structure_factors.T_Debye_Bohm_Staver(
