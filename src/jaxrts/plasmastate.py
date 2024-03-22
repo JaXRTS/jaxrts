@@ -55,8 +55,10 @@ class PlasmaState:
     def __getitem__(self, key: str):
         return self.models[key]
 
-    def __setitem__(self, key: str, model_class: ABCMeta) -> None:
-        self.models[key] = model_class(self)
+    def __setitem__(self, key:str, model_class: ABCMeta) -> None:
+        if key not in model_class.allowed_keys:
+            raise KeyError(f"Model {model_class} not allowed for key {key}.")
+        self.models[key] = model_class(self, key)
 
     def update_default_model(
         self, model_name: str, model_class: ABCMeta

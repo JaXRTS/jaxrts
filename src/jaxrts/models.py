@@ -27,7 +27,10 @@ logger = logging.getLogger(__name__)
 
 # This defines a Model, abstractly.
 class Model(metaclass=abc.ABCMeta):
-    def __init__(self, state: PlasmaState):
+    #: A list of keywords where this model is adequate for
+    allowed_keys: list[str] = []
+
+    def __init__(self, state: PlasmaState, model_key: str):
         """
         As different prerequisites exist for different models, make sure to
         test that all relevant information is given in the PlasmaState, amend
@@ -35,6 +38,7 @@ class Model(metaclass=abc.ABCMeta):
         method. Please log assumtpions, properly
         """
         self.plasma_state = state
+        self.model_key = model_key
         self.check()
 
     @abc.abstractmethod
@@ -52,16 +56,26 @@ class Model(metaclass=abc.ABCMeta):
 
 # Scattering
 # ==========
+scattering_models = [
+    "free-free scattering",
+    "bound-free scattering",
+    "free-bound scattering",
+    "ionic scattering",
+]
 
 
 class Neglect(Model):
+    allowed_keys = [*scattering_models, "ipd"]
     """
     A model that returns an empty with zeros in (units of seconds) for every
     energy probed.
     """
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
-        return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
+        if self.model_key in scattering_models:
+            return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
+        elif self.model_key == "ipd":
+            return jnp.zeros(10) * (1 * ureg.electron_volt)
 
 
 # ion-feature
@@ -94,10 +108,12 @@ class ArkhipovIonFeat(Model):
         The default model for the atomic form factors
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["ionic scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         # Set sane defaults
         state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if self.plasma_state.T_e != self.plasma_state.T_i:
@@ -151,9 +167,11 @@ class Gregori2003IonFeat(Model):
     rather than the electron Temperature throughout the calculation.
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["ionic scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if self.plasma_state.T_e != self.plasma_state.T_i:
@@ -221,10 +239,12 @@ class Gregori2006IonFeat(Model):
     Requires a 'Debye temperature' model (defaults to :py:class:`~BohmStaver`).
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["ionic scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         state.update_default_model("form-factors", PaulingFormFactors)
         state.update_default_model("Debye temperature", BohmStaver)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if len(self.plasma_state) > 1:
@@ -294,6 +314,8 @@ class QCSalpeterApproximation(Model):
         factor.
     """
 
+    allowed_keys = ["free-free scattering"]
+
     def check(self) -> None:
         if len(self.plasma_state) > 1:
             logger.critical(
@@ -330,9 +352,11 @@ class RPA_NoDamping(Model):
         facotr.
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["free-free scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         state.update_default_model("chemical potential", GregoriChemPotential)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if len(self.plasma_state) > 1:
@@ -369,9 +393,11 @@ class BornMermin(Model):
         Function used to calculate the dynamic structure factor
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["free-free scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         state.update_default_model("chemical potential", GregoriChemPotential)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if len(self.plasma_state) > 1:
@@ -417,9 +443,11 @@ class SchumacherImpulse(Model):
     :py:class:`~PaulingFormFactors`).
     """
 
-    def __init__(self, state: PlasmaState) -> None:
+    allowed_keys = ["bound-free scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
         state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state)
+        super().__init__(state, model_key)
 
     def check(self) -> None:
         if len(self.plasma_state) > 1:
@@ -475,6 +503,8 @@ class DetailedBalance(Model):
 
     """
 
+    allowed_keys = ["free-bound scattering"]
+
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         energy_shift = setup.measured_energy - setup.energy
         mirrored_setup = Setup(
@@ -515,6 +545,8 @@ class PaulingFormFactors(Model):
     with :py:func:`jaxrts.form_factors.pauling_all_ff`.
     """
 
+    allowed_keys = ["form-factors"]
+
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         Zstar = form_factors.pauling_effective_charge(self.plasma_state.Z_A)
         ff = form_factors.pauling_all_ff(setup.k, Zstar)
@@ -533,6 +565,8 @@ class GregoriChemPotential(Model):
     classical and the quantum regime, given by :cite:`Gregori.2003`.
     Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
     """
+
+    allowed_keys = ["chemical potential"]
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         return plasma_physics.chem_pot_interpolation(
@@ -554,6 +588,8 @@ class BohmStaver(Model):
     jaxrts.static_structure_factors.T_Debye_Bohm_Staver
         The function used for calculating the Debye temperature.
     """
+
+    allowed_keys = ["Debye temperature"]
 
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         return static_structure_factors.T_Debye_Bohm_Staver(
