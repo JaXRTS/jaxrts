@@ -9,7 +9,7 @@ import logging
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
-from .units import ureg
+from .units import ureg, Quantity
 from .setup import Setup, convolve_stucture_factor_with_instrument
 from .plasmastate import PlasmaState
 from .elements import electron_distribution_ionized_state
@@ -50,6 +50,7 @@ class Model(metaclass=abc.ABCMeta):
         messages and errors.
         """
 
+
 class ScatteringModel(Model):
     """
     A subset of :py:class:`Model`'s, used to provide some extra functionalities
@@ -65,7 +66,7 @@ class ScatteringModel(Model):
        convolution with an instrument function is reasonable, the
        :py:class:`~.Model` s used to decribe ionic scattering are currently not
        instances of :py:class:`~.ScatteringModel` as the convolution with a
-       delta function would just result in numerical issues. 
+       delta function would just result in numerical issues.
 
     It furthermore allows a user to set the :py:attr:`~.sample_points`
     attribute, which is initialized as ``None``.
@@ -73,6 +74,7 @@ class ScatteringModel(Model):
     all :math:`k` that are probed and is then evaluated. Afterwards, the result
     is extrapolated to match the :py:class:`~.setup.Setup`'s :math:`k`.
     """
+
     def __init__(self, state: PlasmaState, model_key: str):
         super().__init__(state, model_key)
 
@@ -88,8 +90,43 @@ class ScatteringModel(Model):
     @abc.abstractmethod
     def evaluate_raw(self, setup: Setup) -> jnp.ndarray: ...
 
+    def sample_grid(self, setup) -> Quantity:
+        """
+        Define the sample-grid if :py:attr:`~.sample_points` is not ``None``.
+        By default, we just divide the :py:attr:`~.setup.Setup.measured_energy`
+        in :py:attr:`~sample_points` equidistant energies. However, one could
+        overwrite this function if the expected signal is within a certain
+        range to achieve faster computation time.
+        """
+        min_E = setup.measured_energy[0]
+        max_E = setup.measured_energy[-1]
+        return jnpu.linspace(min_E, max_E, self.sample_points)
+
     def evaluate(self, setup) -> jnp.ndarray:
-        raw = self.evaluate_raw(setup)
+        """
+        If :py:attr:`~.sample_points` is not ``None``, generate a
+        low-resulution :py:class`~.setup.Setup`. Calculate the
+        instrument-function free scattering intensity with this or the given
+        ``setup``, interpolate it, if needed and then convolve it with the
+        instument function.
+        """
+        if self.sample_points is None:
+            raw = self.evaluate_raw(setup)
+        else:
+            low_res_setup = Setup(
+                setup.scattering_angle,
+                setup.energy,
+                self.sample_grid(setup),
+                setup.instrument,
+            )
+            low_res = self.evaluate_raw(low_res_setup)
+            raw = jnpu.interp(
+                setup.measured_energy,
+                low_res_setup.measured_energy,
+                low_res,
+                left=0,
+                right=0,
+            )
         return convolve_stucture_factor_with_instrument(raw, setup)
 
 
@@ -544,8 +581,8 @@ class DetailedBalance(ScatteringModel):
             -energy_shift / (self.plasma_state.T_e * ureg.k_B)
         )
         free_bound = self.plasma_state["bound-free scattering"].evaluate_raw(
-                mirrored_setup
-            )
+            mirrored_setup
+        )
         return free_bound * db_factor
 
 
