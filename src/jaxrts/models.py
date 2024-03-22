@@ -50,6 +50,48 @@ class Model(metaclass=abc.ABCMeta):
         messages and errors.
         """
 
+class ScatteringModel(Model):
+    """
+    A subset of :py:class:`Model`'s, used to provide some extra functionalities
+    to (mainly elastic) scattering models.
+    These models have a pre-defined :py:meth:`~.evaluate` method, which is
+    performing a convolution with the instrument function, and now requires a
+    user to define :py:meth:`.evaluate_raw` which is giving the scattered
+    energy **without the instrument function**.
+
+    .. note::
+
+       As these extra functionalities are only relevant when re-sampling and
+       convolution with an instrument function is reasonable, the
+       :py:class:`~.Model` s used to decribe ionic scattering are currently not
+       instances of :py:class:`~.ScatteringModel` as the convolution with a
+       delta function would just result in numerical issues. 
+
+    It furthermore allows a user to set the :py:attr:`~.sample_points`
+    attribute, which is initialized as ``None``.
+    If set, the model is evaluated only on `sample_points` points, rather than
+    all :math:`k` that are probed and is then evaluated. Afterwards, the result
+    is extrapolated to match the :py:class:`~.setup.Setup`'s :math:`k`.
+    """
+    def __init__(self, state: PlasmaState, model_key: str):
+        super().__init__(state, model_key)
+
+        #: The number of points for re-sampeling the model. If ``None``, no
+        #: resampeling is none and every of the :py:class:`~.setup.Setup`'s
+        #: :math:`k` s is evaluated when calling :py:meth:`~.evaluate`.
+        #: However, as the computation might be expensive, you can reduce the
+        #: number of relevant :math:`k` s by setting this attribute. After the
+        #: evaluation, the resulting scatting signal is interpolated to the
+        #: relevant :math:`k` s and then convolved with the instument function.
+        self.sample_points: int | None = None
+
+    @abc.abstractmethod
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray: ...
+
+    def evaluate(self, setup) -> jnp.ndarray:
+        raw = self.evaluate_raw(setup)
+        return convolve_stucture_factor_with_instrument(raw, setup)
+
 
 # HERE LIST OF MODELS
 # ===================
@@ -294,7 +336,7 @@ class Gregori2006IonFeat(Model):
 # ----------------
 
 
-class QCSalpeterApproximation(Model):
+class QCSalpeterApproximation(ScatteringModel):
     """
     Quantum Corrected Salpeter Approximation for free-free scattering.
     Presented in :cite:`Gregori.2003`, which provide a quantum correction to
@@ -322,7 +364,7 @@ class QCSalpeterApproximation(Model):
                 "'QCSalpeterApproximation' is only implemented for a one-component plasma"  # noqa: E501
             )
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         See_0 = free_free.S0_ee_Salpeter(
             setup.k,
             self.plasma_state.T_e,
@@ -330,11 +372,10 @@ class QCSalpeterApproximation(Model):
             setup.measured_energy - setup.energy,
         )
 
-        ff = See_0 * self.plasma_state.Z_free
-        return convolve_stucture_factor_with_instrument(ff, setup)
+        return See_0 * self.plasma_state.Z_free
 
 
-class RPA_NoDamping(Model):
+class RPA_NoDamping(ScatteringModel):
     """
     Model for elastic free-free scattering based on the Random Phase
     Approximation
@@ -349,7 +390,7 @@ class RPA_NoDamping(Model):
     --------
     jaxtrs.free_free.S0_ee_RPA_no_damping
         Function used to calculate the dynamic free-free electron structure
-        facotr.
+        factor.
     """
 
     allowed_keys = ["free-free scattering"]
@@ -364,7 +405,7 @@ class RPA_NoDamping(Model):
                 "'RPA_NoDamping' is only implemented for a one-component plasma"  # noqa: E501
             )
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state["chemical potential"].evaluate(setup)
         See_0 = free_free.S0_ee_RPA_no_damping(
             setup.k,
@@ -374,11 +415,10 @@ class RPA_NoDamping(Model):
             mu,
         )
 
-        ff = See_0 * self.plasma_state.Z_free
-        return convolve_stucture_factor_with_instrument(ff, setup)
+        return See_0 * self.plasma_state.Z_free
 
 
-class BornMermin(Model):
+class BornMermin(ScatteringModel):
     """
     Modell of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
@@ -405,7 +445,7 @@ class BornMermin(Model):
                 "'BornMermin' is only implemented for a one-component plasma"  # noqa: E501
             )
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state["chemical potential"].evaluate(setup)
         See_0 = free_free.S0_ee_BMA(
             setup.k,
@@ -416,23 +456,14 @@ class BornMermin(Model):
             self.plasma_state.Z_free,
             setup.measured_energy - setup.energy,
         )
-        ff = See_0 * self.plasma_state.Z_free
-        return convolve_stucture_factor_with_instrument(ff, setup)
+        return See_0 * self.plasma_state.Z_free
 
 
 # bound-free Models
 # -----------------
-#
-# ..note::
-#
-#    We would recommend to have a evaluate_raw function, here, for every
-#    bound-free model, which should return the structure factor **not
-#    convolved** with an instrument function.
-#    This is used preferably in the :py:class:`~.DetailedBalance` free-bound
-#    model.
 
 
-class SchumacherImpulse(Model):
+class SchumacherImpulse(ScatteringModel):
     """
     Bound-free scattering based on the Schumacher Impulse Approximation
     :cite:`Schumacher.1975`. The implementation considers the first order
@@ -477,16 +508,12 @@ class SchumacherImpulse(Model):
         )
         return sbe * Z_c
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
-        raw = self.evaluate_raw(setup)
-        return convolve_stucture_factor_with_instrument(raw, setup)
-
 
 # free-bound Models
 # -----------------
 
 
-class DetailedBalance(Model):
+class DetailedBalance(ScatteringModel):
     """
     Calculate the free-bound scattering by mirroring the free-bound scattering
     around the probing energy and applying a detailed balance factor to the
@@ -505,7 +532,7 @@ class DetailedBalance(Model):
 
     allowed_keys = ["free-bound scattering"]
 
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         energy_shift = setup.measured_energy - setup.energy
         mirrored_setup = Setup(
             setup.scattering_angle,
@@ -516,18 +543,10 @@ class DetailedBalance(Model):
         db_factor = jnpu.exp(
             -energy_shift / (self.plasma_state.T_e * ureg.k_B)
         )
-        if hasattr(self.plasma_state["bound-free scattering"], "evaluate_raw"):
-            raw = self.plasma_state["bound-free scattering"].evaluate_raw(
+        free_bound = self.plasma_state["bound-free scattering"].evaluate_raw(
                 mirrored_setup
             )
-            return convolve_stucture_factor_with_instrument(
-                raw * db_factor, setup
-            )
-        else:
-            bound_free_mirrored = self.plasma_state[
-                "bound-free scattering"
-            ].evaluate(mirrored_setup)
-            return bound_free_mirrored * raw
+        return free_bound * db_factor
 
 
 # Form Factor Models
