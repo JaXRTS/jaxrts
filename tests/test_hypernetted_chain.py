@@ -15,7 +15,7 @@ from jaxrts.units import ureg
 
 r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 10000)
 q = hnc.construct_q_matrix(jnp.array([1]) * 1 * ureg.elementary_charge)
-T = 1.0 * ureg.electron_volt / ureg.boltzmann_constant
+T = 10 * ureg.electron_volt / ureg.boltzmann_constant
 
 Gamma = 30
 d = 1 / (Gamma * (1 * ureg.boltzmann_constant) * T * 4 * jnp.pi * ureg.epsilon_0 / ureg.elementary_charge ** 2)
@@ -34,6 +34,6 @@ g, niter = hnc.pair_distribution_function_HNC(V_s, V_l, T, n)
 print(niter)
 
 plt.plot(r / ureg.a0, g[0,0,:])
-plt.xlim(0, 25.0)
-plt.ylim(0, 1.2)
+# plt.xlim(0, 25.0)
+# plt.ylim(0, 1.2)
 plt.show()

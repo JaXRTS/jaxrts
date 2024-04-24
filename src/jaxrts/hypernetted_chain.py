@@ -60,7 +60,7 @@ def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
 
     return jpu.numpy.outer(q, q)
 
-@jax.jit
+# @jax.jit
 def pair_distribution_function_HNC(V_s, V_l, Ti, ni):
 
     beta = 1 / (ureg.boltzmann_constant * Ti)
@@ -72,10 +72,7 @@ def pair_distribution_function_HNC(V_s, V_l, Ti, ni):
         * ureg.electron_volt
     )
 
-    delta = 1e-5
-
-    g_r_old = g_r 
-    # g_r_old = jnp.exp(-(beta * (V_s + V_l)).m_as(ureg.dimensionless))
+    delta = 1e-4
 
     Ns_r0 = jnp.zeros_like(g_r)
 
@@ -86,8 +83,7 @@ def pair_distribution_function_HNC(V_s, V_l, Ti, ni):
 
     def condition(val):
         g_r, g_r_old, _, n_iter = val
-        # return (jnp.max(jnp.abs(g_r - g_r_old)) > delta) | (n_iter < 10)
-        return (n_iter < 1000) | jnp.all(jnp.greater(jnp.abs(g_r - g_r_old), delta))
+        return (n_iter < 1000) & jnp.all(jnp.max(jnp.abs(g_r - g_r_old)) > delta)
 
     def step(val):
         g_r, _, Ns_r, i = val
@@ -111,7 +107,7 @@ def pair_distribution_function_HNC(V_s, V_l, Ti, ni):
 
         return g_r_new, g_r, Ns_r_new, i + 1
 
-    g_r, _, _, niter = jax.lax.while_loop(condition, step, (g_r, g_r_old, Ns_r0, 0))
+    g_r, _, _, niter = jax.lax.while_loop(condition, step, (g_r, g_r + 100, Ns_r0, 0))
 
     return g_r, niter
 
