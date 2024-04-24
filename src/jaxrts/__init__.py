@@ -16,6 +16,7 @@ from . import units
 from . import math
 from . import models
 from . import setup
+from . import hypernetted_chain
 
 from .elements import Element
 from .plasmastate import (
@@ -45,4 +46,5 @@ __all__ = [
     "static_structure_factors",
     "units",
     "ureg",
+    "hypernetted_chain"
 ]

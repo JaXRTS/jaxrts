@@ -1,8 +1,36 @@
 import pytest
 
+import sys
+sys.path.append("C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src")
 from jax import numpy as jnp
 import jaxrts
 
-ureg = jaxrts.ureg
+import jpu
 
+import jaxrts.hypernetted_chain as hnc
 
+import matplotlib.pyplot as plt
+
+from jaxrts.units import ureg
+
+r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 100000)
+q = hnc.construct_q_matrix(jnp.array([1]) * 1 * ureg.elementary_charge)
+T = 1.0 * ureg.electron_volt / ureg.boltzmann_constant
+
+Gamma = 10
+d = 1 / (Gamma * (1 * ureg.boltzmann_constant) * T * 4 * jnp.pi * ureg.epsilon_0 / ureg.elementary_charge ** 2)
+
+n = (1 / (d ** 3 * (4 * jnp.pi / 3))).to(1 / ureg.centimeter**3)
+print(n)
+n = jnp.array([n.m_as(1 / ureg.centimeter**3)])* (1 / ureg.centimeter**3)
+
+alpha = hnc.construct_alpha_matrix(n)
+
+V_s = hnc.V_s(r, q, alpha)
+V_l = hnc.V_l(r, q, alpha)
+
+g = hnc.pair_distribution_function_HNC(V_s, V_l, T, n)
+
+plt.plot(r / ureg.a0, g[0,0,:])
+plt.xlim(0, 5.0)
+plt.show()
