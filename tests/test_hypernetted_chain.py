@@ -21,8 +21,12 @@ Gamma = 30
 d = 1 / (Gamma * (1 * ureg.boltzmann_constant) * T * 4 * jnp.pi * ureg.epsilon_0 / ureg.elementary_charge ** 2)
 
 n = (1 / (d ** 3 * (4 * jnp.pi / 3))).to(1 / ureg.centimeter**3)
-print(n)
+
 n = jnp.array([n.m_as(1 / ureg.centimeter**3)])* (1 / ureg.centimeter**3)
+
+d = jpu.numpy.cbrt(
+    3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :]) / 2)
+)
 
 alpha = hnc.construct_alpha_matrix(n)
 
@@ -33,7 +37,7 @@ g, niter = hnc.pair_distribution_function_HNC(V_s, V_l, T, n)
 
 print(niter)
 
-plt.plot(r / ureg.a0, g[0,0,:])
-# plt.xlim(0, 25.0)
-# plt.ylim(0, 1.2)
+plt.plot((r/d[0,0]).m_as(ureg.dimensionless), g[0,0,:])
+plt.xlim(0, 5.0)
+plt.ylim(0, 1.2)
 plt.show()
