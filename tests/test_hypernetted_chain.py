@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from jaxrts.units import ureg
 
-r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 10000)
+r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 8192)
 q = hnc.construct_q_matrix(jnp.array([1]) * 1 * ureg.elementary_charge)
 T = 10 * ureg.electron_volt / ureg.boltzmann_constant
 
@@ -33,7 +33,7 @@ alpha = hnc.construct_alpha_matrix(n)
 V_s = hnc.V_s(r, q, alpha)
 V_l = hnc.V_l(r, q, alpha)
 
-g, niter = hnc.pair_distribution_function_HNC(V_s, V_l, T, n)
+g, niter = hnc.pair_distribution_function_HNC(V_s, V_l, r, T, n)
 
 print(niter)
 
