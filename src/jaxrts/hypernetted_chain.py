@@ -11,51 +11,201 @@ from jaxrts.units import ureg
 
 from typing import List, Callable
 
+@partial(jax.jit, static_argnames=["isign"])
+def four1(y, isign):
+
+    # y_indices = [1, ...., 2 * nn]
+
+    # Replaces data[1..2*nn] by its discrete Fourier transform, if isign is
+    # input as 1; or replaces data[1..2*nn] by nn times its inverse discrete
+    # Fourier transform, if isign is input as −1. data is a complex array of
+    # length nn or, equivalently, a real array of length 2*nn. nn MUST be an
+    # integer power of 2 (this is not checked for!).
+    nn = len(y) // 2
+    n = nn << 1
+    j = 1
+    for i in range(1, n, 2):
+        if j > i:
+            temp1 = y[i - 1]
+            temp2 = y[j - 1]
+            y = y.at[j - 1].set(temp1)
+            y = y.at[i - 1].set(temp2)
+            temp1 = y[i]
+            temp2 = y[j]
+            y = y.at[j].set(temp1)
+            y = y.at[i].set(temp2)
+        m = nn
+        while (m >= 2) & (j > m):
+            j -= m
+            m >>= 1
+        j += m
+
+    mmax = 2
+    while n > mmax:
+        istep = mmax << 1
+        theta = isign * (2 * jnp.pi / mmax)
+        wtemp = jnp.sin(0.5 * theta)
+        wpr = -2.0 * wtemp**2
+
+        wpi = jnp.sin(theta)
+        wr = 1.0
+        wi = 0.0
+        for m in range(1, mmax, 2):
+            for i in range(m, n + 1, istep):
+                j = i + mmax
+                tempr = wr * y[j - 1] - wi * y[j]
+                tempi = wr * y[j] + wi * y[j - 1]
+                y = y.at[j - 1].set(y[i - 1] - tempr)
+                y = y.at[j].set(y[i] - tempi)
+                y = y.at[i - 1].set(y[i-1] + tempr)
+                y = y.at[i].set(y[i] + tempi)
+            wtemp = wr
+            wr = wtemp * wpr - wi * wpi + wr
+            wi = wi * wpr + wtemp * wpi + wi
+
+        mmax = istep
+
+    return y
+
+
+@partial(jax.jit, static_argnames=["isign"])
+def realfft(y, isign=1):
+
+    n = len(y)
+
+    theta = jnp.pi / (n >> 1)
+
+    c2 = (-isign) * 0.5
+    if isign == 1:
+        y = four1(y, 1)
+
+    theta = isign * theta
+
+    wtemp = jnp.sin(0.5 * theta)
+    wpr = -2.0 * wtemp**2
+    wpi = jnp.sin(theta)
+
+    wr = 1.0 + wpr
+    wi = wpi
+    np3 = n + 3
+
+    c1 = 0.5
+
+
+    for i in range(2, (n >> 2) + 1, 1):
+        i1 = i + i - 1
+        i2 = 1 + i1
+        i3 = np3 - i2
+        i4 = 1 + i3
+
+
+        h1r = c1 * (y[i1 - 1] + y[i3 - 1])
+        h1i = c1 * (y[i2 - 1] - y[i4 - 1])
+
+        h2r = -c2 * (y[i2 - 1] + y[i4 - 1])
+        h2i = c2 * (y[i1 - 1] - y[i3 - 1])
+
+        y = y.at[i1 - 1].set(+h1r + wr * h2r - wi * h2i)
+        y = y.at[i2 - 1].set(+h1i + wr * h2i + wi * h2r)
+        y = y.at[i3 - 1].set(+h1r - wr * h2r + wi * h2i)
+        y = y.at[i4 - 1].set(-h1i + wr * h2i + wi * h2r)
+
+        wtemp = wr
+        wr = wtemp * wpr - wi * wpi + wr
+        wi = wi * wpr + wtemp * wpi + wi
+
+    # exit()
+
+    if isign == 1:
+
+        h1r = y[0]
+        y = y.at[0].set(h1r + y[1])
+        y = y.at[1].set(h1r - y[1])
+
+    else:
+        h1r = y[0]
+        y = y.at[0].set(c1 * (h1r + y[1]))
+        y = y.at[1].set(c1 * (h1r - y[1]))
+        y = four1(y, -1)
+
+    return y
 
 @jax.jit
-def phi(t, k=2 * jnp.pi):
-    return t / (1 - jnp.exp(-k * jnp.sinh(t)))
+def realfftnp(y):
+    rfft = jnp.fft.rfft(y)[:-1]
+    y = y.at[::2].set(jnp.real(rfft))
+    y = y.at[1::2].set(-jnp.imag(rfft))
+    return y
 
+# @partial(jax.jit, static_argnames = ["n"])
+@jax.jit
+def OLDsinft(y):
+    # In the original version, we modified y in place. This can be ok, but do
+    # we want it, here?
+    # y = y.copy()
+    n = len(y)
+
+    wr = 1.0
+    wi = 0.0
+
+    n2 = n + 2
+
+    theta = jnp.pi / n  # Initialize the recurrence
+    wtemp = jnp.sin(0.5 * theta)
+    wpr = -2.0 * wtemp**2
+    wpi = jnp.sin(theta)
+
+    y = y.at[0].set(0.0)
+    for j in range(2, (n >> 1) + 2, 1):
+        wtemp = wr
+        wr = (wtemp) * wpr - wi * wpi + wr
+        wi = wi * wpr + wtemp * wpi + wi
+        y1 = wi * (y[j - 1] + y[n2 - j - 1])  # Construct the auxiliary array
+        y2 = 0.5 * (y[j - 1] - y[n2 - j - 1])
+        y = y.at[j - 1].set(y1 + y2)  # Terms j and N - j are related
+        y = y.at[n2 - j - 1].set(y1 - y2)  # print(j)
+
+    y = realfftnp(y)  # Transform the auxiliary array
+
+    sum_val = 0.0
+    y = y.at[0].set(y[0] * 0.5)
+    y = y.at[1].set(0.0)
+    for j in range(1, n, 2):
+        # print(n)
+        sum_val += y[j - 1]
+        y = y.at[j - 1].set(y[j])
+        y = y.at[j].set(sum_val)
+    return y
 
 @jax.jit
-def f1(x):
-    return jnp.exp(-(x**2))
+def sinft(y):
+    # In the original version, we modified y in place. This can be ok, but do
+    # we want it, here?
+    # y = y.copy()
+    n = len(y)
 
-@jax.jit
-def _sinfft(f):
-    h = 0.001
-    dk = (2 * jnp.pi)**2 / (r[1] - r[0])
-    k = dk * jnp.arange(len(r))
+    halfn = n>>1
 
-    M = jnp.pi / h
-    N_trunc = int(20 / h)
-    n_eval = jnp.arange(-N_trunc, N_trunc, 1)
+    wi = jnp.imag(jnp.exp(1j * jnp.arange(halfn) / (2 * n) * jnp.pi * 2))
 
-    eval_points = M * phi(n_eval * h)
+    y = y.at[0].set(0.0)
 
-    phi_prime = jax.vmap(jax.grad(phi))
+    f1 = wi[1:halfn] * (y[1:halfn] + y[n : halfn: -1])
+    f2 = 0.5 * (y[1:halfn] - y[n: halfn : -1])
 
-    def for_each_k(k):
-        f_eval = jnp.interp(eval_points / k, r, f)
-        return jnp.pi * jnp.nansum(
-            f_eval * jnp.sin(eval_points) * phi_prime(n_eval * h) / k
-        )
+    y = y.at[1:halfn].set(f1 + f2)
+    y = y.at[n : halfn : -1].set(f1 - f2)
 
-    out = jax.vmap(for_each_k)(k)
-    return out
+    y = realfftnp(y)  # Transform the auxiliary array
 
-def boringtap(f, r, k):
-    return jax.scipy.integrate.trapezoid(f[:, jnp.newaxis] * jnp.sin(k[jnp.newaxis, :] * r[:, jnp.newaxis]), r[:, jnp.newaxis], axis = 0)
+    y = y.at[0].set(y[0] * 0.5)
+    y = y.at[1].set(0.0)
 
-r = jnp.linspace(0.01, 1000000, 1000)
-dk = (2 * jnp.pi)**3/ (r[1] - r[0])
-k =  dk * jnp.arange(len(r))
+    sum_val = jnp.cumsum(y[::2])
+    y = y.at[0::2].set(y[1::2])
+    y = y.at[1::2].set(sum_val)
+    return y
 
-import matplotlib.pyplot as plt
-plt.plot(k, _sinfft(r/(1+r**2)), label = "test")
-plt.plot(k, jnp.pi * jnp.exp(-1 * k) / 2, label="!!!")
-plt.legend()
-plt.show()
 
 
 @jax.jit
@@ -110,34 +260,12 @@ def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
     return jpu.numpy.outer(q, q)
 
 
+_sinfft = jax.vmap(jax.vmap(sinft, in_axes = 0, out_axes=0), in_axes = 1, out_axes=1)
+
 # @jax.jit
 def pair_distribution_function_HNC(V_s, V_l, r, Ti, ni):
     r = r.m_as(ureg.angstrom)
 
-    @jax.jit
-    def _sinfft(f):
-        h = 0.001
-        dk = jnp.pi / (r[1] - r[0])
-        k = 2 * jnp.pi / r[-1] + dk * jnp.arange(len(r))
-
-        M = jnp.pi / h
-        N_trunc = int(2 / h)
-        n_eval = jnp.arange(-N_trunc, N_trunc, 1)
-
-        eval_points = M * phi(n_eval * h)
-
-        phi_prime = jax.vmap(jax.grad(phi))
-
-        def for_each_k(k):
-            f_eval = jnp.interp(eval_points / k, r, f)
-            return jnp.pi * jnp.nansum(
-                f_eval * jnp.sin(eval_points) * phi_prime(n_eval * h) / k
-            )
-
-        out = jax.vmap(for_each_k)(k)
-        return out
-
-    sinfft = jax.vmap(jax.vmap(_sinfft, in_axes = 0, out_axes=0), in_axes = 1, out_axes=1)
 
     dr = r[1] - r[0]
     dk = jnp.pi / (len(r) * dr)
@@ -146,11 +274,11 @@ def pair_distribution_function_HNC(V_s, V_l, r, Ti, ni):
 
     beta = 1 / (ureg.boltzmann_constant * Ti)
     # g_r = (-beta * V_s).m_as(ureg.dimensionless) + 1cls
-    g_r = jnp.exp(-(beta * (V_s + V_l)).m_as(ureg.dimensionless)) + 0j
+    g_r = jnp.exp(-(beta * (V_s + V_l)).m_as(ureg.dimensionless))
 
     V_l_k = (
         (
-            sinfft(
+            _sinfft(
                 r[jnp.newaxis, jnp.newaxis, :] * V_l.m_as(ureg.electron_volt)
             )
             * ureg.electron_volt
@@ -187,9 +315,8 @@ def pair_distribution_function_HNC(V_s, V_l, r, Ti, ni):
         cs_r = h_r - Ns_r
 
         cs_k = (
-            sinfft(r[jnp.newaxis, jnp.newaxis, :] * cs_r)
-            * (4 * jnp.pi)
-            / k[jnp.newaxis, jnp.newaxis, :]
+            _sinfft(r[jnp.newaxis, jnp.newaxis, :] * cs_r)
+            * (4 * jnp.pi) * dr / k[jnp.newaxis, jnp.newaxis, :]
         )
 
         c_k = cs_k - (beta * V_l_k).m_as(ureg.dimensionless)
@@ -200,23 +327,19 @@ def pair_distribution_function_HNC(V_s, V_l, r, Ti, ni):
         Ns_k = h_k - cs_k
 
         Ns_r_new = (
-            sinfft(k[jnp.newaxis, jnp.newaxis, :] * Ns_k)
-            * (4 * jnp.pi)
-            / r[jnp.newaxis, jnp.newaxis, :] * 2 * jnp.pi / len(r)
+            _sinfft(k[jnp.newaxis, jnp.newaxis, :] * Ns_k) * dk / (2 * jnp.pi**2 * r)
         )
 
-        print(Ns_r_new)
         g_r_new = jnp.exp(Ns_r_new - (beta * V_s).m_as(ureg.dimensionless))
-        print(g_r_new)
 
         return g_r_new, g_r, Ns_r_new, i + 1
 
     init = (g_r, g_r + 100, Ns_r0, 0)
-    val = init
-    while condition(val):
-        val = step(val)
-        g_r, _, _, niter = val
-    # g_r, _, _, niter = jax.lax.while_loop(condition, step, (g_r, g_r + 100, Ns_r0, 0))
+    # val = init
+    # while condition(val):
+    #     val = step(val)
+    #     g_r, _, _, niter = val
+    g_r, _, _, niter = jax.lax.while_loop(condition, step, (g_r, g_r + 100, Ns_r0, 0))
 
     return g_r, niter
 
