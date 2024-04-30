@@ -11,6 +11,7 @@ from jaxrts.units import ureg
 
 from typing import List, Callable
 
+
 @partial(jax.jit, static_argnames=["isign"])
 def four1(y, isign):
 
@@ -57,7 +58,7 @@ def four1(y, isign):
                 tempi = wr * y[j] + wi * y[j - 1]
                 y = y.at[j - 1].set(y[i - 1] - tempr)
                 y = y.at[j].set(y[i] - tempi)
-                y = y.at[i - 1].set(y[i-1] + tempr)
+                y = y.at[i - 1].set(y[i - 1] + tempr)
                 y = y.at[i].set(y[i] + tempi)
             wtemp = wr
             wr = wtemp * wpr - wi * wpi + wr
@@ -91,13 +92,11 @@ def realfft(y, isign=1):
 
     c1 = 0.5
 
-
     for i in range(2, (n >> 2) + 1, 1):
         i1 = i + i - 1
         i2 = 1 + i1
         i3 = np3 - i2
         i4 = 1 + i3
-
 
         h1r = c1 * (y[i1 - 1] + y[i3 - 1])
         h1i = c1 * (y[i2 - 1] - y[i4 - 1])
@@ -130,12 +129,14 @@ def realfft(y, isign=1):
 
     return y
 
+
 @jax.jit
 def realfftnp(y):
     rfft = jnp.fft.rfft(y)[:-1]
     y = y.at[::2].set(jnp.real(rfft))
     y = y.at[1::2].set(-jnp.imag(rfft))
     return y
+
 
 # @partial(jax.jit, static_argnames = ["n"])
 @jax.jit
@@ -177,6 +178,7 @@ def OLDsinft(y):
         y = y.at[j].set(sum_val)
     return y
 
+
 @jax.jit
 def sinft(y):
     # In the original version, we modified y in place. This can be ok, but do
@@ -184,17 +186,17 @@ def sinft(y):
     # y = y.copy()
     n = len(y)
 
-    halfn = n>>1
+    halfn = n >> 1
 
     wi = jnp.imag(jnp.exp(1j * jnp.arange(halfn) / (2 * n) * jnp.pi * 2))
 
     y = y.at[0].set(0.0)
 
-    f1 = wi[1:halfn] * (y[1:halfn] + y[n : halfn: -1])
-    f2 = 0.5 * (y[1:halfn] - y[n: halfn : -1])
+    f1 = wi[1:halfn] * (y[1:halfn] + y[n:halfn:-1])
+    f2 = 0.5 * (y[1:halfn] - y[n:halfn:-1])
 
     y = y.at[1:halfn].set(f1 + f2)
-    y = y.at[n : halfn : -1].set(f1 - f2)
+    y = y.at[n:halfn:-1].set(f1 - f2)
 
     y = realfftnp(y)  # Transform the auxiliary array
 
@@ -205,7 +207,6 @@ def sinft(y):
     y = y.at[0::2].set(y[1::2])
     y = y.at[1::2].set(sum_val)
     return y
-
 
 
 @jax.jit
@@ -237,6 +238,7 @@ def V_s(
 
     _q = q[:, :, jnp.newaxis]
     _alpha = alpha[:, :, jnp.newaxis]
+    _alpha = alpha[:, :, jnp.newaxis]
     _r = r[jnp.newaxis, jnp.newaxis, :]
 
     return (
@@ -260,51 +262,52 @@ def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
     return jpu.numpy.outer(q, q)
 
 
-_sinfft = jax.vmap(jax.vmap(sinft, in_axes = 0, out_axes=0), in_axes = 1, out_axes=1)
+_sinfft = jax.vmap(
+    jax.vmap(sinft, in_axes=0, out_axes=0), in_axes=1, out_axes=1
+)
+
 
 # @jax.jit
 def pair_distribution_function_HNC(V_s, V_l, r, Ti, ni):
-    r = r.m_as(ureg.angstrom)
-
-
     dr = r[1] - r[0]
-    dk = jnp.pi / (len(r) * dr)
+    dk = jnp.pi/ (len(r) * dr)
 
-    k = 2 * jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+    k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
     beta = 1 / (ureg.boltzmann_constant * Ti)
-    # g_r = (-beta * V_s).m_as(ureg.dimensionless) + 1cls
-    g_r = jnp.exp(-(beta * (V_s + V_l)).m_as(ureg.dimensionless))
+    v_s = beta * V_s
+    v_l = beta * V_l
+    g_r = jpu.numpy.exp(-(v_s + v_l))
 
-    V_l_k = (
+    v_l_k = (
         (
-            _sinfft(
-                r[jnp.newaxis, jnp.newaxis, :] * V_l.m_as(ureg.electron_volt)
-            )
-            * ureg.electron_volt
+            _sinfft((r[jnp.newaxis, jnp.newaxis, :] * v_l).m_as(ureg.angstrom))
+            * ureg.angstrom
         )
         * ((4 * jnp.pi) / k[jnp.newaxis, jnp.newaxis, :])
+        * dr
     )
 
-    delta = 1e-8
+    delta = 1e-6
 
-    Ns_r0 = jnp.zeros_like(g_r)
+    Ns_r0 = jnp.zeros_like(g_r) * ureg.dimensionless
 
     d = jnp.eye(ni.shape[0]) * ni
 
     def ozr(input_vec):
-        return (
+        return jpu.numpy.matmul(
             jnp.linalg.inv(
-                jnp.eye(ni.shape[0])
-                - input_vec @ d.m_as(1 / ureg.centimeter**3)
-            )
-            @ input_vec
+                (jnp.eye(ni.shape[0]) - jpu.numpy.matmul(input_vec, d)).m_as(
+                    ureg.dimensionless
+                )
+            ),
+            input_vec,
         )
 
     def condition(val):
         g_r, g_r_old, _, n_iter = val
-        return (n_iter < 1000) & jnp.all(
-            jnp.max(jnp.abs(g_r - g_r_old)) > delta
+        return (n_iter < 2000) & jnp.all(
+            jnp.max(jnp.abs((g_r - g_r_old).m_as(ureg.dimensionless))) > delta
         )
 
     def step(val):
@@ -312,34 +315,47 @@ def pair_distribution_function_HNC(V_s, V_l, r, Ti, ni):
 
         h_r = g_r - 1
 
-        cs_r = h_r - Ns_r
+        cs_r = (h_r - Ns_r)
 
         cs_k = (
-            _sinfft(r[jnp.newaxis, jnp.newaxis, :] * cs_r)
-            * (4 * jnp.pi) * dr / k[jnp.newaxis, jnp.newaxis, :]
+            _sinfft(
+                (r[jnp.newaxis, jnp.newaxis, :] * cs_r).m_as(ureg.angstrom)
+            )
+            * ureg.angstrom
+            * (4 * jnp.pi)
+            / k[jnp.newaxis, jnp.newaxis, :]
+            * dr
         )
 
-        c_k = cs_k - (beta * V_l_k).m_as(ureg.dimensionless)
+        c_k = cs_k - v_l_k
 
         # Ornstein-Zernike relation
         h_k = jax.vmap(ozr, in_axes=2, out_axes=2)(c_k)
 
         Ns_k = h_k - cs_k
 
+        print(Ns_k)
+
         Ns_r_new = (
-            _sinfft(k[jnp.newaxis, jnp.newaxis, :] * Ns_k) * dk / (2 * jnp.pi**2 * r)
+            _sinfft((
+                k[jnp.newaxis, jnp.newaxis, :] * Ns_k
+                ).m_as(ureg.angstrom**2)) * (1* ureg.angstrom)**2  #* dk / (2 * jnp.pi**2 * r[jnp.newaxis, jnp.newaxis, :])
+            * (4 * jnp.pi)
+            * dk
+            / r[jnp.newaxis, jnp.newaxis, :]
+            / (len(r) / 2)
         )
 
-        g_r_new = jnp.exp(Ns_r_new - (beta * V_s).m_as(ureg.dimensionless))
+        g_r_new = jpu.numpy.exp(Ns_r_new) / jpu.numpy.exp(v_s)
 
         return g_r_new, g_r, Ns_r_new, i + 1
 
-    init = (g_r, g_r + 100, Ns_r0, 0)
-    # val = init
-    # while condition(val):
-    #     val = step(val)
-    #     g_r, _, _, niter = val
-    g_r, _, _, niter = jax.lax.while_loop(condition, step, (g_r, g_r + 100, Ns_r0, 0))
+    init = (g_r, g_r - 1, Ns_r0, 0)
+    val = init
+    while condition(val):
+        val = step(val)
+        g_r, _, _, niter = val
+    # g_r, _, _, niter = jax.lax.while_loop(condition, step, (g_r, g_r + 1, Ns_r0, 0))
 
     return g_r, niter
 
