@@ -228,6 +228,21 @@ def V_l(
 
 
 @jax.jit
+def V_l_k(
+    k: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity
+) -> Quantity | jnp.ndarray:
+    """
+    q**2 / (4 * jnp.pi * ureg.epsilon_0 * r) * (jnp.exp(-alpha * r))
+    """
+
+    _q = q[:, :, jnp.newaxis]
+    _alpha = alpha[:, :, jnp.newaxis]
+    _k = k[jnp.newaxis, jnp.newaxis, :]
+
+    return _q / (_k**2 * ureg.epsilon_0) * _alpha**2 / (_k**2 + _alpha ** 2)
+
+
+@jax.jit
 def V_s(
     r: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity
 ) -> Quantity | jnp.ndarray:
@@ -267,25 +282,28 @@ _sinfft = jax.vmap(
 
 
 # @jax.jit
-def pair_distribution_function_HNC(V_s, V_l, r, Ti, ni):
+def pair_distribution_function_HNC(V_s, V_l, V_l_k, r, Ti, ni):
     dr = r[1] - r[0]
     dk = jnp.pi/ (len(r) * dr)
 
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
     beta = 1 / (ureg.boltzmann_constant * Ti)
+
     v_s = beta * V_s
     v_l = beta * V_l
-    g_r = jpu.numpy.exp(-(v_s + v_l))
+    v_l_k = beta * V_l_k
 
-    v_l_k = (
-        (
-            _sinfft((r[jnp.newaxis, jnp.newaxis, :] * v_l).m_as(ureg.angstrom))
-            * ureg.angstrom
-        )
-        * ((4 * jnp.pi) / k[jnp.newaxis, jnp.newaxis, :])
-        * dr
-    )
+    g_r = jpu.numpy.exp(-(v_s))
+
+    # v_l_k = (
+    #     (
+    #         _sinfft((r[jnp.newaxis, jnp.newaxis, :] * v_l).m_as(ureg.angstrom))
+    #         * ureg.angstrom
+    #     )
+    #     * ((4 * jnp.pi) / k[jnp.newaxis, jnp.newaxis, :])
+    #     * dr
+    # )
 
     delta = 1e-6
 
@@ -305,6 +323,7 @@ def pair_distribution_function_HNC(V_s, V_l, r, Ti, ni):
 
     def condition(val):
         g_r, g_r_old, _, n_iter = val
+        print(jnp.max(jnp.abs((g_r - g_r_old).m_as(ureg.dimensionless))))
         return (n_iter < 2000) & jnp.all(
             jnp.max(jnp.abs((g_r - g_r_old).m_as(ureg.dimensionless))) > delta
         )
@@ -333,16 +352,14 @@ def pair_distribution_function_HNC(V_s, V_l, r, Ti, ni):
 
         Ns_k = h_k - cs_k
 
-        print(Ns_k)
-
         Ns_r_new = (
             _sinfft((
                 k[jnp.newaxis, jnp.newaxis, :] * Ns_k
-                ).m_as(ureg.angstrom**2)) * (1* ureg.angstrom)**2  #* dk / (2 * jnp.pi**2 * r[jnp.newaxis, jnp.newaxis, :])
-            * (4 * jnp.pi)
-            * dk
-            / r[jnp.newaxis, jnp.newaxis, :]
-            / (len(r) / 2)
+                ).m_as(ureg.angstrom**2)) * (1* ureg.angstrom)**2 * dk / (2 * jnp.pi**2 * r[jnp.newaxis, jnp.newaxis, :])
+            # * (4 * jnp.pi)
+            # * dk
+            # / r[jnp.newaxis, jnp.newaxis, :]
+            # / (len(r) / 2)
         )
 
         g_r_new = jpu.numpy.exp(Ns_r_new) / jpu.numpy.exp(v_s)

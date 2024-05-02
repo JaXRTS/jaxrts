@@ -45,9 +45,15 @@ def main():
         alpha = hnc.construct_alpha_matrix(n)
 
         V_s = hnc.V_s(r, q, alpha)
+
+        dr = r[1] - r[0]
+        dk = jnp.pi/ (len(r) * dr)
+        k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+
+        V_l_k = hnc.V_l_k(k, q, alpha)
         V_l = hnc.V_l(r, q, alpha)
 
-        g, niter = hnc.pair_distribution_function_HNC(V_s, V_l, r, T, n)
+        g, niter = hnc.pair_distribution_function_HNC(V_s, V_l, V_l_k, r, T, n)
 
         print(niter)
         print(g)
@@ -56,8 +62,8 @@ def main():
             (r / d[0, 0]).m_as(ureg.dimensionless),
             g[0, 0, :].m_as(ureg.dimensionless),
         )
-    # plt.xlim(0, 5.0)
-    plt.ylim(0, 1.2)
+    plt.xlim(0, 5.0)
+    plt.ylim(0, 1.5)
     plt.show()
 
 
