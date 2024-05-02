@@ -186,28 +186,27 @@ def sinft(y):
     # y = y.copy()
     n = len(y)
 
-    halfn = n >> 1
+    halfn = (n >> 1)
 
-    wi = jnp.imag(jnp.exp(1j * jnp.arange(halfn) / (2 * n) * jnp.pi * 2))
+    wi = jnp.imag(jnp.exp(1j * jnp.arange(halfn+1) / (2 * n) * jnp.pi * 2))
 
     y = y.at[0].set(0.0)
 
-    f1 = wi[1:halfn] * (y[1:halfn] + y[n:halfn:-1])
-    f2 = 0.5 * (y[1:halfn] - y[n:halfn:-1])
+    f1 = wi[1:halfn+1] * (y[1:halfn+1] + y[n:halfn-1:-1])
+    f2 = 0.5 * (y[1:halfn+1] - y[n:halfn-1:-1])
 
-    y = y.at[1:halfn].set(f1 + f2)
-    y = y.at[n:halfn:-1].set(f1 - f2)
+    y = y.at[1:halfn+1].set(f1 + f2)
+    y = y.at[n:halfn-1:-1].set(f1 - f2)
 
     y = realfftnp(y)  # Transform the auxiliary array
 
     y = y.at[0].set(y[0] * 0.5)
     y = y.at[1].set(0.0)
 
-    sum_val = jnp.cumsum(y[::2])
-    y = y.at[0::2].set(y[1::2])
-    y = y.at[1::2].set(sum_val)
+    sum_val = jnp.cumsum(y[:n-1:2])
+    y = y.at[0:n-1:2].set(y[1:n:2])
+    y = y.at[1:n:2].set(sum_val)
     return y
-
 
 @jax.jit
 def V_l(
