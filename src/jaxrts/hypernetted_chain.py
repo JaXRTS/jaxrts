@@ -14,6 +14,9 @@ from typing import List, Callable
 
 @partial(jax.jit, static_argnames=["isign"])
 def four1(y, isign):
+    """
+    See :cite:`Press.1994`.
+    """
 
     # y_indices = [1, ...., 2 * nn]
 
@@ -71,7 +74,9 @@ def four1(y, isign):
 
 @partial(jax.jit, static_argnames=["isign"])
 def realfft(y, isign=1):
-
+    """
+    See :cite:`Press.1994`.
+    """
     n = len(y)
 
     theta = jnp.pi / (n >> 1)
@@ -138,7 +143,6 @@ def realfftnp(y):
     return y
 
 
-# @partial(jax.jit, static_argnames = ["n"])
 @jax.jit
 def OLDsinft(y):
     # In the original version, we modified y in place. This can be ok, but do
@@ -151,7 +155,7 @@ def OLDsinft(y):
 
     n2 = n + 2
 
-    theta = jnp.pi / n  # Initialize the recurrence
+    theta = jnp.pi / n
     wtemp = jnp.sin(0.5 * theta)
     wpr = -2.0 * wtemp**2
     wpi = jnp.sin(theta)
@@ -164,7 +168,7 @@ def OLDsinft(y):
         y1 = wi * (y[j - 1] + y[n2 - j - 1])  # Construct the auxiliary array
         y2 = 0.5 * (y[j - 1] - y[n2 - j - 1])
         y = y.at[j - 1].set(y1 + y2)  # Terms j and N - j are related
-        y = y.at[n2 - j - 1].set(y1 - y2)  # print(j)
+        y = y.at[n2 - j - 1].set(y1 - y2)
 
     y = realfftnp(y)  # Transform the auxiliary array
 
@@ -181,32 +185,36 @@ def OLDsinft(y):
 
 @jax.jit
 def sinft(y):
+    """
+    See :cite:`Press.1994`.
+    """
     # In the original version, we modified y in place. This can be ok, but do
     # we want it, here?
     # y = y.copy()
     n = len(y)
 
-    halfn = (n >> 1)
+    halfn = n >> 1
 
-    wi = jnp.imag(jnp.exp(1j * jnp.arange(halfn+1) / (2 * n) * jnp.pi * 2))
+    wi = jnp.imag(jnp.exp(1j * jnp.arange(halfn + 1) / (2 * n) * jnp.pi * 2))
 
     y = y.at[0].set(0.0)
 
-    f1 = wi[1:halfn+1] * (y[1:halfn+1] + y[n:halfn-1:-1])
-    f2 = 0.5 * (y[1:halfn+1] - y[n:halfn-1:-1])
+    f1 = wi[1 : halfn + 1] * (y[1 : halfn + 1] + y[n : halfn - 1 : -1])
+    f2 = 0.5 * (y[1 : halfn + 1] - y[n : halfn - 1 : -1])
 
-    y = y.at[1:halfn+1].set(f1 + f2)
-    y = y.at[n:halfn-1:-1].set(f1 - f2)
+    y = y.at[1 : halfn + 1].set(f1 + f2)
+    y = y.at[n : halfn - 1 : -1].set(f1 - f2)
 
-    y = realfftnp(y)  # Transform the auxiliary array
+    y = realfftnp(y)
 
     y = y.at[0].set(y[0] * 0.5)
     y = y.at[1].set(0.0)
 
-    sum_val = jnp.cumsum(y[:n-1:2])
-    y = y.at[0:n-1:2].set(y[1:n:2])
+    sum_val = jnp.cumsum(y[: n - 1 : 2])
+    y = y.at[0 : n - 1 : 2].set(y[1:n:2])
     y = y.at[1:n:2].set(sum_val)
     return y
+
 
 @jax.jit
 def V_l(
@@ -232,14 +240,14 @@ def V_l_k(
     k: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity
 ) -> Quantity | jnp.ndarray:
     """
-    q**2 / (4 * jnp.pi * ureg.epsilon_0 * r) * (jnp.exp(-alpha * r))
+    q**2 / (k**2 * ε0) * (alpha**2 / (k**2 + alpha**2))
     """
 
     _q = q[:, :, jnp.newaxis]
     _alpha = alpha[:, :, jnp.newaxis]
     _k = k[jnp.newaxis, jnp.newaxis, :]
 
-    return _q / (_k**2 * ureg.epsilon_0) * _alpha**2 / (_k**2 + _alpha ** 2)
+    return _q / (_k**2 * ureg.epsilon_0) * _alpha**2 / (_k**2 + _alpha**2)
 
 
 @jax.jit
@@ -262,7 +270,6 @@ def V_s(
 
 @jax.jit
 def construct_alpha_matrix(ne: jnp.ndarray | Quantity):
-
     d = jpu.numpy.cbrt(
         3 / (4 * jnp.pi * (ne[:, jnp.newaxis] + ne[jnp.newaxis, :]) / 2)
     )
@@ -272,7 +279,6 @@ def construct_alpha_matrix(ne: jnp.ndarray | Quantity):
 
 @jax.jit
 def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
-
     return jpu.numpy.outer(q, q)
 
 
@@ -281,37 +287,33 @@ _sinfft = jax.vmap(
 )
 
 
-# @jax.jit
-def pair_distribution_function_HNC(V_s, V_l, V_l_k, r, Ti, ni):
+@jax.jit
+def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
+    """
+    Calculate the Pair distribution function in the Hypernetted Chain approach,
+    as it was published by :cite:`Wunsch.2011`.
+    """
+    delta = 1e-6
+
     dr = r[1] - r[0]
-    dk = jnp.pi/ (len(r) * dr)
+    dk = jnp.pi / (len(r) * dr)
 
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
     beta = 1 / (ureg.boltzmann_constant * Ti)
 
     v_s = beta * V_s
-    v_l = beta * V_l
     v_l_k = beta * V_l_k
 
     g_r = jpu.numpy.exp(-(v_s))
-
-    # v_l_k = (
-    #     (
-    #         _sinfft((r[jnp.newaxis, jnp.newaxis, :] * v_l).m_as(ureg.angstrom))
-    #         * ureg.angstrom
-    #     )
-    #     * ((4 * jnp.pi) / k[jnp.newaxis, jnp.newaxis, :])
-    #     * dr
-    # )
-
-    delta = 1e-6
-
     Ns_r0 = jnp.zeros_like(g_r) * ureg.dimensionless
 
     d = jnp.eye(ni.shape[0]) * ni
 
     def ozr(input_vec):
+        """
+        Ornstein-Zernicke Relation
+        """
         return jpu.numpy.matmul(
             jnp.linalg.inv(
                 (jnp.eye(ni.shape[0]) - jpu.numpy.matmul(input_vec, d)).m_as(
@@ -322,8 +324,11 @@ def pair_distribution_function_HNC(V_s, V_l, V_l_k, r, Ti, ni):
         )
 
     def condition(val):
+        """
+        If this is False, the loop will stop. Abort if too many steps were
+        reached, or if convergence was reached.
+        """
         g_r, g_r_old, _, n_iter = val
-        print(jnp.max(jnp.abs((g_r - g_r_old).m_as(ureg.dimensionless))))
         return (n_iter < 2000) & jnp.all(
             jnp.max(jnp.abs((g_r - g_r_old).m_as(ureg.dimensionless))) > delta
         )
@@ -333,7 +338,7 @@ def pair_distribution_function_HNC(V_s, V_l, V_l_k, r, Ti, ni):
 
         h_r = g_r - 1
 
-        cs_r = (h_r - Ns_r)
+        cs_r = h_r - Ns_r
 
         cs_k = (
             _sinfft(
@@ -353,13 +358,12 @@ def pair_distribution_function_HNC(V_s, V_l, V_l_k, r, Ti, ni):
         Ns_k = h_k - cs_k
 
         Ns_r_new = (
-            _sinfft((
-                k[jnp.newaxis, jnp.newaxis, :] * Ns_k
-                ).m_as(ureg.angstrom**2)) * (1* ureg.angstrom)**2 * dk / (2 * jnp.pi**2 * r[jnp.newaxis, jnp.newaxis, :])
-            # * (4 * jnp.pi)
-            # * dk
-            # / r[jnp.newaxis, jnp.newaxis, :]
-            # / (len(r) / 2)
+            _sinfft(
+                (k[jnp.newaxis, jnp.newaxis, :] * Ns_k).m_as(ureg.angstrom**2)
+            )
+            * (1 * ureg.angstrom) ** 2
+            * dk
+            / (2 * jnp.pi**2 * r[jnp.newaxis, jnp.newaxis, :])
         )
 
         g_r_new = jpu.numpy.exp(Ns_r_new) / jpu.numpy.exp(v_s)
@@ -367,11 +371,7 @@ def pair_distribution_function_HNC(V_s, V_l, V_l_k, r, Ti, ni):
         return g_r_new, g_r, Ns_r_new, i + 1
 
     init = (g_r, g_r - 1, Ns_r0, 0)
-    val = init
-    while condition(val):
-        val = step(val)
-        g_r, _, _, niter = val
-    # g_r, _, _, niter = jax.lax.while_loop(condition, step, (g_r, g_r + 1, Ns_r0, 0))
+    g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
 
     return g_r, niter
 

@@ -16,10 +16,12 @@ import matplotlib.pyplot as plt
 
 from jaxrts.units import ureg
 
+import time
+
 
 def main():
-    for pot in [13, 14, 15]:
-        r = jpu.numpy.linspace(0.01 * ureg.angstrom, 100 * ureg.a0, 2**pot)
+    for pot in [13, 14, 15, 16]:
+        r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 2**pot)
         q = hnc.construct_q_matrix(jnp.array([1]) * 1 * ureg.elementary_charge)
         T = 10 * ureg.electron_volt / ureg.boltzmann_constant
 
@@ -51,12 +53,9 @@ def main():
         k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
         V_l_k = hnc.V_l_k(k, q, alpha)
-        V_l = hnc.V_l(r, q, alpha)
 
-        g, niter = hnc.pair_distribution_function_HNC(V_s, V_l, V_l_k, r, T, n)
-
+        g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
         print(niter)
-        print(g)
 
         plt.plot(
             (r / d[0, 0]).m_as(ureg.dimensionless),
