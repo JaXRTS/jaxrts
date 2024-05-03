@@ -37,7 +37,7 @@ dr = r[1] - r[0]
 dk = jnp.pi / (len(r) * dr)
 k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-alpha = hnc.construct_alpha_matrix(n)
+alpha = hnc.construct_alpha_matrix(n) * 2
 V_l_k = hnc.V_l_k(k, q, alpha)
 V_s = hnc.V_s(r, q, alpha)
 
@@ -62,7 +62,7 @@ ax[0].plot(
 for gtype in ["HH", "CH", "CC"]:
     xlit, glit = onp.genfromtxt(
         Path(__file__).parent
-        / f"../../tests/data/Wunsch2011/Fig4.12/g_{gtype}.py",
+        / f"../../tests/data/Wunsch2011/Fig4.12/g_{gtype}.csv",
         unpack=True,
         delimiter=",",
     )
