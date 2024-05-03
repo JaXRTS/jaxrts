@@ -26,7 +26,7 @@ def main():
         T = 10 * ureg.electron_volt / ureg.boltzmann_constant
 
         Gamma = 30
-        d = 1 / (
+        di = 1 / (
             Gamma
             * (1 * ureg.boltzmann_constant)
             * T
@@ -36,7 +36,7 @@ def main():
             / ureg.elementary_charge**2
         )
 
-        n = (1 / (d**3 * (4 * jnp.pi / 3))).to(1 / ureg.angstrom**3)
+        n = (1 / (di**3 * (4 * jnp.pi / 3))).to(1 / ureg.angstrom**3)
 
         n = jnp.array([n.m_as(1 / ureg.angstrom**3)]) * (1 / ureg.angstrom**3)
 
@@ -49,10 +49,12 @@ def main():
         V_s = hnc.V_s(r, q, alpha)
 
         dr = r[1] - r[0]
-        dk = jnp.pi/ (len(r) * dr)
+        dk = jnp.pi / (len(r) * dr)
         k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
         V_l_k = hnc.V_l_k(k, q, alpha)
+        V_l = hnc.V_l(r, q, alpha)
+        V_l_k, _ = hnc.transformPotential(V_l, r)
 
         g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
         print(niter)
@@ -64,6 +66,7 @@ def main():
     plt.xlim(0, 5.0)
     plt.ylim(0, 1.5)
     plt.show()
+
 
 
 def test_sinft_self_inverse():
@@ -97,6 +100,17 @@ def test_realfft_realfftnp_equaltity():
     f_fft2 = jaxrts.hypernetted_chain.realfftnp(f.copy())
     # There seems to be a small difference in index 1.
     assert jnp.quantile(jnp.abs(f_fft1 - f_fft2), 0.99) < 1e-8
+
+
+def test_sinft_OLDsinft_equaltity():
+    N = 2**7
+    r = jnp.linspace(0.02, 20.0, N)
+
+    f = r / (1 + r**2)
+    f_fft1 = jaxrts.hypernetted_chain.sinft(f.copy())
+    f_fft2 = jaxrts.hypernetted_chain.OLDsinft(f.copy())
+    # There seems to be a small difference in index 1.
+    assert jnp.max(jnp.abs(f_fft1 - f_fft2)) < 1e-8
 
 
 def test_sinft_self_inverse():

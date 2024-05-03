@@ -210,9 +210,9 @@ def sinft(y):
     y = y.at[0].set(y[0] * 0.5)
     y = y.at[1].set(0.0)
 
-    sum_val = jnp.cumsum(y[: n - 1 : 2])
-    y = y.at[0 : n - 1 : 2].set(y[1:n:2])
-    y = y.at[1:n:2].set(sum_val)
+    sum_val = jnp.cumsum(y[::2])
+    y = y.at[::2].set(y[1::2])
+    y = y.at[1::2].set(sum_val)
     return y
 
 
@@ -260,12 +260,35 @@ def V_s(
 
     _q = q[:, :, jnp.newaxis]
     _alpha = alpha[:, :, jnp.newaxis]
-    _alpha = alpha[:, :, jnp.newaxis]
     _r = r[jnp.newaxis, jnp.newaxis, :]
 
     return (
         _q / (4 * jnp.pi * ureg.epsilon_0 * _r) * (jpu.numpy.exp(-_alpha * _r))
     ).to(ureg.electron_volt)
+
+
+@jax.jit
+def transformPotential(V, r) -> Quantity:
+    """
+    ToDo: Test this, potentially, there is something wrong, here.
+    """
+    dr = r[1] - r[0]
+    dk = jnp.pi / (len(r) * dr)
+    k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+    V_k = (
+        (
+            _sinfft(
+                (r[jnp.newaxis, jnp.newaxis, :] * V).m_as(
+                    ureg.electron_volt * ureg.angstrom
+                )
+            )
+            * ureg.electron_volt
+            * ureg.angstrom
+        )
+        * dr
+        / (2 * jnp.pi**2 * k[jnp.newaxis, jnp.newaxis, :])
+    )
+    return V_k, k
 
 
 @jax.jit
