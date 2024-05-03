@@ -1,10 +1,12 @@
 import pytest
+from pathlib import Path
 
 import sys
 
 sys.path.append(
     "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
 )
+import jax
 from jax import numpy as jnp
 import jaxrts
 
@@ -18,14 +20,14 @@ from jaxrts.units import ureg
 
 import time
 
+import numpy as onp
+
 
 def main():
-    for pot in [13, 14, 15, 16]:
-        r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 2**pot)
+    for Gamma, pot in zip([1, 10, 30, 100], [13, 13, 15, 16]):
         q = hnc.construct_q_matrix(jnp.array([1]) * 1 * ureg.elementary_charge)
-        T = 10 * ureg.electron_volt / ureg.boltzmann_constant
 
-        Gamma = 30
+        T = 10 * ureg.electron_volt / ureg.boltzmann_constant
         di = 1 / (
             Gamma
             * (1 * ureg.boltzmann_constant)
@@ -35,6 +37,14 @@ def main():
             * ureg.epsilon_0
             / ureg.elementary_charge**2
         )
+
+        r_lit, g_lit = onp.genfromtxt(
+            Path(__file__).parent
+            / f"data/Wunsch2011/Fig4.4/Gamma_{Gamma}.csv",
+            unpack=True,
+            delimiter=", ",
+        )
+        r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 10 * ureg.a0, 2**pot)
 
         n = (1 / (di**3 * (4 * jnp.pi / 3))).to(1 / ureg.angstrom**3)
 
@@ -59,6 +69,8 @@ def main():
         g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
         print(niter)
 
+        plt.plot(r_lit, g_lit)
+        print(g_lit, r_lit)
         plt.plot(
             (r / d[0, 0]).m_as(ureg.dimensionless),
             g[0, 0, :].m_as(ureg.dimensionless),
@@ -66,7 +78,6 @@ def main():
     plt.xlim(0, 5.0)
     plt.ylim(0, 1.5)
     plt.show()
-
 
 
 def test_sinft_self_inverse():
@@ -124,5 +135,30 @@ def test_sinft_self_inverse():
     assert jnp.max(jnp.abs(f - f_fft)) < 1e-8
 
 
+@pytest.mark.skip(reason="Norm not clear")
+def test_sinft_analytical_result():
+    N = 2**14
+    r = jnp.linspace(0.01, 100, N)
+    dr = r[1] - r[0]
+    pref = jnp.sqrt(jnp.pi)
+
+    dk = pref / (len(r) * dr)
+    k = pref / r[-1] + jnp.arange(len(r)) * dk
+
+    f = 1 / jnp.sqrt(r)
+    f_fft = jaxrts.hypernetted_chain.sinft(f.copy()) / jnp.sqrt(len(r) / 2)
+    f_ft_analytical = jnp.sqrt(jnp.pi / (2 * k))
+    factor = f_fft / f_ft_analytical
+    plt.plot(k, f_fft, label="Trafo")
+    plt.plot(k, f_ft_analytical, label="Ana")
+    plt.plot(k, factor)
+    plt.legend()
+    plt.ylim(0, 2)
+    plt.show()
+
+    # assert jnp.max(jnp.abs(f_ft_analytical - f_fft)) < 1e-8
+
+
 if __name__ == "__main__":
     main()
+    # test_sinft_analytical_result()
