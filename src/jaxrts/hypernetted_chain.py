@@ -347,6 +347,7 @@ def V_s(
     ).to(ureg.electron_volt)
 
 
+
 @jax.jit
 def transformPotential(V, r) -> Quantity:
     """
@@ -402,7 +403,7 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
     dk = jnp.pi / (len(r) * dr)
 
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
-    
+
     beta = 1 / (ureg.boltzmann_constant * Ti)
 
     v_s = beta * V_s
@@ -480,11 +481,11 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
 
 @jax.jit
 def S_ii_HNC(k: Quantity, pdf, ni, r):
-    
+
     """
     Calculates the static structure factor for an isotropic system from the
     pair distribution function obtained used the HNC approach.
-    
+
     .. note::
         Due to the numerical implementation of :py:func:`~.sinft`, we force the
         entry ``S_ii[0]`` to the value ``S_ii[1]``, as it would be always
@@ -501,7 +502,7 @@ def S_ii_HNC(k: Quantity, pdf, ni, r):
     # return jnp.eye(ni.shape[0]) + (
     #     (4 * jnp.pi / k) * jpu.numpy.sqrt(jpu.numpy.outer(ni, ni)) * integral
     # ).m_as(ureg.dimensionless)
-    
+
     dr = r[1] - r[0]
 
     S_k = 1.0 + (
@@ -512,7 +513,7 @@ def S_ii_HNC(k: Quantity, pdf, ni, r):
             * 4 * jnp.pi * ni * dr
             / k[jnp.newaxis, jnp.newaxis, :]
             )
-    
+
     # The first index is forced to 1. Set it to the entry [1], as this is not
     # desired
     return S_k.at[0].set(S_k[1])

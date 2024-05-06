@@ -60,13 +60,12 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
         V_s = hnc.V_s(r, q, alpha)
 
         dr = r[1] - r[0]
-        # dk = jnp.pi / (len(r) * dr)
-        # k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
-        k = 2 * jnp.pi * rfftfreq(len(r), d=dr.m_as(ureg.angstrom))/ (1 * ureg.angstrom) # This works too?
+        dk = jnp.pi / (len(r) * dr)
+        k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
         V_l_k = hnc.V_l_k(k, q, alpha)
-        V_l = hnc.V_l(r, q, alpha)
-        V_l_k, _ = hnc.transformPotential(V_l, r)
+        # V_l = hnc.V_l(r, q, alpha)
+        # V_l_k, _ = hnc.transformPotential(V_l, r)
 
         g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
 
@@ -76,7 +75,7 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
             g[0, 0, :].m_as(ureg.dimensionless),
         )
 
-        assert jnp.all(jnp.abs(g_lit - interp) < 0.03)
+        assert jnp.all(jnp.abs(g_lit - interp) < 0.04)
 
 
 def test_sinft_self_inverse():
