@@ -22,6 +22,8 @@ import time
 
 import numpy as onp
 
+from scipy.fftpack import rfftfreq
+
 
 def main():
     for Gamma, pot in zip([1, 10, 30, 100], [13, 13, 15, 16]):
@@ -59,8 +61,9 @@ def main():
         V_s = hnc.V_s(r, q, alpha)
 
         dr = r[1] - r[0]
-        dk = jnp.pi / (len(r) * dr)
-        k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+        # dk = jnp.pi / (len(r) * dr)
+        # k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+        k = 2 * jnp.pi * rfftfreq(len(r), d=dr.m_as(ureg.angstrom))/ (1 * ureg.angstrom) # This works too?
 
         V_l_k = hnc.V_l_k(k, q, alpha)
         V_l = hnc.V_l(r, q, alpha)
@@ -138,15 +141,17 @@ def test_sinft_self_inverse():
 @pytest.mark.skip(reason="Norm not clear")
 def test_sinft_analytical_result():
     N = 2**14
-    r = jnp.linspace(0.01, 100, N)
+    r = jnp.linspace(0.001, 1000, N)
     dr = r[1] - r[0]
-    pref = jnp.sqrt(jnp.pi)
+    # pref = jnp.sqrt(jnp.pi)
 
-    dk = pref / (len(r) * dr)
-    k = pref / r[-1] + jnp.arange(len(r)) * dk
+    # dk = pref / (len(r) * dr)
+    # k = pref / r[-1] + jnp.arange(len(r)) * dk
+    k = rfftfreq(len(r), d=dr)
 
     f = 1 / jnp.sqrt(r)
-    f_fft = jaxrts.hypernetted_chain.sinft(f.copy()) / jnp.sqrt(len(r) / 2)
+    f_fft = jaxrts.hypernetted_chain.sinft(f.copy()) / jnp.sqrt(len(r) / (2))
+
     f_ft_analytical = jnp.sqrt(jnp.pi / (2 * k))
     factor = f_fft / f_ft_analytical
     plt.plot(k, f_fft, label="Trafo")
@@ -160,5 +165,6 @@ def test_sinft_analytical_result():
 
 
 if __name__ == "__main__":
-    main()
-    # test_sinft_analytical_result()
+    # main()
+    # test_realfft_realfftnp_equaltity()
+    test_sinft_analytical_result()

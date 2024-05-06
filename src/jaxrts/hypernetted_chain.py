@@ -11,6 +11,8 @@ from jaxrts.units import ureg
 
 from typing import List, Callable
 
+from scipy.fftpack import rfftfreq
+
 
 @partial(jax.jit, static_argnames=["isign"])
 def four1(y, isign):
@@ -171,6 +173,7 @@ def OLDsinft(y):
         y = y.at[n2 - j - 1].set(y1 - y2)
 
     y = realfftnp(y)  # Transform the auxiliary array
+    # y = realfft(y)
 
     sum_val = 0.0
     y = y.at[0].set(y[0] * 0.5)
@@ -322,7 +325,7 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
     dk = jnp.pi / (len(r) * dr)
 
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
-
+    
     beta = 1 / (ureg.boltzmann_constant * Ti)
 
     v_s = beta * V_s
@@ -398,19 +401,37 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
 
     return g_r, niter
 
-
+@jax.jit
 def S_ii_HNC(k: Quantity, pdf, ni, r):
+    
+    """
+    Calculates the static structure factor for an isotropic system from the pair distribution
+    function obtained used the HNC approach.
+    """
 
-    integral = (
-        jax.scipy.integrate.trapezoid(
-            (r * jpu.numpy.sin(k * r) * (pdf - 1)).m_as(ureg.angstrom),
-            r.m_as(ureg.angstrom),
-        )
-        * (1 * ureg.angstrom) ** 2
-    )
-    return jnp.eye(ni.shape[0]) + (
-        (4 * jnp.pi / k) * jpu.numpy.sqrt(jpu.numpy.outer(ni, ni)) * integral
-    ).m_as(ureg.dimensionless)
+    # integral = (
+    #     jax.scipy.integrate.trapezoid(
+    #         (r * jpu.numpy.sin(k * r) * (pdf - 1)).m_as(ureg.angstrom),
+    #         r.m_as(ureg.angstrom),
+    #     )
+    #     * (1 * ureg.angstrom) ** 2
+    # )
+    # return jnp.eye(ni.shape[0]) + (
+    #     (4 * jnp.pi / k) * jpu.numpy.sqrt(jpu.numpy.outer(ni, ni)) * integral
+    # ).m_as(ureg.dimensionless)
+    
+    dr = r[1] - r[0]
+
+    S_k = 1.0 + (
+            _sinfft(
+                (r[jnp.newaxis, jnp.newaxis, :] * (pdf-1.0)).m_as(ureg.angstrom)
+            )
+            * (1 * ureg.angstrom)
+            * 4 * jnp.pi * ni * dr
+            / k[jnp.newaxis, jnp.newaxis, :]
+            )
+    
+    return S_k
 
 
 """
