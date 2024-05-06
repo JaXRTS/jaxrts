@@ -219,6 +219,83 @@ def sinft(y):
     return y
 
 
+@partial(jax.jit, static_argnames=["dst_type"])
+def zaf_dst(f, dst_type):
+    """
+    Compute the discrete sine transform (DST) using the fast Fourier transform
+    (FFT).
+
+    Taken from `Zaf
+    Python<https://github.com/zafarrafii/Zaf-Python/tree/master>`_
+    """
+    window_length = len(f)
+
+    # Check if the DST type is I, II, III, or IV
+    if dst_type == 1:
+        # Compute the DST-I using the FFT
+        out = jnp.np.zeros(2 * window_length + 2)
+        out =  out.at[1 : window_length + 1].set(f)
+        out = out.at[window_length + 2 :].set(-f[::-1])
+        out = jnp.fft.fft(out)
+        out = -jnp.imag(out[1 : window_length + 1]) / 2
+
+        # Post-process the results to make the DST-I matrix orthogonal
+        out = out * jnp.sqrt(2 / (window_length + 1))
+
+        return out
+
+    elif dst_type == 2:
+        # Compute the DST-II using the FFT
+        out = jnp.zeros(4 * window_length)
+        out[1 : 2 * window_length : 2] = f
+        out[2 * window_length + 1 : 4 * window_length : 2] = -f[-1::-1]
+        out = jnp.fft.fft(out)
+        out = -jnp.imag(out[1 : window_length + 1]) / 2
+
+        # Post-process the results to make the DST-II matrix orthogonal
+        out[-1] = out[-1] / jnp.sqrt(2)
+        out = out * jnp.sqrt(2 / window_length)
+
+        return out
+
+    elif dst_type == 3:
+        # Pre-process the signal to make the DST-III matrix orthogonal
+        # (copy the signal to avoid modifying it outside of the function)
+        f_copy = f.copy()
+        f_copy = f_copy.at[-1].set(f_copy[-1] * jnp.sqrt(2))
+
+        # Compute the DST-III using the FFT
+        out = jnp.zeros(4 * window_length)
+        out = out.at[1 : window_length + 1].set(f_copy)
+        out = out.at[window_length + 1 : 2 * window_length].set(f_copy[-2::-1])
+        out = out.at[2 * window_length + 1 : 3 * window_length + 1].set(-f_copy)
+        out = out.at[3 * window_length + 1 : 4 * window_length].set(-f_copy[-2::-1])
+        out = jnp.fft.fft(out)
+        out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
+
+        # Post-process the results to make the DST-III matrix orthogonal
+        out = out * jnp.sqrt(2 / window_length)
+
+        return out
+
+    elif dst_type == 4:
+        out = jnp.zeros(8 * window_length)
+
+        # Compute the DST-IV using the FFT
+        out = out.at[1 : 2 * window_length : 2].set(f)
+        out = out.at[2 * window_length + 1 : 4 * window_length : 2].set(f[ window_length - 1 :: -1 ])
+        out = out.at[4 * window_length + 1 : 6 * window_length : 2].set(-f)
+        out = out.at[6 * window_length + 1 : 8 * window_length : 2].set(-f[ window_length - 1 :: -1 ])
+        out = jnp.fft.fft(out)
+        out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
+
+        # Post-process the results to make the DST-IV matrix orthogonal
+        out = out * jnp.sqrt(2 / window_length)
+
+        return out
+
+
+
 @jax.jit
 def V_l(
     r: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity
