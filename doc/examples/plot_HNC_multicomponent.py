@@ -37,7 +37,7 @@ dr = r[1] - r[0]
 dk = jnp.pi / (len(r) * dr)
 k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-alpha = hnc.construct_alpha_matrix(n) * 2
+alpha = hnc.construct_alpha_matrix(n)
 V_l_k = hnc.V_l_k(k, q, alpha)
 V_s = hnc.V_s(r, q, alpha)
 
