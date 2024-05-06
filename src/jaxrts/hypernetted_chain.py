@@ -297,7 +297,7 @@ def zaf_dst(f, dst_type):
 
 
 @jax.jit
-def V_l(
+def V_screened_C_l_r(
     r: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity
 ) -> Quantity | jnp.ndarray:
     """
@@ -316,7 +316,7 @@ def V_l(
 
 
 @jax.jit
-def V_l_k(
+def V_screened_C_l_k(
     k: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity
 ) -> Quantity | jnp.ndarray:
     """
@@ -331,7 +331,7 @@ def V_l_k(
 
 
 @jax.jit
-def V_s(
+def V_screenedC_s_r(
     r: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity
 ) -> Quantity | jnp.ndarray:
     """
@@ -519,6 +519,3 @@ def S_ii_HNC(k: Quantity, pdf, ni, r):
     return S_k.at[0].set(S_k[1])
 
 
-"""
-Returns len(q) x len(q) x len(r)
-"""

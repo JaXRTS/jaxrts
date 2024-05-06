@@ -57,13 +57,13 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
 
         alpha = hnc.construct_alpha_matrix(n)
 
-        V_s = hnc.V_s(r, q, alpha)
+        V_s = hnc.V_screenedC_s_r(r, q, alpha)
 
         dr = r[1] - r[0]
         dk = jnp.pi / (len(r) * dr)
         k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-        V_l_k = hnc.V_l_k(k, q, alpha)
+        V_l_k = hnc.V_screened_C_l_k(k, q, alpha)
         # V_l = hnc.V_l(r, q, alpha)
         # V_l_k, _ = hnc.transformPotential(V_l, r)
 

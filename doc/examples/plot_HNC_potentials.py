@@ -40,10 +40,10 @@ n = (1 / (di**3 * (4 * jnp.pi / 3))).to(1 / ureg.angstrom**3)
 n = jnp.array([n.m_as(1 / ureg.angstrom**3)]) * (1 / ureg.angstrom**3)
 alpha = hnc.construct_alpha_matrix(n)
 
-V_l = hnc.V_l(r, q, alpha)
-V_s = hnc.V_s(r, q, alpha)
+V_l = hnc.V_screened_C_l_r(r, q, alpha)
+V_s = hnc.V_screenedC_s_r(r, q, alpha)
 
-V_l_k_analytical = hnc.V_l_k(k, q, alpha)
+V_l_k_analytical = hnc.V_screened_C_l_k(k, q, alpha)
 V_l_k_transformed, _ = hnc.transformPotential(V_l, r)
 
 fig, ax = plt.subplots(2)

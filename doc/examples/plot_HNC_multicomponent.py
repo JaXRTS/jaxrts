@@ -38,8 +38,8 @@ k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
 alpha = hnc.construct_alpha_matrix(n)
 # V_l_k = hnc.V_l_k(k, q, alpha)
-V_l_k, k = hnc.transformPotential(hnc.V_l(r, q, alpha), r)
-V_s = hnc.V_s(r, q, alpha)
+V_l_k, k = hnc.transformPotential(hnc.V_screened_C_l_r(r, q, alpha), r)
+V_s = hnc.V_screenedC_s_r(r, q, alpha)
 
 g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
 
