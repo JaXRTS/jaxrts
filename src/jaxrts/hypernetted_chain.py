@@ -512,10 +512,10 @@ def S_ii_HNC(k: Quantity, pdf, ni, r):
             * (1 * ureg.angstrom)
             * 4 * jnp.pi * ni * dr
             / k[jnp.newaxis, jnp.newaxis, :]
-            )
+            ).m_as(ureg.dimensionless)
 
     # The first index is forced to 1. Set it to the entry [1], as this is not
     # desired
-    return S_k.at[0].set(S_k[1])
+    return S_k.at[0].set(S_k[1]) * (1 * ureg.dimensionless)
 
 

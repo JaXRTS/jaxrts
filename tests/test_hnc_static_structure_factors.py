@@ -70,7 +70,7 @@ def main():
         k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
         V_l_k = hnc.V_screened_C_l_k(k, q, alpha)
-        # V_l = hnc.V_l(r, q, alpha)
+        # V_l = hnc.V_screened_C_l_r(r, q, alpha)
         # V_l_k, _ = hnc.transformPotential(V_l, r)
 
         g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n_i)
@@ -93,7 +93,7 @@ def main():
         if axis_count <= 1:
             axis[axis_count].set_ylim(0, 1.6)
         else:
-            axis[axis_count].set_ylim(0, 1.5)
+            axis[axis_count].set_ylim(0, 1.6)
         if axis_count > 1:
             axis[axis_count].set_xlabel("k [d$_i^{-1}$]")
         if axis_count in [0, 2]:
