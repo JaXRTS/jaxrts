@@ -295,9 +295,9 @@ def transformPotential(V, r) -> Quantity:
 
 
 @jax.jit
-def construct_alpha_matrix(ne: jnp.ndarray | Quantity):
+def construct_alpha_matrix(n: jnp.ndarray | Quantity):
     d = jpu.numpy.cbrt(
-        3 / (4 * jnp.pi * (ne[:, jnp.newaxis] + ne[jnp.newaxis, :]) / 2)
+        3 / (4 * jnp.pi * (n[:, jnp.newaxis] * n[jnp.newaxis, :])**(1 / 2))
     )
 
     return 2 / d

@@ -6,26 +6,24 @@ import sys
 sys.path.append(
     "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
 )
-import jax
 from jax import numpy as jnp
 import jaxrts
-
 import jpu
-
 import jaxrts.hypernetted_chain as hnc
-
 import matplotlib.pyplot as plt
-
 from jaxrts.units import ureg
-
-import time
-
 import numpy as onp
 
 from scipy.fftpack import rfftfreq
 
+from scipy.fftpack import rfftfreq
 
-def main():
+
+def test_hydrogen_pair_distribution_function_literature_values_wuensch():
+    """
+    Test against the computation of literature data published in Fig. 4.4., in
+    :cite:`Wunsch.2011`.
+    """
     for Gamma, pot in zip([1, 10, 30, 100], [13, 13, 15, 16]):
         q = hnc.construct_q_matrix(jnp.array([1]) * 1 * ureg.elementary_charge)
 
@@ -70,17 +68,14 @@ def main():
         V_l_k, _ = hnc.transformPotential(V_l, r)
 
         g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
-        print(niter)
 
-        plt.plot(r_lit, g_lit)
-        print(g_lit, r_lit)
-        plt.plot(
+        interp = jnp.interp(
+            r_lit,
             (r / d[0, 0]).m_as(ureg.dimensionless),
             g[0, 0, :].m_as(ureg.dimensionless),
         )
-    plt.xlim(0, 5.0)
-    plt.ylim(0, 1.5)
-    plt.show()
+
+        assert jnp.all(jnp.abs(g_lit - interp) < 0.03)
 
 
 def test_sinft_self_inverse():
