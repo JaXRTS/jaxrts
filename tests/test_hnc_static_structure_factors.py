@@ -59,21 +59,19 @@ def main():
             / (4 * jnp.pi * 1 * ureg.epsilon_0 * d)
         ) / (1 * ureg.boltzmann_constant * T)
         
-        r = jpu.numpy.linspace(0.001 * ureg.angstrom, 1000 * ureg.a0, 2**18)
+        r = jpu.numpy.linspace(0.001 * ureg.angstrom, 1000 * ureg.a0, 2**14)
 
         alpha = hnc.construct_alpha_matrix(n_i)
 
         V_s = hnc.V_s(r, q, alpha)
 
         dr = r[1] - r[0]
-        # dk = jnp.pi / (len(r) * dr)
-        # k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
-
-        k = 2 * jnp.pi * rfftfreq(len(r), d=dr.m_as(ureg.angstrom))/ (1 * ureg.angstrom)
+        dk = jnp.pi / (len(r) * dr)
+        k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
         V_l_k = hnc.V_l_k(k, q, alpha)
-        V_l = hnc.V_l(r, q, alpha)
-        V_l_k, _ = hnc.transformPotential(V_l, r)
+        # V_l = hnc.V_l(r, q, alpha)
+        # V_l_k, _ = hnc.transformPotential(V_l, r)
 
         g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n_i)
         

@@ -26,19 +26,19 @@ n = jnp.array([2.5e23, 2.5e23]) * (1 / ureg.centimeter**3)
 T = 2e4 * ureg.kelvin
 
 pot = 14
-r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 40 * ureg.a0, 2**pot)
+r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 2**pot)
 
 d = jpu.numpy.cbrt(
     3 / (4 * jnp.pi * (n[:, jnp.newaxis] * n[jnp.newaxis, :]) ** (1 / 2))
 )
-
 
 dr = r[1] - r[0]
 dk = jnp.pi / (len(r) * dr)
 k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
 alpha = hnc.construct_alpha_matrix(n)
-V_l_k = hnc.V_l_k(k, q, alpha)
+# V_l_k = hnc.V_l_k(k, q, alpha)
+V_l_k, k = hnc.transformPotential(hnc.V_l(r, q, alpha), r)
 V_s = hnc.V_s(r, q, alpha)
 
 g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)

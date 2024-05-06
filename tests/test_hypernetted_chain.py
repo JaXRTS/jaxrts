@@ -13,6 +13,7 @@ import jaxrts.hypernetted_chain as hnc
 import matplotlib.pyplot as plt
 from jaxrts.units import ureg
 import numpy as onp
+from scipy.fft import dst as sp_dst
 
 from scipy.fftpack import rfftfreq
 
@@ -158,8 +159,24 @@ def test_sinft_analytical_result():
 
     # assert jnp.max(jnp.abs(f_ft_analytical - f_fft)) < 1e-8
 
+def test_sinft_vs_scipy_dst():
+    N = 2**14
+    r = jnp.linspace(0.01, 100, N)
+    dr = r[1] - r[0]
+    pref = jnp.sqrt(jnp.pi)
 
-if __name__ == "__main__":
-    # main()
-    # test_realfft_realfftnp_equaltity()
-    test_sinft_analytical_result()
+    dk = pref / (len(r) * dr)
+    k = pref / r[-1] + jnp.arange(len(r)) * dk
+
+    f = 1 / r ** 2
+    # f = 1 / jnp.sqrt(r)
+    for i in range(4):
+        scipy = sp_dst(f.copy(), type=i + 1)
+    # f_fft2 = jaxrts.hypernetted_chain.dst(f.copy(), 2) * jnp.sqrt(N * 2)
+
+        plt.plot(k, scipy, label = str(i+1), alpha = 0.7,)
+    f_fft = jaxrts.hypernetted_chain.sinft(f.copy()) * 2
+    plt.plot(k, f_fft, label="we")
+    plt.legend()
+    plt.show()
+
