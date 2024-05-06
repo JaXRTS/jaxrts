@@ -405,8 +405,13 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
 def S_ii_HNC(k: Quantity, pdf, ni, r):
     
     """
-    Calculates the static structure factor for an isotropic system from the pair distribution
-    function obtained used the HNC approach.
+    Calculates the static structure factor for an isotropic system from the
+    pair distribution function obtained used the HNC approach.
+    
+    .. note::
+        Due to the numerical implementation of :py:func:`~.sinft`, we force the
+        entry ``S_ii[0]`` to the value ``S_ii[1]``, as it would be always
+        unity, otherwise.
     """
 
     # integral = (
@@ -431,7 +436,9 @@ def S_ii_HNC(k: Quantity, pdf, ni, r):
             / k[jnp.newaxis, jnp.newaxis, :]
             )
     
-    return S_k
+    # The first index is forced to 1. Set it to the entry [1], as this is not
+    # desired
+    return S_k.at[0].set(S_k[1])
 
 
 """
