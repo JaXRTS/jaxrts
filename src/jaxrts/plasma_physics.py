@@ -71,6 +71,7 @@ def coulomb_potential_fourier(
     )
 
 
+@jax.jit
 def kin_energy(k: Quantity) -> Quantity:
     """
     Kinetic energy of a free electron with wavevector ``k``.
@@ -88,6 +89,7 @@ def kin_energy(k: Quantity) -> Quantity:
     return (ureg.hbar**2 * k**2) / (2 * ureg.electron_mass)
 
 
+@jax.jit
 def fermi_dirac(k: Quantity, chem_pot: Quantity, T: Quantity) -> Quantity:
     """
     Return the Fermi-Dirac distribution.
