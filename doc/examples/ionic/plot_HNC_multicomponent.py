@@ -1,6 +1,6 @@
 """
-Multicomponent HNC
-==================
+HNC: Multicomponent
+===================
 
 This example reproduces Fig. 4.12 from :cite:`Wunsch.2011`, and shows how to
 use the HNC approximation with different ion species.

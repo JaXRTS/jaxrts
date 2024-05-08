@@ -1,3 +1,21 @@
+"""
+HNC: Pair correlation function for different Γ
+==============================================
+
+This example reproduces Figure 4.4 in :cite:`Wunsch.2011`, showing the the pair
+distribution function oscillating more with increasing :math:`Gamma` (e.g,
+increasing density when temperature stays constant).
+
+We assume fully ionized hydrogen at a temperature of 10 eV, and a statistically
+screened Coulomb potential.
+
+Due to limitations in the numerical discrete evaluation of the 3D Fourier
+transform, we get reasonable results and are able to reproduce the literature
+value well when starting from an analytical experission for the long range
+potential in :math:`r` space, and performing a conversion to :math:`k` space
+with :py:func:`jaxrts.hypernetted_chain.transformPotental`. 
+"""
+
 from jaxrts import hypernetted_chain as hnc
 import jax.numpy as jnp
 import jpu
@@ -48,7 +66,7 @@ for idx, Gamma in enumerate([1, 10, 30, 100]):
     V_l_k, _ = hnc.transformPotential(V_l, r)
 
     g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
-    print(f"$Gamma$={Gamma}, {niter} iteration of the HNC scheme.")
+    print(f"Γ={Gamma}, {niter} iteration of the HNC scheme.")
 
     axis.plot(
         (r / d[0, 0]).m_as(ureg.dimensionless),

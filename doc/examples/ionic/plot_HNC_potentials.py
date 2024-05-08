@@ -1,6 +1,6 @@
 """
-HNC Potentials
-==============
+HNC: Potentials
+===============
 """
 
 from jaxrts import ureg
