@@ -13,6 +13,54 @@ from typing import List, Callable
 
 from scipy.fftpack import rfftfreq
 
+###### FOURIER TRANSFORMATION THORUGH HANKEL TRANSFORM ######
+
+@jax.jit
+def psi(t):
+    return t * jnp.tanh(jnp.pi * jnp.sinh(t) / 2)
+
+@jax.jit
+def dpsi(t):
+    res = (jnp.pi * t * jnp.cosh(t) + jnp.sinh(jnp.pi * jnp.sinh(t))) / (1 + jnp.cosh(jnp.pi * jnp.sinh(t)))
+    return jnp.where(jnp.isnan(res), 1.0, res)
+@jax.jit
+def bessel_3_2(x):
+    return (jnp.sqrt(2 / (jnp.pi*x)) * (jnp.sin(x)/x - jnp.cos(x)))
+
+@jax.jit
+def bessel_0_5(x):
+    return jnp.sqrt(2 / (jnp.pi * x)) * jnp.sin(x)
+
+@jax.jit
+def bessel_neg0_5(x):
+    return jnp.sqrt(2 / (jnp.pi * x)) * jnp.cos(x)
+
+@jax.jit
+def bessel_2ndkind_0_5(x):
+    return (bessel_0_5(x) * jnp.cos(0.5 * jnp.pi) - bessel_neg0_5(x)) / jnp.sin(0.5 * jnp.pi)
+
+@partial(jax.jit, static_argnames = ["N"])
+def fourier_transform_ogata(k, rvals, fvals, N, h):
+
+    # Get N zeros of Bessel function of order 1/2
+    r_k = jnp.arange(1, N+1)
+    
+    y_k = (jnp.pi * psi(h * r_k) / h * k)
+    
+    f_int = jnp.interp(y_k / k, rvals, fvals* jnp.sqrt(rvals), left=jnp.nan, right=0.0, period=None)
+    
+    dpsi_k = dpsi(h * r_k)
+    
+    w_k = bessel_2ndkind_0_5(jnp.pi * r_k) / bessel_3_2(jnp.pi * r_k)
+    
+    series_sum = jnp.pi * w_k * f_int * bessel_0_5(y_k) * dpsi(h * r_k) * (y_k / k)
+    
+    res = jnp.nansum(series_sum) / jnp.sqrt(k)
+
+    return res
+    
+#############################################################
+
 
 @partial(jax.jit, static_argnames=["isign"])
 def four1(y, isign):
