@@ -42,7 +42,18 @@ napoleon_use_rtype = False
 templates_path = ["_templates"]
 exclude_patterns = []
 
+
+
 # Sphinx gallery
+from sphinx_gallery.scrapers import matplotlib_scraper
+
+class matplotlib_svg_scraper(object):
+    def __repr__(self):
+        return self.__class__.__name__
+
+    def __call__(self, *args, **kwargs):
+        return matplotlib_scraper(*args, format='svg', **kwargs)
+
 sphinx_gallery_conf = {
     "examples_dirs": ["../examples"],
     "gallery_dirs": "gen_examples",  # path to where to save gallery generated output
@@ -50,18 +61,11 @@ sphinx_gallery_conf = {
         # The module you locally document uses None
         "jaxrts": None,
     },
-    # directory where function/class granular galleries are stored
     "backreferences_dir": "gen_modules/backreferences",
-    # Modules for which function/class level galleries are created. In
-    # this case sphinx_gallery and numpy in a tuple of strings.
     "doc_module": ("jaxrts"),
-    # Regexes to match objects to exclude from implicit backreferences.
-    # The default option is an empty set, i.e. exclude nothing.
-    # To exclude everything, use: '.*'
     "exclude_implicit_doc": {},
-    # Regexes to match the fully qualified names of objects where the full
-    # module name should be used. To use full names for all objects use: '.*'
     "prefer_full_module": {r"module\.submodule"},
+    "image_scrapers": (matplotlib_svg_scraper(),),
 }
 
 # bibtex

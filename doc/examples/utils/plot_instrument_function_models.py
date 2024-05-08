@@ -1,6 +1,6 @@
 """
 All available instrument function models.
-========================================================
+=========================================
 """
 
 import matplotlib.pyplot as plt

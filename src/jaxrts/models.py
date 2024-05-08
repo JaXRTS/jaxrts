@@ -457,7 +457,7 @@ class RPA_NoDamping(ScatteringModel):
 
 class BornMermin(ScatteringModel):
     """
-    Modell of the free-free scattering, based on the Born Mermin Approximation
+    Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
 
     Requires a 'chemical potential' model (defaults to
@@ -492,6 +492,61 @@ class BornMermin(ScatteringModel):
             self.plasma_state.n_e,
             self.plasma_state.Z_free,
             setup.measured_energy - setup.energy,
+        )
+        return See_0 * self.plasma_state.Z_free
+
+
+class BornMermin_ChapmanInterp(ScatteringModel):
+    """
+    Model of the free-free scattering, based on the Born Mermin Approximation
+    (:cite:`Mermin.1970`).
+    Uses the Chapman Interpolation which allows for a faster computation of the
+    free-free scattering compared to :py:class:`~.BornMermin`, by sampleing at
+    the probing frequency at :py:attr:`~.no_of_freq` points and interpolating
+    between them, after.
+
+    The number of frequencies defaults to 20. To change it, just change the
+    attribute of this model after initializing it. i.e.
+
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_ChapmanInterp
+    >>> state["free-free scattering"].no_of_freq = 10
+
+    Requires a 'chemical potential' model (defaults to
+    :py:class:`~GregoriChemPotential`).
+
+    See Also
+    --------
+
+    jaxrts.free_free.S0_ee_BMA_chapman_interp
+        Function used to calculate the dynamic structure factor
+    """
+
+    allowed_keys = ["free-free scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
+        state.update_default_model("chemical potential", GregoriChemPotential)
+        super().__init__(state, model_key)
+        #: Number of frequencies used for the interpolation of the elastic
+        #: scattering. Defaults to 20.
+        self.no_of_freq: int = 20
+
+    def check(self) -> None:
+        if len(self.plasma_state) > 1:
+            logger.critical(
+                "'BornMermin_ChapmanInterp' is only implemented for a one-component plasma"  # noqa: E501
+            )
+
+    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
+        mu = self.plasma_state["chemical potential"].evaluate(setup)
+        See_0 = free_free.S0_ee_BMA_chapman_interp(
+            setup.k,
+            self.plasma_state.T_e,
+            mu,
+            self.plasma_state.atomic_masses,
+            self.plasma_state.n_e,
+            self.plasma_state.Z_free,
+            setup.measured_energy - setup.energy,
+            self.no_of_freq
         )
         return See_0 * self.plasma_state.Z_free
 
