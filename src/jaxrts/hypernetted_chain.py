@@ -15,51 +15,82 @@ from scipy.fftpack import rfftfreq
 
 ###### FOURIER TRANSFORMATION THORUGH HANKEL TRANSFORM ######
 
+
 @jax.jit
 def psi(t):
     return t * jnp.tanh(jnp.pi * jnp.sinh(t) / 2)
 
+
 @jax.jit
 def dpsi(t):
-    res = (jnp.pi * t * jnp.cosh(t) + jnp.sinh(jnp.pi * jnp.sinh(t))) / (1 + jnp.cosh(jnp.pi * jnp.sinh(t)))
+    res = (jnp.pi * t * jnp.cosh(t) + jnp.sinh(jnp.pi * jnp.sinh(t))) / (
+        1 + jnp.cosh(jnp.pi * jnp.sinh(t))
+    )
     return jnp.where(jnp.isnan(res), 1.0, res)
+
+
 @jax.jit
 def bessel_3_2(x):
-    return (jnp.sqrt(2 / (jnp.pi*x)) * (jnp.sin(x)/x - jnp.cos(x)))
+    return jnp.sqrt(2 / (jnp.pi * x)) * (jnp.sin(x) / x - jnp.cos(x))
+
 
 @jax.jit
 def bessel_0_5(x):
     return jnp.sqrt(2 / (jnp.pi * x)) * jnp.sin(x)
 
+
 @jax.jit
 def bessel_neg0_5(x):
     return jnp.sqrt(2 / (jnp.pi * x)) * jnp.cos(x)
 
+
 @jax.jit
 def bessel_2ndkind_0_5(x):
-    return (bessel_0_5(x) * jnp.cos(0.5 * jnp.pi) - bessel_neg0_5(x)) / jnp.sin(0.5 * jnp.pi)
+    return (
+        bessel_0_5(x) * jnp.cos(0.5 * jnp.pi) - bessel_neg0_5(x)
+    ) / jnp.sin(0.5 * jnp.pi)
 
-@partial(jax.jit, static_argnames = ["N"])
+
+@partial(jax.jit, static_argnames=["N"])
 def fourier_transform_ogata(k, rvals, fvals, N, h):
 
     # Get N zeros of Bessel function of order 1/2
-    r_k = jnp.arange(1, N+1)
-    
-    y_k = (jnp.pi * psi(h * r_k) / h * k)
-    
-    f_int = jnp.interp(y_k / k, rvals, fvals* jnp.sqrt(rvals), left=jnp.nan, right=0.0, period=None)
-    
+    r_k = jnp.arange(1, N + 1)
+
+    y_k = jnp.pi * psi(h * r_k) / h * k
+
+    f_int = jnp.interp(
+        y_k / k,
+        rvals,
+        fvals * jnp.sqrt(rvals),
+        left=jnp.nan,
+        right=0.0,
+        period=None,
+    )
+
     dpsi_k = dpsi(h * r_k)
-    
+
     w_k = bessel_2ndkind_0_5(jnp.pi * r_k) / bessel_3_2(jnp.pi * r_k)
-    
-    series_sum = jnp.pi * w_k * f_int * bessel_0_5(y_k) * dpsi(h * r_k) * (y_k / k)
-    
+
+    series_sum = (
+        jnp.pi * w_k * f_int * bessel_0_5(y_k) * dpsi(h * r_k) * (y_k / k)
+    )
+
     res = jnp.nansum(series_sum) / jnp.sqrt(k)
 
     return res
-    
-#############################################################
+
+
+##########
+
+
+@jax.jit
+def fourier_transform_sine(k, rvals, fvals):
+    arg = rvals * fvals
+    units = arg.units
+    dr = rvals[1] - rvals[0]
+    res = sinft(arg.m_as(units)) * units * (4 * jnp.pi) / k * dr
+    return res
 
 
 @partial(jax.jit, static_argnames=["isign"])
@@ -282,7 +313,7 @@ def zaf_dst(f, dst_type):
     if dst_type == 1:
         # Compute the DST-I using the FFT
         out = jnp.zeros(2 * window_length + 2)
-        out =  out.at[1 : window_length + 1].set(f)
+        out = out.at[1 : window_length + 1].set(f)
         out = out.at[window_length + 2 :].set(-f[::-1])
         out = jnp.fft.fft(out)
         out = -jnp.imag(out[1 : window_length + 1]) / 2
@@ -296,7 +327,9 @@ def zaf_dst(f, dst_type):
         # Compute the DST-II using the FFT
         out = jnp.zeros(4 * window_length)
         out = out.at[1 : 2 * window_length : 2].set(f)
-        out = out.at[2 * window_length + 1 : 4 * window_length : 2].set(-f[-1::-1])
+        out = out.at[2 * window_length + 1 : 4 * window_length : 2].set(
+            -f[-1::-1]
+        )
         out = jnp.fft.fft(out)
         out = -jnp.imag(out[1 : window_length + 1]) / 2
 
@@ -316,8 +349,12 @@ def zaf_dst(f, dst_type):
         out = jnp.zeros(4 * window_length)
         out = out.at[1 : window_length + 1].set(f_copy)
         out = out.at[window_length + 1 : 2 * window_length].set(f_copy[-2::-1])
-        out = out.at[2 * window_length + 1 : 3 * window_length + 1].set(-f_copy)
-        out = out.at[3 * window_length + 1 : 4 * window_length].set(-f_copy[-2::-1])
+        out = out.at[2 * window_length + 1 : 3 * window_length + 1].set(
+            -f_copy
+        )
+        out = out.at[3 * window_length + 1 : 4 * window_length].set(
+            -f_copy[-2::-1]
+        )
         out = jnp.fft.fft(out)
         out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
 
@@ -331,9 +368,13 @@ def zaf_dst(f, dst_type):
 
         # Compute the DST-IV using the FFT
         out = out.at[1 : 2 * window_length : 2].set(f)
-        out = out.at[2 * window_length + 1 : 4 * window_length : 2].set(f[ window_length - 1 :: -1 ])
+        out = out.at[2 * window_length + 1 : 4 * window_length : 2].set(
+            f[window_length - 1 :: -1]
+        )
         out = out.at[4 * window_length + 1 : 6 * window_length : 2].set(-f)
-        out = out.at[6 * window_length + 1 : 8 * window_length : 2].set(-f[ window_length - 1 :: -1 ])
+        out = out.at[6 * window_length + 1 : 8 * window_length : 2].set(
+            -f[window_length - 1 :: -1]
+        )
         out = jnp.fft.fft(out)
         out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
 
@@ -341,7 +382,6 @@ def zaf_dst(f, dst_type):
         # out = out * jnp.sqrt(2 / window_length)
 
         return out
-
 
 
 @jax.jit
@@ -404,26 +444,18 @@ def transformPotential(V, r) -> Quantity:
     dr = r[1] - r[0]
     dk = jnp.pi / (len(r) * dr)
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
-    V_k = (
-        (
-            _sinfft(
-                (r[jnp.newaxis, jnp.newaxis, :] * V).m_as(
-                    ureg.electron_volt * ureg.angstrom
-                )
-            )
-            * ureg.electron_volt
-            * ureg.angstrom
-        )
-        * dr
-        / (2 * jnp.pi**2 * k[jnp.newaxis, jnp.newaxis, :])
-    )
+    V_k = _3Dfour(
+        k,
+        r,
+        V,
+    ) / ((2 * jnp.pi) ** 3)
     return V_k, k
 
 
 @jax.jit
 def construct_alpha_matrix(n: jnp.ndarray | Quantity):
     d = jpu.numpy.cbrt(
-        3 / (4 * jnp.pi * (n[:, jnp.newaxis] * n[jnp.newaxis, :])**(1 / 2))
+        3 / (4 * jnp.pi * (n[:, jnp.newaxis] * n[jnp.newaxis, :]) ** (1 / 2))
     )
 
     return 2 / d
@@ -434,8 +466,10 @@ def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
     return jpu.numpy.outer(q, q)
 
 
-_sinfft = jax.vmap(
-    jax.vmap(sinft, in_axes=0, out_axes=0), in_axes=1, out_axes=1
+_3Dfour = jax.vmap(
+    jax.vmap(fourier_transform_sine, in_axes=(None, None, 0), out_axes=0),
+    in_axes=(None, None, 1),
+    out_axes=1,
 )
 
 
@@ -492,15 +526,7 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
 
         cs_r = h_r - Ns_r
 
-        cs_k = (
-            _sinfft(
-                (r[jnp.newaxis, jnp.newaxis, :] * cs_r).m_as(ureg.angstrom)
-            )
-            * ureg.angstrom
-            * (4 * jnp.pi)
-            / k[jnp.newaxis, jnp.newaxis, :]
-            * dr
-        )
+        cs_k = _3Dfour( k, r, cs_r,)
 
         c_k = cs_k - v_l_k
 
@@ -510,12 +536,11 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
         Ns_k = h_k - cs_k
 
         Ns_r_new = (
-            _sinfft(
-                (k[jnp.newaxis, jnp.newaxis, :] * Ns_k).m_as(ureg.angstrom**2)
+            _3Dfour(
+                r, k,
+                Ns_k,
             )
-            * (1 * ureg.angstrom) ** 2
-            * dk
-            / (2 * jnp.pi**2 * r[jnp.newaxis, jnp.newaxis, :])
+            / (2 * jnp.pi) ** 3
         )
 
         g_r_new = jpu.numpy.exp(Ns_r_new) / jpu.numpy.exp(v_s)
@@ -527,9 +552,9 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
 
     return g_r, niter
 
+
 @jax.jit
 def S_ii_HNC(k: Quantity, pdf, ni, r):
-
     """
     Calculates the static structure factor for an isotropic system from the
     pair distribution function obtained used the HNC approach.
@@ -551,19 +576,15 @@ def S_ii_HNC(k: Quantity, pdf, ni, r):
     #     (4 * jnp.pi / k) * jpu.numpy.sqrt(jpu.numpy.outer(ni, ni)) * integral
     # ).m_as(ureg.dimensionless)
 
-    dr = r[1] - r[0]
-
-    S_k = 1.0 + (
-            _sinfft(
-                (r[jnp.newaxis, jnp.newaxis, :] * (pdf-1.0)).m_as(ureg.angstrom)
-            )
-            * (1 * ureg.angstrom)
-            * 4 * jnp.pi * ni * dr
-            / k[jnp.newaxis, jnp.newaxis, :]
-            ).m_as(ureg.dimensionless)
+    S_k = (
+        1.0
+        + _3Dfour(
+            k,
+            r,
+            pdf - 1.0,
+        )
+    ).m_as(ureg.dimensionless)
 
     # The first index is forced to 1. Set it to the entry [1], as this is not
     # desired
     return S_k.at[0].set(S_k[1]) * (1 * ureg.dimensionless)
-
-
