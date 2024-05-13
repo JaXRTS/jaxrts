@@ -7,13 +7,15 @@ use the HNC approximation with different ion species.
 """
 
 from pathlib import Path
-from jaxrts import hypernetted_chain as hnc
 import jax.numpy as jnp
 import jpu
-from jaxrts import ureg
 import matplotlib.pyplot as plt
 import scienceplots
 import numpy as onp
+
+import jaxrts
+from jaxrts import hypernetted_chain as hnc
+from jaxrts import ureg
 
 plt.style.use("science")
 
@@ -28,18 +30,22 @@ T = 2e4 * ureg.kelvin
 pot = 14
 r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 2**pot)
 
-d = jpu.numpy.cbrt(
-    3 / (4 * jnp.pi * (n[:, jnp.newaxis] * n[jnp.newaxis, :]) ** (1 / 2))
-)
+# We add densities, here. Maybe this is wrong.
+d = jpu.numpy.cbrt(3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :])))
 
 dr = r[1] - r[0]
 dk = jnp.pi / (len(r) * dr)
 k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
 alpha = hnc.construct_alpha_matrix(n)
-# V_l_k = hnc.V_l_k(k, q, alpha)
-V_l_k, k = hnc.transformPotential(hnc.V_screened_C_l_r(r, q, alpha), r)
-V_s = hnc.V_screenedC_s_r(r, q, alpha)
+
+# Verify where this might come form.
+screen = 2 / 3 * ureg.a_0
+
+V_l_k, k = hnc.transformPotential(
+    hnc.V_Debye_Huckel_l_r(r, q, alpha, 1 / screen), r
+)
+V_s = hnc.V_Debye_Huckel_s_r(r, q, alpha, 1 / screen)
 
 g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
 
@@ -47,32 +53,43 @@ ax[0].plot(
     (r / d[0, 0]).m_as(ureg.dimensionless),
     g[0, 0, :].m_as(ureg.dimensionless),
     label="HH",
+    color="C0",
 )
 ax[0].plot(
     (r / d[1, 0]).m_as(ureg.dimensionless),
     g[1, 0, :].m_as(ureg.dimensionless),
     label="CH",
+    color="C1",
 )
 ax[0].plot(
     (r / d[1, 1]).m_as(ureg.dimensionless),
     g[1, 1, :].m_as(ureg.dimensionless),
     label="CC",
+    color="C2",
 )
 
-for gtype in ["HH", "CH", "CC"]:
+for idx, gtype in enumerate(["HH", "CH", "CC"]):
     xlit, glit = onp.genfromtxt(
         Path(__file__).parent
-        / f"../../tests/data/Wunsch2011/Fig4.12/g_{gtype}.csv",
+        / f"../../../tests/data/Wunsch2011/Fig4.12/g_{gtype}.csv",
         unpack=True,
         delimiter=",",
     )
-    ax[0].plot(xlit, glit, ls="dashed", label="literature {gtype}")
+    ax[0].plot(
+        xlit,
+        glit,
+        ls="dashed",
+        label="Literature" if idx == 0 else None,
+        color="gray",
+    )
 
 ax[0].set_xlabel("$r/d_i$")
 ax[0].set_ylabel("$g(r)$")
 
 ax[0].set_xlim(0, 3.5)
 ax[0].set_ylim(0, 1.5)
+
+ax[0].legend()
 
 plt.tight_layout()
 plt.show()

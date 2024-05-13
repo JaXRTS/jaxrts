@@ -3,6 +3,7 @@ This submodule contains basic formulas used in plasma physics.
 """
 
 from .units import ureg, Quantity
+from .math import fermi_integral
 
 import jax
 from jax import numpy as jnp
@@ -205,3 +206,13 @@ def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:
         )
     )
     return f * ureg.k_B * T
+
+
+def degeneracy_param(n_e: Quantity, T_e: Quantity) -> Quantity:
+    return n_e * debroglie_wl(T_e)**3
+
+
+def debroglie_wl(T):
+    return ureg.hbar * jnpu.sqrt(
+        (2 * jnp.pi) / (ureg.electron_mass * ureg.k_B * T)
+    )
