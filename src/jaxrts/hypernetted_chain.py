@@ -438,6 +438,69 @@ def V_screenedC_s_r(
     ).to(ureg.electron_volt)
 
 
+@jax.jit
+def V_Debye_Huckel_s_r(
+    r: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity, kappa: Quantity
+) -> Quantity | jnp.ndarray:
+    """
+    q**2 / (4 * jnp.pi * ureg.epsilon_0 * r) * (jnp.exp(-(kappa + alpha) * r))
+    """
+
+    _q = q[:, :, jnp.newaxis]
+    _alpha = alpha[:, :, jnp.newaxis]
+    _r = r[jnp.newaxis, jnp.newaxis, :]
+
+    return (
+        _q
+        / (4 * jnp.pi * ureg.epsilon_0 * _r)
+        * (jpu.numpy.exp(-(kappa + _alpha) * _r))
+    ).to(ureg.electron_volt)
+
+
+@jax.jit
+def V_Debye_Huckel_l_r(
+    r: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity, kappa: Quantity
+) -> Quantity | jnp.ndarray:
+    """
+    .. math::
+
+        \\frac{q^2}{(4 \\pi \\epsilon_0 r)}
+        \\exp(-\\kappa r)(1 - \\exp(-\\alpha r))
+
+    """
+
+    _q = q[:, :, jnp.newaxis]
+    _alpha = alpha[:, :, jnp.newaxis]
+    _r = r[jnp.newaxis, jnp.newaxis, :]
+
+    return (
+        _q
+        / (4 * jnp.pi * ureg.epsilon_0 * _r)
+        * jpu.numpy.exp(-kappa * r)
+        * (1 - jpu.numpy.exp(-_alpha * _r))
+    )
+
+
+@jax.jit
+def V_Debye_Huckel_l_k(
+    k: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity, kappa: Quantity
+) -> Quantity | jnp.ndarray:
+    """
+    q**2 / (4 * jnp.pi * ureg.epsilon_0 * r) * jnp.exp(-kappa * r) * (1 - jnp.exp(-alpha * r))
+    """
+
+    _q = q[:, :, jnp.newaxis]
+    _alpha = alpha[:, :, jnp.newaxis]
+    _k = k[jnp.newaxis, jnp.newaxis, :]
+
+    return (
+        _q
+        / (_k**2 * ureg.epsilon_0)
+        * _k**2
+        * (_alpha**2 + 2 * _alpha * kappa)
+        / ((_k**2 + kappa**2) * (_k**2 + (kappa + _alpha) ** 2))
+    )
+
 
 @jax.jit
 def transformPotential(V, r) -> Quantity:
