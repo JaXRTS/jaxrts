@@ -52,31 +52,26 @@ def bessel_2ndkind_0_5(x):
 
 
 @partial(jax.jit, static_argnames=["N"])
-def fourier_transform_ogata(k, rvals, fvals, N, h):
-
-    # Get N zeros of Bessel function of order 1/2
+def fourier_transform_ogata(k, r, f, N, h):
     r_k = jnp.arange(1, N + 1)
+    y_k = jnp.pi * psi(h * r_k) / h
 
-    y_k = jnp.pi * psi(h * r_k) / h * k
-
-    f_int = jnp.interp(
-        y_k / k,
-        rvals,
-        fvals * jnp.sqrt(rvals),
-        left=jnp.nan,
-        right=0.0,
+    f_int = jpu.numpy.interp(
+        x=y_k,
+        xp=r,
+        fp=f * jpu.numpy.sqrt(r),
+        left=f[0] * jpu.numpy.sqrt(r[0]),
+        right=f[-1] * jpu.numpy.sqrt(r[-1]),
         period=None,
     )
 
     dpsi_k = dpsi(h * r_k)
-
     w_k = bessel_2ndkind_0_5(jnp.pi * r_k) / bessel_3_2(jnp.pi * r_k)
-
     series_sum = (
-        jnp.pi * w_k * f_int * bessel_0_5(y_k) * dpsi(h * r_k) * (y_k / k)
+        jnp.pi * w_k * f_int * bessel_0_5(y_k) * dpsi_k * (y_k / k)
     )
 
-    res = jnp.nansum(series_sum) / jnp.sqrt(k)
+    res = jpu.numpy.nansum(series_sum, -1) / jpu.numpy.sqrt(k)
 
     return res
 
@@ -472,6 +467,16 @@ _3Dfour = jax.vmap(
     out_axes=1,
 )
 
+_3Dfour_ogata = jax.vmap(
+    jax.vmap(
+        partial(fourier_transform_ogata, N=1000, h=0.001),
+        in_axes=(None, None, 0),
+        out_axes=0,
+    ),
+    in_axes=(None, None, 1),
+    out_axes=1,
+)
+
 
 @jax.jit
 def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
@@ -526,7 +531,7 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
 
         cs_r = h_r - Ns_r
 
-        cs_k = _3Dfour( k, r, cs_r)
+        cs_k = _3Dfour(k, r, cs_r)
 
         c_k = cs_k - v_l_k
 
@@ -537,7 +542,8 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
 
         Ns_r_new = (
             _3Dfour(
-                r, k,
+                r,
+                k,
                 Ns_k,
             )
             / (2 * jnp.pi) ** 3
