@@ -7,13 +7,10 @@ distribution function oscillating more with increasing :math:`Gamma` (e.g,
 increasing density when temperature stays constant).
 
 We assume fully ionized hydrogen at a temperature of 10 eV, and a statistically
-screened Coulomb potential.
+screened / a full Coulomb potential.
 
-Due to limitations in the numerical discrete evaluation of the 3D Fourier
-transform, we get reasonable results and are able to reproduce the literature
-value well when starting from an analytical experission for the long range
-potential in :math:`r` space, and performing a conversion to :math:`k` space
-with :py:func:`jaxrts.hypernetted_chain.transformPotental`. 
+The statically screened potential assumes :math:`V_l = 0` and reprocuced the
+Figure in the literature by :cite:`Wunsch.2011`.
 """
 
 from jaxrts import hypernetted_chain as hnc
@@ -25,7 +22,7 @@ import scienceplots
 
 plt.style.use("science")
 
-fig, ax = plt.subplots(2, 2, sharex=True, sharey=True)
+fig, ax = plt.subplots(2, 2, sharex=True, sharey=True, figsize=(5, 5))
 
 for idx, Gamma in enumerate([1, 10, 30, 100]):
     pot = [13, 13, 15, 16][idx]
@@ -61,22 +58,26 @@ for idx, Gamma in enumerate([1, 10, 30, 100]):
     dk = jnp.pi / (len(r) * dr)
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-    V_l_k = hnc.V_screened_C_l_k(k, q, alpha)
-    V_l = hnc.V_screened_C_l_r(r, q, alpha)
-    V_l_k, _ = hnc.transformPotential(V_l, r)
+    for potential in ["Coulomb", "no $V_l$"]:
+        V_l_k = hnc.V_screened_C_l_k(k, q, alpha)
+        if potential == "no $V_l$":
+            V_l_k *= 0
 
-    g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
-    print(f"Γ={Gamma}, {niter} iteration of the HNC scheme.")
+        g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
+        print(f"Γ={Gamma}, {niter} iteration of the HNC scheme.")
 
-    axis.plot(
-        (r / d[0, 0]).m_as(ureg.dimensionless),
-        g[0, 0, :].m_as(ureg.dimensionless),
-    )
-    axis.set_title("$\\Gamma =$ " + str(Gamma))
-    axis.set_xlabel("$r/d_i$")
-    axis.set_ylabel("$g(r)$")
+        axis.plot(
+            (r / d[0, 0]).m_as(ureg.dimensionless),
+            g[0, 0, :].m_as(ureg.dimensionless),
+            ls="dashed" if potential == "Coulomb" else "dotted",
+            label=potential,
+        )
+        axis.set_title("$\\Gamma =$ " + str(Gamma))
+        axis.set_xlabel("$r/d_i$")
+        axis.set_ylabel("$g(r)$")
 
+ax[0, 0].legend()
 plt.xlim(0, 5.0)
-plt.ylim(0, 1.5)
+plt.ylim(0, 1.8)
 plt.tight_layout()
 plt.show()

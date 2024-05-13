@@ -89,7 +89,7 @@ def fourier_transform_sine(k, rvals, fvals):
     arg = rvals * fvals
     units = arg.units
     dr = rvals[1] - rvals[0]
-    res = sinft(arg.m_as(units)) * units * (4 * jnp.pi) / k * dr
+    res = zaf_dst(arg.m_as(units), 4) * units * (4 * jnp.pi) / k * dr
     return res
 
 
@@ -448,7 +448,7 @@ def transformPotential(V, r) -> Quantity:
         k,
         r,
         V,
-    ) / ((2 * jnp.pi) ** 3)
+    )
     return V_k, k
 
 
@@ -526,7 +526,7 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
 
         cs_r = h_r - Ns_r
 
-        cs_k = _3Dfour( k, r, cs_r,)
+        cs_k = _3Dfour( k, r, cs_r)
 
         c_k = cs_k - v_l_k
 

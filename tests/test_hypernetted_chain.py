@@ -15,10 +15,6 @@ from jaxrts.units import ureg
 import numpy as onp
 from scipy.fft import dst as sp_dst
 
-from scipy.fftpack import rfftfreq
-
-from scipy.fftpack import rfftfreq
-
 
 def test_hydrogen_pair_distribution_function_literature_values_wuensch():
     """
@@ -63,9 +59,9 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
         dk = jnp.pi / (len(r) * dr)
         k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-        # V_l_k = hnc.V_screened_C_l_k(k, q, alpha)
-        V_l = hnc.V_screened_C_l_r(r, q, alpha)
-        V_l_k, _ = hnc.transformPotential(V_l, r)
+        # The long-range part is zero
+        V_l_k = hnc.V_screened_C_l_k(k, q, alpha)
+        V_l_k *= 0
 
         g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
 
@@ -75,12 +71,7 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
             g[0, 0, :].m_as(ureg.dimensionless),
         )
 
-        import matplotlib.pyplot as plt
-
-        plt.plot(r_lit, g_lit)
-        plt.plot(r, g[0, 0, :])
-        plt.show()
-        # assert jnp.all(jnp.abs(g_lit - interp) < 0.04)
+        assert jnp.all(jnp.abs(g_lit - interp) < 0.04)
 
 
 def test_sinft_self_inverse():
@@ -147,53 +138,11 @@ def test_sinft_analytical_result():
 
     dk = pref / (len(r) * dr)
     k = pref / r[-1] + jnp.arange(len(r)) * dk
-    # k = rfftfreq(len(r), d=dr)
 
     alpha = 4
 
     f = jnp.exp(-alpha * r)
     f_ft_analytical = k / (alpha**2 + k**2) * jnp.sqrt(2/jnp.pi)
 
-    f_fft_1 = jaxrts.hypernetted_chain.sinft(f.copy()) / jnp.sqrt(len(r)/ (2))
-    f_fft_1 = jaxrts.hypernetted_chain.zaf_dst(f.copy(), 1) / jnp.sqrt(len(r)/ (2))
-    f_fft_2 = jaxrts.hypernetted_chain.zaf_dst(f.copy(), 4) / jnp.sqrt(len(r)/ (2))
-
-    plt.plot(k, f_ft_analytical, label="Ana", color="C0")
-    plt.plot(k, f_fft_1, label="Trafo1", color = "C1")
-    plt.plot(k, f_fft_1 / f_ft_analytical, color="C1", ls = "dashed")
-    plt.plot(k, f_fft_2, label="Trafo2", color = "C2")
-    plt.plot(k, f_fft_2 / f_ft_analytical, color="C2", ls = "dashed")
-    plt.plot(k, 0.5 * (f_fft_2 + f_fft_1), label="Trafo2", color = "C3")
-    plt.plot(k, 0.5 * (f_fft_2 + f_fft_1) / f_ft_analytical, color="C3", ls = "dashed")
-    plt.legend()
-    plt.ylim(0, 2)
-    plt.show()
-
-    # assert jnp.max(jnp.abs(f_ft_analytical - f_fft)) < 1e-8
-
-
-def test_sinft_vs_scipy_dst():
-    N = 2**14
-    r = jnp.linspace(0.01, 100, N)
-    dr = r[1] - r[0]
-    pref = jnp.sqrt(jnp.pi)
-
-    dk = pref / (len(r) * dr)
-    k = pref / r[-1] + jnp.arange(len(r)) * dk
-
-    f = 1 / r**2
-    # f = 1 / jnp.sqrt(r)
-    for i in range(4):
-        scipy = sp_dst(f.copy(), type=i + 1)
-        # f_fft2 = jaxrts.hypernetted_chain.dst(f.copy(), 2) * jnp.sqrt(N * 2)
-
-        plt.plot(
-            k,
-            scipy,
-            label=str(i + 1),
-            alpha=0.7,
-        )
-    f_fft = jaxrts.hypernetted_chain.sinft(f.copy()) * 2
-    plt.plot(k, f_fft, label="we")
-    plt.legend()
-    plt.show()
+    f_fft = jaxrts.hypernetted_chain.sinft(f.copy()) / jnp.sqrt(len(r)/ (2))
+    assert jnp.max(jnp.abs(f_ft_analytical - f_fft)) < 1e-8
