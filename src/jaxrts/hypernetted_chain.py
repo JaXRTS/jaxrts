@@ -50,30 +50,38 @@ def bessel_2ndkind_0_5(x):
         bessel_0_5(x) * jnp.cos(0.5 * jnp.pi) - bessel_neg0_5(x)
     ) / jnp.sin(0.5 * jnp.pi)
 
-
 @partial(jax.jit, static_argnames=["N"])
 def fourier_transform_ogata(k, r, f, N, h):
+    r = r.m_as(ureg.angstrom)
+    k = k.m_as(1/ureg.angstrom)
+    units = f.units
+    f = f.m_as(units)
     r_k = jnp.arange(1, N + 1)
+    
     y_k = jnp.pi * psi(h * r_k) / h
+    
+    def internal(onek):
+        f_int = jpu.numpy.interp(
+            x=y_k / onek,
+            xp=r,
+            fp=f * r ** (3/2),
+            left=f[0] * r[0] ** (3/2),
+            right=f[-1] * r[-1] ** (3/2),
+            period=None,
+        )
 
-    f_int = jpu.numpy.interp(
-        x=y_k,
-        xp=r,
-        fp=f * jpu.numpy.sqrt(r),
-        left=f[0] * jpu.numpy.sqrt(r[0]),
-        right=f[-1] * jpu.numpy.sqrt(r[-1]),
-        period=None,
-    )
+        dpsi_k = dpsi(h * r_k)
+        w_k = bessel_2ndkind_0_5(jnp.pi * r_k) / bessel_3_2(jnp.pi * r_k)
+        series_sum = (
+            jnp.pi * w_k * f_int * bessel_0_5(y_k) * dpsi_k
+        )
 
-    dpsi_k = dpsi(h * r_k)
-    w_k = bessel_2ndkind_0_5(jnp.pi * r_k) / bessel_3_2(jnp.pi * r_k)
-    series_sum = (
-        jnp.pi * w_k * f_int * bessel_0_5(y_k) * dpsi_k * (y_k / k)
-    )
+        print(series_sum)
+        res = (jpu.numpy.nansum(series_sum) / onek ** 3) * (onek ** (3/2))
+        
+        return res * (2 * jnp.pi) ** (3/2)
 
-    res = jpu.numpy.nansum(series_sum, -1) / jpu.numpy.sqrt(k)
-
-    return res
+    return jax.vmap(internal, in_axes = 0, out_axes = 0)(k) * units * (1* ureg.angstrom**3)
 
 
 ##########
@@ -469,7 +477,7 @@ _3Dfour = jax.vmap(
 
 _3Dfour_ogata = jax.vmap(
     jax.vmap(
-        partial(fourier_transform_ogata, N=1000, h=0.001),
+        lambda k, r, V: fourier_transform_ogata(k, r, V, N=550, h=0.00001),
         in_axes=(None, None, 0),
         out_axes=0,
     ),
