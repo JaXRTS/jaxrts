@@ -648,27 +648,18 @@ def S_ii_HNC(k: Quantity, pdf, ni, r):
         entry ``S_ii[0]`` to the value ``S_ii[1]``, as it would be always
         unity, otherwise.
     """
-
-    # integral = (
-    #     jax.scipy.integrate.trapezoid(
-    #         (r * jpu.numpy.sin(k * r) * (pdf - 1)).m_as(ureg.angstrom),
-    #         r.m_as(ureg.angstrom),
-    #     )
-    #     * (1 * ureg.angstrom) ** 2
-    # )
-    # return jnp.eye(ni.shape[0]) + (
-    #     (4 * jnp.pi / k) * jpu.numpy.sqrt(jpu.numpy.outer(ni, ni)) * integral
-    # ).m_as(ureg.dimensionless)
-
     S_k = (
-        1.0
-        + _3Dfour(
-            k,
-            r,
-            pdf - 1.0,
+        jnp.eye(ni.shape[0])[:, :, jnp.newaxis]
+        + (
+            _3Dfour(
+                k,
+                r,
+                pdf - 1.0,
+            )
+            * jpu.numpy.sqrt(jpu.numpy.outer(ni, ni))[:, :, jnp.newaxis]
         )
     ).m_as(ureg.dimensionless)
 
     # The first index is forced to 1. Set it to the entry [1], as this is not
     # desired
-    return S_k.at[0].set(S_k[1]) * (1 * ureg.dimensionless)
+    return S_k.at[:, :, 0].set(S_k[:, :, 1]) * (1 * ureg.dimensionless)

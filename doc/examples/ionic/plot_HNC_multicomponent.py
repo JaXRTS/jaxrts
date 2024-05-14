@@ -19,7 +19,7 @@ from jaxrts import ureg
 
 plt.style.use("science")
 
-fig, ax = plt.subplots(1, 2, sharex=True)
+fig, ax = plt.subplots(1, 2, figsize=(8, 4))
 
 # Set up the ionization, density and temperature for individual ion
 # species.
@@ -48,10 +48,17 @@ V_l_k, k = hnc.transformPotential(
 V_s = hnc.V_Debye_Huckel_s_r(r, q, alpha, 1 / screen)
 
 g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
+S_ii = hnc.S_ii_HNC(k, g, n, r)
 
 ax[0].plot(
     (r / d[0, 0]).m_as(ureg.dimensionless),
     g[0, 0, :].m_as(ureg.dimensionless),
+    label="HH",
+    color="C0",
+)
+ax[1].plot(
+    (k * d[0, 0]).m_as(ureg.dimensionless),
+    S_ii[0, 0, :].m_as(ureg.dimensionless),
     label="HH",
     color="C0",
 )
@@ -61,9 +68,21 @@ ax[0].plot(
     label="CH",
     color="C1",
 )
+ax[1].plot(
+    (k * d[0, 0]).m_as(ureg.dimensionless),
+    S_ii[1, 0, :].m_as(ureg.dimensionless),
+    label="CH",
+    color="C1",
+)
 ax[0].plot(
     (r / d[1, 1]).m_as(ureg.dimensionless),
     g[1, 1, :].m_as(ureg.dimensionless),
+    label="CC",
+    color="C2",
+)
+ax[1].plot(
+    (k * d[0, 0]).m_as(ureg.dimensionless),
+    S_ii[1, 1, :].m_as(ureg.dimensionless),
     label="CC",
     color="C2",
 )
@@ -83,11 +102,16 @@ for idx, gtype in enumerate(["HH", "CH", "CC"]):
         color="gray",
     )
 
-ax[0].set_xlabel("$r/d_i$")
+ax[0].set_xlabel("$r [d_i]$")
 ax[0].set_ylabel("$g(r)$")
 
 ax[0].set_xlim(0, 3.5)
 ax[0].set_ylim(0, 1.5)
+
+ax[1].set_xlabel("$k [1/d_i]$")
+ax[1].set_ylabel("$S_{ii}(k)$")
+ax[1].set_xlim(0, 9)
+ax[1].set_ylim(-0.4, 1.5)
 
 ax[0].legend()
 
