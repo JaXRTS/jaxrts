@@ -27,8 +27,8 @@ q = hnc.construct_q_matrix(jnp.array([1, 4]) * 1 * ureg.elementary_charge)
 n = jnp.array([2.5e23, 2.5e23]) * (1 / ureg.centimeter**3)
 T = 2e4 * ureg.kelvin
 
-pot = 14
-r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 2**pot)
+pot = 15
+r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 1000 * ureg.a0, 2**pot)
 
 # We add densities, here. Maybe this is wrong.
 d = jpu.numpy.cbrt(3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :])))
