@@ -87,16 +87,37 @@ ax[1].plot(
     color="C2",
 )
 
+
+# Compare to the literature
+
+try:
+    current_folder = Path(__file__).parent
+except NameError:
+    current_folder = Path.cwd()
+
 for idx, gtype in enumerate(["HH", "CH", "CC"]):
     xlit, glit = onp.genfromtxt(
-        Path(__file__).parent
+        current_folder
         / f"../../../tests/data/Wunsch2011/Fig4.12/g_{gtype}.csv",
+        unpack=True,
+        delimiter=",",
+    )
+    klit, Slit = onp.genfromtxt(
+        current_folder
+        / f"../../../tests/data/Wunsch2011/Fig4.12/S_{gtype}.csv",
         unpack=True,
         delimiter=",",
     )
     ax[0].plot(
         xlit,
         glit,
+        ls="dashed",
+        label="Literature" if idx == 0 else None,
+        color="gray",
+    )
+    ax[1].plot(
+        klit,
+        Slit,
         ls="dashed",
         label="Literature" if idx == 0 else None,
         color="gray",
