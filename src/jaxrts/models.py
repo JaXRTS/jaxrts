@@ -181,7 +181,7 @@ class ArkhipovIonFeat(Model):
     jaxrts.static_structure_factors.S_ii_AD
         Calculation of the static ion ion stucture factor given by
         :cite:`Arkhipov.1998`.
-    jaxrts.ion_feature.q
+    jaxrts.ion_feature.q_Gregori2004
         Calculation of the screening by (quasi) free electrons
     jaxrts.models.PaulingFormFactors
         The default model for the atomic form factors
@@ -213,7 +213,7 @@ class ArkhipovIonFeat(Model):
         )[:, jnp.newaxis]
 
         f = jnp.sum(fi * population)
-        q = ion_feature.q(
+        q = ion_feature.q_Gregori2004(
             setup.k[jnp.newaxis],
             self.plasma_state.atomic_masses,
             self.plasma_state.n_e,
@@ -274,7 +274,7 @@ class Gregori2003IonFeat(Model):
             self.plasma_state.T_e, self.plasma_state.n_e
         )
         f = jnp.sum(fi * population)
-        q = ion_feature.q(
+        q = ion_feature.q_Gregori2004(
             setup.k[jnp.newaxis],
             self.plasma_state.atomic_masses,
             self.plasma_state.n_e,
@@ -346,7 +346,7 @@ class Gregori2006IonFeat(Model):
             self.plasma_state.T_i, T_D
         )
         f = jnp.sum(fi * population)
-        q = ion_feature.q(
+        q = ion_feature.q_Gregori2004(
             setup.k[jnp.newaxis],
             self.plasma_state.atomic_masses,
             self.plasma_state.n_e,

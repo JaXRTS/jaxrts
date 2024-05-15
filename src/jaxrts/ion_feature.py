@@ -22,7 +22,7 @@ jax.config.update("jax_enable_x64", True)
 
 
 @jit
-def q(
+def q_Gregori2004(
     k: Quantity,
     m_ion: Quantity,
     n_e: Quantity,
@@ -31,7 +31,8 @@ def q(
     Z_f: float,
 ) -> Quantity:
     """
-    Calculates the screening charge.
+    Calculates the screening charge by the Function given by
+    :cite:`Gregori.2004`.
 
     Parameters
     ----------
