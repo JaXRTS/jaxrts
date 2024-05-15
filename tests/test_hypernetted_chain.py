@@ -74,6 +74,69 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
         assert jnp.all(jnp.abs(g_lit - interp) < 0.04)
 
 
+def test_multicomponent_wunsch2011_literature():
+    # Set up the ionization, density and temperature for individual ion
+    # species.
+    q = hnc.construct_q_matrix(jnp.array([1, 4]) * 1 * ureg.elementary_charge)
+    n = jnp.array([2.5e23, 2.5e23]) * (1 / ureg.centimeter**3)
+    T = 2e4 * ureg.kelvin
+
+    pot = 15
+    r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 1000 * ureg.a0, 2**pot)
+
+    # We add densities, here. Maybe this is wrong.
+    d = jpu.numpy.cbrt(
+        3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :]))
+    )
+
+    dr = r[1] - r[0]
+    dk = jnp.pi / (len(r) * dr)
+    k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+
+    alpha = hnc.construct_alpha_matrix(n)
+
+    # This screening constant is guessed arbitrarily. Verify.
+    screen = 2 / 3 * ureg.a_0
+
+    V_l_k, k = hnc.transformPotential(
+        hnc.V_Debye_Huckel_l_r(r, q, alpha, 1 / screen), r
+    )
+    V_s = hnc.V_Debye_Huckel_s_r(r, q, alpha, 1 / screen)
+
+    g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
+    S_ii = hnc.S_ii_HNC(k, g, n, r)
+
+    current_folder = Path(__file__).parent
+
+    for idx, gtype in zip(
+        [jnp.s_[0, 0, :], jnp.s_[1, 0, :], jnp.s_[1, 1, :]], ["HH", "CH", "CC"]
+    ):
+        xlit, glit = onp.genfromtxt(
+            current_folder / f"data/Wunsch2011/Fig4.12/g_{gtype}.csv",
+            unpack=True,
+            delimiter=",",
+        )
+        klit, Slit = onp.genfromtxt(
+            current_folder / f"data/Wunsch2011/Fig4.12/S_{gtype}.csv",
+            unpack=True,
+            delimiter=",",
+        )
+        g_interp = jpu.numpy.interp(xlit * d[0, 0], r, g[idx])
+        S_interp = jpu.numpy.interp(klit / d[0, 0], k, S_ii[idx])
+        assert (
+            jnp.max(
+                jpu.numpy.absolute(glit - g_interp).m_as(ureg.dimensionless)
+            )
+            < 0.015
+        )
+        assert (
+            jnp.max(
+                jpu.numpy.absolute(Slit - S_interp).m_as(ureg.dimensionless)
+            )
+            < 0.03
+        )
+
+
 def test_sinft_self_inverse():
     N = 2**12
     r = jnp.linspace(0.00, 20.0, N)
@@ -142,7 +205,7 @@ def test_sinft_analytical_result():
     alpha = 4
 
     f = jnp.exp(-alpha * r)
-    f_ft_analytical = k / (alpha**2 + k**2) * jnp.sqrt(2/jnp.pi)
+    f_ft_analytical = k / (alpha**2 + k**2) * jnp.sqrt(2 / jnp.pi)
 
-    f_fft = jaxrts.hypernetted_chain.sinft(f.copy()) / jnp.sqrt(len(r)/ (2))
+    f_fft = jaxrts.hypernetted_chain.sinft(f.copy()) / jnp.sqrt(len(r) / (2))
     assert jnp.max(jnp.abs(f_ft_analytical - f_fft)) < 1e-8
