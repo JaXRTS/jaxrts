@@ -480,12 +480,119 @@ def V_Debye_Huckel_l_r(
     )
 
 
+def V_Kelbg_r(r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity):
+    """
+    See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Kelbg.1964`.
+
+    .. math::
+
+        V_{a b}^{\\mathrm{Deutsch}}(r) =
+        \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
+        \\left[1-\\exp\\left(-\\frac{r^2}{\\lambda_{a b}^2}\\right) +
+        \\frac{\\sqrt\\pi r}{\\lambda_{a b}}
+        \\left(1-\\mathrm{erf}\\left(\\frac{r}{\\lambda_{a b}}\\right)\\right)
+        \\right]
+
+    In the aboce equation, :math:`\\mathrm{erf}` is the Gaussian error function
+
+    .. note::
+
+        Only applicable for weakly coupled systems with :math:`\\Gamma < 1`.
+
+    """
+    return
+    _q = q[:, :, jnp.newaxis]
+    _lambda_ab = lambda_ab[:, :, jnp.newaxis]
+    _r = r[jnp.newaxis, jnp.newaxis, :]
+    return (
+        _q
+        / (4 * jnp.pi * ureg.epsilon_0 * _r)
+        * (
+            1
+            - jpu.numpy.exp(-(_r**2) / _lambda_ab**2)
+            + jnp.pi
+            * _r
+            / _lambda_ab
+            * (
+                1
+                - jax.scipy.special.erf(
+                    (_r / _lambda_ab).m_as(ureg.dimensionless)
+                )
+            )
+        )
+    )
+
+
+def V_Klimontovich_Kraeft_r(
+    r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity, T: Quantity
+):
+    """
+    See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Schwarz.2007`.
+
+    .. math::
+
+        V_{e i}^{\\mathrm{KK}}(r)=-\\frac{k_{B}T\\xi_{e i}^{2}}{16}
+        \\left[1+
+        \\frac{4\\pi\\varepsilon_0 k_{B}T\\xi_{e i}^{2}}{16Z e^{2}}
+        r\\right]^{-1}
+
+
+    In the aboce equation, :math:`\\xi{e i} = (Z e^2 \\beta) / (\\lambda_{e i}
+    4 \\pi \\varepsilon_0)`.
+
+    :math:`Z e^{2} = q^2`, and :math:`\\beta = 1/(k_B T)` (see note below)
+
+
+    .. note::
+
+        This potential is only defined for electron-ion interactions. However,
+        for the output to have the same shape as other potentials, we calculate
+        it for all inputs. The most sensible treatment is to only use the
+        off-diagnonal entries for the `ei` Potential.
+
+    """
+    _q = q[:, :, jnp.newaxis]
+    _lambda_ab = lambda_ab[:, :, jnp.newaxis]
+    _r = r[jnp.newaxis, jnp.newaxis, :]
+    # TO BE DONE
+    beta = 1 / (ureg.k_B * T)
+    xi = _q**2 * beta / (4 * jnp.pi * ureg.epsilon_0 * _lambda_ab)
+    return -(ureg.k_B * T * xi**2 / 16) * (
+        1
+        + ((ureg.k_B * T * xi**2) / (4 * jnp.pi * ureg.epsilon_0 * 16 * _q**2))
+        * _r
+    ) ** (-1)
+
+
+def V_Deutsch_r(r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity):
+    """
+    See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Deutsch.1977`.
+
+    .. math::
+
+        V_{a b}^{\\mathrm{Deutsch}}(r) =
+        \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
+        \\left[1-\\exp\\left(-\\frac{r}{\\lambda_{a b}}\\right)\\right]
+
+    """
+    return
+    _q = q[:, :, jnp.newaxis]
+    _lambda_ab = lambda_ab[:, :, jnp.newaxis]
+    _r = r[jnp.newaxis, jnp.newaxis, :]
+    return (
+        _q
+        / (4 * jnp.pi * ureg.epsilon_0 * _r)
+        * (1 - jpu.numpy.exp(-_r / _lambda_ab))
+    )
+
+
 @jax.jit
 def V_Debye_Huckel_l_k(
     k: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity, kappa: Quantity
 ) -> Quantity | jnp.ndarray:
     """
-    q**2 / (4 * jnp.pi * ureg.epsilon_0 * r) * jnp.exp(-kappa * r) * (1 - jnp.exp(-alpha * r))
+    q**2 / (4 * jnp.pi * ureg.epsilon_0 * r) * jnp.exp(-kappa * r) * (1 -
+    jnp.exp(-alpha * r))
     """
 
     _q = q[:, :, jnp.newaxis]
