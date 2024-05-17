@@ -482,7 +482,7 @@ def V_Debye_Huckel_l_r(
 
 def V_Kelbg_r(r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity):
     """
-    See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Kelbg.1964`.
+    See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Kelbg.1963`.
 
     .. math::
 
@@ -500,7 +500,6 @@ def V_Kelbg_r(r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity):
         Only applicable for weakly coupled systems with :math:`\\Gamma < 1`.
 
     """
-    return
     _q = q[:, :, jnp.newaxis]
     _lambda_ab = lambda_ab[:, :, jnp.newaxis]
     _r = r[jnp.newaxis, jnp.newaxis, :]
@@ -510,9 +509,7 @@ def V_Kelbg_r(r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity):
         * (
             1
             - jpu.numpy.exp(-(_r**2) / _lambda_ab**2)
-            + jnp.pi
-            * _r
-            / _lambda_ab
+            + (jnp.sqrt(jnp.pi) * _r / _lambda_ab)
             * (
                 1
                 - jax.scipy.special.erf(
@@ -554,12 +551,15 @@ def V_Klimontovich_Kraeft_r(
     _q = q[:, :, jnp.newaxis]
     _lambda_ab = lambda_ab[:, :, jnp.newaxis]
     _r = r[jnp.newaxis, jnp.newaxis, :]
-    # TO BE DONE
+
     beta = 1 / (ureg.k_B * T)
-    xi = _q**2 * beta / (4 * jnp.pi * ureg.epsilon_0 * _lambda_ab)
+    xi = _q * beta / (4 * jnp.pi * ureg.epsilon_0 * _lambda_ab)
     return -(ureg.k_B * T * xi**2 / 16) * (
         1
-        + ((ureg.k_B * T * xi**2) / (4 * jnp.pi * ureg.epsilon_0 * 16 * _q**2))
+        + (
+            (ureg.k_B * T * xi**2)
+            / (16 * jpu.numpy.absolute(_q) / (4 * jnp.pi * ureg.epsilon_0))
+        )
         * _r
     ) ** (-1)
 
@@ -575,7 +575,6 @@ def V_Deutsch_r(r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity):
         \\left[1-\\exp\\left(-\\frac{r}{\\lambda_{a b}}\\right)\\right]
 
     """
-    return
     _q = q[:, :, jnp.newaxis]
     _lambda_ab = lambda_ab[:, :, jnp.newaxis]
     _r = r[jnp.newaxis, jnp.newaxis, :]
