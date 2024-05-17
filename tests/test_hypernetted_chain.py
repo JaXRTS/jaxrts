@@ -16,6 +16,59 @@ import numpy as onp
 from scipy.fft import dst as sp_dst
 
 
+def test_electron_ion_potentials_literature_values_schwarz():
+    """
+    Test the calculation of electron and ion potentials by reproducing Fig. 1
+    in :cite:`Schwarz.2007`
+    """
+
+    Z = 2.5
+
+    q = hnc.construct_q_matrix(jnp.array([-1, Z]) * 1 * ureg.elementary_charge)
+    T = 12 * ureg.electron_volt / ureg.k_B
+
+    r = jnp.linspace(0, 10, 1000) * ureg.angstrom
+
+    m = (
+        jnp.array(
+            [
+                (1 * ureg.electron_mass).m_as(ureg.gram),
+                (9 * ureg.proton_mass).m_as(ureg.gram),
+            ]
+        )
+        * ureg.gram
+    )
+
+    # (1/mu = 1/m1 + 1/m2)
+    mu = jpu.numpy.outer(m, m) / (m[:, jnp.newaxis] + m[jnp.newaxis, :])
+    # Compared to Gregori.2003, there is a pi missing
+    lambda_ab = ureg.hbar * jpu.numpy.sqrt(1 / (2 * mu * ureg.k_B * T))
+
+    ei = (-hnc.V_Klimontovich_Kraeft_r(r, q, lambda_ab, T) / (ureg.k_B * T))[
+        1, 0, :
+    ].m_as(ureg.dimensionless)
+    ee = (hnc.V_Kelbg_r(r, q, lambda_ab) / (ureg.k_B * T))[0, 0, :].m_as(
+        ureg.dimensionless
+    )
+    ii = (hnc.V_Kelbg_r(r, q, lambda_ab) / (ureg.k_B * T))[1, 1, :].m_as(
+        ureg.dimensionless
+    )
+
+    current_folder = Path(__file__).parent
+
+    for label, potential in [["ei", ei], ["ii", ii], ["ee", ee]]:
+        f = list((current_folder / "data/Schwarz2007/").glob(f"*{label}.csv"))[
+            0
+        ]
+        r_lit, V = onp.genfromtxt(f, delimiter=",", unpack=True)
+
+        interp = jnp.interp(
+            r_lit, (r / ureg.a_0).m_as(ureg.dimensionless), potential
+        )
+
+        assert jnp.max(jnp.abs(V - interp) / jnp.max(V)) < 0.01
+
+
 def test_hydrogen_pair_distribution_function_literature_values_wuensch():
     """
     Test against the computation of literature data published in Fig. 4.4., in
