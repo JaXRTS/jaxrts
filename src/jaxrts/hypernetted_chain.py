@@ -493,7 +493,12 @@ def V_Kelbg_r(r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity):
         \\left(1-\\mathrm{erf}\\left(\\frac{r}{\\lambda_{a b}}\\right)\\right)
         \\right]
 
-    In the aboce equation, :math:`\\mathrm{erf}` is the Gaussian error function
+    In the aboce equation, :math:`\\mathrm{erf}` is the Gaussian error
+    function.
+
+    For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
+    \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`.
+
 
     .. note::
 
@@ -680,8 +685,8 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
     v_s = beta * V_s
     v_l_k = beta * V_l_k
 
-    g_r = jpu.numpy.exp(-(v_s))
-    Ns_r0 = jnp.zeros_like(g_r) * ureg.dimensionless
+    log_g_r0 = -(v_s).to(ureg.dimensionless)
+    Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
 
     d = jnp.eye(ni.shape[0]) * ni
 
@@ -703,15 +708,22 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
         If this is False, the loop will stop. Abort if too many steps were
         reached, or if convergence was reached.
         """
-        g_r, g_r_old, _, n_iter = val
+        log_g_r, log_g_r_old, _, n_iter = val
         return (n_iter < 2000) & jnp.all(
-            jnp.max(jnp.abs((g_r - g_r_old).m_as(ureg.dimensionless))) > delta
+            jnp.max(
+                jnp.abs(
+                    (jpu.numpy.exp(log_g_r) - jpu.numpy.exp(log_g_r_old)).m_as(
+                        ureg.dimensionless
+                    )
+                )
+            )
+            > delta
         )
 
     def step(val):
-        g_r, _, Ns_r, i = val
+        log_g_r, _, Ns_r, i = val
 
-        h_r = g_r - 1
+        h_r = jpu.numpy.expm1(log_g_r)
 
         cs_r = h_r - Ns_r
 
@@ -733,14 +745,14 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
             / (2 * jnp.pi) ** 3
         )
 
-        g_r_new = jpu.numpy.exp(Ns_r_new) / jpu.numpy.exp(v_s)
+        log_g_r_new = Ns_r_new - v_s
 
-        return g_r_new, g_r, Ns_r_new, i + 1
+        return log_g_r_new, log_g_r, Ns_r_new, i + 1
 
-    init = (g_r, g_r - 1, Ns_r0, 0)
-    g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
+    init = (log_g_r0, log_g_r0 - 1, Ns_r0, 0)
+    log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
 
-    return g_r, niter
+    return jpu.numpy.exp(log_g_r), niter
 
 
 @jax.jit
