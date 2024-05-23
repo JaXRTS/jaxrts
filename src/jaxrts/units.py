@@ -19,13 +19,13 @@ def to_array(obj) -> jnp.ndarray:
         else:
             unit = obj.units
             return jnp.array(obj.m_as(unit)) * unit
-    # If we had no Quantity, just try the straigt-forward conversion to an
-    # array.
-    try:
-        array = jnp.array(obj)
-    # But if this fails because we had a list of Quantities in the first place,
-    # we end up here
-    except AttributeError:
-        unit = obj[0].units
-        array = jnp.array([o.m_as(unit) for o in obj]) * unit
-    return array
+    # Try to unpack a list or tuple, here
+    elif isinstance(obj, list) or isinstance(obj, tuple):
+        try:
+            unit = obj[0].units
+            array = jnp.array([o.m_as(unit) for o in obj]) * unit
+            return array
+        except AttributeError:
+            return jnp.array(obj)
+    else:
+        return jnp.array(obj)
