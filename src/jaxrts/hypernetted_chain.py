@@ -708,20 +708,12 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
         If this is False, the loop will stop. Abort if too many steps were
         reached, or if convergence was reached.
         """
-        log_g_r, log_g_r_old, _, n_iter = val
-        return (n_iter < 2000) & jnp.all(
-            jnp.max(
-                jnp.abs(
-                    (jpu.numpy.exp(log_g_r) - jpu.numpy.exp(log_g_r_old)).m_as(
-                        ureg.dimensionless
-                    )
-                )
-            )
-            > delta
-        )
+        _, Ns_r, Ns_r_old, n_iter = val
+        err = jpu.numpy.sum((Ns_r - Ns_r_old)**2)
+        return (n_iter < 2000) & jnp.all(err > delta)
 
     def step(val):
-        log_g_r, _, Ns_r, i = val
+        log_g_r, Ns_r, _, i = val
 
         h_r = jpu.numpy.expm1(log_g_r)
 
@@ -747,9 +739,9 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
 
         log_g_r_new = Ns_r_new - v_s
 
-        return log_g_r_new, log_g_r, Ns_r_new, i + 1
+        return log_g_r_new, Ns_r_new, Ns_r, i + 1
 
-    init = (log_g_r0, log_g_r0 - 1, Ns_r0, 0)
+    init = (log_g_r0, Ns_r0, Ns_r0 - 1, 0)
     log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
 
     return jpu.numpy.exp(log_g_r), niter
