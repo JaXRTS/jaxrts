@@ -6,7 +6,7 @@ import jpu
 from jax import numpy as jnp
 
 from .elements import Element
-from .units import ureg, Quantity
+from .units import ureg, Quantity, to_array
 from .setup import Setup
 
 logger = logging.getLogger(__name__)
@@ -39,13 +39,14 @@ class PlasmaState:
         self.nions = len(ions)
 
         # Define charge configuration
-        self.Z_free = Z_free
+        self.Z_free = to_array(Z_free)
 
-        self.density_fractions = density_fractions
-        self.mass_density = mass_density
+        self.density_fractions = to_array(density_fractions)
+        self.mass_density = to_array(mass_density)
 
-        self.T_e = T_e
-        self.T_i = T_i if T_i else T_e
+        self.T_e = to_array(T_e)
+        T_i = T_i if T_i else T_e
+        self.T_i = to_array(T_i)
 
         self.models = {}
 
