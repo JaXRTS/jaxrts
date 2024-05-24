@@ -386,262 +386,6 @@ def zaf_dst(f, dst_type):
         return out
 
 
-@jax.jit
-def V_screened_C_l_r(
-    r: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity
-) -> Quantity | jnp.ndarray:
-    """
-    q**2 / (4 * jnp.pi * ureg.epsilon_0 * r) * (1 - jnp.exp(-alpha * r))
-    """
-
-    _q = q[:, :, jnp.newaxis]
-    _alpha = alpha[:, :, jnp.newaxis]
-    _r = r[jnp.newaxis, jnp.newaxis, :]
-
-    return (
-        _q
-        / (4 * jnp.pi * ureg.epsilon_0 * _r)
-        * (1 - jpu.numpy.exp(-_alpha * _r))
-    )
-
-
-@jax.jit
-def V_screened_C_l_k(
-    k: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity
-) -> Quantity | jnp.ndarray:
-    """
-    q**2 / (k**2 * ε0) * (alpha**2 / (k**2 + alpha**2))
-    """
-
-    _q = q[:, :, jnp.newaxis]
-    _alpha = alpha[:, :, jnp.newaxis]
-    _k = k[jnp.newaxis, jnp.newaxis, :]
-
-    return _q / (_k**2 * ureg.epsilon_0) * _alpha**2 / (_k**2 + _alpha**2)
-
-
-@jax.jit
-def V_screenedC_s_r(
-    r: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity
-) -> Quantity | jnp.ndarray:
-    """
-    q**2 / (4 * jnp.pi * ureg.epsilon_0 * r) * (jnp.exp(-alpha * r))
-    """
-
-    _q = q[:, :, jnp.newaxis]
-    _alpha = alpha[:, :, jnp.newaxis]
-    _r = r[jnp.newaxis, jnp.newaxis, :]
-
-    return (
-        _q / (4 * jnp.pi * ureg.epsilon_0 * _r) * (jpu.numpy.exp(-_alpha * _r))
-    ).to(ureg.electron_volt)
-
-
-@jax.jit
-def V_Debye_Huckel_s_r(
-    r: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity, kappa: Quantity
-) -> Quantity | jnp.ndarray:
-    """
-    q**2 / (4 * jnp.pi * ureg.epsilon_0 * r) * (jnp.exp(-(kappa + alpha) * r))
-    """
-
-    _q = q[:, :, jnp.newaxis]
-    _alpha = alpha[:, :, jnp.newaxis]
-    _r = r[jnp.newaxis, jnp.newaxis, :]
-
-    return (
-        _q
-        / (4 * jnp.pi * ureg.epsilon_0 * _r)
-        * (jpu.numpy.exp(-(kappa + _alpha) * _r))
-    ).to(ureg.electron_volt)
-
-
-@jax.jit
-def V_Debye_Huckel_l_r(
-    r: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity, kappa: Quantity
-) -> Quantity | jnp.ndarray:
-    """
-    .. math::
-
-        \\frac{q^2}{(4 \\pi \\epsilon_0 r)}
-        \\exp(-\\kappa r)(1 - \\exp(-\\alpha r))
-
-    """
-
-    _q = q[:, :, jnp.newaxis]
-    _alpha = alpha[:, :, jnp.newaxis]
-    _r = r[jnp.newaxis, jnp.newaxis, :]
-
-    return (
-        _q
-        / (4 * jnp.pi * ureg.epsilon_0 * _r)
-        * jpu.numpy.exp(-kappa * r)
-        * (1 - jpu.numpy.exp(-_alpha * _r))
-    )
-
-
-def V_Kelbg_r(r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity):
-    """
-    See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Kelbg.1963`.
-
-    .. math::
-
-        V_{a b}^{\\mathrm{Deutsch}}(r) =
-        \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
-        \\left[1-\\exp\\left(-\\frac{r^2}{\\lambda_{a b}^2}\\right) +
-        \\frac{\\sqrt\\pi r}{\\lambda_{a b}}
-        \\left(1-\\mathrm{erf}\\left(\\frac{r}{\\lambda_{a b}}\\right)\\right)
-        \\right]
-
-    In the aboce equation, :math:`\\mathrm{erf}` is the Gaussian error
-    function.
-
-    For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
-    \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`.
-
-
-    .. note::
-
-        Only applicable for weakly coupled systems with :math:`\\Gamma < 1`.
-
-    """
-    _q = q[:, :, jnp.newaxis]
-    _lambda_ab = lambda_ab[:, :, jnp.newaxis]
-    _r = r[jnp.newaxis, jnp.newaxis, :]
-    return (
-        _q
-        / (4 * jnp.pi * ureg.epsilon_0 * _r)
-        * (
-            1
-            - jpu.numpy.exp(-(_r**2) / _lambda_ab**2)
-            + (jnp.sqrt(jnp.pi) * _r / _lambda_ab)
-            * (
-                1
-                - jax.scipy.special.erf(
-                    (_r / _lambda_ab).m_as(ureg.dimensionless)
-                )
-            )
-        )
-    )
-
-
-def V_Klimontovich_Kraeft_r(
-    r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity, T: Quantity
-):
-    """
-    See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Schwarz.2007`.
-
-    .. math::
-
-        V_{e i}^{\\mathrm{KK}}(r)=-\\frac{k_{B}T\\xi_{e i}^{2}}{16}
-        \\left[1+
-        \\frac{4\\pi\\varepsilon_0 k_{B}T\\xi_{e i}^{2}}{16Z e^{2}}
-        r\\right]^{-1}
-
-
-    In the aboce equation, :math:`\\xi{e i} = (Z e^2 \\beta) / (\\lambda_{e i}
-    4 \\pi \\varepsilon_0)`.
-
-    :math:`Z e^{2} = q^2`, and :math:`\\beta = 1/(k_B T)` (see note below)
-
-
-    .. note::
-
-        This potential is only defined for electron-ion interactions. However,
-        for the output to have the same shape as other potentials, we calculate
-        it for all inputs. The most sensible treatment is to only use the
-        off-diagnonal entries for the `ei` Potential.
-
-    """
-    _q = q[:, :, jnp.newaxis]
-    _lambda_ab = lambda_ab[:, :, jnp.newaxis]
-    _r = r[jnp.newaxis, jnp.newaxis, :]
-
-    beta = 1 / (ureg.k_B * T)
-    xi = _q * beta / (4 * jnp.pi * ureg.epsilon_0 * _lambda_ab)
-    return -(ureg.k_B * T * xi**2 / 16) * (
-        1
-        + (
-            (ureg.k_B * T * xi**2)
-            / (16 * jpu.numpy.absolute(_q) / (4 * jnp.pi * ureg.epsilon_0))
-        )
-        * _r
-    ) ** (-1)
-
-
-def V_Deutsch_r(r: Quantity | jnp.ndarray, q: Quantity, lambda_ab: Quantity):
-    """
-    See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Deutsch.1977`.
-
-    .. math::
-
-        V_{a b}^{\\mathrm{Deutsch}}(r) =
-        \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
-        \\left[1-\\exp\\left(-\\frac{r}{\\lambda_{a b}}\\right)\\right]
-
-    """
-    _q = q[:, :, jnp.newaxis]
-    _lambda_ab = lambda_ab[:, :, jnp.newaxis]
-    _r = r[jnp.newaxis, jnp.newaxis, :]
-    return (
-        _q
-        / (4 * jnp.pi * ureg.epsilon_0 * _r)
-        * (1 - jpu.numpy.exp(-_r / _lambda_ab))
-    )
-
-
-@jax.jit
-def V_Debye_Huckel_l_k(
-    k: Quantity | jnp.ndarray, q: Quantity, alpha: Quantity, kappa: Quantity
-) -> Quantity | jnp.ndarray:
-    """
-    q**2 / (4 * jnp.pi * ureg.epsilon_0 * r) * jnp.exp(-kappa * r) * (1 -
-    jnp.exp(-alpha * r))
-    """
-
-    _q = q[:, :, jnp.newaxis]
-    _alpha = alpha[:, :, jnp.newaxis]
-    _k = k[jnp.newaxis, jnp.newaxis, :]
-
-    return (
-        _q
-        / (_k**2 * ureg.epsilon_0)
-        * _k**2
-        * (_alpha**2 + 2 * _alpha * kappa)
-        / ((_k**2 + kappa**2) * (_k**2 + (kappa + _alpha) ** 2))
-    )
-
-
-@jax.jit
-def transformPotential(V, r) -> Quantity:
-    """
-    ToDo: Test this, potentially, there is something wrong, here.
-    """
-    dr = r[1] - r[0]
-    dk = jnp.pi / (len(r) * dr)
-    k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
-    V_k = _3Dfour(
-        k,
-        r,
-        V,
-    )
-    return V_k, k
-
-
-@jax.jit
-def construct_alpha_matrix(n: jnp.ndarray | Quantity):
-    d = jpu.numpy.cbrt(
-        3 / (4 * jnp.pi * (n[:, jnp.newaxis] * n[jnp.newaxis, :]) ** (1 / 2))
-    )
-
-    return 2 / d
-
-
-@jax.jit
-def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
-    return jpu.numpy.outer(q, q)
-
-
 _3Dfour_sine = jax.vmap(
     jax.vmap(fourier_transform_sine, in_axes=(None, None, 0), out_axes=0),
     in_axes=(None, None, 1),
@@ -709,7 +453,7 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
         reached, or if convergence was reached.
         """
         _, Ns_r, Ns_r_old, n_iter = val
-        err = jpu.numpy.sum((Ns_r - Ns_r_old)**2)
+        err = jpu.numpy.sum((Ns_r - Ns_r_old) ** 2)
         return (n_iter < 2000) & jnp.all(err > delta)
 
     def step(val):
@@ -745,6 +489,22 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
     log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
 
     return jpu.numpy.exp(log_g_r), niter
+
+
+def mass_weighted_T(m, T):
+    """
+    The mass weighted temperature average of a pair, according to
+    :cite:`Schwarz.2007`.
+
+    .. math::
+
+       \\bar{T}_{ab} = \\frac{T_a m_b + T_b m_a}{m_a m_b}
+
+    """
+    return (
+        m[:, jnp.newaxis] * T[jnp.newaxis, :]
+        + m[jnp.newaxis, :] * T[:, jnp.newaxis]
+    ) / (m[:, jnp.newaxis] + m[jnp.newaxis, :])
 
 
 @jax.jit

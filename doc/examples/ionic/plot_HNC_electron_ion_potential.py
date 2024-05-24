@@ -16,7 +16,9 @@ This plot shows quite plainly, notable differences between various models.
 
 """
 
+import jaxrts
 from jaxrts import hypernetted_chain as hnc
+from jaxrts import hnc_potentials
 import jax.numpy as jnp
 import jpu
 from jaxrts import ureg
@@ -27,59 +29,54 @@ plt.style.use("science")
 
 fig, ax = plt.subplots()
 
-q = hnc.construct_q_matrix(jnp.array([-1, 2]) * 1 * ureg.elementary_charge)
-T = 1e5 * ureg.kelvin
-n = jnp.array([2 * 1.23e23, 1.23e23]) * ureg.centimeter ** (-3)
-
-d = jpu.numpy.cbrt(
-    3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :]) / 2)
+state = jaxrts.PlasmaState(
+    ions=[jaxrts.Element("He")],
+    Z_free=[2.5],
+    density_fractions=[1],
+    mass_density=[
+        1.23e23 / ureg.centimeter**3 * jaxrts.Element("He").atomic_mass
+    ],
+    T_e=1e5 * ureg.kelvin,
 )
+
 r = jnp.linspace(0, 10, 1000) * ureg.angstrom
 
-m = (
-    jnp.array(
-        [
-            (1 * ureg.electron_mass).m_as(ureg.gram),
-            (4 * ureg.proton_mass).m_as(ureg.gram),
-        ]
-    )
-    * ureg.gram
-)
+KK = hnc_potentials.KlimontovichKraeftPotential(state)
+Kelbg = hnc_potentials.KelbgPotential(state)
+Deutsch = hnc_potentials.DeutschPotential(state)
 
-# (1/mu = 1/m1 + 1/m2)
-mu = jpu.numpy.outer(m, m) / (m[:, jnp.newaxis] + m[jnp.newaxis, :])
-# See :cite:`Schwarz.2007`
-lambda_ab = ureg.hbar * jpu.numpy.sqrt(1 / (2 * mu * ureg.k_B * T))
-print(lambda_ab.to(ureg.angstrom))
+KK.include_electrons = True
+Kelbg.include_electrons = True
+Deutsch.include_electrons = True
 
 # Get lambda_ab from the limit of Deutsch:
 # for r-> 0: V_Deutsch -> q1q2/(4 pi eps_0 lam_ab)
 # This will only be correct for the ei part!
-lambda_ab = -q / (4 * jnp.pi * ureg.epsilon_0 * 5 * ureg.rydberg)
+lambda_ab = -KK.q2 / (4 * jnp.pi * ureg.epsilon_0 * 5 * ureg.rydberg)
+
+
+n = jaxrts.units.to_array([state.n_i[0], state.n_e])
+d = jpu.numpy.cbrt(
+    3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :]) / 2)
+)
+
 print(lambda_ab.to(ureg.angstrom))
 
-# See :cite:`Gregori.2003`
-lambda_ab = ureg.hbar * jpu.numpy.sqrt(1 / (2 * jnp.pi * mu * ureg.k_B * T))
-print(lambda_ab.to(ureg.angstrom))
-
-alpha = hnc.construct_alpha_matrix(n)
 
 ax.plot(
     (r / d[0, 0]).m_as(ureg.dimensionless),
-    -hnc.V_Klimontovich_Kraeft_r(r, q, lambda_ab, T)[1, 0, :].m_as(
-        ureg.rydberg
-    ),
+    -KK.full_r(r)[1, 0, :].m_as(ureg.rydberg),
     label="Klimontvich Kraeft",
 )
 ax.plot(
     (r / d[0, 0]).m_as(ureg.dimensionless),
-    -hnc.V_Kelbg_r(r, q, lambda_ab)[1, 0, :].m_as(ureg.rydberg),
+    -Kelbg.full_r(r)[1, 0, :].m_as(ureg.rydberg),
     label="Kelbg",
 )
 
 ax.plot(
     (r / d[0, 0]).m_as(ureg.dimensionless),
-    -hnc.V_Deutsch_r(r, q, lambda_ab)[1, 0, :].m_as(ureg.rydberg),
+    -Deutsch.full_r(r)[1, 0, :].m_as(ureg.rydberg),
     label="Deutsch",
 )
 

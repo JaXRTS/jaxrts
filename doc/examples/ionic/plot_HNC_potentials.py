@@ -3,6 +3,7 @@ HNC: Potentials
 ===============
 """
 
+import jaxrts
 from jaxrts import ureg
 from jaxrts import hypernetted_chain as hnc
 import jpu
@@ -22,7 +23,6 @@ dr = r[1] - r[0]
 dk = jnp.pi / (len(r) * dr)
 k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-q = hnc.construct_q_matrix(jnp.array([1]) * 1 * ureg.elementary_charge)
 T = 10 * ureg.electron_volt / ureg.boltzmann_constant
 
 Gamma = 30
@@ -37,14 +37,23 @@ di = 1 / (
 )
 
 n = (1 / (di**3 * (4 * jnp.pi / 3))).to(1 / ureg.angstrom**3)
-n = jnp.array([n.m_as(1 / ureg.angstrom**3)]) * (1 / ureg.angstrom**3)
-alpha = hnc.construct_alpha_matrix(n)
 
-V_l = hnc.V_screened_C_l_r(r, q, alpha)
-V_s = hnc.V_screenedC_s_r(r, q, alpha)
+state = jaxrts.PlasmaState(
+    [jaxrts.Element("H")],
+    [1],
+    [1],
+    [n * jaxrts.Element("H").atomic_mass],
+    [T],
+    [T],
+)
 
-V_l_k_analytical = hnc.V_screened_C_l_k(k, q, alpha)
-V_l_k_transformed, _ = hnc.transformPotential(V_l, r)
+V = jaxrts.hnc_potentials.CoulombPotential(state)
+
+V_l = V.long_r(r)
+V_s = V.short_r(r)
+
+V_l_k_analytical = V.long_k(k)
+V_l_k_transformed, _ = jaxrts.hnc_potentials.transformPotential(V_l, r)
 
 fig, ax = plt.subplots(2)
 ax[0].plot(

@@ -20,7 +20,7 @@ class PlasmaState:
         Z_free: List | Quantity,
         density_fractions: List | float,
         mass_density: List | Quantity,
-        T_e: List | Quantity,
+        T_e: Quantity,
         T_i: List | Quantity | None = None,
     ):
 
@@ -28,7 +28,6 @@ class PlasmaState:
             (len(ions) == len(Z_free))
             and (len(ions) == len(density_fractions))
             and (len(ions) == len(mass_density))
-            and (len(ions) == len(T_e))
         ), "WARNING: Input parameters should be the same shape as <ions>!"
         if T_i is not None:
             assert len(ions) == len(
@@ -44,8 +43,8 @@ class PlasmaState:
         self.density_fractions = to_array(density_fractions)
         self.mass_density = to_array(mass_density)
 
-        self.T_e = to_array(T_e)
-        T_i = T_i if T_i else T_e
+        self.T_e = T_e
+        T_i = T_i if T_i else T_e * jnp.ones(self.nions)
         self.T_i = to_array(T_i)
 
         self.models = {}
@@ -56,7 +55,7 @@ class PlasmaState:
     def __getitem__(self, key: str):
         return self.models[key]
 
-    def __setitem__(self, key:str, model_class: ABCMeta) -> None:
+    def __setitem__(self, key: str, model_class: ABCMeta) -> None:
         if key not in model_class.allowed_keys:
             raise KeyError(f"Model {model_class} not allowed for key {key}.")
         self.models[key] = model_class(self, key)

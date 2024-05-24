@@ -23,32 +23,43 @@ fig, ax = plt.subplots(1, 2, figsize=(8, 4))
 
 # Set up the ionization, density and temperature for individual ion
 # species.
-q = hnc.construct_q_matrix(jnp.array([1, 4]) * 1 * ureg.elementary_charge)
-n = jnp.array([2.5e23, 2.5e23]) * (1 / ureg.centimeter**3)
-T = 2e4 * ureg.kelvin
+
+state = jaxrts.PlasmaState(
+    ions=[jaxrts.Element("H"), jaxrts.Element("C")],
+    Z_free=[1, 4],
+    density_fractions=[0.5, 0.5],
+    mass_density=[
+        2.5e23 / ureg.centimeter**3 * jaxrts.Element("H").atomic_mass,
+        2.5e23 / ureg.centimeter**3 * jaxrts.Element("C").atomic_mass,
+    ],
+    T_e=2e4 * ureg.kelvin,
+)
 
 pot = 15
 r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 1000 * ureg.a0, 2**pot)
 
 # We add densities, here. Maybe this is wrong.
-d = jpu.numpy.cbrt(3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :])))
+d = jpu.numpy.cbrt(
+    3 / (4 * jnp.pi * (state.n_i[:, jnp.newaxis] + state.n_i[jnp.newaxis, :]))
+)
 
 dr = r[1] - r[0]
 dk = jnp.pi / (len(r) * dr)
 k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-alpha = hnc.construct_alpha_matrix(n)
+# Set the Screening length for the Debye Screening. Verify where this might
+# come form.
+state.DH_screening_length = 2 / 3 * ureg.a_0
 
-# Verify where this might come form.
-screen = 2 / 3 * ureg.a_0
+Potential = jaxrts.hnc_potentials.DebyeHuckelPotential(state)
 
-V_l_k, k = hnc.transformPotential(
-    hnc.V_Debye_Huckel_l_r(r, q, alpha, 1 / screen), r
+V_s = Potential.short_r(r)
+V_l_k = Potential.long_k(k)
+
+g, niter = hnc.pair_distribution_function_HNC(
+    V_s, V_l_k, r, Potential.T, state.n_i
 )
-V_s = hnc.V_Debye_Huckel_s_r(r, q, alpha, 1 / screen)
-
-g, niter = hnc.pair_distribution_function_HNC(V_s, V_l_k, r, T, n)
-S_ii = hnc.S_ii_HNC(k, g, n, r)
+S_ii = hnc.S_ii_HNC(k, g, state.n_i, r)
 
 ax[0].plot(
     (r / d[0, 0]).m_as(ureg.dimensionless),
