@@ -75,3 +75,31 @@ def q_Gregori2004(
             )
         )
     ).to_base_units()
+
+
+@jit
+def q_Glenzer2009(
+    S_ei: Quantity,
+    S_ii: Quantity,
+    Z_f: float,
+) -> Quantity:
+    """
+    Calculates the screening charge by the Function given by
+    :cite:`Glenzer.2009`.
+
+    Parameters
+    ----------
+    S_ei : Quantity
+        The static electron-ion structure factor.
+    S_ii : Quantity
+        The static ion-ion structure factor.
+    Z_f : float
+        The number of electrons not tightly bound to the atom = valence
+        electrons
+
+    Returns
+    -------
+    q(k):  Quantity
+        The screening charge.
+    """
+    return jpu.numpy.sqrt(Z_f) * S_ei / S_ii
