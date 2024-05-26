@@ -37,13 +37,23 @@ def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
 
 
 class HNCPotential(metaclass=abc.ABCMeta):
+    """
+    Potentials, intended to be used in the HNC scheme. Per default, the results
+    of methonds evaluating this Potential (in k or r space), return a
+    :math:`(n\\times n\\times m)` matrix, where ``n`` is the number of ion
+    species and ``m`` is the number of r or k points.
+    However, if :py:attr:`~.include_electrons` is ``True``, electrons are added
+    as another ion species, and so one the first two dimensions get an
+    additional entry.
+    """
 
     def __init__(self, state):
         self.state = state
         self._transform_r = jpu.numpy.linspace(1e-3, 1e3, 2**14) * ureg.a_0
 
         #: If `True`, the electrons are added as the n+1th ion species to the
-        #: potential
+        #: potential. The relevant entries are the last row and column,
+        #: respectively (i.e., the colored lines in the image above).
         self.include_electrons: bool = False
         self.check()
 
