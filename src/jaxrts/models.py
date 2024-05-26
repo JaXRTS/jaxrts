@@ -9,17 +9,19 @@ import logging
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
-from .units import ureg, Quantity
+from .units import ureg, Quantity, to_array
 from .setup import Setup, convolve_stucture_factor_with_instrument
 from .plasmastate import PlasmaState
 from .elements import electron_distribution_ionized_state
 from . import (
-    free_free,
     bound_free,
-    ion_feature,
-    static_structure_factors,
     form_factors,
+    free_free,
+    hnc_potentials,
+    hypernetted_chain,
+    ion_feature,
     plasma_physics,
+    static_structure_factors,
 )
 
 logger = logging.getLogger(__name__)
@@ -369,6 +371,177 @@ class Gregori2006IonFeat(Model):
         return res
 
 
+class ThreePotentialHNCIonFeat(Model):
+    """
+    Model for the ion feature using a calculating all :math:`S_{ab}` in the
+    Hypernetted Chain approximation. This is achieved by treating the electrons
+    as an additional ion species, that is amended to the list of ions. See,
+    e.g. :cite:`Schwarz.2007`.
+
+    .. note::
+
+        Compared to :py:class:`HNCIonFeat`, the internal Variables, `V_s` and
+        `V_l` are now :math:`(n+1 \\times n+1 \\times m)` matrices, where
+        :math:`n` is the number of ion species and :math:`m = 2^\\text{pot}`
+        which pot being :py:attr:`~.pot`, the exponent for the number of
+        scattering vectors to be evaluated in the HNC approach.
+
+    Requires 3 Potentials:
+
+        - an 'ion-ion Potential' The black entries in the picture below
+          (defaults to :py:class:`~DebyeHuckelPotential`).
+        - an 'electron-ion Potential' The orange entries in the picture below
+          (defaults to :py:class:`~KlimontovichKraeftPotential`).
+        - an 'electron-electron Potential' The red entries in the picutre below
+          (defaults to :py:class:`~KelbgPotental`).
+
+    .. image:: ../../_images/ThreePotentialHNC.svg
+       :width: 600
+
+    """
+
+    allowed_keys = ["ionic scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
+        state.update_default_model("form-factors", PaulingFormFactors)
+        state.update_default_model(
+            "ion-ion Potential", hnc_potentials.DebyeHuckelPotential
+        )
+        state.update_default_model(
+            "electron-ion Potential",
+            hnc_potentials.KlimontovichKraeftPotential,
+        )
+        state.update_default_model(
+            "electron-electron Potential", hnc_potentials.KelbgPotential
+        )
+        for key in [
+            "ion-ion Potential",
+            "electron-ion Potential",
+            "electron-electron Potential",
+        ]:
+            state[key].include_electrons = True
+        #: The minmal radius for evaluating the potentials.
+        self.r_min: Quantity = 0.001 * ureg.a_0
+        #: The maximal radius for evaluating the potentials.
+        self.r_max: Quantity = 100 * ureg.a_0
+        #: The exponent (``2 ** pot``), setting the number of points in ``r``
+        #: or ``k`` to evaluate.
+        self.pot: int = 14
+        super().__init__(state, model_key)
+
+    @property
+    def r(self):
+        return jnpu.linspace(self.r_min, self.r_max, 2**self.pot)
+
+    @property
+    def k(self):
+        r = self.r
+        dr = r[1] - r[0]
+        dk = jnp.pi / (len(r) * dr)
+        return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        # Prepare the Potentials
+        # ----------------------
+
+        # Populate the potential with a full ion potential, for starters
+        V_s_r = (
+            self.plasma_state["ion-ion Potential"]
+            .short_r(self.r)
+            .m_as(ureg.electron_volt)
+        )
+        # Replace the last line and column with the electron-ion potential
+        V_s_r = V_s_r.at[-1, :, :].set(
+            self.plasma_state["electron-ion Potential"]
+            .short_r(self.r)
+            .m_as(ureg.electron_volt)[-1, :, :]
+        )
+        V_s_r = V_s_r.at[:, -1, :].set(
+            self.plasma_state["electron-ion Potential"]
+            .short_r(self.r)
+            .m_as(ureg.electron_volt)[:, -1, :]
+        )
+        # Add the electron-electron Potential
+        V_s_r = V_s_r.at[-1, -1, :].set(
+            self.plasma_state["electron-electron Potential"]
+            .short_r(self.r)
+            .m_as(ureg.electron_volt)[-1, -1, :]
+        )
+        V_s_r *= ureg.electron_volt
+
+        # Repeat this for the long-range part of the potential in k space.
+        unit = ureg.electron_volt * ureg.angstrom**3
+        V_l_k = (
+            self.plasma_state["ion-ion Potential"].long_k(self.k).m_as(unit)
+        )
+        V_l_k = V_l_k.at[-1, :, :].set(
+            self.plasma_state["electron-ion Potential"]
+            .long_k(self.k)
+            .m_as(unit)[-1, :, :]
+        )
+        V_l_k = V_l_k.at[:, -1, :].set(
+            self.plasma_state["electron-ion Potential"]
+            .long_k(self.k)
+            .m_as(unit)[:, -1, :]
+        )
+        V_l_k = V_l_k.at[-1, -1, :].set(
+            self.plasma_state["electron-electron Potential"]
+            .long_k(self.k)
+            .m_as(unit)[-1, -1, :]
+        )
+        V_l_k *= unit
+
+        # Calculate g_ab in the HNC Approach
+        # ----------------------------------
+        T = self.plasma_state["ion-ion Potential"].T
+        n = to_array([*self.plasma_state.n_i, self.plasma_state.n_e])
+        g, niter = hypernetted_chain.pair_distribution_function_HNC(
+            V_s_r, V_l_k, self.r, T, n
+        )
+        logger.debug(
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+        )
+        # Calculate S_ab by Fourier-transforming g_ab
+        # ---------------------------------------------
+        S_ab_HNC = hypernetted_chain.S_ii_HNC(self.k, g, n, self.r)
+
+        # Interpolate this to the k given by the setup
+
+        S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
+
+        # To Calculate the screening, use the S_ii and S_ei contributions
+        # ---------------------------------------------------------------
+        S_ii = jnpu.diagonal(S_ab, axis1=0, axis2=1)[:-1]
+        S_ei = S_ab[:-1, -1]
+        q = ion_feature.q_Glenzer2009(S_ei, S_ii, self.plasma_state.Z_free)
+
+        # The W_R is calculated as a sum over all combinations of a_b
+        ion_spec1, ion_spec2 = jnp.meshgrid(
+            jnp.arange(self.plasma_state.nions),
+            jnp.arange(self.plasma_state.nions),
+        )
+        # Get the formfactor from the plasma state
+        fi = self.plasma_state["form-factors"].evaluate(setup)
+        # Calculate the number-fraction per element
+        x = self.plasma_state.n_i / jnpu.sum(self.plasma_state.n_i)
+
+        # Add the contributions from all pairs
+        w_R = 0
+        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+            if a <= b:
+                w_R += (
+                    jnpu.sqrt(x[a] * x[b])
+                    * (fi[a] + q[a])
+                    * (fi[b] + q[b])
+                    * S_ab[a, b]
+                )
+        # Scale the instrument function directly with w_R
+        res = w_R * setup.instrument(
+            (setup.measured_energy - setup.energy) / ureg.hbar
+        )
+        return res
+
+
 # Free-free models
 # ----------------
 
@@ -546,7 +719,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
             self.plasma_state.n_e,
             self.plasma_state.Z_free,
             setup.measured_energy - setup.energy,
-            self.no_of_freq
+            self.no_of_freq,
         )
         return See_0 * self.plasma_state.Z_free
 

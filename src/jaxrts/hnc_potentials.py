@@ -17,7 +17,7 @@ import jax
 import jpu
 
 from jaxrts.units import ureg, Quantity, to_array
-from jaxrts.hypernetted_chain import _3Dfour, mass_weighted_T
+from jaxrts.hypernetted_chain import _3Dfour, mass_weighted_T, hnc_interp
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,13 @@ class HNCPotential(metaclass=abc.ABCMeta):
     additional entry.
     """
 
-    def __init__(self, state):
+    allowed_keys = [
+        "ion-ion Potential",
+        "electron-ion Potential",
+        "electron-electron Potential",
+    ]
+
+    def __init__(self, state, model_key=""):
         self.state = state
         self._transform_r = jpu.numpy.linspace(1e-3, 1e3, 2**14) * ureg.a_0
 
@@ -99,16 +105,20 @@ class HNCPotential(metaclass=abc.ABCMeta):
         """
         The Foutier transform of :py:meth:`~short_r`.
         """
-        V_k, _k = transformPotential(self.short_r, self._transform_r)
-        return jpu.numpy.interp(k, _k, V_k)
+        V_k, _k = transformPotential(
+            self.short_r(self._transform_r), self._transform_r
+        )
+        return hnc_interp(k, _k, V_k)
 
     @partial(jax.jit, static_argnames=["self"])
     def long_k(self, k: Quantity) -> Quantity:
         """
         The Foutier transform of :py:meth:`~short_k`.
         """
-        V_k, _k = transformPotential(self.long_r, self._transform_r)
-        return jpu.numpy.interp(k, _k, V_k)
+        V_k, _k = transformPotential(
+            self.long_r(self._transform_r), self._transform_r
+        )
+        return hnc_interp(k, _k, V_k)
 
     @partial(jax.jit, static_argnames=["self"])
     def full_k(self, k):
@@ -169,11 +179,8 @@ class HNCPotential(metaclass=abc.ABCMeta):
     @property
     def lambda_ab(self):
         # Compared to Gregori.2003, there is a pi missing
-        l_ab = (
-            ureg.hbar
-            * jpu.numpy.sqrt(
-                1 / (2 * self.mu * ureg.k_B * self.T)
-            )
+        l_ab = ureg.hbar * jpu.numpy.sqrt(
+            1 / (2 * self.mu * ureg.k_B * self.T)
         )
         return l_ab
 
@@ -222,12 +229,10 @@ class DebyeHuckelPotential(HNCPotential):
     @property
     def kappa(self):
         # This is called if kappa is defined per ion species
-        if isinstance(
-            self.state.DH_screening_length.magnitude, jnp.ndarray
-        ):
-            return 1/self.state.DH_screening_length[:, :, jnp.newaxis]
+        if isinstance(self.state.DH_screening_length.magnitude, jnp.ndarray):
+            return 1 / self.state.DH_screening_length[:, :, jnp.newaxis]
         else:
-            return 1/self.state.DH_screening_length
+            return 1 / self.state.DH_screening_length
 
     @partial(jax.jit, static_argnames=["self"])
     def full_r(self, r):
@@ -325,6 +330,10 @@ class KlimontovichKraeftPotential(HNCPotential):
         off-diagnonal entries for the `ei` Potential.
 
     """
+
+    allowed_keys = [
+        "electron-ion Potential",
+    ]
 
     @partial(jax.jit, static_argnames=["self"])
     def full_r(self, r):

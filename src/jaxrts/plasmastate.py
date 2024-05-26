@@ -43,7 +43,10 @@ class PlasmaState:
         self.density_fractions = to_array(density_fractions)
         self.mass_density = to_array(mass_density)
 
-        self.T_e = T_e
+        if isinstance(T_e.magnitude, jnp.ndarray):
+            self.T_e = T_e[0]
+        else:
+            self.T_e = T_e
         T_i = T_i if T_i else T_e * jnp.ones(self.nions)
         self.T_i = to_array(T_i)
 

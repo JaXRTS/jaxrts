@@ -533,3 +533,11 @@ def S_ii_HNC(k: Quantity, pdf, ni, r):
     # The first index is forced to 1. Set it to the entry [1], as this is not
     # desired
     return S_k.at[:, :, 0].set(S_k[:, :, 1]) * (1 * ureg.dimensionless)
+
+
+#: The equivalent of jnp.interp for HNC-shaped arrays
+hnc_interp = jax.vmap(
+    jax.vmap(jpu.numpy.interp, in_axes=(None, None, 0), out_axes=0),
+    in_axes=(None, None, 1),
+    out_axes=1,
+)
