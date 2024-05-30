@@ -19,8 +19,6 @@ import jaxrts
 import jpu
 import jaxrts.hypernetted_chain as hnc
 
-print("Using hankel v{}".format(hankel.__version__))
-
 @jax.jit
 def psi(t):
     return t * jnp.tanh(jnp.pi * jnp.sinh(t) / 2)

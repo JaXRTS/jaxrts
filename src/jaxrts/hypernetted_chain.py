@@ -271,6 +271,10 @@ def OLDsinft(y):
 def sinft(y):
     """
     See :cite:`Press.1994`.
+
+    This function implements the Sine FFT algorithm, which is can be used
+    efficiently compute the Fourier transform of a three-dimensional
+    function with rotational symmetry.
     """
     # In the original version, we modified y in place. This can be ok, but do
     # we want it, here?
