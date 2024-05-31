@@ -74,7 +74,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def full_r(self, r: Quantity) -> Quantity: ...
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def short_r(self, r: Quantity) -> Quantity:
         """
         This is the short-range part of :py:meth:`full_r`:
@@ -87,7 +87,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return self.full_r(r) * jpu.numpy.exp(-self.alpha * _r)
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def long_r(self, r: Quantity) -> Quantity:
         """
         This is the long-range part of :py:meth:`full_r`:
@@ -100,7 +100,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return self.full_r(r) * (1 - jpu.numpy.exp(-self.alpha * _r))
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def short_k(self, k: Quantity) -> Quantity:
         """
         The Foutier transform of :py:meth:`~short_r`.
@@ -110,7 +110,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         )
         return hnc_interp(k, _k, V_k)
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def long_k(self, k: Quantity) -> Quantity:
         """
         The Foutier transform of :py:meth:`~short_k`.
@@ -120,7 +120,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         )
         return hnc_interp(k, _k, V_k)
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def full_k(self, k):
         return self.short_k(k) + self.long_k(k)
 
@@ -190,7 +190,7 @@ class CoulombPotential(HNCPotential):
     A full Coulomb Potential.
     """
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def full_r(self, r: Quantity) -> Quantity:
         """
         .. math::
@@ -201,7 +201,7 @@ class CoulombPotential(HNCPotential):
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return self.q2 / (4 * jnp.pi * ureg.epsilon_0 * _r)
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def long_k(self, k: Quantity):
         """
         .. math::
@@ -229,12 +229,15 @@ class DebyeHuckelPotential(HNCPotential):
     @property
     def kappa(self):
         # This is called if kappa is defined per ion species
-        if isinstance(self.state.DH_screening_length.magnitude, jnp.ndarray):
+        if (
+            isinstance(self.state.DH_screening_length.magnitude, jnp.ndarray)
+            and len(self.state.DH_screening_length.shape) == 2
+        ):
             return 1 / self.state.DH_screening_length[:, :, jnp.newaxis]
         else:
             return 1 / self.state.DH_screening_length
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def full_r(self, r):
         """
         .. math::
@@ -251,7 +254,7 @@ class DebyeHuckelPotential(HNCPotential):
             * jpu.numpy.exp(-self.kappa * r)
         )
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def long_k(self, k):
 
         _k = k[jnp.newaxis, jnp.newaxis, :]
@@ -277,7 +280,7 @@ class KelbgPotential(HNCPotential):
 
     """
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def full_r(self, r: Quantity) -> Quantity:
         """
 
@@ -335,7 +338,7 @@ class KlimontovichKraeftPotential(HNCPotential):
         "electron-ion Potential",
     ]
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def full_r(self, r):
         """
         .. math::
@@ -375,7 +378,7 @@ class DeutschPotential(HNCPotential):
 
     """
 
-    @partial(jax.jit, static_argnames=["self"])
+    # @partial(jax.jit, static_argnames=["self"])
     def full_r(self, r):
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return (

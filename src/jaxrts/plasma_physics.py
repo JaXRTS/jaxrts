@@ -2,7 +2,9 @@
 This submodule contains basic formulas used in plasma physics.
 """
 
-from .units import ureg, Quantity
+from typing import List
+
+from .units import ureg, Quantity, to_array
 from .math import fermi_integral
 
 import jax
@@ -208,8 +210,95 @@ def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:
     return f * ureg.k_B * T
 
 
+@jax.jit
+def Debye_Huckel_screening_length(
+    n: Quantity | List, T: Quantity, Z: float | List | jnp.ndarray = 1.0
+) -> Quantity:
+    """
+    Calculate the Debye-Hückel screening length. Use the general formula using
+    a sum over n, Z.
+
+    Parameters
+    ----------
+    n : Quantity or List
+        Electron density in 1/[length]**3
+    T : Quantity
+        The temperature in [K]. Many authors, e.g., :cite:`Gregori.2010`
+        suggest an effective temperature which interpolates between the
+        system's temperature and the fermi temperature.
+        See :py:func:`temperature_interpolation`
+    Z : float, list or np.ndarray, defaults to 1
+        Ionization. The default value of 1 corresponds to electrons
+    """
+    n = to_array(n)
+    Z = to_array(Z)
+    num = ureg.epsilon_0 * ureg.k_B * T
+    denom = jnpu.sum(n * (Z * ureg.elementary_charge) ** 2)
+    return jnpu.sqrt(num / denom)
+
+
+@jax.jit
+def temperature_interpolation(
+    n_e: Quantity, T_e: Quantity, power: int = 2
+) -> Quantity:
+    """
+    Interpolate between electron temperature and Fermi temperature. (See, e.g.,
+    :cite:`Gericke.2010`, who propose a `power` of 4)
+
+    .. math::
+
+        T = \\left( T_e^p + T_F^p\\right)^(1/p)
+
+    Parameters
+    ----------
+    n_e : Quantity
+        Electron density in 1/[length]**3
+    T_e : Quantity
+        Electron temperature in [K]
+    power : int, optional
+        Power to use for interpolation (default: 2)
+
+    Returns
+    -------
+    Quantity
+        Interpolated temperature
+    """
+    # Calculate the fermi temperature
+    T_f = fermi_energy(n_e) / ureg.k_B
+    return (
+        (T_e.m_as(ureg.kelvin) ** power + T_f.m_as(ureg.kelvin) ** power)
+        ** (1 / power)
+    ) * ureg.kelvin
+
+
+@jax.jit
 def degeneracy_param(n_e: Quantity, T_e: Quantity) -> Quantity:
-    return n_e * therm_de_broglie_wl(T_e)**3
+    """
+    Calculate the plasma degeneracy parameter.
+
+    The plasma degeneracy parameter is given by the product of the electron
+    density `n_e` and the cube of the thermal de Broglie wavelength.
+    For values about unity, the probability clouds of the electron wave
+    functions overlap.
+
+    A classical treatment of the plasma is allowed for values << 1, while a
+    fully degenerate electron gas is appropriate for values > 10. See
+    :cite:`Kraus.2012`.
+
+    Parameters
+    ----------
+    n_e : Quantity
+        Electron density in 1/[length]**3
+    T_e : Quantity
+        Electron temperature in [K]
+
+    Returns
+    -------
+    degeneracy_param : Quantity
+        Plasma degeneracy parameter
+
+    """
+    return n_e * therm_de_broglie_wl(T_e) ** 3
 
 
 def therm_de_broglie_wl(T):

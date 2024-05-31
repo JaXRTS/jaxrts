@@ -5,9 +5,7 @@ import jax
 from functools import partial
 import jpu
 
-from pint import Quantity
-
-from jaxrts.units import ureg
+from jaxrts.units import ureg, Quantity
 
 from typing import List, Callable
 

@@ -371,6 +371,135 @@ class Gregori2006IonFeat(Model):
         return res
 
 
+class LinearResponseHNCIonFeat(Model):
+    """
+    Model for the ion feature using a calculating all :math:`S_{ab}` in the
+    Hypernetted Chain approximation.
+
+    The screening density :math:`q` is calculated using a result from linear
+    response, by
+
+    .. math::
+
+       q(k) = \\xi_{ee} V_{ei}(k)
+
+
+    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
+
+
+    Requires 2 Potentials:
+
+        - an 'ion-ion Potential' (defaults to
+          :py:class:`~DebyeHuckelPotential`).
+        - an 'electron-ion Potential'
+          (defaults to :py:class:`~KlimontovichKraeftPotential`).
+
+    Further requires a 'form-factors' model (defaults to
+    :py:class:`~PaulingFormFactors`).
+
+    See Also
+    --------
+    jaxtrs.ion_feature.free_electron_susceptilibily
+        Function used to calculate :math:`\\xi{ee}`
+    """
+
+    allowed_keys = ["ionic scattering"]
+
+    def __init__(self, state: PlasmaState, model_key) -> None:
+        state.update_default_model("form-factors", PaulingFormFactors)
+        state.update_default_model(
+            "ion-ion Potential", hnc_potentials.DebyeHuckelPotential
+        )
+        state.update_default_model(
+            "electron-ion Potential",
+            hnc_potentials.KlimontovichKraeftPotential,
+        )
+        for key in [
+            "ion-ion Potential",
+            "electron-ion Potential",
+        ]:
+            state[key].include_electrons = False
+        #: The minmal radius for evaluating the potentials.
+        self.r_min: Quantity = 0.001 * ureg.a_0
+        #: The maximal radius for evaluating the potentials.
+        self.r_max: Quantity = 100 * ureg.a_0
+        #: The exponent (``2 ** pot``), setting the number of points in ``r``
+        #: or ``k`` to evaluate.
+        self.pot: int = 14
+        super().__init__(state, model_key)
+
+    @property
+    def r(self):
+        return jnpu.linspace(self.r_min, self.r_max, 2**self.pot)
+
+    @property
+    def k(self):
+        r = self.r
+        dr = r[1] - r[0]
+        dk = jnp.pi / (len(r) * dr)
+        return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+
+    def evaluate(self, setup: Setup) -> jnp.ndarray:
+        # Prepare the Potentials
+        # ----------------------
+
+        # Populate the potential with a full ion potential, for starters
+        V_s_r = self.plasma_state["ion-ion Potential"].short_r(self.r)
+        V_l_k = self.plasma_state["ion-ion Potential"].long_k(self.k)
+
+        # Calculate g_ab in the HNC Approach
+        # ----------------------------------
+        T = self.plasma_state["ion-ion Potential"].T
+        n = self.plasma_state.n_i
+        g, niter = hypernetted_chain.pair_distribution_function_HNC(
+            V_s_r, V_l_k, self.r, T, n
+        )
+        logger.debug(
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+        )
+        # Calculate S_ab by Fourier-transforming g_ab
+        # ---------------------------------------------
+        S_ab_HNC = hypernetted_chain.S_ii_HNC(self.k, g, n, self.r)
+
+        # Interpolate this to the k given by the setup
+
+        S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
+
+        # To Calculate the screening, use the S_ii and S_ei contributions
+        # ---------------------------------------------------------------
+        # Use the Debye screening length for the screening cloud.
+        kappa = 1 / self.plasma_state.DH_screening_length
+        xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa)
+        Vei = self.plasma_state["electron-ion Potential"].full_k(setup.k)
+        q = xi * Vei[-1, :]
+
+        # The W_R is calculated as a sum over all combinations of a_b
+        ion_spec1, ion_spec2 = jnp.meshgrid(
+            jnp.arange(self.plasma_state.nions),
+            jnp.arange(self.plasma_state.nions),
+        )
+        # Get the formfactor from the plasma state
+        fi = self.plasma_state["form-factors"].evaluate(setup)
+        # Calculate the number-fraction per element
+        x = self.plasma_state.n_i / jnpu.sum(self.plasma_state.n_i)
+
+        # Add the contributions from all pairs
+        w_R = 0
+        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+            if a <= b:
+                w_R += (
+                    jnpu.sqrt(x[a] * x[b])
+                    * (fi[a] + q[a])
+                    * (fi[b] + q[b])
+                    * S_ab[a, b]
+                )
+        # Scale the instrument function directly with w_R
+        res = w_R * setup.instrument(
+            (setup.measured_energy - setup.energy) / ureg.hbar
+        )
+        return res
+
+
 class ThreePotentialHNCIonFeat(Model):
     """
     Model for the ion feature using a calculating all :math:`S_{ab}` in the

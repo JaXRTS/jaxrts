@@ -103,3 +103,36 @@ def q_Glenzer2009(
         The screening charge.
     """
     return jpu.numpy.sqrt(Z_f) * S_ei / S_ii
+
+
+@jit
+def free_electron_susceptilibily_RPA(
+    k: Quantity,
+    kappa: Quantity,
+):
+    """
+    Return the free electron susceptilibily given by :cite:`Gregori.2010` eqn 4
+
+    .. math::
+
+        \\xi_{ee}^\\text{RPA} =
+        \\frac{\\kappa^2 \\epsilon_0} {e^2 \\varepsilon^\\text{RPA}}
+
+    where :math:`\\varepsilon^\\text{RPA} = \\frac{k^2 + \\kappa^2}{k^2}`
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    kappa : Quantity
+        Inverse screening length.
+
+    Returns
+    -------
+    xi(k) : Quantity
+        The free electron susceptilibily.
+    """
+    xi0 = kappa**2 * ureg.epsilon_0 / ((1 * ureg.elementary_charge) **2)
+    varepsilon = (k**2 + kappa**2)/(k**2)
+    return xi0 / varepsilon

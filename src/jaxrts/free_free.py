@@ -13,8 +13,6 @@ from .plasma_physics import (
 from .static_structure_factors import S_ii_AD
 from .math import inverse_fermi_12_fukushima_single_prec
 
-import pint
-
 import time
 from typing import List
 from functools import partial

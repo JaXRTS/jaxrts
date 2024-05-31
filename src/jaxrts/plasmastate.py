@@ -8,6 +8,7 @@ from jax import numpy as jnp
 from .elements import Element
 from .units import ureg, Quantity, to_array
 from .setup import Setup
+from . import plasma_physics
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +156,24 @@ class PlasmaState:
     @property
     def ii_coupling(self):
         pass
+
+    @property
+    def DH_screening_length(self):
+        """
+        Return the Debye-Hückel Debye screening length. Uses a 4th-power
+        interpolation between electron and fermi temperature, as proposed by
+        :cite:`Gericke.2010`
+
+        See Also
+        --------
+        jaxrts.plasma_physics.temperature_interpolation:
+            The function used for the temperature interpolation
+        jaxrts.plasma_physics.Debye_Huckel_screening_length
+            The function used to calculate the screening length
+        """
+        T = plasma_physics.temperature_interpolation(self.n_e, self.T_e, 4)
+        lam_DH = plasma_physics.Debye_Huckel_screening_length(self.n_e, T)
+        return lam_DH.to(ureg.angstrom)
 
     def db_wavelength(self, kind: List | str):
 
