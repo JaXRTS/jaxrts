@@ -162,7 +162,7 @@ def test_multicomponent_wunsch2011_literature():
 
     # Set the Screening length for the Debye Screening. Verify where this might
     # come form.
-    state.DH_screening_length = 2 / 3 * ureg.a_0
+    # state.DH_screening_length = 2 / 3 * ureg.a_0
 
     Potential = jaxrts.hnc_potentials.DebyeHuckelPotential(state)
 

@@ -1,9 +1,9 @@
 from abc import ABCMeta
-from typing import List
+from typing import List, Dict
 import numpy as np
 import logging
 import jpu
-from jax import numpy as jnp
+from jax import numpy as jnp, tree_util
 
 from .elements import Element
 from .units import ureg, Quantity, to_array
@@ -23,6 +23,7 @@ class PlasmaState:
         mass_density: List | Quantity,
         T_e: Quantity,
         T_i: List | Quantity | None = None,
+        models: Dict = {},
     ):
 
         assert (
@@ -44,14 +45,13 @@ class PlasmaState:
         self.density_fractions = to_array(density_fractions)
         self.mass_density = to_array(mass_density)
 
-        if isinstance(T_e.magnitude, jnp.ndarray):
+        if isinstance(T_e.magnitude, jnp.ndarray) and len(T_e.shape) == 1:
             self.T_e = T_e[0]
         else:
             self.T_e = T_e
         T_i = T_i if T_i else T_e * jnp.ones(self.nions)
         self.T_i = to_array(T_i)
-
-        self.models = {}
+        self.models = models
 
     def __len__(self) -> int:
         return len(self.ions)
@@ -225,3 +225,38 @@ class PlasmaState:
         free_bound = self["free-bound scattering"].evaluate(setup)
 
         return ionic + free_free + bound_free + free_bound
+
+    # The following is required to jit a state
+    def _tree_flatten(self):
+        children = (
+            self.Z_free,
+            self.density_fractions,
+            self.mass_density,
+            self.T_e,
+            self.T_i,
+        )
+        aux_data = (
+            self.ions,
+            self.models,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(PlasmaState)
+        obj.ions, obj.models = aux_data
+        (
+            obj.Z_free,
+            obj.density_fractions,
+            obj.mass_density,
+            obj.T_e,
+            obj.T_i,
+        ) = children
+        return obj
+
+
+tree_util.register_pytree_node(
+    PlasmaState,
+    PlasmaState._tree_flatten,
+    PlasmaState._tree_unflatten,
+)

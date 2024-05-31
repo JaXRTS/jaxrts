@@ -9,7 +9,6 @@ shortrange part and is also Fourier-transformed to k-space.
 
 import abc
 import logging
-from functools import partial
 
 from jax import numpy as jnp
 import jax.interpreters
@@ -53,9 +52,15 @@ class HNCPotential(metaclass=abc.ABCMeta):
         "electron-electron Potential",
     ]
 
-    def __init__(self, state, model_key=""):
+    def __init__(
+        self,
+        state,
+        model_key="",
+    ):
         self.state = state
         self._transform_r = jpu.numpy.linspace(1e-3, 1e3, 2**14) * ureg.a_0
+
+        self.model_key = model_key
 
         #: If `True`, the electrons are added as the n+1th ion species to the
         #: potential. The relevant entries are the last row and column,
@@ -74,7 +79,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def full_r(self, r: Quantity) -> Quantity: ...
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def short_r(self, r: Quantity) -> Quantity:
         """
         This is the short-range part of :py:meth:`full_r`:
@@ -87,7 +92,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return self.full_r(r) * jpu.numpy.exp(-self.alpha * _r)
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def long_r(self, r: Quantity) -> Quantity:
         """
         This is the long-range part of :py:meth:`full_r`:
@@ -98,9 +103,10 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
+        print(self.alpha)
         return self.full_r(r) * (1 - jpu.numpy.exp(-self.alpha * _r))
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def short_k(self, k: Quantity) -> Quantity:
         """
         The Foutier transform of :py:meth:`~short_r`.
@@ -110,7 +116,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         )
         return hnc_interp(k, _k, V_k)
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def long_k(self, k: Quantity) -> Quantity:
         """
         The Foutier transform of :py:meth:`~short_k`.
@@ -120,7 +126,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         )
         return hnc_interp(k, _k, V_k)
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def full_k(self, k):
         return self.short_k(k) + self.long_k(k)
 
@@ -184,13 +190,31 @@ class HNCPotential(metaclass=abc.ABCMeta):
         )
         return l_ab
 
+    # The following is required to jit a state
+    def _tree_flatten(self):
+        children = (self.state,)
+        aux_data = {
+            "include_electrons": self.include_electrons,
+            "transform_r": self._transform_r,
+            "model_key": self.model_key,
+        }  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        new_obj = cls(*children)
+        new_obj._transform_r = aux_data["transform_r"]
+        new_obj.model_key = aux_data["model_key"]
+        new_obj.include_electrons = aux_data["include_electrons"]
+        return new_obj
+
 
 class CoulombPotential(HNCPotential):
     """
     A full Coulomb Potential.
     """
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def full_r(self, r: Quantity) -> Quantity:
         """
         .. math::
@@ -201,7 +225,7 @@ class CoulombPotential(HNCPotential):
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return self.q2 / (4 * jnp.pi * ureg.epsilon_0 * _r)
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def long_k(self, k: Quantity):
         """
         .. math::
@@ -237,7 +261,7 @@ class DebyeHuckelPotential(HNCPotential):
         else:
             return 1 / self.state.DH_screening_length
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def full_r(self, r):
         """
         .. math::
@@ -254,7 +278,7 @@ class DebyeHuckelPotential(HNCPotential):
             * jpu.numpy.exp(-self.kappa * r)
         )
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def long_k(self, k):
 
         _k = k[jnp.newaxis, jnp.newaxis, :]
@@ -280,7 +304,7 @@ class KelbgPotential(HNCPotential):
 
     """
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def full_r(self, r: Quantity) -> Quantity:
         """
 
@@ -338,7 +362,7 @@ class KlimontovichKraeftPotential(HNCPotential):
         "electron-ion Potential",
     ]
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def full_r(self, r):
         """
         .. math::
@@ -378,7 +402,7 @@ class DeutschPotential(HNCPotential):
 
     """
 
-    # @partial(jax.jit, static_argnames=["self"])
+    @jax.jit
     def full_r(self, r):
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return (
@@ -402,3 +426,30 @@ def transformPotential(V, r) -> Quantity:
         V,
     )
     return V_k, k
+
+
+jax.tree_util.register_pytree_node(
+    CoulombPotential,
+    CoulombPotential._tree_flatten,
+    CoulombPotential._tree_unflatten,
+)
+jax.tree_util.register_pytree_node(
+    DebyeHuckelPotential,
+    DebyeHuckelPotential._tree_flatten,
+    DebyeHuckelPotential._tree_unflatten,
+)
+jax.tree_util.register_pytree_node(
+    DeutschPotential,
+    DeutschPotential._tree_flatten,
+    DeutschPotential._tree_unflatten,
+)
+jax.tree_util.register_pytree_node(
+    KelbgPotential,
+    KelbgPotential._tree_flatten,
+    KelbgPotential._tree_unflatten,
+)
+jax.tree_util.register_pytree_node(
+    KlimontovichKraeftPotential,
+    KlimontovichKraeftPotential._tree_flatten,
+    KlimontovichKraeftPotential._tree_unflatten,
+)
