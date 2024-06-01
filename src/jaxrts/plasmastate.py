@@ -3,7 +3,8 @@ from typing import List, Dict
 import numpy as np
 import logging
 import jpu
-from jax import numpy as jnp, tree_util
+import jax
+from jax import numpy as jnp
 
 from .elements import Element
 from .units import ureg, Quantity, to_array
@@ -52,6 +53,7 @@ class PlasmaState:
         T_i = T_i if T_i else T_e * jnp.ones(self.nions)
         self.T_i = to_array(T_i)
         self.models = models
+        self._overwritten = {}
 
     def __len__(self) -> int:
         return len(self.ions)
@@ -157,8 +159,8 @@ class PlasmaState:
     def ii_coupling(self):
         pass
 
-    @property
-    def DH_screening_length(self):
+    @jax.jit
+    def _calc_DH_screening_length(self):
         """
         Return the Debye-Hückel Debye screening length. Uses a 4th-power
         interpolation between electron and fermi temperature, as proposed by
@@ -174,6 +176,38 @@ class PlasmaState:
         T = plasma_physics.temperature_interpolation(self.n_e, self.T_e, 4)
         lam_DH = plasma_physics.Debye_Huckel_screening_length(self.n_e, T)
         return lam_DH.to(ureg.angstrom)
+
+    @property
+    def DH_screening_length(self):
+        """
+        Return the Debye-Hückel Debye screening length. Uses a 4th-power
+        interpolation between electron and fermi temperature, as proposed by
+        :cite:`Gericke.2010`
+
+        This property can be overwritten by a user.
+
+        See Also
+        --------
+        jaxrts.plasma_physics.temperature_interpolation:
+            The function used for the temperature interpolation
+        jaxrts.plasma_physics.Debye_Huckel_screening_length
+            The function used to calculate the screening length
+        """
+        return jax.lax.cond(
+            "DH_screening_length" in self._overwritten,
+            lambda: self._overwritten["DH_screening_length"].to(ureg.angstrom),
+            self._calc_DH_screening_length,
+        )
+
+    @DH_screening_length.setter
+    def DH_screening_length(self, value):
+        calc = self._calc_DH_screening_length()
+        logger.warning(
+            "The value DH_screening_length was overwritten by a user. "
+            + f"The calculated value was {calc:.3f}, "
+            + f"the new value is {value.to(ureg.angstrom):.3f}."
+        )
+        self._overwritten["DH_screening_length"] = value
 
     def db_wavelength(self, kind: List | str):
 
@@ -235,16 +269,13 @@ class PlasmaState:
             self.T_e,
             self.T_i,
         )
-        aux_data = (
-            self.ions,
-            self.models,
-        )  # static values
+        aux_data = (self.ions, self.models, self._overwritten)  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(PlasmaState)
-        obj.ions, obj.models = aux_data
+        obj.ions, obj.models, obj._overwritten = aux_data
         (
             obj.Z_free,
             obj.density_fractions,
@@ -255,7 +286,7 @@ class PlasmaState:
         return obj
 
 
-tree_util.register_pytree_node(
+jax.tree_util.register_pytree_node(
     PlasmaState,
     PlasmaState._tree_flatten,
     PlasmaState._tree_unflatten,
