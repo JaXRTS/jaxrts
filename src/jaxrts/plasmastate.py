@@ -46,7 +46,9 @@ class PlasmaState:
         self.density_fractions = to_array(density_fractions)
         self.mass_density = to_array(mass_density)
 
-        if isinstance(T_e.magnitude, jnp.ndarray) and len(T_e.shape) == 1:
+        if isinstance(T_e, list):
+            self.T_e = T_e[0]
+        elif isinstance(T_e.magnitude, jnp.ndarray) and len(T_e.shape) == 1:
             self.T_e = T_e[0]
         else:
             self.T_e = T_e
