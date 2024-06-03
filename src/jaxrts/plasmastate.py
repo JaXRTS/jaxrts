@@ -20,7 +20,6 @@ class PlasmaState:
         self,
         ions: List[Element],
         Z_free: List | Quantity,
-        density_fractions: List | float,
         mass_density: List | Quantity,
         T_e: Quantity,
         T_i: List | Quantity | None = None,
@@ -29,7 +28,6 @@ class PlasmaState:
 
         assert (
             (len(ions) == len(Z_free))
-            and (len(ions) == len(density_fractions))
             and (len(ions) == len(mass_density))
         ), "WARNING: Input parameters should be the same shape as <ions>!"
         if T_i is not None:
@@ -43,7 +41,6 @@ class PlasmaState:
         # Define charge configuration
         self.Z_free = to_array(Z_free)
 
-        self.density_fractions = to_array(density_fractions)
         self.mass_density = to_array(mass_density)
 
         if isinstance(T_e, list):
@@ -294,7 +291,6 @@ class PlasmaState:
     def _tree_flatten(self):
         children = (
             self.Z_free,
-            self.density_fractions,
             self.mass_density,
             self.T_e,
             self.T_i,
@@ -310,7 +306,6 @@ class PlasmaState:
         obj.ions, obj.models = aux_data
         (
             obj.Z_free,
-            obj.density_fractions,
             obj.mass_density,
             obj.T_e,
             obj.T_i,

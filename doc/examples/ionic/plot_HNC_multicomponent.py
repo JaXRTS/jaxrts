@@ -27,7 +27,6 @@ fig, ax = plt.subplots(1, 2, figsize=(8, 4))
 state = jaxrts.PlasmaState(
     ions=[jaxrts.Element("H"), jaxrts.Element("C")],
     Z_free=[1, 4],
-    density_fractions=[0.5, 0.5],
     mass_density=[
         2.5e23 / ureg.centimeter**3 * jaxrts.Element("H").atomic_mass,
         2.5e23 / ureg.centimeter**3 * jaxrts.Element("C").atomic_mass,

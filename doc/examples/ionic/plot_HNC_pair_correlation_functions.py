@@ -29,7 +29,6 @@ H = jaxrts.Element("H")
 state = jaxrts.PlasmaState(
     ions=[H],
     Z_free=[1],
-    density_fractions=[1],
     mass_density=[1e23 / ureg.centimeter**3 * H.atomic_mass],
     T_e=10 * ureg.electron_volt / ureg.k_B,
 )

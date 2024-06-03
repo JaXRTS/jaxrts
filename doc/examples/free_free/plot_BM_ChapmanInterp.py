@@ -41,7 +41,6 @@ setup = jaxrts.setup.Setup(
 state = jaxrts.PlasmaState(
     [jaxrts.Element("H")],
     jnp.array([1.0]),
-    jnp.array([1.0]),
     jnp.array([0.0017]) * ureg.gram / ureg.centimeter**3,
     jnp.array([2]) * ureg.electron_volt / ureg.k_B,
     jnp.array([2]) * ureg.electron_volt / ureg.k_B,
