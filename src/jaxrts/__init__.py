@@ -4,19 +4,20 @@ from . import bound_free
 from . import elements
 from . import form_factors
 from . import free_bound
+from . import free_free
 from . import helpers
+from . import hnc_potentials
+from . import hypernetted_chain
 from . import instrument_function
 from . import ion_feature
-from . import free_free
-from . import plasmastate
-from . import plasma_physics
-from . import plotting
-from . import static_structure_factors
-from . import units
 from . import math
 from . import models
+from . import plasma_physics
+from . import plasmastate
+from . import plotting
 from . import setup
-from . import hypernetted_chain
+from . import static_structure_factors
+from . import units
 
 from .elements import Element
 from .plasmastate import (
@@ -27,24 +28,25 @@ from .units import (
 )
 
 __all__ = [
-    "PlasmaState",
-    "elements",
     "Element",
+    "PlasmaState",
     "bound_free",
-    "free_free",
+    "elements",
     "form_factors",
     "free_bound",
+    "free_free",
     "helpers",
+    "hnc_potentials",
+    "hypernetted_chain"
     "instrument_function",
     "ion_feature",
-    "plasmastate",
-    "plasma_physics",
-    "plotting",
-    "setup",
     "math",
     "models",
+    "plasma_physics",
+    "plasmastate",
+    "plotting",
+    "setup",
     "static_structure_factors",
     "units",
     "ureg",
-    "hypernetted_chain"
 ]

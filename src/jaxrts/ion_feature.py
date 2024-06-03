@@ -22,7 +22,7 @@ jax.config.update("jax_enable_x64", True)
 
 
 @jit
-def q(
+def q_Gregori2004(
     k: Quantity,
     m_ion: Quantity,
     n_e: Quantity,
@@ -31,7 +31,8 @@ def q(
     Z_f: float,
 ) -> Quantity:
     """
-    Calculates the screening charge.
+    Calculates the screening charge by the Function given by
+    :cite:`Gregori.2004`.
 
     Parameters
     ----------
@@ -74,3 +75,64 @@ def q(
             )
         )
     ).to_base_units()
+
+
+@jit
+def q_Glenzer2009(
+    S_ei: Quantity,
+    S_ii: Quantity,
+    Z_f: float,
+) -> Quantity:
+    """
+    Calculates the screening charge by the Function given by
+    :cite:`Glenzer.2009`.
+
+    Parameters
+    ----------
+    S_ei : Quantity
+        The static electron-ion structure factor.
+    S_ii : Quantity
+        The static ion-ion structure factor.
+    Z_f : float
+        The number of electrons not tightly bound to the atom = valence
+        electrons
+
+    Returns
+    -------
+    q(k):  Quantity
+        The screening charge.
+    """
+    return jpu.numpy.sqrt(Z_f) * S_ei / S_ii
+
+
+@jit
+def free_electron_susceptilibily_RPA(
+    k: Quantity,
+    kappa: Quantity,
+):
+    """
+    Return the free electron susceptilibily given by :cite:`Gregori.2010` eqn 4
+
+    .. math::
+
+        \\xi_{ee}^\\text{RPA} =
+        \\frac{\\kappa^2 \\epsilon_0} {e^2 \\varepsilon^\\text{RPA}}
+
+    where :math:`\\varepsilon^\\text{RPA} = \\frac{k^2 + \\kappa^2}{k^2}`
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    kappa : Quantity
+        Inverse screening length.
+
+    Returns
+    -------
+    xi(k) : Quantity
+        The free electron susceptilibily.
+    """
+    xi0 = kappa**2 * ureg.epsilon_0 / ((1 * ureg.elementary_charge) **2)
+    varepsilon = (k**2 + kappa**2)/(k**2)
+    return xi0 / varepsilon

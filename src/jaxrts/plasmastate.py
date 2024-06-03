@@ -1,13 +1,15 @@
 from abc import ABCMeta
-from typing import List
+from typing import List, Dict
 import numpy as np
 import logging
 import jpu
+import jax
 from jax import numpy as jnp
 
 from .elements import Element
-from .units import ureg, Quantity
+from .units import ureg, Quantity, to_array
 from .setup import Setup
+from . import plasma_physics
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +22,15 @@ class PlasmaState:
         Z_free: List | Quantity,
         density_fractions: List | float,
         mass_density: List | Quantity,
-        T_e: List | Quantity,
+        T_e: Quantity,
         T_i: List | Quantity | None = None,
+        models: Dict = {},
     ):
 
         assert (
             (len(ions) == len(Z_free))
             and (len(ions) == len(density_fractions))
             and (len(ions) == len(mass_density))
-            and (len(ions) == len(T_e))
         ), "WARNING: Input parameters should be the same shape as <ions>!"
         if T_i is not None:
             assert len(ions) == len(
@@ -39,15 +41,26 @@ class PlasmaState:
         self.nions = len(ions)
 
         # Define charge configuration
-        self.Z_free = Z_free
+        self.Z_free = to_array(Z_free)
 
-        self.density_fractions = density_fractions
-        self.mass_density = mass_density
+        self.density_fractions = to_array(density_fractions)
+        self.mass_density = to_array(mass_density)
 
-        self.T_e = T_e
-        self.T_i = T_i if T_i else T_e
-
-        self.models = {}
+        if isinstance(T_e, list):
+            self.T_e = T_e[0]
+        elif isinstance(T_e.magnitude, jnp.ndarray) and len(T_e.shape) == 1:
+            self.T_e = T_e[0]
+        else:
+            self.T_e = T_e
+        T_i = T_i if T_i else T_e * jnp.ones(self.nions)
+        self.T_i = to_array(T_i)
+        self.models = models
+        self._overwritten = {
+            "DH_screening_length": -1.0 * ureg.angstrom,
+            "ion_core_radius": -1.0
+            * jnp.ones_like(self.Z_free)
+            * ureg.angstrom,
+        }
 
     def __len__(self) -> int:
         return len(self.ions)
@@ -55,7 +68,7 @@ class PlasmaState:
     def __getitem__(self, key: str):
         return self.models[key]
 
-    def __setitem__(self, key:str, model_class: ABCMeta) -> None:
+    def __setitem__(self, key: str, model_class: ABCMeta) -> None:
         if key not in model_class.allowed_keys:
             raise KeyError(f"Model {model_class} not allowed for key {key}.")
         self.models[key] = model_class(self, key)
@@ -153,6 +166,79 @@ class PlasmaState:
     def ii_coupling(self):
         pass
 
+    @jax.jit
+    def _calc_DH_screening_length(self):
+        """
+        Return the Debye-Hückel Debye screening length. Uses a 4th-power
+        interpolation between electron and fermi temperature, as proposed by
+        :cite:`Gericke.2010`
+
+        See Also
+        --------
+        jaxrts.plasma_physics.temperature_interpolation:
+            The function used for the temperature interpolation
+        jaxrts.plasma_physics.Debye_Huckel_screening_length
+            The function used to calculate the screening length
+        """
+        T = plasma_physics.temperature_interpolation(self.n_e, self.T_e, 4)
+        lam_DH = plasma_physics.Debye_Huckel_screening_length(self.n_e, T)
+        return lam_DH.to(ureg.angstrom)
+
+    def _lookup_ion_core_radius(self):
+        ioc = [e.atomic_radius_calc for e in self.ions]
+        return to_array(ioc)
+
+    @property
+    def ion_core_radius(self):
+        return jpu.numpy.where(
+            self._overwritten["ion_core_radius"] > 0 * ureg.angstrom,
+            self._overwritten["ion_core_radius"],
+            self._lookup_ion_core_radius(),
+        )
+
+    @ion_core_radius.setter
+    def ion_core_radius(self, value):
+        calc = self._lookup_ion_core_radius()
+        logger.warning(
+            "The value ion_core_radius was overwritten by a user. "
+            + f"The calculated value was {calc.to(ureg.angstrom)}, "
+            + f"the new value is {value.to(ureg.angstrom)}."
+        )
+        self._overwritten["ion_core_radius"] = value
+
+    @property
+    def DH_screening_length(self):
+        """
+        Return the Debye-Hückel Debye screening length. Uses a 4th-power
+        interpolation between electron and fermi temperature, as proposed by
+        :cite:`Gericke.2010`
+
+        This property can be overwritten by a user.
+
+        See Also
+        --------
+        jaxrts.plasma_physics.temperature_interpolation:
+            The function used for the temperature interpolation
+        jaxrts.plasma_physics.Debye_Huckel_screening_length
+            The function used to calculate the screening length
+        """
+        return jax.lax.cond(
+            self._overwritten["DH_screening_length"].to(ureg.angstrom)
+            >= 0 * ureg.angstrom,
+            lambda: self._overwritten["DH_screening_length"].to(ureg.angstrom),
+            self._calc_DH_screening_length,
+        )
+
+    @DH_screening_length.setter
+    def DH_screening_length(self, value):
+        calc = self._calc_DH_screening_length()
+        logger.warning(
+            "The value DH_screening_length was overwritten by a user. "
+            + f"The calculated value was {calc:.3f}, "
+            + f"the new value is {value.to(ureg.angstrom):.3f}."
+        )
+        self._overwritten["DH_screening_length"] = value
+
     def db_wavelength(self, kind: List | str):
 
         wavelengths = []
@@ -203,3 +289,43 @@ class PlasmaState:
         free_bound = self["free-bound scattering"].evaluate(setup)
 
         return ionic + free_free + bound_free + free_bound
+
+    # The following is required to jit a state
+    def _tree_flatten(self):
+        children = (
+            self.Z_free,
+            self.density_fractions,
+            self.mass_density,
+            self.T_e,
+            self.T_i,
+            self._overwritten["DH_screening_length"],
+            self._overwritten["ion_core_radius"],
+        )
+        aux_data = (self.ions, self.models)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(PlasmaState)
+        obj.ions, obj.models = aux_data
+        (
+            obj.Z_free,
+            obj.density_fractions,
+            obj.mass_density,
+            obj.T_e,
+            obj.T_i,
+            DH_screening_length,
+            ion_core_radius,
+        ) = children
+        obj._overwritten = {
+            "DH_screening_length": DH_screening_length,
+            "ion_core_radius": ion_core_radius,
+        }
+        return obj
+
+
+jax.tree_util.register_pytree_node(
+    PlasmaState,
+    PlasmaState._tree_flatten,
+    PlasmaState._tree_unflatten,
+)
