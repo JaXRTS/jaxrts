@@ -192,21 +192,20 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
     # The following is required to jit a state
     def _tree_flatten(self):
-        children = (self.state,)
+        children = (self.state, self._transform_r)
         aux_data = {
             "include_electrons": self.include_electrons,
-            "transform_r": self._transform_r,
             "model_key": self.model_key,
         }  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
-        new_obj = cls(*children)
-        new_obj._transform_r = aux_data["transform_r"]
-        new_obj.model_key = aux_data["model_key"]
-        new_obj.include_electrons = aux_data["include_electrons"]
-        return new_obj
+        obj = object.__new__(cls)
+        obj.state, obj._transform_r  = children
+        obj.model_key = aux_data["model_key"]
+        obj.include_electrons = aux_data["include_electrons"]
+        return obj
 
 
 class CoulombPotential(HNCPotential):

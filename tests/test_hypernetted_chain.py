@@ -102,7 +102,6 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
         # ToDo: It seems that I cannot move this out of the loop. Fix this.
         Coulomb = hnc_potentials.CoulombPotential(state)
 
-        print(Gamma)
         V_s = Coulomb.short_r(r)
         # The long-range part is zero
         V_l_k = 0 * Coulomb.long_k(k)
