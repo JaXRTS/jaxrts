@@ -477,12 +477,10 @@ class EmptyCorePotential(HNCPotential):
 
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
-        return (
-            jnp.heaviside(
-                (_r - self.r_cut).m_as(ureg.angstrom),
-                0.0,
-            ) * (self.q2 / (4 * jnp.pi * ureg.epsilon_0 * _r))
-        )
+        return jnp.heaviside(
+            (_r - self.r_cut).m_as(ureg.angstrom),
+            0.0,
+        ) * (self.q2 / (4 * jnp.pi * ureg.epsilon_0 * _r))
 
     @jax.jit
     def long_r(self, r: Quantity) -> Quantity:
@@ -515,6 +513,123 @@ class EmptyCorePotential(HNCPotential):
         )
 
 
+class SoftCorePotential(HNCPotential):
+    """
+    This potential is very comparable to :py:class:`EmptyCorePotential`, but to
+    circumvent the hard cutoff, we rather introduce a soft cutoff, exponential
+    cutoff. It's strength is given by the attribute :py:attr:`~.beta`.
+    See :cite:`Gericke.2010`.
+
+    We definie `r_cut` in the :py:class:`jaxrts.PlasmaState`.
+
+    .. warning::
+
+       This potential is only defined for the electron-ion interaction. Hence,
+       it will always and automatically set ~:py:meth:`include_electrons` to
+       ``True``. For the rest, we reurn a Coulomb-potential -- but this is
+       really just to be compatible with the other potentials defined here.
+
+    """
+
+    allowed_keys = [
+        "electron-ion Potential",
+    ]
+
+    def __init__(
+        self,
+        state,
+        model_key="",
+        beta: float = 4.0,
+    ):
+        #: This is the exponent which gives the steepness of the soft-core's
+        #: edge
+        self.beta = beta
+        super().__init__(state, model_key)
+        self.include_electrons = True
+
+    @jax.jit
+    def full_r(self, r: Quantity) -> Quantity:
+        """
+        .. math::
+
+           q^2 / (4 jnp.pi \\varepsilon_0 * r)
+           \\left[1 -
+           \\exp\\left(-\\frac{r^\\beta}{r_{cut}^\\beta}\\right)\\right]
+
+        """
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+        exp_part = 1 - jpu.numpy.exp(
+            -((_r / self.r_cut).m_as(ureg.dimensionless) ** self.beta)
+        )
+        return self.q2 / (4 * jnp.pi * ureg.epsilon_0 * _r) * exp_part
+
+    @jax.jit
+    def long_r(self, r: Quantity) -> Quantity:
+        return self.full_r(r)
+
+    @jax.jit
+    def short_r(self, r: Quantity) -> Quantity:
+        return jnp.zero(*self.q.shape[:2], len(r)) * ureg.electron_volt
+
+    @jax.jit
+    def full_k(self, k):
+        _k = k[jnp.newaxis, jnp.newaxis, :]
+        # Define a auxiliary short-range version of this potential; While it is
+        # not used, acutally, it is easier to Fourier transform.
+        exp_part = jpu.numpy.exp(
+            -(
+                (self._transform_r / self.r_cut).m_as(ureg.dimensionless)
+                ** self.beta
+            )
+        )
+        V_s_transform_r = (
+            self.q2
+            / (4 * jnp.pi * ureg.epsilon_0 * self._transform_r)
+            * exp_part
+        )
+        _V_s_transform_k, _k = transformPotential(
+            V_s_transform_r, self._transform_r
+        )
+        V_s_k = hnc_interp(k, _k, _V_s_transform_k)
+
+        # Subtract this from the full, known solution of the Coulomb Potential
+        # in k space.
+
+        _k = k[jnp.newaxis, jnp.newaxis, :]
+        V_full_Coulomb_k = self.q2 / ureg.vacuum_permittivity / _k**2
+
+        return V_full_Coulomb_k - V_s_k
+
+    @jax.jit
+    def long_k(self, k: Quantity) -> Quantity:
+        return self.full_k(k)
+
+    @jax.jit
+    def short_k(self, k: Quantity) -> Quantity:
+        return (
+            jnp.zero(*self.q.shape[:2], len(k))
+            * ureg.electron_volt
+            * ureg.angstrom**3
+        )
+
+    # The following is required to jit a state
+    def _tree_flatten(self):
+        children = (self.state, self._transform_r, self.beta)
+        aux_data = {
+            "include_electrons": self.include_electrons,
+            "model_key": self.model_key,
+        }  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.state, obj._transform_r, obj.beta = children
+        obj.model_key = aux_data["model_key"]
+        obj.include_electrons = aux_data["include_electrons"]
+        return obj
+
+
 @jax.jit
 def transformPotential(V, r) -> Quantity:
     """
@@ -538,6 +653,7 @@ for pot in [
     EmptyCorePotential,
     KelbgPotential,
     KlimontovichKraeftPotential,
+    SoftCorePotential,
 ]:
     jax.tree_util.register_pytree_node(
         pot,
