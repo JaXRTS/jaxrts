@@ -26,7 +26,6 @@ def test_electron_ion_potentials_literature_values_schwarz():
     state = jaxrts.PlasmaState(
         ions=[jaxrts.Element("Be")],
         Z_free=[2.5],
-        density_fractions=[1],
         mass_density=[
             1.21e23 / ureg.centimeter**3 * jaxrts.Element("Be").atomic_mass
         ],
@@ -74,7 +73,6 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
     state = jaxrts.PlasmaState(
         ions=[H],
         Z_free=[1],
-        density_fractions=[1],
         mass_density=[1e23 / ureg.centimeter**3 * H.atomic_mass],
         T_e=10 * ureg.electron_volt / ureg.k_B,
     )
@@ -135,7 +133,6 @@ def test_multicomponent_wunsch2011_literature():
     state = jaxrts.PlasmaState(
         ions=[jaxrts.Element("H"), jaxrts.Element("C")],
         Z_free=[1, 4],
-        density_fractions=[0.5, 0.5],
         mass_density=[
             2.5e23 / ureg.centimeter**3 * jaxrts.Element("H").atomic_mass,
             2.5e23 / ureg.centimeter**3 * jaxrts.Element("C").atomic_mass,

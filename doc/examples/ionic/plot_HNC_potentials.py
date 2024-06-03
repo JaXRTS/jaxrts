@@ -41,7 +41,6 @@ n = (1 / (di**3 * (4 * jnp.pi / 3))).to(1 / ureg.angstrom**3)
 state = jaxrts.PlasmaState(
     [jaxrts.Element("H")],
     [1],
-    [1],
     [n * jaxrts.Element("H").atomic_mass],
     [T],
     [T],

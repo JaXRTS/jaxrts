@@ -47,7 +47,6 @@ def set_state(state, Z_f, n_e, T):
 state = jaxrts.PlasmaState(
     ions=[element],
     Z_free=jnp.array([2]),
-    density_fractions=jnp.array([1]),
     mass_density=jnp.array([3e23])
     / (1 * ureg.centimeter**3)
     * element.atomic_mass

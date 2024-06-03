@@ -21,7 +21,6 @@ fig, ax = plt.subplots(3, figsize=(4, 9))
 state = jaxrts.PlasmaState(
     [jaxrts.Element("Be")],
     [2],
-    [1],
     [ureg("1.848g/cc")],
     ureg("12eV") / ureg.k_B,
 )

@@ -8,7 +8,6 @@ ureg = jaxrts.ureg
 test_state = jaxrts.PlasmaState(
     ions=[jaxrts.Element("C")],
     Z_free=jnp.array([2]),
-    density_fractions=jnp.array([1]),
     mass_density=jnp.array([3.5]) * ureg.gram / ureg.centimeter**3,
     T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
 )
