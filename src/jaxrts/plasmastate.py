@@ -53,7 +53,7 @@ class PlasmaState:
         T_i = T_i if T_i else T_e * jnp.ones(self.nions)
         self.T_i = to_array(T_i)
         self.models = models
-        self._overwritten = {}
+        self._overwritten = {"DH_screening_length": -1.0 * ureg.angstrom}
 
     def __len__(self) -> int:
         return len(self.ions)
@@ -194,7 +194,8 @@ class PlasmaState:
             The function used to calculate the screening length
         """
         return jax.lax.cond(
-            "DH_screening_length" in self._overwritten,
+            self._overwritten["DH_screening_length"].to(ureg.angstrom)
+            >= 0 * ureg.angstrom,
             lambda: self._overwritten["DH_screening_length"].to(ureg.angstrom),
             self._calc_DH_screening_length,
         )
