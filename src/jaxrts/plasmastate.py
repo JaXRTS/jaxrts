@@ -57,7 +57,9 @@ class PlasmaState:
         self.models = models
         self._overwritten = {
             "DH_screening_length": -1.0 * ureg.angstrom,
-            "ion_core_radius": -1.0 * jnp.ones_like(self.Z_free) * ureg.angstrom,
+            "ion_core_radius": -1.0
+            * jnp.ones_like(self.Z_free)
+            * ureg.angstrom,
         }
 
     def __len__(self) -> int:
@@ -296,21 +298,29 @@ class PlasmaState:
             self.mass_density,
             self.T_e,
             self.T_i,
+            self._overwritten["DH_screening_length"],
+            self._overwritten["ion_core_radius"],
         )
-        aux_data = (self.ions, self.models, self._overwritten)  # static values
+        aux_data = (self.ions, self.models)  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(PlasmaState)
-        obj.ions, obj.models, obj._overwritten = aux_data
+        obj.ions, obj.models = aux_data
         (
             obj.Z_free,
             obj.density_fractions,
             obj.mass_density,
             obj.T_e,
             obj.T_i,
+            DH_screening_length,
+            ion_core_radius,
         ) = children
+        obj._overwritten = {
+            "DH_screening_length": DH_screening_length,
+            "ion_core_radius": ion_core_radius,
+        }
         return obj
 
 
