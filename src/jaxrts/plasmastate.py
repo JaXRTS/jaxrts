@@ -55,7 +55,10 @@ class PlasmaState:
         T_i = T_i if T_i else T_e * jnp.ones(self.nions)
         self.T_i = to_array(T_i)
         self.models = models
-        self._overwritten = {"DH_screening_length": -1.0 * ureg.angstrom}
+        self._overwritten = {
+            "DH_screening_length": -1.0 * ureg.angstrom,
+            "ion_core_radius": -1.0 * jnp.ones_like(self.Z_free) * ureg.angstrom,
+        }
 
     def __len__(self) -> int:
         return len(self.ions)
@@ -178,6 +181,28 @@ class PlasmaState:
         T = plasma_physics.temperature_interpolation(self.n_e, self.T_e, 4)
         lam_DH = plasma_physics.Debye_Huckel_screening_length(self.n_e, T)
         return lam_DH.to(ureg.angstrom)
+
+    def _lookup_ion_core_radius(self):
+        ioc = [e.atomic_radius_calc for e in self.ions]
+        return to_array(ioc)
+
+    @property
+    def ion_core_radius(self):
+        return jpu.numpy.where(
+            self._overwritten["ion_core_radius"] > 0 * ureg.angstrom,
+            self._overwritten["ion_core_radius"],
+            self._lookup_ion_core_radius(),
+        )
+
+    @ion_core_radius.setter
+    def ion_core_radius(self, value):
+        calc = self._lookup_ion_core_radius()
+        logger.warning(
+            "The value ion_core_radius was overwritten by a user. "
+            + f"The calculated value was {calc.to(ureg.angstrom)}, "
+            + f"the new value is {value.to(ureg.angstrom)}."
+        )
+        self._overwritten["ion_core_radius"] = value
 
     @property
     def DH_screening_length(self):

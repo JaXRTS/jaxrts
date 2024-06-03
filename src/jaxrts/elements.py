@@ -551,6 +551,9 @@ class Element:
             [Eb1s, Eb2s, Eb2p, Eb3s, Eb3p, Eb3d, Eb4s, Eb4p, Eb4d, Eb4f]
         ) * (1 * ureg.electron_volt)
 
+        self.atomic_radius_calc = _atomic_radii_calc[self.Z] * ureg.picometer
+
+
     def __eq__(self, other: Any) -> bool:
         """
         If this function returns ``True``, the two instances self and other are

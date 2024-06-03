@@ -183,6 +183,25 @@ class HNCPotential(metaclass=abc.ABCMeta):
         return mass_weighted_T(m, T)[:, :, jnp.newaxis]
 
     @property
+    def r_cut(self) -> Quantity:
+        """
+        This casts :attr:`jaxrts.PlasmaState.ion_core_radius` in the form
+        required to be used with an :py:class:~.HNCPotential`. However, this
+        quantity is only relevant if we consider electron-ion interactions.
+        Hence, the returned array will be 0 for all ion-ion pairs and the
+        electron-electron pair.
+        """
+        r = jnp.zeros_like(self.q2.magnitude, dtype=float)
+        if self.include_electrons:
+            r = r.at[:-1, -1, :].set(
+                self.state.ion_core_radius.m_as(ureg.angstrom)
+            )
+            r = r.at[-1, :-1, :].set(
+                self.state.ion_core_radius.m_as(ureg.angstrom)
+            )
+        return r * ureg.angstrom
+
+    @property
     def lambda_ab(self):
         # Compared to Gregori.2003, there is a pi missing
         l_ab = ureg.hbar * jpu.numpy.sqrt(
@@ -202,7 +221,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.state, obj._transform_r  = children
+        obj.state, obj._transform_r = children
         obj.model_key = aux_data["model_key"]
         obj.include_electrons = aux_data["include_electrons"]
         return obj
@@ -223,6 +242,11 @@ class CoulombPotential(HNCPotential):
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return self.q2 / (4 * jnp.pi * ureg.epsilon_0 * _r)
+
+    @jax.jit
+    def full_k(self, k: Quantity):
+        _k = k[jnp.newaxis, jnp.newaxis, :]
+        return self.q2 / ureg.vacuum_permittivity / _k**2
 
     @jax.jit
     def long_k(self, k: Quantity):
@@ -411,6 +435,86 @@ class DeutschPotential(HNCPotential):
         )
 
 
+class EmptyCorePotential(HNCPotential):
+    """
+    The Empty core potential, which is essentially a
+    :py:class:`~.CoulombPotential` for all radii bitter than `r_cut`.
+    For all radii smaller than `r_cut` (this is the short-range part of the
+    potential, for now), the potential is forced to zero.
+
+    We definie `r_cut` in the :py:class:`jaxrts.PlasmaState`.
+
+    .. warning::
+
+       This potential is only defined for the electron-ion interaction. Hence,
+       it will always and automatically set ~:py:meth:`include_electrons` to
+       ``True``. For the rest, we reurn a Coulomb-potential -- but this is
+       really just to be compatible with the other potentials defined here.
+
+    """
+
+    allowed_keys = [
+        "electron-ion Potential",
+    ]
+
+    def __init__(
+        self,
+        state,
+        model_key="",
+    ):
+        super().__init__(state, model_key)
+        self.include_electrons = True
+
+    @jax.jit
+    def full_r(self, r: Quantity) -> Quantity:
+        """
+        .. math::
+
+           \\begin{cases}
+           q^2 / (4 jnp.pi \\varepsilon_0 * r) \\text{if} r \\geq r_{cut}\\\\
+           0 \\text{else}
+           \\end{cases}
+
+        """
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+        return (
+            jnp.heaviside(
+                (_r - self.r_cut).m_as(ureg.angstrom),
+                0.0,
+            ) * (self.q2 / (4 * jnp.pi * ureg.epsilon_0 * _r))
+        )
+
+    @jax.jit
+    def long_r(self, r: Quantity) -> Quantity:
+        return self.full_r(r)
+
+    @jax.jit
+    def short_r(self, r: Quantity) -> Quantity:
+        return jnp.zero(*self.q.shape[:2], len(r)) * ureg.electron_volt
+
+    @jax.jit
+    def full_k(self, k):
+        _k = k[jnp.newaxis, jnp.newaxis, :]
+        return (
+            self.q2
+            / ureg.vacuum_permittivity
+            / _k**2
+            * jpu.numpy.cos(_k * self.r_cut)
+        )
+
+    @jax.jit
+    def long_k(self, k: Quantity) -> Quantity:
+        return self.full_k(k)
+
+    @jax.jit
+    def short_k(self, k: Quantity) -> Quantity:
+        return (
+            jnp.zero(*self.q.shape[:2], len(k))
+            * ureg.electron_volt
+            * ureg.angstrom**3
+        )
+
+
 @jax.jit
 def transformPotential(V, r) -> Quantity:
     """
@@ -427,28 +531,16 @@ def transformPotential(V, r) -> Quantity:
     return V_k, k
 
 
-jax.tree_util.register_pytree_node(
+for pot in [
     CoulombPotential,
-    CoulombPotential._tree_flatten,
-    CoulombPotential._tree_unflatten,
-)
-jax.tree_util.register_pytree_node(
     DebyeHuckelPotential,
-    DebyeHuckelPotential._tree_flatten,
-    DebyeHuckelPotential._tree_unflatten,
-)
-jax.tree_util.register_pytree_node(
     DeutschPotential,
-    DeutschPotential._tree_flatten,
-    DeutschPotential._tree_unflatten,
-)
-jax.tree_util.register_pytree_node(
+    EmptyCorePotential,
     KelbgPotential,
-    KelbgPotential._tree_flatten,
-    KelbgPotential._tree_unflatten,
-)
-jax.tree_util.register_pytree_node(
     KlimontovichKraeftPotential,
-    KlimontovichKraeftPotential._tree_flatten,
-    KlimontovichKraeftPotential._tree_unflatten,
-)
+]:
+    jax.tree_util.register_pytree_node(
+        pot,
+        pot._tree_flatten,
+        pot._tree_unflatten,
+    )
