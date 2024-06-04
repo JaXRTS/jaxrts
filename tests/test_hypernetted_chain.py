@@ -127,6 +127,57 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
         assert jnp.all(jnp.abs(g_lit - interp) < 0.04)
 
 
+def test_linear_response_screening_gericke2010_literature():
+    """
+    Test if one can reproduce the scattering functions reproduced by
+    :cite:`Gericke.2010`, Fig 2.
+    """
+
+    state = jaxrts.PlasmaState(
+        [jaxrts.Element("Be")],
+        [2],
+        [ureg("1.848g/cc")],
+        ureg("12eV") / ureg.k_B,
+    )
+
+    r = jnp.linspace(0.001, 100, 5000) * ureg.a_0
+    k = jnp.pi / r[-1] + jnp.arange(len(r)) * (
+        jnp.pi / (len(r) * (r[1] - r[0]))
+    )
+
+    state.ion_core_radius = jnp.array([1]) * ureg.angstrom
+
+    empty_core = jaxrts.hnc_potentials.EmptyCorePotential(state)
+    soft_core2 = jaxrts.hnc_potentials.SoftCorePotential(state, beta=2)
+    soft_core6 = jaxrts.hnc_potentials.SoftCorePotential(state, beta=6)
+    coulomb = jaxrts.hnc_potentials.CoulombPotential(state)
+
+    current_folder = Path(__file__).parent
+    data_folder = current_folder / "data/Gericke2010/Fig2"
+
+    names = [
+        "EmptyCore.csv",
+        "SoftCore2.csv",
+        "SoftCore6.csv",
+        "Coulomb.csv",
+    ]
+    for idx, pot in enumerate([empty_core, soft_core2, soft_core6, coulomb]):
+        pot.include_electrons = True
+        q = -jaxrts.ion_feature.free_electron_susceptilibily_RPA(
+            k, 1 / state.DH_screening_length
+        ) * pot.full_k(k)
+        klit, qlit = onp.genfromtxt(
+            data_folder / names[idx],
+            unpack=True,
+            delimiter=",",
+        )
+        klit *= 1 / ureg.a_0
+        q_interp = jpu.numpy.interp(klit, k, q[0, 1, :])
+        assert (
+            jnp.max(jnp.abs(q_interp.m_as(ureg.dimensionless) - qlit)) < 0.03
+        )
+
+
 def test_multicomponent_wunsch2011_literature():
     # Set up the ionization, density and temperature for individual ion
     # species.
