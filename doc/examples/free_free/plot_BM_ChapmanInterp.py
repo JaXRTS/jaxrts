@@ -13,26 +13,36 @@ the required number of points for the interpolation.
     (which normally takes a notable time).
 
 """
+import os
 
 from functools import partial
 import time
 
 import matplotlib.pyplot as plt
 import scienceplots
+import jax
 import jax.numpy as jnp
 
 
 import jaxrts
 
+# Allow jax to use 6 CPUs, see
+# https://astralord.github.io/posts/exploring-parallel-strategies-with-jax/
+os.environ["XLA_FLAGS"] = '--xla_force_host_platform_device_count=6'
+
 ureg = jaxrts.units.ureg
 
 plt.style.use("science")
 
+# Create a sharding for the probing energies
+sharding = jax.sharding.PositionalSharding(jax.devices())
+measured_energy = jnp.linspace(295, 305, 300) * ureg.electron_volt
+input_energy = jax.device_put(measured_energy, sharding)
 
 setup = jaxrts.setup.Setup(
     ureg("60°"),
     energy=ureg("300eV"),
-    measured_energy=jnp.linspace(295, 305, 300) * ureg.electron_volt,
+    measured_energy=input_energy,
     instrument=partial(
         jaxrts.instrument_function.instrument_gaussian,
         sigma=(0.01 * ureg.electron_volt) / ureg.hbar,
