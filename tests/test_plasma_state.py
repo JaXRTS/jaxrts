@@ -4,6 +4,8 @@ from jax import numpy as jnp
 import jaxrts
 import copy
 
+import logging
+
 ureg = jaxrts.ureg
 
 test_state = jaxrts.PlasmaState(
@@ -13,8 +15,8 @@ test_state = jaxrts.PlasmaState(
     T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
 )
 
-
 def test_PlasmaStateEquality():
+    logging.warning(test_state.models.keys())
     # Test comparison with some random type
     assert test_state != 6
     # Test comparison with it's copy
@@ -26,5 +28,5 @@ def test_PlasmaStateEquality():
     # Add a new model to the state
     state_copy = copy.deepcopy(test_state)
     assert test_state == state_copy
-    state_copy["form-factors"] = jaxrts.models.PaulingFormFactors
+    state_copy["form-factors"] = jaxrts.models.PaulingFormFactors()
     assert test_state != state_copy

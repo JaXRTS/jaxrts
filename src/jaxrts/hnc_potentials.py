@@ -54,21 +54,17 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        state,
-        model_key="",
     ):
-        self.state = state
         self._transform_r = jpu.numpy.linspace(1e-3, 1e3, 2**14) * ureg.a_0
 
-        self.model_key = model_key
+        self.model_key = ""
 
         #: If `True`, the electrons are added as the n+1th ion species to the
         #: potential. The relevant entries are the last row and column,
         #: respectively (i.e., the colored lines in the image above).
         self.include_electrons: bool = False
-        self.check()
 
-    def check(self) -> None:
+    def check(self, plasma_state) -> None:
         """
         Test if the HNCPotential is applicable to the PlasmaState. Might raise
         logged messages and errors. Is automatically called after
@@ -77,10 +73,10 @@ class HNCPotential(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def full_r(self, r: Quantity) -> Quantity: ...
+    def full_r(self, plasma_state, r: Quantity) -> Quantity: ...
 
     @jax.jit
-    def short_r(self, r: Quantity) -> Quantity:
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
         """
         This is the short-range part of :py:meth:`full_r`:
 
@@ -90,10 +86,12 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
-        return self.full_r(r) * jpu.numpy.exp(-self.alpha * _r)
+        return self.full_r(plasma_state, r) * jpu.numpy.exp(
+            -self.alpha(plasma_state) * _r
+        )
 
     @jax.jit
-    def long_r(self, r: Quantity) -> Quantity:
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
         """
         This is the long-range part of :py:meth:`full_r`:
 
@@ -103,68 +101,65 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
-        print(self.alpha)
-        return self.full_r(r) * (1 - jpu.numpy.exp(-self.alpha * _r))
+        return self.full_r(plasma_state, r) * (
+            1 - jpu.numpy.exp(-self.alpha(plasma_state) * _r)
+        )
 
     @jax.jit
-    def short_k(self, k: Quantity) -> Quantity:
+    def short_k(self, plasma_state, k: Quantity) -> Quantity:
         """
         The Foutier transform of :py:meth:`~short_r`.
         """
         V_k, _k = transformPotential(
-            self.short_r(self._transform_r), self._transform_r
+            self.short_r(plasma_state, self._transform_r), self._transform_r
         )
         return hnc_interp(k, _k, V_k)
 
     @jax.jit
-    def long_k(self, k: Quantity) -> Quantity:
+    def long_k(self, plasma_state, k: Quantity) -> Quantity:
         """
         The Foutier transform of :py:meth:`~short_k`.
         """
         V_k, _k = transformPotential(
-            self.long_r(self._transform_r), self._transform_r
+            self.long_r(plasma_state, self._transform_r), self._transform_r
         )
         return hnc_interp(k, _k, V_k)
 
     @jax.jit
-    def full_k(self, k):
-        return self.short_k(k) + self.long_k(k)
+    def full_k(self, plasma_state, k):
+        return self.short_k(plasma_state, k) + self.long_k(plasma_state, k)
 
-    @property
-    def q2(self):
+    def q2(self, plasma_state):
         """
         This is :math:`q^2`!
         """
         if self.include_electrons:
-            Z = to_array([*self.state.Z_free, -1])
+            Z = to_array([*plasma_state.Z_free, -1])
         else:
-            Z = self.state.Z_free
+            Z = plasma_state.Z_free
         charge = construct_q_matrix(Z * ureg.elementary_charge)
         return charge[:, :, jnp.newaxis]
 
-    @property
-    def alpha(self):
+    def alpha(self, plasma_state):
         if self.include_electrons:
-            n = to_array([*self.state.n_i, self.state.n_e])
+            n = to_array([*plasma_state.n_i, plasma_state.n_e])
         else:
-            n = self.state.n_i
+            n = plasma_state.n_i
         a = construct_alpha_matrix(n)
         return a[:, :, jnp.newaxis]
 
-    @property
-    def mu(self):
+    def mu(self, plasma_state):
         """
         The geometric mean of two masses (or reciprocal sum)
         """
         if self.include_electrons:
-            m = to_array([*self.state.atomic_masses, 1 * ureg.electron_mass])
+            m = to_array([*plasma_state.atomic_masses, 1 * ureg.electron_mass])
         else:
-            m = self.state.atomic_masses
+            m = plasma_state.atomic_masses
         mu = jpu.numpy.outer(m, m) / (m[:, jnp.newaxis] + m[jnp.newaxis, :])
         return mu[:, :, jnp.newaxis]
 
-    @property
-    def T(self):
+    def T(self, plasma_state):
         """
         The mass_weighted temperature average of a pair, according to
         :cite:`Schwarz.2007`.
@@ -175,15 +170,14 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
         """
         if self.include_electrons:
-            m = to_array([*self.state.atomic_masses, 1 * ureg.electron_mass])
-            T = to_array([*self.state.T_i, self.state.T_e])
+            m = to_array([*plasma_state.atomic_masses, 1 * ureg.electron_mass])
+            T = to_array([*plasma_state.T_i, plasma_state.T_e])
         else:
-            m = self.state.atomic_masses
-            T = self.state.T_i
+            m = plasma_state.atomic_masses
+            T = plasma_state.T_i
         return mass_weighted_T(m, T)[:, :, jnp.newaxis]
 
-    @property
-    def r_cut(self) -> Quantity:
+    def r_cut(self, plasma_state) -> Quantity:
         """
         This casts :attr:`jaxrts.PlasmaState.ion_core_radius` in the form
         required to be used with an :py:class:~.HNCPotential`. However, this
@@ -191,27 +185,26 @@ class HNCPotential(metaclass=abc.ABCMeta):
         Hence, the returned array will be 0 for all ion-ion pairs and the
         electron-electron pair.
         """
-        r = jnp.zeros_like(self.q2.magnitude, dtype=float)
+        r = jnp.zeros_like(self.q2(plasma_state).magnitude, dtype=float)
         if self.include_electrons:
             r = r.at[:-1, -1, :].set(
-                self.state.ion_core_radius.m_as(ureg.angstrom)
+                plasma_state.ion_core_radius.m_as(ureg.angstrom)
             )
             r = r.at[-1, :-1, :].set(
-                self.state.ion_core_radius.m_as(ureg.angstrom)
+                plasma_state.ion_core_radius.m_as(ureg.angstrom)
             )
         return r * ureg.angstrom
 
-    @property
-    def lambda_ab(self):
+    def lambda_ab(self, plasma_state):
         # Compared to Gregori.2003, there is a pi missing
         l_ab = ureg.hbar * jpu.numpy.sqrt(
-            1 / (2 * self.mu * ureg.k_B * self.T)
+            1 / (2 * self.mu(plasma_state) * ureg.k_B * self.T(plasma_state))
         )
         return l_ab
 
     # The following is required to jit a state
     def _tree_flatten(self):
-        children = (self.state, self._transform_r)
+        children = (self._transform_r,)
         aux_data = {
             "include_electrons": self.include_electrons,
             "model_key": self.model_key,
@@ -221,7 +214,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.state, obj._transform_r = children
+        (obj._transform_r,) = children
         obj.model_key = aux_data["model_key"]
         obj.include_electrons = aux_data["include_electrons"]
         return obj
@@ -233,7 +226,7 @@ class CoulombPotential(HNCPotential):
     """
 
     @jax.jit
-    def full_r(self, r: Quantity) -> Quantity:
+    def full_r(self, plasma_state, r: Quantity) -> Quantity:
         """
         .. math::
 
@@ -241,15 +234,15 @@ class CoulombPotential(HNCPotential):
 
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
-        return self.q2 / (4 * jnp.pi * ureg.epsilon_0 * _r)
+        return self.q2(plasma_state) / (4 * jnp.pi * ureg.epsilon_0 * _r)
 
     @jax.jit
-    def full_k(self, k: Quantity):
+    def full_k(self, plasma_state, k: Quantity):
         _k = k[jnp.newaxis, jnp.newaxis, :]
-        return self.q2 / ureg.vacuum_permittivity / _k**2
+        return self.q2(plasma_state) / ureg.vacuum_permittivity / _k**2
 
     @jax.jit
-    def long_k(self, k: Quantity):
+    def long_k(self, plasma_state, k: Quantity):
         """
         .. math::
 
@@ -259,33 +252,32 @@ class CoulombPotential(HNCPotential):
         _k = k[jnp.newaxis, jnp.newaxis, :]
 
         return (
-            self.q2
+            self.q2(plasma_state)
             / (_k**2 * ureg.epsilon_0)
-            * self.alpha**2
-            / (_k**2 + self.alpha**2)
+            * self.alpha(plasma_state) ** 2
+            / (_k**2 + self.alpha(plasma_state) ** 2)
         )
 
 
 class DebyeHuckelPotential(HNCPotential):
-    def check(self) -> None:
-        if not hasattr(self.state, "DH_screening_length"):
+    def check(self, plasma_state) -> None:
+        if not hasattr(plasma_state, "DH_screening_length"):
             logger.error(
-                f"The PlasmaState {self.state} has no attribute 'DH_screening_length, which is required for DebyeHuckelPotential."  # noqa: 501
+                f"The PlasmaState {plasma_state} has no attribute 'DH_screening_length, which is required for DebyeHuckelPotential."  # noqa: 501
             )
 
-    @property
-    def kappa(self):
+    def kappa(self, plasma_state):
         # This is called if kappa is defined per ion species
         if (
-            isinstance(self.state.DH_screening_length.magnitude, jnp.ndarray)
-            and len(self.state.DH_screening_length.shape) == 2
+            isinstance(plasma_state.DH_screening_length.magnitude, jnp.ndarray)
+            and len(plasma_state.DH_screening_length.shape) == 2
         ):
-            return 1 / self.state.DH_screening_length[:, :, jnp.newaxis]
+            return 1 / plasma_state.DH_screening_length[:, :, jnp.newaxis]
         else:
-            return 1 / self.state.DH_screening_length
+            return 1 / plasma_state.DH_screening_length
 
     @jax.jit
-    def full_r(self, r):
+    def full_r(self, plasma_state, r):
         """
         .. math::
 
@@ -296,20 +288,22 @@ class DebyeHuckelPotential(HNCPotential):
         _r = r[jnp.newaxis, jnp.newaxis, :]
 
         return (
-            self.q2
+            self.q2(plasma_state)
             / (4 * jnp.pi * ureg.epsilon_0 * _r)
-            * jpu.numpy.exp(-self.kappa * r)
+            * jpu.numpy.exp(-self.kappa(plasma_state) * r)
         )
 
     @jax.jit
-    def long_k(self, k):
+    def long_k(self, plasma_state, k):
 
         _k = k[jnp.newaxis, jnp.newaxis, :]
 
-        pref = self.q2 / (_k**2 * ureg.epsilon_0) * _k**2
-        numerator = self.alpha**2 + 2 * self.alpha * self.kappa
-        denumerator = (_k**2 + self.kappa**2) * (
-            _k**2 + (self.kappa + self.alpha) ** 2
+        pref = self.q2(plasma_state) / (_k**2 * ureg.epsilon_0) * _k**2
+        numerator = self.alpha(plasma_state) ** 2 + 2 * self.alpha(
+            plasma_state
+        ) * self.kappa(plasma_state)
+        denumerator = (_k**2 + self.kappa(plasma_state) ** 2) * (
+            _k**2 + (self.kappa(plasma_state) + self.alpha(plasma_state)) ** 2
         )
 
         return pref * numerator / denumerator
@@ -328,7 +322,7 @@ class KelbgPotential(HNCPotential):
     """
 
     @jax.jit
-    def full_r(self, r: Quantity) -> Quantity:
+    def full_r(self, plasma_state, r: Quantity) -> Quantity:
         """
 
         .. math::
@@ -352,16 +346,18 @@ class KelbgPotential(HNCPotential):
         _r = r[jnp.newaxis, jnp.newaxis, :]
 
         return (
-            self.q2
+            self.q2(plasma_state)
             / (4 * jnp.pi * ureg.epsilon_0 * _r)
             * (
                 1
-                - jpu.numpy.exp(-(_r**2) / self.lambda_ab**2)
-                + (jnp.sqrt(jnp.pi) * _r / self.lambda_ab)
+                - jpu.numpy.exp(-(_r**2) / self.lambda_ab(plasma_state) ** 2)
+                + (jnp.sqrt(jnp.pi) * _r / self.lambda_ab(plasma_state))
                 * (
                     1
                     - jax.scipy.special.erf(
-                        (_r / self.lambda_ab).m_as(ureg.dimensionless)
+                        (_r / self.lambda_ab(plasma_state)).m_as(
+                            ureg.dimensionless
+                        )
                     )
                 )
             )
@@ -386,7 +382,7 @@ class KlimontovichKraeftPotential(HNCPotential):
     ]
 
     @jax.jit
-    def full_r(self, r):
+    def full_r(self, plasma_state, r):
         """
         .. math::
 
@@ -403,12 +399,18 @@ class KlimontovichKraeftPotential(HNCPotential):
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
 
-        beta = 1 / (ureg.k_B * self.T)
-        xi = self.q2 * beta / (4 * jnp.pi * ureg.epsilon_0 * self.lambda_ab)
-        pref = -(ureg.k_B * self.T * xi**2 / 16)
-        factor = ureg.k_B * self.T * xi**2
+        beta = 1 / (ureg.k_B * self.T(plasma_state))
+        xi = (
+            self.q2(plasma_state)
+            * beta
+            / (4 * jnp.pi * ureg.epsilon_0 * self.lambda_ab(plasma_state))
+        )
+        pref = -(ureg.k_B * self.T(plasma_state) * xi**2 / 16)
+        factor = ureg.k_B * self.T(plasma_state) * xi**2
         denominator = (
-            16 * jpu.numpy.absolute(self.q2) / (4 * jnp.pi * ureg.epsilon_0)
+            16
+            * jpu.numpy.absolute(self.q2(plasma_state))
+            / (4 * jnp.pi * ureg.epsilon_0)
         )
         return pref * (1 + (factor / denominator) * _r) ** (-1)
 
@@ -426,12 +428,12 @@ class DeutschPotential(HNCPotential):
     """
 
     @jax.jit
-    def full_r(self, r):
+    def full_r(self, plasma_state, r):
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return (
-            self.q2
+            self.q2(plasma_state)
             / (4 * jnp.pi * ureg.epsilon_0 * _r)
-            * (1 - jpu.numpy.exp(-_r / self.lambda_ab))
+            * (1 - jpu.numpy.exp(-_r / self.lambda_ab(plasma_state)))
         )
 
 
@@ -459,14 +461,12 @@ class EmptyCorePotential(HNCPotential):
 
     def __init__(
         self,
-        state,
-        model_key="",
     ):
-        super().__init__(state, model_key)
+        super().__init__()
         self.include_electrons = True
 
     @jax.jit
-    def full_r(self, r: Quantity) -> Quantity:
+    def full_r(self, plasma_state, r: Quantity) -> Quantity:
         """
         .. math::
 
@@ -478,36 +478,39 @@ class EmptyCorePotential(HNCPotential):
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return jnp.heaviside(
-            (_r - self.r_cut).m_as(ureg.angstrom),
+            (_r - self.r_cut(plasma_state)).m_as(ureg.angstrom),
             0.0,
-        ) * (self.q2 / (4 * jnp.pi * ureg.epsilon_0 * _r))
+        ) * (self.q2(plasma_state) / (4 * jnp.pi * ureg.epsilon_0 * _r))
 
     @jax.jit
-    def long_r(self, r: Quantity) -> Quantity:
-        return self.full_r(r)
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.full_r(plasma_state, r)
 
     @jax.jit
-    def short_r(self, r: Quantity) -> Quantity:
-        return jnp.zero(*self.q.shape[:2], len(r)) * ureg.electron_volt
-
-    @jax.jit
-    def full_k(self, k):
-        _k = k[jnp.newaxis, jnp.newaxis, :]
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
         return (
-            self.q2
-            / ureg.vacuum_permittivity
-            / _k**2
-            * jpu.numpy.cos(_k * self.r_cut)
+            jnp.zero(*self.q2(plasma_state).shape[:2], len(r))
+            * ureg.electron_volt
         )
 
     @jax.jit
-    def long_k(self, k: Quantity) -> Quantity:
-        return self.full_k(k)
+    def full_k(self, plasma_state, k):
+        _k = k[jnp.newaxis, jnp.newaxis, :]
+        return (
+            self.q2(plasma_state)
+            / ureg.vacuum_permittivity
+            / _k**2
+            * jpu.numpy.cos(_k * self.r_cut(plasma_state))
+        )
 
     @jax.jit
-    def short_k(self, k: Quantity) -> Quantity:
+    def long_k(self, plasma_state, k: Quantity) -> Quantity:
+        return self.full_k(plasma_state, k)
+
+    @jax.jit
+    def short_k(self, plasma_state, k: Quantity) -> Quantity:
         return (
-            jnp.zero(*self.q.shape[:2], len(k))
+            jnp.zero(*self.q2(plasma_state).shape[:2], len(k))
             * ureg.electron_volt
             * ureg.angstrom**3
         )
@@ -537,18 +540,16 @@ class SoftCorePotential(HNCPotential):
 
     def __init__(
         self,
-        state,
-        model_key="",
         beta: float = 4.0,
     ):
         #: This is the exponent which gives the steepness of the soft-core's
         #: edge
         self.beta = beta
-        super().__init__(state, model_key)
+        super().__init__()
         self.include_electrons = True
 
     @jax.jit
-    def full_r(self, r: Quantity) -> Quantity:
+    def full_r(self, plasma_state, r: Quantity) -> Quantity:
         """
         .. math::
 
@@ -559,31 +560,35 @@ class SoftCorePotential(HNCPotential):
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
         exp_part = 1 - jpu.numpy.exp(
-            -((_r / self.r_cut).m_as(ureg.dimensionless) ** self.beta)
+            -((_r / self.r_cut(plasma_state)).m_as(ureg.dimensionless) ** self.beta)
         )
-        return self.q2 / (4 * jnp.pi * ureg.epsilon_0 * _r) * exp_part
+        return (
+            self.q2(plasma_state)
+            / (4 * jnp.pi * ureg.epsilon_0 * _r)
+            * exp_part
+        )
 
     @jax.jit
-    def long_r(self, r: Quantity) -> Quantity:
-        return self.full_r(r)
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.full_r(plasma_state, r)
 
     @jax.jit
-    def short_r(self, r: Quantity) -> Quantity:
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
         return jnp.zero(*self.q.shape[:2], len(r)) * ureg.electron_volt
 
     @jax.jit
-    def full_k(self, k):
+    def full_k(self, plasma_state, k):
         _k = k[jnp.newaxis, jnp.newaxis, :]
         # Define a auxiliary short-range version of this potential; While it is
         # not used, acutally, it is easier to Fourier transform.
         exp_part = jpu.numpy.exp(
             -(
-                (self._transform_r / self.r_cut).m_as(ureg.dimensionless)
+                (self._transform_r / self.r_cut(plasma_state)).m_as(ureg.dimensionless)
                 ** self.beta
             )
         )
         V_s_transform_r = (
-            self.q2
+            self.q2(plasma_state)
             / (4 * jnp.pi * ureg.epsilon_0 * self._transform_r)
             * exp_part
         )
@@ -596,16 +601,18 @@ class SoftCorePotential(HNCPotential):
         # in k space.
 
         _k = k[jnp.newaxis, jnp.newaxis, :]
-        V_full_Coulomb_k = self.q2 / ureg.vacuum_permittivity / _k**2
+        V_full_Coulomb_k = (
+            self.q2(plasma_state) / ureg.vacuum_permittivity / _k**2
+        )
 
         return V_full_Coulomb_k - V_s_k
 
     @jax.jit
-    def long_k(self, k: Quantity) -> Quantity:
+    def long_k(self, plasma_state, k: Quantity) -> Quantity:
         return self.full_k(k)
 
     @jax.jit
-    def short_k(self, k: Quantity) -> Quantity:
+    def short_k(self, plasma_state, k: Quantity) -> Quantity:
         return (
             jnp.zero(*self.q.shape[:2], len(k))
             * ureg.electron_volt
@@ -614,7 +621,7 @@ class SoftCorePotential(HNCPotential):
 
     # The following is required to jit a state
     def _tree_flatten(self):
-        children = (self.state, self._transform_r, self.beta)
+        children = (self._transform_r, self.beta)
         aux_data = {
             "include_electrons": self.include_electrons,
             "model_key": self.model_key,
@@ -624,7 +631,7 @@ class SoftCorePotential(HNCPotential):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.state, obj._transform_r, obj.beta = children
+        obj._transform_r, obj.beta = children
         obj.model_key = aux_data["model_key"]
         obj.include_electrons = aux_data["include_electrons"]
         return obj

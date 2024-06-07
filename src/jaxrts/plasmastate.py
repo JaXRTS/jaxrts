@@ -8,6 +8,7 @@ from jax import numpy as jnp
 
 from .elements import Element
 from .units import ureg, Quantity, to_array
+from .helpers import JittableDict
 from .setup import Setup
 from . import plasma_physics
 
@@ -23,7 +24,6 @@ class PlasmaState:
         mass_density: List | Quantity,
         T_e: Quantity,
         T_i: List | Quantity | None = None,
-        models: Dict = {},
     ):
 
         assert (len(ions) == len(Z_free)) and (
@@ -50,7 +50,7 @@ class PlasmaState:
             self.T_e = T_e
         T_i = T_i if T_i else T_e * jnp.ones(self.nions)
         self.T_i = to_array(T_i)
-        self.models = models
+        self.models = JittableDict()
         self._overwritten = {
             "DH_screening_length": -1.0 * ureg.angstrom,
             "ion_core_radius": -1.0
@@ -64,10 +64,13 @@ class PlasmaState:
     def __getitem__(self, key: str):
         return self.models[key]
 
-    def __setitem__(self, key: str, model_class: ABCMeta) -> None:
-        if key not in model_class.allowed_keys:
-            raise KeyError(f"Model {model_class} not allowed for key {key}.")
-        self.models[key] = model_class(self, key)
+    def __setitem__(self, key: str, model) -> None:
+        if key not in model.allowed_keys:
+            raise KeyError(f"Model {model} not allowed for key {key}.")
+        model.prepare(self)
+        model.check(self)
+        model.model_key = key
+        self.models[key] = model
 
     def update_default_model(
         self, model_name: str, model_class: ABCMeta
@@ -296,14 +299,15 @@ class PlasmaState:
             self.T_i,
             self._overwritten["DH_screening_length"],
             self._overwritten["ion_core_radius"],
+            self.models,
         )
-        aux_data = (self.ions, self.models)  # static values
+        aux_data = (self.ions,)  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(PlasmaState)
-        obj.ions, obj.models = aux_data
+        (obj.ions,) = aux_data
         (
             obj.Z_free,
             obj.mass_density,
@@ -311,6 +315,7 @@ class PlasmaState:
             obj.T_i,
             DH_screening_length,
             ion_core_radius,
+            obj.models,
         ) = children
         obj._overwritten = {
             "DH_screening_length": DH_screening_length,
@@ -318,13 +323,14 @@ class PlasmaState:
         }
         return obj
 
+    # This might be easier, now
     def _eq_characteristic(self):
         children, _ = self._tree_flatten()
         static_model_list = [
             self.models[key]._tree_flatten()[1]
             for key in sorted(self.models.keys())
         ]
-        return children, static_model_list, self.ions, self.models.keys()
+        return children[:-1], static_model_list, self.ions, self.models.keys()
 
     def __eq__(self, other):
         if isinstance(other, PlasmaState):

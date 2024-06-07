@@ -35,17 +35,19 @@ def test_electron_ion_potentials_literature_values_schwarz():
 
     r = jnp.linspace(0, 10, 1000) * ureg.angstrom
 
-    KK = hnc_potentials.KlimontovichKraeftPotential(state)
-    Kelbg = hnc_potentials.KelbgPotential(state)
+    KK = hnc_potentials.KlimontovichKraeftPotential()
+    Kelbg = hnc_potentials.KelbgPotential()
 
     KK.include_electrons = True
     Kelbg.include_electrons = True
 
-    ei = (-KK.full_r(r) / (ureg.k_B * KK.T))[1, 0, :].m_as(ureg.dimensionless)
-    ee = (Kelbg.full_r(r) / (ureg.k_B * Kelbg.T))[1, 1, :].m_as(
+    ei = (-KK.full_r(state, r) / (ureg.k_B * KK.T(state)))[1, 0, :].m_as(
         ureg.dimensionless
     )
-    ii = (Kelbg.full_r(r) / (ureg.k_B * Kelbg.T))[0, 0, :].m_as(
+    ee = (Kelbg.full_r(state, r) / (ureg.k_B * Kelbg.T(state)))[1, 1, :].m_as(
+        ureg.dimensionless
+    )
+    ii = (Kelbg.full_r(state, r) / (ureg.k_B * Kelbg.T(state)))[0, 0, :].m_as(
         ureg.dimensionless
     )
 
@@ -98,11 +100,11 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
         state.mass_density = dens
 
         # ToDo: It seems that I cannot move this out of the loop. Fix this.
-        Coulomb = hnc_potentials.CoulombPotential(state)
+        Coulomb = hnc_potentials.CoulombPotential()
 
-        V_s = Coulomb.short_r(r)
+        V_s = Coulomb.short_r(state, r)
         # The long-range part is zero
-        V_l_k = 0 * Coulomb.long_k(k)
+        V_l_k = 0 * Coulomb.long_k(state, k)
 
         r_lit, g_lit = onp.genfromtxt(
             Path(__file__).parent
@@ -147,10 +149,10 @@ def test_linear_response_screening_gericke2010_literature():
 
     state.ion_core_radius = jnp.array([1]) * ureg.angstrom
 
-    empty_core = jaxrts.hnc_potentials.EmptyCorePotential(state)
-    soft_core2 = jaxrts.hnc_potentials.SoftCorePotential(state, beta=2)
-    soft_core6 = jaxrts.hnc_potentials.SoftCorePotential(state, beta=6)
-    coulomb = jaxrts.hnc_potentials.CoulombPotential(state)
+    empty_core = jaxrts.hnc_potentials.EmptyCorePotential()
+    soft_core2 = jaxrts.hnc_potentials.SoftCorePotential(beta=2)
+    soft_core6 = jaxrts.hnc_potentials.SoftCorePotential(beta=6)
+    coulomb = jaxrts.hnc_potentials.CoulombPotential()
 
     current_folder = Path(__file__).parent
     data_folder = current_folder / "data/Gericke2010/Fig2"
@@ -163,9 +165,11 @@ def test_linear_response_screening_gericke2010_literature():
     ]
     for idx, pot in enumerate([empty_core, soft_core2, soft_core6, coulomb]):
         pot.include_electrons = True
+        import logging
+        logging.warning(idx)
         q = -jaxrts.ion_feature.free_electron_susceptilibily_RPA(
             k, 1 / state.DH_screening_length
-        ) * pot.full_k(k)
+        ) * pot.full_k(state, k)
         klit, qlit = onp.genfromtxt(
             data_folder / names[idx],
             unpack=True,
@@ -212,13 +216,13 @@ def test_multicomponent_wunsch2011_literature():
     # come form.
     state.DH_screening_length = 2 / 3 * ureg.a_0
 
-    Potential = jaxrts.hnc_potentials.DebyeHuckelPotential(state)
+    Potential = jaxrts.hnc_potentials.DebyeHuckelPotential()
 
-    V_s = Potential.short_r(r)
-    V_l_k = Potential.long_k(k)
+    V_s = Potential.short_r(state, r)
+    V_l_k = Potential.long_k(state, k)
 
     g, niter = hnc.pair_distribution_function_HNC(
-        V_s, V_l_k, r, Potential.T, state.n_i
+        V_s, V_l_k, r, Potential.T(state), state.n_i
     )
     S_ii = hnc.S_ii_HNC(k, g, state.n_i, r)
 

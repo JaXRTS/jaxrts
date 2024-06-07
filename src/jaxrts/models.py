@@ -33,44 +33,50 @@ class Model(metaclass=abc.ABCMeta):
     #: A list of keywords where this model is adequate for
     allowed_keys: list[str] = []
 
-    def __init__(self, state: PlasmaState, model_key: str):
-        """
-        As different prerequisites exist for different models, make sure to
-        test that all relevant information is given in the PlasmaState, amend
-        defaults if necessary in the ``__init__``, rather than the ``evaluate``
-        method. Please log assumtpions, properly
-        """
-        self.plasma_state = state
-        self.model_key = model_key
-        self.check()
+    def __init__(self):
+        """ """
+        self.model_key = ""
 
     @abc.abstractmethod
-    def evaluate(self, setup: Setup) -> jnp.ndarray: ...
+    def evaluate(
+        self, plasma_state: PlasmaState, setup: Setup
+    ) -> jnp.ndarray: ...
 
-    def check(self) -> None:
+    def prepare(self, plasma_state: PlasmaState) -> None:
+        """
+        Modify the plasma_state in place.
+
+        As different prerequisites exist for different models, make sure to
+        test that all relevant information is given in the PlasmaState, amend
+        defaults if necessary.
+        Please log assumtpions, properly
+        """
+        pass
+
+    def check(self, plasma_state: PlasmaState) -> None:
         """
         Test if the model is applicable to the PlasmaState. Might raise logged
         messages and errors.
         """
+        pass
 
     # The following is required to jit a Model
     def _tree_flatten(self):
-        children = (self.plasma_state,)
+        children = ()
         aux_data = (self.model_key,)  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        (obj.plasma_state,) = children
         (obj.model_key,) = aux_data
+
         return obj
 
     # One can use the flatten functions quite nicely for __eq__ methods.
     def __eq__(self, other):
         """
         Test the quality of two models.
-
         """
         if isinstance(other, Model):
             return self._tree_flatten() == other._tree_flatten()
@@ -101,8 +107,8 @@ class ScatteringModel(Model):
     is extrapolated to match the :py:class:`~.setup.Setup`'s :math:`k`.
     """
 
-    def __init__(self, state: PlasmaState, model_key: str):
-        super().__init__(state, model_key)
+    def __init__(self, sample_points: int | None = None) -> None:
+        super().__init__()
 
         #: The number of points for re-sampeling the model. If ``None``, no
         #: resampeling is none and every of the :py:class:`~.setup.Setup`'s
@@ -111,10 +117,12 @@ class ScatteringModel(Model):
         #: number of relevant :math:`k` s by setting this attribute. After the
         #: evaluation, the resulting scatting signal is interpolated to the
         #: relevant :math:`k` s and then convolved with the instument function.
-        self.sample_points: int | None = None
+        self.sample_points = sample_points
 
     @abc.abstractmethod
-    def evaluate_raw(self, setup: Setup) -> jnp.ndarray: ...
+    def evaluate_raw(
+        self, plasma_state: PlasmaState, setup: Setup
+    ) -> jnp.ndarray: ...
 
     def sample_grid(self, setup) -> Quantity:
         """
@@ -129,7 +137,7 @@ class ScatteringModel(Model):
         return jnpu.linspace(min_E, max_E, self.sample_points)
 
     @jax.jit
-    def evaluate(self, setup) -> jnp.ndarray:
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
         """
         If :py:attr:`~.sample_points` is not ``None``, generate a
         low-resulution :py:class`~.setup.Setup`. Calculate the
@@ -158,15 +166,15 @@ class ScatteringModel(Model):
 
     # The following is required to jit a Model
     def _tree_flatten(self):
-        children = (self.plasma_state,)
+        children = ()
         aux_data = (self.model_key, self.sample_points)  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        (obj.plasma_state,) = children
-        obj.model_key, obj.sample_points = aux_data
+        (obj.plasmas,) = children
+        obj.model_key, sample_points = aux_data
         return obj
 
 
@@ -184,14 +192,16 @@ scattering_models = [
 
 
 class Neglect(Model):
-    allowed_keys = [*scattering_models, "ipd"]
     """
     A model that returns an empty with zeros in (units of seconds) for every
     energy probed.
     """
 
+    allowed_keys = [*scattering_models, "ipd"]
+    __name__ = "Neglect"
+
     @jax.jit
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
         if self.model_key in scattering_models:
             return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
         elif self.model_key == "ipd":
@@ -229,47 +239,46 @@ class ArkhipovIonFeat(Model):
     """
 
     allowed_keys = ["ionic scattering"]
+    __name__ = "ArkhipovIonFeat"
 
-    def __init__(self, state: PlasmaState, model_key) -> None:
-        # Set sane defaults
-        state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state, model_key)
+    def prepare(self, plasma_state: PlasmaState) -> None:
+        plasma_state.update_default_model("form-factors", PaulingFormFactors())
 
-    def check(self) -> None:
-        if self.plasma_state.T_e != self.plasma_state.T_i:
+    def check(self, plasma_state: PlasmaState) -> None:
+        if plasma_state.T_e != plasma_state.T_i:
             logger.warning(
                 "'ArkhipovIonFeat' can only handle plasmas with T_e == T_i."
                 + " The calculation will only consider the electron temperature."  # noqa: E501
                 + " Choose another model if ion and electron temperature models should be treated individually."  # noqa: E501
             )
-        if len(self.plasma_state) > 1:
+        if len(plasma_state) > 1:
             logger.critical(
                 "'ArkhipovIonFeat' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
-        fi = self.plasma_state["form-factors"].evaluate(setup)
-        population = electron_distribution_ionized_state(
-            self.plasma_state.Z_core
-        )[:, jnp.newaxis]
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
+        fi = plasma_state["form-factors"].evaluate(setup)
+        population = electron_distribution_ionized_state(plasma_state.Z_core)[
+            :, jnp.newaxis
+        ]
 
         f = jnp.sum(fi * population)
         q = ion_feature.q_Gregori2004(
             setup.k[jnp.newaxis],
-            self.plasma_state.atomic_masses,
-            self.plasma_state.n_e,
-            self.plasma_state.T_e,
-            self.plasma_state.T_e,
-            self.plasma_state.Z_free,
+            plasma_state.atomic_masses,
+            plasma_state.n_e,
+            plasma_state.T_e,
+            plasma_state.T_e,
+            plasma_state.Z_free,
         )
         S_ii = static_structure_factors.S_ii_AD(
             setup.k,
-            self.plasma_state.T_e,
-            self.plasma_state.T_e,
-            self.plasma_state.n_e,
-            self.plasma_state.atomic_masses,
-            self.plasma_state.Z_free,
+            plasma_state.T_e,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
         )
         w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
         res = w_R * setup.instrument(
@@ -289,49 +298,49 @@ class Gregori2003IonFeat(Model):
     """
 
     allowed_keys = ["ionic scattering"]
+    __name__ = "Gregori2003IonFeat"
 
-    def __init__(self, state: PlasmaState, model_key) -> None:
-        state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state, model_key)
+    def prepare(self, plasma_state: PlasmaState) -> None:
+        plasma_state.update_default_model("form-factors", PaulingFormFactors())
 
-    def check(self) -> None:
-        if self.plasma_state.T_e != self.plasma_state.T_i:
+    def check(self, plasma_state: PlasmaState) -> None:
+        if plasma_state.T_e != plasma_state.T_i:
             logger.warning(
                 "'Gregori2003IonFeat' can only handle plasmas with T_e == T_i."
                 + " The calculation will only consider the electron temperature."  # noqa: E501
                 + " Choose another model if ion and electron temperature models should be treated individually."  # noqa: E501
             )
-        if len(self.plasma_state) > 1:
+        if len(plasma_state) > 1:
             logger.critical(
                 "'Gregori2003IonFeat' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
-        fi = self.plasma_state["form-factors"].evaluate(setup)
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
+        fi = plasma_state["form-factors"].evaluate(setup)
         population = electron_distribution_ionized_state(
-            self.plasma_state.Z_core[0]
+            plasma_state.Z_core[0]
         )[:, jnp.newaxis]
 
         T_eff = static_structure_factors.T_cf_Greg(
-            self.plasma_state.T_e, self.plasma_state.n_e
+            plasma_state.T_e, plasma_state.n_e
         )
         f = jnp.sum(fi * population)
         q = ion_feature.q_Gregori2004(
             setup.k[jnp.newaxis],
-            self.plasma_state.atomic_masses,
-            self.plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.n_e,
             T_eff,
             T_eff,
-            self.plasma_state.Z_free,
+            plasma_state.Z_free,
         )
         S_ii = ion_feature.S_ii_AD(
             setup.k,
             T_eff,
             T_eff,
-            self.plasma_state.n_e,
-            self.plasma_state.atomic_masses,
-            self.plasma_state.Z_free,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
         )
         w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
         res = w_R * setup.instrument(
@@ -362,49 +371,47 @@ class Gregori2006IonFeat(Model):
     """
 
     allowed_keys = ["ionic scattering"]
+    __name__ = "Gregori2006IonFeat"
 
-    def __init__(self, state: PlasmaState, model_key) -> None:
-        state.update_default_model("form-factors", PaulingFormFactors)
-        state.update_default_model("Debye temperature", BohmStaver)
-        super().__init__(state, model_key)
+    def prepare(self, plasma_state: PlasmaState) -> None:
+        plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model("Debye temperature", BohmStaver())
 
-    def check(self) -> None:
-        if len(self.plasma_state) > 1:
+    def check(self, plasma_state: PlasmaState) -> None:
+        if len(plasma_state) > 1:
             logger.critical(
                 "'Gregori2006IonFeat' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
-        fi = self.plasma_state["form-factors"].evaluate(setup)
-        population = electron_distribution_ionized_state(
-            self.plasma_state.Z_core
-        )[:, jnp.newaxis]
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
+        fi = plasma_state["form-factors"].evaluate(setup)
+        population = electron_distribution_ionized_state(plasma_state.Z_core)[
+            :, jnp.newaxis
+        ]
 
-        T_D = self.plasma_state["Debye temperature"].evaluate(setup)
+        T_D = plasma_state["Debye temperature"].evaluate(setup)
 
         T_e_eff = static_structure_factors.T_cf_Greg(
-            self.plasma_state.T_e, self.plasma_state.n_e
+            plasma_state.T_e, plasma_state.n_e
         )
-        T_i_eff = static_structure_factors.T_i_eff_Greg(
-            self.plasma_state.T_i, T_D
-        )
+        T_i_eff = static_structure_factors.T_i_eff_Greg(plasma_state.T_i, T_D)
         f = jnp.sum(fi * population)
         q = ion_feature.q_Gregori2004(
             setup.k[jnp.newaxis],
-            self.plasma_state.atomic_masses,
-            self.plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.n_e,
             T_e_eff,
             T_i_eff,
-            self.plasma_state.Z_free,
+            plasma_state.Z_free,
         )
         S_ii = ion_feature.S_ii_AD(
             setup.k,
             T_e_eff,
             T_i_eff,
-            self.plasma_state.n_e,
-            self.plasma_state.atomic_masses,
-            self.plasma_state.Z_free,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
         )
         w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
         res = w_R * setup.instrument(
@@ -431,9 +438,9 @@ class LinearResponseHNCIonFeat(Model):
 
     Requires 2 Potentials:
 
-        - an 'ion-ion Potential' (defaults to
+        - an 'ion-ion' (defaults to
           :py:class:`~DebyeHuckelPotential`).
-        - an 'electron-ion Potential'
+        - an 'electron-ion'
           (defaults to :py:class:`~KlimontovichKraeftPotential`).
 
     Further requires a 'form-factors' model (defaults to
@@ -446,29 +453,37 @@ class LinearResponseHNCIonFeat(Model):
     """
 
     allowed_keys = ["ionic scattering"]
+    __name__ = "LinearResponseHNCIonFeat"
 
-    def __init__(self, state: PlasmaState, model_key) -> None:
-        state.update_default_model("form-factors", PaulingFormFactors)
-        state.update_default_model(
-            "ion-ion Potential", hnc_potentials.DebyeHuckelPotential
+    def __init__(
+        self,
+        rmin: Quantity = 0.001 * ureg.a_0,
+        rmax: Quantity = 100 * ureg.a_0,
+        pot: int = 14,
+    ) -> None:
+        #: The minmal radius for evaluating the potentials.
+        self.r_min: Quantity = rmin
+        #: The maximal radius for evaluating the potentials.
+        self.r_max: Quantity = rmax
+        #: The exponent (``2 ** pot``), setting the number of points in ``r``
+        #: or ``k`` to evaluate.
+        self.pot: int = pot
+        super().__init__()
+
+    def prepare(self, plasma_state: PlasmaState) -> None:
+        plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model(
+            "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
         )
-        state.update_default_model(
+        plasma_state.update_default_model(
             "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential,
+            hnc_potentials.KlimontovichKraeftPotential(),
         )
         for key in [
             "ion-ion Potential",
             "electron-ion Potential",
         ]:
-            state[key].include_electrons = False
-        #: The minmal radius for evaluating the potentials.
-        self.r_min: Quantity = 0.001 * ureg.a_0
-        #: The maximal radius for evaluating the potentials.
-        self.r_max: Quantity = 100 * ureg.a_0
-        #: The exponent (``2 ** pot``), setting the number of points in ``r``
-        #: or ``k`` to evaluate.
-        self.pot: int = 14
-        super().__init__(state, model_key)
+            plasma_state[key].include_electrons = False
 
     @property
     def r(self):
@@ -482,18 +497,18 @@ class LinearResponseHNCIonFeat(Model):
         return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
     @jax.jit
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
         # Prepare the Potentials
         # ----------------------
 
         # Populate the potential with a full ion potential, for starters
-        V_s_r = self.plasma_state["ion-ion Potential"].short_r(self.r)
-        V_l_k = self.plasma_state["ion-ion Potential"].long_k(self.k)
+        V_s_r = plasma_state["ion-ion Potential"].short_r(self.r)
+        V_l_k = plasma_state["ion-ion Potential"].long_k(self.k)
 
         # Calculate g_ab in the HNC Approach
         # ----------------------------------
-        T = self.plasma_state["ion-ion Potential"].T
-        n = self.plasma_state.n_i
+        T = plasma_state["ion-ion Potential"].T
+        n = plasma_state.n_i
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
             V_s_r, V_l_k, self.r, T, n
         )
@@ -511,20 +526,20 @@ class LinearResponseHNCIonFeat(Model):
         # To Calculate the screening, use the S_ii and S_ei contributions
         # ---------------------------------------------------------------
         # Use the Debye screening length for the screening cloud.
-        kappa = 1 / self.plasma_state.DH_screening_length
+        kappa = 1 / plasma_state.DH_screening_length
         xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa)
-        Vei = self.plasma_state["electron-ion Potential"].full_k(setup.k)
+        Vei = plasma_state["electron-ion Potential"].full_k(setup.k)
         q = xi * Vei[-1, :]
 
         # The W_R is calculated as a sum over all combinations of a_b
         ion_spec1, ion_spec2 = jnp.meshgrid(
-            jnp.arange(self.plasma_state.nions),
-            jnp.arange(self.plasma_state.nions),
+            jnp.arange(plasma_state.nions),
+            jnp.arange(plasma_state.nions),
         )
         # Get the formfactor from the plasma state
-        fi = self.plasma_state["form-factors"].evaluate(setup)
+        fi = plasma_state["form-factors"].evaluate(setup)
         # Calculate the number-fraction per element
-        x = self.plasma_state.n_i / jnpu.sum(self.plasma_state.n_i)
+        x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
 
         # Add the contributions from all pairs
         w_R = 0
@@ -542,8 +557,9 @@ class LinearResponseHNCIonFeat(Model):
         )
         return res
 
+    # The following is required to jit a Model
     def _tree_flatten(self):
-        children = (self.plasma_state, self.r_min, self.r_max)
+        children = (self.r_min, self.r_max)
         aux_data = (
             self.model_key,
             self.sample_points,
@@ -554,8 +570,9 @@ class LinearResponseHNCIonFeat(Model):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.plasma_state, obj.r_min, obj.r_max = children
         obj.model_key, obj.sample_points, obj.pot = aux_data
+        obj.r_min, obj.r_max = children
+
         return obj
 
 
@@ -589,33 +606,42 @@ class ThreePotentialHNCIonFeat(Model):
     """
 
     allowed_keys = ["ionic scattering"]
+    __name__ = "ThreePotentialHNC"
 
-    def __init__(self, state: PlasmaState, model_key) -> None:
-        state.update_default_model("form-factors", PaulingFormFactors)
-        state.update_default_model(
-            "ion-ion Potential", hnc_potentials.DebyeHuckelPotential
+    def __init__(
+        self,
+        rmin: Quantity = 0.001 * ureg.a_0,
+        rmax: Quantity = 100 * ureg.a_0,
+        pot: int = 14,
+    ) -> None:
+        #: The minmal radius for evaluating the potentials.
+        self.r_min: Quantity = rmin
+        #: The maximal radius for evaluating the potentials.
+        self.r_max: Quantity = rmax
+        #: The exponent (``2 ** pot``), setting the number of points in ``r``
+        #: or ``k`` to evaluate.
+        self.pot: int = pot
+        super().__init__()
+
+    def prepare(self, plasma_state: PlasmaState) -> None:
+        plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model(
+            "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
         )
-        state.update_default_model(
+        plasma_state.update_default_model(
             "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential,
+            hnc_potentials.KlimontovichKraeftPotential(),
         )
-        state.update_default_model(
-            "electron-electron Potential", hnc_potentials.KelbgPotential
+        plasma_state.update_default_model(
+            "electron-electron Potential",
+            hnc_potentials.KelbgPotential(),
         )
         for key in [
             "ion-ion Potential",
             "electron-ion Potential",
             "electron-electron Potential",
         ]:
-            state[key].include_electrons = True
-        #: The minmal radius for evaluating the potentials.
-        self.r_min: Quantity = 0.001 * ureg.a_0
-        #: The maximal radius for evaluating the potentials.
-        self.r_max: Quantity = 100 * ureg.a_0
-        #: The exponent (``2 ** pot``), setting the number of points in ``r``
-        #: or ``k`` to evaluate.
-        self.pot: int = 14
-        super().__init__(state, model_key)
+            plasma_state[key].include_electrons = True
 
     @property
     def r(self):
@@ -629,30 +655,30 @@ class ThreePotentialHNCIonFeat(Model):
         return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
     @jax.jit
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
         # Prepare the Potentials
         # ----------------------
 
         # Populate the potential with a full ion potential, for starters
         V_s_r = (
-            self.plasma_state["ion-ion Potential"]
+            plasma_state["ion-ion Potential"]
             .short_r(self.r)
             .m_as(ureg.electron_volt)
         )
         # Replace the last line and column with the electron-ion potential
         V_s_r = V_s_r.at[-1, :, :].set(
-            self.plasma_state["electron-ion Potential"]
+            plasma_state["electron-ion Potential"]
             .short_r(self.r)
             .m_as(ureg.electron_volt)[-1, :, :]
         )
         V_s_r = V_s_r.at[:, -1, :].set(
-            self.plasma_state["electron-ion Potential"]
+            plasma_state["electron-ion Potential"]
             .short_r(self.r)
             .m_as(ureg.electron_volt)[:, -1, :]
         )
         # Add the electron-electron Potential
         V_s_r = V_s_r.at[-1, -1, :].set(
-            self.plasma_state["electron-electron Potential"]
+            plasma_state["electron-electron Potential"]
             .short_r(self.r)
             .m_as(ureg.electron_volt)[-1, -1, :]
         )
@@ -660,21 +686,19 @@ class ThreePotentialHNCIonFeat(Model):
 
         # Repeat this for the long-range part of the potential in k space.
         unit = ureg.electron_volt * ureg.angstrom**3
-        V_l_k = (
-            self.plasma_state["ion-ion Potential"].long_k(self.k).m_as(unit)
-        )
+        V_l_k = plasma_state["ion-ion Potential"].long_k(self.k).m_as(unit)
         V_l_k = V_l_k.at[-1, :, :].set(
-            self.plasma_state["electron-ion Potential"]
+            plasma_state["electron-ion Potential"]
             .long_k(self.k)
             .m_as(unit)[-1, :, :]
         )
         V_l_k = V_l_k.at[:, -1, :].set(
-            self.plasma_state["electron-ion Potential"]
+            plasma_state["electron-ion Potential"]
             .long_k(self.k)
             .m_as(unit)[:, -1, :]
         )
         V_l_k = V_l_k.at[-1, -1, :].set(
-            self.plasma_state["electron-electron Potential"]
+            plasma_state["electron-electron Potential"]
             .long_k(self.k)
             .m_as(unit)[-1, -1, :]
         )
@@ -682,8 +706,8 @@ class ThreePotentialHNCIonFeat(Model):
 
         # Calculate g_ab in the HNC Approach
         # ----------------------------------
-        T = self.plasma_state["ion-ion Potential"].T
-        n = to_array([*self.plasma_state.n_i, self.plasma_state.n_e])
+        T = plasma_state["ion-ion Potential"].T
+        n = to_array([*plasma_state.n_i, plasma_state.n_e])
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
             V_s_r, V_l_k, self.r, T, n
         )
@@ -702,17 +726,17 @@ class ThreePotentialHNCIonFeat(Model):
         # ---------------------------------------------------------------
         S_ii = jnpu.diagonal(S_ab, axis1=0, axis2=1)[:-1]
         S_ei = S_ab[:-1, -1]
-        q = ion_feature.q_Glenzer2009(S_ei, S_ii, self.plasma_state.Z_free)
+        q = ion_feature.q_Glenzer2009(S_ei, S_ii, plasma_state.Z_free)
 
         # The W_R is calculated as a sum over all combinations of a_b
         ion_spec1, ion_spec2 = jnp.meshgrid(
-            jnp.arange(self.plasma_state.nions),
-            jnp.arange(self.plasma_state.nions),
+            jnp.arange(plasma_state.nions),
+            jnp.arange(plasma_state.nions),
         )
         # Get the formfactor from the plasma state
-        fi = self.plasma_state["form-factors"].evaluate(setup)
+        fi = plasma_state["form-factors"].evaluate(setup)
         # Calculate the number-fraction per element
-        x = self.plasma_state.n_i / jnpu.sum(self.plasma_state.n_i)
+        x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
 
         # Add the contributions from all pairs
         w_R = 0
@@ -730,8 +754,9 @@ class ThreePotentialHNCIonFeat(Model):
         )
         return res
 
+    # The following is required to jit a Model
     def _tree_flatten(self):
-        children = (self.plasma_state, self.r_min, self.r_max)
+        children = (self.r_min, self.r_max)
         aux_data = (
             self.model_key,
             self.sample_points,
@@ -742,8 +767,9 @@ class ThreePotentialHNCIonFeat(Model):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.plasma_state, obj.r_min, obj.r_max = children
         obj.model_key, obj.sample_points, obj.pot = aux_data
+        obj.r_min, obj.r_max = children
+
         return obj
 
 
@@ -772,23 +798,26 @@ class QCSalpeterApproximation(ScatteringModel):
     """
 
     allowed_keys = ["free-free scattering"]
+    __name__ = "QCSalpeterApproximation"
 
-    def check(self) -> None:
-        if len(self.plasma_state) > 1:
+    def check(self, plasma_state: PlasmaState) -> None:
+        if len(plasma_state) > 1:
             logger.critical(
                 "'QCSalpeterApproximation' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
-    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(
+        self, plasma_state: PlasmaState, setup: Setup
+    ) -> jnp.ndarray:
         See_0 = free_free.S0_ee_Salpeter(
             setup.k,
-            self.plasma_state.T_e,
-            self.plasma_state.n_e,
+            plasma_state.T_e,
+            plasma_state.n_e,
             setup.measured_energy - setup.energy,
         )
 
-        return See_0 * self.plasma_state.Z_free
+        return See_0 * plasma_state.Z_free
 
 
 class RPA_NoDamping(ScatteringModel):
@@ -810,29 +839,33 @@ class RPA_NoDamping(ScatteringModel):
     """
 
     allowed_keys = ["free-free scattering"]
+    __name__ = "RPA_NoDamping"
 
-    def __init__(self, state: PlasmaState, model_key) -> None:
-        state.update_default_model("chemical potential", GregoriChemPotential)
-        super().__init__(state, model_key)
+    def prepare(self, plasma_state: PlasmaState) -> None:
+        plasma_state.update_default_model(
+            "chemical potential", GregoriChemPotential()
+        )
 
-    def check(self) -> None:
-        if len(self.plasma_state) > 1:
+    def check(self, plasma_state: PlasmaState) -> None:
+        if len(plasma_state) > 1:
             logger.critical(
                 "'RPA_NoDamping' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
-    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
-        mu = self.plasma_state["chemical potential"].evaluate(setup)
+    def evaluate_raw(
+        self, plasma_state: PlasmaState, setup: Setup
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(setup)
         See_0 = free_free.S0_ee_RPA_no_damping(
             setup.k,
-            self.plasma_state.T_e,
-            self.plasma_state.n_e,
+            plasma_state.T_e,
+            plasma_state.n_e,
             setup.measured_energy - setup.energy,
             mu,
         )
 
-        return See_0 * self.plasma_state.Z_free
+        return See_0 * plasma_state.Z_free
 
 
 class BornMermin(ScatteringModel):
@@ -850,31 +883,35 @@ class BornMermin(ScatteringModel):
         Function used to calculate the dynamic structure factor
     """
 
+    __name__ = "BornMermin"
     allowed_keys = ["free-free scattering"]
 
-    def __init__(self, state: PlasmaState, model_key) -> None:
-        state.update_default_model("chemical potential", GregoriChemPotential)
-        super().__init__(state, model_key)
+    def prepare(self, plasma_state: PlasmaState) -> None:
+        plasma_state.update_default_model(
+            "chemical potential", GregoriChemPotential()
+        )
 
-    def check(self) -> None:
-        if len(self.plasma_state) > 1:
+    def check(self, plasma_state: PlasmaState) -> None:
+        if len(plasma_state) > 1:
             logger.critical(
                 "'BornMermin' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
-    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
-        mu = self.plasma_state["chemical potential"].evaluate(setup)
+    def evaluate_raw(
+        self, plasma_state: PlasmaState, setup: Setup
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(setup)
         See_0 = free_free.S0_ee_BMA(
             setup.k,
-            self.plasma_state.T_e,
+            plasma_state.T_e,
             mu,
-            self.plasma_state.atomic_masses,
-            self.plasma_state.n_e,
-            self.plasma_state.Z_free,
+            plasma_state.atomic_masses,
+            plasma_state.n_e,
+            plasma_state.Z_free,
             setup.measured_energy - setup.energy,
         )
-        return See_0 * self.plasma_state.Z_free
+        return See_0 * plasma_state.Z_free
 
 
 class BornMermin_ChapmanInterp(ScatteringModel):
@@ -903,37 +940,42 @@ class BornMermin_ChapmanInterp(ScatteringModel):
     """
 
     allowed_keys = ["free-free scattering"]
+    __name__ = "BornMermin_ChapmanInterp"
 
-    def __init__(self, state: PlasmaState, model_key) -> None:
-        state.update_default_model("chemical potential", GregoriChemPotential)
-        super().__init__(state, model_key)
-        #: Number of frequencies used for the interpolation of the elastic
-        #: scattering. Defaults to 20.
-        self.no_of_freq: int = 20
+    def __init__(self, no_of_freq: int = 20) -> None:
+        super().__init__()
+        self.no_of_freq: int = no_of_freq
 
-    def check(self) -> None:
-        if len(self.plasma_state) > 1:
+    def prepare(self, plasma_state: PlasmaState) -> None:
+        plasma_state.update_default_model(
+            "chemical potential", GregoriChemPotential()
+        )
+
+    def check(self, plasma_state: PlasmaState) -> None:
+        if len(plasma_state) > 1:
             logger.critical(
                 "'BornMermin_ChapmanInterp' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
-    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
-        mu = self.plasma_state["chemical potential"].evaluate(setup)
+    def evaluate_raw(
+        self, plasma_state: PlasmaState, setup: Setup
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(setup)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
             setup.k,
-            self.plasma_state.T_e,
+            plasma_state.T_e,
             mu,
-            self.plasma_state.atomic_masses,
-            self.plasma_state.n_e,
-            self.plasma_state.Z_free,
+            plasma_state.atomic_masses,
+            plasma_state.n_e,
+            plasma_state.Z_free,
             setup.measured_energy - setup.energy,
             self.no_of_freq,
         )
-        return See_0 * self.plasma_state.Z_free
+        return See_0 * plasma_state.Z_free
 
     def _tree_flatten(self):
-        children = (self.plasma_state,)
+        children = ()
         aux_data = (
             self.model_key,
             self.sample_points,
@@ -944,8 +986,8 @@ class BornMermin_ChapmanInterp(ScatteringModel):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        (obj.plasma_state,) = children
         obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+
         return obj
 
 
@@ -965,31 +1007,31 @@ class SchumacherImpulse(ScatteringModel):
     """
 
     allowed_keys = ["bound-free scattering"]
+    __name__ = "SchumacherImpulse"
 
-    def __init__(self, state: PlasmaState, model_key) -> None:
-        state.update_default_model("form-factors", PaulingFormFactors)
-        super().__init__(state, model_key)
+    def prepare(self, plasma_state: PlasmaState) -> None:
+        plasma_state.update_default_model("form-factors", PaulingFormFactors())
 
-    def check(self) -> None:
-        if len(self.plasma_state) > 1:
+    def check(self, plasma_state: PlasmaState) -> None:
+        if len(plasma_state) > 1:
             logger.critical(
                 "'SchumacherImpulse' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
-    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(
+        self, plasma_state: PlasmaState, setup: Setup
+    ) -> jnp.ndarray:
         k = setup.k
         omega_0 = setup.energy / ureg.hbar
         omega = omega_0 - setup.measured_energy / ureg.hbar
-        Z_c = self.plasma_state.Z_core[0]
-        E_b = self.plasma_state.ions[0].binding_energies
+        Z_c = plasma_state.Z_core[0]
+        E_b = plasma_state.ions[0].binding_energies
 
-        Zeff = form_factors.pauling_effective_charge(
-            self.plasma_state.ions[0].Z
-        )
+        Zeff = form_factors.pauling_effective_charge(plasma_state.ions[0].Z)
         population = electron_distribution_ionized_state(Z_c)
         # Gregori.2004, Eqn 20
-        fi = self.plasma_state["form-factors"].evaluate(setup)
+        fi = plasma_state["form-factors"].evaluate(setup)
         r_k = 1 - jnp.sum(population[:, jnp.newaxis] / Z_c * fi**2)
         B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
         sbe = (
@@ -1021,10 +1063,13 @@ class DetailedBalance(ScatteringModel):
 
     """
 
+    __name__ = "DetailedBalance"
     allowed_keys = ["free-bound scattering"]
 
     @jax.jit
-    def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
+    def evaluate_raw(
+        self, plasma_state: PlasmaState, setup: Setup
+    ) -> jnp.ndarray:
         energy_shift = setup.measured_energy - setup.energy
         mirrored_setup = Setup(
             setup.scattering_angle,
@@ -1032,10 +1077,8 @@ class DetailedBalance(ScatteringModel):
             setup.energy - energy_shift,
             setup.instrument,
         )
-        db_factor = jnpu.exp(
-            -energy_shift / (self.plasma_state.T_e * ureg.k_B)
-        )
-        free_bound = self.plasma_state["bound-free scattering"].evaluate_raw(
+        db_factor = jnpu.exp(-energy_shift / (plasma_state.T_e * ureg.k_B))
+        free_bound = plasma_state["bound-free scattering"].evaluate_raw(
             mirrored_setup
         )
         return free_bound * db_factor
@@ -1057,12 +1100,13 @@ class PaulingFormFactors(Model):
     """
 
     allowed_keys = ["form-factors"]
+    __name__ = "PaulingFormFactors"
 
     @jax.jit
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
-        Zstar = form_factors.pauling_effective_charge(self.plasma_state.Z_A)
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
+        Zstar = form_factors.pauling_effective_charge(plasma_state.Z_A)
         ff = form_factors.pauling_all_ff(setup.k, Zstar)
-        # population = self.plasma_state.ions[0].electron_distribution
+        # population = plasma_state.ions[0].electron_distribution
         # return jnp.where(population > 0, ff, 0)
         return ff
 
@@ -1078,12 +1122,13 @@ class GregoriChemPotential(Model):
     Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
     """
 
+    __name__ = "GregoriChemPotential"
     allowed_keys = ["chemical potential"]
 
     @jax.jit
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
         return plasma_physics.chem_pot_interpolation(
-            self.plasma_state.T_e, self.plasma_state.n_e
+            plasma_state.T_e, plasma_state.n_e
         )
 
 
@@ -1103,14 +1148,15 @@ class BohmStaver(Model):
     """
 
     allowed_keys = ["Debye temperature"]
+    __name__ = "BohmStaver"
 
     @jax.jit
-    def evaluate(self, setup: Setup) -> jnp.ndarray:
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
         return static_structure_factors.T_Debye_Bohm_Staver(
-            self.plasma_state.T_e,
-            self.plasma_state.n_e,
-            self.plasma_state.atomic_masses,
-            self.plasma_state.Z_free,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
         )
 
 
@@ -1136,5 +1182,7 @@ _all_models = [
 
 for model in _all_models:
     jax.tree_util.register_pytree_node(
-        model, model._tree_flatten, model._tree_unflatten
+        model,
+        model._tree_flatten,
+        model._tree_unflatten,
     )

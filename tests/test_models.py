@@ -24,13 +24,15 @@ test_setup = jaxrts.setup.Setup(
 
 
 def test_NeglectModel():
-    NeglectInstance1 = jaxrts.models.Neglect(
-        test_state, "free-free scattering"
-    )
-    res1 = NeglectInstance1.evaluate(test_setup).m_as(ureg.second)
+    NeglectInstance1 = jaxrts.models.Neglect()
+    NeglectInstance1.model_key = "free-free scattering"
+    res1 = NeglectInstance1.evaluate(test_state, test_setup).m_as(ureg.second)
 
-    NeglectInstance2 = jaxrts.models.Neglect(test_state, "ipd")
-    res2 = NeglectInstance2.evaluate(test_setup).m_as(ureg.electron_volt)
+    NeglectInstance2 = jaxrts.models.Neglect()
+    NeglectInstance2.model_key = "ipd"
+    res2 = NeglectInstance2.evaluate(test_state, test_setup).m_as(
+        ureg.electron_volt
+    )
 
     assert jnp.all(res1 == 0)
     assert jnp.all(res2 == 0)
@@ -40,18 +42,20 @@ def test_NeglectModel():
 
 def test_KeyError_on_not_allowed_model_key():
     # This shoud work and return no error
-    test_state["ionic scattering"] = jaxrts.models.Gregori2003IonFeat
+    test_state["ionic scattering"] = jaxrts.models.Gregori2003IonFeat()
 
     # But now we should get an error
     with pytest.raises(KeyError) as context:
-        test_state["free-free scattering"] = jaxrts.models.Gregori2003IonFeat
+        test_state["free-free scattering"] = jaxrts.models.Gregori2003IonFeat()
 
     assert "free-free scattering" in str(context.value)
     assert "Gregori2003IonFeat" in str(context.value)
 
 
 def test_ModelEquality():
-    test_state["free-free scattering"] = jaxrts.models.QCSalpeterApproximation
+    test_state["free-free scattering"] = (
+        jaxrts.models.QCSalpeterApproximation()
+    )
     # Test comparison with some random type
     assert test_state["free-free scattering"] != 6
     model = copy.deepcopy(test_state["free-free scattering"])

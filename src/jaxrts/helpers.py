@@ -2,6 +2,7 @@
 Miscellaneous helper functions.
 """
 
+import jax
 from jax import numpy as jnp
 from .units import Quantity
 
@@ -91,12 +92,12 @@ def invert_dict(dictionary: dict) -> dict:
         )
     return out_dir
 
+
 def timer(func, custom_prefix=None, loglevel=logging.INFO):
-    
     """
     Simple timer wrapper.
     """
-    
+
     print("Starting ", func.__name__, "...\n")
 
     @wraps(func)
@@ -110,3 +111,25 @@ def timer(func, custom_prefix=None, loglevel=logging.INFO):
         return result
 
     return wrapper
+
+
+class JittableDict(dict):
+    # The following is required to jit a state
+    def _tree_flatten(self):
+        children = self.values()
+        aux_data = self.keys()
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = JittableDict.__new__(cls)
+        for key, val in zip(children, aux_data):
+            obj[key] = val
+        return obj
+
+
+jax.tree_util.register_pytree_node(
+    JittableDict,
+    JittableDict._tree_flatten,
+    JittableDict._tree_unflatten,
+)
