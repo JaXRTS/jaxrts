@@ -40,9 +40,9 @@ state = jaxrts.PlasmaState(
 
 r = jnp.linspace(0, 10, 1000) * ureg.angstrom
 
-KK = hnc_potentials.KlimontovichKraeftPotential(state)
-Kelbg = hnc_potentials.KelbgPotential(state)
-Deutsch = hnc_potentials.DeutschPotential(state)
+KK = hnc_potentials.KlimontovichKraeftPotential()
+Kelbg = hnc_potentials.KelbgPotential()
+Deutsch = hnc_potentials.DeutschPotential()
 
 KK.include_electrons = True
 Kelbg.include_electrons = True
@@ -51,7 +51,7 @@ Deutsch.include_electrons = True
 # Get lambda_ab from the limit of Deutsch:
 # for r-> 0: V_Deutsch -> q1q2/(4 pi eps_0 lam_ab)
 # This will only be correct for the ei part!
-lambda_ab = -KK.q2 / (4 * jnp.pi * ureg.epsilon_0 * 5 * ureg.rydberg)
+lambda_ab = -KK.q2(state) / (4 * jnp.pi * ureg.epsilon_0 * 5 * ureg.rydberg)
 
 
 n = jaxrts.units.to_array([state.n_i[0], state.n_e])
@@ -64,18 +64,18 @@ print(lambda_ab.to(ureg.angstrom))
 
 ax.plot(
     (r / d[0, 0]).m_as(ureg.dimensionless),
-    -KK.full_r(r)[1, 0, :].m_as(ureg.rydberg),
+    -KK.full_r(state, r)[1, 0, :].m_as(ureg.rydberg),
     label="Klimontvich Kraeft",
 )
 ax.plot(
     (r / d[0, 0]).m_as(ureg.dimensionless),
-    -Kelbg.full_r(r)[1, 0, :].m_as(ureg.rydberg),
+    -Kelbg.full_r(state, r)[1, 0, :].m_as(ureg.rydberg),
     label="Kelbg",
 )
 
 ax.plot(
     (r / d[0, 0]).m_as(ureg.dimensionless),
-    -Deutsch.full_r(r)[1, 0, :].m_as(ureg.rydberg),
+    -Deutsch.full_r(state, r)[1, 0, :].m_as(ureg.rydberg),
     label="Deutsch",
 )
 

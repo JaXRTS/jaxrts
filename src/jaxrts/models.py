@@ -146,7 +146,7 @@ class ScatteringModel(Model):
         instument function.
         """
         if self.sample_points is None:
-            raw = self.evaluate_raw(setup)
+            raw = self.evaluate_raw(plasma_state, setup)
         else:
             low_res_setup = Setup(
                 setup.scattering_angle,
@@ -154,7 +154,7 @@ class ScatteringModel(Model):
                 self.sample_grid(setup),
                 setup.instrument,
             )
-            low_res = self.evaluate_raw(low_res_setup)
+            low_res = self.evaluate_raw(plasma_state, low_res_setup)
             raw = jnpu.interp(
                 setup.measured_energy,
                 low_res_setup.measured_energy,
@@ -173,8 +173,7 @@ class ScatteringModel(Model):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        (obj.plasmas,) = children
-        obj.model_key, sample_points = aux_data
+        obj.model_key, obj.sample_points = aux_data
         return obj
 
 
@@ -258,7 +257,7 @@ class ArkhipovIonFeat(Model):
 
     @jax.jit
     def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
-        fi = plasma_state["form-factors"].evaluate(setup)
+        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
         population = electron_distribution_ionized_state(plasma_state.Z_core)[
             :, jnp.newaxis
         ]
@@ -317,7 +316,7 @@ class Gregori2003IonFeat(Model):
 
     @jax.jit
     def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
-        fi = plasma_state["form-factors"].evaluate(setup)
+        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
         population = electron_distribution_ionized_state(
             plasma_state.Z_core[0]
         )[:, jnp.newaxis]
@@ -385,12 +384,12 @@ class Gregori2006IonFeat(Model):
 
     @jax.jit
     def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
-        fi = plasma_state["form-factors"].evaluate(setup)
+        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
         population = electron_distribution_ionized_state(plasma_state.Z_core)[
             :, jnp.newaxis
         ]
 
-        T_D = plasma_state["Debye temperature"].evaluate(setup)
+        T_D = plasma_state["Debye temperature"].evaluate(plasma_state, setup)
 
         T_e_eff = static_structure_factors.T_cf_Greg(
             plasma_state.T_e, plasma_state.n_e
@@ -507,8 +506,8 @@ class LinearResponseHNCIonFeat(Model):
 
         # Calculate g_ab in the HNC Approach
         # ----------------------------------
-        T = plasma_state["ion-ion Potential"].T
-        n = plasma_state.n_i
+        T = plasma_state["ion-ion Potential"].T(plasma_state)
+        n = plasma_state.n_i(plasma_state)
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
             V_s_r, V_l_k, self.r, T, n
         )
@@ -537,7 +536,7 @@ class LinearResponseHNCIonFeat(Model):
             jnp.arange(plasma_state.nions),
         )
         # Get the formfactor from the plasma state
-        fi = plasma_state["form-factors"].evaluate(setup)
+        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
         # Calculate the number-fraction per element
         x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
 
@@ -706,8 +705,8 @@ class ThreePotentialHNCIonFeat(Model):
 
         # Calculate g_ab in the HNC Approach
         # ----------------------------------
-        T = plasma_state["ion-ion Potential"].T
-        n = to_array([*plasma_state.n_i, plasma_state.n_e])
+        T = plasma_state["ion-ion Potential"].T(plasma_state)
+        n = plasma_state.n_i(plasma_state)
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
             V_s_r, V_l_k, self.r, T, n
         )
@@ -734,7 +733,7 @@ class ThreePotentialHNCIonFeat(Model):
             jnp.arange(plasma_state.nions),
         )
         # Get the formfactor from the plasma state
-        fi = plasma_state["form-factors"].evaluate(setup)
+        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
         # Calculate the number-fraction per element
         x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
 
@@ -856,7 +855,7 @@ class RPA_NoDamping(ScatteringModel):
     def evaluate_raw(
         self, plasma_state: PlasmaState, setup: Setup
     ) -> jnp.ndarray:
-        mu = plasma_state["chemical potential"].evaluate(setup)
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         See_0 = free_free.S0_ee_RPA_no_damping(
             setup.k,
             plasma_state.T_e,
@@ -901,7 +900,7 @@ class BornMermin(ScatteringModel):
     def evaluate_raw(
         self, plasma_state: PlasmaState, setup: Setup
     ) -> jnp.ndarray:
-        mu = plasma_state["chemical potential"].evaluate(setup)
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         See_0 = free_free.S0_ee_BMA(
             setup.k,
             plasma_state.T_e,
@@ -961,7 +960,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
     def evaluate_raw(
         self, plasma_state: PlasmaState, setup: Setup
     ) -> jnp.ndarray:
-        mu = plasma_state["chemical potential"].evaluate(setup)
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
             setup.k,
             plasma_state.T_e,
@@ -1031,7 +1030,7 @@ class SchumacherImpulse(ScatteringModel):
         Zeff = form_factors.pauling_effective_charge(plasma_state.ions[0].Z)
         population = electron_distribution_ionized_state(Z_c)
         # Gregori.2004, Eqn 20
-        fi = plasma_state["form-factors"].evaluate(setup)
+        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
         r_k = 1 - jnp.sum(population[:, jnp.newaxis] / Z_c * fi**2)
         B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
         sbe = (
@@ -1079,7 +1078,7 @@ class DetailedBalance(ScatteringModel):
         )
         db_factor = jnpu.exp(-energy_shift / (plasma_state.T_e * ureg.k_B))
         free_bound = plasma_state["bound-free scattering"].evaluate_raw(
-            mirrored_setup
+            plasma_state, mirrored_setup
         )
         return free_bound * db_factor
 

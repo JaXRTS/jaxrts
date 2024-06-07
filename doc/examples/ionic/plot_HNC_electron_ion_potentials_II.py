@@ -33,10 +33,10 @@ k = jnp.pi / r[-1] + jnp.arange(len(r)) * (jnp.pi / (len(r) * (r[1] - r[0])))
 # fairer comparison.
 state.ion_core_radius = jnp.array([1]) * ureg.angstrom
 
-empty_core = jaxrts.hnc_potentials.EmptyCorePotential(state)
-soft_core2 = jaxrts.hnc_potentials.SoftCorePotential(state, beta=2)
-soft_core6 = jaxrts.hnc_potentials.SoftCorePotential(state, beta=6)
-coulomb = jaxrts.hnc_potentials.CoulombPotential(state)
+empty_core = jaxrts.hnc_potentials.EmptyCorePotential()
+soft_core2 = jaxrts.hnc_potentials.SoftCorePotential(beta=2)
+soft_core6 = jaxrts.hnc_potentials.SoftCorePotential(beta=6)
+coulomb = jaxrts.hnc_potentials.CoulombPotential()
 
 names = [
     "Empty core",
@@ -48,12 +48,12 @@ for idx, pot in enumerate([empty_core, soft_core2, soft_core6, coulomb]):
     pot.include_electrons = True
     ax[0].plot(
         r.m_as(ureg.a_0),
-        pot.full_r(r).m_as(ureg.rydberg)[0, 1, :],
+        pot.full_r(state, r).m_as(ureg.rydberg)[0, 1, :],
         label=names[idx],
     )
     q = -jaxrts.ion_feature.free_electron_susceptilibily_RPA(
         k, 1 / state.DH_screening_length
-    ) * pot.full_k(k)
+    ) * pot.full_k(state, k)
     ax[1].plot(
         k.m_as(1 / ureg.a_0),
         q.m_as(ureg.dimensionless)[0, 1, :],
@@ -64,7 +64,7 @@ for ls, r_cut in zip(["solid", "dashed", "dotted"], [0.5, 1, 2]):
     state.ion_core_radius = jnp.array([r_cut]) * ureg.angstrom
     q = -jaxrts.ion_feature.free_electron_susceptilibily_RPA(
         k, 1 / state.DH_screening_length
-    ) * soft_core6.full_k(k)
+    ) * soft_core6.full_k(state, k)
     ax[2].plot(
         k.m_as(1 / ureg.a_0),
         q.m_as(ureg.dimensionless)[0, 1, :],

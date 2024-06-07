@@ -46,21 +46,21 @@ state = jaxrts.PlasmaState(
     jnp.array([2]) * ureg.electron_volt / ureg.k_B,
 )
 
-state["free-free scattering"] = jaxrts.models.BornMermin
-state["free-free scattering"].evaluate(setup).m_as(ureg.second)
+state["free-free scattering"] = jaxrts.models.BornMermin()
+state.evaluate("free-free scattering", setup).m_as(ureg.second)
 t0 = time.time()
 BM_free_free_scatter = (
-    state["free-free scattering"].evaluate(setup).m_as(ureg.second)
+    state.evaluate("free-free scattering", setup).m_as(ureg.second)
 )
 print(f"Full BMA: {time.time()-t0}s")
-state["free-free scattering"] = jaxrts.models.BornMermin_ChapmanInterp
+state["free-free scattering"] = jaxrts.models.BornMermin_ChapmanInterp()
 
 for no_of_freq in [2, 4, 20, 100]:
     state["free-free scattering"].no_of_freq = no_of_freq
-    state["free-free scattering"].evaluate(setup).m_as(ureg.second)
+    state.evaluate("free-free scattering", setup).m_as(ureg.second)
     t0 = time.time()
     free_free_scatter = (
-        state["free-free scattering"].evaluate(setup).m_as(ureg.second)
+        state.evaluate("free-free scattering", setup).m_as(ureg.second)
     )
     print(
         f"{no_of_freq} interp points: {time.time()-t0}s      ",
@@ -85,11 +85,11 @@ plt.plot(
     color="black",
 )
 
-state["free-free scattering"] = jaxrts.models.RPA_NoDamping
-state["free-free scattering"].evaluate(setup).m_as(ureg.second)
+state["free-free scattering"] = jaxrts.models.RPA_NoDamping()
+state.evaluate("free-free scattering", setup).m_as(ureg.second)
 t0 = time.time()
 free_free_scatter = (
-    state["free-free scattering"].evaluate(setup).m_as(ureg.second)
+    state.evaluate("free-free scattering", setup).m_as(ureg.second)
 )
 print(f"RPA: {time.time()-t0}s")
 plt.plot(
@@ -102,5 +102,5 @@ plt.plot(
 
 plt.xlabel("Energy [eV]")
 plt.ylabel("Scattering intensity")
-plt.legend(loc='upper left', bbox_to_anchor=(1.05, 1.00))
+plt.legend(loc="upper left", bbox_to_anchor=(1.05, 1.00))
 plt.show()

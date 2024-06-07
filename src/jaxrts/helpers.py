@@ -123,7 +123,7 @@ class JittableDict(dict):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = JittableDict.__new__(cls)
-        for key, val in zip(children, aux_data):
+        for key, val in zip(aux_data, children):
             obj[key] = val
         return obj
 

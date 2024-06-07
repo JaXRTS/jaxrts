@@ -50,13 +50,13 @@ k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 # come form.
 state.DH_screening_length = 2 / 3 * ureg.a_0
 
-Potential = jaxrts.hnc_potentials.DebyeHuckelPotential(state)
+Potential = jaxrts.hnc_potentials.DebyeHuckelPotential()
 
-V_s = Potential.short_r(r)
-V_l_k = Potential.long_k(k)
+V_s = Potential.short_r(state, r)
+V_l_k = Potential.long_k(state, k)
 
 g, niter = hnc.pair_distribution_function_HNC(
-    V_s, V_l_k, r, Potential.T, state.n_i
+    V_s, V_l_k, r, Potential.T(state), state.n_i
 )
 S_ii = hnc.S_ii_HNC(k, g, state.n_i, r)
 

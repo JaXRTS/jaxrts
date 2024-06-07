@@ -65,16 +65,16 @@ for idx, Gamma in enumerate([1, 10, 30, 100]):
         )
     )
 
-    Coulomb = jaxrts.hnc_potentials.CoulombPotential(state)
+    Coulomb = jaxrts.hnc_potentials.CoulombPotential()
 
-    V_s = Coulomb.short_r(r)
+    V_s = Coulomb.short_r(state, r)
     for potential in ["Coulomb", "no $V_l$"]:
-        V_l_k = Coulomb.long_k(k)
+        V_l_k = Coulomb.long_k(state, k)
         if potential == "no $V_l$":
             V_l_k *= 0
 
         g, niter = hnc.pair_distribution_function_HNC(
-            V_s, V_l_k, r, Coulomb.T, n
+            V_s, V_l_k, r, Coulomb.T(state), n
         )
         print(f"Γ={Gamma}, {niter} iteration of the HNC scheme.")
 

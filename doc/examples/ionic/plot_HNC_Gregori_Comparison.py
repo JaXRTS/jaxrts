@@ -40,9 +40,9 @@ dr = r[1] - r[0]
 dk = jnp.pi / (len(r) * dr)
 k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-KK = hnc_potentials.KlimontovichKraeftPotential(state)
-Kelbg = hnc_potentials.KelbgPotential(state)
-Coulomb = hnc_potentials.CoulombPotential(state)
+KK = hnc_potentials.KlimontovichKraeftPotential()
+Kelbg = hnc_potentials.KelbgPotential()
+Coulomb = hnc_potentials.CoulombPotential()
 
 KK.include_electrons = True
 Kelbg.include_electrons = True
@@ -62,12 +62,12 @@ for idx, frac in enumerate([1.0, 2.0, 4.0]):
     )
     T_i_prime = jaxrts.static_structure_factors.T_i_eff_Greg(state.T_i[0], T_D)
 
-    V = Kelbg.short_r(r) * jnp.eye(2)[:, :, jnp.newaxis]
-    V += -KK.full_r(r) * jnp.eye(2, k=1)[:, :, jnp.newaxis]
-    V += -KK.full_r(r) * jnp.eye(2, k=-1)[:, :, jnp.newaxis]
+    V = Kelbg.short_r(state, r) * jnp.eye(2)[:, :, jnp.newaxis]
+    V += -KK.full_r(state, r) * jnp.eye(2, k=1)[:, :, jnp.newaxis]
+    V += -KK.full_r(state, r) * jnp.eye(2, k=-1)[:, :, jnp.newaxis]
     # Use the Coulomb - potential for the long-range part
-    V_k = Coulomb.long_k(k) * jnp.eye(2)[:, :, jnp.newaxis]
-    A = KK.full_r(r) * jnp.eye(2, k=-1)[:, :, jnp.newaxis]
+    V_k = Coulomb.long_k(state, k) * jnp.eye(2)[:, :, jnp.newaxis]
+    A = KK.full_r(state, r) * jnp.eye(2, k=-1)[:, :, jnp.newaxis]
 
     g, niter = hnc.pair_distribution_function_HNC(
         V, V_k, r, Tbar[:, :, jnp.newaxis], n

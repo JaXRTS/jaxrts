@@ -64,10 +64,10 @@ setup = jaxrts.setup.Setup(
     ),
 )
 
-state["ionic scattering"] = Gregori2003IonFeat
-state["free-free scattering"] = RPA_NoDamping
-state["bound-free scattering"] = SchumacherImpulse
-state["free-bound scattering"] = Neglect
+state["ionic scattering"] = Gregori2003IonFeat()
+state["free-free scattering"] = RPA_NoDamping()
+state["bound-free scattering"] = SchumacherImpulse()
+state["free-bound scattering"] = Neglect()
 
 plt.style.use("science")
 fig, ax = plt.subplots(3, 2, sharex=True, sharey=True, figsize=(8, 8))

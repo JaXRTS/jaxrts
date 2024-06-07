@@ -281,12 +281,15 @@ class PlasmaState:
                     ).to_base_units()
                 )
 
+    def evaluate(self, key, setup) -> Quantity:
+        return self[key].evaluate(self, setup)
+
     @jax.jit
     def probe(self, setup: Setup) -> Quantity:
-        ionic = self["ionic scattering"].evaluate(setup)
-        free_free = self["free-free scattering"].evaluate(setup)
-        bound_free = self["bound-free scattering"].evaluate(setup)
-        free_bound = self["free-bound scattering"].evaluate(setup)
+        ionic = self["ionic scattering"].evaluate(self, setup)
+        free_free = self["free-free scattering"].evaluate(self, setup)
+        bound_free = self["bound-free scattering"].evaluate(self, setup)
+        free_bound = self["free-bound scattering"].evaluate(self, setup)
 
         return ionic + free_free + bound_free + free_bound
 

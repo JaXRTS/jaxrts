@@ -39,25 +39,25 @@ state = jaxrts.PlasmaState(
 )
 
 
-state["ionic scattering"] = jaxrts.models.Gregori2003IonFeat
-state["free-free scattering"] = jaxrts.models.RPA_NoDamping
-state["bound-free scattering"] = jaxrts.models.SchumacherImpulse
-state["free-bound scattering"] = jaxrts.models.DetailedBalance
+state["ionic scattering"] = jaxrts.models.Gregori2003IonFeat()
+state["free-free scattering"] = jaxrts.models.RPA_NoDamping()
+state["bound-free scattering"] = jaxrts.models.SchumacherImpulse()
+state["free-bound scattering"] = jaxrts.models.DetailedBalance()
 
 plt.plot(
     setup.measured_energy.m_as(ureg.electron_volt),
-    state["free-free scattering"].evaluate(setup).m_as(ureg.second),
+    state.evaluate("free-free scattering", setup).m_as(ureg.second),
     label="free-free",
     linestyle="dashed",
 )
 plt.plot(
     setup.measured_energy.m_as(ureg.electron_volt),
-    state["bound-free scattering"].evaluate(setup).m_as(ureg.second),
+    state.evaluate("bound-free scattering", setup).m_as(ureg.second),
     label="bound-free",
 )
 plt.plot(
     setup.measured_energy.m_as(ureg.electron_volt),
-    state["free-bound scattering"].evaluate(setup).m_as(ureg.second),
+    state.evaluate("free-bound scattering", setup).m_as(ureg.second),
     label="free-bound",
 )
 plt.plot(

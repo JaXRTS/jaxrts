@@ -46,12 +46,12 @@ state = jaxrts.PlasmaState(
     [T],
 )
 
-V = jaxrts.hnc_potentials.CoulombPotential(state)
+V = jaxrts.hnc_potentials.CoulombPotential()
 
-V_l = V.long_r(r)
-V_s = V.short_r(r)
+V_l = V.long_r(state, r)
+V_s = V.short_r(state, r)
 
-V_l_k_analytical = V.long_k(k)
+V_l_k_analytical = V.long_k(state, k)
 V_l_k_transformed, _ = jaxrts.hnc_potentials.transformPotential(V_l, r)
 
 fig, ax = plt.subplots(2)
