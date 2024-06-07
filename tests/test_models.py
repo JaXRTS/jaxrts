@@ -2,6 +2,7 @@ import pytest
 
 from jax import numpy as jnp
 import jaxrts
+import copy
 
 ureg = jaxrts.ureg
 
@@ -47,3 +48,15 @@ def test_KeyError_on_not_allowed_model_key():
 
     assert "free-free scattering" in str(context.value)
     assert "Gregori2003IonFeat" in str(context.value)
+
+
+def test_ModelEquality():
+    test_state["free-free scattering"] = jaxrts.models.QCSalpeterApproximation
+    # Test comparison with some random type
+    assert test_state["free-free scattering"] != 6
+    model = copy.deepcopy(test_state["free-free scattering"])
+    # Test comparison with it's copy
+    assert test_state["free-free scattering"] == model
+    # Now change the copy
+    model.sample_points = 8
+    assert test_state["free-free scattering"] != model

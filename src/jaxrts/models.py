@@ -6,6 +6,7 @@ implemented.
 import abc
 import logging
 
+import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
@@ -51,6 +52,29 @@ class Model(metaclass=abc.ABCMeta):
         Test if the model is applicable to the PlasmaState. Might raise logged
         messages and errors.
         """
+
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.plasma_state,)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.plasma_state,) = children
+        (obj.model_key,) = aux_data
+        return obj
+
+    # One can use the flatten functions quite nicely for __eq__ methods.
+    def __eq__(self, other):
+        """
+        Test the quality of two models.
+
+        """
+        if isinstance(other, Model):
+            return self._tree_flatten() == other._tree_flatten()
+        return NotImplemented
 
 
 class ScatteringModel(Model):
@@ -104,6 +128,7 @@ class ScatteringModel(Model):
         max_E = setup.measured_energy[-1]
         return jnpu.linspace(min_E, max_E, self.sample_points)
 
+    @jax.jit
     def evaluate(self, setup) -> jnp.ndarray:
         """
         If :py:attr:`~.sample_points` is not ``None``, generate a
@@ -131,6 +156,19 @@ class ScatteringModel(Model):
             )
         return convolve_stucture_factor_with_instrument(raw, setup)
 
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.plasma_state,)
+        aux_data = (self.model_key, self.sample_points)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.plasma_state,) = children
+        obj.model_key, obj.sample_points = aux_data
+        return obj
+
 
 # HERE LIST OF MODELS
 # ===================
@@ -152,6 +190,7 @@ class Neglect(Model):
     energy probed.
     """
 
+    @jax.jit
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         if self.model_key in scattering_models:
             return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
@@ -208,6 +247,7 @@ class ArkhipovIonFeat(Model):
                 "'ArkhipovIonFeat' is only implemented for a one-component plasma"  # noqa: E501
             )
 
+    @jax.jit
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         fi = self.plasma_state["form-factors"].evaluate(setup)
         population = electron_distribution_ionized_state(
@@ -266,6 +306,7 @@ class Gregori2003IonFeat(Model):
                 "'Gregori2003IonFeat' is only implemented for a one-component plasma"  # noqa: E501
             )
 
+    @jax.jit
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         fi = self.plasma_state["form-factors"].evaluate(setup)
         population = electron_distribution_ionized_state(
@@ -333,6 +374,7 @@ class Gregori2006IonFeat(Model):
                 "'Gregori2006IonFeat' is only implemented for a one-component plasma"  # noqa: E501
             )
 
+    @jax.jit
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         fi = self.plasma_state["form-factors"].evaluate(setup)
         population = electron_distribution_ionized_state(
@@ -439,6 +481,7 @@ class LinearResponseHNCIonFeat(Model):
         dk = jnp.pi / (len(r) * dr)
         return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
+    @jax.jit
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         # Prepare the Potentials
         # ----------------------
@@ -498,6 +541,22 @@ class LinearResponseHNCIonFeat(Model):
             (setup.measured_energy - setup.energy) / ureg.hbar
         )
         return res
+
+    def _tree_flatten(self):
+        children = (self.plasma_state, self.r_min, self.r_max)
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.pot,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.plasma_state, obj.r_min, obj.r_max = children
+        obj.model_key, obj.sample_points, obj.pot = aux_data
+        return obj
 
 
 class ThreePotentialHNCIonFeat(Model):
@@ -569,6 +628,7 @@ class ThreePotentialHNCIonFeat(Model):
         dk = jnp.pi / (len(r) * dr)
         return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
+    @jax.jit
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         # Prepare the Potentials
         # ----------------------
@@ -670,6 +730,22 @@ class ThreePotentialHNCIonFeat(Model):
         )
         return res
 
+    def _tree_flatten(self):
+        children = (self.plasma_state, self.r_min, self.r_max)
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.pot,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.plasma_state, obj.r_min, obj.r_max = children
+        obj.model_key, obj.sample_points, obj.pot = aux_data
+        return obj
+
 
 # Free-free models
 # ----------------
@@ -703,6 +779,7 @@ class QCSalpeterApproximation(ScatteringModel):
                 "'QCSalpeterApproximation' is only implemented for a one-component plasma"  # noqa: E501
             )
 
+    @jax.jit
     def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         See_0 = free_free.S0_ee_Salpeter(
             setup.k,
@@ -744,6 +821,7 @@ class RPA_NoDamping(ScatteringModel):
                 "'RPA_NoDamping' is only implemented for a one-component plasma"  # noqa: E501
             )
 
+    @jax.jit
     def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state["chemical potential"].evaluate(setup)
         See_0 = free_free.S0_ee_RPA_no_damping(
@@ -784,6 +862,7 @@ class BornMermin(ScatteringModel):
                 "'BornMermin' is only implemented for a one-component plasma"  # noqa: E501
             )
 
+    @jax.jit
     def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state["chemical potential"].evaluate(setup)
         See_0 = free_free.S0_ee_BMA(
@@ -838,6 +917,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
                 "'BornMermin_ChapmanInterp' is only implemented for a one-component plasma"  # noqa: E501
             )
 
+    @jax.jit
     def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         mu = self.plasma_state["chemical potential"].evaluate(setup)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
@@ -851,6 +931,22 @@ class BornMermin_ChapmanInterp(ScatteringModel):
             self.no_of_freq,
         )
         return See_0 * self.plasma_state.Z_free
+
+    def _tree_flatten(self):
+        children = (self.plasma_state,)
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.no_of_freq,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.plasma_state,) = children
+        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+        return obj
 
 
 # bound-free Models
@@ -880,6 +976,7 @@ class SchumacherImpulse(ScatteringModel):
                 "'SchumacherImpulse' is only implemented for a one-component plasma"  # noqa: E501
             )
 
+    @jax.jit
     def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         k = setup.k
         omega_0 = setup.energy / ureg.hbar
@@ -926,6 +1023,7 @@ class DetailedBalance(ScatteringModel):
 
     allowed_keys = ["free-bound scattering"]
 
+    @jax.jit
     def evaluate_raw(self, setup: Setup) -> jnp.ndarray:
         energy_shift = setup.measured_energy - setup.energy
         mirrored_setup = Setup(
@@ -960,6 +1058,7 @@ class PaulingFormFactors(Model):
 
     allowed_keys = ["form-factors"]
 
+    @jax.jit
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         Zstar = form_factors.pauling_effective_charge(self.plasma_state.Z_A)
         ff = form_factors.pauling_all_ff(setup.k, Zstar)
@@ -981,6 +1080,7 @@ class GregoriChemPotential(Model):
 
     allowed_keys = ["chemical potential"]
 
+    @jax.jit
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         return plasma_physics.chem_pot_interpolation(
             self.plasma_state.T_e, self.plasma_state.n_e
@@ -1004,6 +1104,7 @@ class BohmStaver(Model):
 
     allowed_keys = ["Debye temperature"]
 
+    @jax.jit
     def evaluate(self, setup: Setup) -> jnp.ndarray:
         return static_structure_factors.T_Debye_Bohm_Staver(
             self.plasma_state.T_e,
@@ -1011,3 +1112,29 @@ class BohmStaver(Model):
             self.plasma_state.atomic_masses,
             self.plasma_state.Z_free,
         )
+
+
+_all_models = [
+    ArkhipovIonFeat,
+    BohmStaver,
+    BornMermin,
+    BornMermin_ChapmanInterp,
+    DetailedBalance,
+    Gregori2003IonFeat,
+    Gregori2006IonFeat,
+    GregoriChemPotential,
+    LinearResponseHNCIonFeat,
+    Model,
+    Neglect,
+    PaulingFormFactors,
+    QCSalpeterApproximation,
+    RPA_NoDamping,
+    ScatteringModel,
+    SchumacherImpulse,
+    ThreePotentialHNCIonFeat,
+]
+
+for model in _all_models:
+    jax.tree_util.register_pytree_node(
+        model, model._tree_flatten, model._tree_unflatten
+    )

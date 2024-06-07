@@ -26,9 +26,8 @@ class PlasmaState:
         models: Dict = {},
     ):
 
-        assert (
-            (len(ions) == len(Z_free))
-            and (len(ions) == len(mass_density))
+        assert (len(ions) == len(Z_free)) and (
+            len(ions) == len(mass_density)
         ), "WARNING: Input parameters should be the same shape as <ions>!"
         if T_i is not None:
             assert len(ions) == len(
@@ -279,6 +278,7 @@ class PlasmaState:
                     ).to_base_units()
                 )
 
+    @jax.jit
     def probe(self, setup: Setup) -> Quantity:
         ionic = self["ionic scattering"].evaluate(setup)
         free_free = self["free-free scattering"].evaluate(setup)
@@ -317,6 +317,19 @@ class PlasmaState:
             "ion_core_radius": ion_core_radius,
         }
         return obj
+
+    def _eq_characteristic(self):
+        children, _ = self._tree_flatten()
+        static_model_list = [
+            self.models[key]._tree_flatten()[1]
+            for key in sorted(self.models.keys())
+        ]
+        return children, static_model_list, self.ions, self.models.keys()
+
+    def __eq__(self, other):
+        if isinstance(other, PlasmaState):
+            return self._eq_characteristic() == other._eq_characteristic()
+        return NotImplemented
 
 
 jax.tree_util.register_pytree_node(

@@ -30,7 +30,7 @@ class Setup:
         #: A callable function over energy shifts that gives the total
         #: instrument spread. The curve should be normed so that the integral
         #: from `-inf` to `inf` should be one.
-        self.instrument: Callable = instrument
+        self.instrument: Callable = jax.tree_util.Partial(instrument)
 
     @property
     def k(self) -> Quantity:
@@ -49,7 +49,30 @@ class Setup:
         """
         return ureg.planck_constant * ureg.c / self.energy
 
+    # The following is required to jit a setup
+    def _tree_flatten(self):
+        children = (
+            self.scattering_angle,
+            self.energy,
+            self.measured_energy,
+            self.instrument,
+        )
+        aux_data = ()  # static values
+        return (children, aux_data)
 
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(Setup)
+        (
+            obj.scattering_angle,
+            obj.energy,
+            obj.measured_energy,
+            obj.instrument,
+        ) = children
+        return obj
+
+
+@jax.jit
 def convolve_stucture_factor_with_instrument(
     Sfac: Quantity, setup: Setup
 ) -> Quantity:
@@ -86,3 +109,10 @@ def convolve_stucture_factor_with_instrument(
         * (1 * ureg.second**2)
         * (jnpu.diff(setup.measured_energy)[0] / ureg.hbar)
     )
+
+
+jax.tree_util.register_pytree_node(
+    Setup,
+    Setup._tree_flatten,
+    Setup._tree_unflatten,
+)
