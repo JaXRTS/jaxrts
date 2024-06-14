@@ -72,6 +72,9 @@ class HNCPotential(metaclass=abc.ABCMeta):
         """
         pass
 
+    def prepare(self, plasma_state) -> None:
+        pass
+
     @abc.abstractmethod
     def full_r(self, plasma_state, r: Quantity) -> Quantity: ...
 
@@ -225,6 +228,8 @@ class CoulombPotential(HNCPotential):
     A full Coulomb Potential.
     """
 
+    __name__ = "CoulombPotential"
+
     @jax.jit
     def full_r(self, plasma_state, r: Quantity) -> Quantity:
         """
@@ -260,6 +265,8 @@ class CoulombPotential(HNCPotential):
 
 
 class DebyeHuckelPotential(HNCPotential):
+    __name__ = "DebyeHuckelPotential"
+
     def check(self, plasma_state) -> None:
         if not hasattr(plasma_state, "DH_screening_length"):
             logger.error(
@@ -321,6 +328,8 @@ class KelbgPotential(HNCPotential):
 
     """
 
+    __name__ = "KelbgPotential"
+
     @jax.jit
     def full_r(self, plasma_state, r: Quantity) -> Quantity:
         """
@@ -380,6 +389,7 @@ class KlimontovichKraeftPotential(HNCPotential):
     allowed_keys = [
         "electron-ion Potential",
     ]
+    __name__ = "KlimontovichKraeftPotential"
 
     @jax.jit
     def full_r(self, plasma_state, r):
@@ -427,6 +437,8 @@ class DeutschPotential(HNCPotential):
 
     """
 
+    __name__ = "DeutschPotential"
+
     @jax.jit
     def full_r(self, plasma_state, r):
         _r = r[jnp.newaxis, jnp.newaxis, :]
@@ -458,6 +470,7 @@ class EmptyCorePotential(HNCPotential):
     allowed_keys = [
         "electron-ion Potential",
     ]
+    __name__ = "EmptyCorePotential"
 
     def __init__(
         self,
@@ -537,6 +550,7 @@ class SoftCorePotential(HNCPotential):
     allowed_keys = [
         "electron-ion Potential",
     ]
+    __name__ = "SoftCorePotential"
 
     def __init__(
         self,
@@ -560,7 +574,10 @@ class SoftCorePotential(HNCPotential):
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
         exp_part = 1 - jpu.numpy.exp(
-            -((_r / self.r_cut(plasma_state)).m_as(ureg.dimensionless) ** self.beta)
+            -(
+                (_r / self.r_cut(plasma_state)).m_as(ureg.dimensionless)
+                ** self.beta
+            )
         )
         return (
             self.q2(plasma_state)
@@ -583,7 +600,9 @@ class SoftCorePotential(HNCPotential):
         # not used, acutally, it is easier to Fourier transform.
         exp_part = jpu.numpy.exp(
             -(
-                (self._transform_r / self.r_cut(plasma_state)).m_as(ureg.dimensionless)
+                (self._transform_r / self.r_cut(plasma_state)).m_as(
+                    ureg.dimensionless
+                )
                 ** self.beta
             )
         )

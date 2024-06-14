@@ -501,13 +501,13 @@ class LinearResponseHNCIonFeat(Model):
         # ----------------------
 
         # Populate the potential with a full ion potential, for starters
-        V_s_r = plasma_state["ion-ion Potential"].short_r(self.r)
-        V_l_k = plasma_state["ion-ion Potential"].long_k(self.k)
+        V_s_r = plasma_state["ion-ion Potential"].short_r(plasma_state, self.r)
+        V_l_k = plasma_state["ion-ion Potential"].long_k(plasma_state, self.k)
 
         # Calculate g_ab in the HNC Approach
         # ----------------------------------
         T = plasma_state["ion-ion Potential"].T(plasma_state)
-        n = plasma_state.n_i(plasma_state)
+        n = plasma_state.n_i
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
             V_s_r, V_l_k, self.r, T, n
         )
@@ -527,7 +527,9 @@ class LinearResponseHNCIonFeat(Model):
         # Use the Debye screening length for the screening cloud.
         kappa = 1 / plasma_state.DH_screening_length
         xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa)
-        Vei = plasma_state["electron-ion Potential"].full_k(setup.k)
+        Vei = plasma_state["electron-ion Potential"].full_k(
+            plasma_state, setup.k
+        )
         q = xi * Vei[-1, :]
 
         # The W_R is calculated as a sum over all combinations of a_b
@@ -542,14 +544,20 @@ class LinearResponseHNCIonFeat(Model):
 
         # Add the contributions from all pairs
         w_R = 0
+
+        def add_wrt(a, b):
+            return (
+                jnpu.sqrt(x[a] * x[b])
+                * (fi[a] + q[a])
+                * (fi[b] + q[b])
+                * S_ab[a, b]
+            ).m_as(ureg.dimensionless)
+
+        def dont_add_wrt(a, b):
+            return jnp.array([0.0])
+
         for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
-            if a <= b:
-                w_R += (
-                    jnpu.sqrt(x[a] * x[b])
-                    * (fi[a] + q[a])
-                    * (fi[b] + q[b])
-                    * S_ab[a, b]
-                )
+            w_R += jax.lax.cond(a <= b, add_wrt, dont_add_wrt, a, b)
         # Scale the instrument function directly with w_R
         res = w_R * setup.instrument(
             (setup.measured_energy - setup.energy) / ureg.hbar
@@ -561,7 +569,6 @@ class LinearResponseHNCIonFeat(Model):
         children = (self.r_min, self.r_max)
         aux_data = (
             self.model_key,
-            self.sample_points,
             self.pot,
         )  # static values
         return (children, aux_data)
@@ -569,7 +576,7 @@ class LinearResponseHNCIonFeat(Model):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.pot = aux_data
+        obj.model_key, obj.pot = aux_data
         obj.r_min, obj.r_max = children
 
         return obj
@@ -661,44 +668,48 @@ class ThreePotentialHNCIonFeat(Model):
         # Populate the potential with a full ion potential, for starters
         V_s_r = (
             plasma_state["ion-ion Potential"]
-            .short_r(self.r)
+            .short_r(plasma_state, self.r)
             .m_as(ureg.electron_volt)
         )
         # Replace the last line and column with the electron-ion potential
         V_s_r = V_s_r.at[-1, :, :].set(
             plasma_state["electron-ion Potential"]
-            .short_r(self.r)
+            .short_r(plasma_state, self.r)
             .m_as(ureg.electron_volt)[-1, :, :]
         )
         V_s_r = V_s_r.at[:, -1, :].set(
             plasma_state["electron-ion Potential"]
-            .short_r(self.r)
+            .short_r(plasma_state, self.r)
             .m_as(ureg.electron_volt)[:, -1, :]
         )
         # Add the electron-electron Potential
         V_s_r = V_s_r.at[-1, -1, :].set(
             plasma_state["electron-electron Potential"]
-            .short_r(self.r)
+            .short_r(plasma_state, self.r)
             .m_as(ureg.electron_volt)[-1, -1, :]
         )
         V_s_r *= ureg.electron_volt
 
         # Repeat this for the long-range part of the potential in k space.
         unit = ureg.electron_volt * ureg.angstrom**3
-        V_l_k = plasma_state["ion-ion Potential"].long_k(self.k).m_as(unit)
+        V_l_k = (
+            plasma_state["ion-ion Potential"]
+            .long_k(plasma_state, self.k)
+            .m_as(unit)
+        )
         V_l_k = V_l_k.at[-1, :, :].set(
             plasma_state["electron-ion Potential"]
-            .long_k(self.k)
+            .long_k(plasma_state, self.k)
             .m_as(unit)[-1, :, :]
         )
         V_l_k = V_l_k.at[:, -1, :].set(
             plasma_state["electron-ion Potential"]
-            .long_k(self.k)
+            .long_k(plasma_state, self.k)
             .m_as(unit)[:, -1, :]
         )
         V_l_k = V_l_k.at[-1, -1, :].set(
             plasma_state["electron-electron Potential"]
-            .long_k(self.k)
+            .long_k(plasma_state, self.k)
             .m_as(unit)[-1, -1, :]
         )
         V_l_k *= unit
@@ -706,7 +717,7 @@ class ThreePotentialHNCIonFeat(Model):
         # Calculate g_ab in the HNC Approach
         # ----------------------------------
         T = plasma_state["ion-ion Potential"].T(plasma_state)
-        n = plasma_state.n_i(plasma_state)
+        n = to_array([*plasma_state.n_i, plasma_state.n_e])
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
             V_s_r, V_l_k, self.r, T, n
         )
@@ -739,14 +750,20 @@ class ThreePotentialHNCIonFeat(Model):
 
         # Add the contributions from all pairs
         w_R = 0
+
+        def add_wrt(a, b):
+            return (
+                jnpu.sqrt(x[a] * x[b])
+                * (fi[a] + q[a])
+                * (fi[b] + q[b])
+                * S_ab[a, b]
+            ).m_as(ureg.dimensionless)
+
+        def dont_add_wrt(a, b):
+            return jnp.array([0.0])
+
         for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
-            if a <= b:
-                w_R += (
-                    jnpu.sqrt(x[a] * x[b])
-                    * (fi[a] + q[a])
-                    * (fi[b] + q[b])
-                    * S_ab[a, b]
-                )
+            w_R += jax.lax.cond(a <= b, add_wrt, dont_add_wrt, a, b)
         # Scale the instrument function directly with w_R
         res = w_R * setup.instrument(
             (setup.measured_energy - setup.energy) / ureg.hbar
@@ -758,7 +775,6 @@ class ThreePotentialHNCIonFeat(Model):
         children = (self.r_min, self.r_max)
         aux_data = (
             self.model_key,
-            self.sample_points,
             self.pot,
         )  # static values
         return (children, aux_data)
@@ -766,7 +782,7 @@ class ThreePotentialHNCIonFeat(Model):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.pot = aux_data
+        obj.model_key, obj.pot = aux_data
         obj.r_min, obj.r_max = children
 
         return obj

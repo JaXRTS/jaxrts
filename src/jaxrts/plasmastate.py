@@ -35,7 +35,6 @@ class PlasmaState:
             ), "WARNING: Input parameters should be the same shape as <ions>!"
 
         self.ions = ions
-        self.nions = len(ions)
 
         # Define charge configuration
         self.Z_free = to_array(Z_free)
@@ -120,6 +119,10 @@ class PlasmaState:
         The atomic number of the atom-species.
         """
         return jnp.array([i.Z for i in self.ions])
+
+    @property
+    def nions(self) -> int:
+        return len(self.ions)
 
     @property
     def Z_core(self) -> jnp.ndarray:
