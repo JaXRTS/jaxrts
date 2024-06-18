@@ -9,6 +9,7 @@ import jax
 from jax import jit
 import jax.numpy as jnp
 import jpu.numpy as jnpu
+from jax.scipy.special import factorial
 import numpy as onp
 
 import logging
@@ -26,25 +27,52 @@ def _xi(n: int, Zeff: Quantity, omega: Quantity, k: Quantity):
     return (n * q) / (Zeff * ureg.alpha)
 
 
-def _J10_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
-    xi = _xi(1, Zeff, omega, k)
-    return 8 / (3 * jnp.pi * Zeff * ureg.alpha * (1 + xi**2) ** 3)
+def _y(n: int, Zeff: Quantity, omega: Quantity, k: Quantity):
+    """
+    This is the argument to the phi in Eqn (28) of :cite:`Schumacher.1975`.
+    """
+    return 1 + (_xi(n, Zeff, omega, k)) ** 2
 
 
-def _J20_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
-    xi = _xi(2, Zeff, omega, k)
-    return (64 / (jnp.pi * Zeff * ureg.alpha)) * (
-        (1 / (3 * (1 + xi**2) ** 3))
-        - (1 / (1 + xi**2) ** 4)
-        + (4 / (5 * (1 + xi**2) ** 5))
+def _pref_Schumacher_1975(n: int, l: int, Zeff: Quantity) -> Quantity:
+    """
+    This is the prefactor in Eqn (28) of :cite:`Schumacher.1975`.
+    """
+    return (
+        (2 ** (4 * l + 3) / (jnp.pi))
+        * (factorial(n - l - 1) / factorial(n + l))
+        * ((n**2 * factorial(l) ** 2) / (Zeff * ureg.alpha))
     )
 
 
-def _J21_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
-    xi = _xi(2, Zeff, omega, k)
-    return (64 / (15 * jnp.pi * Zeff * ureg.alpha)) * (
-        (1 + 5 * xi**2) / (1 + xi**2) ** 5
-    )
+def _J10_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(1, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(1, 0, Zeff)
+    phi = 1 / (3 * y**2)
+    return pref * phi
+
+
+def _J20_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(2, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(2, 0, Zeff)
+    phi = 4 * (1 / (3 * y**3) - 1 / y**4 + 4 / (5 * y**5))
+    return pref * phi
+
+
+def _J21_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(2, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(2, 1, Zeff)
+    phi = 1 / (4 * y**4) - 1 / (5 * y**5)
+    return pref * phi
 
 
 def _J10_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
@@ -52,9 +80,9 @@ def _J10_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     :cite:`Gregori.2004`, eqn (16)
     """
     xi = _xi(1, Zeff, omega, k)
-    J10BM = _J10_BM(omega, k, Zeff)
+    J10Schum75 = _J10_Schum75(omega, k, Zeff)
     return (
-        J10BM
+        J10Schum75
         * (Zeff * ureg.alpha / (k * ureg.a_0))
         * (3 / 2 * xi - 2 * jnpu.arctan(xi))
     )
@@ -65,9 +93,9 @@ def _J20_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     :cite:`Gregori.2004`, eqn (17)
     """
     xi = _xi(2, Zeff, omega, k)
-    J20BM = _J20_BM(omega, k, Zeff)
+    J20Schum75 = _J20_Schum75(omega, k, Zeff)
     return (
-        J20BM
+        J20Schum75
         * (Zeff * ureg.alpha / (k * ureg.a_0))
         * (
             5 * xi * (1 + 3 * xi**4) / (1 - 2.5 * xi**2 + 2.5 * xi**4) / 8
@@ -81,9 +109,9 @@ def _J21_HR(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     :cite:`Gregori.2004`, eqn (18)
     """
     xi = _xi(2, Zeff, omega, k)
-    J21BM = _J21_BM(omega, k, Zeff)
+    J21Schum75 = _J21_Schum75(omega, k, Zeff)
     return (
-        J21BM
+        J21Schum75
         * (Zeff * ureg.alpha / (k * ureg.a_0))
         * (
             (1 / 3) * ((10 + 15 * xi**2) / (1 + 5 * xi**2)) * xi
@@ -128,8 +156,8 @@ def bm_bound_wavefunction(
         bound-free structure factor (without the correction for elastic
         scattering which reduces the contribution [James.1962]).
     """
-    # Find the correct _Jxx_BM function and execute it
-    Jxx0 = globals()["_J{:1d}{:1d}_BM".format(n, l)](omega, k, Zeff)
+    # Find the correct _Jxx_Schum75 function and execute it
+    Jxx0 = globals()["_J{:1d}{:1d}_Schum75".format(n, l)](omega, k, Zeff)
     if HR_Correction:
         Jxx1 = globals()["_J{:1d}{:1d}_HR".format(n, l)](omega, k, Zeff)
         return Jxx0 + Jxx1
@@ -137,21 +165,35 @@ def bm_bound_wavefunction(
 
 
 @jit
-def all_J_BM(
+def all_J_Schum75(
     omega: Quantity, k: Quantity, Zeff: Quantity | jnp.ndarray
 ) -> Quantity:
     return jnp.array(
         [
-            _J10_BM(omega, k, Zeff[0, :]).m_as(ureg.dimensionless),
-            _J20_BM(omega, k, Zeff[1, :]).m_as(ureg.dimensionless),
-            _J21_BM(omega, k, Zeff[2, :]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J30_BM(omega, k, Zeff[3]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J31_BM(omega, k, Zeff[4]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J32_BM(omega, k, Zeff[5]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J40_BM(omega, k, Zeff[6]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J41_BM(omega, k, Zeff[7]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J42_BM(omega, k, Zeff[8]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J43_BM(omega, k, Zeff[9]).m_as(ureg.dimensionless),
+            _J10_Schum75(omega, k, Zeff[0, :]).m_as(ureg.dimensionless),
+            _J20_Schum75(omega, k, Zeff[1, :]).m_as(ureg.dimensionless),
+            _J21_Schum75(omega, k, Zeff[2, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J30_Schum75(omega, k, Zeff[3]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J31_Schum75(omega, k, Zeff[4]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J32_Schum75(omega, k, Zeff[5]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J40_Schum75(omega, k, Zeff[6]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J41_Schum75(omega, k, Zeff[7]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J42_Schum75(omega, k, Zeff[8]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J43_Schum75(omega, k, Zeff[9]).m_as(ureg.dimensionless),
         ]
     )
 
@@ -165,13 +207,27 @@ def all_J_HR(
             _J10_HR(omega, k, Zeff[0, :]).m_as(ureg.dimensionless),
             _J20_HR(omega, k, Zeff[1, :]).m_as(ureg.dimensionless),
             _J21_HR(omega, k, Zeff[2, :]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J30_HR(omega, k, Zeff[3, :]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J31_HR(omega, k, Zeff[4, :]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J32_HR(omega, k, Zeff[5, :]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J40_HR(omega, k, Zeff[6, :]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J41_HR(omega, k, Zeff[7, :]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J42_HR(omega, k, Zeff[8, :]).m_as(ureg.dimensionless),
-            jnp.zeros_like(omega),  # _J43_HR(omega, k, Zeff[9, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J30_HR(omega, k, Zeff[3, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J31_HR(omega, k, Zeff[4, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J32_HR(omega, k, Zeff[5, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J40_HR(omega, k, Zeff[6, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J41_HR(omega, k, Zeff[7, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J42_HR(omega, k, Zeff[8, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J43_HR(omega, k, Zeff[9, :]).m_as(ureg.dimensionless),
         ]
     )
 
@@ -186,11 +242,12 @@ def J_impulse_approx(
 
     intensity = (
         pop[:, jnp.newaxis]
-        * (all_J_BM(omega, k, Zeff[:, jnp.newaxis]) + all_J_HR(omega, k, Zeff[:, jnp.newaxis]))
+        * (
+            all_J_Schum75(omega, k, Zeff[:, jnp.newaxis])
+            + all_J_HR(omega, k, Zeff[:, jnp.newaxis])
+        )
         * jnp.heaviside(
-            (omega * ureg.hbar - E_b[:, jnp.newaxis]).m_as(
-                ureg.electron_volt
-            ),
+            (omega * ureg.hbar - E_b[:, jnp.newaxis]).m_as(ureg.electron_volt),
             0.5,
         )
     ) / (1 * ureg.c * k)
