@@ -257,7 +257,7 @@ class PlasmaState:
                         (1 * ureg.planck_constant)
                         / jpu.numpy.sqrt(
                             2.0
-                            * np.pi
+                            * jnp.pi
                             * 1
                             * ureg.electron_mass
                             * 1
@@ -272,7 +272,7 @@ class PlasmaState:
                         (1 * ureg.planck_constant)
                         / jpu.numpy.sqrt(
                             2.0
-                            * np.pi
+                            * jnp.pi
                             * 1
                             * self.atomic_masses[
                                 np.argwhere(np.array(self.ions == par))
