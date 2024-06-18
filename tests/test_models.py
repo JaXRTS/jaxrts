@@ -37,7 +37,7 @@ def test_NeglectModel():
     assert jnp.all(res1 == 0)
     assert jnp.all(res2 == 0)
     assert res1.shape == test_setup.measured_energy.shape
-    assert res2.shape == test_state.ions[0].binding_energies.shape
+    assert res2.shape == ()
 
 
 def test_KeyError_on_not_allowed_model_key():
