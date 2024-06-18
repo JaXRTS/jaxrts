@@ -1042,6 +1042,9 @@ class SchumacherImpulse(ScatteringModel):
         E_b = plasma_state.ions[0].binding_energies + plasma_state.models[
             "ipd"
         ].evaluate(plasma_state, None)
+        E_b = jnpu.where(
+            E_b < 0 * ureg.electron_volt, 0 * ureg.electron_volt, E_b
+        )
 
         Zeff = form_factors.pauling_effective_charge(plasma_state.ions[0].Z)
         population = electron_distribution_ionized_state(Z_c)
@@ -1177,6 +1180,7 @@ class BohmStaver(Model):
 
 # Ionization Potential Depression Models
 # ======================================
+
 
 class ConstantIPD(Model):
     """
