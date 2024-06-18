@@ -9,7 +9,7 @@ from jax import numpy as jnp
 import jpu.numpy as jnpu
 
 from .helpers import orbital_array, invert_dict
-from .units import ureg, Quantity
+from .units import ureg, Quantity, to_array
 
 _element_symbols = {
     1: "H",  # Hydrogen
@@ -494,8 +494,9 @@ def electron_distribution_ionized_state(Z_core: float) -> jnp.ndarray:
     S3d = jnpu.interp(Z_core, jnp.array([18, 28]), jnp.array([0, 10]))
     S4s = jnpu.interp(Z_core, jnp.array([28, 30]), jnp.array([0, 2]))
     S4p = jnpu.interp(Z_core, jnp.array([30, 36]), jnp.array([0, 6]))
-    S4d = 0
-    S4f = 0
+    # Note: the lines below are wrong, but we are only interested in Z<37
+    S4d = jnpu.interp(Z_core, jnp.array([0, 99]), jnp.array([0, 0]))
+    S4f = jnpu.interp(Z_core, jnp.array([0, 99]), jnp.array([0, 0]))
     return jnp.array(
         [
             S1s,
@@ -552,7 +553,6 @@ class Element:
         ) * (1 * ureg.electron_volt)
 
         self.atomic_radius_calc = _atomic_radii_calc[self.Z] * ureg.picometer
-
 
     def __eq__(self, other: Any) -> bool:
         """
