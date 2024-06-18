@@ -478,11 +478,8 @@ class LinearResponseHNCIonFeat(Model):
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
         )
-        for key in [
-            "ion-ion Potential",
-            "electron-ion Potential",
-        ]:
-            plasma_state[key].include_electrons = False
+        plasma_state["ion-ion Potential"].include_electrons = False
+        plasma_state["electron-ion Potential"].include_electrons = True
 
     @property
     def r(self):
@@ -530,7 +527,7 @@ class LinearResponseHNCIonFeat(Model):
         Vei = plasma_state["electron-ion Potential"].full_k(
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
-        q = xi * Vei[-1, :]
+        q = xi * Vei[-1, :-1]
 
         # The W_R is calculated as a sum over all combinations of a_b
         ion_spec1, ion_spec2 = jnp.meshgrid(
