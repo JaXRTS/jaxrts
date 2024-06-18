@@ -34,6 +34,36 @@ def _y(n: int, Zeff: Quantity, omega: Quantity, k: Quantity):
     return 1 + (_xi(n, Zeff, omega, k)) ** 2
 
 
+def _J10_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Bloch.1975`
+    """
+    xi = _xi(1, Zeff, omega, k)
+    return 8 / (3 * jnp.pi * Zeff * ureg.alpha * (1 + xi**2) ** 3)
+
+
+def _J20_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Bloch.1975`
+    """
+    xi = _xi(2, Zeff, omega, k)
+    return (64 / (jnp.pi * Zeff * ureg.alpha)) * (
+        (1 / (3 * (1 + xi**2) ** 3))
+        - (1 / (1 + xi**2) ** 4)
+        + (4 / (5 * (1 + xi**2) ** 5))
+    )
+
+
+def _J21_BM(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Bloch.1975`
+    """
+    xi = _xi(2, Zeff, omega, k)
+    return (64 / (15 * jnp.pi * Zeff * ureg.alpha)) * (
+        (1 + 5 * xi**2) / (1 + xi**2) ** 5
+    )
+
+
 def _pref_Schumacher_1975(n: int, l: int, Zeff: Quantity) -> Quantity:
     """
     This is the prefactor in Eqn (28) of :cite:`Schumacher.1975`.
@@ -51,7 +81,8 @@ def _J10_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
     y = _y(1, Zeff, omega, k)
     pref = _pref_Schumacher_1975(1, 0, Zeff)
-    phi = 1 / (3 * y**2)
+    # Note: Schumacher goes with y**2!
+    phi = 1 / (3 * y**3)
     return pref * phi
 
 
@@ -163,6 +194,39 @@ def bm_bound_wavefunction(
         return Jxx0 + Jxx1
     return Jxx0
 
+@jit
+def all_J_BM(
+    omega: Quantity, k: Quantity, Zeff: Quantity | jnp.ndarray
+) -> Quantity:
+    return jnp.array(
+        [
+            _J10_BM(omega, k, Zeff[0, :]).m_as(ureg.dimensionless),
+            _J20_BM(omega, k, Zeff[1, :]).m_as(ureg.dimensionless),
+            _J21_BM(omega, k, Zeff[2, :]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J30_Schum75(omega, k, Zeff[3]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J31_Schum75(omega, k, Zeff[4]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J32_Schum75(omega, k, Zeff[5]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J40_Schum75(omega, k, Zeff[6]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J41_Schum75(omega, k, Zeff[7]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J42_Schum75(omega, k, Zeff[8]).m_as(ureg.dimensionless),
+            jnp.zeros_like(
+                omega
+            ),  # _J43_Schum75(omega, k, Zeff[9]).m_as(ureg.dimensionless),
+        ]
+    )
+
 
 @jit
 def all_J_Schum75(
@@ -215,7 +279,7 @@ def all_J_HR(
             ),  # _J31_HR(omega, k, Zeff[4, :]).m_as(ureg.dimensionless),
             jnp.zeros_like(
                 omega
-            ),  # _J32_HR(omega, k, Zeff[5, :]).m_as(ureg.dimensionless),
+            ),  # _J31_HR(omega, k, Zeff[5, :]).m_as(ureg.dimensionless),
             jnp.zeros_like(
                 omega
             ),  # _J40_HR(omega, k, Zeff[6, :]).m_as(ureg.dimensionless),
@@ -230,6 +294,51 @@ def all_J_HR(
             ),  # _J43_HR(omega, k, Zeff[9, :]).m_as(ureg.dimensionless),
         ]
     )
+
+
+def J_BM_HR_approx(
+    omega: Quantity,
+    k: Quantity,
+    pop: jnp.ndarray,
+    Zeff: jnp.ndarray,
+    E_b: Quantity,
+) -> Quantity:
+
+    intensity = (
+        pop[:, jnp.newaxis]
+        * (
+            all_J_BM(omega, k, Zeff[:, jnp.newaxis])
+            + all_J_HR(omega, k, Zeff[:, jnp.newaxis])
+        )
+        * jnp.heaviside(
+            (omega[jnp.newaxis, :] * ureg.hbar - E_b[:, jnp.newaxis]).m_as(
+                ureg.electron_volt
+            ),
+            0.5,
+        )
+    ) / (1 * ureg.c * k)
+    return jnpu.sum(intensity, axis=0)
+
+
+def J_BM_approx(
+    omega: Quantity,
+    k: Quantity,
+    pop: jnp.ndarray,
+    Zeff: jnp.ndarray,
+    E_b: Quantity,
+) -> Quantity:
+
+    intensity = (
+        pop[:, jnp.newaxis]
+        * (all_J_BM(omega, k, Zeff[:, jnp.newaxis]))
+        * jnp.heaviside(
+            (omega[jnp.newaxis, :] * ureg.hbar - E_b[:, jnp.newaxis]).m_as(
+                ureg.electron_volt
+            ),
+            0.5,
+        )
+    ) / (1 * ureg.c * k)
+    return jnpu.sum(intensity, axis=0)
 
 
 def J_impulse_approx(
@@ -247,10 +356,11 @@ def J_impulse_approx(
             + all_J_HR(omega, k, Zeff[:, jnp.newaxis])
         )
         * jnp.heaviside(
-            (omega * ureg.hbar - E_b[:, jnp.newaxis]).m_as(ureg.electron_volt),
+            (omega[jnp.newaxis, :] * ureg.hbar - E_b[:, jnp.newaxis]).m_as(
+                ureg.electron_volt
+            ),
             0.5,
         )
     ) / (1 * ureg.c * k)
-    # Doublecheck this unit
 
     return jnpu.sum(intensity, axis=0)
