@@ -9,11 +9,7 @@ from functools import partial
 from scipy.interpolate import InterpolatedUnivariateSpline as spline    # Spline
 import scipy
 import matplotlib.pyplot as plt         
-import sys
 
-sys.path.append(
-    "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
-)
 from jax import numpy as jnp
 import jaxrts
 import jpu

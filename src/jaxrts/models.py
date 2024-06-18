@@ -23,6 +23,7 @@ from . import (
     ion_feature,
     plasma_physics,
     static_structure_factors,
+    ipd,
 )
 
 logger = logging.getLogger(__name__)
@@ -204,7 +205,7 @@ class Neglect(Model):
         if self.model_key in scattering_models:
             return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
         elif self.model_key == "ipd":
-            return jnp.zeros(10) * (1 * ureg.electron_volt)
+            return 0.0 * (1 * ureg.electron_volt)
 
 
 # ion-feature
@@ -1038,7 +1039,9 @@ class SchumacherImpulse(ScatteringModel):
         omega_0 = setup.energy / ureg.hbar
         omega = omega_0 - setup.measured_energy / ureg.hbar
         Z_c = plasma_state.Z_core[0]
-        E_b = plasma_state.ions[0].binding_energies
+        E_b = plasma_state.ions[0].binding_energies + plasma_state.models[
+            "ipd"
+        ].evaluate(plasma_state, None)
 
         Zeff = form_factors.pauling_effective_charge(plasma_state.ions[0].Z)
         population = electron_distribution_ionized_state(Z_c)
@@ -1144,9 +1147,36 @@ class GregoriChemPotential(Model):
         )
 
 
-# IPD Models
-# ==========
+# Debye Temperature Models
+# ========================
 
+
+class BohmStaver(Model):
+    """
+    The Bohm-Staver relation for the Debye temperature, valid for 'simple
+    metals', as it is presented in Eqn (3) of :cite:`Gregori.2006`.
+
+    See Also
+    --------
+    jaxrts.static_structure_factors.T_Debye_Bohm_Staver
+        The function used for calculating the Debye temperature.
+    """
+
+    allowed_keys = ["Debye temperature"]
+    __name__ = "BohmStaver"
+
+    @jax.jit
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
+        return static_structure_factors.T_Debye_Bohm_Staver(
+            plasma_state.T_e,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
+        )
+
+
+# Ionization Potential Depression Models
+# ======================================
 
 class ConstantIPD(Model):
     """
@@ -1180,31 +1210,79 @@ class ConstantIPD(Model):
         return obj
 
 
-# Debye Temperature Models
-# ========================
+class DebyeHueckelIPD(Model):
 
-
-class BohmStaver(Model):
-    """
-    The Bohm-Staver relation for the Debye temperature, valid for 'simple
-    metals', as it is presented in Eqn (3) of :cite:`Gregori.2006`.
-
-    See Also
-    --------
-    jaxrts.static_structure_factors.T_Debye_Bohm_Staver
-        The function used for calculating the Debye temperature.
-    """
-
-    allowed_keys = ["Debye temperature"]
-    __name__ = "BohmStaver"
+    allowed_keys = ["ipd"]
+    __name__ = "DebyeHueckel"
 
     @jax.jit
-    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
-        return static_structure_factors.T_Debye_Bohm_Staver(
-            plasma_state.T_e,
-            plasma_state.n_e,
-            plasma_state.atomic_masses,
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> Quantity:
+        return ipd.ipd_debye_hueckel(
             plasma_state.Z_free,
+            plasma_state.n_e,
+            plasma_state.n_i,
+            plasma_state.T_e,
+            plasma_state.T_i,
+        )
+
+
+class StewartPyattIPD(Model):
+
+    allowed_keys = ["ipd"]
+    __name__ = "StewartPyatt"
+
+    @jax.jit
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> Quantity:
+        return ipd.ipd_stewart_pyatt(
+            plasma_state.Z_free,
+            plasma_state.n_e,
+            plasma_state.n_i,
+            plasma_state.T_e,
+            plasma_state.T_i,
+        )
+
+
+class IonSphereIPD(Model):
+
+    allowed_keys = ["ipd"]
+    __name__ = "IonSphere"
+
+    @jax.jit
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> Quantity:
+        return ipd.ipd_ion_sphere(
+            plasma_state.Z_free, plasma_state.n_e, plasma_state.n_i
+        )
+
+
+class EckerKroellIPD(Model):
+
+    allowed_keys = ["ipd"]
+    __name__ = "EckerKroell"
+
+    @jax.jit
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> Quantity:
+        return ipd.ipd_ecker_kroell(
+            plasma_state.Z_free,
+            plasma_state.n_e,
+            plasma_state.n_i,
+            plasma_state.T_e,
+            plasma_state.T_i,
+        )
+
+
+class PauliBlockingIPD(Model):
+
+    allowed_keys = ["ipd"]
+    __name__ = "PauliBlocking"
+
+    @jax.jit
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> Quantity:
+        return ipd.ipd_pauli_blocking(
+            plasma_state.Z_free,
+            plasma_state.n_e,
+            plasma_state.n_i,
+            plasma_state.T_e,
+            plasma_state.T_i,
         )
 
 
@@ -1227,6 +1305,11 @@ _all_models = [
     ScatteringModel,
     SchumacherImpulse,
     ThreePotentialHNCIonFeat,
+    DebyeHueckelIPD,
+    StewartPyattIPD,
+    IonSphereIPD,
+    EckerKroellIPD,
+    PauliBlockingIPD,
 ]
 
 for model in _all_models:
