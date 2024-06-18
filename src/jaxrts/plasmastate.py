@@ -296,6 +296,14 @@ class PlasmaState:
 
         return ionic + free_free + bound_free + free_bound
 
+    def evaluate(self, key: str, setup: Setup) -> Quantity:
+        """
+        This is just a to avoid the redundancy when one wants to evaluate a
+        specific model and would otherwise need to provide the state, again.
+        """
+        return self[key].evaluate(self, setup)
+
+
     # The following is required to jit a state
     def _tree_flatten(self):
         children = (
