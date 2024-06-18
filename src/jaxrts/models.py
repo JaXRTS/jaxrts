@@ -1147,9 +1147,36 @@ class GregoriChemPotential(Model):
         )
 
 
-# IPD Models
-# ==========
+# Debye Temperature Models
+# ========================
 
+
+class BohmStaver(Model):
+    """
+    The Bohm-Staver relation for the Debye temperature, valid for 'simple
+    metals', as it is presented in Eqn (3) of :cite:`Gregori.2006`.
+
+    See Also
+    --------
+    jaxrts.static_structure_factors.T_Debye_Bohm_Staver
+        The function used for calculating the Debye temperature.
+    """
+
+    allowed_keys = ["Debye temperature"]
+    __name__ = "BohmStaver"
+
+    @jax.jit
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
+        return static_structure_factors.T_Debye_Bohm_Staver(
+            plasma_state.T_e,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
+        )
+
+
+# Ionization Potential Depression Models
+# ======================================
 
 class ConstantIPD(Model):
     """
@@ -1181,38 +1208,6 @@ class ConstantIPD(Model):
         (obj.value,) = children
 
         return obj
-
-
-# Debye Temperature Models
-# ========================
-
-
-class BohmStaver(Model):
-    """
-    The Bohm-Staver relation for the Debye temperature, valid for 'simple
-    metals', as it is presented in Eqn (3) of :cite:`Gregori.2006`.
-
-    See Also
-    --------
-    jaxrts.static_structure_factors.T_Debye_Bohm_Staver
-        The function used for calculating the Debye temperature.
-    """
-
-    allowed_keys = ["Debye temperature"]
-    __name__ = "BohmStaver"
-
-    @jax.jit
-    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
-        return static_structure_factors.T_Debye_Bohm_Staver(
-            plasma_state.T_e,
-            plasma_state.n_e,
-            plasma_state.atomic_masses,
-            plasma_state.Z_free,
-        )
-
-
-# Ionization Potential Depression Models
-# ========================
 
 
 class DebyeHueckelIPD(Model):
