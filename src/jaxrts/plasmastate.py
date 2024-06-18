@@ -8,6 +8,7 @@ from jax import numpy as jnp
 
 from .elements import Element
 from .units import ureg, Quantity, to_array
+from .ipd import inverse_screening_length_e
 from .helpers import JittableDict
 from .setup import Setup
 from . import plasma_physics
@@ -182,9 +183,13 @@ class PlasmaState:
         jaxrts.plasma_physics.Debye_Huckel_screening_length
             The function used to calculate the screening length
         """
-        T = plasma_physics.temperature_interpolation(self.n_e, self.T_e, 4)
-        lam_DH = plasma_physics.Debye_Huckel_screening_length(self.n_e, T)
-        return lam_DH.to(ureg.angstrom)
+        ilam = inverse_screening_length_e(
+            jpu.numpy.mean(self.Z_free * self.n_i) / jpu.numpy.mean(self.n_i)
+            * (1 * ureg.elementary_charge),
+            self.n_e,
+            self.T_e,
+        )
+        return (1 / ilam[0]).to(ureg.angstrom)
 
     def _lookup_ion_core_radius(self):
         ioc = [e.atomic_radius_calc for e in self.ions]
