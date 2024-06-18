@@ -79,7 +79,7 @@ state.mass_density = (
     * element.atomic_mass
     / state.Z_free[0]
 )
-state.probe(setup).m_as(ureg.second),
+state.probe(setup).m_as(ureg.second)
 
 for Z, ne, T in [(2, 0.5e23, 1), (2, 1e23, 1), (2, 5e23, 1)]:
     set_state(state, Z, ne, T)

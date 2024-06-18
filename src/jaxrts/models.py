@@ -528,7 +528,7 @@ class LinearResponseHNCIonFeat(Model):
         kappa = 1 / plasma_state.DH_screening_length
         xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa)
         Vei = plasma_state["electron-ion Potential"].full_k(
-            plasma_state, setup.k
+            plasma_state, to_array(setup.k)[jnp.newaxis]
         )
         q = xi * Vei[-1, :]
 
@@ -1147,6 +1147,42 @@ class GregoriChemPotential(Model):
         )
 
 
+# IPD Models
+# ==========
+
+
+class ConstantIPD(Model):
+    """
+    A model that returns an empty with zeros in (units of seconds) for every
+    energy probed.
+    """
+
+    allowed_keys = ["ipd"]
+    __name__ = "ConstantIPD"
+
+    def __init__(self, value):
+        self.value = value
+        super().__init__()
+
+    @jax.jit
+    def evaluate(self, plasma_state: PlasmaState, setup: Setup) -> jnp.ndarray:
+        return self.value
+
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.value,)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj.value,) = children
+
+        return obj
+
+
 # Debye Temperature Models
 # ========================
 
@@ -1180,6 +1216,7 @@ _all_models = [
     BohmStaver,
     BornMermin,
     BornMermin_ChapmanInterp,
+    ConstantIPD,
     DetailedBalance,
     Gregori2003IonFeat,
     Gregori2006IonFeat,
