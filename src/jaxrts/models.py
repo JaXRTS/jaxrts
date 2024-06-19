@@ -1017,6 +1017,9 @@ class SchumacherImpulse(ScatteringModel):
 
     Requires a 'form-factors' model (defaults to
     :py:class:`~PaulingFormFactors`).
+
+    Requires an 'ipd' model (defaults to
+    :py:class:`~Neglect`).
     """
 
     allowed_keys = ["bound-free scattering"]
@@ -1024,6 +1027,7 @@ class SchumacherImpulse(ScatteringModel):
 
     def prepare(self, plasma_state: PlasmaState) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model("ipd", Neglect())
 
     def check(self, plasma_state: PlasmaState) -> None:
         if len(plasma_state) > 1:
