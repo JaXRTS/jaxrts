@@ -75,6 +75,27 @@ def _pref_Schumacher_1975(n: int, l: int, Zeff: Quantity) -> Quantity:
     )
 
 
+def _phi10_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return 1 / (3 * y**3)
+
+
+def _phi20_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return 4 * (1 / (3 * y**3) - 1 / y**4 + 4 / (5 * y**5))
+
+
+def _phi21_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return 1 / (4 * y**4) - 1 / (5 * y**5)
+
+
 def _J10_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
     See :cite:`Schumacher.1975`.
@@ -82,7 +103,7 @@ def _J10_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     y = _y(1, Zeff, omega, k)
     pref = _pref_Schumacher_1975(1, 0, Zeff)
     # Note: Schumacher goes with y**2!
-    phi = 1 / (3 * y**3)
+    phi = _phi10_Schum75(y)
     return pref * phi
 
 
@@ -92,7 +113,7 @@ def _J20_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
     y = _y(2, Zeff, omega, k)
     pref = _pref_Schumacher_1975(2, 0, Zeff)
-    phi = 4 * (1 / (3 * y**3) - 1 / y**4 + 4 / (5 * y**5))
+    phi = _phi20_Schum75(y)
     return pref * phi
 
 
@@ -102,7 +123,7 @@ def _J21_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
     y = _y(2, Zeff, omega, k)
     pref = _pref_Schumacher_1975(2, 1, Zeff)
-    phi = 1 / (4 * y**4) - 1 / (5 * y**5)
+    phi = _phi21_Schum75(y)
     return pref * phi
 
 
@@ -187,12 +208,13 @@ def bm_bound_wavefunction(
         bound-free structure factor (without the correction for elastic
         scattering which reduces the contribution [James.1962]).
     """
-    # Find the correct _Jxx_Schum75 function and execute it
-    Jxx0 = globals()["_J{:1d}{:1d}_Schum75".format(n, l)](omega, k, Zeff)
+    # Find the correct _Jxx_BM function and execute it
+    Jxx0 = globals()["_J{:1d}{:1d}_BM".format(n, l)](omega, k, Zeff)
     if HR_Correction:
         Jxx1 = globals()["_J{:1d}{:1d}_HR".format(n, l)](omega, k, Zeff)
         return Jxx0 + Jxx1
     return Jxx0
+
 
 @jit
 def all_J_BM(
