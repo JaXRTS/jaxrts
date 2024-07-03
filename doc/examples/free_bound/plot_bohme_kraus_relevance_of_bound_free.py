@@ -81,7 +81,7 @@ state["electron-ion Potential"] = CoulombPotential()
 state["ionic scattering"] = LinearResponseHNCIonFeat()
 state["ipd"] = ConstantIPD(-24 * ureg.electron_volt)
 state["free-free scattering"] = RPA_NoDamping()
-state["bound-free scattering"] = SchumacherImpulse(r_k=True)
+state["bound-free scattering"] = SchumacherImpulse(r_k=1)
 state["free-bound scattering"] = DetailedBalance()
 
 probed = state.probe(setup)

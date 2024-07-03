@@ -1031,11 +1031,23 @@ class SchumacherImpulse(ScatteringModel):
     allowed_keys = ["bound-free scattering"]
     __name__ = "SchumacherImpulse"
 
-    def __init__(self, r_k: bool = False) -> None:
+    def __init__(self, r_k: float | None = None) -> None:
+        """
+        r_k is the correction given in :cite:`Gregori.2004`. If None, or if a
+        negative value is given, we use the folula given by
+        :cite:`Gregori.2004`. Otherwise, it is just the value provided by the
+        user.
+        """
         super().__init__()
 
-        #: if True, we use the :cite:`Gregori.2004` r_k multiplicative factor
+        #: The value for r_k (see :cite:`Gregori.2004`). A negative value means
+        #: to use the calculation given in the aforementioned paper.
         self.r_k = r_k
+        if self.r_k is None:
+            self.r_k = -1.0
+        # This is required to catch a potential int input by a user
+        if isinstance(self.r_k, int):
+            self.r_k = float(self.r_k)
 
     def prepare(self, plasma_state: PlasmaState) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
@@ -1067,15 +1079,23 @@ class SchumacherImpulse(ScatteringModel):
         # Gregori.2004, Eqn 20
         fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
 
-        def rk_on():
-            r_k = 1 - jnp.sum(population[:, jnp.newaxis] / Z_c * fi**2)
-            B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
-            return r_k / (Z_c * B**3).m_as(ureg.dimensionless)
+        def rk_on(r_k):
+            # Because we did restict ourselfs to the first ion, we have to add
+            # a dimension to population, here.
+            new_r_k = 1 - jnp.sum(population[:, jnp.newaxis]* (fi)**2) / Z_c
+            return new_r_k
 
-        def rk_off():
-            return 1.0
+        def rk_off(r_k):
+            """
+            Use the rk provided by the user
+            """
+            return r_k
 
-        factor = jax.lax.cond(self.r_k, rk_on, rk_off)
+        r_k = jax.lax.cond(self.r_k < 0, rk_on, rk_off, self.r_k)
+        B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
+        # B should be close to unity
+        # B = 1 * ureg.dimensionless
+        factor =  r_k / (Z_c * B**3).m_as(ureg.dimensionless)
         sbe = factor * bound_free.J_impulse_approx(
             omega, k, population, Zeff, E_b
         )
