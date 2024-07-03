@@ -63,8 +63,9 @@ def PSF(omega):
 state = jaxrts.PlasmaState(
     ions=[jaxrts.Element("C")],
     Z_free=jnp.array([1.71]),
-    mass_density=([2.2]) * ureg.gram / ureg.centimeter**3,
+    mass_density=([2]) * ureg.gram / ureg.centimeter**3,
     T_e=jnp.array([21.7]) * ureg.electron_volt / ureg.k_B,
+    # T_e=jnp.array([16.6]) * ureg.electron_volt / ureg.k_B,
 )
 
 setup = jaxrts.setup.Setup(
@@ -75,20 +76,15 @@ setup = jaxrts.setup.Setup(
     PSF,
 )
 
+
 state["electron-ion Potential"] = CoulombPotential()
 state["ionic scattering"] = LinearResponseHNCIonFeat()
-state["ipd"] = Neglect()
-# state["ipd"] = ConstantIPD(-24*ureg.electron_volt)
-# state["free-free scattering"] = BornMermin_ChapmanInterp()
+state["ipd"] = ConstantIPD(-24 * ureg.electron_volt)
 state["free-free scattering"] = RPA_NoDamping()
-state["bound-free scattering"] = SchumacherImpulse()
-state["free-bound scattering"] = Neglect()
+state["bound-free scattering"] = SchumacherImpulse(r_k=True)
+state["free-bound scattering"] = DetailedBalance()
 
-probed = 2.8 * state.evaluate("ionic scattering", setup)
-print(jnpu.max(probed))
-probed += state.evaluate("free-bound scattering", setup)
-probed += state.evaluate("bound-free scattering", setup)
-probed += state.evaluate("free-free scattering", setup)
+probed = state.probe(setup)
 norm = jnpu.max(probed)
 plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
