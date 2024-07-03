@@ -535,8 +535,11 @@ class LinearResponseHNCIonFeat(Model):
             jnp.arange(plasma_state.nions),
             jnp.arange(plasma_state.nions),
         )
+
         # Get the formfactor from the plasma state
         fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
+        population = electron_distribution_ionized_state(plasma_state.Z_core)
+        f = jnp.sum(fi * population, axis=0)
         # Calculate the number-fraction per element
         x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
 
@@ -546,8 +549,8 @@ class LinearResponseHNCIonFeat(Model):
         def add_wrt(a, b):
             return (
                 jnpu.sqrt(x[a] * x[b])
-                * (fi[a] + q[a])
-                * (fi[b] + q[b])
+                * (f[a] + q[a])
+                * (f[b] + q[b])
                 * S_ab[a, b]
             ).m_as(ureg.dimensionless)
 
@@ -743,6 +746,9 @@ class ThreePotentialHNCIonFeat(Model):
         )
         # Get the formfactor from the plasma state
         fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
+        population = electron_distribution_ionized_state(plasma_state.Z_core)
+        # Sum up all fi to the full f
+        f = jnp.sum(fi * population, axis=0)
         # Calculate the number-fraction per element
         x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
 
@@ -752,8 +758,8 @@ class ThreePotentialHNCIonFeat(Model):
         def add_wrt(a, b):
             return (
                 jnpu.sqrt(x[a] * x[b])
-                * (fi[a] + q[a])
-                * (fi[b] + q[b])
+                * (f[a] + q[a])
+                * (f[b] + q[b])
                 * S_ab[a, b]
             ).m_as(ureg.dimensionless)
 
