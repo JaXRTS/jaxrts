@@ -24,7 +24,7 @@ from jaxrts.models import (
     RPA_NoDamping,
     ConstantIPD,
     SchumacherImpulse,
-    Gregori2006IonFeat
+    Gregori2006IonFeat,
 )
 
 import jpu.numpy as jnpu
@@ -64,7 +64,8 @@ state = jaxrts.PlasmaState(
     ions=[jaxrts.Element("C")],
     Z_free=jnp.array([1.71]),
     mass_density=([2]) * ureg.gram / ureg.centimeter**3,
-    T_e=jnp.array([16.6]) * ureg.electron_volt / ureg.k_B,
+    T_e=jnp.array([21.7]) * ureg.electron_volt / ureg.k_B,
+    # T_e=jnp.array([16.6]) * ureg.electron_volt / ureg.k_B,
 )
 
 setup = jaxrts.setup.Setup(
@@ -75,18 +76,25 @@ setup = jaxrts.setup.Setup(
     PSF,
 )
 
+
 state["electron-ion Potential"] = CoulombPotential()
 state["ionic scattering"] = LinearResponseHNCIonFeat()
 state["ipd"] = ConstantIPD(-24 * ureg.electron_volt)
-# state["free-free scattering"] = BornMermin_ChapmanInterp()
-state["free-free scattering"] = Neglect()
-state["bound-free scattering"] = SchumacherImpulse()
+state["free-free scattering"] = RPA_NoDamping()
+state["bound-free scattering"] = SchumacherImpulse(r_k=1)
 state["free-bound scattering"] = DetailedBalance()
 
 probed = state.probe(setup)
+norm = jnpu.max(probed)
 plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
-    (probed / jnpu.max(probed)).m_as(ureg.dimensionless),
+    (probed / norm).m_as(ureg.dimensionless),
+)
+plt.plot(
+    (setup.measured_energy).m_as(ureg.electron_volt),
+    (state.evaluate("bound-free scattering", setup) / norm).m_as(
+        ureg.dimensionless
+    ),
 )
 
 Data_E, Data_I = onp.genfromtxt(
