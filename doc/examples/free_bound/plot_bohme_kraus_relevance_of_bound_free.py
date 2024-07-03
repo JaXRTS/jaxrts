@@ -77,7 +77,7 @@ setup = jaxrts.setup.Setup(
 
 state["electron-ion Potential"] = CoulombPotential()
 state["ionic scattering"] = LinearResponseHNCIonFeat()
-state["ipd"] = ConstantIPD(24 * ureg.electron_volt)
+state["ipd"] = ConstantIPD(-24 * ureg.electron_volt)
 # state["free-free scattering"] = BornMermin_ChapmanInterp()
 state["free-free scattering"] = Neglect()
 state["bound-free scattering"] = SchumacherImpulse()

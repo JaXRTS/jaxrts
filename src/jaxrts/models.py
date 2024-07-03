@@ -535,8 +535,11 @@ class LinearResponseHNCIonFeat(Model):
             jnp.arange(plasma_state.nions),
             jnp.arange(plasma_state.nions),
         )
+
         # Get the formfactor from the plasma state
         fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
+        population = electron_distribution_ionized_state(plasma_state.Z_core)
+        f = jnp.sum(fi * population, axis=0)
         # Calculate the number-fraction per element
         x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
 
@@ -546,8 +549,8 @@ class LinearResponseHNCIonFeat(Model):
         def add_wrt(a, b):
             return (
                 jnpu.sqrt(x[a] * x[b])
-                * (fi[a] + q[a])
-                * (fi[b] + q[b])
+                * (f[a] + q[a])
+                * (f[b] + q[b])
                 * S_ab[a, b]
             ).m_as(ureg.dimensionless)
 
@@ -743,6 +746,9 @@ class ThreePotentialHNCIonFeat(Model):
         )
         # Get the formfactor from the plasma state
         fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
+        population = electron_distribution_ionized_state(plasma_state.Z_core)
+        # Sum up all fi to the full f
+        f = jnp.sum(fi * population, axis=0)
         # Calculate the number-fraction per element
         x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
 
@@ -752,8 +758,8 @@ class ThreePotentialHNCIonFeat(Model):
         def add_wrt(a, b):
             return (
                 jnpu.sqrt(x[a] * x[b])
-                * (fi[a] + q[a])
-                * (fi[b] + q[b])
+                * (f[a] + q[a])
+                * (f[b] + q[b])
                 * S_ab[a, b]
             ).m_as(ureg.dimensionless)
 
@@ -1017,6 +1023,9 @@ class SchumacherImpulse(ScatteringModel):
 
     Requires a 'form-factors' model (defaults to
     :py:class:`~PaulingFormFactors`).
+
+    Requires an 'ipd' model (defaults to
+    :py:class:`~Neglect`).
     """
 
     allowed_keys = ["bound-free scattering"]
@@ -1024,6 +1033,7 @@ class SchumacherImpulse(ScatteringModel):
 
     def prepare(self, plasma_state: PlasmaState) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model("ipd", Neglect())
 
     def check(self, plasma_state: PlasmaState) -> None:
         if len(plasma_state) > 1:
@@ -1042,6 +1052,9 @@ class SchumacherImpulse(ScatteringModel):
         E_b = plasma_state.ions[0].binding_energies + plasma_state.models[
             "ipd"
         ].evaluate(plasma_state, None)
+        E_b = jnpu.where(
+            E_b < 0 * ureg.electron_volt, 0 * ureg.electron_volt, E_b
+        )
 
         Zeff = form_factors.pauling_effective_charge(plasma_state.ions[0].Z)
         population = electron_distribution_ionized_state(Z_c)
@@ -1177,6 +1190,7 @@ class BohmStaver(Model):
 
 # Ionization Potential Depression Models
 # ======================================
+
 
 class ConstantIPD(Model):
     """
