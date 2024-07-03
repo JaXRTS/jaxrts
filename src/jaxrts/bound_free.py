@@ -96,6 +96,140 @@ def _phi21_Schum75(y):
     return 1 / (4 * y**4) - 1 / (5 * y**5)
 
 
+def _phi30_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return (
+        3 * y ** (-3)
+        - 24 * y ** (-4)
+        + (352 / 5) * y ** (-5)
+        - (256 / 3) * y ** (-6)
+        + (256 / 7) * y ** (-7)
+    )
+
+
+def _phi31_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return (
+        16 * (4 / 3) * y ** (-4)
+        - y ** (-5)
+        + (4 / 3) * y ** (-6)
+        - (4 / 7) * y ** (-7)
+    )
+
+
+def _phi32_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return (3 / 5) * y ** (-5) - (3 / 5) * y ** (-6) + (1 / 7) * y ** (-7)
+
+
+def _phi40_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return (
+        16 * (3 / 5) * y ** (-3)
+        - 5 * y ** (-4)
+        + (148 / 5) * y ** (-5)
+        - (256 / 3) * y ** (-6)
+        + 128 * y ** (-7)
+        - 96 * y ** (-8)
+        + (256 / 9) * y ** (-9)
+    )
+
+
+def _phi41_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return (
+        4 * (25 / 4) * y ** (-4)
+        - 53 * y ** (-5)
+        + 176 * y ** (-6)
+        - (1968 / 7) * y ** (-7)
+        + 216 * y ** (-8)
+        - 64 * y ** (-9)
+    )
+
+
+def _phi42_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return (
+        36 * (15 / 7) * y ** (-5)
+        - y ** (-6)
+        + (13 / 7) * y ** (-7)
+        - (3 / 2) * y ** (-8)
+        + (4 / 9) * y ** (-9)
+    )
+
+
+def _phi43_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return (
+        (6 / 7) * y ** (-6)
+        - (3 / 7) * y ** (-7)
+        + (3 / 8) * y ** (-8)
+        - (1 / 9) * y ** (-9)
+    )
+
+
+def _phi50_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return (
+        25 / 3 * y ** (-3)
+        - 200 * y ** (-4)
+        + 1952 * y ** (-5)
+        - (29440 / 3) * y ** (-6)
+        + (197376 / 7) * y ** (-7)
+        - 48 * 128 * y ** (-8)
+        + (434176 / 9) * y ** (-9)
+        - (131072 / 5) * y ** (-10)
+        + (65536 / 11) * y ** (-11)
+    )
+
+
+def _phi51_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return (
+        100 * y ** (-4)
+        - 1424 * y ** (-5)
+        + 8384 * y ** (-6)
+        - (182848 / 7) * y ** (-7)
+        + 46 * 592 * y ** (-8)
+        - (143360 / 3) * y ** (-9)
+        + (131072 / 5) * y ** (-10)
+        - (65536 / 11) * y ** (-11)
+    )
+
+
+def _phi52_Schum75(y):
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    return (
+        9 * (49 / 5) * y ** (-5)
+        - 91 * y ** (-6)
+        + (2417 / 7) * y ** (-7)
+        - 680 * y ** (-8)
+        + (6592 / 9) * y ** (-9)
+        - (2048 / 5) * y ** (-10)
+        + (1024 / 11) * y ** (-11)
+    )
+
+
 def _J10_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     """
     See :cite:`Schumacher.1975`.
@@ -124,6 +258,106 @@ def _J21_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
     y = _y(2, Zeff, omega, k)
     pref = _pref_Schumacher_1975(2, 1, Zeff)
     phi = _phi21_Schum75(y)
+    return pref * phi
+
+
+def _J30_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(3, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(3, 0, Zeff)
+    phi = _phi30_Schum75(y)
+    return pref * phi
+
+
+def _J31_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(3, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(3, 1, Zeff)
+    phi = _phi31_Schum75(y)
+    return pref * phi
+
+
+def _J32_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(3, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(3, 2, Zeff)
+    phi = _phi32_Schum75(y)
+    return pref * phi
+
+
+def _J40_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(4, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(4, 0, Zeff)
+    phi = _phi40_Schum75(y)
+    return pref * phi
+
+
+def _J41_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(4, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(4, 1, Zeff)
+    phi = _phi41_Schum75(y)
+    return pref * phi
+
+
+def _J42_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(4, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(4, 2, Zeff)
+    phi = _phi42_Schum75(y)
+    return pref * phi
+
+
+def _J43_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(4, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(4, 3, Zeff)
+    phi = _phi43_Schum75(y)
+    return pref * phi
+
+
+def _J50_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(5, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(5, 0, Zeff)
+    phi = _phi50_Schum75(y)
+    return pref * phi
+
+
+def _J51_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(5, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(5, 1, Zeff)
+    phi = _phi51_Schum75(y)
+    return pref * phi
+
+
+def _J52_Schum75(omega: Quantity, k: Quantity, Zeff: Quantity) -> Quantity:
+    """
+    See :cite:`Schumacher.1975`.
+    """
+    y = _y(5, Zeff, omega, k)
+    pref = _pref_Schumacher_1975(5, 2, Zeff)
+    phi = _phi52_Schum75(y)
     return pref * phi
 
 
@@ -259,27 +493,13 @@ def all_J_Schum75(
             _J10_Schum75(omega, k, Zeff[0, :]).m_as(ureg.dimensionless),
             _J20_Schum75(omega, k, Zeff[1, :]).m_as(ureg.dimensionless),
             _J21_Schum75(omega, k, Zeff[2, :]).m_as(ureg.dimensionless),
-            jnp.zeros_like(
-                omega
-            ),  # _J30_Schum75(omega, k, Zeff[3]).m_as(ureg.dimensionless),
-            jnp.zeros_like(
-                omega
-            ),  # _J31_Schum75(omega, k, Zeff[4]).m_as(ureg.dimensionless),
-            jnp.zeros_like(
-                omega
-            ),  # _J32_Schum75(omega, k, Zeff[5]).m_as(ureg.dimensionless),
-            jnp.zeros_like(
-                omega
-            ),  # _J40_Schum75(omega, k, Zeff[6]).m_as(ureg.dimensionless),
-            jnp.zeros_like(
-                omega
-            ),  # _J41_Schum75(omega, k, Zeff[7]).m_as(ureg.dimensionless),
-            jnp.zeros_like(
-                omega
-            ),  # _J42_Schum75(omega, k, Zeff[8]).m_as(ureg.dimensionless),
-            jnp.zeros_like(
-                omega
-            ),  # _J43_Schum75(omega, k, Zeff[9]).m_as(ureg.dimensionless),
+            _J30_Schum75(omega, k, Zeff[3, :]).m_as(ureg.dimensionless),
+            _J31_Schum75(omega, k, Zeff[4, :]).m_as(ureg.dimensionless),
+            _J32_Schum75(omega, k, Zeff[5, :]).m_as(ureg.dimensionless),
+            _J40_Schum75(omega, k, Zeff[6, :]).m_as(ureg.dimensionless),
+            _J41_Schum75(omega, k, Zeff[7, :]).m_as(ureg.dimensionless),
+            _J42_Schum75(omega, k, Zeff[8, :]).m_as(ureg.dimensionless),
+            _J43_Schum75(omega, k, Zeff[9, :]).m_as(ureg.dimensionless),
         ]
     )
 
