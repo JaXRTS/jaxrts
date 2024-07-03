@@ -24,6 +24,7 @@ state = jaxrts.PlasmaState(
     [ureg("1.848g/cc")],
     ureg("12eV") / ureg.k_B,
 )
+state["screening length"] = jaxrts.models.Gericke2010ScreeningLength()
 
 r = jnp.linspace(0.001, 100, 5000) * ureg.a_0
 k = jnp.pi / r[-1] + jnp.arange(len(r)) * (jnp.pi / (len(r) * (r[1] - r[0])))
@@ -52,7 +53,7 @@ for idx, pot in enumerate([empty_core, soft_core2, soft_core6, coulomb]):
         label=names[idx],
     )
     q = -jaxrts.ion_feature.free_electron_susceptilibily_RPA(
-        k, 1 / state.DH_screening_length
+        k, 1 / state.screening_length
     ) * pot.full_k(state, k)
     ax[1].plot(
         k.m_as(1 / ureg.a_0),
@@ -63,7 +64,7 @@ for idx, pot in enumerate([empty_core, soft_core2, soft_core6, coulomb]):
 for ls, r_cut in zip(["solid", "dashed", "dotted"], [0.5, 1, 2]):
     state.ion_core_radius = jnp.array([r_cut]) * ureg.angstrom
     q = -jaxrts.ion_feature.free_electron_susceptilibily_RPA(
-        k, 1 / state.DH_screening_length
+        k, 1 / state.screening_length
     ) * soft_core6.full_k(state, k)
     ax[2].plot(
         k.m_as(1 / ureg.a_0),

@@ -141,6 +141,7 @@ def test_linear_response_screening_gericke2010_literature():
         [ureg("1.848g/cc")],
         ureg("12eV") / ureg.k_B,
     )
+    state["screening length"] = jaxrts.models.Gericke2010ScreeningLength()
 
     r = jnp.linspace(0.001, 100, 5000) * ureg.a_0
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * (
@@ -166,9 +167,10 @@ def test_linear_response_screening_gericke2010_literature():
     for idx, pot in enumerate([empty_core, soft_core2, soft_core6, coulomb]):
         pot.include_electrons = True
         import logging
+
         logging.warning(idx)
         q = -jaxrts.ion_feature.free_electron_susceptilibily_RPA(
-            k, 1 / state.DH_screening_length
+            k, 1 / state.screening_length
         ) * pot.full_k(state, k)
         klit, qlit = onp.genfromtxt(
             data_folder / names[idx],
@@ -194,6 +196,11 @@ def test_multicomponent_wunsch2011_literature():
         ],
         T_e=2e4 * ureg.kelvin,
     )
+    # Set the Screening length for the Debye Screening. Verify where this might
+    # come form.
+    state["screening length"] = jaxrts.models.ConstantScreeningLength(
+        2 / 3 * ureg.a_0
+    )
 
     pot = 15
     r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 1000 * ureg.a0, 2**pot)
@@ -211,10 +218,6 @@ def test_multicomponent_wunsch2011_literature():
     dr = r[1] - r[0]
     dk = jnp.pi / (len(r) * dr)
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
-
-    # Set the Screening length for the Debye Screening. Verify where this might
-    # come form.
-    state.DH_screening_length = 2 / 3 * ureg.a_0
 
     Potential = jaxrts.hnc_potentials.DebyeHuckelPotential()
 
