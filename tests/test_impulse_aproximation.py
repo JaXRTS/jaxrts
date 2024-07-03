@@ -94,35 +94,35 @@ def test_modified_literature_chapman2015():
         )
 
 
-def test_holm_first_order_corrections():
-    p = jnp.linspace(-0.2, 0.2, 1500)
-    E = ureg("56keV")
-    k = 2 * E / (ureg.hbar * ureg.c) * jnpu.sin(ureg("173°") / 2)
+# def test_holm_first_order_corrections():
+#     p = jnp.linspace(-0.2, 0.2, 1500)
+#     E = ureg("56keV")
+#     k = 2 * E / (ureg.hbar * ureg.c) * jnpu.sin(ureg("173°") / 2)
 
-    Zeff = jaxrts.form_factors.pauling_effective_charge(11)
+#     Zeff = jaxrts.form_factors.pauling_effective_charge(11)
 
-    omega_c = (ureg.hbar * k**2) / (2 * ureg.m_e)
-    omega_plus = (p * ureg.c * k) + omega_c
-    omega_min = (-p * ureg.c * k) + omega_c
+#     omega_c = (ureg.hbar * k**2) / (2 * ureg.m_e)
+#     omega_plus = (p * ureg.c * k) + omega_c
+#     omega_min = (-p * ureg.c * k) + omega_c
 
-    J10BM = jaxrts.bound_free._J10_BM(omega_c[jnp.newaxis], k, Zeff[0])
-    J10HRp = jaxrts.bound_free._J10_HR(omega_plus, k, Zeff[0])
-    J10HRm = jaxrts.bound_free._J10_HR(omega_min, k, Zeff[0])
+#     J10BM = jaxrts.bound_free._J10_BM(omega_c[jnp.newaxis], k, Zeff[0])
+#     J10HRp = jaxrts.bound_free._J10_HR(omega_plus, k, Zeff[0])
+#     J10HRm = jaxrts.bound_free._J10_HR(omega_min, k, Zeff[0])
 
-    J20BM = jaxrts.bound_free._J20_BM(omega_c[jnp.newaxis], k, Zeff[1])
-    J20HRp = jaxrts.bound_free._J20_HR(omega_plus, k, Zeff[1])
-    J20HRm = jaxrts.bound_free._J20_HR(omega_min, k, Zeff[1])
+#     J20BM = jaxrts.bound_free._J20_BM(omega_c[jnp.newaxis], k, Zeff[1])
+#     J20HRp = jaxrts.bound_free._J20_HR(omega_plus, k, Zeff[1])
+#     J20HRm = jaxrts.bound_free._J20_HR(omega_min, k, Zeff[1])
 
-    J21BM = jaxrts.bound_free._J21_BM(omega_c[jnp.newaxis], k, Zeff[2])
-    J21HRp = jaxrts.bound_free._J21_HR(omega_plus, k, Zeff[2])
-    J21HRm = jaxrts.bound_free._J21_HR(omega_min, k, Zeff[2])
+#     J21BM = jaxrts.bound_free._J21_BM(omega_c[jnp.newaxis], k, Zeff[2])
+#     J21HRp = jaxrts.bound_free._J21_HR(omega_plus, k, Zeff[2])
+#     J21HRm = jaxrts.bound_free._J21_HR(omega_min, k, Zeff[2])
 
-    import matplotlib.pyplot as plt
+#     import matplotlib.pyplot as plt
 
-    plt.plot(p, 100 * -(J10HRp - J10HRm) / J10BM, label = "1s")
-    plt.plot(p, 100 * -(J20HRp - J20HRm) / J20BM, label = "2s")
-    plt.plot(p, 100 * -(J21HRp - J21HRm) / J21BM, label = "2p")
-    plt.show()
+#     plt.plot(p, 100 * -(J10HRp - J10HRm) / J10BM, label = "1s")
+#     plt.plot(p, 100 * -(J20HRp - J20HRm) / J20BM, label = "2s")
+#     plt.plot(p, 100 * -(J21HRp - J21HRm) / J21BM, label = "2p")
+#     plt.show()
 
 
 def test_Schum_vs_BM():
@@ -146,6 +146,3 @@ def test_Schum_vs_BM():
     assert jnpu.max(jnpu.absolute(J21BM - J21Schum)/jnpu.max(J21BM)) < 1e-6
     assert jnpu.max(jnpu.absolute(J20BM - J20Schum)/jnpu.max(J20BM)) < 1e-6
     assert jnpu.max(jnpu.absolute(J10BM - J10Schum)/jnpu.max(J10BM)) < 1e-6
-
-
-test_holm_first_order_corrections()
