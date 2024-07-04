@@ -305,3 +305,20 @@ def therm_de_broglie_wl(T):
     return ureg.hbar * jnpu.sqrt(
         (2 * jnp.pi) / (ureg.electron_mass * ureg.k_B * T)
     )
+    
+def compton_energy(probe_energy, scattering_angle):
+
+    shift = (
+        probe_energy
+        * (
+            1
+            - (1)
+            / (
+                1
+                + probe_energy
+                / (1 * ureg.electron_mass * ureg.speed_of_light**2)
+                * (1 - jnp.cos(jnp.deg2rad(scattering_angle)))
+            )
+        )
+    ).to(ureg.electron_volt)
+    return shift
