@@ -17,6 +17,7 @@ import jax.numpy as jnp
 
 from jaxrts.hnc_potentials import CoulombPotential, SoftCorePotential
 from jaxrts.models import (
+    ArbitraryDegeneracyScreeningLength,
     DetailedBalance,
     LinearResponseHNCIonFeat,
     Neglect,
@@ -78,6 +79,7 @@ setup = jaxrts.setup.Setup(
 
 
 state["electron-ion Potential"] = CoulombPotential()
+state["screening length"] = ArbitraryDegeneracyScreeningLength()
 state["ionic scattering"] = LinearResponseHNCIonFeat()
 state["ipd"] = ConstantIPD(-24 * ureg.electron_volt)
 state["free-free scattering"] = RPA_NoDamping()

@@ -48,7 +48,9 @@ k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
 # Set the Screening length for the Debye Screening. Verify where this might
 # come form.
-state.DH_screening_length = 2 / 3 * ureg.a_0
+state["screening length"] = jaxrts.models.ConstantScreeningLength(
+    2 / 3 * ureg.a_0
+)
 
 Potential = jaxrts.hnc_potentials.DebyeHuckelPotential()
 
