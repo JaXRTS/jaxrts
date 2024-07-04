@@ -268,20 +268,20 @@ class DebyeHuckelPotential(HNCPotential):
     __name__ = "DebyeHuckelPotential"
 
     def check(self, plasma_state) -> None:
-        if not hasattr(plasma_state, "DH_screening_length"):
+        if not hasattr(plasma_state, "screening_length"):
             logger.error(
-                f"The PlasmaState {plasma_state} has no attribute 'DH_screening_length, which is required for DebyeHuckelPotential."  # noqa: 501
+                f"The PlasmaState {plasma_state} has no attribute 'screening_length, which is required for DebyeHuckelPotential."  # noqa: 501
             )
 
     def kappa(self, plasma_state):
         # This is called if kappa is defined per ion species
         if (
-            isinstance(plasma_state.DH_screening_length.magnitude, jnp.ndarray)
-            and len(plasma_state.DH_screening_length.shape) == 2
+            isinstance(plasma_state.screening_length.magnitude, jnp.ndarray)
+            and len(plasma_state.screening_length.shape) == 2
         ):
-            return 1 / plasma_state.DH_screening_length[:, :, jnp.newaxis]
+            return 1 / plasma_state.screening_length[:, :, jnp.newaxis]
         else:
-            return 1 / plasma_state.DH_screening_length
+            return 1 / plasma_state.screening_length
 
     @jax.jit
     def full_r(self, plasma_state, r):

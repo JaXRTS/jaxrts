@@ -10,7 +10,7 @@ from .elements import Element
 from .units import ureg, Quantity, to_array
 from .helpers import JittableDict
 from .setup import Setup
-from . import plasma_physics
+from .models import DebyeHueckelScreeningLength
 
 logger = logging.getLogger(__name__)
 
@@ -51,11 +51,12 @@ class PlasmaState:
         self.T_i = to_array(T_i)
         self.models = JittableDict()
         self._overwritten = {
-            "DH_screening_length": -1.0 * ureg.angstrom,
             "ion_core_radius": -1.0
             * jnp.ones_like(self.Z_free)
             * ureg.angstrom,
         }
+        # Set a default screening length
+        self["screening length"] = DebyeHueckelScreeningLength()
 
     def __len__(self) -> int:
         return len(self.ions)
@@ -168,24 +169,6 @@ class PlasmaState:
     def ii_coupling(self):
         pass
 
-    @jax.jit
-    def _calc_DH_screening_length(self):
-        """
-        Return the Debye-Hückel Debye screening length. Uses a 4th-power
-        interpolation between electron and fermi temperature, as proposed by
-        :cite:`Gericke.2010`
-
-        See Also
-        --------
-        jaxrts.plasma_physics.temperature_interpolation:
-            The function used for the temperature interpolation
-        jaxrts.plasma_physics.Debye_Huckel_screening_length
-            The function used to calculate the screening length
-        """
-        T = plasma_physics.temperature_interpolation(self.n_e, self.T_e, 4)
-        lam_DH = plasma_physics.Debye_Huckel_screening_length(self.n_e, T)
-        return lam_DH.to(ureg.angstrom)
-
     def _lookup_ion_core_radius(self):
         ioc = [e.atomic_radius_calc for e in self.ions]
         return to_array(ioc)
@@ -209,37 +192,12 @@ class PlasmaState:
         self._overwritten["ion_core_radius"] = value
 
     @property
-    def DH_screening_length(self):
+    def screening_length(self):
         """
-        Return the Debye-Hückel Debye screening length. Uses a 4th-power
-        interpolation between electron and fermi temperature, as proposed by
-        :cite:`Gericke.2010`
-
-        This property can be overwritten by a user.
-
-        See Also
-        --------
-        jaxrts.plasma_physics.temperature_interpolation:
-            The function used for the temperature interpolation
-        jaxrts.plasma_physics.Debye_Huckel_screening_length
-            The function used to calculate the screening length
+        This is a shortcut to just get the screening length, which is used,
+        e.g., by the :py:class:`jaxrts.hnc_potentials.DebyeHuckelPotential`.
         """
-        return jax.lax.cond(
-            self._overwritten["DH_screening_length"].to(ureg.angstrom)
-            >= 0 * ureg.angstrom,
-            lambda: self._overwritten["DH_screening_length"].to(ureg.angstrom),
-            self._calc_DH_screening_length,
-        )
-
-    @DH_screening_length.setter
-    def DH_screening_length(self, value):
-        calc = self._calc_DH_screening_length()
-        logger.warning(
-            "The value DH_screening_length was overwritten by a user. "
-            + f"The calculated value was {calc:.3f}, "
-            + f"the new value is {value.to(ureg.angstrom):.3f}."
-        )
-        self._overwritten["DH_screening_length"] = value
+        return self.evaluate("screening length", None)
 
     def db_wavelength(self, kind: List | str):
 
@@ -303,7 +261,6 @@ class PlasmaState:
         """
         return self[key].evaluate(self, setup)
 
-
     # The following is required to jit a state
     def _tree_flatten(self):
         children = (
@@ -311,7 +268,6 @@ class PlasmaState:
             self.mass_density,
             self.T_e,
             self.T_i,
-            self._overwritten["DH_screening_length"],
             self._overwritten["ion_core_radius"],
             self.models,
         )
@@ -327,12 +283,10 @@ class PlasmaState:
             obj.mass_density,
             obj.T_e,
             obj.T_i,
-            DH_screening_length,
             ion_core_radius,
             obj.models,
         ) = children
         obj._overwritten = {
-            "DH_screening_length": DH_screening_length,
             "ion_core_radius": ion_core_radius,
         }
         return obj
