@@ -179,7 +179,7 @@ def S0ee_from_dielectric_func_FDT(
     """
 
     res = -(
-        (1 * ureg.planck_constant / (2 * jnp.pi))
+        (1 * ureg.hbar)
         / (1 - jpu.numpy.exp(-(E / (1 * ureg.boltzmann_constant * T_e))))
         * (
             ((1 * ureg.vacuum_permittivity) * k**2)
