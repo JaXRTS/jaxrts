@@ -11,7 +11,11 @@ import jax.numpy as jnp
 from jpu import numpy as jnpu
 
 from .units import ureg, Quantity, to_array
-from .setup import Setup, convolve_stucture_factor_with_instrument
+from .setup import (
+    Setup,
+    convolve_stucture_factor_with_instrument,
+    dispersion_corrected_k,
+)
 from .elements import electron_distribution_ionized_state
 from . import (
     bound_free,
@@ -27,6 +31,7 @@ from . import (
 
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from .plasmastate import PlasmaState
 
@@ -142,7 +147,9 @@ class ScatteringModel(Model):
         return jnpu.linspace(min_E, max_E, self.sample_points)
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         """
         If :py:attr:`~.sample_points` is not ``None``, generate a
         low-resulution :py:class`~.setup.Setup`. Calculate the
@@ -205,7 +212,9 @@ class Neglect(Model):
     __name__ = "Neglect"
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         if self.model_key in scattering_models:
             return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
         elif self.model_key == "ipd":
@@ -261,7 +270,9 @@ class ArkhipovIonFeat(Model):
             )
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
         population = electron_distribution_ionized_state(plasma_state.Z_core)[
             :, jnp.newaxis
@@ -320,7 +331,9 @@ class Gregori2003IonFeat(Model):
             )
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
         population = electron_distribution_ionized_state(
             plasma_state.Z_core[0]
@@ -388,7 +401,9 @@ class Gregori2006IonFeat(Model):
             )
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
         population = electron_distribution_ionized_state(plasma_state.Z_core)[
             :, jnp.newaxis
@@ -498,7 +513,9 @@ class LinearResponseHNCIonFeat(Model):
         return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         # Prepare the Potentials
         # ----------------------
 
@@ -666,7 +683,9 @@ class ThreePotentialHNCIonFeat(Model):
         return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         # Prepare the Potentials
         # ----------------------
 
@@ -833,8 +852,9 @@ class QCSalpeterApproximation(ScatteringModel):
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_Salpeter(
-            setup.k,
+            k,
             plasma_state.T_e,
             plasma_state.n_e,
             setup.measured_energy - setup.energy,
@@ -880,8 +900,9 @@ class RPA_NoDamping(ScatteringModel):
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_RPA_no_damping(
-            setup.k,
+            k,
             plasma_state.T_e,
             plasma_state.n_e,
             setup.measured_energy - setup.energy,
@@ -925,8 +946,9 @@ class BornMermin(ScatteringModel):
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA(
-            setup.k,
+            k,
             plasma_state.T_e,
             mu,
             plasma_state.atomic_masses,
@@ -985,8 +1007,9 @@ class BornMermin_ChapmanInterp(ScatteringModel):
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
-            setup.k,
+            k,
             plasma_state.T_e,
             mu,
             plasma_state.atomic_masses,
@@ -1067,7 +1090,7 @@ class SchumacherImpulse(ScatteringModel):
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
-        k = setup.k
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
         omega_0 = setup.energy / ureg.hbar
         omega = omega_0 - setup.measured_energy / ureg.hbar
         Z_c = plasma_state.Z_core[0]
@@ -1086,7 +1109,7 @@ class SchumacherImpulse(ScatteringModel):
         def rk_on(r_k):
             # Because we did restict ourselfs to the first ion, we have to add
             # a dimension to population, here.
-            new_r_k = 1 - jnp.sum(population[:, jnp.newaxis]* (fi)**2) / Z_c
+            new_r_k = 1 - jnp.sum(population[:, jnp.newaxis] * (fi) ** 2) / Z_c
             return new_r_k
 
         def rk_off(r_k):
@@ -1099,7 +1122,7 @@ class SchumacherImpulse(ScatteringModel):
         B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
         # B should be close to unity
         # B = 1 * ureg.dimensionless
-        factor =  r_k / (Z_c * B**3).m_as(ureg.dimensionless)
+        factor = r_k / (Z_c * B**3).m_as(ureg.dimensionless)
         sbe = factor * bound_free.J_impulse_approx(
             omega, k, population, Zeff, E_b
         )
@@ -1183,7 +1206,9 @@ class PaulingFormFactors(Model):
     __name__ = "PaulingFormFactors"
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         Zstar = form_factors.pauling_effective_charge(plasma_state.Z_A)
         ff = form_factors.pauling_all_ff(setup.k, Zstar)
         # population = plasma_state.ions[0].electron_distribution
@@ -1206,10 +1231,61 @@ class GregoriChemPotential(Model):
     allowed_keys = ["chemical potential"]
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         return plasma_physics.chem_pot_interpolation(
             plasma_state.T_e, plasma_state.n_e
         )
+
+
+class IdealElectronChemPotential(Model):
+    """
+    A fitting formula for the chemical potential of a plasma between the
+    classical and the quantum regime, given by :cite:`Gregori.2003`.
+    Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
+    """
+
+    __name__ = "IdealElectronGregoriChemPotential"
+    allowed_keys = ["chemical potential"]
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        return 
+
+class ConstantChemPotential(Model):
+    """
+    A model that returns an a constant for each energy probed.
+    """
+
+    allowed_keys = ["chemical potential"]
+    __name__ = "ConstantChemPotential"
+
+    def __init__(self, value):
+        self.value = value
+        super().__init__()
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        return self.value
+
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.value,)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj.value,) = children
+
+        return obj
 
 
 # Debye Temperature Models
@@ -1231,7 +1307,9 @@ class BohmStaver(Model):
     __name__ = "BohmStaver"
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         return static_structure_factors.T_Debye_Bohm_Staver(
             plasma_state.T_e,
             plasma_state.n_e,
@@ -1258,7 +1336,9 @@ class ConstantIPD(Model):
         super().__init__()
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         return self.value
 
     # The following is required to jit a Model
@@ -1396,8 +1476,12 @@ class Gericke2010ScreeningLength(Model):
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
-        T = plasma_physics.temperature_interpolation(plasma_state.n_e, plasma_state.T_e, 4)
-        lam_DH = plasma_physics.Debye_Huckel_screening_length(plasma_state.n_e, T)
+        T = plasma_physics.temperature_interpolation(
+            plasma_state.n_e, plasma_state.T_e, 4
+        )
+        lam_DH = plasma_physics.Debye_Huckel_screening_length(
+            plasma_state.n_e, T
+        )
         return lam_DH.to(ureg.angstrom)
 
 
@@ -1441,7 +1525,9 @@ class ConstantScreeningLength(Model):
         super().__init__()
 
     @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
         return self.value
 
     # The following is required to jit a Model
@@ -1465,6 +1551,7 @@ _all_models = [
     BohmStaver,
     BornMermin,
     BornMermin_ChapmanInterp,
+    ConstantChemPotential,
     ConstantIPD,
     ConstantScreeningLength,
     DebyeHueckelIPD,

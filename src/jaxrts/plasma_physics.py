@@ -193,7 +193,10 @@ def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:
     Quantity
         Chemical potential
     """
-    A = 0.25945
+    
+    A = 0.25945 # This would be Gregori.2003
+    A = 0.25054 # This would be Atzeni
+    A = 0.25954 # This would be Drake?
     B = 0.072
     b = 0.858
 

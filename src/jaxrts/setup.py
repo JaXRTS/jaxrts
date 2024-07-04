@@ -7,6 +7,7 @@ import jax.numpy as jnp
 from jpu import numpy as jnpu
 
 from .units import ureg, Quantity
+from .plasma_physics import plasma_frequency
 
 
 class Setup:
@@ -42,6 +43,24 @@ class Setup:
         )
 
     @property
+    def full_k(self) -> Quantity:
+        """
+        The scattering vector length probed in the experiment at each energy
+        chanel.
+        """
+        k_in = self.energy / ureg.hbar / ureg.c
+        k_out = self.measured_energy / ureg.hbar / ureg.c
+
+        k = jnpu.sqrt(
+            (k_out**2 + k_in**2)
+            - (
+                (2 * k_out * k_in)
+                * jnpu.cos(jnpu.deg2rad(self.scattering_angle))
+            )
+        )
+        return k
+
+    @property
     def lambda0(self) -> Quantity:
         """
         The wavelength of the probing light, i.e., the wavelength
@@ -70,6 +89,31 @@ class Setup:
             obj.instrument,
         ) = children
         return obj
+
+
+@jax.jit
+def dispersion_corrected_k(setup: Setup, n_e: Quantity) -> Quantity:
+    omega_in = setup.energy / ureg.hbar
+    omega_out = setup.measured_energy / ureg.hbar
+    omega_pl = plasma_frequency(n_e)
+    k_in = omega_in / ureg.c
+    k_out = omega_out / ureg.c
+
+    # Do the dispersion correction:
+    k_in *= jnpu.sqrt(1 - omega_pl**2 / omega_in**2)
+    k_out *= jnpu.sqrt(1 - omega_pl**2 / omega_out**2)
+
+    k = jnpu.sqrt(
+        (
+            k_out**2
+            - (
+                (2 * k_out * k_in)
+                * jnpu.cos(jnpu.deg2rad(setup.scattering_angle))
+            )
+            + (k_in**2)
+        )
+    )
+    return k
 
 
 @jax.jit
