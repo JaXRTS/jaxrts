@@ -41,7 +41,7 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         energy_shift = omega * ureg.hbar
         # Read the temperature from the filename
         T = Tdict[datafile.stem[:2]]
-        mu = jaxrts.plasma_physics.chem_pot_interpolation(
+        mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(
             T / (1 * ureg.boltzmann_constant), n_e
         )
         calc_See = (
@@ -119,7 +119,7 @@ def test_glenzer2009_fig9a_reprduction() -> None:
         energy_shift = omega * ureg.hbar
         # Read the temperature from the filename
         T = Tdict[datafile.stem]
-        mu = jaxrts.plasma_physics.chem_pot_interpolation(
+        mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(
             T / (1 * ureg.boltzmann_constant), n_e
         )
         calc_See = (
@@ -207,7 +207,7 @@ def test_gregori2003_fig1c_reprduction() -> None:
         # Read the temperature from the filename
         T = ureg(datafile.stem[2:])
 
-        mu = jaxrts.plasma_physics.chem_pot_interpolation(
+        mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(
             T / (1 * ureg.boltzmann_constant), n_e
         )
         calc_See = jaxrts.free_free.S0_ee_RPA_no_damping(

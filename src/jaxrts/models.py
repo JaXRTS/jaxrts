@@ -852,7 +852,7 @@ class RPA_NoDamping(ScatteringModel):
     the fluctuation dissipation theorem. Based on lecture notes from M. Bonitz.
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~GregoriChemPotential`).
+    :py:class:`~IchimaryChemPotential`).
 
     See Also
     --------
@@ -866,7 +866,7 @@ class RPA_NoDamping(ScatteringModel):
 
     def prepare(self, plasma_state: "PlasmaState") -> None:
         plasma_state.update_default_model(
-            "chemical potential", GregoriChemPotential()
+            "chemical potential", IchimaruChemPotential()
         )
 
     def check(self, plasma_state: "PlasmaState") -> None:
@@ -897,7 +897,7 @@ class BornMermin(ScatteringModel):
     (:cite:`Mermin.1970`).
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~GregoriChemPotential`).
+    :py:class:`~IchimaryChemPotential`).
 
     See Also
     --------
@@ -911,7 +911,7 @@ class BornMermin(ScatteringModel):
 
     def prepare(self, plasma_state: "PlasmaState") -> None:
         plasma_state.update_default_model(
-            "chemical potential", GregoriChemPotential()
+            "chemical potential", IchimaruChemPotential()
         )
 
     def check(self, plasma_state: "PlasmaState") -> None:
@@ -953,7 +953,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
     >>> state["free-free scattering"].no_of_freq = 10
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~GregoriChemPotential`).
+    :py:class:`~IchimaryChemPotential`).
 
     See Also
     --------
@@ -971,7 +971,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
 
     def prepare(self, plasma_state: "PlasmaState") -> None:
         plasma_state.update_default_model(
-            "chemical potential", GregoriChemPotential()
+            "chemical potential", IchimaruChemPotential()
         )
 
     def check(self, plasma_state: "PlasmaState") -> None:
@@ -1197,19 +1197,19 @@ class PaulingFormFactors(Model):
 # =========================
 
 
-class GregoriChemPotential(Model):
+class IchimaruChemPotential(Model):
     """
     A fitting formula for the chemical potential of a plasma between the
     classical and the quantum regime, given by :cite:`Gregori.2003`.
     Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
     """
 
-    __name__ = "GregoriChemPotential"
+    __name__ = "IchimaryChemPotential"
     allowed_keys = ["chemical potential"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
-        return plasma_physics.chem_pot_interpolation(
+        return plasma_physics.chem_pot_interpolationIchimaru(
             plasma_state.T_e, plasma_state.n_e
         )
 
@@ -1476,7 +1476,7 @@ _all_models = [
     Gericke2010ScreeningLength,
     Gregori2003IonFeat,
     Gregori2006IonFeat,
-    GregoriChemPotential,
+    IchimaruChemPotential,
     IonSphereIPD,
     LinearResponseHNCIonFeat,
     Model,
