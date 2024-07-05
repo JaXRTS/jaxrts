@@ -36,7 +36,7 @@ def test_literature_chapman2015():
 
         E_b = jaxrts.Element("C").binding_energies
 
-        Zeff = jaxrts.form_factors.pauling_effective_charge(6)
+        Zeff = 6 - jaxrts.form_factors.pauling_size_screening_constants(Z_b)
         population = jaxrts.elements.electron_distribution_ionized_state(Z_b)
 
         S_bf = jaxrts.bound_free.J_impulse_approx(
@@ -74,12 +74,13 @@ def test_modified_literature_chapman2015():
         E_b = jaxrts.Element("C").binding_energies
 
         Zeff = jaxrts.form_factors.pauling_effective_charge(6)
-        if Z_b == 1:
-            population = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        elif Z_b == 2:
-            population = [2, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        Zeff = 6 - jaxrts.form_factors.pauling_size_screening_constants(Z_b)
+        if Z_b <= 2:
+            population = [Z_b, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        elif Z_b <= 4:
+            population = [2, (Z_b - 2), 0, 0, 0, 0, 0, 0, 0, 0]
         else:
-            population = [2, (Z_b - 2) / 2, (Z_b - 2) / 2, 0, 0, 0, 0, 0, 0, 0]
+            population = [2, 2, (Z_b - 4), 0, 0, 0, 0, 0, 0, 0]
         population = jnp.array(population)
 
         S_bf = jaxrts.bound_free.J_impulse_approx(
@@ -90,7 +91,7 @@ def test_modified_literature_chapman2015():
             jnpu.quantile(
                 jnpu.absolute((S_bf_lit - S_bf)) / jnpu.max(S_bf), 0.90
             ).to(ureg.dimensionless)
-            < 0.1
+            < 0.04
         )
 
 
@@ -143,6 +144,6 @@ def test_Schum_vs_BM():
     J21BM = jaxrts.bound_free._J21_BM(omega, k, Zeff)
     J21Schum = jaxrts.bound_free._J21_Schum75(omega, k, Zeff)
 
-    assert jnpu.max(jnpu.absolute(J21BM - J21Schum)/jnpu.max(J21BM)) < 1e-6
-    assert jnpu.max(jnpu.absolute(J20BM - J20Schum)/jnpu.max(J20BM)) < 1e-6
-    assert jnpu.max(jnpu.absolute(J10BM - J10Schum)/jnpu.max(J10BM)) < 1e-6
+    assert jnpu.max(jnpu.absolute(J21BM - J21Schum) / jnpu.max(J21BM)) < 1e-6
+    assert jnpu.max(jnpu.absolute(J20BM - J20Schum) / jnpu.max(J20BM)) < 1e-6
+    assert jnpu.max(jnpu.absolute(J10BM - J10Schum) / jnpu.max(J10BM)) < 1e-6
