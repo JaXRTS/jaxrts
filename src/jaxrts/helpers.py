@@ -4,7 +4,7 @@ Miscellaneous helper functions.
 
 import jax
 from jax import numpy as jnp
-from .units import Quantity
+from .units import Quantity, ureg
 
 from functools import partial, wraps
 from time import time
@@ -111,6 +111,51 @@ def timer(func, custom_prefix=None, loglevel=logging.INFO):
         return result
 
     return wrapper
+
+
+def mass_from_number_fraction(number_fractions, elements):
+    """
+    Calculate the mass fraction of a mixture.
+
+    Parameters
+    ----------
+    number_fractions : array_like
+        The number fractions of each chemical element.
+    elements : list
+        The masses of the respective chemical elements.
+
+    Returns
+    -------
+    ndarray
+        The mass fractions of the chemical elements in the mixture.
+
+    Raises
+    ------
+    ValueError
+        If the lengths of `number_fractions` and `elements` are not the same.
+
+    Examples
+    --------
+    >>> number_fractions = [1/3, 2/3]
+    >>> elements = [jaxrts.Element("C"), jaxrts.Element("H")]
+    >>> calculate_mass_fraction(number_fractions, elements)
+    Array([0.85627718, 0.14372282], dtype=float64)
+    """
+    number_fractions = jnp.asarray(number_fractions)
+    masses = jnp.array([e.atomic_mass.m_as(ureg.gram) for e in elements])
+
+    if number_fractions.shape != masses.shape:
+        raise ValueError(
+            "number_fractions and elements must have the same length"
+        )
+
+    # Calculate the total mass of the mixture
+    total_mass = jnp.sum(number_fractions * masses)
+
+    # Calculate the mass fraction for each element
+    mass_fractions = (number_fractions * masses) / total_mass
+
+    return mass_fractions
 
 
 class JittableDict(dict):

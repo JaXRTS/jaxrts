@@ -1,5 +1,8 @@
 import pytest
 
+import jax.numpy as jnp
+import jpu.numpy as jnpu
+
 import jaxrts
 
 
@@ -15,3 +18,26 @@ def test_dictionary_inversion_error_with_identical_keys():
 
     assert str(test_dict) in str(context.value)
     assert "cannot be inverted" in str(context.value)
+
+
+def test_number_to_mass_density():
+    ratio = jnp.array([0.2, 0.3, 0.5])
+    elements = [jaxrts.Element("C"), jaxrts.Element("H"), jaxrts.Element("F")]
+    mass_ratio = jaxrts.helpers.mass_from_number_fraction(ratio, elements)
+
+    # The actual state is not really relevant...
+    state = jaxrts.PlasmaState(
+        ions=elements,
+        Z_free=jnp.array([1, 1, 1]),
+        mass_density=3.5
+        * jaxrts.ureg.gram
+        / jaxrts.ureg.centimeter**3
+        * mass_ratio,
+        T_e=jnp.array([80]) * jaxrts.ureg.electron_volt / jaxrts.ureg.k_B,
+    )
+
+    # Calculate the number ratio, again
+    n_i_ratio = (state.n_i / jnpu.sum(state.n_i)).m_as(
+        jaxrts.ureg.dimensionless
+    )
+    assert jnp.isclose(ratio, n_i_ratio).all()

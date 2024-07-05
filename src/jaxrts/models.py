@@ -842,12 +842,6 @@ class QCSalpeterApproximation(ScatteringModel):
     allowed_keys = ["free-free scattering"]
     __name__ = "QCSalpeterApproximation"
 
-    def check(self, plasma_state: "PlasmaState") -> None:
-        if len(plasma_state) > 1:
-            logger.critical(
-                "'QCSalpeterApproximation' is only implemented for a one-component plasma"  # noqa: E501
-            )
-
     @jax.jit
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup
@@ -860,7 +854,7 @@ class QCSalpeterApproximation(ScatteringModel):
             setup.measured_energy - setup.energy,
         )
 
-        return See_0 * plasma_state.Z_free
+        return See_0 * jnp.sum(plasma_state.Z_free)
 
 
 class RPA_NoDamping(ScatteringModel):
@@ -889,12 +883,6 @@ class RPA_NoDamping(ScatteringModel):
             "chemical potential", IchimaruChemPotential()
         )
 
-    def check(self, plasma_state: "PlasmaState") -> None:
-        if len(plasma_state) > 1:
-            logger.critical(
-                "'RPA_NoDamping' is only implemented for a one-component plasma"  # noqa: E501
-            )
-
     @jax.jit
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup
@@ -909,7 +897,7 @@ class RPA_NoDamping(ScatteringModel):
             mu,
         )
 
-        return See_0 * plasma_state.Z_free
+        return See_0 * jnp.sum(plasma_state.Z_free)
 
 
 class BornMermin(ScatteringModel):
