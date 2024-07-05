@@ -1078,7 +1078,9 @@ class SchumacherImpulse(ScatteringModel):
             E_b < 0 * ureg.electron_volt, 0 * ureg.electron_volt, E_b
         )
 
-        Zeff = form_factors.pauling_effective_charge(plasma_state.ions[0].Z)
+        Zeff = (
+            plasma_state.ions[0].Z
+        ) - form_factors.pauling_size_screening_constants(Z_c)
         population = electron_distribution_ionized_state(Z_c)
         # Gregori.2004, Eqn 20
         fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
