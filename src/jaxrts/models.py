@@ -1103,10 +1103,10 @@ class SchumacherImpulse(ScatteringModel):
 
         Zeff = form_factors.pauling_effective_charge(plasma_state.ions[0].Z)
         population = electron_distribution_ionized_state(Z_c)
-        # Gregori.2004, Eqn 20
-        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
 
         def rk_on(r_k):
+            # Gregori.2004, Eqn 20
+            fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
             # Because we did restict ourselfs to the first ion, we have to add
             # a dimension to population, here.
             new_r_k = 1 - jnp.sum(population[:, jnp.newaxis] * (fi) ** 2) / Z_c

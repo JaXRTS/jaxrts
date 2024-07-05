@@ -104,14 +104,8 @@ def dispersion_corrected_k(setup: Setup, n_e: Quantity) -> Quantity:
     k_out *= jnpu.sqrt(1 - omega_pl**2 / omega_out**2)
 
     k = jnpu.sqrt(
-        (
-            k_out**2
-            - (
-                (2 * k_out * k_in)
-                * jnpu.cos(jnpu.deg2rad(setup.scattering_angle))
-            )
-            + (k_in**2)
-        )
+        (k_out**2 + k_in**2)
+        - (2 * k_out * k_in * jnpu.cos(setup.scattering_angle))
     )
     return k
 
