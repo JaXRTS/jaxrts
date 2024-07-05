@@ -562,7 +562,7 @@ class LinearResponseHNCIonFeat(Model):
         population = electron_distribution_ionized_state(plasma_state.Z_core)
         f = jnp.sum(fi * population, axis=0)
         # Calculate the number-fraction per element
-        x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
+        x = plasma_state.number_fraction
 
         # Add the contributions from all pairs
         w_R = 0
@@ -773,7 +773,7 @@ class ThreePotentialHNCIonFeat(Model):
         # Sum up all fi to the full f
         f = jnp.sum(fi * population, axis=0)
         # Calculate the number-fraction per element
-        x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
+        x = plasma_state.number_fraction
 
         # Add the contributions from all pairs
         w_R = 0
@@ -854,9 +854,9 @@ class QCSalpeterApproximation(ScatteringModel):
             setup.measured_energy - setup.energy,
         )
 
-        x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
-        x = x.m_as(ureg.dimensionless)
-        return See_0 * jnp.sum(plasma_state.Z_free * x)
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
 
 
 class RPA_NoDamping(ScatteringModel):
@@ -899,9 +899,9 @@ class RPA_NoDamping(ScatteringModel):
             mu,
         )
 
-        x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
-        x = x.m_as(ureg.dimensionless)
-        return See_0 * jnp.sum(plasma_state.Z_free * x)
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
 
 
 class BornMermin(ScatteringModel):
@@ -1072,12 +1072,6 @@ class SchumacherImpulse(ScatteringModel):
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
 
-    def check(self, plasma_state: "PlasmaState") -> None:
-        if len(plasma_state) > 1:
-            logger.critical(
-                "'SchumacherImpulse' is only implemented for a one-component plasma"  # noqa: E501
-            )
-
     @jax.jit
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup
@@ -1085,42 +1079,51 @@ class SchumacherImpulse(ScatteringModel):
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         omega_0 = setup.energy / ureg.hbar
         omega = omega_0 - setup.measured_energy / ureg.hbar
-        Z_c = plasma_state.Z_core[0]
-        E_b = plasma_state.ions[0].binding_energies + plasma_state.models[
-            "ipd"
-        ].evaluate(plasma_state, None)
-        E_b = jnpu.where(
-            E_b < 0 * ureg.electron_volt, 0 * ureg.electron_volt, E_b
-        )
+        x = plasma_state.number_fraction
 
-        Zeff = (
-            plasma_state.ions[0].Z
-        ) - form_factors.pauling_size_screening_constants(Z_c)
-        population = electron_distribution_ionized_state(Z_c)
+        out = 0 * ureg.second
+        for idx in range(plasma_state.nions):
+            Z_c = plasma_state.Z_core[idx]
+            E_b = plasma_state.ions[
+                idx
+            ].binding_energies + plasma_state.models["ipd"].evaluate(
+                plasma_state, None
+            )
+            E_b = jnpu.where(
+                E_b < 0 * ureg.electron_volt, 0 * ureg.electron_volt, E_b
+            )
 
-        def rk_on(r_k):
-            # Gregori.2004, Eqn 20
-            fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
-            # Because we did restict ourselfs to the first ion, we have to add
-            # a dimension to population, here.
-            new_r_k = 1 - jnp.sum(population[:, jnp.newaxis] * (fi) ** 2) / Z_c
-            return new_r_k
+            Zeff = (
+                plasma_state.ions[idx].Z
+            ) - form_factors.pauling_size_screening_constants(Z_c)
+            population = electron_distribution_ionized_state(Z_c)
 
-        def rk_off(r_k):
-            """
-            Use the rk provided by the user
-            """
-            return r_k
+            def rk_on(r_k):
+                # Gregori.2004, Eqn 20
+                fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
+                # Because we did restict ourselfs to the first ion, we have to
+                # add a dimension to population, here.
+                new_r_k = (
+                    1 - jnp.sum(population[:, jnp.newaxis] * (fi) ** 2) / Z_c
+                )
+                return new_r_k
 
-        r_k = jax.lax.cond(self.r_k < 0, rk_on, rk_off, self.r_k)
-        B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
-        # B should be close to unity
-        # B = 1 * ureg.dimensionless
-        factor = r_k / (Z_c * B**3).m_as(ureg.dimensionless)
-        sbe = factor * bound_free.J_impulse_approx(
-            omega, k, population, Zeff, E_b
-        )
-        return sbe * Z_c
+            def rk_off(r_k):
+                """
+                Use the rk provided by the user
+                """
+                return r_k
+
+            r_k = jax.lax.cond(self.r_k < 0, rk_on, rk_off, self.r_k)
+            B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
+            # B should be close to unity
+            # B = 1 * ureg.dimensionless
+            factor = r_k / (Z_c * B**3).m_as(ureg.dimensionless)
+            sbe = factor * bound_free.J_impulse_approx(
+                omega, k, population, Zeff, E_b
+            )
+            out += sbe * Z_c * x[idx]
+        return out
 
     def _tree_flatten(self):
         children = ()

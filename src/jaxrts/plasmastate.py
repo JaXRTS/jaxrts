@@ -199,6 +199,14 @@ class PlasmaState:
         """
         return self.evaluate("screening length", None)
 
+    @property
+    def number_fraction(self):
+        """
+        Return the number fraction of the elements.
+        """
+        x = self.n_i / jpu.numpy.sum(self.n_i)
+        return x.m_as(ureg.dimensionless)
+
     def db_wavelength(self, kind: List | str):
 
         wavelengths = []

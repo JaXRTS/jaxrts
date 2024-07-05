@@ -36,8 +36,4 @@ def test_number_to_mass_density():
         T_e=jnp.array([80]) * jaxrts.ureg.electron_volt / jaxrts.ureg.k_B,
     )
 
-    # Calculate the number ratio, again
-    n_i_ratio = (state.n_i / jnpu.sum(state.n_i)).m_as(
-        jaxrts.ureg.dimensionless
-    )
-    assert jnp.isclose(ratio, n_i_ratio).all()
+    assert jnp.isclose(ratio, state.number_fraction).all()
