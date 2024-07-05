@@ -854,7 +854,9 @@ class QCSalpeterApproximation(ScatteringModel):
             setup.measured_energy - setup.energy,
         )
 
-        return See_0 * jnp.sum(plasma_state.Z_free)
+        x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
+        x = x.m_as(ureg.dimensionless)
+        return See_0 * jnp.sum(plasma_state.Z_free * x)
 
 
 class RPA_NoDamping(ScatteringModel):
@@ -897,7 +899,9 @@ class RPA_NoDamping(ScatteringModel):
             mu,
         )
 
-        return See_0 * jnp.sum(plasma_state.Z_free)
+        x = plasma_state.n_i / jnpu.sum(plasma_state.n_i)
+        x = x.m_as(ureg.dimensionless)
+        return See_0 * jnp.sum(plasma_state.Z_free * x)
 
 
 class BornMermin(ScatteringModel):
