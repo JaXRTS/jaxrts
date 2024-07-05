@@ -176,10 +176,12 @@ def wiegner_seitz_radius(n_e: Quantity) -> Quantity:
     return (3 / (4 * jnp.pi * n_e)) ** (1 / 3)
 
 
-def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:
+def chem_pot_interpolationIchimaru(T: Quantity, n_e: Quantity) -> Quantity:
     """
     Interpolation function for the chemical potential between the classical and
-    quantum region, given in :cite:`Gregori.2003`, eqn. (19).
+    quantum region, originally from :cite:`Ichimaru.2018`, eqn.(3.147). The
+    same formula (with a number flip in parameter A) is  in
+    :cite:`Gregori.2003`, eqn. (19).
 
     Parameters
     ----------
@@ -193,10 +195,7 @@ def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:
     Quantity
         Chemical potential
     """
-    
-    A = 0.25945 # This would be Gregori.2003
-    A = 0.25054 # This would be Atzeni
-    A = 0.25954 # This would be Drake?
+    A = 0.25954
     B = 0.072
     b = 0.858
 

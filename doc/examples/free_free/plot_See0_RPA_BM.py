@@ -52,7 +52,7 @@ for T in [
     2.0* ureg.electron_volts,
     8.0 * ureg.electron_volts,
 ]:
-    mu = jaxrts.plasma_physics.chem_pot_interpolation(
+    mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(
         T / (1 * ureg.boltzmann_constant), n_e
     )
 
