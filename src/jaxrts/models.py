@@ -52,7 +52,7 @@ class Model(metaclass=abc.ABCMeta):
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray: ...
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         """
         Modify the plasma_state in place.
 
@@ -253,7 +253,7 @@ class ArkhipovIonFeat(Model):
     allowed_keys = ["ionic scattering"]
     __name__ = "ArkhipovIonFeat"
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("screening", Gregori2004Screening())
 
@@ -307,7 +307,7 @@ class Gregori2003IonFeat(Model):
     allowed_keys = ["ionic scattering"]
     __name__ = "Gregori2003IonFeat"
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("screening", Gregori2004Screening())
 
@@ -376,7 +376,7 @@ class Gregori2006IonFeat(Model):
     allowed_keys = ["ionic scattering"]
     __name__ = "Gregori2006IonFeat"
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("screening", Gregori2004Screening())
         plasma_state.update_default_model("Debye temperature", BohmStaver())
@@ -455,7 +455,7 @@ class OnePotentialHNCIonFeat(Model):
         self.pot: int = pot
         super().__init__()
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model(
             "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
@@ -617,7 +617,7 @@ class ThreePotentialHNCIonFeat(Model):
         self.pot: int = pot
         super().__init__()
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model(
             "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
@@ -862,7 +862,7 @@ class RPA_NoDamping(ScatteringModel):
     allowed_keys = ["free-free scattering"]
     __name__ = "RPA_NoDamping"
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
@@ -919,7 +919,7 @@ class BornMermin(ScatteringModel):
     __name__ = "BornMermin"
     allowed_keys = ["free-free scattering"]
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
@@ -998,7 +998,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
         super().__init__()
         self.no_of_freq: int = no_of_freq
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
@@ -1105,7 +1105,7 @@ class SchumacherImpulse(ScatteringModel):
         if isinstance(self.r_k, int):
             self.r_k = float(self.r_k)
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
 
@@ -1611,7 +1611,7 @@ class LinearResponseScreeningGericke2010(Model):
         Function used to calculate :math:`\\xi{ee}`
     """
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
@@ -1660,7 +1660,7 @@ class FiniteWavelengthScreening(Model):
         Function used to calculate :math:`\\xi{ee}`
     """
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
