@@ -120,6 +120,10 @@ def fermi_dirac(k: Quantity, chem_pot: Quantity, T: Quantity) -> Quantity:
     exponent = (energy - chem_pot) / (ureg.k_B * T)
     return 1 / (jnpu.exp(exponent) + 1)
 
+@jax.jit
+def fermi_wavenumber(n_e: Quantity) -> Quantity:
+    
+    return (3 * jnp.pi ** 2 * n_e) ** (1 / 3)
 
 @jax.jit
 def fermi_energy(n_e: Quantity) -> Quantity:
@@ -302,12 +306,41 @@ def degeneracy_param(n_e: Quantity, T_e: Quantity) -> Quantity:
     """
     return n_e * therm_de_broglie_wl(T_e) ** 3
 
+def interparticle_spacing(Z1 : float, Z2 : float, n_e : Quantity):
+    
+    return (3 * (Z1 * Z2) ** (1 / 2) / (4 * jnp.pi * n_e)) ** (1 / 3)
+
+def coupling_param(Z1: float, Z2: float, n_e: Quantity, T_e: Quantity):
+    """
+    Returns the degree of interparticle coupling with corresponding charge
+    numbers Z1 and Z2 at temperature T_e and density n_e.
+    """
+
+    intspac = interparticle_spacing(Z1, Z2, n_e)
+
+    return (
+        Z1
+        * Z2
+        * 1
+        * ureg.elementary_charge**2
+        / (
+            4
+            * jnp.pi
+            * ureg.epsilon_0
+            * intspac
+            * 1
+            * ureg.boltzmann_constant
+            * T_e
+        )
+    ).m_as(ureg.dimensionless)
+
 
 def therm_de_broglie_wl(T):
     return ureg.hbar * jnpu.sqrt(
         (2 * jnp.pi) / (ureg.electron_mass * ureg.k_B * T)
     )
-    
+
+
 def compton_energy(probe_energy, scattering_angle):
 
     shift = (

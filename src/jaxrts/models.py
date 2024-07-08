@@ -27,6 +27,7 @@ from . import (
     plasma_physics,
     static_structure_factors,
     ipd,
+    ee_localfieldcorrections
 )
 
 
@@ -1715,9 +1716,73 @@ class Gregori2004Screening(Model):
             plasma_state.Z_free,
         )
         return q
+    
+# Electron-Electron Local Field Correction Models
+# ================
+#
+
+class EELFCGeldartVosko(Model):
+    allowed_keys = ["ee-lfc"]
+    __name__ = "GeldartVosko LFC"
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_geldartvosko(setup.k, plasma_state.T_e, plasma_state.n_e)
+    
+class EELFCUtsumiIchimaru(Model):
+    allowed_keys = ["ee-lfc"]
+    __name__ = "UtsumiIchimaru LFC"
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_utsumiichimaru(setup.k, plasma_state.T_e, plasma_state.n_e)
+    
+class EELFCStaticInterpolation(Model):
+    allowed_keys = ["ee-lfc"]
+    __name__ = "UtsumiIchimaru LFC"
+    
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_interpolationgregori2007(setup.k, plasma_state.T_e, plasma_state.n_e)
+
+class EELFCConstant(Model):
+    allowed_keys = ["ee-lfc"]
+    __name__ = "Constant LFC"
+    
+    def __init__(self, value):
+        self.value = value
+        super().__init__()
+        
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return self.value
 
 
 _all_models = [
+    EELFCUtsumiIchimaru,
+    EELFCGeldartVosko,
+    EELFCConstant,
+    EELFCStaticInterpolation,
     ArbitraryDegeneracyScreeningLength,
     ArkhipovIonFeat,
     BohmStaver,
@@ -1757,3 +1822,4 @@ for model in _all_models:
         model._tree_flatten,
         model._tree_unflatten,
     )
+    
