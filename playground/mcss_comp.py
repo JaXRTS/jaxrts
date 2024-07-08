@@ -89,6 +89,7 @@ setup = jaxrts.setup.Setup(
 state["ipd"] = jaxrts.models.ConstantIPD(0 * ureg.electron_volt)
 state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
 state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
+state["screening"] = jaxrts.models.FiniteWavelengthScreening()
 state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHuckelPotential()
 state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
 state["free-free scattering"] = jaxrts.models.RPA_NoDamping()

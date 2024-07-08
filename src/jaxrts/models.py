@@ -783,6 +783,9 @@ class ThreePotentialHNCIonFeat(Model):
 
 # Free-free models
 # ----------------
+#
+# These models also give a dielectric_function method, which might be used by
+# screening models, later.
 
 
 class QCSalpeterApproximation(ScatteringModel):
@@ -823,6 +826,19 @@ class QCSalpeterApproximation(ScatteringModel):
         return See_0 * jnp.sum(
             plasma_state.Z_free * plasma_state.number_fraction
         )
+
+    @jax.jit
+    def dielectric_function(
+        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    ) -> jnp.ndarray:
+        k = setup.k
+        eps = free_free.dielectric_function_salpeter(
+            k,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            E,
+        )
+        return eps
 
 
 class RPA_NoDamping(ScatteringModel):
@@ -868,6 +884,21 @@ class RPA_NoDamping(ScatteringModel):
         return See_0 * jnp.sum(
             plasma_state.Z_free * plasma_state.number_fraction
         )
+
+    @jax.jit
+    def dielectric_function(
+        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = setup.k
+
+        eps = free_free.dielectric_function_RPA_no_damping(
+            k,
+            E,
+            mu,
+            plasma_state.T_e,
+        )
+        return eps
 
 
 class BornMermin(ScatteringModel):
@@ -915,6 +946,24 @@ class BornMermin(ScatteringModel):
             setup.measured_energy - setup.energy,
         )
         return See_0 * plasma_state.Z_free
+
+    @jax.jit
+    def dielectric_function(
+        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = setup.k
+
+        eps = free_free.dielectric_function_BMA(
+            k,
+            E,
+            mu,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
+        )
+        return eps
 
 
 class BornMermin_ChapmanInterp(ScatteringModel):
@@ -977,6 +1026,28 @@ class BornMermin_ChapmanInterp(ScatteringModel):
             self.no_of_freq,
         )
         return See_0 * plasma_state.Z_free
+
+    @jax.jit
+    def dielectric_function(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = setup.k
+
+        eps = free_free.dielectric_function_BMA_chapman_interp(
+            k,
+            E,
+            mu,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
+            self.no_of_freq,
+        )
+        return eps
 
     def _tree_flatten(self):
         children = ()
@@ -1526,7 +1597,7 @@ class LinearResponseScreeningGericke2010(Model):
 
     .. math::
 
-       q(k) = \\xi_{ee} V_{ei}(k)
+       q(k) = \\xi_{ee}^{RPA} V_{ei}(k)
 
 
     See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
@@ -1563,6 +1634,56 @@ class LinearResponseScreeningGericke2010(Model):
         )
         q = xi * Vei[-1, :-1]
         return q
+
+
+class FiniteWavelengthScreening(Model):
+    allowed_keys = ["screening"]
+    __name__ = "FiniteWavelengthScreening"
+
+    """
+    The screening density :math:`q` is calculated using a result from linear
+    response, by
+
+    .. math::
+
+       q(k) = \\xi_{ee} V_{ei}(k)
+
+
+    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
+
+    Requires an 'electron-ion' potential. (defaults to
+    :py:class:`~KlimontovichKraeftPotential`).
+
+    See Also
+    --------
+    jaxtrs.ion_feature.susceptibility_from_epsilon
+        Function used to calculate :math:`\\xi{ee}`
+    """
+
+    def prepare(self, plasma_state: "PlasmaState") -> None:
+        plasma_state.update_default_model(
+            "electron-ion Potential",
+            hnc_potentials.KlimontovichKraeftPotential(),
+        )
+        plasma_state["electron-ion Potential"].include_electrons = True
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        epsilon = plasma_state["free-free scattering"].dielectric_function(
+            plasma_state, setup, 0 * ureg.electron_volt
+        )
+        xi = ion_feature.susceptibility_from_epsilon(epsilon, setup.k)
+        Vei = plasma_state["electron-ion Potential"].full_k(
+            plasma_state, to_array(setup.k)[jnp.newaxis]
+        )
+        q = xi * Vei[-1, :-1]
+        return jnp.real(q.m_as(ureg.dimensionless))
 
 
 class Gregori2004Screening(Model):
@@ -1609,6 +1730,7 @@ _all_models = [
     DebyeHueckelScreeningLength,
     DetailedBalance,
     EckerKroellIPD,
+    FiniteWavelengthScreening,
     Gericke2010ScreeningLength,
     Gregori2003IonFeat,
     Gregori2004Screening,
