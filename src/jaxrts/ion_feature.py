@@ -150,4 +150,4 @@ def susceptibility_from_epsilon(epsilon: Quantity, k: Quantity) -> Quantity:
     Where :math:`V_{ee}` is the Coulomb potential in k space.
     """
     Vee = coulomb_potential_fourier(-1, -1, k)
-    return ((epsilon - 1) / Vee) / epsilon
+    return -((epsilon - 1) / Vee) / epsilon
