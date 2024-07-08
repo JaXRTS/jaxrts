@@ -9,6 +9,7 @@ from .plasma_physics import (
     kin_energy,
     fermi_dirac,
     plasma_frequency,
+    susceptibility_from_epsilon,
 )
 from .static_structure_factors import S_ii_AD
 from .math import inverse_fermi_12_fukushima_single_prec
@@ -192,6 +193,58 @@ def S0ee_from_dielectric_func_FDT(
 
 
 @jit
+def S0ee_from_susceptibility_FDT(
+    k: Quantity,
+    T_e: Quantity,
+    n_e: Quantity,
+    E: Quantity | List,
+    susceptibility : Quantity | List,
+) -> Quantity:
+    """
+    Links the dielectric function to S0_ee via the fluctuation dissipation
+    theorem, see, e.g., :cite:`Fortmann.2010`, Eqn (2).
+
+    .. math::
+
+        S_{\\mathrm{ee}}^{0}(k,\\omega) =
+        -\\frac{\\hbar}{1-\\exp(-\\hbar\\omega/k_{B}T_{e})}
+        \\frac{1}{\\pi n_{e}}
+        \\mathrm{Im}\\left[\\xi(k,\\omega)\\right]
+
+
+    Parameters
+    ----------
+    k :  Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    T_e: Quantity
+        The electron temperature.
+    n_e: Quantity
+        The electron number density.
+    E : Quantity | List
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+        Can be an interval of values.
+    dielectric_function: List:
+        The dielectric function, normally dependent on :math:`k` and :math:`E`.
+        Several aproximations for this are given in this submodule, e.g.
+        :py:func:`~.dielectric_function_salpeter`.
+
+    Returns
+    -------
+    S0_ee: jnp.ndarray
+         The free electron dynamic structure.
+    """
+    Vee = coulomb_potential_fourier(-1, -1, k)
+    res = -(
+        ((1 * ureg.hbar) / (jnp.pi * n_e * Vee))
+        / (1 - jpu.numpy.exp(-(E / (1 * ureg.boltzmann_constant * T_e))))
+        * jnp.imag((susceptibility * Vee).m_as(ureg.dimensionless))
+    ).to_base_units()
+
+    return res
+
+@jit
 def S0_ee_Salpeter(
     k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List
 ) -> jnp.ndarray:
@@ -221,7 +274,8 @@ def S0_ee_Salpeter(
     # Perform the sign flip
     E = -E
     eps = dielectric_function_salpeter(k, T_e, n_e, E)
-    return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
+    xi = susceptibility_from_epsilon(eps, k)
+    return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
 
 
 @jit
@@ -647,7 +701,8 @@ def S0_ee_RPA_no_damping(
     """
     E = -E
     eps = dielectric_function_RPA_no_damping(k, E, chem_pot, T_e, unsave)
-    return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
+    xi = susceptibility_from_epsilon(eps, k)
+    return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
 
 
 @jit
@@ -685,7 +740,8 @@ def S0_ee_RPA(
     """
     E = -E
     eps = dielectric_function_RPA(k, E, chem_pot, T_e)
-    return S0ee_from_dielectric_func_FDT(k, T_e, n_e, E, eps)
+    xi = susceptibility_from_epsilon(eps, k)
+    return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
 
 
 @jit
@@ -994,7 +1050,8 @@ def S0_ee_BMA(
 
     eps = dielectric_function_BMA(k, E, chem_pot, T, n_e, m_ion, Zf)
 
-    return S0ee_from_dielectric_func_FDT(k, T, n_e, E, eps)
+    xi = susceptibility_from_epsilon(eps, k)
+    return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 
 @partial(jit, static_argnames=("no_of_points"))
@@ -1070,7 +1127,8 @@ def S0_ee_BMA_chapman_interp(
         k, E, chem_pot, T, n_e, m_ion, Zf, no_of_points
     )
 
-    return S0ee_from_dielectric_func_FDT(k, T, n_e, E, eps)
+    xi = susceptibility_from_epsilon(eps, k)
+    return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 
 # def ret_diel_func_DPA(k: Quantity, Z: jnp.ndarray) -> Quantity:

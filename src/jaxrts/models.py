@@ -16,6 +16,7 @@ from .setup import (
     convolve_stucture_factor_with_instrument,
     dispersion_corrected_k,
 )
+from .plasma_physics import susceptibility_from_epsilon
 from .elements import electron_distribution_ionized_state
 from . import (
     bound_free,
@@ -785,7 +786,7 @@ class ThreePotentialHNCIonFeat(Model):
 # Free-free models
 # ----------------
 #
-# These models also give a dielectric_function method, which might be used by
+# These models also give a susceptibility method, which might be used by
 # screening models, later.
 
 
@@ -829,7 +830,7 @@ class QCSalpeterApproximation(ScatteringModel):
         )
 
     @jax.jit
-    def dielectric_function(
+    def susceptibility(
         self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
     ) -> jnp.ndarray:
         k = setup.k
@@ -839,7 +840,8 @@ class QCSalpeterApproximation(ScatteringModel):
             plasma_state.n_e,
             E,
         )
-        return eps
+        xi = susceptibility_from_epsilon(eps, k)
+        return xi
 
 
 class RPA_NoDamping(ScatteringModel):
@@ -887,7 +889,7 @@ class RPA_NoDamping(ScatteringModel):
         )
 
     @jax.jit
-    def dielectric_function(
+    def susceptibility(
         self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
     ) -> jnp.ndarray:
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
@@ -899,7 +901,8 @@ class RPA_NoDamping(ScatteringModel):
             mu,
             plasma_state.T_e,
         )
-        return eps
+        xi = susceptibility_from_epsilon(eps, k)
+        return xi
 
 
 class BornMermin(ScatteringModel):
@@ -949,7 +952,7 @@ class BornMermin(ScatteringModel):
         return See_0 * plasma_state.Z_free
 
     @jax.jit
-    def dielectric_function(
+    def susceptibility(
         self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
     ) -> jnp.ndarray:
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
@@ -964,7 +967,8 @@ class BornMermin(ScatteringModel):
             plasma_state.atomic_masses,
             plasma_state.Z_free,
         )
-        return eps
+        xi = susceptibility_from_epsilon(eps, k)
+        return xi
 
 
 class BornMermin_ChapmanInterp(ScatteringModel):
@@ -1029,7 +1033,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
         return See_0 * plasma_state.Z_free
 
     @jax.jit
-    def dielectric_function(
+    def susceptibility(
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
@@ -1048,7 +1052,8 @@ class BornMermin_ChapmanInterp(ScatteringModel):
             plasma_state.Z_free,
             self.no_of_freq,
         )
-        return eps
+        xi = susceptibility_from_epsilon(eps, k)
+        return xi
 
     def _tree_flatten(self):
         children = ()
@@ -1657,8 +1662,9 @@ class FiniteWavelengthScreening(Model):
 
     See Also
     --------
-    jaxtrs.ion_feature.susceptibility_from_epsilon
-        Function used to calculate :math:`\\xi{ee}`
+    jaxtrs.susceptibility_from_epsilon
+        Function which can be used to calculate :math:`\\xi{ee}`, given a
+        dielectric function.
     """
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -1676,10 +1682,9 @@ class FiniteWavelengthScreening(Model):
         **kwargs,
     ) -> jnp.ndarray:
 
-        epsilon = plasma_state["free-free scattering"].dielectric_function(
+        xi = plasma_state["free-free scattering"].susceptibility(
             plasma_state, setup, 0 * ureg.electron_volt
         )
-        xi = ion_feature.susceptibility_from_epsilon(epsilon, setup.k)
         Vei = plasma_state["electron-ion Potential"].full_k(
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
@@ -1716,9 +1721,9 @@ class Gregori2004Screening(Model):
             plasma_state.Z_free,
         )
         return q
-    
+
 # Electron-Electron Local Field Correction Models
-# ================
+# ===============================================
 #
 
 class EELFCGeldartVosko(Model):
@@ -1733,7 +1738,7 @@ class EELFCGeldartVosko(Model):
         **kwargs,
     ) -> jnp.ndarray:
         return ee_localfieldcorrections.eelfc_geldartvosko(setup.k, plasma_state.T_e, plasma_state.n_e)
-    
+
 class EELFCUtsumiIchimaru(Model):
     allowed_keys = ["ee-lfc"]
     __name__ = "UtsumiIchimaru LFC"
@@ -1746,11 +1751,11 @@ class EELFCUtsumiIchimaru(Model):
         **kwargs,
     ) -> jnp.ndarray:
         return ee_localfieldcorrections.eelfc_utsumiichimaru(setup.k, plasma_state.T_e, plasma_state.n_e)
-    
+
 class EELFCStaticInterpolation(Model):
     allowed_keys = ["ee-lfc"]
     __name__ = "UtsumiIchimaru LFC"
-    
+
     @jax.jit
     def evaluate(
         self,
@@ -1763,11 +1768,11 @@ class EELFCStaticInterpolation(Model):
 class EELFCConstant(Model):
     allowed_keys = ["ee-lfc"]
     __name__ = "Constant LFC"
-    
+
     def __init__(self, value):
         self.value = value
         super().__init__()
-        
+
     @jax.jit
     def evaluate(
         self,
@@ -1822,4 +1827,3 @@ for model in _all_models:
         model._tree_flatten,
         model._tree_unflatten,
     )
-    

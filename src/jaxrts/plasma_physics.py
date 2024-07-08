@@ -120,10 +120,12 @@ def fermi_dirac(k: Quantity, chem_pot: Quantity, T: Quantity) -> Quantity:
     exponent = (energy - chem_pot) / (ureg.k_B * T)
     return 1 / (jnpu.exp(exponent) + 1)
 
+
 @jax.jit
 def fermi_wavenumber(n_e: Quantity) -> Quantity:
-    
-    return (3 * jnp.pi ** 2 * n_e) ** (1 / 3)
+
+    return (3 * jnp.pi**2 * n_e) ** (1 / 3)
+
 
 @jax.jit
 def fermi_energy(n_e: Quantity) -> Quantity:
@@ -306,9 +308,11 @@ def degeneracy_param(n_e: Quantity, T_e: Quantity) -> Quantity:
     """
     return n_e * therm_de_broglie_wl(T_e) ** 3
 
-def interparticle_spacing(Z1 : float, Z2 : float, n_e : Quantity):
-    
+
+def interparticle_spacing(Z1: float, Z2: float, n_e: Quantity):
+
     return (3 * (Z1 * Z2) ** (1 / 2) / (4 * jnp.pi * n_e)) ** (1 / 3)
+
 
 def coupling_param(Z1: float, Z2: float, n_e: Quantity, T_e: Quantity):
     """
@@ -357,3 +361,18 @@ def compton_energy(probe_energy, scattering_angle):
         )
     ).to(ureg.electron_volt)
     return shift
+
+
+@jax.jit
+def susceptibility_from_epsilon(epsilon: Quantity, k: Quantity) -> Quantity:
+    """
+    Calculates the susceptilibily from a given dielectric function epsilon.
+
+    ..math::
+
+        \\xi_{ee} = \\frac{\\frac{\\varepsilon -1}{V_{ee}(k)}{\\varepsilon}
+
+    Where :math:`V_{ee}` is the Coulomb potential in k space.
+    """
+    Vee = coulomb_potential_fourier(-1, -1, k)
+    return -((epsilon - 1) / Vee) / epsilon

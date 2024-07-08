@@ -138,16 +138,3 @@ def free_electron_susceptilibily_RPA(
     varepsilon = (k**2 + kappa**2) / (k**2)
     return xi0 / varepsilon
 
-
-def susceptibility_from_epsilon(epsilon: Quantity, k: Quantity) -> Quantity:
-    """
-    Calculates the susceptilibily from a given dielectric function epsilon.
-
-    ..math::
-
-        \\xi_{ee} = \\frac{\\frac{\\varepsilon -1}{V_{ee}(k)}{\\varepsilon}
-
-    Where :math:`V_{ee}` is the Coulomb potential in k space.
-    """
-    Vee = coulomb_potential_fourier(-1, -1, k)
-    return -((epsilon - 1) / Vee) / epsilon
