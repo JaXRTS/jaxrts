@@ -439,40 +439,26 @@ class Gregori2006IonFeat(Model):
         return res
 
 
-class LinearResponseHNCIonFeat(Model):
+class OnePotentialHNCIonFeat(Model):
     """
     Model for the ion feature using a calculating all :math:`S_{ab}` in the
     Hypernetted Chain approximation.
 
-    The screening density :math:`q` is calculated using a result from linear
-    response, by
-
-    .. math::
-
-       q(k) = \\xi_{ee} V_{ei}(k)
+    In contrast to :py:class:`~.ThreePotentialHNCIonFeat`, this models
+    calculates only the ion-ion Structure factors, and is neglecting the
+    electron-contibutions. Hence, screening is not included, automatically, but
+    has to be provided as an additional `screening`.
 
 
-    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
-
-
-    Requires 2 Potentials:
-
-        - an 'ion-ion' (defaults to
-          :py:class:`~DebyeHuckelPotential`).
-        - an 'electron-ion'
-          (defaults to :py:class:`~KlimontovichKraeftPotential`).
-
+    Requires an 'ion-ion' (defaults to :py:class:`~DebyeHuckelPotential`) and a
+    `screening` model (default:
+    :py::class:`~.LinearResponseScreeningGericke2010`.
     Further requires a 'form-factors' model (defaults to
     :py:class:`~PaulingFormFactors`).
-
-    See Also
-    --------
-    jaxtrs.ion_feature.free_electron_susceptilibily
-        Function used to calculate :math:`\\xi{ee}`
     """
 
     allowed_keys = ["ionic scattering"]
-    __name__ = "LinearResponseHNCIonFeat"
+    __name__ = "OnePotentialHNCIonFeat"
 
     def __init__(
         self,
@@ -495,11 +481,9 @@ class LinearResponseHNCIonFeat(Model):
             "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
         )
         plasma_state.update_default_model(
-            "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential(),
+            "screening", LinearResponseScreeningGericke2010()
         )
         plasma_state["ion-ion Potential"].include_electrons = False
-        plasma_state["electron-ion Potential"].include_electrons = True
 
     @property
     def r(self):
@@ -541,15 +525,9 @@ class LinearResponseHNCIonFeat(Model):
 
         S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
 
-        # To Calculate the screening, use the S_ii and S_ei contributions
+        # To Calculate the screening from a screening model
         # ---------------------------------------------------------------
-        # Use the Debye screening length for the screening cloud.
-        kappa = 1 / plasma_state.screening_length
-        xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa)
-        Vei = plasma_state["electron-ion Potential"].full_k(
-            plasma_state, to_array(setup.k)[jnp.newaxis]
-        )
-        q = xi * Vei[-1, :-1]
+        q = plasma_state.evaluate("screening", setup)
 
         # The W_R is calculated as a sum over all combinations of a_b
         ion_spec1, ion_spec2 = jnp.meshgrid(
@@ -1543,6 +1521,59 @@ class ConstantScreeningLength(Model):
         return obj
 
 
+# Screening Models
+# ================
+#
+# These models should return a `q`, the screening by free electrons which is
+# relevant when calculating the Raighley weight.
+
+
+class LinearResponseScreeningGericke2010(Model):
+    allowed_keys = ["screening"]
+    __name__ = "LinearResponseScreeningGericke2010"
+
+    """
+    The screening density :math:`q` is calculated using a result from linear
+    response, by
+
+    .. math::
+
+       q(k) = \\xi_{ee} V_{ei}(k)
+
+
+    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
+
+    Requires an 'electron-ion' potential. (defaults to
+    :py:class:`~KlimontovichKraeftPotential`).
+
+    See Also
+    --------
+    jaxtrs.ion_feature.free_electron_susceptilibily
+        Function used to calculate :math:`\\xi{ee}`
+    """
+
+    def prepare(self, plasma_state: "PlasmaState") -> None:
+        plasma_state.update_default_model(
+            "electron-ion Potential",
+            hnc_potentials.KlimontovichKraeftPotential(),
+        )
+        plasma_state["electron-ion Potential"].include_electrons = True
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup, **kwargs,
+    ) -> jnp.ndarray:
+
+        # Use the Debye screening length for the screening cloud.
+        kappa = 1 / plasma_state.screening_length
+        xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa)
+        Vei = plasma_state["electron-ion Potential"].full_k(
+            plasma_state, to_array(setup.k)[jnp.newaxis]
+        )
+        q = xi * Vei[-1, :-1]
+        return q
+
+
 _all_models = [
     ArbitraryDegeneracyScreeningLength,
     ArkhipovIonFeat,
@@ -1561,9 +1592,10 @@ _all_models = [
     Gregori2006IonFeat,
     IchimaruChemPotential,
     IonSphereIPD,
-    LinearResponseHNCIonFeat,
+    LinearResponseScreeningGericke2010,
     Model,
     Neglect,
+    OnePotentialHNCIonFeat,
     PauliBlockingIPD,
     PaulingFormFactors,
     QCSalpeterApproximation,
