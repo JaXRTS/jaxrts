@@ -11,6 +11,9 @@ from .plasma_physics import (
     plasma_frequency,
     susceptibility_from_epsilon,
 )
+
+from .ee_localfieldcorrections import xi_lfc_corrected
+
 from .static_structure_factors import S_ii_AD
 from .math import inverse_fermi_12_fukushima_single_prec
 
@@ -246,7 +249,7 @@ def S0ee_from_susceptibility_FDT(
 
 @jit
 def S0_ee_Salpeter(
-    k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List
+    k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List, lfc : Quantity,
 ) -> jnp.ndarray:
     """
     Calculates the free electron dynamics structure using the quantum corrected
@@ -275,6 +278,8 @@ def S0_ee_Salpeter(
     E = -E
     eps = dielectric_function_salpeter(k, T_e, n_e, E)
     xi = susceptibility_from_epsilon(eps, k)
+    v_k = (1 * ureg.elementary_charge ** 2) / ureg.vacuum_permittivity / k**2
+    xi = xi_lfc_corrected(xi, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
 
 
@@ -672,6 +677,7 @@ def S0_ee_RPA_no_damping(
     n_e: Quantity,
     E: Quantity | List,
     chem_pot: Quantity,
+    lfc : Quantity,
     unsave: bool = False,
 ) -> jnp.ndarray:
     """
@@ -702,6 +708,8 @@ def S0_ee_RPA_no_damping(
     E = -E
     eps = dielectric_function_RPA_no_damping(k, E, chem_pot, T_e, unsave)
     xi = susceptibility_from_epsilon(eps, k)
+    v_k = (1 * ureg.elementary_charge ** 2) / ureg.vacuum_permittivity / k**2
+    xi = xi_lfc_corrected(xi, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
 
 
@@ -712,6 +720,7 @@ def S0_ee_RPA(
     n_e: Quantity,
     E: Quantity | List,
     chem_pot: Quantity,
+    lfc : Quantity,
 ) -> jnp.ndarray:
     """
     Calculates the free electron dynamics structure using the quantum corrected
@@ -741,6 +750,8 @@ def S0_ee_RPA(
     E = -E
     eps = dielectric_function_RPA(k, E, chem_pot, T_e)
     xi = susceptibility_from_epsilon(eps, k)
+    v_k = (1 * ureg.elementary_charge ** 2) / ureg.vacuum_permittivity / k**2
+    xi = xi_lfc_corrected(xi, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
 
 
@@ -1044,6 +1055,7 @@ def S0_ee_BMA(
     n_e: Quantity,
     Zf: float,
     E: Quantity | List,
+    lfc : Quantity,
 ) -> jnp.ndarray:
 
     E = -E
@@ -1051,6 +1063,8 @@ def S0_ee_BMA(
     eps = dielectric_function_BMA(k, E, chem_pot, T, n_e, m_ion, Zf)
 
     xi = susceptibility_from_epsilon(eps, k)
+    v_k = (1 * ureg.elementary_charge ** 2) / ureg.vacuum_permittivity / k**2
+    xi = xi_lfc_corrected(xi, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 
@@ -1118,6 +1132,7 @@ def S0_ee_BMA_chapman_interp(
     n_e: Quantity,
     Zf: float,
     E: Quantity | List,
+    lfc : Quantity,
     no_of_points: int = 20,
 ) -> jnp.ndarray:
 
@@ -1128,6 +1143,9 @@ def S0_ee_BMA_chapman_interp(
     )
 
     xi = susceptibility_from_epsilon(eps, k)
+    v_k = (1 * ureg.elementary_charge ** 2) / ureg.vacuum_permittivity / k**2
+    xi = xi_lfc_corrected(xi, v_k, lfc)
+    
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 

@@ -823,11 +823,15 @@ class QCSalpeterApproximation(ScatteringModel):
             plasma_state.T_e,
             plasma_state.n_e,
             setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup)
         )
 
         return See_0 * jnp.sum(
             plasma_state.Z_free * plasma_state.number_fraction
         )
+        
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model("ee-lfc", EELFCConstant(1.0))
 
     @jax.jit
     def susceptibility(
@@ -869,6 +873,7 @@ class RPA_NoDamping(ScatteringModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
+        plasma_state.update_default_model("ee-lfc", EELFCConstant(1.0))
 
     @jax.jit
     def evaluate_raw(
@@ -882,6 +887,7 @@ class RPA_NoDamping(ScatteringModel):
             plasma_state.n_e,
             setup.measured_energy - setup.energy,
             mu,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup)
         )
 
         return See_0 * jnp.sum(
@@ -927,6 +933,8 @@ class BornMermin(ScatteringModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
+        plasma_state.update_default_model("ee-lfc", EELFCConstant(1.0))
+    
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
@@ -948,6 +956,7 @@ class BornMermin(ScatteringModel):
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup)
         )
         return See_0 * plasma_state.Z_free
 
@@ -1007,6 +1016,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
+        plasma_state.update_default_model("ee-lfc", EELFCConstant(1.0))
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
@@ -1028,6 +1038,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
         return See_0 * plasma_state.Z_free
@@ -1726,9 +1737,9 @@ class Gregori2004Screening(Model):
 # ===============================================
 #
 
-class EELFCGeldartVosko(Model):
+class ElectronicLFCGeldartVosko(Model):
     allowed_keys = ["ee-lfc"]
-    __name__ = "GeldartVosko LFC"
+    __name__ = "GeldartVosko Static LFC"
 
     @jax.jit
     def evaluate(
@@ -1739,9 +1750,9 @@ class EELFCGeldartVosko(Model):
     ) -> jnp.ndarray:
         return ee_localfieldcorrections.eelfc_geldartvosko(setup.k, plasma_state.T_e, plasma_state.n_e)
 
-class EELFCUtsumiIchimaru(Model):
+class ElectronicLFCUtsumiIchimaru(Model):
     allowed_keys = ["ee-lfc"]
-    __name__ = "UtsumiIchimaru LFC"
+    __name__ = "UtsumiIchimaru Static LFC"
 
     @jax.jit
     def evaluate(
@@ -1752,9 +1763,9 @@ class EELFCUtsumiIchimaru(Model):
     ) -> jnp.ndarray:
         return ee_localfieldcorrections.eelfc_utsumiichimaru(setup.k, plasma_state.T_e, plasma_state.n_e)
 
-class EELFCStaticInterpolation(Model):
+class ElectronicLFCStaticInterpolation(Model):
     allowed_keys = ["ee-lfc"]
-    __name__ = "UtsumiIchimaru LFC"
+    __name__ = "Static Interpolation"
 
     @jax.jit
     def evaluate(
@@ -1765,9 +1776,9 @@ class EELFCStaticInterpolation(Model):
     ) -> jnp.ndarray:
         return ee_localfieldcorrections.eelfc_interpolationgregori2007(setup.k, plasma_state.T_e, plasma_state.n_e)
 
-class EELFCConstant(Model):
+class ElectronicLFCConstant(Model):
     allowed_keys = ["ee-lfc"]
-    __name__ = "Constant LFC"
+    __name__ = "None"
 
     def __init__(self, value):
         self.value = value
@@ -1781,13 +1792,26 @@ class EELFCConstant(Model):
         **kwargs,
     ) -> jnp.ndarray:
         return self.value
+    
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.value,)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
 
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj.value,) = children
+
+        return obj
 
 _all_models = [
-    EELFCUtsumiIchimaru,
-    EELFCGeldartVosko,
-    EELFCConstant,
-    EELFCStaticInterpolation,
+    ElectronicLFCUtsumiIchimaru,
+    ElectronicLFCGeldartVosko,
+    ElectronicLFCConstant,
+    ElectronicLFCStaticInterpolation,
     ArbitraryDegeneracyScreeningLength,
     ArkhipovIonFeat,
     BohmStaver,

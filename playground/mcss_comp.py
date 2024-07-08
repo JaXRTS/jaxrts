@@ -1,4 +1,8 @@
 import pathlib
+import sys
+sys.path.append(
+    "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
+)
 
 import jaxrts
 import jax
@@ -20,7 +24,6 @@ mcss_file = (
     file_dir
     / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=3.0]_E=8978eV_theta=120_rho=3.0gcc_T=2.0eV_RPA_NOLFC.txt"
 )
-
 
 def load_data_from_mcss_file_name(name):
     elements_string = re.findall(r"[_]*[A-Za-z]*\[[A-Za-z0-9.=_]*\]", name)
@@ -86,6 +89,8 @@ setup = jaxrts.setup.Setup(
 # state["chemical potential"] = jaxrts.models.ConstantChemPotential(
 #     0 * ureg.electron_volt
 # )
+state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
+
 state["ipd"] = jaxrts.models.ConstantIPD(0 * ureg.electron_volt)
 state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
 state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()

@@ -20,6 +20,20 @@ from .plasma_physics import (
     interparticle_spacing,
 )
 
+@jax.jit
+def xi_lfc_corrected(xi : Quantity | jnp.ndarray, v : Quantity, lfc : Quantity | jnp.ndarray):
+
+    return xi / (1 - v * (1 - lfc) * xi)
+
+# Static local-field corrections
+# ===============================================
+#
+
+@jax.jit
+def eelfc_hubbard(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
+    
+    k_F = fermi_wavenumber(n_e)
+    return k ** 2 / (2*(k**2 + k_F**2))
 
 @jax.jit
 def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
@@ -34,7 +48,7 @@ def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     )
 
     k_F = fermi_wavenumber(n_e)
-    T_F = fermi_energy / (1 * ureg.boltzmann_constant)
+    T_F = fermi_energy(n_e) / (1 * ureg.boltzmann_constant)
 
     # Fitting formula for H_0, see 'Gregori & Ravasio et al:2007'
     C_sc = 1.0754
@@ -45,29 +59,29 @@ def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     # Effective temperature (Gregori)
     T_q = T_F / (
         1.3251
-        - 0.1779 * jnp.sqrt(interparticle_spacing(1, 1, n_e) / (1 * ureg.a0))
+        - 0.1779 * jnpu.sqrt(interparticle_spacing(1, 1, n_e) / (1 * ureg.a0))
     )
     T_ee = (T_e**2 + T_q**2) ** (1 / 2)
 
-    xi = (1 * ureg.electron_mass * ureg.elementary_charge**4) / (
+    xi = ((1 * ureg.electron_mass * ureg.elementary_charge**4) / (
         (4 * jnp.pi * 1 * ureg.epsilon_0) ** 2
         * 1
         * ureg.boltzmann_constant
         * T_ee
         * 1
         * ureg.hbar**2
-    )
+    )).m_as(ureg.dimensionless)
 
     prefactor = jnp.sqrt(2 * jnp.pi) * xi ** (3 / 2)
 
     def integrand(u):
-        return u * jnp.exp(-xi * u**2) / (jnp.exp(jnp.pi / u) - 1.0)
+        return (u * jnpu.exp(-xi * u**2) / (jnpu.exp(jnp.pi / u) - 1.0))
 
     g_bin_0 = prefactor * quad(
         integrand, [0, jnp.inf], epsabs=1e-16, epsrel=1e-16
-    )
+    )[0]
 
-    gT_ee_0 = g_bin_0 * jnp.exp(H_0)
+    gT_ee_0 = g_bin_0 * jnpu.exp(H_0)
 
     return k**2 / (1 / gamma_T * k_F**2 + (1 - gT_ee_0) ** (-1) * k**2)
 
@@ -77,7 +91,7 @@ def eelfc_utsumiichimaru(
     k: Quantity, T_e: Quantity, n_e: Quantity
 ) -> Quantity:
 
-    rs = interparticle_spacing(1, 1, n_e)
+    rs = interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)
     A = 0.029
 
     # Expression of g^0_ee (T = 0) by Yasuhara
@@ -97,13 +111,13 @@ def eelfc_utsumiichimaru(
     gamma_0 = 1 / 4 - (jnp.pi * (4 / (9 * jnp.pi)) ** (1 / 3)) / (24) * (
         rs3d2Ec_d2rs - 2 * rs2dEc_drs
     )
-    g0_ee = 1 / 8 * (z / jax.scipy.special.i1(z)) ** 2
+    g0_ee = 1 / 8 * (z / jax.scipy.special.i1(z.m_as(ureg.dimensionless))) ** 2
 
     B = 9 / 16 * gamma_0 - 3 / 64 * (1 - g0_ee) - 16 / 15 * A
     C = -3 / 4 * gamma_0 + 9 / 16 * (1 - g0_ee) - 16 / 5 * A
 
     k_F = fermi_wavenumber(n_e)
-    Q = k / k_F
+    Q = (k / k_F).m_as(ureg.dimensionless)
 
     return (
         A * Q**4
@@ -128,3 +142,33 @@ def eelfc_interpolationgregori2007(
         eelfc_utsumiichimaru(k, T_e, n_e)
         + Theta * eelfc_geldartvosko(k, T_e, n_e)
     ) / (1 + Theta)
+
+
+# Dynamic local-field corrections
+# ===============================================
+#
+
+@jax.jit
+def eelfc_dynamic_dabrowski1986(real_part_g_ee_static_limit : float, real_part_g_ee_short_wl_limit : float, E : Quantity, k: Quantity, T_e: Quantity, n_e: Quantity):
+    
+    """
+    Interpolation scheme for the dynamics LFC incorporating sum rules as described by 'Dabrowski:1986'.
+    """
+    omega = E / (1 * ureg.hbar)
+    alpha = (4 / (9 * jnp.pi)) ** (1 / 3)
+    rs = interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)
+    C = 23 / (60 * alpha * rs)
+    
+    # D = jax.scipy.special.gamma(3/4) / (jnp.sqrt(jnp.pi) * jax.scipy.special.gamma(5/4))
+    D = 0.763
+    
+    # Calculation of the imaginary part of the dynamic LFC
+    a_k = C * k ** 2 * ((real_part_g_ee_static_limit - real_part_g_ee_short_wl_limit)/(C * D * k ** 2)) ** (5/3)
+    b_k = ((real_part_g_ee_static_limit - real_part_g_ee_short_wl_limit) / (C * D * k**2)) ** (4/3)
+    im_G_ee_k_w = (a_k * omega)/(1 + b_k * omega ** 2) ** (5/4)
+    
+    # Calculation of the real part of the dynamic LFC
+    
+    # WIP
+    pass
+    

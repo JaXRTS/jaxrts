@@ -2,10 +2,6 @@ import pytest
 
 import sys
 
-sys.path.append(
-    "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
-)
-
 from jax import numpy as jnp
 import jaxrts
 import copy
