@@ -72,8 +72,10 @@ class HNCPotential(metaclass=abc.ABCMeta):
         """
         pass
 
-    def prepare(self, plasma_state) -> None:
-        pass
+    def prepare(self, plasma_state, key: str) -> None:
+        # Set include-electrons to True
+        if key in ["electron-ion Potential", "electron-electron Potential"]:
+            self.include_electrons = True
 
     @abc.abstractmethod
     def full_r(self, plasma_state, r: Quantity) -> Quantity: ...

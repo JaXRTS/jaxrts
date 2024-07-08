@@ -52,7 +52,7 @@ class Model(metaclass=abc.ABCMeta):
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray: ...
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         """
         Modify the plasma_state in place.
 
@@ -237,7 +237,8 @@ class ArkhipovIonFeat(Model):
     take into account both quantum and collective effects.
 
     Requires a 'form-factors' model (defaults to
-    :py:class:`~PaulingFormFactors`).
+    :py:class:`~PaulingFormFactors`) and a 'screening' model (defaults to
+    :py:class:`Gregori2004Screenig`).
 
     See Also
     --------
@@ -245,8 +246,6 @@ class ArkhipovIonFeat(Model):
     jaxrts.static_structure_factors.S_ii_AD
         Calculation of the static ion ion stucture factor given by
         :cite:`Arkhipov.1998`.
-    jaxrts.ion_feature.q_Gregori2004
-        Calculation of the screening by (quasi) free electrons
     jaxrts.models.PaulingFormFactors
         The default model for the atomic form factors
     """
@@ -254,8 +253,9 @@ class ArkhipovIonFeat(Model):
     allowed_keys = ["ionic scattering"]
     __name__ = "ArkhipovIonFeat"
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model("screening", Gregori2004Screening())
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if plasma_state.T_e != plasma_state.T_i:
@@ -277,16 +277,8 @@ class ArkhipovIonFeat(Model):
         population = electron_distribution_ionized_state(plasma_state.Z_core)[
             :, jnp.newaxis
         ]
-
+        q = plasma_state.evaluate("screening", setup)
         f = jnp.sum(fi * population)
-        q = ion_feature.q_Gregori2004(
-            setup.k[jnp.newaxis],
-            plasma_state.atomic_masses,
-            plasma_state.n_e,
-            plasma_state.T_e,
-            plasma_state.T_e,
-            plasma_state.Z_free,
-        )
         S_ii = static_structure_factors.S_ii_AD(
             setup.k,
             plasma_state.T_e,
@@ -315,8 +307,9 @@ class Gregori2003IonFeat(Model):
     allowed_keys = ["ionic scattering"]
     __name__ = "Gregori2003IonFeat"
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model("screening", Gregori2004Screening())
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if plasma_state.T_e != plasma_state.T_i:
@@ -343,14 +336,7 @@ class Gregori2003IonFeat(Model):
             plasma_state.T_e, plasma_state.n_e
         )
         f = jnp.sum(fi * population)
-        q = ion_feature.q_Gregori2004(
-            setup.k[jnp.newaxis],
-            plasma_state.atomic_masses,
-            plasma_state.n_e,
-            T_eff,
-            T_eff,
-            plasma_state.Z_free,
-        )
+        q = plasma_state.evaluate("screening", setup)
         S_ii = ion_feature.S_ii_AD(
             setup.k,
             T_eff,
@@ -390,8 +376,9 @@ class Gregori2006IonFeat(Model):
     allowed_keys = ["ionic scattering"]
     __name__ = "Gregori2006IonFeat"
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model("screening", Gregori2004Screening())
         plasma_state.update_default_model("Debye temperature", BohmStaver())
 
     def check(self, plasma_state: "PlasmaState") -> None:
@@ -416,14 +403,7 @@ class Gregori2006IonFeat(Model):
         )
         T_i_eff = static_structure_factors.T_i_eff_Greg(plasma_state.T_i, T_D)
         f = jnp.sum(fi * population)
-        q = ion_feature.q_Gregori2004(
-            setup.k[jnp.newaxis],
-            plasma_state.atomic_masses,
-            plasma_state.n_e,
-            T_e_eff,
-            T_i_eff,
-            plasma_state.Z_free,
-        )
+        q = plasma_state.evaluate("screening", setup)
         S_ii = ion_feature.S_ii_AD(
             setup.k,
             T_e_eff,
@@ -439,40 +419,26 @@ class Gregori2006IonFeat(Model):
         return res
 
 
-class LinearResponseHNCIonFeat(Model):
+class OnePotentialHNCIonFeat(Model):
     """
     Model for the ion feature using a calculating all :math:`S_{ab}` in the
     Hypernetted Chain approximation.
 
-    The screening density :math:`q` is calculated using a result from linear
-    response, by
-
-    .. math::
-
-       q(k) = \\xi_{ee} V_{ei}(k)
+    In contrast to :py:class:`~.ThreePotentialHNCIonFeat`, this models
+    calculates only the ion-ion Structure factors, and is neglecting the
+    electron-contibutions. Hence, screening is not included, automatically, but
+    has to be provided as an additional `screening`.
 
 
-    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
-
-
-    Requires 2 Potentials:
-
-        - an 'ion-ion' (defaults to
-          :py:class:`~DebyeHuckelPotential`).
-        - an 'electron-ion'
-          (defaults to :py:class:`~KlimontovichKraeftPotential`).
-
+    Requires an 'ion-ion' (defaults to :py:class:`~DebyeHuckelPotential`) and a
+    `screening` model (default:
+    :py::class:`~.LinearResponseScreeningGericke2010`.
     Further requires a 'form-factors' model (defaults to
     :py:class:`~PaulingFormFactors`).
-
-    See Also
-    --------
-    jaxtrs.ion_feature.free_electron_susceptilibily
-        Function used to calculate :math:`\\xi{ee}`
     """
 
     allowed_keys = ["ionic scattering"]
-    __name__ = "LinearResponseHNCIonFeat"
+    __name__ = "OnePotentialHNCIonFeat"
 
     def __init__(
         self,
@@ -489,17 +455,15 @@ class LinearResponseHNCIonFeat(Model):
         self.pot: int = pot
         super().__init__()
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model(
             "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
         )
         plasma_state.update_default_model(
-            "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential(),
+            "screening", LinearResponseScreeningGericke2010()
         )
         plasma_state["ion-ion Potential"].include_electrons = False
-        plasma_state["electron-ion Potential"].include_electrons = True
 
     @property
     def r(self):
@@ -541,15 +505,9 @@ class LinearResponseHNCIonFeat(Model):
 
         S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
 
-        # To Calculate the screening, use the S_ii and S_ei contributions
+        # To Calculate the screening from a screening model
         # ---------------------------------------------------------------
-        # Use the Debye screening length for the screening cloud.
-        kappa = 1 / plasma_state.screening_length
-        xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa)
-        Vei = plasma_state["electron-ion Potential"].full_k(
-            plasma_state, to_array(setup.k)[jnp.newaxis]
-        )
-        q = xi * Vei[-1, :-1]
+        q = plasma_state.evaluate("screening", setup)
 
         # The W_R is calculated as a sum over all combinations of a_b
         ion_spec1, ion_spec2 = jnp.meshgrid(
@@ -631,6 +589,14 @@ class ThreePotentialHNCIonFeat(Model):
     .. image:: ../../_images/ThreePotentialHNC.svg
        :width: 600
 
+    See Also
+    --------
+
+    jaxrts.ion_feature.q_Glenzer2009
+        Calculation of the screening, when both S_ei and S_ii are known. As
+        this should be accurate, we don't require a 'screening' model with this
+        'ionic scttering' model.
+
     """
 
     allowed_keys = ["ionic scattering"]
@@ -651,7 +617,7 @@ class ThreePotentialHNCIonFeat(Model):
         self.pot: int = pot
         super().__init__()
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model(
             "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
@@ -817,6 +783,9 @@ class ThreePotentialHNCIonFeat(Model):
 
 # Free-free models
 # ----------------
+#
+# These models also give a dielectric_function method, which might be used by
+# screening models, later.
 
 
 class QCSalpeterApproximation(ScatteringModel):
@@ -858,6 +827,19 @@ class QCSalpeterApproximation(ScatteringModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
 
+    @jax.jit
+    def dielectric_function(
+        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    ) -> jnp.ndarray:
+        k = setup.k
+        eps = free_free.dielectric_function_salpeter(
+            k,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            E,
+        )
+        return eps
+
 
 class RPA_NoDamping(ScatteringModel):
     """
@@ -880,7 +862,7 @@ class RPA_NoDamping(ScatteringModel):
     allowed_keys = ["free-free scattering"]
     __name__ = "RPA_NoDamping"
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
@@ -903,6 +885,21 @@ class RPA_NoDamping(ScatteringModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
 
+    @jax.jit
+    def dielectric_function(
+        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = setup.k
+
+        eps = free_free.dielectric_function_RPA_no_damping(
+            k,
+            E,
+            mu,
+            plasma_state.T_e,
+        )
+        return eps
+
 
 class BornMermin(ScatteringModel):
     """
@@ -922,7 +919,7 @@ class BornMermin(ScatteringModel):
     __name__ = "BornMermin"
     allowed_keys = ["free-free scattering"]
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
@@ -949,6 +946,24 @@ class BornMermin(ScatteringModel):
             setup.measured_energy - setup.energy,
         )
         return See_0 * plasma_state.Z_free
+
+    @jax.jit
+    def dielectric_function(
+        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = setup.k
+
+        eps = free_free.dielectric_function_BMA(
+            k,
+            E,
+            mu,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
+        )
+        return eps
 
 
 class BornMermin_ChapmanInterp(ScatteringModel):
@@ -983,7 +998,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
         super().__init__()
         self.no_of_freq: int = no_of_freq
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
@@ -1011,6 +1026,28 @@ class BornMermin_ChapmanInterp(ScatteringModel):
             self.no_of_freq,
         )
         return See_0 * plasma_state.Z_free
+
+    @jax.jit
+    def dielectric_function(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = setup.k
+
+        eps = free_free.dielectric_function_BMA_chapman_interp(
+            k,
+            E,
+            mu,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
+            self.no_of_freq,
+        )
+        return eps
 
     def _tree_flatten(self):
         children = ()
@@ -1068,7 +1105,7 @@ class SchumacherImpulse(ScatteringModel):
         if isinstance(self.r_k, int):
             self.r_k = float(self.r_k)
 
-    def prepare(self, plasma_state: "PlasmaState") -> None:
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
 
@@ -1543,6 +1580,143 @@ class ConstantScreeningLength(Model):
         return obj
 
 
+# Screening Models
+# ================
+#
+# These models should return a `q`, the screening by free electrons which is
+# relevant when calculating the Raighley weight.
+
+
+class LinearResponseScreeningGericke2010(Model):
+    allowed_keys = ["screening"]
+    __name__ = "LinearResponseScreeningGericke2010"
+
+    """
+    The screening density :math:`q` is calculated using a result from linear
+    response, by
+
+    .. math::
+
+       q(k) = \\xi_{ee}^{RPA} V_{ei}(k)
+
+
+    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
+
+    Requires an 'electron-ion' potential. (defaults to
+    :py:class:`~KlimontovichKraeftPotential`).
+
+    See Also
+    --------
+    jaxtrs.ion_feature.free_electron_susceptilibily
+        Function used to calculate :math:`\\xi{ee}`
+    """
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "electron-ion Potential",
+            hnc_potentials.KlimontovichKraeftPotential(),
+        )
+        plasma_state["electron-ion Potential"].include_electrons = True
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        # Use the Debye screening length for the screening cloud.
+        kappa = 1 / plasma_state.screening_length
+        xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa)
+        Vei = plasma_state["electron-ion Potential"].full_k(
+            plasma_state, to_array(setup.k)[jnp.newaxis]
+        )
+        q = xi * Vei[-1, :-1]
+        return q
+
+
+class FiniteWavelengthScreening(Model):
+    allowed_keys = ["screening"]
+    __name__ = "FiniteWavelengthScreening"
+
+    """
+    The screening density :math:`q` is calculated using a result from linear
+    response, by
+
+    .. math::
+
+       q(k) = \\xi_{ee} V_{ei}(k)
+
+
+    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
+
+    Requires an 'electron-ion' potential. (defaults to
+    :py:class:`~KlimontovichKraeftPotential`).
+
+    See Also
+    --------
+    jaxtrs.ion_feature.susceptibility_from_epsilon
+        Function used to calculate :math:`\\xi{ee}`
+    """
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "electron-ion Potential",
+            hnc_potentials.KlimontovichKraeftPotential(),
+        )
+        plasma_state["electron-ion Potential"].include_electrons = True
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        epsilon = plasma_state["free-free scattering"].dielectric_function(
+            plasma_state, setup, 0 * ureg.electron_volt
+        )
+        xi = ion_feature.susceptibility_from_epsilon(epsilon, setup.k)
+        Vei = plasma_state["electron-ion Potential"].full_k(
+            plasma_state, to_array(setup.k)[jnp.newaxis]
+        )
+        q = xi * Vei[-1, :-1]
+        return jnp.real(q.m_as(ureg.dimensionless))
+
+
+class Gregori2004Screening(Model):
+    allowed_keys = ["screening"]
+    __name__ = "Gregori2004Screenig"
+    """
+    Calculating the screening from free electrons according to
+    :cite:`Gregori.2004`.
+
+    See Also
+    --------
+    jaxrts.ion_feature.q_Gregori2004
+        Calculation of the screening by (quasi) free electrons
+    """
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+        q = ion_feature.q_Gregori2004(
+            setup.k[jnp.newaxis],
+            plasma_state.atomic_masses,
+            plasma_state.n_e,
+            plasma_state.T_e,
+            plasma_state.T_e,
+            plasma_state.Z_free,
+        )
+        return q
+
+
 _all_models = [
     ArbitraryDegeneracyScreeningLength,
     ArkhipovIonFeat,
@@ -1556,14 +1730,17 @@ _all_models = [
     DebyeHueckelScreeningLength,
     DetailedBalance,
     EckerKroellIPD,
+    FiniteWavelengthScreening,
     Gericke2010ScreeningLength,
     Gregori2003IonFeat,
+    Gregori2004Screening,
     Gregori2006IonFeat,
     IchimaruChemPotential,
     IonSphereIPD,
-    LinearResponseHNCIonFeat,
+    LinearResponseScreeningGericke2010,
     Model,
     Neglect,
+    OnePotentialHNCIonFeat,
     PauliBlockingIPD,
     PaulingFormFactors,
     QCSalpeterApproximation,

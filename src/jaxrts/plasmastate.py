@@ -67,7 +67,7 @@ class PlasmaState:
     def __setitem__(self, key: str, model) -> None:
         if key not in model.allowed_keys:
             raise KeyError(f"Model {model} not allowed for key {key}.")
-        model.prepare(self)
+        model.prepare(self, key)
         model.check(self)
         model.model_key = key
         self.models[key] = model

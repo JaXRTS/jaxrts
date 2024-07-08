@@ -5,6 +5,7 @@ This submodule is dedicated to the calculation of the ion-feature.
 from .units import ureg, Quantity
 from .free_free import dielectric_function_salpeter
 from .static_structure_factors import S_ee_AD, S_ei_AD, S_ii_AD
+from .plasma_physics import coulomb_potential_fourier
 from typing import List
 
 import jax
@@ -111,7 +112,7 @@ def free_electron_susceptilibily_RPA(
     kappa: Quantity,
 ):
     """
-    Return the free electron susceptilibily given by :cite:`Gregori.2010` eqn 4
+    Return the free electron susceptilibily given by :cite:`Gericke.2010` eqn 4
 
     .. math::
 
@@ -133,6 +134,20 @@ def free_electron_susceptilibily_RPA(
     xi(k) : Quantity
         The free electron susceptilibily.
     """
-    xi0 = kappa**2 * ureg.epsilon_0 / ((1 * ureg.elementary_charge) **2)
-    varepsilon = (k**2 + kappa**2)/(k**2)
+    xi0 = kappa**2 * ureg.epsilon_0 / ((1 * ureg.elementary_charge) ** 2)
+    varepsilon = (k**2 + kappa**2) / (k**2)
     return xi0 / varepsilon
+
+
+def susceptibility_from_epsilon(epsilon: Quantity, k: Quantity) -> Quantity:
+    """
+    Calculates the susceptilibily from a given dielectric function epsilon.
+
+    ..math::
+
+        \\xi_{ee} = \\frac{\\frac{\\varepsilon -1}{V_{ee}(k)}{\\varepsilon}
+
+    Where :math:`V_{ee}` is the Coulomb potential in k space.
+    """
+    Vee = coulomb_potential_fourier(-1, -1, k)
+    return -((epsilon - 1) / Vee) / epsilon
