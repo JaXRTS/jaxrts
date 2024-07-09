@@ -249,7 +249,7 @@ def S0ee_from_susceptibility_FDT(
 
 @jit
 def S0_ee_Salpeter(
-    k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List, lfc : Quantity,
+    k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List, lfc : Quantity = 0.0,
 ) -> jnp.ndarray:
     """
     Calculates the free electron dynamics structure using the quantum corrected
@@ -677,7 +677,7 @@ def S0_ee_RPA_no_damping(
     n_e: Quantity,
     E: Quantity | List,
     chem_pot: Quantity,
-    lfc : Quantity,
+    lfc : Quantity = 0.0,
     unsave: bool = False,
 ) -> jnp.ndarray:
     """
@@ -720,7 +720,7 @@ def S0_ee_RPA(
     n_e: Quantity,
     E: Quantity | List,
     chem_pot: Quantity,
-    lfc : Quantity,
+    lfc : Quantity = 0.0,
 ) -> jnp.ndarray:
     """
     Calculates the free electron dynamics structure using the quantum corrected
@@ -1055,7 +1055,7 @@ def S0_ee_BMA(
     n_e: Quantity,
     Zf: float,
     E: Quantity | List,
-    lfc : Quantity,
+    lfc : Quantity = 0.0,
 ) -> jnp.ndarray:
 
     E = -E
@@ -1132,7 +1132,7 @@ def S0_ee_BMA_chapman_interp(
     n_e: Quantity,
     Zf: float,
     E: Quantity | List,
-    lfc : Quantity,
+    lfc : Quantity = 0.0,
     no_of_points: int = 20,
 ) -> jnp.ndarray:
 
