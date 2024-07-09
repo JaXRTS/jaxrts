@@ -1,5 +1,6 @@
 import pathlib
 import sys
+
 sys.path.append(
     "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
 )
@@ -21,14 +22,11 @@ import re
 ureg = jaxrts.ureg
 
 file_dir = pathlib.Path(__file__).parent
-# mcss_file = (
-#     file_dir
-#     / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=3.0]_E=8978eV_theta=120_rho=3.0gcc_T=2.0eV_RPA.txt"
-# )
 mcss_file = (
     file_dir
-    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=5.5]_E=8975eV_theta=120_rho=4.0gcc_T=10.0eV.txt"
+    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=3.0]_E=8978eV_theta=120_rho=3.0gcc_T=2.0eV_RPA.txt"
 )
+
 
 def load_data_from_mcss_file_name(name):
     elements_string = re.findall(r"[_]*[A-Za-z]*\[[A-Za-z0-9.=_]*\]", name)
@@ -98,7 +96,6 @@ print(eelfc_farid(setup.k.to(1 / ureg.angstrom), T_e = T_e * ureg.electron_volt 
 #     0 * ureg.electron_volt
 # )
 state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
-
 state["ipd"] = jaxrts.models.ConstantIPD(0 * ureg.electron_volt)
 state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
 state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
@@ -124,6 +121,7 @@ plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
     (I / norm).m_as(ureg.dimensionless),
     color="C0",
+    label="LFC=StaticInterp",
 )
 plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
@@ -143,12 +141,30 @@ plt.plot(
     ls="dotted",
     alpha=0.7,
 )
-MCSS_Norm = jnp.max(S_ff)
-plt.plot(
-    central_energy - E,
-    S_tot / MCSS_Norm,
-    color="C1",
+state["ee-lfc"] = jaxrts.models.ElectronicLFCConstant(1.0)
+
+I = state.probe(setup)
+norm = jnpu.max(
+    state.evaluate("free-free scattering", setup)
+    # + state.evaluate("bound-free scattering", setup)
 )
+plt.plot(
+    (setup.measured_energy).m_as(ureg.electron_volt),
+    (I / norm).m_as(ureg.dimensionless),
+    color="C2",
+    label="LFC=1",
+)
+plt.plot(
+    (setup.measured_energy).m_as(ureg.electron_volt),
+    (state.evaluate("free-free scattering", setup) / norm).m_as(
+        ureg.dimensionless
+    ),
+    color="C2",
+    ls="dotted",
+    alpha=0.7,
+)
+MCSS_Norm = jnp.max(S_ff)
+plt.plot(central_energy - E, S_tot / MCSS_Norm, color="C1", label="MCSS")
 plt.plot(
     central_energy - E,
     S_bf / MCSS_Norm,
@@ -173,6 +189,8 @@ compton_shift = (
 plt.plot([compton_shift, compton_shift], [0.9, 1.1], color="black")
 plt.plot([compton_shift - 20, compton_shift + 20], [1, 1], color="black")
 plt.title(name)
+
+plt.legend()
 
 t0 = time.time()
 state.probe(setup)
