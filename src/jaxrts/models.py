@@ -829,9 +829,6 @@ class QCSalpeterApproximation(ScatteringModel):
         return See_0 * jnp.sum(
             plasma_state.Z_free * plasma_state.number_fraction
         )
-        
-    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
-        plasma_state.update_default_model("ee-lfc", EELFCConstant(1.0))
 
     @jax.jit
     def susceptibility(
@@ -873,7 +870,6 @@ class RPA_NoDamping(ScatteringModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
-        plasma_state.update_default_model("ee-lfc", EELFCConstant(1.0))
 
     @jax.jit
     def evaluate_raw(
@@ -933,7 +929,6 @@ class BornMermin(ScatteringModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
-        plasma_state.update_default_model("ee-lfc", EELFCConstant(1.0))
     
 
     def check(self, plasma_state: "PlasmaState") -> None:
@@ -1016,7 +1011,6 @@ class BornMermin_ChapmanInterp(ScatteringModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
-        plasma_state.update_default_model("ee-lfc", EELFCConstant(1.0))
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:

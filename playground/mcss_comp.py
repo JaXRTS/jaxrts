@@ -20,9 +20,13 @@ import re
 ureg = jaxrts.ureg
 
 file_dir = pathlib.Path(__file__).parent
+# mcss_file = (
+#     file_dir
+#     / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=3.0]_E=8978eV_theta=120_rho=3.0gcc_T=2.0eV_RPA.txt"
+# )
 mcss_file = (
     file_dir
-    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=3.0]_E=8978eV_theta=120_rho=3.0gcc_T=2.0eV_RPA_NOLFC.txt"
+    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=5.5]_E=8975eV_theta=120_rho=4.0gcc_T=10.0eV.txt"
 )
 
 def load_data_from_mcss_file_name(name):
