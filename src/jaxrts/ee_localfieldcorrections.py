@@ -253,6 +253,21 @@ def eelfc_interpolationgregori2007(
         eelfc_utsumiichimaru(k, T_e, n_e)
         + Theta * eelfc_geldartvosko(k, T_e, n_e)
     ) / (1 + Theta)
+    
+@jax.jit
+def eelfc_interpolationgregori_farid(
+    k: Quantity, T_e: Quantity, n_e: Quantity
+) -> Quantity:
+
+    Theta = (T_e / (fermi_energy(n_e) / (1 * ureg.boltzmann_constant))).m_as(
+        ureg.dimensionless
+    )
+
+    return (
+        eelfc_farid(k, T_e, n_e)
+        + Theta * eelfc_geldartvosko(k, T_e, n_e)
+    ) / (1 + Theta)
+
 
 
 # Dynamic local-field corrections
