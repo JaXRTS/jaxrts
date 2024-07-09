@@ -45,7 +45,15 @@ def eelfc_hubbard(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
 @jax.jit
 def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
 
-    Gamma_ee = coupling_param(1, 1, n_e, T_e)
+    k_F = fermi_wavenumber(n_e)
+    T_F = fermi_energy(n_e) / (1 * ureg.boltzmann_constant)
+    # Effective temperature (Gregori)
+    T_q = T_F / (
+        1.3251
+        - 0.1779 * jnpu.sqrt(interparticle_spacing(1, 1, n_e) / (1 * ureg.a0))
+    )
+    T_ee = (T_e**2 + T_q**2) ** (1 / 2)
+    Gamma_ee = coupling_param(1, 1, n_e, T_ee)
 
     gamma_T = (12.0 * jnp.pi**2) ** (1 / 3) * (
         0.0999305
@@ -54,21 +62,12 @@ def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
         - 0.0479236 / (Gamma_ee ** (2 / 3))
     )
 
-    k_F = fermi_wavenumber(n_e)
-    T_F = fermi_energy(n_e) / (1 * ureg.boltzmann_constant)
-
     # Fitting formula for H_0, see 'Gregori & Ravasio et al:2007'
     C_sc = 1.0754
     H_0 = (C_sc * Gamma_ee ** (3 / 2)) / (
         (C_sc / jnp.sqrt(3)) ** 4 + Gamma_ee**4
     ) ** (1 / 4)
 
-    # Effective temperature (Gregori)
-    T_q = T_F / (
-        1.3251
-        - 0.1779 * jnpu.sqrt(interparticle_spacing(1, 1, n_e) / (1 * ureg.a0))
-    )
-    T_ee = (T_e**2 + T_q**2) ** (1 / 2)
 
     xi = (
         (1 * ureg.electron_mass * ureg.elementary_charge**4)
