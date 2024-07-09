@@ -16,7 +16,7 @@ from .setup import (
     convolve_stucture_factor_with_instrument,
     dispersion_corrected_k,
 )
-from .plasma_physics import susceptibility_from_epsilon
+from .plasma_physics import noninteracting_susceptibility_from_epsilon
 from .elements import electron_distribution_ionized_state
 from . import (
     bound_free,
@@ -841,7 +841,10 @@ class QCSalpeterApproximation(ScatteringModel):
             plasma_state.n_e,
             E,
         )
-        xi = susceptibility_from_epsilon(eps, k)
+        xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
         return xi
 
 
@@ -903,7 +906,10 @@ class RPA_NoDamping(ScatteringModel):
             mu,
             plasma_state.T_e,
         )
-        xi = susceptibility_from_epsilon(eps, k)
+        xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
         return xi
 
 
@@ -971,7 +977,10 @@ class BornMermin(ScatteringModel):
             plasma_state.atomic_masses,
             plasma_state.Z_free,
         )
-        xi = susceptibility_from_epsilon(eps, k)
+        xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
         return xi
 
 
@@ -1057,7 +1066,10 @@ class BornMermin_ChapmanInterp(ScatteringModel):
             plasma_state.Z_free,
             self.no_of_freq,
         )
-        xi = susceptibility_from_epsilon(eps, k)
+        xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
         return xi
 
     def _tree_flatten(self):

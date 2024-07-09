@@ -364,15 +364,17 @@ def compton_energy(probe_energy, scattering_angle):
 
 
 @jax.jit
-def susceptibility_from_epsilon(epsilon: Quantity, k: Quantity) -> Quantity:
+def noninteracting_susceptibility_from_epsilon(
+    epsilon: Quantity, k: Quantity
+) -> Quantity:
     """
     Calculates the susceptilibily from a given dielectric function epsilon.
 
     ..math::
 
-        \\xi_{ee} = \\frac{\\frac{\\varepsilon -1}{V_{ee}(k)}{\\varepsilon}
+        \\xi_{ee} = \\frac{1 - \\varepsilon}{V_{ee}(k)}
 
     Where :math:`V_{ee}` is the Coulomb potential in k space.
     """
     Vee = coulomb_potential_fourier(-1, -1, k)
-    return -((epsilon - 1) / Vee) / epsilon
+    return (1 - epsilon) / Vee
