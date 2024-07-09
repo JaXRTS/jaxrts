@@ -227,7 +227,7 @@ def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     A = 63 / 64 * a + 15 / 4096 * (b0A - 2 * (b0B + b0C) - 16 * bm2)
     B = 9 / 16 * gamma_0 + 7 / 16 * bm2 - 3 / 64 * b0 - 16 / 15 * A
     C = -3 / 4 * gamma_0 + 3 / 4 * bm2 + 9 / 16 * b0 - 16 / 5 * A
-    D = 9 / 16 + gamma_0 - 9 / 16 * bm2 - 3 / 64 * b0 + 8 / 5 * A
+    D = 9 / 16 * gamma_0 - 9 / 16 * bm2 - 3 / 64 * b0 + 8 / 5 * A
 
     return (
         A * Q**4
