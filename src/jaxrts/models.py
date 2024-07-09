@@ -28,7 +28,7 @@ from . import (
     plasma_physics,
     static_structure_factors,
     ipd,
-    ee_localfieldcorrections
+    ee_localfieldcorrections,
 )
 
 
@@ -823,7 +823,7 @@ class QCSalpeterApproximation(ScatteringModel):
             plasma_state.T_e,
             plasma_state.n_e,
             setup.measured_energy - setup.energy,
-            plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
         )
 
         return See_0 * jnp.sum(
@@ -886,7 +886,7 @@ class RPA_NoDamping(ScatteringModel):
             plasma_state.n_e,
             setup.measured_energy - setup.energy,
             mu,
-            plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+            plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
         )
 
         return See_0 * jnp.sum(
@@ -935,7 +935,6 @@ class BornMermin(ScatteringModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
-    
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
@@ -957,7 +956,7 @@ class BornMermin(ScatteringModel):
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
-            plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
         )
         return See_0 * plasma_state.Z_free
 
@@ -1183,7 +1182,9 @@ class SchumacherImpulse(ScatteringModel):
                 omega, k, population, Zeff, E_b
             )
             out += sbe * Z_c * x[idx]
-        return out
+        return jnpu.where(
+            jnp.isnan(out.m_as(ureg.second)), 0 * ureg.second, out
+        )
 
     def _tree_flatten(self):
         children = ()
@@ -1739,9 +1740,11 @@ class Gregori2004Screening(Model):
         )
         return q
 
+
 # Electron-Electron Local Field Correction Models
 # ===============================================
 #
+
 
 class ElectronicLFCGeldartVosko(Model):
     allowed_keys = ["ee-lfc"]
@@ -1754,7 +1757,22 @@ class ElectronicLFCGeldartVosko(Model):
         setup: Setup,
         **kwargs,
     ) -> jnp.ndarray:
-        return ee_localfieldcorrections.eelfc_geldartvosko(setup.k, plasma_state.T_e, plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_geldartvosko(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_geldartvosko(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
 
 class ElectronicLFCUtsumiIchimaru(Model):
     allowed_keys = ["ee-lfc"]
@@ -1767,7 +1785,22 @@ class ElectronicLFCUtsumiIchimaru(Model):
         setup: Setup,
         **kwargs,
     ) -> jnp.ndarray:
-        return ee_localfieldcorrections.eelfc_utsumiichimaru(setup.k, plasma_state.T_e, plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_utsumiichimaru(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_utsumiichimaru(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
 
 class ElectronicLFCStaticInterpolation(Model):
     allowed_keys = ["ee-lfc"]
@@ -1780,7 +1813,22 @@ class ElectronicLFCStaticInterpolation(Model):
         setup: Setup,
         **kwargs,
     ) -> jnp.ndarray:
-        return ee_localfieldcorrections.eelfc_interpolationgregori2007(setup.k, plasma_state.T_e, plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
 
 class ElectronicLFCConstant(Model):
     allowed_keys = ["ee-lfc"]
@@ -1798,7 +1846,16 @@ class ElectronicLFCConstant(Model):
         **kwargs,
     ) -> jnp.ndarray:
         return self.value
-    
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return self.value
+
     # The following is required to jit a Model
     def _tree_flatten(self):
         children = (self.value,)
@@ -1812,6 +1869,7 @@ class ElectronicLFCConstant(Model):
         (obj.value,) = children
 
         return obj
+
 
 _all_models = [
     ElectronicLFCUtsumiIchimaru,

@@ -12,6 +12,8 @@ import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
 
+# jax.config.update("jax_disable_jit", True)
+
 import matplotlib.pyplot as plt
 
 from functools import partial
@@ -24,7 +26,7 @@ ureg = jaxrts.ureg
 file_dir = pathlib.Path(__file__).parent
 mcss_file = (
     file_dir
-    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=3.0]_E=8978eV_theta=120_rho=3.0gcc_T=2.0eV_RPA.txt"
+    / "../tests/mcss_samples/without_rk/no_ipd/mcss_H[Z_f=1.0]_E=8300eV_theta=90_rho=80.0gcc_T=200.0eV_RPA.txt"
 )
 
 
@@ -90,14 +92,21 @@ setup = jaxrts.setup.Setup(
     ),
 )
 
+print(setup.measured_energy)
+print(setup.energy)
+print(setup.instrument((setup.measured_energy - setup.energy)/ureg.hbar))
+
 print(eelfc_farid(setup.k.to(1 / ureg.angstrom), T_e = T_e * ureg.electron_volt / ureg.k_B, n_e = 1E23 / (1 * ureg.cc)))
 
 # state["chemical potential"] = jaxrts.models.ConstantChemPotential(
 #     0 * ureg.electron_volt
 # )
+
+print(state.evaluate("screening length", setup).to(ureg.nanometer))
 state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
 state["ipd"] = jaxrts.models.ConstantIPD(0 * ureg.electron_volt)
 state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
+print(state.evaluate("screening length", setup).to(ureg.nanometer))
 state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
 state["screening"] = jaxrts.models.FiniteWavelengthScreening()
 state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHuckelPotential()
@@ -141,6 +150,16 @@ plt.plot(
     ls="dotted",
     alpha=0.7,
 )
+plt.plot(
+    (setup.measured_energy).m_as(ureg.electron_volt),
+    (state.evaluate("ionic scattering", setup) / norm).m_as(
+        ureg.dimensionless
+    ),
+    color="C0",
+    ls="dashdot",
+    alpha=0.7,
+)
+print(state.evaluate("ee-lfc", setup).m_as(ureg.dimensionless))
 state["ee-lfc"] = jaxrts.models.ElectronicLFCConstant(1.0)
 
 I = state.probe(setup)

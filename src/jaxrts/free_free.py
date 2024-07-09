@@ -708,7 +708,7 @@ def S0_ee_RPA_no_damping(
     E = -E
     eps = dielectric_function_RPA_no_damping(k, E, chem_pot, T_e, unsave)
     xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
-    v_k = (1 * ureg.elementary_charge ** 2) / ureg.vacuum_permittivity / k**2
+    v_k = coulomb_potential_fourier(-1, -1, k)
     xi = xi_lfc_corrected(xi0, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
 
