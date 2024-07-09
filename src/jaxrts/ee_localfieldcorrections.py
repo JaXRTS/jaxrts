@@ -139,17 +139,25 @@ def eelfc_utsumiichimaru(
     )
 
 
-@jax.jit
+# @jax.jit
 def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     """
     Improved version of Utsumi and Ichimaru, based on QMC results. (Farid et al. 1993)
     """
     pass
 
-    k_F = fermi_wavenumber(n_e)
-    Q = (k / k_F).m_as(ureg.dimensionless)
-    rs = interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)
+    rs = (interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)).m_as(ureg.dimensionless)
 
+    lamb = (4 / (9 * jnp.pi)) ** (1/3)
+
+    k_F = 1 / (lamb * rs)
+    E_F = k_F ** 2 / 2
+    w_p = (3 / rs ** 3) ** (1/2)
+    # w_p = plasma_frequency(n_e)
+    # E_F = fermi_energy(n_e)
+    # k_F = fermi_wavenumber(n_e)
+    Q = (k / fermi_wavenumber(n_e)).m_as(ureg.dimensionless)
+    
     rs2dEc_drs = (0.0621814 + 0.61024 * rs ** (1 / 2)) / (
         1 + 9.81379 * rs ** (1 / 2) + 2.82224 * rs + 0.736411 * rs ** (3 / 2)
     )
@@ -204,19 +212,16 @@ def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
             + (-6.3066750) * x**5
         )
     )
-
     a = 0.029
-    E_F = fermi_energy(n_e)
-    w_p = plasma_frequency(n_e)
 
     # Expression of g0_ee (T = 0) by Yasuhara
     z = 4 * (4 / (9 * jnp.pi)) ** (1 / 6) * (rs / jnp.pi) ** (1 / 2)
-    g0_ee = 1 / 8 * (z / jax.scipy.special.i1(z.m_as(ureg.dimensionless))) ** 2
+    g0_ee = 1 / 8 * (z / jax.scipy.special.i1(z)) ** 2
 
-    b0A = 2 / 3 * (1 - g0_ee)
-    b0B = 48 * E_F**2 / (35 * w_p**2) * delta_4
-    b0C = -16 / 25 * (E_F**2 / w_p**2) * (2 * delta_2 + delta_2**2)
-    bm2 = 4 / 5 * E_F**2 / w_p**2 * delta_2
+    b0A = (2 / 3 * (1 - g0_ee))
+    b0B = (48 * E_F**2 / (35 * w_p**2) * delta_4)
+    b0C = (-16 / 25 * (E_F**2 / w_p**2) * (2 * delta_2 + delta_2**2))
+    bm2 = (4 / 5 * E_F**2 / w_p**2 * delta_2)
     b0 = b0A + b0B + b0C
 
     A = 63 / 64 * a + 15 / 4096 * (b0A - 2 * (b0B + b0C) - 16 * bm2)
@@ -231,7 +236,7 @@ def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
         + (A * Q**4 + D * Q**2 - C)
         * (4 - Q**2)
         / (4 * Q)
-        * jnp.log((2 + Q) / (2 - Q))
+        * jnp.log(jnp.abs((2 + Q) / (2 - Q)))
     )
 
 

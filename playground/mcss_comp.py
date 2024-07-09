@@ -4,6 +4,7 @@ sys.path.append(
     "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
 )
 
+from jaxrts.ee_localfieldcorrections import eelfc_farid
 import jaxrts
 import jax
 import jax.numpy as jnp
@@ -79,6 +80,7 @@ state = jaxrts.PlasmaState(
     mass_density=rho * ureg.gram / ureg.centimeter**3 * jnp.array(number_frac),
     T_e=T_e * ureg.electron_volt / ureg.k_B,
 )
+
 setup = jaxrts.setup.Setup(
     ureg(f"{theta}°"),
     ureg(f"{central_energy} eV"),
@@ -89,6 +91,8 @@ setup = jaxrts.setup.Setup(
         sigma=ureg("10eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
     ),
 )
+
+print(eelfc_farid(setup.k.to(1 / ureg.angstrom), T_e = T_e * ureg.electron_volt / ureg.k_B, n_e = 1E23 / (1 * ureg.cc)))
 
 # state["chemical potential"] = jaxrts.models.ConstantChemPotential(
 #     0 * ureg.electron_volt
