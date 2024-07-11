@@ -2,10 +2,12 @@ import pathlib
 
 import numpy as onp
 import pytest
+import jax.numpy as jnp
 
 import jaxrts
 
 ureg = jaxrts.ureg
+
 
 def test_BM_glenzer2009_fig9b_reprduction() -> None:
     # This should be the same data as gregori.2003, fig 1b. But the data
@@ -227,3 +229,20 @@ def test_gregori2003_fig1c_reprduction() -> None:
         assert onp.max(error) < 0.05
         assert onp.mean(error) < 0.02
         count += 1
+
+
+def test_dandrea_fit_reproduces_calculated_RPA() -> None:
+    lambda_0 = 0.26 * ureg.nanometer
+    E = jnp.linspace(-200, 500, 1000) * ureg.electron_volt
+    theta = 60
+    n_e = 1e23 / ureg.centimeter**3
+    T = 50000 * ureg.kelvin
+    k = (4 * onp.pi / lambda_0) * onp.sin(onp.deg2rad(theta) / 2.0)
+
+    mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(T, n_e)
+    calc_RPA = jaxrts.free_free.dielectric_function_RPA_no_damping(k, E, mu, T)
+    dfit_RPA = jaxrts.free_free.dielectric_function_RPA_Dandrea1986(
+        k, E, T, n_e
+    )
+    assert jnp.max(jnp.abs(jnp.real(calc_RPA) - jnp.real(dfit_RPA))) < 0.005
+    assert jnp.max(jnp.abs(jnp.imag(calc_RPA) - jnp.imag(dfit_RPA))) < 0.005

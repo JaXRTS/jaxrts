@@ -5,18 +5,20 @@ structure.
 
 from .units import ureg, Quantity
 from .plasma_physics import (
+    fermi_energy,
+    fermi_wavenumber,
     coulomb_potential_fourier,
     kin_energy,
     fermi_dirac,
     plasma_frequency,
     noninteracting_susceptibility_from_epsilon,
+    wiegner_seitz_radius,
 )
 
 from .ee_localfieldcorrections import xi_lfc_corrected
 
 from .static_structure_factors import S_ii_AD
-from .math import inverse_fermi_12_fukushima_single_prec
-
+from . import math
 import time
 from typing import List
 from functools import partial
@@ -201,7 +203,7 @@ def S0ee_from_susceptibility_FDT(
     T_e: Quantity,
     n_e: Quantity,
     E: Quantity | List,
-    susceptibility : Quantity | List,
+    susceptibility: Quantity | List,
 ) -> Quantity:
     """
     Links the dielectric function to S0_ee via the fluctuation dissipation
@@ -247,9 +249,14 @@ def S0ee_from_susceptibility_FDT(
 
     return res
 
+
 @jit
 def S0_ee_Salpeter(
-    k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List, lfc : Quantity = 0.0,
+    k: Quantity,
+    T_e: Quantity,
+    n_e: Quantity,
+    E: Quantity | List,
+    lfc: Quantity = 0.0,
 ) -> jnp.ndarray:
     """
     Calculates the free electron dynamics structure using the quantum corrected
@@ -278,7 +285,7 @@ def S0_ee_Salpeter(
     E = -E
     eps = dielectric_function_salpeter(k, T_e, n_e, E)
     xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
-    v_k = (1 * ureg.elementary_charge ** 2) / ureg.vacuum_permittivity / k**2
+    v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
 
@@ -598,6 +605,221 @@ def _real_diel_func_RPA_no_damping(
     return 1 + (prefactor * integral).to_base_units()
 
 
+def _phi_Dandrea(x, theta, eta0):
+    I_min05_eta0 = math.fermi_neg12_rational_approximation_antia(eta0)
+    I_plu15_eta0 = math.fermi_32_rational_approximation_antia(eta0)
+    I_plu25_eta0 = math.fermi_52_rational_approximation_antia(eta0)
+    # A21, ff
+    a2 = (-0.2280 + theta) / (
+        0.4222 + -0.6466 * theta**0.70572 + 5.8820 * theta**2
+    )
+    a4 = (1 - 3.0375 * theta + 64.646 * theta**2) / (
+        19.608
+        - 96.978 * theta
+        + 423.66 * theta**2
+        - 331.01 * theta**3
+        + 20.833 * 64.646 * theta**4
+    )
+    a6 = (-0.1900 + theta) / (
+        0.36538
+        - 2.2575 * theta
+        + 22.942 * theta**2
+        - 43.492 * theta**3
+        + 106.40 * theta**4
+    )
+    a8 = (0.91 - 6.4453 * theta + 12.2324 * theta**2) / (
+        1
+        - 7.1316 * theta
+        + 22.725 * theta**2
+        + 58.092 * theta**3
+        - 436.02 * theta**4
+        - 826.51 * theta**5
+        + 4912.9 * theta**6
+    )
+
+    # A19
+    J = (1 + 3248.8 * theta**2 - 691.47 * theta**4 - 3202700 * theta**7) / (
+        1
+        + (3248.8 - jnp.pi**2 / 6) * theta**2
+        - 4535.6 * theta**4
+        - 462400 * theta**6
+        + (
+            (
+                3
+                * jnp.sqrt(2)
+                * -3202700
+                / (4 * jnp.sqrt(jnp.pi))
+                * theta ** (15 / 2)
+            )
+            + (3 * -3202700 / 4) * theta**9
+        )
+    )
+    Kn = 1 - 4.8780 * theta**2 + 473.25 * theta**4 - 2337.5 * theta**7
+    Kd = (
+        1
+        + (-4.8780 - 3 * jnp.pi**2 / 4) * theta**2
+        + 348.31 * theta**4
+        + 1517.3 * theta**7
+        - (
+            7
+            * jnp.sqrt(2)
+            * -2337.5
+            / (8 * jnp.sqrt(jnp.pi))
+            * theta ** (17 / 2)
+        )
+        - ((3 * -2337.5 / 8) * theta**10)
+    )
+    K = Kn / Kd
+
+    b2 = a2 + 2 * J / (3 * jnpu.sqrt(theta) * I_min05_eta0)
+    b4 = b2**2 - a2 * b2 + a4 + 2 * K / (15 * jnpu.sqrt(theta) * I_min05_eta0)
+    b10 = 3 / 2 * jnpu.sqrt(theta) * I_min05_eta0 * a8
+    b8 = (
+        3 / 2 * jnpu.sqrt(theta) * I_min05_eta0 * a6
+        - 1 / 2 * theta ** (5 / 2) * I_plu15_eta0 * b10
+    )
+    b6 = (
+        3 / 2 * jnpu.sqrt(theta) * I_min05_eta0 * a4
+        - 1 / 2 * theta ** (5 / 2) * I_plu15_eta0 * b8
+        - 3 / 10 * theta ** (7 / 2) * I_plu25_eta0 * b10
+    )
+
+    # Dandrea, eqn 4.8b
+    numerator = 1 + a2 * x**2 + a4 * x**4 + a6 * x**6 + a8 * x**8
+    denum = 1 + b2 * x**2 + b4 * x**4 + b6 * x**6 + b8 * x**8 + b10 * x**10
+    phi_tilde = numerator / denum
+    # Dandrea, eqn 4.8a
+    phi = jnpu.sqrt(theta) * I_min05_eta0 * x * phi_tilde
+    return phi
+
+
+@jit
+def _real_susceptibility_func_RPA_Dandrea(
+    k: Quantity,
+    theta: float,
+    Q: float,
+    rs: float,
+    z: float,
+    eta0: float,
+    alpha: float,
+) -> Quantity:
+    """
+    Eqn 4.6 of :cite:`Dandrea.1986`.
+
+    The name of this function might be misleading, the 1/V factor is applied in
+    :py:func:`~.susceptibility_RPA_Dandrea1986`.
+    """
+
+    x_plu = z / Q + Q
+    x_min = z / Q - Q
+
+    # Minus was found by tests, seems like eqn 4.7 in :cite:`Dandrea.1986` is
+    # sign-flipped to (10a) in :cite:`Arista.1984`.
+    pref = -alpha * rs / (4 * jnp.pi * Q**3)
+
+    return pref * (
+        _phi_Dandrea(x_plu, theta, eta0) - _phi_Dandrea(x_min, theta, eta0)
+    )
+
+
+@jit
+def _imag_susceptibility_func_RPA_Dandrea(
+    k: Quantity,
+    theta: float,
+    Q: float,
+    rs: float,
+    z: float,
+    eta0: float,
+    alpha: float,
+) -> Quantity:
+    """
+    Eqn 4.5 of :cite:`Dandrea.1986`.
+
+    The name of this function might be misleading, the 1/V factor is applied in
+    :py:func:`~.susceptibility_RPA_Dandrea1986`.
+    """
+    x_plu = z / Q + Q
+    x_min = z / Q - Q
+
+    pref = -alpha * rs * theta / (8 * Q**3)
+    return pref * jnpu.log(
+        (1 + jnpu.exp(eta0 - 1 / theta * x_min**2))
+        / (1 + jnpu.exp(eta0 - 1 / theta * x_plu**2))
+    )
+
+
+@jit
+def susceptibility_RPA_Dandrea1986(
+    k: Quantity,
+    E: Quantity,
+    T: Quantity,
+    n_e: Quantity,
+):
+    Ef = fermi_energy(n_e)
+    kf = fermi_wavenumber(n_e)
+    theta = (T * ureg.k_B / Ef).m_as(ureg.dimensionless)
+    alpha = (4 / (9 * jnp.pi)) ** (1 / 3)
+    rs = (wiegner_seitz_radius(n_e) / ureg.a_0).m_as(ureg.dimensionless)
+    Q = (k / (2 * kf)).m_as(ureg.dimensionless)
+    # hbar missing in comparison do Dandrea?
+    z = (E / (4 * Ef)).m_as(ureg.dimensionless)
+    # Dendrea, Eqn 2.2
+    eta0 = math.inverse_fermi_12_fukushima_single_prec(
+        2 / 3 * theta ** (-3 / 2)
+    )
+    real = _real_susceptibility_func_RPA_Dandrea(
+        k, theta, Q, rs, z, eta0, alpha
+    )
+    imag = _imag_susceptibility_func_RPA_Dandrea(
+        k, theta, Q, rs, z, eta0, alpha
+    )
+    return 1 / coulomb_potential_fourier(-1, -1, k) * (real + 1j * imag)
+
+
+@jit
+def dielectric_function_RPA_Dandrea1986(
+    k: Quantity,
+    E: Quantity,
+    T: Quantity,
+    n_e: Quantity,
+):
+    """
+    Calculate the dielectric function in random phase approximation by usind
+    the fitts given by :cite:`Dandrea.1986`, which should give a notable
+    increase in the calculation time over solving the integrals, numerically.
+
+    This function does not require a chemical potential, and rather a electron
+    number density `n_e`. It seems to be included in the fitting functions.
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    E: Quantity
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+    T : Quantity
+        The plasma temperature in Kelvin.
+    n_e : Quantity
+        The electron number_density in 1 / [length]**3.
+
+    Returns
+    -------
+    Quantity
+        The full dielectric function (complex number)
+
+    See Also
+    --------
+    jaxrts.free_free.susceptibility_RPA_Dandrea1986
+        The function used to calculate xi0, the noninteracting susceptibility
+    """
+    xi0 = susceptibility_RPA_Dandrea1986(k, E, T, n_e)
+    return 1 - (coulomb_potential_fourier(-1, -1, k) * xi0).m_as(
+        ureg.dimensionless
+    )
+
+
 @partial(jit, static_argnames=("unsave"))
 def dielectric_function_RPA_no_damping(
     k: Quantity,
@@ -677,7 +899,7 @@ def S0_ee_RPA_no_damping(
     n_e: Quantity,
     E: Quantity | List,
     chem_pot: Quantity,
-    lfc : Quantity = 0.0,
+    lfc: Quantity = 0.0,
     unsave: bool = False,
 ) -> jnp.ndarray:
     """
@@ -720,7 +942,7 @@ def S0_ee_RPA(
     n_e: Quantity,
     E: Quantity | List,
     chem_pot: Quantity,
-    lfc : Quantity = 0.0,
+    lfc: Quantity = 0.0,
 ) -> jnp.ndarray:
     """
     Calculates the free electron dynamics structure using the quantum corrected
@@ -750,7 +972,7 @@ def S0_ee_RPA(
     E = -E
     eps = dielectric_function_RPA(k, E, chem_pot, T_e)
     xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
-    v_k = (1 * ureg.elementary_charge ** 2) / ureg.vacuum_permittivity / k**2
+    v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
 
@@ -1047,6 +1269,23 @@ def dielectric_function_BMA(
 
 
 @jit
+def S0_ee_RPA_Dandrea(
+    k: Quantity,
+    T: Quantity,
+    n_e: Quantity,
+    E: Quantity | List,
+    lfc: Quantity = 0.0,
+) -> jnp.ndarray:
+
+    E = -E
+
+    xi0 = susceptibility_RPA_Dandrea1986(k, E, T, n_e)
+    v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
+    xi = xi_lfc_corrected(xi0, v_k, lfc)
+    return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
+
+
+@jit
 def S0_ee_BMA(
     k: Quantity,
     T: Quantity,
@@ -1055,7 +1294,7 @@ def S0_ee_BMA(
     n_e: Quantity,
     Zf: float,
     E: Quantity | List,
-    lfc : Quantity = 0.0,
+    lfc: Quantity = 0.0,
 ) -> jnp.ndarray:
 
     E = -E
@@ -1063,7 +1302,7 @@ def S0_ee_BMA(
     eps = dielectric_function_BMA(k, E, chem_pot, T, n_e, m_ion, Zf)
 
     xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
-    v_k = (1 * ureg.elementary_charge ** 2) / ureg.vacuum_permittivity / k**2
+    v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
@@ -1132,7 +1371,7 @@ def S0_ee_BMA_chapman_interp(
     n_e: Quantity,
     Zf: float,
     E: Quantity | List,
-    lfc : Quantity = 0.0,
+    lfc: Quantity = 0.0,
     no_of_points: int = 20,
 ) -> jnp.ndarray:
 
@@ -1143,9 +1382,9 @@ def S0_ee_BMA_chapman_interp(
     )
 
     xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
-    v_k = (1 * ureg.elementary_charge ** 2) / ureg.vacuum_permittivity / k**2
+    v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
-    
+
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 
