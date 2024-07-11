@@ -10,6 +10,7 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 import logging
 
+from .plasma_physics import fermi_energy
 logger = logging.getLogger(__name__)
 
 from .math import fermi_neg12_rational_approximation_antia
@@ -57,32 +58,37 @@ def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:
 
 
 @jax.jit
-def inverse_screening_length_e(q: Quantity, ne: Quantity, Te: Quantity):
+def inverse_screening_length_e(ne: Quantity, Te: Quantity):
     """
     Inverse screening length for arbitrary degeneracy as needed for WDM applications.
     """
 
     chem_pot = chem_pot_interpolation(Te, ne)
-
+    beta = 1 / (1 * ureg.boltzmann_constant * Te)
+    
     fermi_integral_neg1_2 = fermi_neg12_rational_approximation_antia(
-        (chem_pot / (1 * ureg.boltzmann_constant * Te)).m_as(
+        (chem_pot * beta).m_as(
             ureg.dimensionless
         )
     )
+    
+    pref = 12 * jnp.pi ** (5/2) * (1 * ureg.elementary_charge ** 2 / (4 * jnp.pi * ureg.epsilon_0)) * ne * beta / (beta * fermi_energy(ne)) ** (3/2)
 
-    therm_wv = jnpu.sqrt(
-        (2 * jnp.pi * 1 * ureg.hbar**2)
-        / ((1 * ureg.electron_mass) * 1 * ureg.boltzmann_constant * Te)
-    )
+    # therm_wv = jnpu.sqrt(
+    #     (2 * jnp.pi * 1 * ureg.hbar**2)
+    #     / ((1 * ureg.electron_mass) * 1 * ureg.boltzmann_constant * Te)
+    # )
 
-    k = (
-        (q**2)
-        / (4 * jnp.pi * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
-        * (2.0 / therm_wv**3)
-        * fermi_integral_neg1_2
-    )
+    # k = (
+    #     (q**2)
+    #     / (4 * jnp.pi * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
+    #     * (2.0 / therm_wv**3)
+    #     * fermi_integral_neg1_2
+    # )
+    
+    k_sq = pref * fermi_integral_neg1_2
 
-    return jnpu.sqrt(k).to(1 / ureg.angstrom)
+    return jnpu.sqrt(k_sq).to(1 / ureg.angstrom)
 
 
 @jax.jit
@@ -95,23 +101,18 @@ def ipd_debye_hueckel(
     Coulomb forces are weak perturbations.
     """
     # The Debye (screening) wavenumber for the electrons for arbitrary degeneracy
-    K_De = inverse_screening_length_e(1 * ureg.elementary_charge, ne, Te)
+    # K_De = inverse_screening_length_e(ne, Te)
     # The Debye wavenumber for the ions
-    K_Di = jnpu.sqrt(
-        Zi**2
-        * 1
-        * ureg.elementary_charge**2
-        * ni
-        / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti)
-    )
-    kappa= jnpu.sqrt(K_De**2 + K_Di**2)
+    # K_Di_squared = Zi ** 2 * 1 * ureg.elementary_charge ** 2  * ni / (ureg.epsilon_0 * ureg.boltzmann_constant * Ti)
     
+    # kappa = jnpu.sqrt(K_Di_squared + K_De**2)
+
+    kappa_class = jnpu.sqrt(Zi ** 2 * ni * 1 * ureg.elementary_charge**2 / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti))
     # The ionization potential depression energy shift
     ipd_shift = (
-        -Zi
-        * 1
+        -(Zi+1)
         * ureg.elementary_charge**2
-        * kappa
+        * kappa_class
         / (4 * jnp.pi * ureg.epsilon_0)
     )
 
@@ -138,7 +139,7 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     # approximately 2 R_0.
     R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
 
-    ipd_shift = -pref * Zi * 1 * ureg.elementary_charge**2 / (R_0 * 4 * jnp.pi * 1 * ureg.epsilon_0)
+    ipd_shift = -pref * Zi**2 * 1 * ureg.elementary_charge**2 / (R_0 * 4 * jnp.pi * 1 * ureg.epsilon_0)
 
     return ipd_shift.to(ureg.electron_volt)
 
@@ -156,7 +157,7 @@ def ipd_stewart_pyatt(
     R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
 
     # The Debye (screening) wavenumber for the electrons for arbitrary degeneracy
-    K_De = inverse_screening_length_e(1 * ureg.elementary_charge, ne, Te)
+    K_De = inverse_screening_length_e(ne, Te)
     # The Debye wavenumber for the ions
     K_Di = jnpu.sqrt(
         Zi**2
