@@ -913,6 +913,55 @@ class RPA_NoDamping(ScatteringModel):
         return xi
 
 
+class RPA_DandreaFit(ScatteringModel):
+    """
+    Model for elastic free-free scattering based fitting to the Random Phase
+    Approximation, as presented by :cite:`Dandrea.1986`.
+
+    Requires a 'chemical potential' model (defaults to
+    :py:class:`~IchimaryChemPotential`).
+
+    See Also
+    --------
+    jaxtrs.free_free.
+        Function used to calculate the dynamic free-free electron structure
+        factor.
+    """
+
+    allowed_keys = ["free-free scattering"]
+    __name__ = "PRA_DandreaFit"
+
+    @jax.jit
+    def evaluate_raw(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        See_0 = free_free.S0_ee_RPA_Dandrea(
+            k,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
+        )
+
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
+
+    @jax.jit
+    def susceptibility(
+        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    ) -> jnp.ndarray:
+        k = setup.k
+        xi0 = free_free.susceptibility_RPA_Dandrea1986(
+            k, E, plasma_state.T_e, plasma_state.n_e
+        )
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+        return xi
+
+
 class BornMermin(ScatteringModel):
     """
     Model of the free-free scattering, based on the Born Mermin Approximation
@@ -1902,6 +1951,7 @@ _all_models = [
     PauliBlockingIPD,
     PaulingFormFactors,
     QCSalpeterApproximation,
+    RPA_DandreaFit,
     RPA_NoDamping,
     ScatteringModel,
     SchumacherImpulse,

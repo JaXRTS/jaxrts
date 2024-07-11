@@ -1269,6 +1269,23 @@ def dielectric_function_BMA(
 
 
 @jit
+def S0_ee_RPA_Dandrea(
+    k: Quantity,
+    T: Quantity,
+    n_e: Quantity,
+    E: Quantity | List,
+    lfc: Quantity = 0.0,
+) -> jnp.ndarray:
+
+    E = -E
+
+    xi0 = susceptibility_RPA_Dandrea1986(k, E, T, n_e)
+    v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
+    xi = xi_lfc_corrected(xi0, v_k, lfc)
+    return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
+
+
+@jit
 def S0_ee_BMA(
     k: Quantity,
     T: Quantity,
