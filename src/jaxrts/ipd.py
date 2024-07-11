@@ -58,7 +58,7 @@ def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:
 
 
 @jax.jit
-def inverse_screening_length_e(ne: Quantity, Te: Quantity):
+def inverse_screening_length_e(q: Quantity, ne: Quantity, Te: Quantity):
     """
     Inverse screening length for arbitrary degeneracy as needed for WDM applications.
     """
@@ -72,21 +72,21 @@ def inverse_screening_length_e(ne: Quantity, Te: Quantity):
         )
     )
     
-    pref = 12 * jnp.pi ** (5/2) * (1 * ureg.elementary_charge ** 2 / (4 * jnp.pi * ureg.epsilon_0)) * ne * beta / (beta * fermi_energy(ne)) ** (3/2)
+    # pref = 12 * jnp.pi ** (5/2) * (1 * ureg.elementary_charge ** 2 / (4 * jnp.pi * ureg.epsilon_0)) * ne * beta / (beta * fermi_energy(ne)) ** (3/2)
 
-    # therm_wv = jnpu.sqrt(
-    #     (2 * jnp.pi * 1 * ureg.hbar**2)
-    #     / ((1 * ureg.electron_mass) * 1 * ureg.boltzmann_constant * Te)
-    # )
+    therm_wv = jnpu.sqrt(
+        (2 * jnp.pi * 1 * ureg.hbar**2)
+        / ((1 * ureg.electron_mass) * 1 * ureg.boltzmann_constant * Te)
+    )
 
-    # k = (
-    #     (q**2)
-    #     / (4 * jnp.pi * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
-    #     * (2.0 / therm_wv**3)
-    #     * fermi_integral_neg1_2
-    # )
+    k_sq = (
+        (q**2)
+        / (4 * jnp.pi * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
+        * (2.0 / therm_wv**3)
+        * fermi_integral_neg1_2
+    )
     
-    k_sq = pref * fermi_integral_neg1_2
+    # k_sq = pref * fermi_integral_neg1_2
 
     return jnpu.sqrt(k_sq).to(1 / ureg.angstrom)
 
