@@ -1136,6 +1136,109 @@ class BornMermin_ChapmanInterp(ScatteringModel):
 
         return obj
 
+class BornMermin_ChapmanInterpFit(ScatteringModel):
+    """
+    Model of the free-free scattering, based on the Born Mermin Approximation
+    (:cite:`Mermin.1970`).
+    Identical to :py:class:`~.BornMermin_ChapmanInterp`, but uses the Dandrea
+    fit (:cite:`Dandrea.1986`), rather than numerically calculating the
+    un-damped RPA, numerically. However, the damped RPA is still evaluated
+    using the integral.
+
+    The number of frequencies defaults to 20. To change it, just change the
+    attribute of this model after initializing it. i.e.
+
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_ChapmanInterp
+    >>> state["free-free scattering"].no_of_freq = 10
+
+    Requires a 'chemical potential' model (defaults to
+    :py:class:`~IchimaryChemPotential`).
+
+    See Also
+    --------
+
+    jaxrts.free_free.S0_ee_BMA_chapman_interpFit
+        Function used to calculate the dynamic structure factor
+    """
+
+    allowed_keys = ["free-free scattering"]
+    __name__ = "BornMermin_ChapmanInterpFit"
+
+    def __init__(self, no_of_freq: int = 20) -> None:
+        super().__init__()
+        self.no_of_freq: int = no_of_freq
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "chemical potential", IchimaruChemPotential()
+        )
+
+    def check(self, plasma_state: "PlasmaState") -> None:
+        if len(plasma_state) > 1:
+            logger.critical(
+                "'BornMermin_ChapmanInterp' is only implemented for a one-component plasma"  # noqa: E501
+            )
+
+    @jax.jit
+    def evaluate_raw(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        See_0 = free_free.S0_ee_BMA_chapman_interpFit(
+            k,
+            plasma_state.T_e,
+            mu,
+            plasma_state.atomic_masses,
+            plasma_state.n_e,
+            plasma_state.Z_free,
+            setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
+            self.no_of_freq,
+        )
+        return See_0 * plasma_state.Z_free
+
+    @jax.jit
+    def susceptibility(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+    ) -> jnp.ndarray:
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = setup.k
+
+        eps = free_free.dielectric_function_BMA_chapman_interpFit(
+            k,
+            E,
+            mu,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            plasma_state.atomic_masses,
+            plasma_state.Z_free,
+            self.no_of_freq,
+        )
+        xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+        return xi
+
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.no_of_freq,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+
+        return obj
 
 # bound-free Models
 # -----------------
@@ -1930,6 +2033,7 @@ _all_models = [
     BohmStaver,
     BornMermin,
     BornMermin_ChapmanInterp,
+    BornMermin_ChapmanInterpFit,
     ConstantChemPotential,
     ConstantIPD,
     ConstantScreeningLength,

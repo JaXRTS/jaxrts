@@ -29,7 +29,7 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 import numpy as onp
 
-from quadax import quadgk, quadts, romberg, STATUS
+from quadax import quadgk, quadts, rombergts, STATUS
 
 import logging
 
@@ -1226,6 +1226,119 @@ def collision_frequency_BA_Chapman_interp(
 
     return interpolated_integral.to(1 / ureg.second)
 
+@partial(jit, static_argnames=("no_of_points"))
+def collision_frequency_BA_Chapman_interpFit(
+    E: Quantity,
+    T: Quantity,
+    m_ion: Quantity,
+    n_e: Quantity,
+    Zf: float,
+    no_of_points: int = 20,
+    E_cutoff: None | Quantity = None,
+):
+    """
+    Calculate the electron-ion collision frequency for the Born approximation,
+    at it is done in :py:func:`~collision_frequency_BA`, but instead of using a
+    quadrature, we evaluate only at a `no_of_point` points between the
+    frequencies :math:`10^-8 \\omega_{pe}` and :math:`1.1
+    \\max(\\mid \\omega \\mid)`.
+
+    Uses the :cite:`Dandrea.1986` interpolation for the RPA.
+    """
+
+    E_pe = plasma_frequency(n_e) * (1 * ureg.hbar)
+
+    if E_cutoff is None:
+        E_cutoff = 1.1 * jnpu.max(jnpu.max(E))
+
+    interp_E = jnpu.linspace(
+        0.1 * (jnpu.min(jnpu.max(E)) + 1e-6 * E_pe),
+        E_cutoff,
+        no_of_points,
+    )
+    interp_w = interp_E / (1 * ureg.hbar)
+    T_e = T
+    T_i = T
+    kappa = inverse_screening_length_non_degenerate(n_e, T)
+
+    prefactor = (
+        -1j
+        * (ureg.epsilon_0 * jnp.pi * 4)
+        / (6 * jnp.pi**2 * Zf * ureg.elementary_charge**2 * ureg.electron_mass)
+    )
+
+    def integrand(q):
+
+        q /= 1 * ureg.angstrom
+
+        # t1 = time.time()
+        eps_zero = dielectric_function_RPA_Dandrea1986(
+            q, 0 * ureg.electron_volt, T, n_e
+        )
+        eps_part = (
+            dielectric_function_RPA_Dandrea1986(
+                q, interp_E, T, n_e
+            )
+            - eps_zero
+        )
+
+        res = (
+            q**6
+            * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
+            * S_ii_AD(q, T_e, T_i, n_e, m_ion, Zf)
+            * eps_part
+            * (1 / interp_w)
+        ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
+        return jnp.array(
+            [
+                jnp.real(res),
+                jnp.imag(res),
+            ]
+        )
+
+    # Check the choice of the integrator, here...
+    integral, errl = rombergts(
+        integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
+    )
+
+    integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
+    integral *= prefactor
+
+    integral_real, integral_imag = integral
+
+    extended_interp_E = (
+        jnp.array(
+            [
+                *(-1 * interp_E[::-1].m_as(ureg.electron_volt)),
+                *interp_E.m_as(ureg.electron_volt),
+            ]
+        )
+        * ureg.electron_volt
+    )
+    extended_integral_real = jnp.array(
+        [
+            *(-1 * integral_real[::-1]).m_as(1 / ureg.second),
+            *integral_real.m_as(1 / ureg.second),
+        ]
+    ) / (1 * ureg.second)
+    extended_integral_imag = jnp.array(
+        [
+            *(1 * integral_imag[::-1]).m_as(1 / ureg.second),
+            *integral_imag.m_as(1 / ureg.second),
+        ]
+    ) / (1 * ureg.second)
+
+    interpolated_real = jnpu.interp(
+        E, extended_interp_E, extended_integral_real
+    )
+    interpolated_imag = jnpu.interp(
+        E, extended_interp_E, extended_integral_imag
+    )
+
+    interpolated_integral = interpolated_real + 1j * interpolated_imag
+
+    return interpolated_integral.to(1 / ureg.second)
+
 
 @jit
 def dielectric_function_BMA(
@@ -1308,6 +1421,61 @@ def S0_ee_BMA(
 
 
 @partial(jit, static_argnames=("no_of_points"))
+def dielectric_function_BMA_chapman_interpFit(
+    k: Quantity,
+    E: Quantity | List,
+    chem_pot: Quantity,
+    T: Quantity,
+    n_e: Quantity,
+    m_ion: Quantity,
+    Zf: float,
+    no_of_points: int = 20,
+) -> jnp.ndarray:
+    """
+    Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions
+    into account.
+
+    """
+    w = E / (1 * ureg.hbar)
+
+    # Calculate the cut-off energy from the RPA
+
+    See_RPA = S0_ee_RPA_Dandrea(k, T, n_e, E)
+    E_cutoff = (
+        jnpu.min(
+            jnpu.where(See_RPA > jnpu.max(See_RPA * 0.001), E, jnpu.max(E))
+        )
+        * 1.5
+    )
+    E_cutoff = jnpu.absolute(E_cutoff)
+
+    coll_freq = collision_frequency_BA_Chapman_interpFit(
+        E, T, m_ion, n_e, Zf, no_of_points, E_cutoff
+    )
+
+    numerator = (1 + 1j * coll_freq / w) * (
+        dielectric_function_RPA(k, E + 1j * ureg.hbar * coll_freq, chem_pot, T)
+        - 1
+    )
+
+    denumerator = 1 + 1j * (coll_freq / w) * (
+        (
+            dielectric_function_RPA(
+                k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+            )
+            - 1
+        )
+    ) / (
+        dielectric_function_RPA_Dandrea1986(
+            k, 0 * ureg.electron_volt, T, n_e
+        )
+        - 1
+    )
+
+    return (1 + numerator / denumerator).m_as(ureg.dimensionless)
+
+
+@partial(jit, static_argnames=("no_of_points"))
 def dielectric_function_BMA_chapman_interp(
     k: Quantity,
     E: Quantity | List,
@@ -1387,6 +1555,30 @@ def S0_ee_BMA_chapman_interp(
 
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
+@partial(jit, static_argnames=("no_of_points"))
+def S0_ee_BMA_chapman_interpFit(
+    k: Quantity,
+    T: Quantity,
+    chem_pot: Quantity,
+    m_ion: Quantity,
+    n_e: Quantity,
+    Zf: float,
+    E: Quantity | List,
+    lfc: Quantity = 0.0,
+    no_of_points: int = 20,
+) -> jnp.ndarray:
+
+    E = -E
+
+    eps = dielectric_function_BMA_chapman_interpFit(
+        k, E, chem_pot, T, n_e, m_ion, Zf, no_of_points
+    )
+
+    xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+    v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
+    xi = xi_lfc_corrected(xi0, v_k, lfc)
+
+    return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 # def ret_diel_func_DPA(k: Quantity, Z: jnp.ndarray) -> Quantity:
 #     """
