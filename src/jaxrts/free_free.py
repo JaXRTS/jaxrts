@@ -29,7 +29,7 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 import numpy as onp
 
-from quadax import quadgk, quadts, rombergts, STATUS
+from quadax import quadgk, quadts, romberg, STATUS
 
 import logging
 
@@ -1296,8 +1296,7 @@ def collision_frequency_BA_Chapman_interpFit(
             ]
         )
 
-    # Check the choice of the integrator, here...
-    integral, errl = rombergts(
+    integral, errl = quadgk(
         integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
     )
 

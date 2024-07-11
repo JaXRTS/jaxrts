@@ -10,7 +10,7 @@ from .elements import Element
 from .units import ureg, Quantity, to_array
 from .helpers import JittableDict
 from .setup import Setup
-from .models import DebyeHueckelScreeningLength
+from .models import DebyeHueckelScreeningLength, ElectronicLFCConstant
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +55,9 @@ class PlasmaState:
             * jnp.ones_like(self.Z_free)
             * ureg.angstrom,
         }
-        # Set a default screening length
+        # Set a default screening length & LFC
         self["screening length"] = DebyeHueckelScreeningLength()
+        self["ee-lfc"] = ElectronicLFCConstant(0.0)
 
     def __len__(self) -> int:
         return len(self.ions)
