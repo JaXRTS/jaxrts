@@ -1023,7 +1023,12 @@ class BornMermin(FreeFreeModel):
         self, plasma_state: "PlasmaState", setup: Setup, S_ii = None, *args, **kwargs
     ) -> jnp.ndarray:
         if S_ii is None:
-            S_ii = plasma_state["ionic scattering"].Sii(plasma_state, setup)
+            @jax.tree_util.Partial
+            def S_ii(k):
+                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
+                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
+                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
+
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA(
@@ -1049,7 +1054,11 @@ class BornMermin(FreeFreeModel):
         **kwargs,
     ) -> jnp.ndarray:
         if S_ii is None:
-            S_ii = plasma_state["ionic scattering"].Sii(plasma_state, setup)
+            @jax.tree_util.Partial
+            def S_ii(k):
+                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
+                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
+                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
@@ -1116,7 +1125,11 @@ class BornMermin_ChapmanInterp(FreeFreeModel):
         self, plasma_state: "PlasmaState", setup: Setup, S_ii = None, *args, **kwargs
     ) -> jnp.ndarray:
         if S_ii is None:
-            S_ii = plasma_state["ionic scattering"].Sii(plasma_state, setup)
+            @jax.tree_util.Partial
+            def S_ii(k):
+                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
+                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
+                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
@@ -1142,6 +1155,12 @@ class BornMermin_ChapmanInterp(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
+        if S_ii is None:
+            @jax.tree_util.Partial
+            def S_ii(k):
+                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
+                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
+                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
@@ -1230,7 +1249,11 @@ class BornMermin_ChapmanInterpFit(FreeFreeModel):
         **kwargs,
     ) -> jnp.ndarray:
         if S_ii is None:
-            S_ii = plasma_state["ionic scattering"].Sii(plasma_state, setup)
+            @jax.tree_util.Partial
+            def S_ii(k):
+                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
+                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
+                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interpFit(
@@ -1257,7 +1280,11 @@ class BornMermin_ChapmanInterpFit(FreeFreeModel):
         **kwargs,
     ) -> jnp.ndarray:
         if S_ii is None:
-            S_ii = plasma_state["ionic scattering"].Sii(plasma_state, setup)
+            @jax.tree_util.Partial
+            def S_ii(k):
+                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
+                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
+                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 

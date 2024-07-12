@@ -1079,7 +1079,7 @@ def collision_frequency_BA(
         res = (
             q**6
             * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
-            * S_ii
+            * S_ii(q)
             * eps_part
             * (1 / w)
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
@@ -1172,7 +1172,7 @@ def collision_frequency_BA_Chapman_interp(
         res = (
             q**6
             * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
-            * S_ii
+            * S_ii(q)
             * eps_part
             * (1 / interp_w)
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
@@ -1281,11 +1281,10 @@ def collision_frequency_BA_Chapman_interpFit(
             )
             - eps_zero
         )
-
         res = (
             q**6
             * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
-            * S_ii
+            * S_ii(q)
             * eps_part
             * (1 / interp_w)
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
