@@ -157,7 +157,7 @@ def ipd_stewart_pyatt(
     R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
 
     # The Debye (screening) wavenumber for the electrons for arbitrary degeneracy
-    K_De = inverse_screening_length_e(ne, Te)
+    K_De = inverse_screening_length_e(-1 * ureg.elementary_charge, ne, Te)
     # The Debye wavenumber for the ions
     K_Di = jnpu.sqrt(
         Zi**2

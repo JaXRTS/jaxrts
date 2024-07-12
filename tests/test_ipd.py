@@ -108,10 +108,17 @@ def test_ipd_zeng2022():
     rho1, ipd1 = np.genfromtxt(data_path1, unpack=True, delimiter=",")
     rho2, ipd2 = np.genfromtxt(data_path2, unpack=True, delimiter=",")
 
+    sort1 = jnp.argsort(rho1)
+    ipd1 = ipd1[sort1]
+    rho1 = rho1[sort1]
+    sort2 = jnp.argsort(rho2)
+    ipd2 = ipd2[sort2]
+    rho2 = rho2[sort2]
+
     Zi = 11.0
     ma = 26.98 * ureg.gram / ureg.mole
-    ne1 = electron_number_density(np.sort(rho1) * 1 * ureg.gram / ureg.cc, ma, Zi)
-    ne2 = electron_number_density(np.sort(rho2) * 1 * ureg.gram / ureg.cc, ma, Zi)
+    ne1 = electron_number_density(rho1 * 1 * ureg.gram / ureg.cc, ma, Zi)
+    ne2 = electron_number_density(rho2 * 1 * ureg.gram / ureg.cc, ma, Zi)
 
     ipd1_calc = ipd_debye_hueckel(Zi, ne1, ne1 / Zi, T, T).m_as(
         ureg.electron_volt
@@ -121,10 +128,10 @@ def test_ipd_zeng2022():
         ureg.electron_volt
     )
 
-    plt.scatter(np.sort(rho1), ipd1, label="DH Lin2017", color="C0", linestyle="dashed")
-    plt.scatter(np.sort(rho2), ipd2, label="IS Lin2017", color="C1", linestyle="dashed")
-    plt.plot(np.sort(rho1), ipd1_calc, label="DH calc", color="C0")
-    plt.plot(np.sort(rho2), ipd2_calc, label="PB calc", color="C1")
+    plt.plot(rho1, ipd1, label="DH Lin2017", color="C0", linestyle="dashed", marker="+")
+    plt.plot(rho2, ipd2, label="SP Lin2017", color="C3", linestyle="dashed", marker="+")
+    plt.plot(rho1, ipd1_calc, label="DH calc", color="C0")
+    plt.plot(rho2, ipd2_calc, label="PB calc", color="C1")
     plt.plot(rho2, ipd3_calc, label="SP calc", color="C2")
 
     plt.xscale("log")
