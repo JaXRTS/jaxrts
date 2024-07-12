@@ -1,13 +1,17 @@
 import pathlib
 import sys
 
+import jax
+jax.config.update("jax_compilation_cache_dir", "/tmp/jax_cache")
+jax.config.update("jax_persistent_cache_min_entry_size_bytes", -1)
+jax.config.update("jax_persistent_cache_min_compile_time_secs", 0.5)
+
 sys.path.append(
     "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
 )
 
 from jaxrts.ee_localfieldcorrections import eelfc_farid
 import jaxrts
-import jax
 import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
@@ -21,12 +25,20 @@ from functools import partial
 import time
 import re
 
+import os
+
+# Allow jax to use 6 CPUs, see
+# https://astralord.github.io/posts/exploring-parallel-strategies-with-jax/
+os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=6"
+
+tstart = time.time()
+
 ureg = jaxrts.ureg
 
 file_dir = pathlib.Path(__file__).parent
 mcss_file = (
     file_dir
-    / "../tests/mcss_samples/without_rk/no_ipd/mcss_H[Z_f=1.0]_E=8300eV_theta=90_rho=80.0gcc_T=200.0eV_RPA.txt"
+    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[frac=0.5_Z_f=3.0]O[frac=0.5_Z_f=3.0]_E=8975eV_theta=120_rho=1.8gcc_T=10.0eV_RPA_NOLFC.txt"
 )
 
 
@@ -73,6 +85,7 @@ E, S_el, S_bf, S_ff, S_tot = onp.genfromtxt(
     delimiter=",",
     unpack=True,
 )
+print(len(E))
 
 state = jaxrts.PlasmaState(
     ions=elements,
@@ -81,39 +94,43 @@ state = jaxrts.PlasmaState(
     T_e=T_e * ureg.electron_volt / ureg.k_B,
 )
 
+sharding = jax.sharding.PositionalSharding(jax.devices())
+energy = (
+    ureg(f"{central_energy} eV")
+    - jnp.linspace(jnp.max(E), jnp.min(E), 2046) * ureg.electron_volt
+)
+sharded_energy = jax.device_put(energy, sharding)
+# sharded_energy = energy
+
 setup = jaxrts.setup.Setup(
     ureg(f"{theta}°"),
     ureg(f"{central_energy} eV"),
-    ureg(f"{central_energy} eV")
-    + jnp.linspace(-700, 200, 2000) * ureg.electron_volt,
+    sharded_energy,
+    # ureg(f"{central_energy} eV")
+    # + jnp.linspace(-700, 200, 2000) * ureg.electron_volt,
     partial(
         jaxrts.instrument_function.instrument_gaussian,
         sigma=ureg("10eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
     ),
 )
 
-print(setup.measured_energy)
-print(setup.energy)
-print(setup.instrument((setup.measured_energy - setup.energy)/ureg.hbar))
-
-print(eelfc_farid(setup.k.to(1 / ureg.angstrom), T_e = T_e * ureg.electron_volt / ureg.k_B, n_e = 1E23 / (1 * ureg.cc)))
-
 # state["chemical potential"] = jaxrts.models.ConstantChemPotential(
 #     0 * ureg.electron_volt
 # )
 
-print(state.evaluate("screening length", setup).to(ureg.nanometer))
-state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
-state["ipd"] = jaxrts.models.ConstantIPD(0 * ureg.electron_volt)
-state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
-print(state.evaluate("screening length", setup).to(ureg.nanometer))
-state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
-state["screening"] = jaxrts.models.FiniteWavelengthScreening()
+# print(state.evaluate("screening length", setup).to(ureg.nanometer))
+# state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
+# state["ipd"] = jaxrts.models.ConstantIPD(0 * ureg.electron_volt)
+# state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
+# print(state.evaluate("screening length", setup).to(ureg.nanometer))
+# state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
+state["screening"] = jaxrts.models.Gregori2004Screening()
 state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHuckelPotential()
 state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
-state["free-free scattering"] = jaxrts.models.RPA_NoDamping()
+state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
 state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=1)
 state["free-bound scattering"] = jaxrts.models.Neglect()
+# print(state["free-free scattering"].susceptibility(state, setup, 0 * ureg.electron_volt))
 
 print(setup.k.to(1 / ureg.angstrom))
 # print(setup.full_k.to(1 / ureg.angstrom))
@@ -159,8 +176,7 @@ plt.plot(
     ls="dashdot",
     alpha=0.7,
 )
-print(state.evaluate("ee-lfc", setup).m_as(ureg.dimensionless))
-state["ee-lfc"] = jaxrts.models.ElectronicLFCConstant(1.0)
+state["ee-lfc"] = jaxrts.models.ElectronicLFCConstant(0.0)
 
 I = state.probe(setup)
 norm = jnpu.max(
@@ -171,7 +187,7 @@ plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
     (I / norm).m_as(ureg.dimensionless),
     color="C2",
-    label="LFC=1",
+    label="LFC=0",
 )
 plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
@@ -214,4 +230,5 @@ plt.legend()
 t0 = time.time()
 state.probe(setup)
 print(f"One sample takes {time.time()-t0}s.")
+print(f"Full excecution took {time.time()-tstart}s.")
 plt.show()
