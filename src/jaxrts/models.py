@@ -802,7 +802,7 @@ class FreeFreeModel(ScatteringModel):
 
     @abc.abstractmethod
     def susceptibility(
-        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity, *args, **kwargs
     ) -> jnp.ndarray: ...
 
 
@@ -1020,15 +1020,17 @@ class BornMermin(FreeFreeModel):
 
     @jax.jit
     def evaluate_raw(
-        self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
+        self, plasma_state: "PlasmaState", setup: Setup, S_ii = None, *args, **kwargs
     ) -> jnp.ndarray:
+        if S_ii is None:
+            S_ii = plasma_state["ionic scattering"].Sii(plasma_state, setup)
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA(
             k,
             plasma_state.T_e,
             mu,
-            plasma_state.atomic_masses,
+            S_ii,
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
@@ -1042,9 +1044,12 @@ class BornMermin(FreeFreeModel):
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
+        S_ii = None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
+        if S_ii is None:
+            S_ii = plasma_state["ionic scattering"].Sii(plasma_state, setup)
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
@@ -1054,7 +1059,7 @@ class BornMermin(FreeFreeModel):
             mu,
             plasma_state.T_e,
             plasma_state.n_e,
-            plasma_state.atomic_masses,
+            S_ii,
             plasma_state.Z_free,
         )
         xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
@@ -1108,15 +1113,17 @@ class BornMermin_ChapmanInterp(FreeFreeModel):
 
     @jax.jit
     def evaluate_raw(
-        self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
+        self, plasma_state: "PlasmaState", setup: Setup, S_ii = None, *args, **kwargs
     ) -> jnp.ndarray:
+        if S_ii is None:
+            S_ii = plasma_state["ionic scattering"].Sii(plasma_state, setup)
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
             k,
             plasma_state.T_e,
             mu,
-            plasma_state.atomic_masses,
+            S_ii,
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
@@ -1131,6 +1138,7 @@ class BornMermin_ChapmanInterp(FreeFreeModel):
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
+        S_ii = None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
@@ -1143,7 +1151,7 @@ class BornMermin_ChapmanInterp(FreeFreeModel):
             mu,
             plasma_state.T_e,
             plasma_state.n_e,
-            plasma_state.atomic_masses,
+            S_ii,
             plasma_state.Z_free,
             self.no_of_freq,
         )
@@ -1217,16 +1225,19 @@ class BornMermin_ChapmanInterpFit(FreeFreeModel):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
+        S_ii = None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
+        if S_ii is None:
+            S_ii = plasma_state["ionic scattering"].Sii(plasma_state, setup)
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interpFit(
             k,
             plasma_state.T_e,
             mu,
-            plasma_state.atomic_masses,
+            S_ii,
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
@@ -1241,7 +1252,12 @@ class BornMermin_ChapmanInterpFit(FreeFreeModel):
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
+        S_ii = None,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
+        if S_ii is None:
+            S_ii = plasma_state["ionic scattering"].Sii(plasma_state, setup)
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
@@ -1251,7 +1267,7 @@ class BornMermin_ChapmanInterpFit(FreeFreeModel):
             mu,
             plasma_state.T_e,
             plasma_state.n_e,
-            plasma_state.atomic_masses,
+            S_ii,
             plasma_state.Z_free,
             self.no_of_freq,
         )

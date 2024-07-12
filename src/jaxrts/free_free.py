@@ -1031,7 +1031,7 @@ def statically_screened_ie_debye_potential(
 def collision_frequency_BA(
     E: Quantity,
     T: Quantity,
-    m_ion: Quantity,
+    S_ii: Quantity,
     n_e: Quantity,
     chem_pot: Quantity,
     Zf: float,
@@ -1079,7 +1079,7 @@ def collision_frequency_BA(
         res = (
             q**6
             * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
-            * S_ii_AD(q, T_e, T_i, n_e, m_ion, Zf)
+            * S_ii
             * eps_part
             * (1 / w)
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
@@ -1108,7 +1108,7 @@ def collision_frequency_BA(
 def collision_frequency_BA_Chapman_interp(
     E: Quantity,
     T: Quantity,
-    m_ion: Quantity,
+    S_ii: Quantity,
     n_e: Quantity,
     chem_pot: Quantity,
     Zf: float,
@@ -1172,7 +1172,7 @@ def collision_frequency_BA_Chapman_interp(
         res = (
             q**6
             * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
-            * S_ii_AD(q, T_e, T_i, n_e, m_ion, Zf)
+            * S_ii
             * eps_part
             * (1 / interp_w)
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
@@ -1230,7 +1230,7 @@ def collision_frequency_BA_Chapman_interp(
 def collision_frequency_BA_Chapman_interpFit(
     E: Quantity,
     T: Quantity,
-    m_ion: Quantity,
+    S_ii: Quantity,
     n_e: Quantity,
     Zf: float,
     no_of_points: int = 20,
@@ -1285,7 +1285,7 @@ def collision_frequency_BA_Chapman_interpFit(
         res = (
             q**6
             * statically_screened_ie_debye_potential(q, kappa, Zf) ** 2
-            * S_ii_AD(q, T_e, T_i, n_e, m_ion, Zf)
+            * S_ii
             * eps_part
             * (1 / interp_w)
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
@@ -1346,7 +1346,7 @@ def dielectric_function_BMA(
     chem_pot: Quantity,
     T: Quantity,
     n_e: Quantity,
-    m_ion: Quantity,
+    S_ii: Quantity,
     Zf: float,
 ) -> jnp.ndarray:
     """
@@ -1356,7 +1356,7 @@ def dielectric_function_BMA(
     See, e.g., :cite:`Redmer.2005`, eqn (20) and :cite:`Mermin.1970`, (eqn 8).
     """
     w = E / (1 * ureg.hbar)
-    coll_freq = collision_frequency_BA(E, T, m_ion, n_e, chem_pot, Zf)
+    coll_freq = collision_frequency_BA(E, T, S_ii, n_e, chem_pot, Zf)
 
     numerator = (1 + 1j * coll_freq / w) * (
         dielectric_function_RPA(k, E + 1j * ureg.hbar * coll_freq, chem_pot, T)
@@ -1402,7 +1402,7 @@ def S0_ee_BMA(
     k: Quantity,
     T: Quantity,
     chem_pot: Quantity,
-    m_ion: Quantity,
+    S_ii: Quantity,
     n_e: Quantity,
     Zf: float,
     E: Quantity | List,
@@ -1411,7 +1411,7 @@ def S0_ee_BMA(
 
     E = -E
 
-    eps = dielectric_function_BMA(k, E, chem_pot, T, n_e, m_ion, Zf)
+    eps = dielectric_function_BMA(k, E, chem_pot, T, n_e, S_ii, Zf)
 
     xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
     v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
@@ -1426,7 +1426,7 @@ def dielectric_function_BMA_chapman_interpFit(
     chem_pot: Quantity,
     T: Quantity,
     n_e: Quantity,
-    m_ion: Quantity,
+    S_ii: Quantity,
     Zf: float,
     no_of_points: int = 20,
 ) -> jnp.ndarray:
@@ -1449,7 +1449,7 @@ def dielectric_function_BMA_chapman_interpFit(
     E_cutoff = jnpu.absolute(E_cutoff)
 
     coll_freq = collision_frequency_BA_Chapman_interpFit(
-        E, T, m_ion, n_e, Zf, no_of_points, E_cutoff
+        E, T, S_ii, n_e, Zf, no_of_points, E_cutoff
     )
 
     numerator = (1 + 1j * coll_freq / w) * (
@@ -1481,7 +1481,7 @@ def dielectric_function_BMA_chapman_interp(
     chem_pot: Quantity,
     T: Quantity,
     n_e: Quantity,
-    m_ion: Quantity,
+    S_ii: Quantity,
     Zf: float,
     no_of_points: int = 20,
 ) -> jnp.ndarray:
@@ -1504,7 +1504,7 @@ def dielectric_function_BMA_chapman_interp(
     E_cutoff = jnpu.absolute(E_cutoff)
 
     coll_freq = collision_frequency_BA_Chapman_interp(
-        E, T, m_ion, n_e, chem_pot, Zf, no_of_points, E_cutoff
+        E, T, S_ii, n_e, chem_pot, Zf, no_of_points, E_cutoff
     )
 
     numerator = (1 + 1j * coll_freq / w) * (
@@ -1534,7 +1534,7 @@ def S0_ee_BMA_chapman_interp(
     k: Quantity,
     T: Quantity,
     chem_pot: Quantity,
-    m_ion: Quantity,
+    S_ii: Quantity,
     n_e: Quantity,
     Zf: float,
     E: Quantity | List,
@@ -1545,7 +1545,7 @@ def S0_ee_BMA_chapman_interp(
     E = -E
 
     eps = dielectric_function_BMA_chapman_interp(
-        k, E, chem_pot, T, n_e, m_ion, Zf, no_of_points
+        k, E, chem_pot, T, n_e, S_ii, Zf, no_of_points
     )
 
     xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
@@ -1559,7 +1559,7 @@ def S0_ee_BMA_chapman_interpFit(
     k: Quantity,
     T: Quantity,
     chem_pot: Quantity,
-    m_ion: Quantity,
+    S_ii: Quantity,
     n_e: Quantity,
     Zf: float,
     E: Quantity | List,
@@ -1570,7 +1570,7 @@ def S0_ee_BMA_chapman_interpFit(
     E = -E
 
     eps = dielectric_function_BMA_chapman_interpFit(
-        k, E, chem_pot, T, n_e, m_ion, Zf, no_of_points
+        k, E, chem_pot, T, n_e, S_ii, Zf, no_of_points
     )
 
     xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
