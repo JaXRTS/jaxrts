@@ -790,7 +790,17 @@ class ThreePotentialHNCIonFeat(Model):
 # screening models, later.
 
 
-class QCSalpeterApproximation(ScatteringModel):
+class FreeFreeModel(ScatteringModel):
+    #: A list of keywords where this model is adequate for
+    allowed_keys: list[str] = ["free-free scattering"]
+
+    @abc.abstractmethod
+    def susceptibility(
+        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    ) -> jnp.ndarray: ...
+
+
+class QCSalpeterApproximation(FreeFreeModel):
     """
     Quantum Corrected Salpeter Approximation for free-free scattering.
     Presented in :cite:`Gregori.2003`, which provide a quantum correction to
@@ -810,7 +820,6 @@ class QCSalpeterApproximation(ScatteringModel):
         factor.
     """
 
-    allowed_keys = ["free-free scattering"]
     __name__ = "QCSalpeterApproximation"
 
     @jax.jit
@@ -848,7 +857,7 @@ class QCSalpeterApproximation(ScatteringModel):
         return xi
 
 
-class RPA_NoDamping(ScatteringModel):
+class RPA_NoDamping(FreeFreeModel):
     """
     Model for elastic free-free scattering based on the Random Phase
     Approximation
@@ -866,7 +875,6 @@ class RPA_NoDamping(ScatteringModel):
         factor.
     """
 
-    allowed_keys = ["free-free scattering"]
     __name__ = "RPA_NoDamping"
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -913,7 +921,7 @@ class RPA_NoDamping(ScatteringModel):
         return xi
 
 
-class RPA_DandreaFit(ScatteringModel):
+class RPA_DandreaFit(FreeFreeModel):
     """
     Model for elastic free-free scattering based fitting to the Random Phase
     Approximation, as presented by :cite:`Dandrea.1986`.
@@ -928,7 +936,6 @@ class RPA_DandreaFit(ScatteringModel):
         factor.
     """
 
-    allowed_keys = ["free-free scattering"]
     __name__ = "PRA_DandreaFit"
 
     @jax.jit
@@ -962,7 +969,7 @@ class RPA_DandreaFit(ScatteringModel):
         return xi
 
 
-class BornMermin(ScatteringModel):
+class BornMermin(FreeFreeModel):
     """
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
@@ -978,7 +985,6 @@ class BornMermin(ScatteringModel):
     """
 
     __name__ = "BornMermin"
-    allowed_keys = ["free-free scattering"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1032,7 +1038,7 @@ class BornMermin(ScatteringModel):
         return xi
 
 
-class BornMermin_ChapmanInterp(ScatteringModel):
+class BornMermin_ChapmanInterp(FreeFreeModel):
     """
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
@@ -1057,7 +1063,6 @@ class BornMermin_ChapmanInterp(ScatteringModel):
         Function used to calculate the dynamic structure factor
     """
 
-    allowed_keys = ["free-free scattering"]
     __name__ = "BornMermin_ChapmanInterp"
 
     def __init__(self, no_of_freq: int = 20) -> None:
@@ -1136,7 +1141,8 @@ class BornMermin_ChapmanInterp(ScatteringModel):
 
         return obj
 
-class BornMermin_ChapmanInterpFit(ScatteringModel):
+
+class BornMermin_ChapmanInterpFit(FreeFreeModel):
     """
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
@@ -1161,7 +1167,6 @@ class BornMermin_ChapmanInterpFit(ScatteringModel):
         Function used to calculate the dynamic structure factor
     """
 
-    allowed_keys = ["free-free scattering"]
     __name__ = "BornMermin_ChapmanInterpFit"
 
     def __init__(self, no_of_freq: int = 20) -> None:
@@ -1239,6 +1244,7 @@ class BornMermin_ChapmanInterpFit(ScatteringModel):
         obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
 
         return obj
+
 
 # bound-free Models
 # -----------------
