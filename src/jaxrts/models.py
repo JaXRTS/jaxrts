@@ -1948,8 +1948,8 @@ class Gregori2004Screening(Model):
             plasma_state.T_e,
             plasma_state.T_e,
             plasma_state.Z_free,
-        )
-        return q
+        )[:, jnp.newaxis]
+        return jnp.real(q.m_as(ureg.dimensionless))
 
 
 # Electron-Electron Local Field Correction Models
