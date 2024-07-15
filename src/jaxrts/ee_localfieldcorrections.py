@@ -139,13 +139,12 @@ def eelfc_utsumiichimaru(
     )
 
 
-# @jax.jit
+@jax.jit
 def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     """
-    Improved version of Utsumi and Ichimaru, based on QMC results. (Farid et al. 1993)
+    Improved version of Utsumi and Ichimaru, based on QMC results. (Farid et
+    al. 1993)
     """
-    pass
-
     rs = (interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)).m_as(ureg.dimensionless)
 
     lamb = (4 / (9 * jnp.pi)) ** (1/3)
