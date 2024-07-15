@@ -38,7 +38,7 @@ ureg = jaxrts.ureg
 file_dir = pathlib.Path(__file__).parent
 mcss_file = (
     file_dir
-    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[frac=0.5_Z_f=3.0]O[frac=0.5_Z_f=3.0]_E=8975eV_theta=120_rho=1.8gcc_T=10.0eV_RPA_NOLFC.txt"
+    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=3.0]_E=8978eV_theta=120_rho=3.0gcc_T=2.0eV_RPA_NOLFC.txt"
 )
 
 
@@ -118,19 +118,19 @@ setup = jaxrts.setup.Setup(
 #     0 * ureg.electron_volt
 # )
 
-# print(state.evaluate("screening length", setup).to(ureg.nanometer))
-# state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
-# state["ipd"] = jaxrts.models.ConstantIPD(0 * ureg.electron_volt)
-# state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
-# print(state.evaluate("screening length", setup).to(ureg.nanometer))
-# state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
-state["screening"] = jaxrts.models.Gregori2004Screening()
+print(state.evaluate("screening length", setup).to(ureg.nanometer))
+state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
+state["ipd"] = jaxrts.models.ConstantIPD(0 * ureg.electron_volt)
+state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
+print(state.evaluate("screening length", setup).to(ureg.nanometer))
+state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
+state["screening"] = jaxrts.models.FiniteWavelengthScreening()
 state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHuckelPotential()
 state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
-state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
+state["free-free scattering"] = jaxrts.models.BornMermin_Fit()
 state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=1)
 state["free-bound scattering"] = jaxrts.models.Neglect()
-# print(state["free-free scattering"].susceptibility(state, setup, 0 * ureg.electron_volt))
+print(state["free-free scattering"].susceptibility(state, setup, 0 * ureg.electron_volt))
 
 print(setup.k.to(1 / ureg.angstrom))
 # print(setup.full_k.to(1 / ureg.angstrom))

@@ -1028,7 +1028,7 @@ def statically_screened_ie_debye_potential(
 
 
 @jit
-def collision_frequency_BA(
+def collision_frequency_BA_full(
     E: Quantity,
     T: Quantity,
     S_ii: Quantity,
@@ -1339,7 +1339,7 @@ def collision_frequency_BA_Chapman_interpFit(
 
 
 @jit
-def dielectric_function_BMA(
+def dielectric_function_BMA_full(
     k: Quantity,
     E: Quantity | List,
     chem_pot: Quantity,
@@ -1349,13 +1349,13 @@ def dielectric_function_BMA(
     Zf: float,
 ) -> jnp.ndarray:
     """
-    Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions
-    into account.
+    Calculates the Born-Mermin Approximation for the dielectric function, which
+    takes collisions into account.
 
     See, e.g., :cite:`Redmer.2005`, eqn (20) and :cite:`Mermin.1970`, (eqn 8).
     """
     w = E / (1 * ureg.hbar)
-    coll_freq = collision_frequency_BA(E, T, S_ii, n_e, chem_pot, Zf)
+    coll_freq = collision_frequency_BA_full(E, T, S_ii, n_e, chem_pot, Zf)
 
     numerator = (1 + 1j * coll_freq / w) * (
         dielectric_function_RPA(k, E + 1j * ureg.hbar * coll_freq, chem_pot, T)
@@ -1410,7 +1410,7 @@ def S0_ee_BMA(
 
     E = -E
 
-    eps = dielectric_function_BMA(k, E, chem_pot, T, n_e, S_ii, Zf)
+    eps = dielectric_function_BMA_full(k, E, chem_pot, T, n_e, S_ii, Zf)
 
     xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
     v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2

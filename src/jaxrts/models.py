@@ -990,7 +990,7 @@ class RPA_DandreaFit(FreeFreeModel):
         return xi
 
 
-class BornMermin(FreeFreeModel):
+class BornMerminFull(FreeFreeModel):
     """
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
@@ -1005,7 +1005,7 @@ class BornMermin(FreeFreeModel):
         Function used to calculate the dynamic structure factor
     """
 
-    __name__ = "BornMermin"
+    __name__ = "BornMerminFull"
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1015,7 +1015,7 @@ class BornMermin(FreeFreeModel):
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
             logger.critical(
-                "'BornMermin' is only implemented for a one-component plasma"  # noqa: E501
+                f"'{self.__name__}' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
@@ -1062,7 +1062,7 @@ class BornMermin(FreeFreeModel):
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
-        eps = free_free.dielectric_function_BMA(
+        eps = free_free.dielectric_function_BMA_full(
             k,
             E,
             mu,
@@ -1078,19 +1078,19 @@ class BornMermin(FreeFreeModel):
         return xi
 
 
-class BornMermin_ChapmanInterp(FreeFreeModel):
+class BornMermin(FreeFreeModel):
     """
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
-    Uses the Chapman Interpolation which allows for a faster computation of the
-    free-free scattering compared to :py:class:`~.BornMermin`, by sampleing at
-    the probing frequency at :py:attr:`~.no_of_freq` points and interpolating
-    between them, after.
+    Uses the Chapman interpolation which allows for a faster computation of the
+    free-free scattering compared to :py:class:`~.BornMerminFull`, by sampleing
+    at the probing frequency at :py:attr:`~.no_of_freq` points and
+    interpolating between them, after.
 
     The number of frequencies defaults to 20. To change it, just change the
     attribute of this model after initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin_ChapmanInterp
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin
     >>> state["free-free scattering"].no_of_freq = 10
 
     Requires a 'chemical potential' model (defaults to
@@ -1103,7 +1103,7 @@ class BornMermin_ChapmanInterp(FreeFreeModel):
         Function used to calculate the dynamic structure factor
     """
 
-    __name__ = "BornMermin_ChapmanInterp"
+    __name__ = "BornMermin"
 
     def __init__(self, no_of_freq: int = 20) -> None:
         super().__init__()
@@ -1117,7 +1117,7 @@ class BornMermin_ChapmanInterp(FreeFreeModel):
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
             logger.critical(
-                "'BornMermin_ChapmanInterp' is only implemented for a one-component plasma"  # noqa: E501
+                f"'{self.__name__}' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
@@ -1197,11 +1197,11 @@ class BornMermin_ChapmanInterp(FreeFreeModel):
         return obj
 
 
-class BornMermin_ChapmanInterpFit(FreeFreeModel):
+class BornMermin_Fit(FreeFreeModel):
     """
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
-    Identical to :py:class:`~.BornMermin_ChapmanInterp`, but uses the Dandrea
+    Identical to :py:class:`~.BornMermin`, but uses the Dandrea
     fit (:cite:`Dandrea.1986`), rather than numerically calculating the
     un-damped RPA, numerically. However, the damped RPA is still evaluated
     using the integral.
@@ -1209,7 +1209,7 @@ class BornMermin_ChapmanInterpFit(FreeFreeModel):
     The number of frequencies defaults to 20. To change it, just change the
     attribute of this model after initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin_ChapmanInterp
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit
     >>> state["free-free scattering"].no_of_freq = 10
 
     Requires a 'chemical potential' model (defaults to
@@ -1222,7 +1222,7 @@ class BornMermin_ChapmanInterpFit(FreeFreeModel):
         Function used to calculate the dynamic structure factor
     """
 
-    __name__ = "BornMermin_ChapmanInterpFit"
+    __name__ = "BornMermin_Fit"
 
     def __init__(self, no_of_freq: int = 20) -> None:
         super().__init__()
@@ -1236,7 +1236,7 @@ class BornMermin_ChapmanInterpFit(FreeFreeModel):
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
             logger.critical(
-                "'BornMermin_ChapmanInterp' is only implemented for a one-component plasma"  # noqa: E501
+                f"'{self.__name__}' is only implemented for a one-component plasma"  # noqa: E501
             )
 
     @jax.jit
@@ -2125,9 +2125,9 @@ _all_models = [
     ArbitraryDegeneracyScreeningLength,
     ArkhipovIonFeat,
     BohmStaver,
+    BornMerminFull,
     BornMermin,
-    BornMermin_ChapmanInterp,
-    BornMermin_ChapmanInterpFit,
+    BornMermin_Fit,
     ConstantChemPotential,
     ConstantIPD,
     ConstantScreeningLength,

@@ -21,7 +21,7 @@ from jaxrts.models import (
     DetailedBalance,
     OnePotentialHNCIonFeat,
     Neglect,
-    BornMermin_ChapmanInterp,
+    BornMermin,
     RPA_NoDamping,
     ConstantIPD,
     SchumacherImpulse,
