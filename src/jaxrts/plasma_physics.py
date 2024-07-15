@@ -364,15 +364,53 @@ def compton_energy(probe_energy, scattering_angle):
 
 
 @jax.jit
-def noninteracting_susceptibility_from_epsilon(
-    epsilon: Quantity, k: Quantity
-) -> Quantity:
+def susceptibility_from_epsilon(epsilon: Quantity, k: Quantity) -> Quantity:
     """
-    Calculates the susceptilibily from a given dielectric function epsilon.
+    Calculate the full susceptilibily from a  given dielectric function epsilon
+    by inverting
 
     ..math::
 
-        \\xi_{ee} = \\frac{1 - \\varepsilon}{V_{ee}(k)}
+        \\varepsilon^{-1} = 1 + V_{ee} xi_{ee}
+
+    Where :math:`V_{ee}` is the Coulomb potential in k space.
+
+    See, e.g., :cite:`Dandrea.1986`.
+    """
+    Vee = coulomb_potential_fourier(-1, -1, k)
+    return (epsilon ** (-1) - 1) / Vee
+
+
+@jax.jit
+def epsilon_from_susceptibility(xi: Quantity, k: Quantity) -> Quantity:
+    """
+    Calculate the dielectric function from a full susceptibility xi
+
+    ..math::
+
+        \\varepsilon^{-1} = 1 + V_{ee} xi_{ee}
+
+    Where :math:`V_{ee}` is the Coulomb potential in k space.
+
+    See, e.g., :cite:`Dandrea.1986`.
+    """
+    Vee = coulomb_potential_fourier(-1, -1, k)
+    return ((1 + Vee * xi) ** -1).m_as(ureg.dimensionless)
+
+
+@jax.jit
+def noninteracting_susceptibility_from_eps_RPA(
+    epsilon: Quantity, k: Quantity
+) -> Quantity:
+    """
+    Calculates the non-interacting susceptilibily from a given dielectric
+    function epsilon in RPA.
+
+    See, e.g., :cite:`Fortmann.2010`.
+
+    ..math::
+
+        \\xi^{(0)}_{e} = \\frac{1 - \\varepsilon^{RPA}}{V_{ee}(k)}
 
     Where :math:`V_{ee}` is the Coulomb potential in k space.
     """

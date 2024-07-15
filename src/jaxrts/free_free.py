@@ -11,8 +11,9 @@ from .plasma_physics import (
     kin_energy,
     fermi_dirac,
     plasma_frequency,
-    noninteracting_susceptibility_from_epsilon,
+    noninteracting_susceptibility_from_eps_RPA,
     wiegner_seitz_radius,
+    epsilon_from_susceptibility,
 )
 
 from .ee_localfieldcorrections import xi_lfc_corrected
@@ -284,7 +285,7 @@ def S0_ee_Salpeter(
     # Perform the sign flip
     E = -E
     eps = dielectric_function_salpeter(k, T_e, n_e, E)
-    xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+    xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
     v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
@@ -749,7 +750,7 @@ def _imag_susceptibility_func_RPA_Dandrea(
 
 
 @jit
-def susceptibility_RPA_Dandrea1986(
+def noninteracting_susceptibility_Dandrea1986(
     k: Quantity,
     E: Quantity,
     T: Quantity,
@@ -814,7 +815,7 @@ def dielectric_function_RPA_Dandrea1986(
     jaxrts.free_free.susceptibility_RPA_Dandrea1986
         The function used to calculate xi0, the noninteracting susceptibility
     """
-    xi0 = susceptibility_RPA_Dandrea1986(k, E, T, n_e)
+    xi0 = noninteracting_susceptibility_Dandrea1986(k, E, T, n_e)
     return 1 - (coulomb_potential_fourier(-1, -1, k) * xi0).m_as(
         ureg.dimensionless
     )
@@ -929,7 +930,7 @@ def S0_ee_RPA_no_damping(
     """
     E = -E
     eps = dielectric_function_RPA_no_damping(k, E, chem_pot, T_e, unsave)
-    xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+    xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
     v_k = coulomb_potential_fourier(-1, -1, k)
     xi = xi_lfc_corrected(xi0, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
@@ -971,7 +972,7 @@ def S0_ee_RPA(
     """
     E = -E
     eps = dielectric_function_RPA(k, E, chem_pot, T_e)
-    xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+    xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
     v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
@@ -1226,6 +1227,7 @@ def collision_frequency_BA_Chapman_interp(
 
     return interpolated_integral.to(1 / ureg.second)
 
+
 @partial(jit, static_argnames=("no_of_points"))
 def collision_frequency_BA_Chapman_interpFit(
     E: Quantity,
@@ -1257,8 +1259,6 @@ def collision_frequency_BA_Chapman_interpFit(
         no_of_points,
     )
     interp_w = interp_E / (1 * ureg.hbar)
-    T_e = T
-    T_i = T
     kappa = inverse_screening_length_non_degenerate(n_e, T)
 
     prefactor = (
@@ -1276,10 +1276,7 @@ def collision_frequency_BA_Chapman_interpFit(
             q, 0 * ureg.electron_volt, T, n_e
         )
         eps_part = (
-            dielectric_function_RPA_Dandrea1986(
-                q, interp_E, T, n_e
-            )
-            - eps_zero
+            dielectric_function_RPA_Dandrea1986(q, interp_E, T, n_e) - eps_zero
         )
         res = (
             q**6
@@ -1390,7 +1387,7 @@ def S0_ee_RPA_Dandrea(
 
     E = -E
 
-    xi0 = susceptibility_RPA_Dandrea1986(k, E, T, n_e)
+    xi0 = noninteracting_susceptibility_Dandrea1986(k, E, T, n_e)
     v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
@@ -1412,7 +1409,7 @@ def S0_ee_BMA(
 
     eps = dielectric_function_BMA_full(k, E, chem_pot, T, n_e, S_ii, Zf)
 
-    xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+    xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
     v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
@@ -1464,13 +1461,94 @@ def dielectric_function_BMA_chapman_interpFit(
             - 1
         )
     ) / (
-        dielectric_function_RPA_Dandrea1986(
-            k, 0 * ureg.electron_volt, T, n_e
-        )
+        dielectric_function_RPA_Dandrea1986(k, 0 * ureg.electron_volt, T, n_e)
         - 1
     )
 
     return (1 + numerator / denumerator).m_as(ureg.dimensionless)
+
+
+@partial(jit, static_argnames=("no_of_points"))
+def dielectric_function_BMA_Fortmann(
+    k: Quantity,
+    E: Quantity | List,
+    chem_pot: Quantity,
+    T: Quantity,
+    n_e: Quantity,
+    S_ii: Quantity,
+    Zf: float,
+    lfc: float = 0,
+    no_of_points: int = 20,
+) -> jnp.ndarray:
+
+    xi = susceptibility_BMA_Fortmann(
+        k, E, chem_pot, T, n_e, S_ii, Zf, lfc, no_of_points
+    )
+    return epsilon_from_susceptibility(xi, k)
+
+
+@partial(jit, static_argnames=("no_of_points"))
+def susceptibility_BMA_Fortmann(
+    k: Quantity,
+    E: Quantity | List,
+    chem_pot: Quantity,
+    T: Quantity,
+    n_e: Quantity,
+    S_ii: Quantity,
+    Zf: float,
+    lfc: float = 0,
+    no_of_points: int = 20,
+) -> jnp.ndarray:
+    """
+    Calculates the Born-Mermin Approximation for the dielectric function, which
+    takes collisions into account. The collision frequency is evaluated at
+    ``no_of_points`` frequencies, and interpolated to save computation time.
+    (See the MCSS user guide :cite:`Chapman.2016`).
+
+    Local field corrections (``lfc``) are included as described by
+    :cite:`Fortmann.2010`, i.e., by modifying the susceptibilities before the
+    Mermin approach is calculated (See eqn. (7) and (8), therein).
+    The collision frequency, however, is not using the LFC corrected xi's
+    """
+    w = E / (1 * ureg.hbar)
+
+    # Calculate the cut-off energy from the RPA
+
+    See_RPA = S0_ee_RPA_Dandrea(k, T, n_e, E)
+    E_cutoff = (
+        jnpu.min(
+            jnpu.where(See_RPA > jnpu.max(See_RPA * 0.001), E, jnpu.max(E))
+        )
+        * 1.5
+    )
+    E_cutoff = jnpu.absolute(E_cutoff)
+
+    coll_freq = collision_frequency_BA_Chapman_interpFit(
+        E, T, S_ii, n_e, Zf, no_of_points, E_cutoff
+    )
+
+    V_ee = coulomb_potential_fourier(-1, -1, k)
+
+    # The dynamic (and therefore dumped) part
+    xi_0_dyn = noninteracting_susceptibility_from_eps_RPA(
+        dielectric_function_RPA(
+            k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+        ),
+        k,
+    )
+    xi_OCP_dyn = xi_0_dyn / (1 - V_ee * (1 - lfc) * xi_0_dyn)
+    # The static part, were E = 0eV)
+    xi_0_stat = noninteracting_susceptibility_Dandrea1986(
+        k, 0 * ureg.electron_volt, T, n_e
+    )
+    xi_OCP_stat = xi_0_stat / (1 - V_ee * (1 - lfc) * xi_0_stat)
+
+    pref = 1 - 1j * w / coll_freq
+
+    numerator = xi_OCP_dyn * xi_OCP_stat
+    denominator = xi_OCP_dyn - (1j * w / coll_freq) * xi_OCP_stat
+
+    return pref * numerator / denominator
 
 
 @partial(jit, static_argnames=("no_of_points"))
@@ -1485,9 +1563,8 @@ def dielectric_function_BMA_chapman_interp(
     no_of_points: int = 20,
 ) -> jnp.ndarray:
     """
-    Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions
-    into account.
-
+    Calculates the Born-Mermin Approximation for the dielectric function, which
+    takes collisions into account.
     """
     w = E / (1 * ureg.hbar)
 
@@ -1547,11 +1624,12 @@ def S0_ee_BMA_chapman_interp(
         k, E, chem_pot, T, n_e, S_ii, Zf, no_of_points
     )
 
-    xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+    xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
     v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
 
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
+
 
 @partial(jit, static_argnames=("no_of_points"))
 def S0_ee_BMA_chapman_interpFit(
@@ -1572,22 +1650,29 @@ def S0_ee_BMA_chapman_interpFit(
         k, E, chem_pot, T, n_e, S_ii, Zf, no_of_points
     )
 
-    xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+    xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
     v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
 
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
-# def ret_diel_func_DPA(k: Quantity, Z: jnp.ndarray) -> Quantity:
-#     """
-#     Retarded dielectric funciton in diagonalised polarization approximation DPA
-#     See :cite:`Chapman.2015`, (Eqn. 2.80), by inserting a Kronecker delta.
-#     """
 
-#     # The electron part
-#     eps = 1 - PiR_e_e * coulomb_potential_fourier(
-#         -1, -1, k
-#     )
-#     # The ion part
-#     eps -= jnpu.sum(PiR_ion_ion(Z, ) * coulomb_potential_fourier(Z, Z, k))
-#     return eps
+@partial(jit, static_argnames=("no_of_points"))
+def S0_ee_BMA_Fortmann(
+    k: Quantity,
+    T: Quantity,
+    chem_pot: Quantity,
+    S_ii: Quantity,
+    n_e: Quantity,
+    Zf: float,
+    E: Quantity | List,
+    lfc: Quantity = 0.0,
+    no_of_points: int = 20,
+) -> jnp.ndarray:
+
+    E = -E
+
+    xi = susceptibility_BMA_Fortmann(
+        k, E, chem_pot, T, n_e, S_ii, Zf, lfc, no_of_points
+    )
+    return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)

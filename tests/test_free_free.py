@@ -4,6 +4,7 @@ import numpy as onp
 import pytest
 import jax
 import jax.numpy as jnp
+import jpu.numpy as jnpu
 
 import jaxrts
 
@@ -55,6 +56,7 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
                 1 * ureg.proton_mass,
                 Z_f=1.0,
             )
+
         mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(
             T / (1 * ureg.boltzmann_constant), n_e
         )
@@ -261,3 +263,34 @@ def test_dandrea_fit_reproduces_calculated_RPA() -> None:
     )
     assert jnp.max(jnp.abs(jnp.real(calc_RPA) - jnp.real(dfit_RPA))) < 0.005
     assert jnp.max(jnp.abs(jnp.imag(calc_RPA) - jnp.imag(dfit_RPA))) < 0.005
+
+
+def test_Fortman_reproduces_vanilla_BMA_without_LFC():
+    @jax.tree_util.Partial
+    def S_ii(q):
+        return jnpu.ones_like(q)
+
+    lfc = 0.0
+
+    lambda_0 = 4.13 * ureg.nanometer
+    theta = 60
+    n_e = 1e21 / ureg.centimeter**3
+
+    k = (4 * jnp.pi / lambda_0) * jnp.sin(jnp.deg2rad(theta) / 2.0)
+    w_pl = jaxrts.plasma_physics.plasma_frequency(n_e)
+    omega = jnp.linspace(-6, 6, 200) * w_pl
+    E = omega * ureg.hbar
+
+    T = 50000 * ureg.kelvin
+    Zf = 2.1
+
+    mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(T, n_e)
+
+    classical_BMA = jaxrts.free_free.dielectric_function_BMA_chapman_interpFit(
+        k, E, mu, T, n_e, S_ii, Zf
+    )
+    fortmann_BMA = jaxrts.free_free.dielectric_function_BMA_Fortmann(
+        k, E, mu, T, n_e, S_ii, Zf, lfc
+    )
+    assert jnp.isclose(jnp.real(classical_BMA), jnp.real(fortmann_BMA)).all()
+    assert jnp.isclose(jnp.imag(classical_BMA), jnp.imag(fortmann_BMA)).all()

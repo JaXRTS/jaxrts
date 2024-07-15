@@ -16,7 +16,7 @@ from .setup import (
     convolve_stucture_factor_with_instrument,
     dispersion_corrected_k,
 )
-from .plasma_physics import noninteracting_susceptibility_from_epsilon
+from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
 from .elements import electron_distribution_ionized_state
 from . import (
     bound_free,
@@ -802,7 +802,12 @@ class FreeFreeModel(ScatteringModel):
 
     @abc.abstractmethod
     def susceptibility(
-        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity, *args, **kwargs
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray: ...
 
 
@@ -818,6 +823,10 @@ class QCSalpeterApproximation(FreeFreeModel):
     use :py:class:~RPA_NoDamping`, which should give more accurate results
     (according to, e.g., "cite:`Gregori.2003`) at a comparable computation
     time.
+
+    This model does not provide a straight-forward approach to include local
+    field corrections. We have included it, for now, by assuming the behavior
+    would be the same as it is for the RPA.
 
     See Also
     --------
@@ -861,7 +870,7 @@ class QCSalpeterApproximation(FreeFreeModel):
             plasma_state.n_e,
             E,
         )
-        xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+        xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
         lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
         V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
         xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
@@ -930,7 +939,7 @@ class RPA_NoDamping(FreeFreeModel):
             mu,
             plasma_state.T_e,
         )
-        xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+        xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
         lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
         V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
         xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
@@ -981,7 +990,7 @@ class RPA_DandreaFit(FreeFreeModel):
         **kwargs,
     ) -> jnp.ndarray:
         k = setup.k
-        xi0 = free_free.susceptibility_RPA_Dandrea1986(
+        xi0 = free_free.noninteracting_susceptibility_Dandrea1986(
             k, E, plasma_state.T_e, plasma_state.n_e
         )
         lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1020,14 +1029,29 @@ class BornMerminFull(FreeFreeModel):
 
     @jax.jit
     def evaluate_raw(
-        self, plasma_state: "PlasmaState", setup: Setup, S_ii = None, *args, **kwargs
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        S_ii=None,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
         if S_ii is None:
+
             @jax.tree_util.Partial
             def S_ii(k):
                 theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
-                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
+                probe_setup = Setup(
+                    theta,
+                    setup.energy,
+                    setup.measured_energy,
+                    setup.instrument,
+                )
+                return jnpu.diagonal(
+                    plasma_state["ionic scattering"].S_ii(
+                        plasma_state, probe_setup
+                    )
+                )
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
@@ -1049,16 +1073,27 @@ class BornMerminFull(FreeFreeModel):
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
-        S_ii = None,
+        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
         if S_ii is None:
+
             @jax.tree_util.Partial
             def S_ii(k):
                 theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
-                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
+                probe_setup = Setup(
+                    theta,
+                    setup.energy,
+                    setup.measured_energy,
+                    setup.instrument,
+                )
+                return jnpu.diagonal(
+                    plasma_state["ionic scattering"].S_ii(
+                        plasma_state, probe_setup
+                    )
+                )
+
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
@@ -1071,7 +1106,7 @@ class BornMerminFull(FreeFreeModel):
             S_ii,
             plasma_state.Z_free,
         )
-        xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+        xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
         lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
         V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
         xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
@@ -1122,14 +1157,30 @@ class BornMermin(FreeFreeModel):
 
     @jax.jit
     def evaluate_raw(
-        self, plasma_state: "PlasmaState", setup: Setup, S_ii = None, *args, **kwargs
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        S_ii=None,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
         if S_ii is None:
+
             @jax.tree_util.Partial
             def S_ii(k):
                 theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
-                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
+                probe_setup = Setup(
+                    theta,
+                    setup.energy,
+                    setup.measured_energy,
+                    setup.instrument,
+                )
+                return jnpu.diagonal(
+                    plasma_state["ionic scattering"].S_ii(
+                        plasma_state, probe_setup
+                    )
+                )
+
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
@@ -1151,16 +1202,27 @@ class BornMermin(FreeFreeModel):
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
-        S_ii = None,
+        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
         if S_ii is None:
+
             @jax.tree_util.Partial
             def S_ii(k):
                 theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
-                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
+                probe_setup = Setup(
+                    theta,
+                    setup.energy,
+                    setup.measured_energy,
+                    setup.instrument,
+                )
+                return jnpu.diagonal(
+                    plasma_state["ionic scattering"].S_ii(
+                        plasma_state, probe_setup
+                    )
+                )
+
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
@@ -1174,7 +1236,7 @@ class BornMermin(FreeFreeModel):
             plasma_state.Z_free,
             self.no_of_freq,
         )
-        xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+        xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
         lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
         V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
         xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
@@ -1244,16 +1306,27 @@ class BornMermin_Fit(FreeFreeModel):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
-        S_ii = None,
+        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
         if S_ii is None:
+
             @jax.tree_util.Partial
             def S_ii(k):
                 theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
-                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
+                probe_setup = Setup(
+                    theta,
+                    setup.energy,
+                    setup.measured_energy,
+                    setup.instrument,
+                )
+                return jnpu.diagonal(
+                    plasma_state["ionic scattering"].S_ii(
+                        plasma_state, probe_setup
+                    )
+                )
+
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interpFit(
@@ -1275,16 +1348,27 @@ class BornMermin_Fit(FreeFreeModel):
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
-        S_ii = None,
+        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
         if S_ii is None:
+
             @jax.tree_util.Partial
             def S_ii(k):
                 theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(theta, setup.energy, setup.measured_energy, setup.instrument)
-                return jnpu.diagonal(plasma_state["ionic scattering"].S_ii(plasma_state, setup))
+                probe_setup = Setup(
+                    theta,
+                    setup.energy,
+                    setup.measured_energy,
+                    setup.instrument,
+                )
+                return jnpu.diagonal(
+                    plasma_state["ionic scattering"].S_ii(
+                        plasma_state, probe_setup
+                    )
+                )
+
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
@@ -1298,10 +1382,155 @@ class BornMermin_Fit(FreeFreeModel):
             plasma_state.Z_free,
             self.no_of_freq,
         )
-        xi0 = noninteracting_susceptibility_from_epsilon(eps, k)
+        xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
         lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
         V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
         xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+        return xi
+
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.no_of_freq,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+
+        return obj
+
+
+class BornMermin_Fortmann(FreeFreeModel):
+    """
+    Model of the free-free scattering, based on the Born Mermin Approximation
+    (:cite:`Mermin.1970`).
+    Uses the same collision frequency as :py:class:`~.BornMermin_Fit`
+    (including the :cite:`Dandrea.1986` fit), but uses a rigorous
+    implementation of the local field correction, proposed by
+    :cite:`Fortmann.2010`.
+
+    The number of frequencies defaults to 20. To change it, just change the
+    attribute of this model after initializing it. i.e.
+
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann
+    >>> state["free-free scattering"].no_of_freq = 10
+
+    Requires a 'chemical potential' model (defaults to
+    :py:class:`~IchimaryChemPotential`).
+
+    See Also
+    --------
+
+    jaxrts.free_free.S0_ee_BMA_Fortmann
+        Function used to calculate the dynamic structure factor
+    jaxrts.free_free.susceptibility_BMA_Fortmann
+        Function used to calculate the susceptibility
+    """
+
+    __name__ = "BornMermin_Fit"
+
+    def __init__(self, no_of_freq: int = 20) -> None:
+        super().__init__()
+        self.no_of_freq: int = no_of_freq
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "chemical potential", IchimaruChemPotential()
+        )
+
+    def check(self, plasma_state: "PlasmaState") -> None:
+        if len(plasma_state) > 1:
+            logger.critical(
+                f"'{self.__name__}' is only implemented for a one-component plasma"  # noqa: E501
+            )
+
+    @jax.jit
+    def evaluate_raw(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        S_ii=None,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        if S_ii is None:
+
+            @jax.tree_util.Partial
+            def S_ii(k):
+                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
+                probe_setup = Setup(
+                    theta,
+                    setup.energy,
+                    setup.measured_energy,
+                    setup.instrument,
+                )
+                return jnpu.diagonal(
+                    plasma_state["ionic scattering"].S_ii(
+                        plasma_state, probe_setup
+                    )
+                )
+
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        See_0 = free_free.S0_ee_BMA_Fortmann(
+            k,
+            plasma_state.T_e,
+            mu,
+            S_ii,
+            plasma_state.n_e,
+            plasma_state.Z_free,
+            setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
+            self.no_of_freq,
+        )
+        return See_0 * plasma_state.Z_free
+
+    @jax.jit
+    def susceptibility(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+        S_ii=None,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        if S_ii is None:
+
+            @jax.tree_util.Partial
+            def S_ii(k):
+                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
+                probe_setup = Setup(
+                    theta,
+                    setup.energy,
+                    setup.measured_energy,
+                    setup.instrument,
+                )
+                return jnpu.diagonal(
+                    plasma_state["ionic scattering"].S_ii(
+                        plasma_state, probe_setup
+                    )
+                )
+
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = setup.k
+
+        xi = free_free.susceptibility_BMA_Fortmann(
+            k,
+            E,
+            mu,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            S_ii,
+            plasma_state.Z_free,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
+            self.no_of_freq,
+        )
         return xi
 
     def _tree_flatten(self):
@@ -1914,11 +2143,8 @@ class FiniteWavelengthScreening(Model):
     Requires an 'electron-ion' potential. (defaults to
     :py:class:`~KlimontovichKraeftPotential`).
 
-    See Also
-    --------
-    jaxtrs.susceptibility_from_epsilon
-        Function which can be used to calculate :math:`\\xi{ee}`, given a
-        dielectric function.
+    Uses the :py:meth:`~.FreeFreeModel.susceptibility` method of the chosen
+    Free Free model.
     """
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
