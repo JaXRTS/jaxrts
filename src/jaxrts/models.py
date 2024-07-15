@@ -886,7 +886,7 @@ class RPA_NoDamping(FreeFreeModel):
     the fluctuation dissipation theorem. Based on lecture notes from M. Bonitz.
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaryChemPotential`).
+    :py:class:`~IchimaruChemPotential`).
 
     See Also
     --------
@@ -952,7 +952,7 @@ class RPA_DandreaFit(FreeFreeModel):
     Approximation, as presented by :cite:`Dandrea.1986`.
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaryChemPotential`).
+    :py:class:`~IchimaruChemPotential`).
 
     See Also
     --------
@@ -1005,7 +1005,7 @@ class BornMerminFull(FreeFreeModel):
     (:cite:`Mermin.1970`).
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaryChemPotential`).
+    :py:class:`~IchimaruChemPotential`).
 
     See Also
     --------
@@ -1129,7 +1129,7 @@ class BornMermin(FreeFreeModel):
     >>> state["free-free scattering"].no_of_freq = 10
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaryChemPotential`).
+    :py:class:`~IchimaruChemPotential`).
 
     See Also
     --------
@@ -1275,7 +1275,7 @@ class BornMermin_Fit(FreeFreeModel):
     >>> state["free-free scattering"].no_of_freq = 10
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaryChemPotential`).
+    :py:class:`~IchimaruChemPotential`).
 
     See Also
     --------
@@ -1421,7 +1421,7 @@ class BornMermin_Fortmann(FreeFreeModel):
     >>> state["free-free scattering"].no_of_freq = 10
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaryChemPotential`).
+    :py:class:`~IchimaruChemPotential`).
 
     See Also
     --------
@@ -1749,7 +1749,7 @@ class IchimaruChemPotential(Model):
     Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
     """
 
-    __name__ = "IchimaryChemPotential"
+    __name__ = "IchimaruChemPotential"
     allowed_keys = ["chemical potential"]
 
     @jax.jit
