@@ -15,6 +15,7 @@ from .setup import (
     Setup,
     convolve_stucture_factor_with_instrument,
     dispersion_corrected_k,
+    get_probe_setup,
 )
 from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
 from .elements import electron_distribution_ionized_state
@@ -150,7 +151,11 @@ class ScatteringModel(Model):
 
     @jax.jit
     def evaluate(
-        self, plasma_state: "PlasmaState", setup: Setup
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
         """
         If :py:attr:`~.sample_points` is not ``None``, generate a
@@ -160,7 +165,7 @@ class ScatteringModel(Model):
         instument function.
         """
         if self.sample_points is None:
-            raw = self.evaluate_raw(plasma_state, setup)
+            raw = self.evaluate_raw(plasma_state, setup, *args, **kwargs)
         else:
             low_res_setup = Setup(
                 setup.scattering_angle,
@@ -168,7 +173,9 @@ class ScatteringModel(Model):
                 self.sample_grid(setup),
                 setup.instrument,
             )
-            low_res = self.evaluate_raw(plasma_state, low_res_setup)
+            low_res = self.evaluate_raw(
+                plasma_state, low_res_setup, *args, **kwargs
+            )
             raw = jnpu.interp(
                 setup.measured_energy,
                 low_res_setup.measured_energy,
@@ -1005,7 +1012,9 @@ class BornMerminFull(FreeFreeModel):
     (:cite:`Mermin.1970`).
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaruChemPotential`).
+    :py:class:`~.IchimaruChemPotential`).
+    Requires a 'BM V_eiS' model (defaults to
+    :py:class:`~.FiniteWavelength_BM_V`).
 
     See Also
     --------
@@ -1020,6 +1029,7 @@ class BornMerminFull(FreeFreeModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
+        plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
@@ -1032,26 +1042,22 @@ class BornMerminFull(FreeFreeModel):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
-        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        if S_ii is None:
 
-            @jax.tree_util.Partial
-            def S_ii(k):
-                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(
-                    theta,
-                    setup.energy,
-                    setup.measured_energy,
-                    setup.instrument,
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return jnpu.diagonal(
+                plasma_state["ionic scattering"].S_ii(
+                    plasma_state, probe_setup
                 )
-                return jnpu.diagonal(
-                    plasma_state["ionic scattering"].S_ii(
-                        plasma_state, probe_setup
-                    )
-                )
+            )
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
@@ -1060,6 +1066,7 @@ class BornMerminFull(FreeFreeModel):
             plasma_state.T_e,
             mu,
             S_ii,
+            V_eiS,
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
@@ -1073,26 +1080,22 @@ class BornMerminFull(FreeFreeModel):
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
-        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        if S_ii is None:
 
-            @jax.tree_util.Partial
-            def S_ii(k):
-                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(
-                    theta,
-                    setup.energy,
-                    setup.measured_energy,
-                    setup.instrument,
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return jnpu.diagonal(
+                plasma_state["ionic scattering"].S_ii(
+                    plasma_state, probe_setup
                 )
-                return jnpu.diagonal(
-                    plasma_state["ionic scattering"].S_ii(
-                        plasma_state, probe_setup
-                    )
-                )
+            )
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
@@ -1104,6 +1107,7 @@ class BornMerminFull(FreeFreeModel):
             plasma_state.T_e,
             plasma_state.n_e,
             S_ii,
+            V_eiS,
             plasma_state.Z_free,
         )
         xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
@@ -1129,7 +1133,9 @@ class BornMermin(FreeFreeModel):
     >>> state["free-free scattering"].no_of_freq = 10
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaruChemPotential`).
+    :py:class:`~.IchimaruChemPotential`).
+    Requires a 'BM V_eiS' model (defaults to
+    :py:class:`~.FiniteWavelength_BM_V`).
 
     See Also
     --------
@@ -1148,6 +1154,7 @@ class BornMermin(FreeFreeModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
+        plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
@@ -1160,26 +1167,22 @@ class BornMermin(FreeFreeModel):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
-        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        if S_ii is None:
 
-            @jax.tree_util.Partial
-            def S_ii(k):
-                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(
-                    theta,
-                    setup.energy,
-                    setup.measured_energy,
-                    setup.instrument,
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return jnpu.diagonal(
+                plasma_state["ionic scattering"].S_ii(
+                    plasma_state, probe_setup
                 )
-                return jnpu.diagonal(
-                    plasma_state["ionic scattering"].S_ii(
-                        plasma_state, probe_setup
-                    )
-                )
+            )
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
@@ -1188,6 +1191,7 @@ class BornMermin(FreeFreeModel):
             plasma_state.T_e,
             mu,
             S_ii,
+            V_eiS,
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
@@ -1202,26 +1206,23 @@ class BornMermin(FreeFreeModel):
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
-        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        if S_ii is None:
 
-            @jax.tree_util.Partial
-            def S_ii(k):
-                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(
-                    theta,
-                    setup.energy,
-                    setup.measured_energy,
-                    setup.instrument,
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return jnpu.diagonal(
+                plasma_state["ionic scattering"].S_ii(
+                    plasma_state, probe_setup
                 )
-                return jnpu.diagonal(
-                    plasma_state["ionic scattering"].S_ii(
-                        plasma_state, probe_setup
-                    )
-                )
+            )
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state["BM V_eiS"].evaluate(plasma_state, probe_setup)
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
@@ -1233,6 +1234,7 @@ class BornMermin(FreeFreeModel):
             plasma_state.T_e,
             plasma_state.n_e,
             S_ii,
+            V_eiS,
             plasma_state.Z_free,
             self.no_of_freq,
         )
@@ -1275,7 +1277,9 @@ class BornMermin_Fit(FreeFreeModel):
     >>> state["free-free scattering"].no_of_freq = 10
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaruChemPotential`).
+    :py:class:`~.IchimaruChemPotential`).
+    Requires a 'BM V_eiS' model (defaults to
+    :py:class:`~.FiniteWavelength_BM_V`).
 
     See Also
     --------
@@ -1294,6 +1298,7 @@ class BornMermin_Fit(FreeFreeModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
+        plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
@@ -1306,26 +1311,22 @@ class BornMermin_Fit(FreeFreeModel):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
-        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        if S_ii is None:
 
-            @jax.tree_util.Partial
-            def S_ii(k):
-                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(
-                    theta,
-                    setup.energy,
-                    setup.measured_energy,
-                    setup.instrument,
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return jnpu.diagonal(
+                plasma_state["ionic scattering"].S_ii(
+                    plasma_state, probe_setup
                 )
-                return jnpu.diagonal(
-                    plasma_state["ionic scattering"].S_ii(
-                        plasma_state, probe_setup
-                    )
-                )
+            )
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
@@ -1334,6 +1335,7 @@ class BornMermin_Fit(FreeFreeModel):
             plasma_state.T_e,
             mu,
             S_ii,
+            V_eiS,
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
@@ -1348,26 +1350,22 @@ class BornMermin_Fit(FreeFreeModel):
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
-        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        if S_ii is None:
 
-            @jax.tree_util.Partial
-            def S_ii(k):
-                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(
-                    theta,
-                    setup.energy,
-                    setup.measured_energy,
-                    setup.instrument,
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return jnpu.diagonal(
+                plasma_state["ionic scattering"].S_ii(
+                    plasma_state, probe_setup
                 )
-                return jnpu.diagonal(
-                    plasma_state["ionic scattering"].S_ii(
-                        plasma_state, probe_setup
-                    )
-                )
+            )
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
@@ -1379,6 +1377,7 @@ class BornMermin_Fit(FreeFreeModel):
             plasma_state.T_e,
             plasma_state.n_e,
             S_ii,
+            V_eiS,
             plasma_state.Z_free,
             self.no_of_freq,
         )
@@ -1421,7 +1420,9 @@ class BornMermin_Fortmann(FreeFreeModel):
     >>> state["free-free scattering"].no_of_freq = 10
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaruChemPotential`).
+    :py:class:`~.IchimaruChemPotential`).
+    Requires a 'BM V_eiS' model (defaults to
+    :py:class:`~.FiniteWavelength_BM_V`).
 
     See Also
     --------
@@ -1432,7 +1433,7 @@ class BornMermin_Fortmann(FreeFreeModel):
         Function used to calculate the susceptibility
     """
 
-    __name__ = "BornMermin_Fit"
+    __name__ = "BornMermin_Fortmann"
 
     def __init__(self, no_of_freq: int = 20) -> None:
         super().__init__()
@@ -1442,6 +1443,7 @@ class BornMermin_Fortmann(FreeFreeModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
+        plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
@@ -1454,26 +1456,22 @@ class BornMermin_Fortmann(FreeFreeModel):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
-        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        if S_ii is None:
 
-            @jax.tree_util.Partial
-            def S_ii(k):
-                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(
-                    theta,
-                    setup.energy,
-                    setup.measured_energy,
-                    setup.instrument,
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return jnpu.diagonal(
+                plasma_state["ionic scattering"].S_ii(
+                    plasma_state, probe_setup
                 )
-                return jnpu.diagonal(
-                    plasma_state["ionic scattering"].S_ii(
-                        plasma_state, probe_setup
-                    )
-                )
+            )
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
@@ -1482,6 +1480,7 @@ class BornMermin_Fortmann(FreeFreeModel):
             plasma_state.T_e,
             mu,
             S_ii,
+            V_eiS,
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
@@ -1496,26 +1495,22 @@ class BornMermin_Fortmann(FreeFreeModel):
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
-        S_ii=None,
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        if S_ii is None:
 
-            @jax.tree_util.Partial
-            def S_ii(k):
-                theta = 2 * jnpu.arcsin(k * setup.lambda0 / (4 * jnp.pi))
-                probe_setup = Setup(
-                    theta,
-                    setup.energy,
-                    setup.measured_energy,
-                    setup.instrument,
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return jnpu.diagonal(
+                plasma_state["ionic scattering"].S_ii(
+                    plasma_state, probe_setup
                 )
-                return jnpu.diagonal(
-                    plasma_state["ionic scattering"].S_ii(
-                        plasma_state, probe_setup
-                    )
-                )
+            )
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
@@ -1527,6 +1522,7 @@ class BornMermin_Fortmann(FreeFreeModel):
             plasma_state.T_e,
             plasma_state.n_e,
             S_ii,
+            V_eiS,
             plasma_state.Z_free,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
@@ -2343,6 +2339,68 @@ class ElectronicLFCConstant(Model):
         return obj
 
 
+# BM V_eiS models
+# ===============
+
+
+class BM_V_eiSModel(Model):
+    @abc.abstractmethod
+    def V(self, plasma_state: "PlasmaState", k: Quantity) -> jnp.ndarray: ...
+
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ):
+        return self.V(plasma_state, setup.k)
+
+
+class DebyeHueckel_BM_V(BM_V_eiSModel):
+    allowed_keys = ["BM V_eiS"]
+    __name__ = "DebyeHueckel_BM_V"
+
+    @jax.jit
+    def V(
+        self,
+        plasma_state: "PlasmaState",
+        k: Quantity,
+        *args,
+        **kwargs,
+    ):
+        kappa = 1 / plasma_state.screening_length
+        return free_free.statically_screened_ie_debye_potential(
+            k,
+            kappa,
+            jnp.sum(plasma_state.number_fraction * plasma_state.Z_free),
+        )
+
+
+class FiniteWavelength_BM_V(BM_V_eiSModel):
+    allowed_keys = ["BM V_eiS"]
+    __name__ = "FiniteWavelength_BM_V"
+
+    @jax.jit
+    def V(
+        self,
+        plasma_state: "PlasmaState",
+        k: Quantity,
+    ):
+        V = plasma_physics.coulomb_potential_fourier(
+            jnpu.sum(plasma_state.number_fraction * plasma_state.Z_free),
+            -1,
+            k,
+        )
+        eps0 = free_free.dielectric_function_RPA_Dandrea1986(
+            k,
+            0 * ureg.electron_volt,
+            plasma_state.T_e,
+            plasma_state.n_e,
+        )
+        return V / eps0
+
+
 _all_models = [
     ElectronicLFCUtsumiIchimaru,
     ElectronicLFCGeldartVosko,
@@ -2357,11 +2415,13 @@ _all_models = [
     ConstantChemPotential,
     ConstantIPD,
     ConstantScreeningLength,
+    DebyeHueckel_BM_V,
     DebyeHueckelIPD,
     DebyeHueckelScreeningLength,
     DetailedBalance,
     EckerKroellIPD,
     FiniteWavelengthScreening,
+    FiniteWavelength_BM_V,
     Gericke2010ScreeningLength,
     Gregori2003IonFeat,
     Gregori2004Screening,

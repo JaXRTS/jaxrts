@@ -80,6 +80,16 @@ for T in [
             Z_f=1.0,
         )
 
+    kappa = 1 / jaxrts.plasma_physics.Debye_Huckel_screening_length(
+        n_e, T / (1 * ureg.boltzmann_constant)
+    )
+
+    @jax.tree_util.Partial
+    def V_eiS(q):
+        return jaxrts.free_free.statically_screened_ie_debye_potential(
+            q, kappa, Zf=1.0
+        )
+
     t0 = time.time()
     vals = (
         free_free.S0_ee_BMA(
@@ -89,6 +99,7 @@ for T in [
             E=E,
             chem_pot=mu,
             S_ii=S_ii,
+            V_eiS=V_eiS,
             Zf=1.0,
         )
         / ureg.hbar
@@ -104,6 +115,7 @@ for T in [
             E=E,
             chem_pot=mu,
             S_ii=S_ii,
+            V_eiS=V_eiS,
             Zf=1.0,
             no_of_points=10,
         )

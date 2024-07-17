@@ -148,10 +148,8 @@ def fermi_energy(n_e: Quantity) -> Quantity:
         Fermi energy
     """
     factor1 = ureg.hbar**2 / (2 * ureg.m_e)
-    factor2 = (3 * jnp.pi**2 * n_e) ** (2 / 3)
-    E_F = factor1.to(
-        ureg.centimeter**4 * ureg.gram / ureg.second**2
-    ) * factor2.to(1 / ureg.centimeter**2)
+    k_fsquared = (3 * jnp.pi**2 * n_e) ** (2 / 3)
+    E_F = factor1 * k_fsquared
     return E_F.to(ureg.electron_volt)
 
 
