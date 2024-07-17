@@ -4,7 +4,7 @@ import sys
 import jax
 jax.config.update("jax_compilation_cache_dir", "/tmp/jax_cache")
 jax.config.update("jax_persistent_cache_min_entry_size_bytes", -1)
-jax.config.update("jax_persistent_cache_min_compile_time_secs", 0.5)
+jax.config.update("jax_persistent_cache_min_compile_time_secs", 0.2)
 
 sys.path.append(
     "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
@@ -38,7 +38,7 @@ ureg = jaxrts.ureg
 file_dir = pathlib.Path(__file__).parent
 mcss_file = (
     file_dir
-    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=3.0]_E=8978eV_theta=120_rho=3.0gcc_T=2.0eV_RPA_NOLFC.txt"
+    / "../tests/mcss_samples/without_rk/mcss_C[Z_f=4.0]_E=8978eV_theta=17_rho=4.5gcc_T=20.0eV_BM+STATINTERP.txt"
 )
 
 
@@ -118,11 +118,9 @@ setup = jaxrts.setup.Setup(
 #     0 * ureg.electron_volt
 # )
 
-print(state.evaluate("screening length", setup).to(ureg.nanometer))
 state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
-state["ipd"] = jaxrts.models.ConstantIPD(0 * ureg.electron_volt)
+state["ipd"] = jaxrts.models.StewartPyattIPD()
 state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
-print(state.evaluate("screening length", setup).to(ureg.nanometer))
 state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
 state["screening"] = jaxrts.models.FiniteWavelengthScreening()
 state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHuckelPotential()
@@ -130,9 +128,7 @@ state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
 state["free-free scattering"] = jaxrts.models.BornMermin_Fit()
 state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=1)
 state["free-bound scattering"] = jaxrts.models.Neglect()
-print(state["free-free scattering"].susceptibility(state, setup, 0 * ureg.electron_volt))
 
-print(setup.k.to(1 / ureg.angstrom))
 # print(setup.full_k.to(1 / ureg.angstrom))
 # print(
 #     jaxrts.setup.dispersion_corrected_k(setup, state.n_e).to(1 / ureg.angstrom)
@@ -147,7 +143,7 @@ plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
     (I / norm).m_as(ureg.dimensionless),
     color="C0",
-    label="LFC=StaticInterp",
+    label="BMA (LFC=StaticInterp, naive)",
 )
 plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
@@ -176,7 +172,7 @@ plt.plot(
     ls="dashdot",
     alpha=0.7,
 )
-state["ee-lfc"] = jaxrts.models.ElectronicLFCConstant(0.0)
+state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
 
 I = state.probe(setup)
 norm = jnpu.max(
@@ -187,7 +183,7 @@ plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
     (I / norm).m_as(ureg.dimensionless),
     color="C2",
-    label="LFC=0",
+    label="RPA",
 )
 plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),

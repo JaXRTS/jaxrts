@@ -2412,6 +2412,7 @@ _all_models = [
     BornMerminFull,
     BornMermin,
     BornMermin_Fit,
+    BornMermin_Fortmann,
     ConstantChemPotential,
     ConstantIPD,
     ConstantScreeningLength,
