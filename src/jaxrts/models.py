@@ -1100,21 +1100,32 @@ class BornMerminFull(FreeFreeModel):
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
-        eps = free_free.dielectric_function_BMA_full(
-            k,
-            E,
-            mu,
-            plasma_state.T_e,
-            plasma_state.n_e,
-            S_ii,
-            V_eiS,
-            plasma_state.Z_free,
+        def chi(energy):
+            eps = free_free.dielectric_function_BMA_full(
+                k,
+                energy,
+                mu,
+                plasma_state.T_e,
+                plasma_state.n_e,
+                S_ii,
+                V_eiS,
+                plasma_state.Z_free,
+            )
+            xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
+            lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+            V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+            xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+            return xi
+
+        # Interpolate for small energy transfers, as it will give nans for zero
+        w_pl = plasma_physics.plasma_frequency(plasma_state.n_e)
+        interpE = jnp.array([-1e-4, 1e-4]) * (1 * ureg.hbar) * w_pl
+        interpchi = chi(interpE)
+        return jnpu.where(
+            jnpu.absolute(E) > interpE[1],
+            chi(E),
+            jnpu.interp(E, interpE, interpchi),
         )
-        xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
-        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
-        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
-        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
-        return xi
 
 
 class BornMermin(FreeFreeModel):
@@ -1227,22 +1238,33 @@ class BornMermin(FreeFreeModel):
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
-        eps = free_free.dielectric_function_BMA_chapman_interp(
-            k,
-            E,
-            mu,
-            plasma_state.T_e,
-            plasma_state.n_e,
-            S_ii,
-            V_eiS,
-            plasma_state.Z_free,
-            self.no_of_freq,
+        def chi(energy):
+            eps = free_free.dielectric_function_BMA_chapman_interp(
+                k,
+                energy,
+                mu,
+                plasma_state.T_e,
+                plasma_state.n_e,
+                S_ii,
+                V_eiS,
+                plasma_state.Z_free,
+                self.no_of_freq,
+            )
+            xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
+            lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+            V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+            xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+            return xi
+
+        # Interpolate for small energy transfers, as it will give nans for zero
+        w_pl = plasma_physics.plasma_frequency(plasma_state.n_e)
+        interpE = jnp.array([-1e-4, 1e-4]) * (1 * ureg.hbar) * w_pl
+        interpchi = chi(interpE)
+        return jnpu.where(
+            jnpu.absolute(E) > interpE[1],
+            chi(E),
+            jnpu.interp(E, interpE, interpchi),
         )
-        xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
-        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
-        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
-        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
-        return xi
 
     def _tree_flatten(self):
         children = ()
@@ -1370,22 +1392,33 @@ class BornMermin_Fit(FreeFreeModel):
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
-        eps = free_free.dielectric_function_BMA_chapman_interpFit(
-            k,
-            E,
-            mu,
-            plasma_state.T_e,
-            plasma_state.n_e,
-            S_ii,
-            V_eiS,
-            plasma_state.Z_free,
-            self.no_of_freq,
+        def chi(energy):
+            eps = free_free.dielectric_function_BMA_chapman_interpFit(
+                k,
+                energy,
+                mu,
+                plasma_state.T_e,
+                plasma_state.n_e,
+                S_ii,
+                V_eiS,
+                plasma_state.Z_free,
+                self.no_of_freq,
+            )
+            xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
+            lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+            V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+            xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+            return xi
+
+        # Interpolate for small energy transfers, as it will give nans for zero
+        w_pl = plasma_physics.plasma_frequency(plasma_state.n_e)
+        interpE = jnp.array([-1e-4, 1e-4]) * (1 * ureg.hbar) * w_pl
+        interpchi = chi(interpE)
+        return jnpu.where(
+            jnpu.absolute(E) > interpE[1],
+            chi(E),
+            jnpu.interp(E, interpE, interpchi),
         )
-        xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
-        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
-        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
-        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
-        return xi
 
     def _tree_flatten(self):
         children = ()
