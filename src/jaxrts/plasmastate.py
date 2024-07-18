@@ -6,7 +6,7 @@ import jpu
 import jax
 from jax import numpy as jnp
 
-from .elements import Element
+from .elements import Element, MixElement
 from .units import ureg, Quantity, to_array
 from .helpers import JittableDict
 from .setup import Setup
@@ -250,9 +250,6 @@ class PlasmaState:
                         )
                     ).to_base_units()
                 )
-
-    def evaluate(self, key, setup) -> Quantity:
-        return self[key].evaluate(self, setup)
 
     @jax.jit
     def probe(self, setup: Setup) -> Quantity:

@@ -4,6 +4,7 @@ implemented.
 """
 
 import abc
+from copy import deepcopy
 import logging
 
 import jax
@@ -18,7 +19,7 @@ from .setup import (
     get_probe_setup,
 )
 from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
-from .elements import electron_distribution_ionized_state
+from .elements import electron_distribution_ionized_state, MixElement
 from . import (
     bound_free,
     form_factors,
@@ -244,7 +245,7 @@ class IonFeatModel(Model):
     def S_ii(
         self,
         plasma_state: "PlasmaState",
-        setup: Setup,
+        k: Quantity,
     ) -> jnp.ndarray: ...
 
     @jax.jit
@@ -474,11 +475,10 @@ class OnePotentialHNCIonFeat(IonFeatModel):
     has to be provided as an additional `screening`.
 
 
-    Requires an 'ion-ion' (defaults to :py:class:`~DebyeHueckelPotential`) and a
-    `screening` model (default:
-    :py::class:`~.LinearResponseScreeningGericke2010`.
-    Further requires a 'form-factors' model (defaults to
-    :py:class:`~PaulingFormFactors`).
+    Requires an 'ion-ion' (defaults to :py:class:`~DebyeHueckelPotential`) and
+    a `screening` model (default:
+    :py::class:`~.LinearResponseScreeningGericke2010`. Further requires a
+    'form-factors' model (defaults to :py:class:`~PaulingFormFactors`).
     """
 
     __name__ = "OnePotentialHNCIonFeat"
@@ -1031,12 +1031,6 @@ class BornMerminFull(FreeFreeModel):
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
 
-    def check(self, plasma_state: "PlasmaState") -> None:
-        if len(plasma_state) > 1:
-            logger.critical(
-                f"'{self.__name__}' is only implemented for a one-component plasma"  # noqa: E501
-            )
-
     @jax.jit
     def evaluate_raw(
         self,
@@ -1049,11 +1043,7 @@ class BornMerminFull(FreeFreeModel):
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
-            return jnpu.diagonal(
-                plasma_state["ionic scattering"].S_ii(
-                    plasma_state, probe_setup
-                )
-            )
+            return plasma_state.evaluate("BM S_ii", probe_setup)
 
         @jax.tree_util.Partial
         def V_eiS(k):
@@ -1089,11 +1079,7 @@ class BornMerminFull(FreeFreeModel):
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
-            return jnpu.diagonal(
-                plasma_state["ionic scattering"].S_ii(
-                    plasma_state, probe_setup
-                )
-            )
+            return plasma_state.evaluate("BM S_ii", probe_setup)
 
         @jax.tree_util.Partial
         def V_eiS(k):
@@ -1169,12 +1155,6 @@ class BornMermin(FreeFreeModel):
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
 
-    def check(self, plasma_state: "PlasmaState") -> None:
-        if len(plasma_state) > 1:
-            logger.critical(
-                f"'{self.__name__}' is only implemented for a one-component plasma"  # noqa: E501
-            )
-
     @jax.jit
     def evaluate_raw(
         self,
@@ -1187,11 +1167,7 @@ class BornMermin(FreeFreeModel):
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
-            return jnpu.diagonal(
-                plasma_state["ionic scattering"].S_ii(
-                    plasma_state, probe_setup
-                )
-            )
+            return plasma_state.evaluate("BM S_ii", probe_setup)
 
         @jax.tree_util.Partial
         def V_eiS(k):
@@ -1228,11 +1204,7 @@ class BornMermin(FreeFreeModel):
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
-            return jnpu.diagonal(
-                plasma_state["ionic scattering"].S_ii(
-                    plasma_state, probe_setup
-                )
-            )
+            return plasma_state.evaluate("BM S_ii", probe_setup)
 
         @jax.tree_util.Partial
         def V_eiS(k):
@@ -1326,12 +1298,6 @@ class BornMermin_Fit(FreeFreeModel):
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
 
-    def check(self, plasma_state: "PlasmaState") -> None:
-        if len(plasma_state) > 1:
-            logger.critical(
-                f"'{self.__name__}' is only implemented for a one-component plasma"  # noqa: E501
-            )
-
     @jax.jit
     def evaluate_raw(
         self,
@@ -1344,11 +1310,7 @@ class BornMermin_Fit(FreeFreeModel):
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
-            return jnpu.diagonal(
-                plasma_state["ionic scattering"].S_ii(
-                    plasma_state, probe_setup
-                )
-            )
+            return plasma_state.evaluate("BM S_ii", probe_setup)
 
         @jax.tree_util.Partial
         def V_eiS(k):
@@ -1385,11 +1347,7 @@ class BornMermin_Fit(FreeFreeModel):
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
-            return jnpu.diagonal(
-                plasma_state["ionic scattering"].S_ii(
-                    plasma_state, probe_setup
-                )
-            )
+            return plasma_state.evaluate("BM S_ii", probe_setup)
 
         @jax.tree_util.Partial
         def V_eiS(k):
@@ -1484,12 +1442,6 @@ class BornMermin_Fortmann(FreeFreeModel):
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
 
-    def check(self, plasma_state: "PlasmaState") -> None:
-        if len(plasma_state) > 1:
-            logger.critical(
-                f"'{self.__name__}' is only implemented for a one-component plasma"  # noqa: E501
-            )
-
     @jax.jit
     def evaluate_raw(
         self,
@@ -1502,11 +1454,7 @@ class BornMermin_Fortmann(FreeFreeModel):
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
-            return jnpu.diagonal(
-                plasma_state["ionic scattering"].S_ii(
-                    plasma_state, probe_setup
-                )
-            )
+            return plasma_state.evaluate("BM S_ii", probe_setup)
 
         @jax.tree_util.Partial
         def V_eiS(k):
@@ -1543,11 +1491,7 @@ class BornMermin_Fortmann(FreeFreeModel):
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
-            return jnpu.diagonal(
-                plasma_state["ionic scattering"].S_ii(
-                    plasma_state, probe_setup
-                )
-            )
+            return plasma_state.evaluate("BM S_ii", probe_setup)
 
         @jax.tree_util.Partial
         def V_eiS(k):
@@ -2454,6 +2398,169 @@ class ElectronicLFCConstant(Model):
         return obj
 
 
+# BM S_ii models
+# ===============
+
+
+def averagePlasmaState(state: "PlasmaState") -> "PlasmaState":
+    """
+    Create an average plasma state that shares the models of the origional.
+    """
+    mean_Z = jnpu.sum(state.Z_A * state.number_fraction)[jnp.newaxis]
+    mean_Z_free = jnpu.sum(state.Z_free * state.number_fraction)[jnp.newaxis]
+    mean_mass = jnpu.sum(state.atomic_masses * state.number_fraction)
+
+    mean_ion_T = jnpu.sum(state.T_i * state.number_fraction)[jnp.newaxis]
+    mean_rho = jnpu.sum(state.mass_density * state.number_fraction)[
+        jnp.newaxis
+    ]
+
+    mix_element = MixElement(mean_Z, mean_mass)
+
+    newState = deepcopy(state)
+    newState.ions = [mix_element]
+    newState.Z_free = mean_Z_free
+    newState.mass_density = mean_rho
+    newState.T_i = mean_ion_T
+    return newState
+
+
+class Sum_Sii(Model):
+    """
+    This model sums up all S_ab from the HNC and multiplies it with ``sqrt(x_a
+    * x_b)``. While it is obviously ok for a single-species plasma, multiple
+    species might not be treated correctly.
+    """
+
+    allowed_keys = ["BM S_ii"]
+    __name__ = "Sum_Sii"
+
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ):
+
+        S_ab = plasma_state["ionic scattering"].S_ii(plasma_state, setup)
+        x = plasma_state.number_fraction
+        # Add the contributions from all pairs
+        S_ii = 0
+
+        def add_Sii(a, b):
+            return (jnpu.sqrt(x[a] * x[b]) * S_ab[a, b]).m_as(
+                ureg.dimensionless
+            )[jnp.newaxis]
+
+        def dont_add_Sii(a, b):
+            return jnp.array([0.0])
+
+        # The W_R is calculated as a sum over all combinations of a_b
+        ion_spec1, ion_spec2 = jnp.meshgrid(
+            jnp.arange(plasma_state.nions),
+            jnp.arange(plasma_state.nions),
+        )
+        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+            S_ii += jax.lax.cond(a <= b, add_Sii, dont_add_Sii, a, b)
+        return S_ii
+
+
+class AverageAtom_Sii(Model):
+    """
+    This model performes a HNC calculation, assuming one average atom with a
+    given, average charge state. While it might lead to reasonable results,
+    this is not tested and takes some computation time.
+    """
+
+    allowed_keys = ["BM S_ii"]
+    __name__ = "AverageAtom_Sii"
+
+    def __init__(
+        self,
+        rmin: Quantity = 0.001 * ureg.a_0,
+        rmax: Quantity = 100 * ureg.a_0,
+        pot: int = 14,
+    ) -> None:
+        #: The minmal radius for evaluating the potentials.
+        self.r_min: Quantity = rmin
+        #: The maximal radius for evaluating the potentials.
+        self.r_max: Quantity = rmax
+        #: The exponent (``2 ** pot``), setting the number of points in ``r``
+        #: or ``k`` to evaluate.
+        self.pot: int = pot
+        super().__init__()
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        super().prepare(plasma_state, key)
+        plasma_state.update_default_model(
+            "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
+        )
+        plasma_state["ion-ion Potential"].include_electrons = False
+
+    @property
+    def r(self):
+        return jnpu.linspace(self.r_min, self.r_max, 2**self.pot)
+
+    @property
+    def k(self):
+        r = self.r
+        dr = r[1] - r[0]
+        dk = jnp.pi / (len(r) * dr)
+        return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        # Average the Plasma State
+        aaState = averagePlasmaState(plasma_state)
+
+        # Prepare the Potentials
+        # ----------------------
+
+        # Populate the potential with a full ion potential, for starters
+        V_s_r = aaState["ion-ion Potential"].short_r(aaState, self.r)
+        V_l_k = aaState["ion-ion Potential"].long_k(aaState, self.k)
+
+        # Calculate g_ab in the HNC Approach
+        # ----------------------------------
+        T = aaState["ion-ion Potential"].T(aaState)
+        n = aaState.n_i
+        g, niter = hypernetted_chain.pair_distribution_function_HNC(
+            V_s_r, V_l_k, self.r, T, n
+        )
+        logger.debug(
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+        )
+        # Calculate S_ab by Fourier-transforming g_ab
+        # ---------------------------------------------
+        S_ab_HNC = hypernetted_chain.S_ii_HNC(self.k, g, n, self.r)
+
+        # Interpolate this to the k given by the setup
+
+        S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
+        # Return the Sii with the correct shape
+        return S_ab[0, 0]
+
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.r_min, self.r_max)
+        aux_data = (
+            self.model_key,
+            self.pot,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.pot = aux_data
+        obj.r_min, obj.r_max = children
+
+        return obj
+
+
 # BM V_eiS models
 # ===============
 
@@ -2519,6 +2626,7 @@ class FiniteWavelength_BM_V(BM_V_eiSModel):
 _all_models = [
     ArbitraryDegeneracyScreeningLength,
     ArkhipovIonFeat,
+    AverageAtom_Sii,
     BohmStaver,
     BornMermin,
     BornMerminFull,
@@ -2557,6 +2665,7 @@ _all_models = [
     RPA_NoDamping,
     ScatteringModel,
     SchumacherImpulse,
+    Sum_Sii,
     StewartPyattIPD,
     ThreePotentialHNCIonFeat,
 ]
