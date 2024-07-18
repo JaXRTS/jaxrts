@@ -52,7 +52,7 @@ state["screening length"] = jaxrts.models.ConstantScreeningLength(
     2 / 3 * ureg.a_0
 )
 
-Potential = jaxrts.hnc_potentials.DebyeHuckelPotential()
+Potential = jaxrts.hnc_potentials.DebyeHueckelPotential()
 
 V_s = Potential.short_r(state, r)
 V_l_k = Potential.long_k(state, k)

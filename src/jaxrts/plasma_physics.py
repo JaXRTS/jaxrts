@@ -122,6 +122,12 @@ def fermi_dirac(k: Quantity, chem_pot: Quantity, T: Quantity) -> Quantity:
 
 
 @jax.jit
+def fermi_wavenumber(n_e: Quantity) -> Quantity:
+
+    return (3 * jnp.pi**2 * n_e) ** (1 / 3)
+
+
+@jax.jit
 def fermi_energy(n_e: Quantity) -> Quantity:
     """
     Calculate the Fermi energy of an ideal fermi gas from a given electron
@@ -142,10 +148,8 @@ def fermi_energy(n_e: Quantity) -> Quantity:
         Fermi energy
     """
     factor1 = ureg.hbar**2 / (2 * ureg.m_e)
-    factor2 = (3 * jnp.pi**2 * n_e) ** (2 / 3)
-    E_F = factor1.to(
-        ureg.centimeter**4 * ureg.gram / ureg.second**2
-    ) * factor2.to(1 / ureg.centimeter**2)
+    k_fsquared = (3 * jnp.pi**2 * n_e) ** (2 / 3)
+    E_F = factor1 * k_fsquared
     return E_F.to(ureg.electron_volt)
 
 
@@ -213,7 +217,7 @@ def chem_pot_interpolationIchimaru(T: Quantity, n_e: Quantity) -> Quantity:
 
 
 @jax.jit
-def Debye_Huckel_screening_length(
+def Debye_Hueckel_screening_length(
     n: Quantity | List, T: Quantity, Z: float | List | jnp.ndarray = 1.0
 ) -> Quantity:
     """
@@ -303,11 +307,42 @@ def degeneracy_param(n_e: Quantity, T_e: Quantity) -> Quantity:
     return n_e * therm_de_broglie_wl(T_e) ** 3
 
 
+def interparticle_spacing(Z1: float, Z2: float, n_e: Quantity):
+
+    return (3 * (Z1 * Z2) ** (1 / 2) / (4 * jnp.pi * n_e)) ** (1 / 3)
+
+
+def coupling_param(Z1: float, Z2: float, n_e: Quantity, T_e: Quantity):
+    """
+    Returns the degree of interparticle coupling with corresponding charge
+    numbers Z1 and Z2 at temperature T_e and density n_e.
+    """
+
+    intspac = interparticle_spacing(Z1, Z2, n_e)
+
+    return (
+        Z1
+        * Z2
+        * 1
+        * ureg.elementary_charge**2
+        / (
+            4
+            * jnp.pi
+            * ureg.epsilon_0
+            * intspac
+            * 1
+            * ureg.boltzmann_constant
+            * T_e
+        )
+    ).m_as(ureg.dimensionless)
+
+
 def therm_de_broglie_wl(T):
     return ureg.hbar * jnpu.sqrt(
         (2 * jnp.pi) / (ureg.electron_mass * ureg.k_B * T)
     )
-    
+
+
 def compton_energy(probe_energy, scattering_angle):
 
     shift = (
@@ -324,3 +359,58 @@ def compton_energy(probe_energy, scattering_angle):
         )
     ).to(ureg.electron_volt)
     return shift
+
+
+@jax.jit
+def susceptibility_from_epsilon(epsilon: Quantity, k: Quantity) -> Quantity:
+    """
+    Calculate the full susceptilibily from a  given dielectric function epsilon
+    by inverting
+
+    ..math::
+
+        \\varepsilon^{-1} = 1 + V_{ee} xi_{ee}
+
+    Where :math:`V_{ee}` is the Coulomb potential in k space.
+
+    See, e.g., :cite:`Dandrea.1986`.
+    """
+    Vee = coulomb_potential_fourier(-1, -1, k)
+    return (epsilon ** (-1) - 1) / Vee
+
+
+@jax.jit
+def epsilon_from_susceptibility(xi: Quantity, k: Quantity) -> Quantity:
+    """
+    Calculate the dielectric function from a full susceptibility xi
+
+    ..math::
+
+        \\varepsilon^{-1} = 1 + V_{ee} xi_{ee}
+
+    Where :math:`V_{ee}` is the Coulomb potential in k space.
+
+    See, e.g., :cite:`Dandrea.1986`.
+    """
+    Vee = coulomb_potential_fourier(-1, -1, k)
+    return ((1 + Vee * xi) ** -1).m_as(ureg.dimensionless)
+
+
+@jax.jit
+def noninteracting_susceptibility_from_eps_RPA(
+    epsilon: Quantity, k: Quantity
+) -> Quantity:
+    """
+    Calculates the non-interacting susceptilibily from a given dielectric
+    function epsilon in RPA.
+
+    See, e.g., :cite:`Fortmann.2010`.
+
+    ..math::
+
+        \\xi^{(0)}_{e} = \\frac{1 - \\varepsilon^{RPA}}{V_{ee}(k)}
+
+    Where :math:`V_{ee}` is the Coulomb potential in k space.
+    """
+    Vee = coulomb_potential_fourier(-1, -1, k)
+    return (1 - epsilon) / Vee

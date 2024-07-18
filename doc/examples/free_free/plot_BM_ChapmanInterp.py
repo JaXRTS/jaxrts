@@ -13,6 +13,7 @@ the required number of points for the interpolation.
     (which normally takes a notable time).
 
 """
+
 import os
 
 from functools import partial
@@ -28,7 +29,7 @@ import jaxrts
 
 # Allow jax to use 6 CPUs, see
 # https://astralord.github.io/posts/exploring-parallel-strategies-with-jax/
-os.environ["XLA_FLAGS"] = '--xla_force_host_platform_device_count=6'
+os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=6"
 
 ureg = jaxrts.units.ureg
 
@@ -56,21 +57,26 @@ state = jaxrts.PlasmaState(
     jnp.array([2]) * ureg.electron_volt / ureg.k_B,
 )
 
-state["free-free scattering"] = jaxrts.models.BornMermin()
+state["free-free scattering"] = jaxrts.models.BornMerminFull()
+# This is required for the S_ii in the collision frequency
+state["ionic scattering"] = jaxrts.models.ArkhipovIonFeat()
+
+# This is required for the V_eiS in the collision frequency
+state["BM V_eiS"] = jaxrts.models.DebyeHueckel_BM_V()
 state.evaluate("free-free scattering", setup).m_as(ureg.second)
 t0 = time.time()
-BM_free_free_scatter = (
-    state.evaluate("free-free scattering", setup).m_as(ureg.second)
+BM_free_free_scatter = state.evaluate("free-free scattering", setup).m_as(
+    ureg.second
 )
 print(f"Full BMA: {time.time()-t0}s")
-state["free-free scattering"] = jaxrts.models.BornMermin_ChapmanInterp()
+state["free-free scattering"] = jaxrts.models.BornMermin()
 
 for no_of_freq in [2, 4, 20, 100]:
     state["free-free scattering"].no_of_freq = no_of_freq
     state.evaluate("free-free scattering", setup).m_as(ureg.second)
     t0 = time.time()
-    free_free_scatter = (
-        state.evaluate("free-free scattering", setup).m_as(ureg.second)
+    free_free_scatter = state.evaluate("free-free scattering", setup).m_as(
+        ureg.second
     )
     print(
         f"{no_of_freq} interp points: {time.time()-t0}s      ",
@@ -91,15 +97,14 @@ plt.plot(
     setup.measured_energy.m_as(ureg.electron_volt),
     BM_free_free_scatter,
     label="Full BMA",
-    linestyle="dashed",
     color="black",
 )
 
 state["free-free scattering"] = jaxrts.models.RPA_NoDamping()
 state.evaluate("free-free scattering", setup).m_as(ureg.second)
 t0 = time.time()
-free_free_scatter = (
-    state.evaluate("free-free scattering", setup).m_as(ureg.second)
+free_free_scatter = state.evaluate("free-free scattering", setup).m_as(
+    ureg.second
 )
 print(f"RPA: {time.time()-t0}s")
 plt.plot(

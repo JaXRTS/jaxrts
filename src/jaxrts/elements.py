@@ -566,8 +566,36 @@ class Element:
                     type(self), type(other)
                 )
             )
+        if isinstance(other, MixElement):
+            return False
 
         return self.Z == other.Z
 
     def __repr__(self) -> str:
         return f"Element {self.name} ({self.symbol}) Z={self.Z}"
+
+
+class MixElement(Element):
+    """
+    This helper class is used to define Average Atoms to perform calculations
+    on.
+
+    This class is not intended to be used everywhere, where a real
+    :py:class:`~.Element` can be used. Rather, we see it as a convenience tool.
+    """
+
+    def __init__(self, Zmix, avgMass, name=""):
+        self.Z: float = Zmix
+        self.electron_distribution = electron_distribution_ionized_state(
+            self.Z
+        )
+        self.atomic_mass: Quantity = avgMass
+        self.symbol = "MIX"
+        self.name = name
+
+        # These are entries that do not make semse for an Average Atom
+        self.binding_energies = jnp.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) * (
+            1 * ureg.electron_volt
+        )
+
+        self.atomic_radius_calc = 0 * ureg.picometer

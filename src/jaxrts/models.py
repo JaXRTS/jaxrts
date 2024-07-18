@@ -4,6 +4,7 @@ implemented.
 """
 
 import abc
+from copy import deepcopy
 import logging
 
 import jax
@@ -15,8 +16,10 @@ from .setup import (
     Setup,
     convolve_stucture_factor_with_instrument,
     dispersion_corrected_k,
+    get_probe_setup,
 )
-from .elements import electron_distribution_ionized_state
+from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
+from .elements import electron_distribution_ionized_state, MixElement
 from . import (
     bound_free,
     form_factors,
@@ -27,6 +30,7 @@ from . import (
     plasma_physics,
     static_structure_factors,
     ipd,
+    ee_localfieldcorrections,
 )
 
 
@@ -148,7 +152,11 @@ class ScatteringModel(Model):
 
     @jax.jit
     def evaluate(
-        self, plasma_state: "PlasmaState", setup: Setup
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
         """
         If :py:attr:`~.sample_points` is not ``None``, generate a
@@ -158,7 +166,7 @@ class ScatteringModel(Model):
         instument function.
         """
         if self.sample_points is None:
-            raw = self.evaluate_raw(plasma_state, setup)
+            raw = self.evaluate_raw(plasma_state, setup, *args, **kwargs)
         else:
             low_res_setup = Setup(
                 setup.scattering_angle,
@@ -166,7 +174,9 @@ class ScatteringModel(Model):
                 self.sample_grid(setup),
                 setup.instrument,
             )
-            low_res = self.evaluate_raw(plasma_state, low_res_setup)
+            low_res = self.evaluate_raw(
+                plasma_state, low_res_setup, *args, **kwargs
+            )
             raw = jnpu.interp(
                 setup.measured_energy,
                 low_res_setup.measured_energy,
@@ -223,9 +233,77 @@ class Neglect(Model):
 
 # ion-feature
 # -----------
+class IonFeatModel(Model):
+    #: A list of keywords where this model is adequate for
+    allowed_keys: list[str] = ["ionic scattering"]
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model("screening", Gregori2004Screening())
+
+    @abc.abstractmethod
+    def S_ii(
+        self,
+        plasma_state: "PlasmaState",
+        k: Quantity,
+    ) -> jnp.ndarray: ...
+
+    @jax.jit
+    def Rayleigh_weight(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+    ) -> jnp.ndarray:
+        """
+        This is the result from Wünsch, to calculate the Rayleigh weight for
+        multiple species.
+        """
+        S_ab = self.S_ii(plasma_state, setup)
+        # Get the formfactor from the plasma state
+        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
+        population = electron_distribution_ionized_state(plasma_state.Z_core)
+        f = jnp.sum(fi * population, axis=0)
+        # Calculate the number-fraction per element
+        x = plasma_state.number_fraction
+
+        # Get the screening from the plasma state
+        q = plasma_state.evaluate("screening", setup)
+
+        # Add the contributions from all pairs
+        w_R = 0
+
+        def add_wrt(a, b):
+            return (
+                jnpu.sqrt(x[a] * x[b])
+                * (f[a] + q[a])
+                * (f[b] + q[b])
+                * S_ab[a, b]
+            ).m_as(ureg.dimensionless)
+
+        def dont_add_wrt(a, b):
+            return jnp.array([0.0])
+
+        # The W_R is calculated as a sum over all combinations of a_b
+        ion_spec1, ion_spec2 = jnp.meshgrid(
+            jnp.arange(plasma_state.nions),
+            jnp.arange(plasma_state.nions),
+        )
+        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+            w_R += jax.lax.cond(a <= b, add_wrt, dont_add_wrt, a, b)
+        return w_R
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        w_R = self.Rayleigh_weight(plasma_state, setup)
+        res = w_R * setup.instrument(
+            (setup.measured_energy - setup.energy) / ureg.hbar
+        )
+        return res
 
 
-class ArkhipovIonFeat(Model):
+class ArkhipovIonFeat(IonFeatModel):
     """
     Model for the ion feature of the scatting, presented in
     :cite:`Arkhipov.1998` and :cite:`Arkhipov.2000`.
@@ -250,12 +328,7 @@ class ArkhipovIonFeat(Model):
         The default model for the atomic form factors
     """
 
-    allowed_keys = ["ionic scattering"]
     __name__ = "ArkhipovIonFeat"
-
-    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
-        plasma_state.update_default_model("form-factors", PaulingFormFactors())
-        plasma_state.update_default_model("screening", Gregori2004Screening())
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if plasma_state.T_e != plasma_state.T_i:
@@ -270,15 +343,7 @@ class ArkhipovIonFeat(Model):
             )
 
     @jax.jit
-    def evaluate(
-        self, plasma_state: "PlasmaState", setup: Setup
-    ) -> jnp.ndarray:
-        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
-        population = electron_distribution_ionized_state(plasma_state.Z_core)[
-            :, jnp.newaxis
-        ]
-        q = plasma_state.evaluate("screening", setup)
-        f = jnp.sum(fi * population)
+    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
         S_ii = static_structure_factors.S_ii_AD(
             setup.k,
             plasma_state.T_e,
@@ -287,14 +352,25 @@ class ArkhipovIonFeat(Model):
             plasma_state.atomic_masses,
             plasma_state.Z_free,
         )
-        w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
-        res = w_R * setup.instrument(
-            (setup.measured_energy - setup.energy) / ureg.hbar
-        )
-        return res
+        # Add a dimension, so that the shape is (1x1)
+        return S_ii[:, jnp.newaxis]
+
+    # @jax.jit
+    # def Rayleigh_weight(
+    #     self, plasma_state: "PlasmaState", setup: Setup
+    # ) -> jnp.ndarray:
+    #     fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
+    #     population = electron_distribution_ionized_state(plasma_state.Z_core)[
+    #         :, jnp.newaxis
+    #     ]
+    #     q = plasma_state.evaluate("screening", setup)
+    #     f = jnp.sum(fi * population)
+    #     S_ii = self.S_ii(plasma_state, setup)
+    #     w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
+    #     return w_R
 
 
-class Gregori2003IonFeat(Model):
+class Gregori2003IonFeat(IonFeatModel):
     """
     Model for the ion feature of the scatting, presented in
     :cite:`Gregori.2003`.
@@ -304,12 +380,7 @@ class Gregori2003IonFeat(Model):
     rather than the electron Temperature throughout the calculation.
     """
 
-    allowed_keys = ["ionic scattering"]
     __name__ = "Gregori2003IonFeat"
-
-    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
-        plasma_state.update_default_model("form-factors", PaulingFormFactors())
-        plasma_state.update_default_model("screening", Gregori2004Screening())
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if plasma_state.T_e != plasma_state.T_i:
@@ -324,19 +395,10 @@ class Gregori2003IonFeat(Model):
             )
 
     @jax.jit
-    def evaluate(
-        self, plasma_state: "PlasmaState", setup: Setup
-    ) -> jnp.ndarray:
-        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
-        population = electron_distribution_ionized_state(
-            plasma_state.Z_core[0]
-        )[:, jnp.newaxis]
-
+    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
         T_eff = static_structure_factors.T_cf_Greg(
             plasma_state.T_e, plasma_state.n_e
         )
-        f = jnp.sum(fi * population)
-        q = plasma_state.evaluate("screening", setup)
         S_ii = ion_feature.S_ii_AD(
             setup.k,
             T_eff,
@@ -345,14 +407,11 @@ class Gregori2003IonFeat(Model):
             plasma_state.atomic_masses,
             plasma_state.Z_free,
         )
-        w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
-        res = w_R * setup.instrument(
-            (setup.measured_energy - setup.energy) / ureg.hbar
-        )
-        return res
+        # Add a dimension, so that the shape is (1x1)
+        return S_ii[:, jnp.newaxis]
 
 
-class Gregori2006IonFeat(Model):
+class Gregori2006IonFeat(IonFeatModel):
     """
     Model for the ion feature of the scatting, presented in
     :cite:`Gregori.2006`.
@@ -373,12 +432,10 @@ class Gregori2006IonFeat(Model):
     Requires a 'Debye temperature' model (defaults to :py:class:`~BohmStaver`).
     """
 
-    allowed_keys = ["ionic scattering"]
     __name__ = "Gregori2006IonFeat"
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
-        plasma_state.update_default_model("form-factors", PaulingFormFactors())
-        plasma_state.update_default_model("screening", Gregori2004Screening())
+        super().prepare(plasma_state, key)
         plasma_state.update_default_model("Debye temperature", BohmStaver())
 
     def check(self, plasma_state: "PlasmaState") -> None:
@@ -388,22 +445,13 @@ class Gregori2006IonFeat(Model):
             )
 
     @jax.jit
-    def evaluate(
-        self, plasma_state: "PlasmaState", setup: Setup
-    ) -> jnp.ndarray:
-        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
-        population = electron_distribution_ionized_state(plasma_state.Z_core)[
-            :, jnp.newaxis
-        ]
-
+    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
         T_D = plasma_state["Debye temperature"].evaluate(plasma_state, setup)
 
         T_e_eff = static_structure_factors.T_cf_Greg(
             plasma_state.T_e, plasma_state.n_e
         )
         T_i_eff = static_structure_factors.T_i_eff_Greg(plasma_state.T_i, T_D)
-        f = jnp.sum(fi * population)
-        q = plasma_state.evaluate("screening", setup)
         S_ii = ion_feature.S_ii_AD(
             setup.k,
             T_e_eff,
@@ -412,14 +460,11 @@ class Gregori2006IonFeat(Model):
             plasma_state.atomic_masses,
             plasma_state.Z_free,
         )
-        w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
-        res = w_R * setup.instrument(
-            (setup.measured_energy - setup.energy) / ureg.hbar
-        )
-        return res
+        # Add a dimension, so that the shape is (1x1)
+        return S_ii[:, jnp.newaxis]
 
 
-class OnePotentialHNCIonFeat(Model):
+class OnePotentialHNCIonFeat(IonFeatModel):
     """
     Model for the ion feature using a calculating all :math:`S_{ab}` in the
     Hypernetted Chain approximation.
@@ -430,14 +475,12 @@ class OnePotentialHNCIonFeat(Model):
     has to be provided as an additional `screening`.
 
 
-    Requires an 'ion-ion' (defaults to :py:class:`~DebyeHuckelPotential`) and a
-    `screening` model (default:
-    :py::class:`~.LinearResponseScreeningGericke2010`.
-    Further requires a 'form-factors' model (defaults to
-    :py:class:`~PaulingFormFactors`).
+    Requires an 'ion-ion' (defaults to :py:class:`~DebyeHueckelPotential`) and
+    a `screening` model (default:
+    :py::class:`~.LinearResponseScreeningGericke2010`. Further requires a
+    'form-factors' model (defaults to :py:class:`~PaulingFormFactors`).
     """
 
-    allowed_keys = ["ionic scattering"]
     __name__ = "OnePotentialHNCIonFeat"
 
     def __init__(
@@ -456,12 +499,9 @@ class OnePotentialHNCIonFeat(Model):
         super().__init__()
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
-        plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        super().prepare(plasma_state, key)
         plasma_state.update_default_model(
-            "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
-        )
-        plasma_state.update_default_model(
-            "screening", LinearResponseScreeningGericke2010()
+            "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
         )
         plasma_state["ion-ion Potential"].include_electrons = False
 
@@ -477,9 +517,7 @@ class OnePotentialHNCIonFeat(Model):
         return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
     @jax.jit
-    def evaluate(
-        self, plasma_state: "PlasmaState", setup: Setup
-    ) -> jnp.ndarray:
+    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
         # Prepare the Potentials
         # ----------------------
 
@@ -504,45 +542,7 @@ class OnePotentialHNCIonFeat(Model):
         # Interpolate this to the k given by the setup
 
         S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
-
-        # To Calculate the screening from a screening model
-        # ---------------------------------------------------------------
-        q = plasma_state.evaluate("screening", setup)
-
-        # The W_R is calculated as a sum over all combinations of a_b
-        ion_spec1, ion_spec2 = jnp.meshgrid(
-            jnp.arange(plasma_state.nions),
-            jnp.arange(plasma_state.nions),
-        )
-
-        # Get the formfactor from the plasma state
-        fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
-        population = electron_distribution_ionized_state(plasma_state.Z_core)
-        f = jnp.sum(fi * population, axis=0)
-        # Calculate the number-fraction per element
-        x = plasma_state.number_fraction
-
-        # Add the contributions from all pairs
-        w_R = 0
-
-        def add_wrt(a, b):
-            return (
-                jnpu.sqrt(x[a] * x[b])
-                * (f[a] + q[a])
-                * (f[b] + q[b])
-                * S_ab[a, b]
-            ).m_as(ureg.dimensionless)
-
-        def dont_add_wrt(a, b):
-            return jnp.array([0.0])
-
-        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
-            w_R += jax.lax.cond(a <= b, add_wrt, dont_add_wrt, a, b)
-        # Scale the instrument function directly with w_R
-        res = w_R * setup.instrument(
-            (setup.measured_energy - setup.energy) / ureg.hbar
-        )
-        return res
+        return S_ab
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -562,7 +562,7 @@ class OnePotentialHNCIonFeat(Model):
         return obj
 
 
-class ThreePotentialHNCIonFeat(Model):
+class ThreePotentialHNCIonFeat(IonFeatModel):
     """
     Model for the ion feature using a calculating all :math:`S_{ab}` in the
     Hypernetted Chain approximation. This is achieved by treating the electrons
@@ -580,7 +580,7 @@ class ThreePotentialHNCIonFeat(Model):
     Requires 3 Potentials:
 
         - an 'ion-ion Potential' The black entries in the picture below
-          (defaults to :py:class:`~DebyeHuckelPotential`).
+          (defaults to :py:class:`~DebyeHueckelPotential`).
         - an 'electron-ion Potential' The orange entries in the picture below
           (defaults to :py:class:`~KlimontovichKraeftPotential`).
         - an 'electron-electron Potential' The red entries in the picutre below
@@ -599,7 +599,6 @@ class ThreePotentialHNCIonFeat(Model):
 
     """
 
-    allowed_keys = ["ionic scattering"]
     __name__ = "ThreePotentialHNC"
 
     def __init__(
@@ -618,9 +617,11 @@ class ThreePotentialHNCIonFeat(Model):
         super().__init__()
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        # Overwrite the old prepare function, here, because we don't need a
+        # screening model
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model(
-            "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
+            "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
         )
         plasma_state.update_default_model(
             "electron-ion Potential",
@@ -649,7 +650,7 @@ class ThreePotentialHNCIonFeat(Model):
         return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
     @jax.jit
-    def evaluate(
+    def _S_ii_with_electrons(
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
         # Prepare the Potentials
@@ -721,12 +722,29 @@ class ThreePotentialHNCIonFeat(Model):
         # Interpolate this to the k given by the setup
 
         S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
+        return S_ab
 
+    def S_ii(self, plasma_state, setup):
+        S_ab = self._S_ii_with_electrons(plasma_state, setup)
+        return S_ab[:-1, :-1]
+
+    def Rayleigh_weight(self, plasma_state, setup):
+        """
+        Here, we have to calculate teh Rayleigh weight different than the
+        default, because we get the screening from the calculated S_ei, rather
+        than any model.
+        """
         # To Calculate the screening, use the S_ii and S_ei contributions
         # ---------------------------------------------------------------
+        S_ab = self._S_ii_with_electrons(plasma_state, setup)
         S_ii = jnpu.diagonal(S_ab, axis1=0, axis2=1)[:-1]
         S_ei = S_ab[:-1, -1]
-        q = ion_feature.q_Glenzer2009(S_ei, S_ii, plasma_state.Z_free)
+
+        # Add a dimension here, to be compatible with the the typical output of
+        # plasma_state["screening].evaluate...
+        q = ion_feature.q_Glenzer2009(S_ei, S_ii, plasma_state.Z_free)[
+            :, jnp.newaxis
+        ]
 
         # The W_R is calculated as a sum over all combinations of a_b
         ion_spec1, ion_spec2 = jnp.meshgrid(
@@ -758,10 +776,7 @@ class ThreePotentialHNCIonFeat(Model):
         for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
             w_R += jax.lax.cond(a <= b, add_wrt, dont_add_wrt, a, b)
         # Scale the instrument function directly with w_R
-        res = w_R * setup.instrument(
-            (setup.measured_energy - setup.energy) / ureg.hbar
-        )
-        return res
+        return w_R
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -784,11 +799,26 @@ class ThreePotentialHNCIonFeat(Model):
 # Free-free models
 # ----------------
 #
-# These models also give a dielectric_function method, which might be used by
+# These models also give a susceptibility method, which might be used by
 # screening models, later.
 
 
-class QCSalpeterApproximation(ScatteringModel):
+class FreeFreeModel(ScatteringModel):
+    #: A list of keywords where this model is adequate for
+    allowed_keys: list[str] = ["free-free scattering"]
+
+    @abc.abstractmethod
+    def susceptibility(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray: ...
+
+
+class QCSalpeterApproximation(FreeFreeModel):
     """
     Quantum Corrected Salpeter Approximation for free-free scattering.
     Presented in :cite:`Gregori.2003`, which provide a quantum correction to
@@ -801,6 +831,10 @@ class QCSalpeterApproximation(ScatteringModel):
     (according to, e.g., "cite:`Gregori.2003`) at a comparable computation
     time.
 
+    This model does not provide a straight-forward approach to include local
+    field corrections. We have included it, for now, by assuming the behavior
+    would be the same as it is for the RPA.
+
     See Also
     --------
     jaxtrs.free_free.S0_ee_Salpeter(
@@ -808,12 +842,11 @@ class QCSalpeterApproximation(ScatteringModel):
         factor.
     """
 
-    allowed_keys = ["free-free scattering"]
     __name__ = "QCSalpeterApproximation"
 
     @jax.jit
     def evaluate_raw(
-        self, plasma_state: "PlasmaState", setup: Setup
+        self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
     ) -> jnp.ndarray:
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_Salpeter(
@@ -821,6 +854,7 @@ class QCSalpeterApproximation(ScatteringModel):
             plasma_state.T_e,
             plasma_state.n_e,
             setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
         )
 
         return See_0 * jnp.sum(
@@ -828,8 +862,13 @@ class QCSalpeterApproximation(ScatteringModel):
         )
 
     @jax.jit
-    def dielectric_function(
-        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    def susceptibility(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
         k = setup.k
         eps = free_free.dielectric_function_salpeter(
@@ -838,10 +877,14 @@ class QCSalpeterApproximation(ScatteringModel):
             plasma_state.n_e,
             E,
         )
-        return eps
+        xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+        return xi
 
 
-class RPA_NoDamping(ScatteringModel):
+class RPA_NoDamping(FreeFreeModel):
     """
     Model for elastic free-free scattering based on the Random Phase
     Approximation
@@ -850,7 +893,7 @@ class RPA_NoDamping(ScatteringModel):
     the fluctuation dissipation theorem. Based on lecture notes from M. Bonitz.
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaryChemPotential`).
+    :py:class:`~IchimaruChemPotential`).
 
     See Also
     --------
@@ -859,7 +902,6 @@ class RPA_NoDamping(ScatteringModel):
         factor.
     """
 
-    allowed_keys = ["free-free scattering"]
     __name__ = "RPA_NoDamping"
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -869,7 +911,7 @@ class RPA_NoDamping(ScatteringModel):
 
     @jax.jit
     def evaluate_raw(
-        self, plasma_state: "PlasmaState", setup: Setup
+        self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
     ) -> jnp.ndarray:
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
@@ -879,6 +921,7 @@ class RPA_NoDamping(ScatteringModel):
             plasma_state.n_e,
             setup.measured_energy - setup.energy,
             mu,
+            plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
         )
 
         return See_0 * jnp.sum(
@@ -886,8 +929,13 @@ class RPA_NoDamping(ScatteringModel):
         )
 
     @jax.jit
-    def dielectric_function(
-        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    def susceptibility(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
@@ -898,16 +946,75 @@ class RPA_NoDamping(ScatteringModel):
             mu,
             plasma_state.T_e,
         )
-        return eps
+        xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+        return xi
 
 
-class BornMermin(ScatteringModel):
+class RPA_DandreaFit(FreeFreeModel):
+    """
+    Model for elastic free-free scattering based fitting to the Random Phase
+    Approximation, as presented by :cite:`Dandrea.1986`.
+
+    Requires a 'chemical potential' model (defaults to
+    :py:class:`~IchimaruChemPotential`).
+
+    See Also
+    --------
+    jaxtrs.free_free.
+        Function used to calculate the dynamic free-free electron structure
+        factor.
+    """
+
+    __name__ = "PRA_DandreaFit"
+
+    @jax.jit
+    def evaluate_raw(
+        self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
+    ) -> jnp.ndarray:
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        See_0 = free_free.S0_ee_RPA_Dandrea(
+            k,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
+        )
+
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
+
+    @jax.jit
+    def susceptibility(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = setup.k
+        xi0 = free_free.noninteracting_susceptibility_Dandrea1986(
+            k, E, plasma_state.T_e, plasma_state.n_e
+        )
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+        xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+        return xi
+
+
+class BornMerminFull(FreeFreeModel):
     """
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaryChemPotential`).
+    :py:class:`~.IchimaruChemPotential`).
+    Requires a 'BM V_eiS' model (defaults to
+    :py:class:`~.FiniteWavelength_BM_V`).
 
     See Also
     --------
@@ -916,73 +1023,118 @@ class BornMermin(ScatteringModel):
         Function used to calculate the dynamic structure factor
     """
 
-    __name__ = "BornMermin"
-    allowed_keys = ["free-free scattering"]
+    __name__ = "BornMerminFull"
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
-
-    def check(self, plasma_state: "PlasmaState") -> None:
-        if len(plasma_state) > 1:
-            logger.critical(
-                "'BornMermin' is only implemented for a one-component plasma"  # noqa: E501
-            )
+        plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
 
     @jax.jit
     def evaluate_raw(
-        self, plasma_state: "PlasmaState", setup: Setup
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
+
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state.evaluate("BM S_ii", probe_setup)
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
+
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA(
             k,
             plasma_state.T_e,
             mu,
-            plasma_state.atomic_masses,
+            S_ii,
+            V_eiS,
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
         )
-        return See_0 * plasma_state.Z_free
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
 
     @jax.jit
-    def dielectric_function(
-        self, plasma_state: "PlasmaState", setup: Setup, E: Quantity
+    def susceptibility(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
+
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state.evaluate("BM S_ii", probe_setup)
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
+
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
-        eps = free_free.dielectric_function_BMA(
-            k,
-            E,
-            mu,
-            plasma_state.T_e,
-            plasma_state.n_e,
-            plasma_state.atomic_masses,
-            plasma_state.Z_free,
+        def chi(energy):
+            eps = free_free.dielectric_function_BMA_full(
+                k,
+                energy,
+                mu,
+                plasma_state.T_e,
+                plasma_state.n_e,
+                S_ii,
+                V_eiS,
+                plasma_state.Z_free,
+            )
+            xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
+            lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+            V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+            xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+            return xi
+
+        # Interpolate for small energy transfers, as it will give nans for zero
+        w_pl = plasma_physics.plasma_frequency(plasma_state.n_e)
+        interpE = jnp.array([-1e-4, 1e-4]) * (1 * ureg.hbar) * w_pl
+        interpchi = chi(interpE)
+        return jnpu.where(
+            jnpu.absolute(E) > interpE[1],
+            chi(E),
+            jnpu.interp(E, interpE, interpchi),
         )
-        return eps
 
 
-class BornMermin_ChapmanInterp(ScatteringModel):
+class BornMermin(FreeFreeModel):
     """
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
-    Uses the Chapman Interpolation which allows for a faster computation of the
-    free-free scattering compared to :py:class:`~.BornMermin`, by sampleing at
-    the probing frequency at :py:attr:`~.no_of_freq` points and interpolating
-    between them, after.
+    Uses the Chapman interpolation which allows for a faster computation of the
+    free-free scattering compared to :py:class:`~.BornMerminFull`, by sampleing
+    at the probing frequency at :py:attr:`~.no_of_freq` points and
+    interpolating between them, after.
 
     The number of frequencies defaults to 20. To change it, just change the
     attribute of this model after initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin_ChapmanInterp
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin
     >>> state["free-free scattering"].no_of_freq = 10
 
     Requires a 'chemical potential' model (defaults to
-    :py:class:`~IchimaryChemPotential`).
+    :py:class:`~.IchimaruChemPotential`).
+    Requires a 'BM V_eiS' model (defaults to
+    :py:class:`~.FiniteWavelength_BM_V`).
 
     See Also
     --------
@@ -991,8 +1143,7 @@ class BornMermin_ChapmanInterp(ScatteringModel):
         Function used to calculate the dynamic structure factor
     """
 
-    allowed_keys = ["free-free scattering"]
-    __name__ = "BornMermin_ChapmanInterp"
+    __name__ = "BornMermin"
 
     def __init__(self, no_of_freq: int = 20) -> None:
         super().__init__()
@@ -1002,52 +1153,366 @@ class BornMermin_ChapmanInterp(ScatteringModel):
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
         )
-
-    def check(self, plasma_state: "PlasmaState") -> None:
-        if len(plasma_state) > 1:
-            logger.critical(
-                "'BornMermin_ChapmanInterp' is only implemented for a one-component plasma"  # noqa: E501
-            )
+        plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
 
     @jax.jit
     def evaluate_raw(
-        self, plasma_state: "PlasmaState", setup: Setup
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
+
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state.evaluate("BM S_ii", probe_setup)
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
+
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
             k,
             plasma_state.T_e,
             mu,
-            plasma_state.atomic_masses,
+            S_ii,
+            V_eiS,
             plasma_state.n_e,
             plasma_state.Z_free,
             setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * plasma_state.Z_free
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
 
     @jax.jit
-    def dielectric_function(
+    def susceptibility(
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
         E: Quantity,
+        *args,
+        **kwargs,
     ) -> jnp.ndarray:
+
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state.evaluate("BM S_ii", probe_setup)
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state["BM V_eiS"].evaluate(plasma_state, probe_setup)
+
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
-        eps = free_free.dielectric_function_BMA_chapman_interp(
+        def chi(energy):
+            eps = free_free.dielectric_function_BMA_chapman_interp(
+                k,
+                energy,
+                mu,
+                plasma_state.T_e,
+                plasma_state.n_e,
+                S_ii,
+                V_eiS,
+                plasma_state.Z_free,
+                self.no_of_freq,
+            )
+            xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
+            lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+            V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+            xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+            return xi
+
+        # Interpolate for small energy transfers, as it will give nans for zero
+        w_pl = plasma_physics.plasma_frequency(plasma_state.n_e)
+        interpE = jnp.array([-1e-4, 1e-4]) * (1 * ureg.hbar) * w_pl
+        interpchi = chi(interpE)
+        return jnpu.where(
+            jnpu.absolute(E) > interpE[1],
+            chi(E),
+            jnpu.interp(E, interpE, interpchi),
+        )
+
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.no_of_freq,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+
+        return obj
+
+
+class BornMermin_Fit(FreeFreeModel):
+    """
+    Model of the free-free scattering, based on the Born Mermin Approximation
+    (:cite:`Mermin.1970`).
+    Identical to :py:class:`~.BornMermin`, but uses the Dandrea
+    fit (:cite:`Dandrea.1986`), rather than numerically calculating the
+    un-damped RPA, numerically. However, the damped RPA is still evaluated
+    using the integral.
+
+    The number of frequencies defaults to 20. To change it, just change the
+    attribute of this model after initializing it. i.e.
+
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit
+    >>> state["free-free scattering"].no_of_freq = 10
+
+    Requires a 'chemical potential' model (defaults to
+    :py:class:`~.IchimaruChemPotential`).
+    Requires a 'BM V_eiS' model (defaults to
+    :py:class:`~.FiniteWavelength_BM_V`).
+
+    See Also
+    --------
+
+    jaxrts.free_free.S0_ee_BMA_chapman_interpFit
+        Function used to calculate the dynamic structure factor
+    """
+
+    __name__ = "BornMermin_Fit"
+
+    def __init__(self, no_of_freq: int = 20) -> None:
+        super().__init__()
+        self.no_of_freq: int = no_of_freq
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "chemical potential", IchimaruChemPotential()
+        )
+        plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
+
+    @jax.jit
+    def evaluate_raw(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state.evaluate("BM S_ii", probe_setup)
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
+
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        See_0 = free_free.S0_ee_BMA_chapman_interpFit(
+            k,
+            plasma_state.T_e,
+            mu,
+            S_ii,
+            V_eiS,
+            plasma_state.n_e,
+            plasma_state.Z_free,
+            setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
+            self.no_of_freq,
+        )
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
+
+    @jax.jit
+    def susceptibility(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state.evaluate("BM S_ii", probe_setup)
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
+
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = setup.k
+
+        def chi(energy):
+            eps = free_free.dielectric_function_BMA_chapman_interpFit(
+                k,
+                energy,
+                mu,
+                plasma_state.T_e,
+                plasma_state.n_e,
+                S_ii,
+                V_eiS,
+                plasma_state.Z_free,
+                self.no_of_freq,
+            )
+            xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
+            lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+            V = plasma_physics.coulomb_potential_fourier(-1, -1, k)
+            xi = ee_localfieldcorrections.xi_lfc_corrected(xi0, V, lfc)
+            return xi
+
+        # Interpolate for small energy transfers, as it will give nans for zero
+        w_pl = plasma_physics.plasma_frequency(plasma_state.n_e)
+        interpE = jnp.array([-1e-2, 1e-2]) * (1 * ureg.hbar) * w_pl
+        interpchi = chi(interpE)
+        return jnpu.where(
+            jnpu.absolute(E) > interpE[1],
+            chi(E),
+            jnpu.interp(E, interpE, interpchi),
+        )
+
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.no_of_freq,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+
+        return obj
+
+
+class BornMermin_Fortmann(FreeFreeModel):
+    """
+    Model of the free-free scattering, based on the Born Mermin Approximation
+    (:cite:`Mermin.1970`).
+    Uses the same collision frequency as :py:class:`~.BornMermin_Fit`
+    (including the :cite:`Dandrea.1986` fit), but uses a rigorous
+    implementation of the local field correction, proposed by
+    :cite:`Fortmann.2010`.
+
+    The number of frequencies defaults to 20. To change it, just change the
+    attribute of this model after initializing it. i.e.
+
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann
+    >>> state["free-free scattering"].no_of_freq = 10
+
+    Requires a 'chemical potential' model (defaults to
+    :py:class:`~.IchimaruChemPotential`).
+    Requires a 'BM V_eiS' model (defaults to
+    :py:class:`~.FiniteWavelength_BM_V`).
+
+    See Also
+    --------
+
+    jaxrts.free_free.S0_ee_BMA_Fortmann
+        Function used to calculate the dynamic structure factor
+    jaxrts.free_free.susceptibility_BMA_Fortmann
+        Function used to calculate the susceptibility
+    """
+
+    __name__ = "BornMermin_Fortmann"
+
+    def __init__(self, no_of_freq: int = 20) -> None:
+        super().__init__()
+        self.no_of_freq: int = no_of_freq
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "chemical potential", IchimaruChemPotential()
+        )
+        plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
+
+    @jax.jit
+    def evaluate_raw(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state.evaluate("BM S_ii", probe_setup)
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
+
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        See_0 = free_free.S0_ee_BMA_Fortmann(
+            k,
+            plasma_state.T_e,
+            mu,
+            S_ii,
+            V_eiS,
+            plasma_state.n_e,
+            plasma_state.Z_free,
+            setup.measured_energy - setup.energy,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
+            self.no_of_freq,
+        )
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
+
+    @jax.jit
+    def susceptibility(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        E: Quantity,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state.evaluate("BM S_ii", probe_setup)
+
+        @jax.tree_util.Partial
+        def V_eiS(k):
+            return plasma_state["BM V_eiS"].V(plasma_state, k)
+
+        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        k = setup.k
+
+        xi = free_free.susceptibility_BMA_Fortmann(
             k,
             E,
             mu,
             plasma_state.T_e,
             plasma_state.n_e,
-            plasma_state.atomic_masses,
+            S_ii,
+            V_eiS,
             plasma_state.Z_free,
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return eps
+        return xi
 
     def _tree_flatten(self):
         children = ()
@@ -1111,7 +1576,9 @@ class SchumacherImpulse(ScatteringModel):
 
     @jax.jit
     def evaluate_raw(
-        self, plasma_state: "PlasmaState", setup: Setup
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
     ) -> jnp.ndarray:
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         omega_0 = setup.energy / ureg.hbar
@@ -1160,7 +1627,9 @@ class SchumacherImpulse(ScatteringModel):
                 omega, k, population, Zeff, E_b
             )
             out += sbe * Z_c * x[idx]
-        return out
+        return jnpu.where(
+            jnp.isnan(out.m_as(ureg.second)), 0 * ureg.second, out
+        )
 
     def _tree_flatten(self):
         children = ()
@@ -1261,7 +1730,7 @@ class IchimaruChemPotential(Model):
     Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
     """
 
-    __name__ = "IchimaryChemPotential"
+    __name__ = "IchimaruChemPotential"
     allowed_keys = ["chemical potential"]
 
     @jax.jit
@@ -1478,7 +1947,7 @@ class DebyeHueckelScreeningLength(Model):
 
     See also
     --------
-    jaxrts.plasma_physics.Debye_Huckel_screening_length
+    jaxrts.plasma_physics.Debye_Hueckel_screening_length
         The function used to calculate the screening length
     """
 
@@ -1487,7 +1956,7 @@ class DebyeHueckelScreeningLength(Model):
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
-        return plasma_physics.Debye_Huckel_screening_length(
+        return plasma_physics.Debye_Hueckel_screening_length(
             plasma_state.n_e, plasma_state.T_e
         )
 
@@ -1502,7 +1971,7 @@ class Gericke2010ScreeningLength(Model):
     --------
     jaxrts.plasma_physics.temperature_interpolation:
         The function used for the temperature interpolation
-    jaxrts.plasma_physics.Debye_Huckel_screening_length
+    jaxrts.plasma_physics.Debye_Hueckel_screening_length
         The function used to calculate the screening length
     """
 
@@ -1514,7 +1983,7 @@ class Gericke2010ScreeningLength(Model):
         T = plasma_physics.temperature_interpolation(
             plasma_state.n_e, plasma_state.T_e, 4
         )
-        lam_DH = plasma_physics.Debye_Huckel_screening_length(
+        lam_DH = plasma_physics.Debye_Hueckel_screening_length(
             plasma_state.n_e, T
         )
         return lam_DH.to(ureg.angstrom)
@@ -1536,9 +2005,7 @@ class ArbitraryDegeneracyScreeningLength(Model):
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
         inverse_lam = ipd.inverse_screening_length_e(
-            jnpu.mean(plasma_state.Z_free * plasma_state.n_i)
-            / jnpu.mean(plasma_state.n_i)
-            * (1 * ureg.elementary_charge),
+            (1 * ureg.elementary_charge),
             plasma_state.n_e,
             plasma_state.T_e,
         )
@@ -1623,6 +2090,7 @@ class LinearResponseScreeningGericke2010(Model):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
+        *args,
         **kwargs,
     ) -> jnp.ndarray:
 
@@ -1637,8 +2105,84 @@ class LinearResponseScreeningGericke2010(Model):
 
 
 class FiniteWavelengthScreening(Model):
+    """
+    Finite wavelenth screening as presented by :cite:`Chapman.2015`.
+
+    Should be identical to :py:class:`~.LinearResponseScreening`, if the
+    free-free model is a RPA model.
+
+    See also
+    --------
+    jaxrts.ion_feature.q_FiniteWLChapman2015
+        The function used to calculate ``q``.
+    """
+
     allowed_keys = ["screening"]
     __name__ = "FiniteWavelengthScreening"
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "electron-ion Potential",
+            hnc_potentials.KlimontovichKraeftPotential(),
+        )
+        plasma_state["electron-ion Potential"].include_electrons = True
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        Vei = plasma_state["electron-ion Potential"].full_k(
+            plasma_state, to_array(setup.k)[jnp.newaxis]
+        )[-1, :-1]
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        q = ion_feature.q_FiniteWLChapman2015(
+            setup.k, Vei, plasma_state.T_e, plasma_state.n_e, lfc
+        )
+        return jnp.real(q.m_as(ureg.dimensionless))
+
+
+class DebyeHueckelScreening(Model):
+    """
+    Debye Hueckel screening as presented by :cite:`Chapman.2015`.
+
+    Should be identical to :py:class:`~.LinearResponseScreening`, if the
+    free-free model is a RPA model.
+
+    See also
+    --------
+    jaxrts.ion_feature.q_LChapman2015
+        The function used to calculate ``q``.
+    """
+
+    allowed_keys = ["screening"]
+    __name__ = "DebyeHueckelScreening"
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        kappa = 1 / plasma_state.screening_length
+        q = ion_feature.q_DebyeHueckelChapman2015(
+            setup.k,
+            kappa,
+            plasma_state.Z_f,
+        )
+        return jnp.real(q.m_as(ureg.dimensionless))
+
+
+class LinearResponseScreening(Model):
+    allowed_keys = ["screening"]
+    __name__ = "LinearResponseScreening"
 
     """
     The screening density :math:`q` is calculated using a result from linear
@@ -1654,10 +2198,8 @@ class FiniteWavelengthScreening(Model):
     Requires an 'electron-ion' potential. (defaults to
     :py:class:`~KlimontovichKraeftPotential`).
 
-    See Also
-    --------
-    jaxtrs.ion_feature.susceptibility_from_epsilon
-        Function used to calculate :math:`\\xi{ee}`
+    Uses the :py:meth:`~.FreeFreeModel.susceptibility` method of the chosen
+    Free Free model.
     """
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -1672,13 +2214,13 @@ class FiniteWavelengthScreening(Model):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
+        *args,
         **kwargs,
     ) -> jnp.ndarray:
 
-        epsilon = plasma_state["free-free scattering"].dielectric_function(
+        xi = plasma_state["free-free scattering"].susceptibility(
             plasma_state, setup, 0 * ureg.electron_volt
         )
-        xi = ion_feature.susceptibility_from_epsilon(epsilon, setup.k)
         Vei = plasma_state["electron-ion Potential"].full_k(
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
@@ -1704,6 +2246,7 @@ class Gregori2004Screening(Model):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
+        *args,
         **kwargs,
     ) -> jnp.ndarray:
         q = ion_feature.q_Gregori2004(
@@ -1713,30 +2256,404 @@ class Gregori2004Screening(Model):
             plasma_state.T_e,
             plasma_state.T_e,
             plasma_state.Z_free,
+        )[:, jnp.newaxis]
+        return jnp.real(q.m_as(ureg.dimensionless))
+
+
+# Electron-Electron Local Field Correction Models
+# ===============================================
+#
+
+
+class ElectronicLFCGeldartVosko(Model):
+    allowed_keys = ["ee-lfc"]
+    __name__ = "GeldartVosko Static LFC"
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_geldartvosko(
+            setup.k, plasma_state.T_e, plasma_state.n_e
         )
-        return q
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_geldartvosko(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
+
+class ElectronicLFCUtsumiIchimaru(Model):
+    allowed_keys = ["ee-lfc"]
+    __name__ = "UtsumiIchimaru Static LFC"
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_utsumiichimaru(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_utsumiichimaru(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
+
+class ElectronicLFCStaticInterpolation(Model):
+    allowed_keys = ["ee-lfc"]
+    __name__ = "Static Interpolation"
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
+
+class ElectronicLFCConstant(Model):
+    allowed_keys = ["ee-lfc"]
+    __name__ = "None"
+
+    def __init__(self, value):
+        self.value = value
+        super().__init__()
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return self.value
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return self.value
+
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.value,)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj.value,) = children
+
+        return obj
+
+
+# BM S_ii models
+# ===============
+
+
+def averagePlasmaState(state: "PlasmaState") -> "PlasmaState":
+    """
+    Create an average plasma state that shares the models of the origional.
+    """
+    mean_Z = jnpu.sum(state.Z_A * state.number_fraction)[jnp.newaxis]
+    mean_Z_free = jnpu.sum(state.Z_free * state.number_fraction)[jnp.newaxis]
+    mean_mass = jnpu.sum(state.atomic_masses * state.number_fraction)
+
+    mean_ion_T = jnpu.sum(state.T_i * state.number_fraction)[jnp.newaxis]
+    mean_rho = jnpu.sum(state.mass_density * state.number_fraction)[
+        jnp.newaxis
+    ]
+
+    mix_element = MixElement(mean_Z, mean_mass)
+
+    newState = deepcopy(state)
+    newState.ions = [mix_element]
+    newState.Z_free = mean_Z_free
+    newState.mass_density = mean_rho
+    newState.T_i = mean_ion_T
+    return newState
+
+
+class Sum_Sii(Model):
+    """
+    This model sums up all S_ab from the HNC and multiplies it with ``sqrt(x_a
+    * x_b)``. While it is obviously ok for a single-species plasma, multiple
+    species might not be treated correctly.
+    """
+
+    allowed_keys = ["BM S_ii"]
+    __name__ = "Sum_Sii"
+
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ):
+
+        S_ab = plasma_state["ionic scattering"].S_ii(plasma_state, setup)
+        x = plasma_state.number_fraction
+        # Add the contributions from all pairs
+        S_ii = 0
+
+        def add_Sii(a, b):
+            return (jnpu.sqrt(x[a] * x[b]) * S_ab[a, b]).m_as(
+                ureg.dimensionless
+            )[jnp.newaxis]
+
+        def dont_add_Sii(a, b):
+            return jnp.array([0.0])
+
+        # The W_R is calculated as a sum over all combinations of a_b
+        ion_spec1, ion_spec2 = jnp.meshgrid(
+            jnp.arange(plasma_state.nions),
+            jnp.arange(plasma_state.nions),
+        )
+        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+            S_ii += jax.lax.cond(a <= b, add_Sii, dont_add_Sii, a, b)
+        return S_ii
+
+
+class AverageAtom_Sii(Model):
+    """
+    This model performes a HNC calculation, assuming one average atom with a
+    given, average charge state. While it might lead to reasonable results,
+    this is not tested and takes some computation time.
+    """
+
+    allowed_keys = ["BM S_ii"]
+    __name__ = "AverageAtom_Sii"
+
+    def __init__(
+        self,
+        rmin: Quantity = 0.001 * ureg.a_0,
+        rmax: Quantity = 100 * ureg.a_0,
+        pot: int = 14,
+    ) -> None:
+        #: The minmal radius for evaluating the potentials.
+        self.r_min: Quantity = rmin
+        #: The maximal radius for evaluating the potentials.
+        self.r_max: Quantity = rmax
+        #: The exponent (``2 ** pot``), setting the number of points in ``r``
+        #: or ``k`` to evaluate.
+        self.pot: int = pot
+        super().__init__()
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        super().prepare(plasma_state, key)
+        plasma_state.update_default_model(
+            "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
+        )
+        plasma_state["ion-ion Potential"].include_electrons = False
+
+    @property
+    def r(self):
+        return jnpu.linspace(self.r_min, self.r_max, 2**self.pot)
+
+    @property
+    def k(self):
+        r = self.r
+        dr = r[1] - r[0]
+        dk = jnp.pi / (len(r) * dr)
+        return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        # Average the Plasma State
+        aaState = averagePlasmaState(plasma_state)
+
+        # Prepare the Potentials
+        # ----------------------
+
+        # Populate the potential with a full ion potential, for starters
+        V_s_r = aaState["ion-ion Potential"].short_r(aaState, self.r)
+        V_l_k = aaState["ion-ion Potential"].long_k(aaState, self.k)
+
+        # Calculate g_ab in the HNC Approach
+        # ----------------------------------
+        T = aaState["ion-ion Potential"].T(aaState)
+        n = aaState.n_i
+        g, niter = hypernetted_chain.pair_distribution_function_HNC(
+            V_s_r, V_l_k, self.r, T, n
+        )
+        logger.debug(
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+        )
+        # Calculate S_ab by Fourier-transforming g_ab
+        # ---------------------------------------------
+        S_ab_HNC = hypernetted_chain.S_ii_HNC(self.k, g, n, self.r)
+
+        # Interpolate this to the k given by the setup
+
+        S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
+        # Return the Sii with the correct shape
+        return S_ab[0, 0]
+
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.r_min, self.r_max)
+        aux_data = (
+            self.model_key,
+            self.pot,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.pot = aux_data
+        obj.r_min, obj.r_max = children
+
+        return obj
+
+
+# BM V_eiS models
+# ===============
+
+
+class BM_V_eiSModel(Model):
+    @abc.abstractmethod
+    def V(self, plasma_state: "PlasmaState", k: Quantity) -> jnp.ndarray: ...
+
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ):
+        return self.V(plasma_state, setup.k)
+
+
+class DebyeHueckel_BM_V(BM_V_eiSModel):
+    allowed_keys = ["BM V_eiS"]
+    __name__ = "DebyeHueckel_BM_V"
+
+    @jax.jit
+    def V(
+        self,
+        plasma_state: "PlasmaState",
+        k: Quantity,
+        *args,
+        **kwargs,
+    ):
+        kappa = 1 / plasma_state.screening_length
+        return free_free.statically_screened_ie_debye_potential(
+            k,
+            kappa,
+            jnp.sum(plasma_state.number_fraction * plasma_state.Z_free),
+        )
+
+
+class FiniteWavelength_BM_V(BM_V_eiSModel):
+    allowed_keys = ["BM V_eiS"]
+    __name__ = "FiniteWavelength_BM_V"
+
+    @jax.jit
+    def V(
+        self,
+        plasma_state: "PlasmaState",
+        k: Quantity,
+    ):
+        V = plasma_physics.coulomb_potential_fourier(
+            jnpu.sum(plasma_state.number_fraction * plasma_state.Z_free),
+            -1,
+            k,
+        )
+        eps0 = free_free.dielectric_function_RPA_Dandrea1986(
+            k,
+            0 * ureg.electron_volt,
+            plasma_state.T_e,
+            plasma_state.n_e,
+        )
+        return V / eps0
 
 
 _all_models = [
     ArbitraryDegeneracyScreeningLength,
     ArkhipovIonFeat,
+    AverageAtom_Sii,
     BohmStaver,
     BornMermin,
-    BornMermin_ChapmanInterp,
+    BornMerminFull,
+    BornMermin_Fit,
+    BornMermin_Fortmann,
     ConstantChemPotential,
     ConstantIPD,
     ConstantScreeningLength,
     DebyeHueckelIPD,
+    DebyeHueckelScreening,
     DebyeHueckelScreeningLength,
+    DebyeHueckel_BM_V,
     DetailedBalance,
     EckerKroellIPD,
+    ElectronicLFCConstant,
+    ElectronicLFCGeldartVosko,
+    ElectronicLFCStaticInterpolation,
+    ElectronicLFCUtsumiIchimaru,
     FiniteWavelengthScreening,
+    FiniteWavelength_BM_V,
     Gericke2010ScreeningLength,
     Gregori2003IonFeat,
     Gregori2004Screening,
     Gregori2006IonFeat,
     IchimaruChemPotential,
     IonSphereIPD,
+    LinearResponseScreening,
     LinearResponseScreeningGericke2010,
     Model,
     Neglect,
@@ -1744,9 +2661,11 @@ _all_models = [
     PauliBlockingIPD,
     PaulingFormFactors,
     QCSalpeterApproximation,
+    RPA_DandreaFit,
     RPA_NoDamping,
     ScatteringModel,
     SchumacherImpulse,
+    Sum_Sii,
     StewartPyattIPD,
     ThreePotentialHNCIonFeat,
 ]

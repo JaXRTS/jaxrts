@@ -6,11 +6,11 @@ import jpu
 import jax
 from jax import numpy as jnp
 
-from .elements import Element
+from .elements import Element, MixElement
 from .units import ureg, Quantity, to_array
 from .helpers import JittableDict
 from .setup import Setup
-from .models import DebyeHueckelScreeningLength
+from .models import DebyeHueckelScreeningLength, ElectronicLFCConstant
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +55,9 @@ class PlasmaState:
             * jnp.ones_like(self.Z_free)
             * ureg.angstrom,
         }
-        # Set a default screening length
+        # Set a default screening length & LFC
         self["screening length"] = DebyeHueckelScreeningLength()
+        self["ee-lfc"] = ElectronicLFCConstant(0.0)
 
     def __len__(self) -> int:
         return len(self.ions)
@@ -195,7 +196,7 @@ class PlasmaState:
     def screening_length(self):
         """
         This is a shortcut to just get the screening length, which is used,
-        e.g., by the :py:class:`jaxrts.hnc_potentials.DebyeHuckelPotential`.
+        e.g., by the :py:class:`jaxrts.hnc_potentials.DebyeHueckelPotential`.
         """
         return self.evaluate("screening length", None)
 
@@ -249,9 +250,6 @@ class PlasmaState:
                         )
                     ).to_base_units()
                 )
-
-    def evaluate(self, key, setup) -> Quantity:
-        return self[key].evaluate(self, setup)
 
     @jax.jit
     def probe(self, setup: Setup) -> Quantity:

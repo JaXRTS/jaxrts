@@ -1,10 +1,22 @@
 import pathlib
+import sys
 
-import jaxrts
 import jax
+jax.config.update("jax_compilation_cache_dir", "/tmp/jax_cache")
+jax.config.update("jax_persistent_cache_min_entry_size_bytes", -1)
+jax.config.update("jax_persistent_cache_min_compile_time_secs", 0.2)
+
+sys.path.append(
+    "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
+)
+
+from jaxrts.ee_localfieldcorrections import eelfc_farid
+import jaxrts
 import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
+
+# jax.config.update("jax_disable_jit", True)
 
 import matplotlib.pyplot as plt
 
@@ -13,12 +25,20 @@ from functools import partial
 import time
 import re
 
+import os
+
+# Allow jax to use 6 CPUs, see
+# https://astralord.github.io/posts/exploring-parallel-strategies-with-jax/
+os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=6"
+
+tstart = time.time()
+
 ureg = jaxrts.ureg
 
 file_dir = pathlib.Path(__file__).parent
 mcss_file = (
     file_dir
-    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[Z_f=3.0]_E=8978eV_theta=120_rho=3.0gcc_T=2.0eV_RPA_NOLFC.txt"
+    / "../tests/mcss_samples/without_rk/mcss_C[Z_f=4.0]_E=8978eV_theta=17_rho=4.5gcc_T=20.0eV_BM+STATINTERP.txt"
 )
 
 
@@ -65,6 +85,7 @@ E, S_el, S_bf, S_ff, S_tot = onp.genfromtxt(
     delimiter=",",
     unpack=True,
 )
+print(len(E))
 
 state = jaxrts.PlasmaState(
     ions=elements,
@@ -72,11 +93,21 @@ state = jaxrts.PlasmaState(
     mass_density=rho * ureg.gram / ureg.centimeter**3 * jnp.array(number_frac),
     T_e=T_e * ureg.electron_volt / ureg.k_B,
 )
+
+sharding = jax.sharding.PositionalSharding(jax.devices())
+energy = (
+    ureg(f"{central_energy} eV")
+    - jnp.linspace(jnp.max(E), jnp.min(E), 2046) * ureg.electron_volt
+)
+sharded_energy = jax.device_put(energy, sharding)
+# sharded_energy = energy
+
 setup = jaxrts.setup.Setup(
     ureg(f"{theta}°"),
     ureg(f"{central_energy} eV"),
-    ureg(f"{central_energy} eV")
-    + jnp.linspace(-700, 200, 2000) * ureg.electron_volt,
+    sharded_energy,
+    # ureg(f"{central_energy} eV")
+    # + jnp.linspace(-700, 200, 2000) * ureg.electron_volt,
     partial(
         jaxrts.instrument_function.instrument_gaussian,
         sigma=ureg("10eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
@@ -86,23 +117,37 @@ setup = jaxrts.setup.Setup(
 # state["chemical potential"] = jaxrts.models.ConstantChemPotential(
 #     0 * ureg.electron_volt
 # )
-state["ipd"] = jaxrts.models.ConstantIPD(0 * ureg.electron_volt)
+
+state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
+state["ipd"] = jaxrts.models.StewartPyattIPD()
 state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
+# state["screening length"] = jaxrts.models.ConstantScreeningLength(ureg("4.38E-2 nm"))
 state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
 state["screening"] = jaxrts.models.FiniteWavelengthScreening()
-state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHuckelPotential()
+state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHueckelPotential()
 state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
-state["free-free scattering"] = jaxrts.models.RPA_NoDamping()
+state["BM S_ii"] = jaxrts.models.AverageAtom_Sii()
+state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann()
 state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=1)
 state["free-bound scattering"] = jaxrts.models.Neglect()
 
-print(setup.k.to(1 / ureg.angstrom))
+print("W_R")
+print(state["ionic scattering"].Rayleigh_weight(state, setup))
+print("scattering length: ")
+print(state.screening_length)
+print("n_e:")
+print(state.n_e.to(1 / ureg.centimeter**3))
+print("chemPot")
+print(state.evaluate("chemical potential", setup)/(1*ureg.k_B * state.T_e))
 # print(setup.full_k.to(1 / ureg.angstrom))
 # print(
 #     jaxrts.setup.dispersion_corrected_k(setup, state.n_e).to(1 / ureg.angstrom)
 # )
 
 I = state.probe(setup)
+t0 = time.time()
+state.probe(setup)
+print(f"One sample takes {time.time()-t0}s.")
 norm = jnpu.max(
     state.evaluate("free-free scattering", setup)
     # + state.evaluate("bound-free scattering", setup)
@@ -111,6 +156,7 @@ plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
     (I / norm).m_as(ureg.dimensionless),
     color="C0",
+    label="BMA (LFC=StaticInterp, naive)",
 )
 plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
@@ -130,12 +176,43 @@ plt.plot(
     ls="dotted",
     alpha=0.7,
 )
-MCSS_Norm = jnp.max(S_ff)
 plt.plot(
-    central_energy - E,
-    S_tot / MCSS_Norm,
-    color="C1",
+    (setup.measured_energy).m_as(ureg.electron_volt),
+    (state.evaluate("ionic scattering", setup) / norm).m_as(
+        ureg.dimensionless
+    ),
+    color="C0",
+    ls="dashdot",
+    alpha=0.7,
 )
+state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
+print(state["ionic scattering"].Rayleigh_weight(state, setup))
+
+_I = state.probe(setup)
+_norm = jnpu.max(
+    state.evaluate("free-free scattering", setup)
+    # + state.evaluate("bound-free scattering", setup)
+)
+print(jnpu.max(I) / norm / (jnpu.max(_I) / _norm))
+I = _I
+norm = _norm
+plt.plot(
+    (setup.measured_energy).m_as(ureg.electron_volt),
+    (I / norm).m_as(ureg.dimensionless),
+    color="C2",
+    label="RPA",
+)
+plt.plot(
+    (setup.measured_energy).m_as(ureg.electron_volt),
+    (state.evaluate("free-free scattering", setup) / norm).m_as(
+        ureg.dimensionless
+    ),
+    color="C2",
+    ls="dotted",
+    alpha=0.7,
+)
+MCSS_Norm = jnp.max(S_ff)
+plt.plot(central_energy - E, S_tot / MCSS_Norm, color="C1", label="MCSS")
 plt.plot(
     central_energy - E,
     S_bf / MCSS_Norm,
@@ -161,7 +238,7 @@ plt.plot([compton_shift, compton_shift], [0.9, 1.1], color="black")
 plt.plot([compton_shift - 20, compton_shift + 20], [1, 1], color="black")
 plt.title(name)
 
-t0 = time.time()
-state.probe(setup)
-print(f"One sample takes {time.time()-t0}s.")
+plt.legend()
+
+print(f"Full excecution took {time.time()-tstart}s.")
 plt.show()

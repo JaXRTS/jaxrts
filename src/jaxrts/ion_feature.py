@@ -2,8 +2,11 @@
 This submodule is dedicated to the calculation of the ion-feature.
 """
 
-from .units import ureg, Quantity
-from .free_free import dielectric_function_salpeter
+from .units import ureg, Quantity, to_array
+from .free_free import (
+    dielectric_function_salpeter,
+    noninteracting_susceptibility_Dandrea1986,
+)
 from .static_structure_factors import S_ee_AD, S_ei_AD, S_ii_AD
 from .plasma_physics import coulomb_potential_fourier
 from typing import List
@@ -107,6 +110,86 @@ def q_Glenzer2009(
 
 
 @jit
+def q_FiniteWLChapman2015(
+    k: Quantity,
+    V_ei: Quantity,
+    T: Quantity,
+    n_e: Quantity,
+    lfc: float = 0,
+) -> Quantity:
+    """
+    Calculates the Finite wavelength screening presented in
+    :cite:`Chapman.2015`, eqn (3). This function relies on the Dandrea
+    interpolation fit of the non-interacting susceptibility for a faster
+    cimputation (see
+    :py:func:`jaxrts.free_free.noninteracting_susceptibility_Dandrea1986`).
+
+    We furthermore allow for a local field correction which might deviate from
+    the default of zero, which goes beyond the RPA.
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    V_ei : Quantity
+        The Potential between electrons and ions. Should have the the shape
+        ``(n, m)``, where n is the numer of ion species considered, and ``m =
+        len(k)``.
+    T : Quantity
+        The electron temperature in units of [temperature].
+    n_e : Quantity
+        The electron numer density in units of 1/[length]**3.
+    lfc: float
+        The local field correction.
+
+    Returns
+    -------
+    q(k):  Quantity
+        The screening charge. Has the shape ``(n, m)``
+    """
+    if k.shape == ():
+        k = k[jnp.newaxis]
+    k = k[jnp.newaxis, :]
+    chi0 = noninteracting_susceptibility_Dandrea1986(
+        k, 0 * ureg.electron_volts, T, n_e
+    )
+    V_ee = coulomb_potential_fourier(-1, -1, k)
+    eps_ee = 1 - V_ee * (1 - lfc) * chi0
+    return chi0 * V_ei / eps_ee
+
+
+@jit
+def q_DebyeHueckelChapman2015(
+    k: Quantity,
+    kappa: Quantity,
+    Z_f: Quantity | jnp.ndarray,
+) -> Quantity:
+    """
+    Calculates the Debye Hückel screening presented in :cite:`Chapman.2015`,
+    eqn (5).
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    kappa : Quantity
+        The inverse sceening lenght, units of 1 / [length]
+    Z_f : Quantity, jnp.ndarray
+        The ionization / mean charge state of the ions. Should be one entry per
+        ion considered.
+
+    Returns
+    -------
+    q(k):  Quantity
+        The screening charge. Has the shape ``(n, m)``, where ``n = len(Z_f)``
+        is the number of ions, and ``m = len(k)``.
+    """
+    return Z_f[:, jnp.newaxis] * kappa**2 / (k[jnp.newaxis, :] ** 2 + kappa**2)
+
+
+@jit
 def free_electron_susceptilibily_RPA(
     k: Quantity,
     kappa: Quantity,
@@ -137,17 +220,3 @@ def free_electron_susceptilibily_RPA(
     xi0 = kappa**2 * ureg.epsilon_0 / ((1 * ureg.elementary_charge) ** 2)
     varepsilon = (k**2 + kappa**2) / (k**2)
     return xi0 / varepsilon
-
-
-def susceptibility_from_epsilon(epsilon: Quantity, k: Quantity) -> Quantity:
-    """
-    Calculates the susceptilibily from a given dielectric function epsilon.
-
-    ..math::
-
-        \\xi_{ee} = \\frac{\\frac{\\varepsilon -1}{V_{ee}(k)}{\\varepsilon}
-
-    Where :math:`V_{ee}` is the Coulomb potential in k space.
-    """
-    Vee = coulomb_potential_fourier(-1, -1, k)
-    return -((epsilon - 1) / Vee) / epsilon

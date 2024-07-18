@@ -149,6 +149,28 @@ def convolve_stucture_factor_with_instrument(
     )
 
 
+@jax.jit
+def get_probe_setup(k: Quantity, setup: Setup) -> Setup:
+    """
+    Returns a :py:class:`~.Setup`, which has the same properties of setup, but
+    a different `k`. This is realized by modifying the
+    :py:attr:`~.measured_energy` attribute of setup.
+
+    This helper function can be useful when evaluating e.g., `S_ii` Models at a
+    different `k` than realized in an experiment, as it is required, e.g., for
+    the Born collision frequency.
+    """
+    E = (
+        (1 * ureg.hbar)
+        * k
+        * (1 * ureg.c)
+        / (2 * jnpu.sin(setup.scattering_angle / 2))
+    )
+    return Setup(
+        setup.scattering_angle, E, setup.measured_energy, setup.instrument
+    )
+
+
 jax.tree_util.register_pytree_node(
     Setup,
     Setup._tree_flatten,
