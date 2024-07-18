@@ -1072,7 +1072,9 @@ class BornMerminFull(FreeFreeModel):
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
         )
-        return See_0 * plasma_state.Z_free
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
 
     @jax.jit
     def susceptibility(
@@ -1209,7 +1211,9 @@ class BornMermin(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * plasma_state.Z_free
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
 
     @jax.jit
     def susceptibility(
@@ -1364,7 +1368,9 @@ class BornMermin_Fit(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * plasma_state.Z_free
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
 
     @jax.jit
     def susceptibility(
@@ -1520,7 +1526,9 @@ class BornMermin_Fortmann(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * plasma_state.Z_free
+        return See_0 * jnp.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
 
     @jax.jit
     def susceptibility(
