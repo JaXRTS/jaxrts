@@ -16,7 +16,7 @@ plt.style.use("science")
 
 xmin, xmax = 0, 200
 x = onp.linspace(xmin, xmax, 400)
-y = jaxrts.math.fermi_integral(x, 0.5)
+y = jaxrts.math.fermi_integral(x, 0.5)[:, 0]
 plt.plot(
     x,
     jaxrts.math.inverse_fermi_12_rational_approximation_antia(y) - x,

@@ -81,7 +81,7 @@ def inverse_screening_length_e(q: Quantity, ne: Quantity, Te: Quantity):
 
     k_sq = (
         (q**2)
-        / (4 * jnp.pi * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
+        / (ureg.epsilon_0 * ureg.boltzmann_constant * Te)
         * (2.0 / therm_wv**3)
         * fermi_integral_neg1_2
     )

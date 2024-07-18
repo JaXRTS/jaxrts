@@ -120,7 +120,8 @@ setup = jaxrts.setup.Setup(
 
 state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
 state["ipd"] = jaxrts.models.StewartPyattIPD()
-# state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
+state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
+# state["screening length"] = jaxrts.models.ConstantScreeningLength(ureg("4.38E-2 nm"))
 state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
 state["screening"] = jaxrts.models.FiniteWavelengthScreening()
 state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHueckelPotential()
@@ -129,7 +130,14 @@ state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann()
 state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=1)
 state["free-bound scattering"] = jaxrts.models.Neglect()
 
+print("W_R")
 print(state["ionic scattering"].Rayleigh_weight(state, setup))
+print("scattering length: ")
+print(state.screening_length)
+print("n_e:")
+print(state.n_e.to(1 / ureg.centimeter**3))
+print("chemPot")
+print(state.evaluate("chemical potential", setup)/(1*ureg.k_B * state.T_e))
 # print(setup.full_k.to(1 / ureg.angstrom))
 # print(
 #     jaxrts.setup.dispersion_corrected_k(setup, state.n_e).to(1 / ureg.angstrom)
@@ -140,7 +148,7 @@ t0 = time.time()
 state.probe(setup)
 print(f"One sample takes {time.time()-t0}s.")
 norm = jnpu.max(
-    state.evaluate("ionic scattering", setup)
+    state.evaluate("free-free scattering", setup)
     # + state.evaluate("bound-free scattering", setup)
 )
 plt.plot(
@@ -181,7 +189,7 @@ print(state["ionic scattering"].Rayleigh_weight(state, setup))
 
 _I = state.probe(setup)
 _norm = jnpu.max(
-    state.evaluate("ionic scattering", setup)
+    state.evaluate("free-free scattering", setup)
     # + state.evaluate("bound-free scattering", setup)
 )
 print(jnpu.max(I) / norm / (jnpu.max(_I) / _norm))
@@ -202,7 +210,7 @@ plt.plot(
     ls="dotted",
     alpha=0.7,
 )
-MCSS_Norm = jnp.max(S_el)
+MCSS_Norm = jnp.max(S_ff)
 plt.plot(central_energy - E, S_tot / MCSS_Norm, color="C1", label="MCSS")
 plt.plot(
     central_energy - E,

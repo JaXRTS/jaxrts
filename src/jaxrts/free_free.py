@@ -655,9 +655,16 @@ def _real_diel_func_RPA_no_damping(
 
 
 def _phi_Dandrea(x, theta, eta0):
-    I_min05_eta0 = math.fermi_neg12_rational_approximation_antia(eta0)
-    I_plu15_eta0 = math.fermi_32_rational_approximation_antia(eta0)
-    I_plu25_eta0 = math.fermi_52_rational_approximation_antia(eta0)
+    # Note: Dandrea does not norm the Fermi integrals!
+    I_min05_eta0 = math.fermi_neg12_rational_approximation_antia(
+        eta0
+    ) * jax.scipy.special.gamma(-1 / 2 + 1)
+    I_plu15_eta0 = math.fermi_32_rational_approximation_antia(
+        eta0
+    ) * jax.scipy.special.gamma(3 / 2 + 1)
+    I_plu25_eta0 = math.fermi_52_rational_approximation_antia(
+        eta0
+    ) * jax.scipy.special.gamma(5 / 2 + 1)
     # A21, ff
     a2 = (-0.2280 + theta) / (
         0.4222 + -0.6466 * theta**0.70572 + 5.8820 * theta**2
@@ -814,7 +821,7 @@ def noninteracting_susceptibility_Dandrea1986(
     z = (E / (4 * Ef)).m_as(ureg.dimensionless)
     # Dendrea, Eqn 2.2
     eta0 = math.inverse_fermi_12_fukushima_single_prec(
-        2 / 3 * theta ** (-3 / 2)
+        (2 / 3 * theta ** (-3 / 2)) / jax.scipy.special.gamma(1 / 2 + 1)
     )
     real = _real_susceptibility_func_RPA_Dandrea(
         k, theta, Q, rs, z, eta0, alpha
