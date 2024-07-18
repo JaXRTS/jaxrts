@@ -196,7 +196,7 @@ class PlasmaState:
     def screening_length(self):
         """
         This is a shortcut to just get the screening length, which is used,
-        e.g., by the :py:class:`jaxrts.hnc_potentials.DebyeHuckelPotential`.
+        e.g., by the :py:class:`jaxrts.hnc_potentials.DebyeHueckelPotential`.
         """
         return self.evaluate("screening length", None)
 

@@ -50,7 +50,7 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(
             T / (1 * ureg.boltzmann_constant), n_e
         )
-        kappa = 1 / jaxrts.plasma_physics.Debye_Huckel_screening_length(
+        kappa = 1 / jaxrts.plasma_physics.Debye_Hueckel_screening_length(
             n_e, T / (1 * ureg.boltzmann_constant)
         )
         # We cout reproduce the data well with this correction to kappa

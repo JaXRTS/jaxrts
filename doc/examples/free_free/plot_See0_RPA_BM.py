@@ -80,7 +80,7 @@ for T in [
             Z_f=1.0,
         )
 
-    kappa = 1 / jaxrts.plasma_physics.Debye_Huckel_screening_length(
+    kappa = 1 / jaxrts.plasma_physics.Debye_Hueckel_screening_length(
         n_e, T / (1 * ureg.boltzmann_constant)
     )
 

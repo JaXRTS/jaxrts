@@ -219,7 +219,7 @@ def test_multicomponent_wunsch2011_literature():
     dk = jnp.pi / (len(r) * dr)
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-    Potential = jaxrts.hnc_potentials.DebyeHuckelPotential()
+    Potential = jaxrts.hnc_potentials.DebyeHueckelPotential()
 
     V_s = Potential.short_r(state, r)
     V_l_k = Potential.long_k(state, k)

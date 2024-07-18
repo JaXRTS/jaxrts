@@ -217,7 +217,7 @@ def chem_pot_interpolationIchimaru(T: Quantity, n_e: Quantity) -> Quantity:
 
 
 @jax.jit
-def Debye_Huckel_screening_length(
+def Debye_Hueckel_screening_length(
     n: Quantity | List, T: Quantity, Z: float | List | jnp.ndarray = 1.0
 ) -> Quantity:
     """

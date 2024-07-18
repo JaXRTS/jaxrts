@@ -266,13 +266,13 @@ class CoulombPotential(HNCPotential):
         )
 
 
-class DebyeHuckelPotential(HNCPotential):
-    __name__ = "DebyeHuckelPotential"
+class DebyeHueckelPotential(HNCPotential):
+    __name__ = "DebyeHueckelPotential"
 
     def check(self, plasma_state) -> None:
         if not hasattr(plasma_state, "screening_length"):
             logger.error(
-                f"The PlasmaState {plasma_state} has no attribute 'screening_length, which is required for DebyeHuckelPotential."  # noqa: 501
+                f"The PlasmaState {plasma_state} has no attribute 'screening_length, which is required for DebyeHueckelPotential."  # noqa: 501
             )
 
     def kappa(self, plasma_state):
@@ -676,7 +676,7 @@ def transformPotential(V, r) -> Quantity:
 
 for pot in [
     CoulombPotential,
-    DebyeHuckelPotential,
+    DebyeHueckelPotential,
     DeutschPotential,
     EmptyCorePotential,
     KelbgPotential,

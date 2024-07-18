@@ -474,7 +474,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
     has to be provided as an additional `screening`.
 
 
-    Requires an 'ion-ion' (defaults to :py:class:`~DebyeHuckelPotential`) and a
+    Requires an 'ion-ion' (defaults to :py:class:`~DebyeHueckelPotential`) and a
     `screening` model (default:
     :py::class:`~.LinearResponseScreeningGericke2010`.
     Further requires a 'form-factors' model (defaults to
@@ -501,7 +501,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         super().prepare(plasma_state, key)
         plasma_state.update_default_model(
-            "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
+            "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
         )
         plasma_state["ion-ion Potential"].include_electrons = False
 
@@ -580,7 +580,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
     Requires 3 Potentials:
 
         - an 'ion-ion Potential' The black entries in the picture below
-          (defaults to :py:class:`~DebyeHuckelPotential`).
+          (defaults to :py:class:`~DebyeHueckelPotential`).
         - an 'electron-ion Potential' The orange entries in the picture below
           (defaults to :py:class:`~KlimontovichKraeftPotential`).
         - an 'electron-electron Potential' The red entries in the picutre below
@@ -621,7 +621,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         # screening model
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model(
-            "ion-ion Potential", hnc_potentials.DebyeHuckelPotential()
+            "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
         )
         plasma_state.update_default_model(
             "electron-ion Potential",
@@ -1412,7 +1412,7 @@ class BornMermin_Fit(FreeFreeModel):
 
         # Interpolate for small energy transfers, as it will give nans for zero
         w_pl = plasma_physics.plasma_frequency(plasma_state.n_e)
-        interpE = jnp.array([-1e-4, 1e-4]) * (1 * ureg.hbar) * w_pl
+        interpE = jnp.array([-1e-2, 1e-2]) * (1 * ureg.hbar) * w_pl
         interpchi = chi(interpE)
         return jnpu.where(
             jnpu.absolute(E) > interpE[1],
@@ -1995,7 +1995,7 @@ class DebyeHueckelScreeningLength(Model):
 
     See also
     --------
-    jaxrts.plasma_physics.Debye_Huckel_screening_length
+    jaxrts.plasma_physics.Debye_Hueckel_screening_length
         The function used to calculate the screening length
     """
 
@@ -2004,7 +2004,7 @@ class DebyeHueckelScreeningLength(Model):
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
-        return plasma_physics.Debye_Huckel_screening_length(
+        return plasma_physics.Debye_Hueckel_screening_length(
             plasma_state.n_e, plasma_state.T_e
         )
 
@@ -2019,7 +2019,7 @@ class Gericke2010ScreeningLength(Model):
     --------
     jaxrts.plasma_physics.temperature_interpolation:
         The function used for the temperature interpolation
-    jaxrts.plasma_physics.Debye_Huckel_screening_length
+    jaxrts.plasma_physics.Debye_Hueckel_screening_length
         The function used to calculate the screening length
     """
 
@@ -2031,7 +2031,7 @@ class Gericke2010ScreeningLength(Model):
         T = plasma_physics.temperature_interpolation(
             plasma_state.n_e, plasma_state.T_e, 4
         )
-        lam_DH = plasma_physics.Debye_Huckel_screening_length(
+        lam_DH = plasma_physics.Debye_Hueckel_screening_length(
             plasma_state.n_e, T
         )
         return lam_DH.to(ureg.angstrom)
@@ -2155,8 +2155,84 @@ class LinearResponseScreeningGericke2010(Model):
 
 
 class FiniteWavelengthScreening(Model):
+    """
+    Finite wavelenth screening as presented by :cite:`Chapman.2015`.
+
+    Should be identical to :py:class:`~.LinearResponseScreening`, if the
+    free-free model is a RPA model.
+
+    See also
+    --------
+    jaxrts.ion_feature.q_FiniteWLChapman2015
+        The function used to calculate ``q``.
+    """
+
     allowed_keys = ["screening"]
     __name__ = "FiniteWavelengthScreening"
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "electron-ion Potential",
+            hnc_potentials.KlimontovichKraeftPotential(),
+        )
+        plasma_state["electron-ion Potential"].include_electrons = True
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        Vei = plasma_state["electron-ion Potential"].full_k(
+            plasma_state, to_array(setup.k)[jnp.newaxis]
+        )[-1, :-1]
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        q = ion_feature.q_FiniteWLChapman2015(
+            setup.k, Vei, plasma_state.T_e, plasma_state.n_e, lfc
+        )
+        return jnp.real(q.m_as(ureg.dimensionless))
+
+
+class DebyeHueckelScreening(Model):
+    """
+    Debye Hueckel screening as presented by :cite:`Chapman.2015`.
+
+    Should be identical to :py:class:`~.LinearResponseScreening`, if the
+    free-free model is a RPA model.
+
+    See also
+    --------
+    jaxrts.ion_feature.q_LChapman2015
+        The function used to calculate ``q``.
+    """
+
+    allowed_keys = ["screening"]
+    __name__ = "DebyeHueckelScreening"
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        kappa = 1 / plasma_state.screening_length
+        q = ion_feature.q_DebyeHueckelChapman2015(
+            setup.k,
+            kappa,
+            plasma_state.Z_f,
+        )
+        return jnp.real(q.m_as(ureg.dimensionless))
+
+
+class LinearResponseScreening(Model):
+    allowed_keys = ["screening"]
+    __name__ = "LinearResponseScreening"
 
     """
     The screening density :math:`q` is calculated using a result from linear
@@ -2435,25 +2511,26 @@ class FiniteWavelength_BM_V(BM_V_eiSModel):
 
 
 _all_models = [
-    ElectronicLFCUtsumiIchimaru,
-    ElectronicLFCGeldartVosko,
-    ElectronicLFCConstant,
-    ElectronicLFCStaticInterpolation,
     ArbitraryDegeneracyScreeningLength,
     ArkhipovIonFeat,
     BohmStaver,
-    BornMerminFull,
     BornMermin,
+    BornMerminFull,
     BornMermin_Fit,
     BornMermin_Fortmann,
     ConstantChemPotential,
     ConstantIPD,
     ConstantScreeningLength,
-    DebyeHueckel_BM_V,
     DebyeHueckelIPD,
+    DebyeHueckelScreening,
     DebyeHueckelScreeningLength,
+    DebyeHueckel_BM_V,
     DetailedBalance,
     EckerKroellIPD,
+    ElectronicLFCConstant,
+    ElectronicLFCGeldartVosko,
+    ElectronicLFCStaticInterpolation,
+    ElectronicLFCUtsumiIchimaru,
     FiniteWavelengthScreening,
     FiniteWavelength_BM_V,
     Gericke2010ScreeningLength,
@@ -2462,6 +2539,7 @@ _all_models = [
     Gregori2006IonFeat,
     IchimaruChemPotential,
     IonSphereIPD,
+    LinearResponseScreening,
     LinearResponseScreeningGericke2010,
     Model,
     Neglect,

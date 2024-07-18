@@ -123,18 +123,22 @@ state["ipd"] = jaxrts.models.StewartPyattIPD()
 state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
 state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
 state["screening"] = jaxrts.models.FiniteWavelengthScreening()
-state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHuckelPotential()
+state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHueckelPotential()
 state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
 state["free-free scattering"] = jaxrts.models.BornMermin_Fit()
 state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=1)
 state["free-bound scattering"] = jaxrts.models.Neglect()
 
+print(state["ionic scattering"].Rayleigh_weight(state, setup))
 # print(setup.full_k.to(1 / ureg.angstrom))
 # print(
 #     jaxrts.setup.dispersion_corrected_k(setup, state.n_e).to(1 / ureg.angstrom)
 # )
 
 I = state.probe(setup)
+t0 = time.time()
+state.probe(setup)
+print(f"One sample takes {time.time()-t0}s.")
 norm = jnpu.max(
     state.evaluate("free-free scattering", setup)
     # + state.evaluate("bound-free scattering", setup)
@@ -173,6 +177,7 @@ plt.plot(
     alpha=0.7,
 )
 state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
+print(state["ionic scattering"].Rayleigh_weight(state, setup))
 
 I = state.probe(setup)
 norm = jnpu.max(
@@ -223,8 +228,5 @@ plt.title(name)
 
 plt.legend()
 
-t0 = time.time()
-state.probe(setup)
-print(f"One sample takes {time.time()-t0}s.")
 print(f"Full excecution took {time.time()-tstart}s.")
 plt.show()
