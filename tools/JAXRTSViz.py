@@ -330,7 +330,7 @@ class JAXRTSViz(QMainWindow):
             if mod in base_models:
                 label = QLabel()
                 combo_box = QComboBox()
-                combo_box.setObjectName("Model" + mod)
+                combo_box.setObjectName("Model-" + mod)
                 combo_box.setMaximumWidth(200)
                 combo_box.addItems(list(self.Allmodels[mod]))
                 combo_box.currentTextChanged.connect(self.set_compile_off)
@@ -544,8 +544,8 @@ class JAXRTSViz(QMainWindow):
         self.console_worker.start()
 
         # Redirect stdout and stderr
-        # sys.stdout = EmittingStream(text_written=self.update_console_output)
-        # sys.stderr = EmittingStream(text_written=self.update_console_output)
+        sys.stdout = EmittingStream(text_written=self.update_console_output)
+        sys.stderr = EmittingStream(text_written=self.update_console_output)
         
         main_layout2.addWidget(self.console_output, 2)
         
@@ -571,7 +571,7 @@ class JAXRTSViz(QMainWindow):
             if mod == action_name:
                 label = QLabel()
                 combo_box = QComboBox()
-                combo_box.setObjectName("Model" + mod)
+                combo_box.setObjectName("Model-" + mod)
                 combo_box.setMaximumWidth(200)
                 combo_box.addItems(list(self.Allmodels[mod]))
                 combo_box.currentTextChanged.connect(self.set_compile_off)
@@ -605,21 +605,28 @@ class JAXRTSViz(QMainWindow):
         fwhm_changed = True
 
         for cb in self.comboBoxesList:
-            if "Model" in cb.objectName(): 
-                models_changed = (cb.currentText() not in current_models) and (len(current_models) > 0)
-                if(models_changed):
-                    break
+            try:
+                if "Model" in cb.objectName(): 
+                    models_changed = (cb.currentText() not in current_models) and (len(current_models) > 0)
+                    if(models_changed):
+                        break
+            except:
+                pass
         
         for textb in self.textboxes:
-            if textb.objectName() == "fwhm":
-                if(textb.text() != ""):
-                    try:
-                        fwhm_changed = float(textb.text()) != float(current_fwhm)
-                        if(fwhm_changed):
-                            break
-                    except:
-                        fwhm_changed = True
+            try:
+                if textb.objectName() == "fwhm":
+                    if(textb.text() != ""):
+                        try:
+                            fwhm_changed = float(textb.text()) != float(current_fwhm)
+                            if(fwhm_changed):
+                                break
+                        except:
+                            fwhm_changed = True
                     
+            except:
+                pass
+
         if ((not fwhm_changed) and (not models_changed)):
             is_compiled = True
         else:
@@ -629,19 +636,29 @@ class JAXRTSViz(QMainWindow):
          
     def del_instrument(self):
         for textb in self.textboxes:
-            if textb.objectName() == "fwhm":
-                textb.setEnabled(
-            True
-        )
+            try:
+                if textb.objectName() == "fwhm":
+                    textb.setEnabled(
+                True
+                    )
+            except:
+                pass
+        
     def load_instrument(self):
         for textb in self.textboxes:
-            if textb.objectName() == "fwhm":
-                textb.setEnabled(
-            False
-        )
+            try:
+                if textb.objectName() == "fwhm":
+                    textb.setEnabled(
+                False
+                    )
+            except:
+                pass
+            
 
     def add_new_row(self):
         global elements_counter
+        global is_compiled
+        
         elements_counter += 1
         counter = elements_counter
         combo_box = QComboBox()
@@ -679,6 +696,8 @@ class JAXRTSViz(QMainWindow):
         self.comboBoxesList.append(combo_box)
 
         elements_counter += 1
+        is_compiled = False
+        self.toolbar.compile_status.repaint()
 
     def remove_row(self, x, k):
         global elements_counter
@@ -735,7 +754,10 @@ class JAXRTSViz(QMainWindow):
             
         for cb in self.comboBoxesList:
             try:
-                probing_values_and_models[cb.objectName().strip("Model")] = cb.currentText()
+                if "Model" in cb.objectName():
+                    probing_values_and_models[cb.objectName()[6:]] = cb.currentText()
+                else:
+                    probing_values_and_models[cb.objectName()] = cb.currentText()
             except ValueError as err:
                 print("Please check entries!")
                 return
@@ -783,6 +805,7 @@ class JAXRTSViz(QMainWindow):
                 self.probe_button.setEnabled(
                     True
                 )
+                print("This didn't work.")
                 return
             
             self.probe_button.setEnabled(
@@ -828,6 +851,7 @@ class JAXRTSViz(QMainWindow):
             try:
                 I = current_state.probe(current_setup)
             except AttributeError as err:
+                print("This didn't work.")
                 return
             
             is_compiled= True
@@ -841,7 +865,7 @@ class JAXRTSViz(QMainWindow):
             
             n_e = current_state.n_e.m_as(1 / ureg.centimeter**3) if current_state is not None else np.nan
             try:
-                kappa_sc = current_state.screening_length.m_as(1 / ureg.angstrom)  if current_state is not None else np.nan
+                kappa_sc = current_state.screening_length.m_as(1 / ureg.angstrom) if current_state is not None else np.nan
             except:
                 kappa_sc = np.nan
             w_p = jaxrts.plasma_physics.plasma_frequency(current_state.n_e).m_as(1 / ureg.second) if current_state is not None else np.nan
