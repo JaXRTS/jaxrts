@@ -19,6 +19,8 @@ from PyQt5.QtWidgets import (
     QLabel,
     QPlainTextEdit,
     QComboBox,
+    QMenu,
+    QAction,
     QVBoxLayout,
     QHBoxLayout,
     QGridLayout,
@@ -28,9 +30,9 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QMainWindow,
 )
-from PyQt5.QtGui import QTextCursor, QTextBlockFormat
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject
-from PyQt5 import QtCore
+from PyQt5.QtGui import QTextCursor, QTextBlockFormat, QFont
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QRect
+from PyQt5 import QtCore, QtGui
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -40,11 +42,50 @@ import time
 
 from jaxrts.units import ureg, Quantity, to_array
 
+current_fwhm = 0.0
+
 current_state = None
+current_setup = None
+
+is_compiled = False
 
 elements_counter = 1
 
 atomic_number = {v: k for k, v in jaxrts.elements._element_symbols.items()}
+
+class StatusSwitch(QPushButton):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.setCheckable(True)
+        self.setMinimumWidth(66)
+        self.setMinimumHeight(22)
+
+    def paintEvent(self, event):
+        global is_compiled
+        label = "Compiled" if is_compiled else "Uncompiled"
+        bg_color = Qt.green if is_compiled else Qt.red
+
+        radius = 10
+        width = 32
+        center = self.rect().center()
+
+        painter = QtGui.QPainter(self)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        painter.translate(center)
+        painter.setBrush(QtGui.QColor(0,0,0))
+
+        pen = QtGui.QPen(Qt.black)
+        pen.setWidth(2)
+        painter.setPen(pen)
+
+        painter.drawRoundedRect(QRect(-width, -radius, 2*width, 2*radius), radius, radius)
+        painter.setBrush(QtGui.QBrush(bg_color))
+        sw_rect = QRect(-radius, -radius, width + radius, 2*radius)
+        if not is_compiled:
+            sw_rect.moveLeft(-width)
+        painter.drawRoundedRect(sw_rect, radius, radius)
+        painter.setFont(QFont('Times', 5))
+        painter.drawText(sw_rect, Qt.AlignCenter, label)
 
 class EmittingStream(QObject):
     text_written = pyqtSignal(str)
@@ -79,7 +120,20 @@ class ConsoleOutputWorker(QThread):
 
     def stop(self):
         self._is_running = False
+        
+class CustomToolbar(NavigationToolbar):
+    def __init__(self, canvas, parent=None):
+        super(CustomToolbar, self).__init__(canvas, parent)
 
+        self.compile_status = StatusSwitch()
+        self.compile_status.setFixedSize(80, 30)
+        # self.compile_status.setCheckable(False)
+        global is_compiled
+        is_compiled = False
+        self.addWidget(self.compile_status)
+        self.addData = QPushButton("Load Spectrum")
+        self.addData.setFixedSize(90, 40)
+        self.addWidget(self.addData)
 class JAXRTSViz(QMainWindow):
 
     def __init__(self):
@@ -102,7 +156,7 @@ class JAXRTSViz(QMainWindow):
         self.textboxes = []
         self.comboBoxesList = []
         self.activeModels = {}
-        self.compiled = False
+        is_compiled= False
         ##########################################################PLASMA STATE################################################################
         # Create left side layout
         self.left_layout = QVBoxLayout()
@@ -241,8 +295,6 @@ class JAXRTSViz(QMainWindow):
         # Model layout box
         # row_layout2 = QHBoxLayout()
 
-        def add_new_model():
-            pass
 
         self.Allmodels = {}
 
@@ -281,13 +333,21 @@ class JAXRTSViz(QMainWindow):
                 self.comboBoxesList.append(combo_box)
     
             self.left_layout.addLayout(row_layout2)
+            
+        # Create a dropdown menu
+        self.model_dropdown_menu = QMenu(self)
+        
+        for mod in list(self.Allmodels.keys()):
+            if mod not in self.base_models:
+                self.add_model_menu_element(mod)
+        # Add actions to the dropdown menu
         
         # Initial row + button for adding new rows
         self.button_layout2 = QHBoxLayout()
-        add_row_button = QPushButton("+")
-        add_row_button.setFixedSize(40, 40)
-        add_row_button.clicked.connect(add_new_model)
-        self.button_layout2.addWidget(add_row_button)
+        self.model_add_button = QPushButton("+")
+        self.model_add_button.setFixedSize(40, 40)
+        self.model_add_button.clicked.connect(self.add_new_model)
+        self.button_layout2.addWidget(self.model_add_button)
         self.left_layout.addLayout(self.button_layout2)
 
         line = QFrame()
@@ -367,6 +427,7 @@ class JAXRTSViz(QMainWindow):
         label4 = QLabel(r"fwhm=")
         text_box4 = QLineEdit()
         text_box4.setObjectName("fwhm")
+        text_box4.textChanged.connect(self.set_compile_off)
         text_box4.setMaximumWidth(50)
         setup_layout2.addWidget(label4, alignment=QtCore.Qt.AlignLeft)
         setup_layout2.addWidget(text_box4, alignment=QtCore.Qt.AlignLeft)
@@ -421,9 +482,11 @@ class JAXRTSViz(QMainWindow):
         )
 
         self.canvas = MplCanvas(self, width=5, height=4, dpi=100)
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        self.canvas.ax.patch.set_facecolor('#f0f0f0')
+        self.canvas.fig.set_facecolor('#f0f0f0')
+        self.toolbar = CustomToolbar(self.canvas, self)
         # self.figure, self.ax = plt.subplots(figsize=(6, 6))  # Adjust the width and height as needed
-
+        
         right_layout.addWidget(self.toolbar)
         right_layout.addWidget(self.canvas)
 
@@ -480,7 +543,43 @@ class JAXRTSViz(QMainWindow):
         
         main_layout.addLayout(main_layout1)
         main_layout.addLayout(main_layout2)
+        
+    def add_model_menu_element(self, action_name):
+        action = QAction(action_name, self)
+        action.triggered.connect(lambda checked, name=action_name: self.model_menu_element_triggered(name))
+        self.model_dropdown_menu.addAction(action)
 
+    def model_menu_element_triggered(self, action_name):
+        print(f'{action_name} was clicked')
+        
+    def update_base_models(self, value):
+        pass
+        
+        
+    def add_new_model(self):
+        # Get the position of the button
+        button_position = self.model_add_button.mapToGlobal(self.model_add_button.rect().bottomLeft())
+
+        # Show the dropdown menu at the button's position
+        self.model_dropdown_menu.exec_(button_position)
+        
+    def set_compile_off(self):
+        global is_compiled
+        global current_fwhm
+        
+        for textb in self.textboxes:
+            if textb.objectName() == "fwhm":
+                if(textb.text() != ""):
+                    try:
+                        if(float(textb.text()) == float(current_fwhm)):
+                            is_compiled= True
+                        else:
+                            is_compiled= False
+                    except:
+                        is_compiled= False
+                        
+        self.toolbar.compile_status.repaint()
+         
     def del_instrument(self):
         for textb in self.textboxes:
             if textb.objectName() == "fwhm":
@@ -556,6 +655,7 @@ class JAXRTSViz(QMainWindow):
         button.setEnabled(
             not self.toggle_probe_button.isChecked()
         )
+    
         
     def update_console_output(self, message):
         self.console_output.appendPlainText(message)
@@ -568,7 +668,10 @@ class JAXRTSViz(QMainWindow):
 
     def toggle_probe(self):
         
+        print(self.activeModels)
         global current_state
+        global current_setup
+        global is_compiled
         
         probing_values_and_models = {}
         elements = []
@@ -602,28 +705,32 @@ class JAXRTSViz(QMainWindow):
             print("Please check that the density fractions add up to 1!")
             return  
         
+        global current_fwhm
+        current_fwhm = probing_values_and_models["fwhm"]
+        
         self.probe_button.setEnabled(
             False
         )
         
         self.probe_button.repaint()
         
-        if self.compiled:
-            current_state.Z_free = to_array(Z_free)
-            current_state.mass_density = to_array(probing_values_and_models["rho"] * ureg.gram / ureg.centimeter**3 * jnp.array(n_frac))
-            current_state.T_e=to_array(probing_values_and_models["T"] * ureg.electron_volt / ureg.k_B)
-            current_state.ions = [jaxrts.elements.Element(e) for e in elements]
+        if is_compiled:
             
             energy = (
                 jnp.linspace(probing_values_and_models["E1"], probing_values_and_models["E2"], int(probing_values_and_models["npoints"])) * ureg.electron_volt
             )
             
-            self.setup.energy =  probing_values_and_models["Energy"] * 1 * ureg.electron_volt
-            self.setup.scattering_angle = probing_values_and_models["Theta"] * 1 * ureg.degrees
-            self.setup.measured_energ = energy
+            current_state.Z_free = to_array(Z_free)
+            current_state.mass_density = to_array(probing_values_and_models["rho"] * ureg.gram / ureg.centimeter**3 * jnp.array(n_frac))
+            current_state.T_e=to_array(probing_values_and_models["T"] * ureg.electron_volt / ureg.k_B)
+            current_state.ions = [jaxrts.elements.Element(e) for e in elements]
+            
+            current_setup.energy = probing_values_and_models["Energy"] * 1 * ureg.electron_volt
+            current_setup.scattering_angle = probing_values_and_models["Theta"] * 1 * ureg.degrees
+            current_setup.measured_energy = energy
             
             try:
-                I = current_state.probe(self.setup)
+                I = current_state.probe(current_setup)
             except AttributeError as err:
                 self.probe_button.setEnabled(
                     True
@@ -635,7 +742,7 @@ class JAXRTSViz(QMainWindow):
             )
             
             self.canvas.ax.clear()
-            self.canvas.ax.plot((self.setup.measured_energy).m_as(ureg.electron_volt), I.m_as(ureg.second))
+            self.canvas.ax.plot((current_setup.measured_energy).m_as(ureg.electron_volt), I.m_as(ureg.second))
             self.canvas.ax.set_xlabel("E [eV]")
             self.canvas.ax.set_ylabel("I [1/s]")
             self.canvas.draw()
@@ -654,8 +761,7 @@ class JAXRTSViz(QMainWindow):
             )
             # sharded_energy = jax.device_put(energy, sharding)
     #         # sharded_energy = energy
-
-            self.setup = jaxrts.setup.Setup(
+            current_setup = jaxrts.setup.Setup(
                 probing_values_and_models["Theta"] * 1 * ureg.degrees,
                 probing_values_and_models["Energy"] * 1 * ureg.electron_volt,
                 energy,
@@ -663,24 +769,22 @@ class JAXRTSViz(QMainWindow):
                 # + jnp.linspace(-700, 200, 2000) * ureg.electron_volt,
                 partial(
                     jaxrts.instrument_function.instrument_gaussian,
-                    sigma=ureg("10eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
+                    sigma=float(probing_values_and_models["fwhm"]) * 1 * ureg.electron_volt / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
                 ),
     )
-
-    
             for typ in self.base_models:
                 current_state[typ] = eval("jaxrts.models." + probing_values_and_models[typ])()
             
             current_state["BM S_ii"] = jaxrts.models.AverageAtom_Sii()
             
             try:
-                I = current_state.probe(self.setup)
+                I = current_state.probe(current_setup)
             except AttributeError as err:
                 return
             
-            self.compiled = True
+            is_compiled= True
             
-            self.canvas.ax.plot((self.setup.measured_energy).m_as(ureg.electron_volt), I.m_as(ureg.second))
+            self.canvas.ax.plot((current_setup.measured_energy).m_as(ureg.electron_volt), I.m_as(ureg.second))
             self.canvas.ax.set_xlabel("E [eV]")
             self.canvas.ax.set_ylabel("I [1/s]")
             self.canvas.draw()
@@ -699,21 +803,23 @@ class JAXRTSViz(QMainWindow):
             
             self.console_output_pp.setPlainText(
                 "Plasma parameters:\n\n"
-                + "➢  Free electron density: " + str(np.around(n_e, 3)) + " g/cm³\n"
-                + "➢  screening length: " + str(np.around(kappa_sc,3)) + " 1/Å\n"
-                + "➢  plasma frequency: " + str(np.around(w_p, 3)) + " 1/s\n"
-                + "➢  electron degeneracy parameter: " + str(np.around(theta_e, 3)) + "\n"
-                + "➢  electron coupling parameter: " + str(np.around(gamma_ee, 3)) + " \n"
-                + "➢  compton energy: " + str(np.around(compton, 3)) + " eV\n"
+                + "➢  Free electron density: " + "{:0.3E}".format(n_e) + " g/cm³\n"
+                + "➢  screening length: " + "{:0.3E}".format(kappa_sc,3) + " 1/Å\n"
+                + "➢  plasma frequency: " + "{:0.3E}".format(w_p, 3) + " 1/s\n"
+                + "➢  electron degeneracy parameter: " + "{:0.3f}".format(theta_e, 3) + "\n"
+                + "➢  electron coupling parameter: " + "{:0.3f}".format(gamma_ee, 3) + " \n"
+                + "➢  compton energy: " + "{:0.3E}".format(compton, 3) + " eV\n"
             )
+            
+                    
+            self.canvas.ax.patch.set_facecolor('#f0f0f0')
+            self.canvas.fig.set_facecolor('#f0f0f0')
             
             self.probe_button.setEnabled(
                 True
             )
-            
-            
-
-
+            is_compiled = True
+            self.toolbar.compile_status.repaint()
 def main():
     app = QApplication(sys.argv)
     window = JAXRTSViz()
