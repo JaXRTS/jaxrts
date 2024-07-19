@@ -42,6 +42,15 @@ import time
 
 from jaxrts.units import ureg, Quantity, to_array
 
+
+base_models = [
+    "ionic scattering",
+    "free-free scattering",
+    "bound-free scattering",
+    "free-bound scattering",
+    "BM S_ii"
+]
+current_models = []
 current_fwhm = 0.0
 
 current_state = None
@@ -49,6 +58,7 @@ current_setup = None
 
 is_compiled = False
 
+offset_elements = 27
 elements_counter = 1
 
 atomic_number = {v: k for k, v in jaxrts.elements._element_symbols.items()}
@@ -140,6 +150,8 @@ class JAXRTSViz(QMainWindow):
         super().__init__()
 
         global elements_counter
+        global base_models
+        global offset_elements
         self.setWindowTitle("JAXRTSViz")
         self.setGeometry(100, 100, 1000, 600)
 
@@ -156,7 +168,8 @@ class JAXRTSViz(QMainWindow):
         self.textboxes = []
         self.comboBoxesList = []
         self.activeModels = {}
-        is_compiled= False
+        self.model_dropdown_menu_actions = []
+
         ##########################################################PLASMA STATE################################################################
         # Create left side layout
         self.left_layout = QVBoxLayout()
@@ -241,7 +254,7 @@ class JAXRTSViz(QMainWindow):
         label_blank.setText(r"")
         label_blank.setMaximumWidth(20)
         grid_layout.addWidget(
-            text_box2, 0, 3, 1, 1, alignment=QtCore.Qt.AlignLeft
+            text_box2, 0, 2, 1, 1, alignment=QtCore.Qt.AlignLeft
         )  # Row 1, Col 2
 
         # Layout for initial dropdown and textboxes
@@ -310,23 +323,17 @@ class JAXRTSViz(QMainWindow):
                                 self.Allmodels[k].append(obj_name)
                             except:
                                 self.Allmodels[k] = [obj_name]
-
-        self.base_models = [
-            "ionic scattering",
-            "free-free scattering",
-            "bound-free scattering",
-            "free-bound scattering",
-        ]
         
 
         for mod in list(self.Allmodels.keys()):
             row_layout2 = QHBoxLayout()
-            if mod in self.base_models:
+            if mod in base_models:
                 label = QLabel()
                 combo_box = QComboBox()
-                combo_box.setObjectName(mod)
+                combo_box.setObjectName("Model" + mod)
                 combo_box.setMaximumWidth(200)
                 combo_box.addItems(list(self.Allmodels[mod]))
+                combo_box.currentTextChanged.connect(self.set_compile_off)
                 label.setText(mod + str(":"))
                 row_layout2.addWidget(label)
                 row_layout2.addWidget(combo_box)
@@ -338,7 +345,7 @@ class JAXRTSViz(QMainWindow):
         self.model_dropdown_menu = QMenu(self)
         
         for mod in list(self.Allmodels.keys()):
-            if mod not in self.base_models:
+            if mod not in base_models:
                 self.add_model_menu_element(mod)
         # Add actions to the dropdown menu
         
@@ -460,7 +467,8 @@ class JAXRTSViz(QMainWindow):
 
         self.probe_button_layout = QHBoxLayout()
         self.probe_button = QPushButton("Probe")
-        self.probe_button.setFixedSize(70, 60)
+        self.probe_button.setFixedSize(120, 60)
+        self.probe_button.setFont(QFont(None, 12))
         self.probe_button.clicked.connect(self.toggle_probe)
 
         self.toggle_probe_button = QCheckBox()
@@ -546,15 +554,40 @@ class JAXRTSViz(QMainWindow):
         
     def add_model_menu_element(self, action_name):
         action = QAction(action_name, self)
+        action.setObjectName(action_name)
+        self.model_dropdown_menu_actions.append(action)
         action.triggered.connect(lambda checked, name=action_name: self.model_menu_element_triggered(name))
         self.model_dropdown_menu.addAction(action)
 
     def model_menu_element_triggered(self, action_name):
-        print(f'{action_name} was clicked')
+
+        global is_compiled
+        global base_models
+        is_compiled = False
+        base_models.append(action_name)
         
-    def update_base_models(self, value):
-        pass
-        
+        for mod in list(self.Allmodels.keys()):
+            row_layout2 = QHBoxLayout()
+            if mod == action_name:
+                label = QLabel()
+                combo_box = QComboBox()
+                combo_box.setObjectName("Model" + mod)
+                combo_box.setMaximumWidth(200)
+                combo_box.addItems(list(self.Allmodels[mod]))
+                combo_box.currentTextChanged.connect(self.set_compile_off)
+                label.setText(mod + str(":"))
+            
+                row_layout2.addWidget(label)
+                row_layout2.addWidget(combo_box)
+                self.comboBoxesList.append(combo_box)
+    
+            self.left_layout.insertLayout(self.left_layout.count() - 12, row_layout2)
+            for act in self.model_dropdown_menu_actions:
+                if act.objectName() == action_name:
+                    self.model_dropdown_menu.removeAction(act)
+                    
+        global offset_elements
+        offset_elements += 13
         
     def add_new_model(self):
         # Get the position of the button
@@ -566,18 +599,32 @@ class JAXRTSViz(QMainWindow):
     def set_compile_off(self):
         global is_compiled
         global current_fwhm
+        global current_models
+        
+        models_changed = True
+        fwhm_changed = True
+
+        for cb in self.comboBoxesList:
+            if "Model" in cb.objectName(): 
+                models_changed = (cb.currentText() not in current_models) and (len(current_models) > 0)
+                if(models_changed):
+                    break
         
         for textb in self.textboxes:
             if textb.objectName() == "fwhm":
                 if(textb.text() != ""):
                     try:
-                        if(float(textb.text()) == float(current_fwhm)):
-                            is_compiled= True
-                        else:
-                            is_compiled= False
+                        fwhm_changed = float(textb.text()) != float(current_fwhm)
+                        if(fwhm_changed):
+                            break
                     except:
-                        is_compiled= False
-                        
+                        fwhm_changed = True
+                    
+        if ((not fwhm_changed) and (not models_changed)):
+            is_compiled = True
+        else:
+            is_compiled = False
+
         self.toolbar.compile_status.repaint()
          
     def del_instrument(self):
@@ -623,7 +670,7 @@ class JAXRTSViz(QMainWindow):
         row_layout.setObjectName("Element" + str(elements_counter))
 
         self.left_layout.insertLayout(
-            self.left_layout.count() - 27, row_layout
+            self.left_layout.count() - offset_elements, row_layout
         )  # Insert before the button layout
         self.dropdown_layouts.append(row_layout)
 
@@ -668,10 +715,11 @@ class JAXRTSViz(QMainWindow):
 
     def toggle_probe(self):
         
-        print(self.activeModels)
         global current_state
         global current_setup
         global is_compiled
+        global base_models
+        global current_models
         
         probing_values_and_models = {}
         elements = []
@@ -687,7 +735,7 @@ class JAXRTSViz(QMainWindow):
             
         for cb in self.comboBoxesList:
             try:
-                probing_values_and_models[cb.objectName()] = cb.currentText()
+                probing_values_and_models[cb.objectName().strip("Model")] = cb.currentText()
             except ValueError as err:
                 print("Please check entries!")
                 return
@@ -772,10 +820,10 @@ class JAXRTSViz(QMainWindow):
                     sigma=float(probing_values_and_models["fwhm"]) * 1 * ureg.electron_volt / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
                 ),
     )
-            for typ in self.base_models:
+            current_models = []
+            for typ in base_models:
                 current_state[typ] = eval("jaxrts.models." + probing_values_and_models[typ])()
-            
-            current_state["BM S_ii"] = jaxrts.models.AverageAtom_Sii()
+                current_models.append(probing_values_and_models[typ])
             
             try:
                 I = current_state.probe(current_setup)
@@ -811,7 +859,6 @@ class JAXRTSViz(QMainWindow):
                 + "➢  compton energy: " + "{:0.3E}".format(compton, 3) + " eV\n"
             )
             
-                    
             self.canvas.ax.patch.set_facecolor('#f0f0f0')
             self.canvas.fig.set_facecolor('#f0f0f0')
             
