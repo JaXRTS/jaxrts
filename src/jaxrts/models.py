@@ -1048,6 +1048,9 @@ class BornMerminFull(FreeFreeModel):
         def V_eiS(k):
             return plasma_state["BM V_eiS"].V(plasma_state, k)
 
+        mean_Z_free = jnpu.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA(
@@ -1057,13 +1060,11 @@ class BornMerminFull(FreeFreeModel):
             S_ii,
             V_eiS,
             plasma_state.n_e,
-            plasma_state.Z_free,
+            mean_Z_free,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
         )
-        return See_0 * jnp.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
+        return See_0 * mean_Z_free
 
     @jax.jit
     def susceptibility(
@@ -1086,6 +1087,9 @@ class BornMerminFull(FreeFreeModel):
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
+        mean_Z_free = jnpu.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
 
         def chi(energy):
             eps = free_free.dielectric_function_BMA_full(
@@ -1096,7 +1100,7 @@ class BornMerminFull(FreeFreeModel):
                 plasma_state.n_e,
                 S_ii,
                 V_eiS,
-                plasma_state.Z_free,
+                mean_Z_free,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
             lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1172,6 +1176,9 @@ class BornMermin(FreeFreeModel):
         def V_eiS(k):
             return plasma_state["BM V_eiS"].V(plasma_state, k)
 
+        mean_Z_free = jnpu.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
@@ -1181,14 +1188,12 @@ class BornMermin(FreeFreeModel):
             S_ii,
             V_eiS,
             plasma_state.n_e,
-            plasma_state.Z_free,
+            mean_Z_free,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * jnp.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
+        return See_0 * mean_Z_free
 
     @jax.jit
     def susceptibility(
@@ -1210,6 +1215,9 @@ class BornMermin(FreeFreeModel):
             probe_setup = get_probe_setup(k, setup)
             return plasma_state["BM V_eiS"].evaluate(plasma_state, probe_setup)
 
+        mean_Z_free = jnpu.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
@@ -1222,7 +1230,7 @@ class BornMermin(FreeFreeModel):
                 plasma_state.n_e,
                 S_ii,
                 V_eiS,
-                plasma_state.Z_free,
+                mean_Z_free,
                 self.no_of_freq,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
@@ -1315,6 +1323,9 @@ class BornMermin_Fit(FreeFreeModel):
         def V_eiS(k):
             return plasma_state["BM V_eiS"].V(plasma_state, k)
 
+        mean_Z_free = jnpu.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interpFit(
@@ -1324,14 +1335,12 @@ class BornMermin_Fit(FreeFreeModel):
             S_ii,
             V_eiS,
             plasma_state.n_e,
-            plasma_state.Z_free,
+            mean_Z_free,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * jnp.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
+        return See_0 * mean_Z_free
 
     @jax.jit
     def susceptibility(
@@ -1352,6 +1361,9 @@ class BornMermin_Fit(FreeFreeModel):
         def V_eiS(k):
             return plasma_state["BM V_eiS"].V(plasma_state, k)
 
+        mean_Z_free = jnpu.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
@@ -1364,7 +1376,7 @@ class BornMermin_Fit(FreeFreeModel):
                 plasma_state.n_e,
                 S_ii,
                 V_eiS,
-                plasma_state.Z_free,
+                mean_Z_free,
                 self.no_of_freq,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
@@ -1461,6 +1473,9 @@ class BornMermin_Fortmann(FreeFreeModel):
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = dispersion_corrected_k(setup, plasma_state.n_e)
+        mean_Z_free = jnpu.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
         See_0 = free_free.S0_ee_BMA_Fortmann(
             k,
             plasma_state.T_e,
@@ -1468,14 +1483,12 @@ class BornMermin_Fortmann(FreeFreeModel):
             S_ii,
             V_eiS,
             plasma_state.n_e,
-            plasma_state.Z_free,
+            mean_Z_free,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * jnp.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
+        return See_0 * mean_Z_free
 
     @jax.jit
     def susceptibility(
@@ -1499,6 +1512,9 @@ class BornMermin_Fortmann(FreeFreeModel):
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
         k = setup.k
 
+        mean_Z_free = jnpu.sum(
+            plasma_state.Z_free * plasma_state.number_fraction
+        )
         xi = free_free.susceptibility_BMA_Fortmann(
             k,
             E,
@@ -1507,7 +1523,7 @@ class BornMermin_Fortmann(FreeFreeModel):
             plasma_state.n_e,
             S_ii,
             V_eiS,
-            plasma_state.Z_free,
+            mean_Z_free,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
@@ -1587,10 +1603,9 @@ class SchumacherImpulse(ScatteringModel):
         out = 0 * ureg.second
         for idx in range(plasma_state.nions):
             Z_c = plasma_state.Z_core[idx]
-            E_b = plasma_state.ions[
-                idx
-            ].binding_energies + plasma_state.models["ipd"].evaluate(
-                plasma_state, None
+            E_b = (
+                plasma_state.ions[idx].binding_energies
+                + plasma_state.models["ipd"].evaluate(plasma_state, None)[idx]
             )
             E_b = jnpu.where(
                 E_b < 0 * ureg.electron_volt, 0 * ureg.electron_volt, E_b
@@ -1625,10 +1640,12 @@ class SchumacherImpulse(ScatteringModel):
             sbe = factor * bound_free.J_impulse_approx(
                 omega, k, population, Zeff, E_b
             )
-            out += sbe * Z_c * x[idx]
-        return jnpu.where(
-            jnp.isnan(out.m_as(ureg.second)), 0 * ureg.second, out
-        )
+            val = sbe * Z_c * x[idx]
+            out += jnpu.where(
+                jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
+            )
+
+        return out
 
     def _tree_flatten(self):
         children = ()
