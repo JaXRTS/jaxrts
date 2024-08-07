@@ -121,7 +121,7 @@ def q_FiniteWLChapman2015(
     Calculates the Finite wavelength screening presented in
     :cite:`Chapman.2015`, eqn (3). This function relies on the Dandrea
     interpolation fit of the non-interacting susceptibility for a faster
-    cimputation (see
+    computation (see
     :py:func:`jaxrts.free_free.noninteracting_susceptibility_Dandrea1986`).
 
     We furthermore allow for a local field correction which might deviate from
@@ -139,7 +139,7 @@ def q_FiniteWLChapman2015(
     T : Quantity
         The electron temperature in units of [temperature].
     n_e : Quantity
-        The electron numer density in units of 1/[length]**3.
+        The electron number density in units of 1/[length]**3.
     lfc: float
         The local field correction.
 

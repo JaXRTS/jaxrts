@@ -57,6 +57,12 @@ import matplotlib.colors as mcolors
 # Get the base colors and their names
 base_colors = mcolors.BASE_COLORS
 
+def save_state():
+    pass
+
+def load_state():
+    pass
+
 class ConstantValueInputDialog(QDialog):
     def __init__(self, typ, unit_v):
         super().__init__()

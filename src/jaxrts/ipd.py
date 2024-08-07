@@ -222,7 +222,7 @@ def ipd_ecker_kroell(
 @jax.jit
 def ipd_pauli_blocking(Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity) -> Quantity:
     """
-    The correction to the ionization potential due to Pauli blocking, as described in Röpke et al 2019.
+    The correction to the ionization potential due to Pauli blocking, as described in Röpke et al. 2019.
     """
     
     chem_pot = chem_pot_interpolation(Te, ne)
