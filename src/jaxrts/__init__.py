@@ -23,6 +23,9 @@ from .elements import Element
 from .plasmastate import (
     PlasmaState,
 )
+from .setup import (
+    Setup,
+)
 from .units import (
     ureg,
 )

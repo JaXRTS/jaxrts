@@ -1,10 +1,20 @@
 # JaXRTS
 
-**Python code for x-ray Thomson scattering, made fast by using [jax](https://jax.readthedocs.io/en/latest/index.html).**
+**Python code for x-ray Thomson scattering (XRTS), heavily relying on [jax](https://jax.readthedocs.io/en/latest/index.html).**
+
+![An example result](getting_started.png)
+
+## Disclaimer
+
+This module is very much work in progress, and experimental in itself, but also in it's dependencies. These scripts are an attempt to summarize published XRTS theory into code usable to compare to experiments, as the state-of-the art software for this purpose, the Multicomponent Scattering Code MCSS by Dave Chapman is not freely available.
+
+We would not have been able to write this without the seminal work by D. Chapman, G. Gregori, K. Wünsch and D. O. Gericke. A full bibliography can be found under `doc/source/literature.bib`.
+
+The code was written by Samuel Schumacher and Julian Lütgert in the High Energy Density Group of Dominik Kraus at University Rostock.
 
 ## Documentation
 
-The [Documentation can be found online](http://aghed.hed.physik.uni-rostock.de/lue/jaxrts/). However, as we don't generate it automatically, yet, it might be outdated. If you want to generate it for yourself, just run
+The documentation can be found in the `doc` directory. To generate it for yourself, just run
 
 ```bash
 poetry make html
@@ -31,3 +41,11 @@ pip install -e .
 ```
 
 This `-e` flag installs the module in 'edit' mode, i.e., changes you made are available without the need of reinstalling the package.
+
+## Getting started
+
+The `jaxrts` module provides a user with two classes, a `Setup` and a `PlasmaState`
+While the former specifies the probing energy and measurement grid, scattering angle and instrument function, the latter is defines the state to be probed, and allows for adding `Models` as keys to the plasma state.
+To calculate a spectrum, use the `PlasmaState.probe()` method.
+
+A simple example (which generated the figure above) can be found at `doc/examples/plot_getting_started.py`. More examples can be found in the `doc/example` directory.
