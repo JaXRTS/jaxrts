@@ -10,13 +10,13 @@ shortrange part and is also Fourier-transformed to k-space.
 import abc
 import logging
 
-from jax import numpy as jnp
-import jax.interpreters
 import jax
+import jax.interpreters
 import jpu
+from jax import numpy as jnp
 
-from jaxrts.units import ureg, Quantity, to_array
-from jaxrts.hypernetted_chain import _3Dfour, mass_weighted_T, hnc_interp
+from jaxrts.hypernetted_chain import _3Dfour, hnc_interp, mass_weighted_T
+from jaxrts.units import Quantity, to_array, ureg
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,6 @@ class HNCPotential(metaclass=abc.ABCMeta):
         logged messages and errors. Is automatically called after
         :py:meth:`~.__init__`.
         """
-        pass
 
     def prepare(self, plasma_state, key: str) -> None:
         # Set include-electrons to True

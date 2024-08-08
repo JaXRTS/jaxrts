@@ -15,15 +15,12 @@ the required number of points for the interpolation.
 """
 
 import os
-
-from functools import partial
 import time
+from functools import partial
 
-import matplotlib.pyplot as plt
-import scienceplots
 import jax
 import jax.numpy as jnp
-
+import matplotlib.pyplot as plt
 
 import jaxrts
 

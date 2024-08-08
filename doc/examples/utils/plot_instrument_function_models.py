@@ -3,15 +3,11 @@ All available instrument function models.
 =========================================
 """
 
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
-import numpy as onp
-import matplotlib.pyplot as plt
-import scienceplots
 
 import jaxrts
 import jaxrts.instrument_function as ifs
-
-import jax.numpy as jnp
 
 ureg = jaxrts.units.ureg
 

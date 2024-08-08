@@ -11,32 +11,24 @@ Here, we present the stated best-fit results, to show the relevance of these
 contributions for certain conditions.
 """
 
-import jaxrts
-
-import jax.numpy as jnp
-
-from jaxrts.hnc_potentials import CoulombPotential, SoftCorePotential
-from jaxrts.models import (
-    ArbitraryDegeneracyScreeningLength,
-    DetailedBalance,
-    OnePotentialHNCIonFeat,
-    Neglect,
-    BornMermin,
-    RPA_NoDamping,
-    ConstantIPD,
-    SchumacherImpulse,
-    Gregori2006IonFeat,
-)
-
-import jpu.numpy as jnpu
-
-import numpy as onp
-
-import matplotlib.pyplot as plt
-import scienceplots  # noqa: F401
-
 from pathlib import Path
 
+import jax.numpy as jnp
+import jpu.numpy as jnpu
+import matplotlib.pyplot as plt
+import numpy as onp
+import scienceplots  # noqa: F401
+
+import jaxrts
+from jaxrts.hnc_potentials import CoulombPotential
+from jaxrts.models import (
+    ArbitraryDegeneracyScreeningLength,
+    ConstantIPD,
+    DetailedBalance,
+    OnePotentialHNCIonFeat,
+    RPA_NoDamping,
+    SchumacherImpulse,
+)
 
 ureg = jaxrts.ureg
 

@@ -11,9 +11,8 @@ presented in :cite:`Pauling.1932`.
     :py:func:`jaxrts.form_factors.pauling_atomic_ff`, instead.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
-import scienceplots
+import numpy as np
 
 import jaxrts
 import jaxrts.form_factors as ff

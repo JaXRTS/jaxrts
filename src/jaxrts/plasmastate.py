@@ -1,16 +1,17 @@
-from abc import ABCMeta
-from typing import List, Dict
-import numpy as np
 import logging
-import jpu
+from abc import ABCMeta
+from typing import List
+
 import jax
+import jpu
+import numpy as np
 from jax import numpy as jnp
 
-from .elements import Element, MixElement
-from .units import ureg, Quantity, to_array
+from .elements import Element
 from .helpers import JittableDict
-from .setup import Setup
 from .models import DebyeHueckelScreeningLength, ElectronicLFCConstant
+from .setup import Setup
+from .units import Quantity, to_array, ureg
 
 logger = logging.getLogger(__name__)
 
@@ -111,8 +112,8 @@ class PlasmaState:
         """
         if model_name not in self.models.keys():
             logger.warning(
-                f"Setting default '{model_name}' model to '{model_class.__name__}'."
-                + " You can suppress this warning by setting the model manually."
+                f"Setting default '{model_name}' model to '{model_class.__name__}'."  # noqa: E501
+                + " You can suppress this warning by setting the model manually."  # noqa: E501
             )
             self[model_name] = model_class
 

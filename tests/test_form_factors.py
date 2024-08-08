@@ -1,7 +1,6 @@
-import pytest
-
-import numpy as onp
 import jpu.numpy as jnpu
+import numpy as onp
+
 import jaxrts
 import jaxrts.form_factors as ff
 

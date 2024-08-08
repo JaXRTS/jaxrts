@@ -1,6 +1,7 @@
-import jaxrts
-from collections import defaultdict
 import pathlib
+from collections import defaultdict
+
+import jaxrts
 
 all_models = defaultdict(list)
 

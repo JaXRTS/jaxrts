@@ -4,12 +4,11 @@ This submodule contains basic formulas used in plasma physics.
 
 from typing import List
 
-from .units import ureg, Quantity, to_array
-from .math import fermi_integral
-
 import jax
 from jax import numpy as jnp
 from jpu import numpy as jnpu
+
+from .units import Quantity, to_array, ureg
 
 
 def plasma_frequency(electron_density: Quantity) -> Quantity:

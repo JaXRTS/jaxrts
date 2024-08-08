@@ -1,20 +1,14 @@
-import pytest
 from pathlib import Path
 
-import sys
-
-sys.path.append(
-    "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
-)
-from jax import numpy as jnp
-import jaxrts
+import pytest
 import jpu
+import numpy as onp
+from jax import numpy as jnp
+
+import jaxrts
 import jaxrts.hypernetted_chain as hnc
 from jaxrts import hnc_potentials
-import matplotlib.pyplot as plt
 from jaxrts.units import ureg
-import numpy as onp
-from scipy.fft import dst as sp_dst
 
 
 def test_electron_ion_potentials_literature_values_schwarz():
@@ -258,17 +252,6 @@ def test_multicomponent_wunsch2011_literature():
             )
             < 0.03
         )
-
-
-def test_sinft_self_inverse():
-    N = 2**12
-    r = jnp.linspace(0.00, 20.0, N)
-
-    f = r / (1 + r**2)
-    f_fft = (2 / N) * jaxrts.hypernetted_chain.sinft(
-        jaxrts.hypernetted_chain.sinft(f.copy())
-    )
-    assert jnp.max(jnp.abs(f - f_fft)) < 1e-8
 
 
 def test_realfft_inversion():

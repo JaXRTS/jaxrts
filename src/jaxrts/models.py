@@ -4,36 +4,35 @@ implemented.
 """
 
 import abc
-from copy import deepcopy
 import logging
+from copy import deepcopy
+from typing import TYPE_CHECKING
 
 import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
-from .units import ureg, Quantity, to_array
+from . import (
+    bound_free,
+    ee_localfieldcorrections,
+    form_factors,
+    free_free,
+    hnc_potentials,
+    hypernetted_chain,
+    ion_feature,
+    ipd,
+    plasma_physics,
+    static_structure_factors,
+)
+from .elements import MixElement, electron_distribution_ionized_state
+from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
 from .setup import (
     Setup,
     convolve_stucture_factor_with_instrument,
     dispersion_corrected_k,
     get_probe_setup,
 )
-from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
-from .elements import electron_distribution_ionized_state, MixElement
-from . import (
-    bound_free,
-    form_factors,
-    free_free,
-    hnc_potentials,
-    hypernetted_chain,
-    ion_feature,
-    plasma_physics,
-    static_structure_factors,
-    ipd,
-    ee_localfieldcorrections,
-)
-
-from typing import TYPE_CHECKING
+from .units import Quantity, to_array, ureg
 
 if TYPE_CHECKING:
     from .plasmastate import PlasmaState
@@ -64,14 +63,12 @@ class Model(metaclass=abc.ABCMeta):
         defaults if necessary.
         Please log assumtpions, properly
         """
-        pass
 
     def check(self, plasma_state: "PlasmaState") -> None:
         """
         Test if the model is applicable to the PlasmaState. Might raise logged
         messages and errors.
         """
-        pass
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -360,20 +357,6 @@ class ArkhipovIonFeat(IonFeatModel):
         )
         # Add a dimension, so that the shape is (1x1)
         return S_ii[:, jnp.newaxis]
-
-    # @jax.jit
-    # def Rayleigh_weight(
-    #     self, plasma_state: "PlasmaState", setup: Setup
-    # ) -> jnp.ndarray:
-    #     fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
-    #     population = electron_distribution_ionized_state(plasma_state.Z_core)[
-    #         :, jnp.newaxis
-    #     ]
-    #     q = plasma_state.evaluate("screening", setup)
-    #     f = jnp.sum(fi * population)
-    #     S_ii = self.S_ii(plasma_state, setup)
-    #     w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
-    #     return w_R
 
 
 class Gregori2003IonFeat(IonFeatModel):
@@ -1628,9 +1611,7 @@ class SchumacherImpulse(ScatteringModel):
                 fi = plasma_state["form-factors"].evaluate(
                     plasma_state, setup
                 )[:, idx]
-                new_r_k = (
-                    1 - jnp.sum(population * (fi) ** 2) / Z_c
-                )
+                new_r_k = 1 - jnp.sum(population * (fi) ** 2) / Z_c
                 # Catch the division by zero error
                 new_r_k = jax.lax.cond(Z_c == 0, lambda: 1.0, lambda: new_r_k)
                 return new_r_k

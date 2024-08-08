@@ -1,10 +1,5 @@
-import pathlib
-
-import numpy as onp
 import jax.numpy as jnp
 import jpu.numpy as jnpu
-import jax
-import pytest
 import matplotlib.pyplot as plt
 
 import jaxrts
@@ -30,9 +25,10 @@ def test_staticInterp_Gregori2007_reproduction():
                 k, T, n_e
             )
         )
-        plt.plot(k/kf, G_calc.m_as(ureg.dimensionless))
-        plt.plot(k/kf, G_farid)
+        plt.plot(k / kf, G_calc.m_as(ureg.dimensionless))
+        plt.plot(k / kf, G_farid)
 
     plt.show()
+
 
 test_staticInterp_Gregori2007_reproduction()

@@ -2,13 +2,14 @@
 Miscellaneous helper functions.
 """
 
+import logging
+from functools import wraps
+from time import time
+
 import jax
 from jax import numpy as jnp
-from .units import Quantity, ureg
 
-from functools import partial, wraps
-from time import time
-import logging
+from .units import Quantity, ureg
 
 #: Typically, we return quantities that differ per orbital in an
 #: :py:class:`jax.numpy.ndarray` with 10 entries, the orbitals with n<=4.

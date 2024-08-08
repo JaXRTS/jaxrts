@@ -1,7 +1,5 @@
-import pytest
-
 import jax.numpy as jnp
-import jpu.numpy as jnpu
+import pytest
 
 import jaxrts
 

@@ -3,65 +3,62 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parents[1] / "src"))
 
-import inspect
+import sys
 from functools import partial
 
-import numpy as np
-
-import jax.numpy as jnp
-import jaxrts
 import jax
-import sys
-from PyQt5.QtWidgets import (
-    QApplication,
-    QFrame,
-    QWidget,
-    QLabel,
-    QPlainTextEdit,
-    QComboBox,
-    QMenu,
-    QAction,
-    QVBoxLayout,
-    QButtonGroup,
-    QHBoxLayout,
-    QGridLayout,
-    QCheckBox,
-    QSizePolicy,
-    QFileDialog,
-    QTabWidget,
-    QRadioButton,
-    QTabBar,
-    QLineEdit,
-    QPushButton,
-    QDialog,
-    QMainWindow,
-)
-from PyQt5.QtGui import QTextCursor, QTextBlockFormat, QFont
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QRect
-from PyQt5 import QtCore, QtGui
+import jax.numpy as jnp
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
 )
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar,
 )
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import QObject, QRect, Qt, QThread, pyqtSignal
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QButtonGroup,
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QFrame,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMenu,
+    QPlainTextEdit,
+    QPushButton,
+    QRadioButton,
+    QSizePolicy,
+    QTabBar,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
-import time
-
-from jaxrts.units import ureg, Quantity, to_array
-
-import matplotlib.colors as mcolors
+import jaxrts
+from jaxrts.units import to_array, ureg
 
 # Get the base colors and their names
 base_colors = mcolors.BASE_COLORS
 
+
 def save_state():
     pass
 
+
 def load_state():
     pass
+
 
 class ConstantValueInputDialog(QDialog):
     def __init__(self, typ, unit_v):
@@ -209,7 +206,7 @@ class ConsoleOutputWorker(QThread):
         self._is_running = True
 
     def run(self):
-        counter = 0
+        pass
         # while self._is_running:
         #     time.sleep(1)
         #     # Simulate console output
@@ -772,7 +769,7 @@ class JAXRTSViz(QWidget):
                 intensity,
                 label=file_name.split("/")[-1].split(".txt")[0],
                 s=3,
-                color = base_colors[len(self.spectra_data)]
+                color=base_colors[len(self.spectra_data)],
             )
             self.canvas.ax.legend()
             self.canvas.draw()
@@ -1072,10 +1069,10 @@ class JAXRTSViz(QWidget):
                         float(probing_values_and_models["Zf_" + key])
                     )
                     n_frac.append(float(probing_values_and_models["f_" + key]))
-                except ValueError as err:
+                except ValueError:
                     print("Please check entries!")
                     return
-                except KeyError as err:
+                except KeyError:
                     print("Please check entries!")
                     return
         if jnp.abs(jnp.sum(jnp.array(n_frac)) - 1.0) >= 0.001:
@@ -1084,7 +1081,7 @@ class JAXRTSViz(QWidget):
 
         try:
             self.current_fwhm = probing_values_and_models["fwhm"]
-        except KeyError as err:
+        except KeyError:
             self.current_fwhm = 0.0
 
         self.probe_button.setEnabled(False)
@@ -1158,7 +1155,7 @@ class JAXRTSViz(QWidget):
 
             try:
                 I = self.current_state.probe(self.current_setup)
-            except AttributeError as err:
+            except AttributeError:
                 self.probe_button.setEnabled(True)
                 print("This didn't work.")
                 return
@@ -1184,7 +1181,7 @@ class JAXRTSViz(QWidget):
                 (self.current_setup.measured_energy).m_as(ureg.electron_volt),
                 I.m_as(ureg.second),
                 label="Model " + str(len(self.model_data)),
-                color = list(base_colors.keys())[len(self.model_data)]
+                color=list(base_colors.keys())[len(self.model_data)],
             )
             self.canvas.ax.set_xlabel("E [eV]")
             self.canvas.ax.set_ylabel("I [1/s]")
@@ -1192,7 +1189,7 @@ class JAXRTSViz(QWidget):
             self.canvas.draw()
 
         else:
-            
+
             print("Compiling ...")
             self.console_output.repaint()
 
@@ -1263,7 +1260,7 @@ class JAXRTSViz(QWidget):
 
             try:
                 I = self.current_state.probe(self.current_setup)
-            except AttributeError as err:
+            except AttributeError:
                 print("This didn't work.")
                 return
 
@@ -1285,7 +1282,7 @@ class JAXRTSViz(QWidget):
                 (self.current_setup.measured_energy).m_as(ureg.electron_volt),
                 I.m_as(ureg.second),
                 label="Model " + str(len(self.model_data)),
-                color = list(base_colors.keys())[len(self.model_data)]
+                color=list(base_colors.keys())[len(self.model_data)],
             )
             self.canvas.ax.set_xlabel("E [eV]")
             self.canvas.ax.set_ylabel("I [1/s]")

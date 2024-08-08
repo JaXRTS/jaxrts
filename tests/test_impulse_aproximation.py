@@ -1,12 +1,11 @@
-import pytest
-
 from pathlib import Path
 
-import numpy as onp
-
-import jaxrts
 import jax.numpy as jnp
 import jpu.numpy as jnpu
+import numpy as onp
+import pytest
+
+import jaxrts
 
 ureg = jaxrts.ureg
 

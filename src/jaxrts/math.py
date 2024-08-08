@@ -1,12 +1,11 @@
 """
-This submodule is dedicated to math functions which occur frequently in the calculations.
+This submodule is dedicated to math functions which occur frequently in the
+calculations.
 """
 
-from jax import numpy as jnp
 import jax
+from jax import numpy as jnp
 from quadax import quadgk
-
-import numpy as np
 
 
 @jax.jit
@@ -28,7 +27,6 @@ def numerical_inverse_fermi_integral(x, n):
     """
     WIP
     """
-    pass
 
 
 @jax.jit
@@ -417,11 +415,12 @@ def fermi_52_rational_approximation_antia(x):
 @jax.jit
 def inverse_fermi_12_rational_approximation_antia(x):
     """
-    Calculates F_{1/2} using a rational function approximation as described in Antia 1993.
-
+    Calculates F_{1/2} using a rational function approximation as described in
+    :cite:`Antia.1993`.
     """
 
-    # Set parameters of the approximating functions (see Antia 1993 eq. (6)) for fixed k_1 = m_1 = 7.
+    # Set parameters of the approximating functions (see Antia 1993 eq. (6))
+    # for fixed k_1 = m_1 = 7.
 
     a = jnp.array(
         [

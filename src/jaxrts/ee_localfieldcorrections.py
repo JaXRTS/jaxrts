@@ -1,26 +1,25 @@
 """
-This submodule is dedicated to the calculation of static and dynamic local field corrections.
-structure.
+This submodule is dedicated to the calculation of static and dynamic local
+field corrections. structure.
 """
 
-from .units import ureg, Quantity
-
-from quadax import quadts as quad
-
-import jax
-from jax import jit
-from jax import numpy as jnp
-from jpu import numpy as jnpu
 import logging
 
-logger = logging.getLogger(__name__)
+import jax
+from jax import numpy as jnp
+from jpu import numpy as jnpu
+from quadax import quadts as quad
 
 from .plasma_physics import (
     coupling_param,
-    fermi_wavenumber,
     fermi_energy,
+    fermi_wavenumber,
     interparticle_spacing,
 )
+from .units import Quantity, ureg
+
+logger = logging.getLogger(__name__)
+
 
 @jax.jit
 def xi_lfc_corrected(
@@ -284,14 +283,17 @@ def eelfc_dynamic_dabrowski1986(
     n_e: Quantity,
 ):
     """
-    Interpolation scheme for the dynamics LFC incorporating sum rules as described by 'Dabrowski:1986'.
+    Interpolation scheme for the dynamics LFC incorporating sum rules as
+    described by 'Dabrowski:1986'.
     """
     omega = E / (1 * ureg.hbar)
     alpha = (4 / (9 * jnp.pi)) ** (1 / 3)
     rs = interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)
     C = 23 / (60 * alpha * rs)
 
-    # D = jax.scipy.special.gamma(3/4) / (jnp.sqrt(jnp.pi) * jax.scipy.special.gamma(5/4))
+    # D = jax.scipy.special.gamma(3 / 4) / (
+    #     jnp.sqrt(jnp.pi) * jax.scipy.special.gamma(5 / 4)
+    # )
     D = 0.763
 
     # Calculation of the imaginary part of the dynamic LFC
@@ -308,9 +310,8 @@ def eelfc_dynamic_dabrowski1986(
         (real_part_g_ee_static_limit - real_part_g_ee_short_wl_limit)
         / (C * D * k**2)
     ) ** (4 / 3)
-    im_G_ee_k_w = (a_k * omega) / (1 + b_k * omega**2) ** (5 / 4)
+    (a_k * omega) / (1 + b_k * omega**2) ** (5 / 4)
 
     # Calculation of the real part of the dynamic LFC
 
     # WIP
-    pass

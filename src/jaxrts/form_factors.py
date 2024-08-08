@@ -3,11 +3,13 @@ This submodule is dedicated to form factors.
 """
 
 import logging
-from jax import jit, numpy as jnp
-from jpu import numpy as jnpu
-import numpy as onp
 
-from .units import ureg, Quantity
+import numpy as onp
+from jax import jit
+from jax import numpy as jnp
+from jpu import numpy as jnpu
+
+from .units import Quantity, ureg
 
 logger = logging.getLogger(__name__)
 

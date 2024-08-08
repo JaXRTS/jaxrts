@@ -1,19 +1,17 @@
 """
-This submodule is dedicated to the modelling and handling of instrument functions.
+This submodule is dedicated to the modelling and handling of instrument
+functions.
 """
 
-from .units import ureg, Quantity
-from pathlib import Path
-from typing import List
-
 import logging
+from pathlib import Path
 
+import jax
+import jax.numpy as jnp
 import jpu
-
 import numpy as onp
 
-import jax.numpy as jnp
-import jax
+from .units import Quantity
 
 logger = logging.getLogger(__name__)
 
@@ -113,4 +111,3 @@ def instrument_from_file(filename: Path) -> jnp.ndarray:
     E, ints = data[:, 0], data[:, 1]
 
     return jnp.array([E, ints])
-

@@ -6,14 +6,12 @@ This script reprocudes :cite:`Gregori.2003`, Fig. 1c. showing the calculation
 of :math:`S_\\text{ee}^{0, \\text{RPA}}`.
 """
 
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as onp
-import scienceplots
 
 import jaxrts
 import jaxrts.free_free as free_free
-
-import jax.numpy as jnp
 
 ureg = jaxrts.units.ureg
 

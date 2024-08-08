@@ -1,30 +1,17 @@
-import pytest
-import sys
-
-sys.path.append(
-    "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
-)
-
-from jax import numpy as jnp
-import jaxrts
-import copy
-
 from pathlib import Path
 
 import jpu.numpy as jnpu
-
-import os
-
 import numpy as np
+from jax import numpy as jnp
 
-ureg = jaxrts.ureg
+import jaxrts
 
 from jaxrts.ipd import (
     ipd_debye_hueckel,
-    ipd_ion_sphere,
     ipd_stewart_pyatt,
-    ipd_pauli_blocking,
 )
+
+ureg = jaxrts.ureg
 
 
 def electron_number_density(mass_density, m_a, ionization):

@@ -2,15 +2,15 @@
 Static structure factors.
 """
 
+import logging
+
 import jax
 from jax import numpy as jnp
 from jpu import numpy as jnpu
 from quadax import quadts as quad
 
-import logging
-
-from .units import ureg, Quantity
 from .plasma_physics import fermi_energy, wiegner_seitz_radius
+from .units import Quantity, ureg
 
 jax.config.update("jax_enable_x64", True)
 
@@ -55,8 +55,6 @@ def T_Debye_Bohm_Staver(
     T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float
 ) -> Quantity:
     """
-    T_Debye_Bohm_Staver(T_e: Quantity, n_e: Quantity, m_i: Quantity, Z_f: float) -> Quantity
-
     Bohm Staver relation, as presented in eqn (3) of :cite:`Gregori.2006`. An
     approximation function for the Debye temperature of 'simple metals'.
 

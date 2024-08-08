@@ -3,7 +3,7 @@ Plot static structure Factors in the Approximation by Gregori for T_i != T_e
 ============================================================================
 
 This scripts plots :math:`S_{ee}`, :math:`S_{ei}`, :math:`S_{ii}` and :math:`q`
-for Beryllium with an ionization of 2 at :math:`T_e = 20\\text{eV}` and 
+for Beryllium with an ionization of 2 at :math:`T_e = 20\\text{eV}` and
 :math:`n_e = 2.5\\times 10^{23} 1 / \\text{cm}^3`.
 This script reproduces Fig.1 in :cite:`Gregori.2006`, showing the impact of
 differences between the ion- and electron temperature on the statig structure
@@ -11,9 +11,9 @@ factors as well as on the screening charge :math:`q`.
 """
 
 import matplotlib.pyplot as plt
-import scienceplots
-import jaxrts
 from jax import numpy as jnp
+
+import jaxrts
 
 ureg = jaxrts.ureg
 
