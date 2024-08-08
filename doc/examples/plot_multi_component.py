@@ -26,7 +26,7 @@ mass_fraction = jaxrts.helpers.mass_from_number_fraction(number_fraction, ions)
 # Initialize a plasma state with has different temperatures for the electrons
 state = jaxrts.PlasmaState(
     ions=ions,
-    Z_free=jnp.array([3.0, 0.9, 5.0]),  # This is the ionization per species
+    Z_free=jnp.array([3.0, 1.0, 5.0]),  # This is the ionization per species
     mass_density=rho * mass_fraction,
     T_e=6 * ureg.electron_volt / ureg.k_B,
     T_i=jnp.array([5, 4, 4.5]) * ureg.electron_volt / ureg.k_B,
