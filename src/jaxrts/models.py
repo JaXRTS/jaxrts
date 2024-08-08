@@ -1625,12 +1625,14 @@ class SchumacherImpulse(ScatteringModel):
 
             def rk_on(r_k):
                 # Gregori.2004, Eqn 20
-                fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
-                # Because we did restict ourselfs to the first ion, we have to
-                # add a dimension to population, here.
+                fi = plasma_state["form-factors"].evaluate(
+                    plasma_state, setup
+                )[:, idx]
                 new_r_k = (
-                    1 - jnp.sum(population[:, jnp.newaxis] * (fi) ** 2) / Z_c
+                    1 - jnp.sum(population * (fi) ** 2) / Z_c
                 )
+                # Catch the division by zero error
+                new_r_k = jax.lax.cond(Z_c == 0, lambda: 1.0, lambda: new_r_k)
                 return new_r_k
 
             def rk_off(r_k):
