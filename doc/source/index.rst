@@ -13,12 +13,7 @@ A python Package for x-ray Thomson Scattering, using jax.
    physics.rst
    gen_examples/index.rst
    bibliography
-
-.. autosummary::
-   :recursive:
-   :toctree: _autosummary
-
-   jaxrts
+   module_overview
 
 Indices and tables
 ==================
