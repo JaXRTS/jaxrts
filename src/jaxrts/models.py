@@ -33,7 +33,6 @@ from . import (
     ee_localfieldcorrections,
 )
 
-
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -228,7 +227,7 @@ class Neglect(Model):
         if self.model_key in scattering_models:
             return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
         elif self.model_key == "ipd":
-            return 0.0 * (1 * ureg.electron_volt)
+            return jnp.zeros_like(plasma_state.n_i) * (1 * ureg.electron_volt)
 
 
 # ion-feature
@@ -305,7 +304,7 @@ class IonFeatModel(Model):
 
 class ArkhipovIonFeat(IonFeatModel):
     """
-    Model for the ion feature of the scatting, presented in
+    Model for the ion feature of the scattering, presented in
     :cite:`Arkhipov.1998` and :cite:`Arkhipov.2000`.
 
     The structure factors are obtained by using an effective potential
@@ -372,7 +371,7 @@ class ArkhipovIonFeat(IonFeatModel):
 
 class Gregori2003IonFeat(IonFeatModel):
     """
-    Model for the ion feature of the scatting, presented in
+    Model for the ion feature of the scattering, presented in
     :cite:`Gregori.2003`.
 
     This model is identical to :py:class:`~ArkhipovIonFeat`, but uses an
@@ -413,7 +412,7 @@ class Gregori2003IonFeat(IonFeatModel):
 
 class Gregori2006IonFeat(IonFeatModel):
     """
-    Model for the ion feature of the scatting, presented in
+    Model for the ion feature of the scattering, presented in
     :cite:`Gregori.2006`.
 
     This model extends :py:class:`~ArkhipovIonFeat`, to allow for different
@@ -730,7 +729,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
 
     def Rayleigh_weight(self, plasma_state, setup):
         """
-        Here, we have to calculate teh Rayleigh weight different than the
+        Here, we have to calculate the Rayleigh weight different than the
         default, because we get the screening from the calculated S_ei, rather
         than any model.
         """

@@ -38,7 +38,7 @@ ureg = jaxrts.ureg
 file_dir = pathlib.Path(__file__).parent
 mcss_file = (
     file_dir
-    / "../tests/mcss_samples/without_rk/mcss_C[Z_f=4.0]_E=8978eV_theta=17_rho=4.5gcc_T=20.0eV_BM+STATINTERP.txt"
+    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[frac=0.5_Z_f=3.0]O[frac=0.5_Z_f=3.0]_E=8975eV_theta=120_rho=1.8gcc_T=10.0eV_RPA_NOLFC.txt"
 )
 
 
@@ -79,18 +79,18 @@ elements, Zf, number_frac, central_energy, theta, rho, T_e = (
     load_data_from_mcss_file_name(name)
 )
 
+mass_fraction = jaxrts.helpers.mass_from_number_fraction(number_frac, elements)
 
 E, S_el, S_bf, S_ff, S_tot = onp.genfromtxt(
     mcss_file,
     delimiter=",",
     unpack=True,
 )
-print(len(E))
 
 state = jaxrts.PlasmaState(
     ions=elements,
     Z_free=Zf,
-    mass_density=rho * ureg.gram / ureg.centimeter**3 * jnp.array(number_frac),
+    mass_density=rho * ureg.gram / ureg.centimeter**3 * mass_fraction,
     T_e=T_e * ureg.electron_volt / ureg.k_B,
 )
 
@@ -119,7 +119,9 @@ setup = jaxrts.setup.Setup(
 # )
 
 state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
+state["ee-lfc"] = jaxrts.models.ElectronicLFCConstant(1)
 state["ipd"] = jaxrts.models.StewartPyattIPD()
+state["ipd"] = jaxrts.models.Neglect()
 state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
 # state["screening length"] = jaxrts.models.ConstantScreeningLength(ureg("4.38E-2 nm"))
 state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
