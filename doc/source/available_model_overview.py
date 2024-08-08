@@ -28,7 +28,7 @@ def generate_available_model_overview_page():
         defined in :py:mod:`jaxrts.models` and :py:mod:`jaxrts.hnc_potentials`.
         The latter module contains only the potentials relevant for calculating
         the elastic scattering in the Hypernetted Chain approach.
-        
+
 
         The following keys are available to add to
         :py:class:`jaxrts.plasmastate.PlasmaState`:
@@ -51,6 +51,16 @@ def generate_available_model_overview_page():
         for key, model_list in all_models.items():
             f.write(f"\n\n{key}\n")
             f.write("-" * len(key) + "\n")
+            notefile = (
+                pathlib.Path(__file__).parent / f"available_models/{key}"
+            )
+            if notefile.exists():
+                with open(notefile, "r") as nf:
+                    lines = nf.readlines()
+                f.write("\n")
+                f.writelines(lines)
+                f.write("\n")
+
             f.write(f".. autosummary::\n")
             f.write("    :toctree: _autosummary\n")
             f.write("    :recursive:\n\n")
