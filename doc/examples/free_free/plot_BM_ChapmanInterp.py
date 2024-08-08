@@ -63,6 +63,7 @@ state["ionic scattering"] = jaxrts.models.ArkhipovIonFeat()
 
 # This is required for the V_eiS in the collision frequency
 state["BM V_eiS"] = jaxrts.models.DebyeHueckel_BM_V()
+state["BM S_ii"] = jaxrts.models.Sum_Sii()
 state.evaluate("free-free scattering", setup).m_as(ureg.second)
 t0 = time.time()
 BM_free_free_scatter = state.evaluate("free-free scattering", setup).m_as(

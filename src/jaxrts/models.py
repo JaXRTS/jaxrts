@@ -229,6 +229,13 @@ class Neglect(Model):
         elif self.model_key == "ipd":
             return jnp.zeros_like(plasma_state.n_i) * (1 * ureg.electron_volt)
 
+    @jax.jit
+    def evaluate_raw(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        if self.model_key in scattering_models:
+            return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
+
 
 # ion-feature
 # -----------
@@ -1758,23 +1765,6 @@ class IchimaruChemPotential(Model):
         )
 
 
-class IdealElectronChemPotential(Model):
-    """
-    A fitting formula for the chemical potential of a plasma between the
-    classical and the quantum regime, given by :cite:`Gregori.2003`.
-    Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
-    """
-
-    __name__ = "IdealElectronGregoriChemPotential"
-    allowed_keys = ["chemical potential"]
-
-    @jax.jit
-    def evaluate(
-        self, plasma_state: "PlasmaState", setup: Setup
-    ) -> jnp.ndarray:
-        return
-
-
 class ConstantChemPotential(Model):
     """
     A model that returns an a constant for each energy probed.
@@ -2071,9 +2061,6 @@ class ConstantScreeningLength(Model):
 
 
 class LinearResponseScreeningGericke2010(Model):
-    allowed_keys = ["screening"]
-    __name__ = "LinearResponseScreeningGericke2010"
-
     """
     The screening density :math:`q` is calculated using a result from linear
     response, by
@@ -2093,6 +2080,9 @@ class LinearResponseScreeningGericke2010(Model):
     jaxtrs.ion_feature.free_electron_susceptilibily
         Function used to calculate :math:`\\xi{ee}`
     """
+
+    allowed_keys = ["screening"]
+    __name__ = "LinearResponseScreeningGericke2010"
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -2166,12 +2156,9 @@ class DebyeHueckelScreening(Model):
     """
     Debye Hueckel screening as presented by :cite:`Chapman.2015`.
 
-    Should be identical to :py:class:`~.LinearResponseScreening`, if the
-    free-free model is a RPA model.
-
     See also
     --------
-    jaxrts.ion_feature.q_LChapman2015
+    jaxrts.ion_feature.q_DebyeHueckelChapman2015
         The function used to calculate ``q``.
     """
 
@@ -2197,9 +2184,6 @@ class DebyeHueckelScreening(Model):
 
 
 class LinearResponseScreening(Model):
-    allowed_keys = ["screening"]
-    __name__ = "LinearResponseScreening"
-
     """
     The screening density :math:`q` is calculated using a result from linear
     response, by
@@ -2217,6 +2201,9 @@ class LinearResponseScreening(Model):
     Uses the :py:meth:`~.FreeFreeModel.susceptibility` method of the chosen
     Free Free model.
     """
+
+    allowed_keys = ["screening"]
+    __name__ = "LinearResponseScreening"
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -2245,8 +2232,6 @@ class LinearResponseScreening(Model):
 
 
 class Gregori2004Screening(Model):
-    allowed_keys = ["screening"]
-    __name__ = "Gregori2004Screenig"
     """
     Calculating the screening from free electrons according to
     :cite:`Gregori.2004`.
@@ -2256,6 +2241,9 @@ class Gregori2004Screening(Model):
     jaxrts.ion_feature.q_Gregori2004
         Calculation of the screening by (quasi) free electrons
     """
+
+    allowed_keys = ["screening"]
+    __name__ = "Gregori2004Screenig"
 
     @jax.jit
     def evaluate(
@@ -2582,6 +2570,12 @@ class AverageAtom_Sii(Model):
 
 
 class BM_V_eiSModel(Model):
+    """
+    These models implement potentials which can be when calculating the Born
+    collision frequencies in :py:class:`~.BornMermin` and derived free-free
+    scattering models.
+    """
+
     @abc.abstractmethod
     def V(self, plasma_state: "PlasmaState", k: Quantity) -> jnp.ndarray: ...
 
@@ -2596,6 +2590,18 @@ class BM_V_eiSModel(Model):
 
 
 class DebyeHueckel_BM_V(BM_V_eiSModel):
+    """
+    A Debye Hückel potential, using the
+    :py:meth:`jaxrts.plasmastate.PlasmaState.screening_length` method to get
+    the screening length.
+
+    See Also
+    --------
+
+    jaxrts.free_free.statically_screened_ie_debye_potential
+        The Potential used
+    """
+
     allowed_keys = ["BM V_eiS"]
     __name__ = "DebyeHueckel_BM_V"
 
@@ -2616,6 +2622,23 @@ class DebyeHueckel_BM_V(BM_V_eiSModel):
 
 
 class FiniteWavelength_BM_V(BM_V_eiSModel):
+    """
+    Uses finite wavelength screening to screen the bare Coulomb potential,
+    i.e., :math:`V_{s} = \\frac{V_\\mathrm{Coulomb}}{\\vareps_{RPA}(k, E=0)}`
+
+    We use the pure RPA result to calculate the dielectric funtion, and use the
+    :cite:`Dandrea.1986` fitting formula.
+
+    See Also
+    --------
+
+    jaxrts.plasma_physics.coulomb_potential_fourier
+        The Coulomb potential in k space
+    jaxrts.free_free.dielectric_function_RPA_Dandrea1986
+        The function used to calculate the dielectric function in random phase
+        approximation using numerically inexpensive fitting functions.
+    """
+
     allowed_keys = ["BM V_eiS"]
     __name__ = "FiniteWavelength_BM_V"
 
