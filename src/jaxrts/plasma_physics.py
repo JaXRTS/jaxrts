@@ -163,7 +163,7 @@ def wiegner_seitz_radius(n_e: Quantity) -> Quantity:
 
     .. note::
 
-        Some authors use the Wiegner Seits radius as a dimensionless unit by
+        Some authors use the Wiegner-Seitz radius as a dimensionless unit by
         dividing by the Bohr radius. This is not done here, rather :math:`r_s`
         has the dimensionality of a length.
 
@@ -364,7 +364,7 @@ def compton_energy(probe_energy, scattering_angle):
 @jax.jit
 def susceptibility_from_epsilon(epsilon: Quantity, k: Quantity) -> Quantity:
     """
-    Calculate the full susceptilibily from a  given dielectric function epsilon
+    Calculate the full susceptilibily from a given dielectric function epsilon
     by inverting
 
     ..math::

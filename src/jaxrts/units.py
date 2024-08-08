@@ -1,3 +1,7 @@
+"""
+This submodule defines the unit registry for calculations involving dimensionful quantities.
+"""
+
 import jpu
 import jax.numpy as jnp
 from pint import Quantity, Unit

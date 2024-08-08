@@ -1,3 +1,9 @@
+"""
+This submodule is dedicated to the using the hypernetted chain approach
+to calculate static structure factors.
+"""
+
+
 from jax import numpy as jnp
 import jax.interpreters
 import jaxrts
@@ -11,13 +17,10 @@ from typing import List, Callable
 
 from scipy.fftpack import rfftfreq
 
-###### FOURIER TRANSFORMATION THORUGH HANKEL TRANSFORM ######
-
-
+# Helper functions.
 @jax.jit
 def psi(t):
     return t * jnp.tanh(jnp.pi * jnp.sinh(t) / 2)
-
 
 @jax.jit
 def dpsi(t):
@@ -26,7 +29,7 @@ def dpsi(t):
     )
     return jnp.where(jnp.isnan(res), 1.0, res)
 
-
+# Jitted-versions of Bessel functions of various orders and kinds.
 @jax.jit
 def bessel_3_2(x):
     return jnp.sqrt(2 / (jnp.pi * x)) * (jnp.sin(x) / x - jnp.cos(x))
@@ -51,6 +54,11 @@ def bessel_2ndkind_0_5(x):
 
 @partial(jax.jit, static_argnames=["N"])
 def fourier_transform_ogata(k, r, f, N, h):
+    
+    """
+    A numerical algorithm to calculate the discrete fourier transform based on work by Ogata.
+    """
+    
     runits = r.units
     units = f.units
     r = r.m_as(runits)
@@ -82,7 +90,6 @@ def fourier_transform_ogata(k, r, f, N, h):
 
 
 ##########
-
 
 @jax.jit
 def fourier_transform_sine(k, rvals, fvals):

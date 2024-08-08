@@ -380,7 +380,7 @@ def S_ii_AD(
 
     The method is using the Random Phase Approximation, treating the problem
     semi-classically and uses a pseudopotential between charged particles to
-    account for quantum diffraction effects and symmetry
+    account for quantum diffraction effects and symmetry.
 
     Parameters
     ----------
