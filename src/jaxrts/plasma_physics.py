@@ -229,7 +229,7 @@ def Debye_Hueckel_screening_length(
     n : Quantity or List
         Electron density in 1/[length]**3
     T : Quantity
-        The temperature in [K]. Many authors, e.g., :cite:`Gregori.2010`
+        The temperature in [K]. Many authors, e.g., :cite:`Gericke.2010`
         suggest an effective temperature which interpolates between the
         system's temperature and the fermi temperature.
         See :py:func:`temperature_interpolation`

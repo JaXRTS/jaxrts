@@ -39,7 +39,7 @@ def generate_available_model_overview_page():
             f.write(f"\n\n{key}\n")
             f.write("-" * len(key) + "\n")
             f.write(f".. autosummary::\n")
-            f.write("    :toctree:\n")
+            f.write("    :toctree: _autosummary\n")
             f.write("    :recursive:\n\n")
             for model in model_list:
                 f.write(f"    jaxrts.models.{model}\n")
