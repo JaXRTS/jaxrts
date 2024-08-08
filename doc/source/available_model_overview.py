@@ -13,7 +13,11 @@ def generate_available_model_overview_page():
                 attributes = getattr(module, obj_name)
                 if "allowed_keys" in dir(attributes):
                     keys = getattr(attributes, "allowed_keys")
-                    if ("Model" not in obj_name) & ("model" not in obj_name):
+                    if (
+                        ("Model" not in obj_name)
+                        & ("model" not in obj_name)
+                        & (not obj_name.startswith("_"))
+                    ):
                         for k in keys:
                             all_models[k].append(
                                 f"{module.__name__}.{obj_name}"

@@ -674,7 +674,7 @@ def transformPotential(V, r) -> Quantity:
     return V_k, k
 
 
-for pot in [
+for _pot in [
     CoulombPotential,
     DebyeHueckelPotential,
     DeutschPotential,
@@ -684,7 +684,7 @@ for pot in [
     SoftCorePotential,
 ]:
     jax.tree_util.register_pytree_node(
-        pot,
-        pot._tree_flatten,
-        pot._tree_unflatten,
+        _pot,
+        _pot._tree_flatten,
+        _pot._tree_unflatten,
     )
