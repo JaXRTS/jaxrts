@@ -75,3 +75,11 @@ bibtex_bibfiles = ["literature.bib"]
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_rtd_theme"
+
+# Automatically create an overview page for the models implemented
+import sys
+import pathlib
+sys.path.append(str(pathlib.Path.cwd()))
+
+from available_model_overview import generate_available_model_overview_page
+generate_available_model_overview_page()

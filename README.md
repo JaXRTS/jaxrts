@@ -49,3 +49,5 @@ While the former specifies the probing energy and measurement grid, scattering a
 To calculate a spectrum, use the `PlasmaState.probe()` method.
 
 A simple example (which generated the figure above) can be found at `doc/examples/plot_getting_started.py`. More examples can be found in the `doc/example` directory.
+
+To get an overview over all the models available, we recommend building the documentation and opening `doc/build/html/models.html`. This page should list all the available model keys and the models with are allowed.
