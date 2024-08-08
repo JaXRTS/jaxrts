@@ -1624,6 +1624,8 @@ class SchumacherImpulse(ScatteringModel):
                 new_r_k = (
                     1 - jnp.sum(population[:, jnp.newaxis] * (fi) ** 2) / Z_c
                 )
+                # Catch the division by zero error
+                new_r_k = jax.lax.cond(Z_c == 0, lambda: 1.0, lambda: new_r_k)
                 return new_r_k
 
             def rk_off(r_k):
