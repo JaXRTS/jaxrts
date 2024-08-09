@@ -2,6 +2,7 @@ import pathlib
 import sys
 
 import jax
+
 jax.config.update("jax_compilation_cache_dir", "/tmp/jax_cache")
 jax.config.update("jax_persistent_cache_min_entry_size_bytes", -1)
 jax.config.update("jax_persistent_cache_min_compile_time_secs", 0.2)
@@ -10,22 +11,20 @@ sys.path.append(
     "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
 )
 
-from jaxrts.ee_localfieldcorrections import eelfc_farid
-import jaxrts
+import os
+import re
+import time
+from functools import partial
+
 import jax.numpy as jnp
 import jpu.numpy as jnpu
+import matplotlib.pyplot as plt
 import numpy as onp
+
+import jaxrts
 
 # jax.config.update("jax_disable_jit", True)
 
-import matplotlib.pyplot as plt
-
-from functools import partial
-
-import time
-import re
-
-import os
 
 # Allow jax to use 6 CPUs, see
 # https://astralord.github.io/posts/exploring-parallel-strategies-with-jax/
@@ -140,7 +139,7 @@ print(state.screening_length)
 print("n_e:")
 print(state.n_e.to(1 / ureg.centimeter**3))
 print("chemPot")
-print(state.evaluate("chemical potential", setup)/(1*ureg.k_B * state.T_e))
+print(state.evaluate("chemical potential", setup) / (1 * ureg.k_B * state.T_e))
 # print(setup.full_k.to(1 / ureg.angstrom))
 # print(
 #     jaxrts.setup.dispersion_corrected_k(setup, state.n_e).to(1 / ureg.angstrom)

@@ -2,25 +2,23 @@
 This submodule is dedicated to the calculation of the ion-feature.
 """
 
-from .units import ureg, Quantity, to_array
+import logging
+
+import jax
+import jax.numpy as jnp
+import jpu
+from jax import jit
+
 from .free_free import (
     dielectric_function_salpeter,
     noninteracting_susceptibility_Dandrea1986,
 )
-from .static_structure_factors import S_ee_AD, S_ei_AD, S_ii_AD
 from .plasma_physics import coulomb_potential_fourier
-from typing import List
-
-import jax
-from jax import jit
-import jax.numpy as jnp
-import numpy as onp
-
-import logging
+from .static_structure_factors import S_ee_AD, S_ei_AD, S_ii_AD
+from .units import Quantity, ureg
 
 logger = logging.getLogger(__name__)
 
-import jpu
 
 jax.config.update("jax_enable_x64", True)
 

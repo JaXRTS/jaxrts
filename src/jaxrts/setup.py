@@ -1,13 +1,16 @@
+"""
+This submodule is dedicated to handling the setup configuration for the
+calculation of the synthetic spectra.
+"""
+
 from typing import Callable
-from functools import partial
 
 import jax
 import jax.numpy as jnp
-
 from jpu import numpy as jnpu
 
-from .units import ureg, Quantity
 from .plasma_physics import plasma_frequency
+from .units import Quantity, ureg
 
 
 class Setup:
@@ -25,8 +28,8 @@ class Setup:
         #: The base-energy at which we probe. This should be the central
         #: energy, for the instrument function, see :py:attr:`~.instrument`.
         self.energy: Quantity = energy
-        #: The energies at which the scatting is recorded. This is an array of
-        #: absolute energies and not an energy shift.
+        #: The energies at which the scattering is recorded. This is an array
+        #: of absolute energies and not an energy shift.
         self.measured_energy: Quantity = measured_energy
         #: A callable function over energy shifts that gives the total
         #: instrument spread. The curve should be normed so that the integral
@@ -46,7 +49,7 @@ class Setup:
     def full_k(self) -> Quantity:
         """
         The scattering vector length probed in the experiment at each energy
-        chanel.
+        channel.
         """
         k_in = self.energy / ureg.hbar / ureg.c
         k_out = self.measured_energy / ureg.hbar / ureg.c
@@ -93,6 +96,10 @@ class Setup:
 
 @jax.jit
 def dispersion_corrected_k(setup: Setup, n_e: Quantity) -> Quantity:
+    """
+    Returns the dispersion corrected wavenumber.
+    """
+
     omega_in = setup.energy / ureg.hbar
     omega_out = setup.measured_energy / ureg.hbar
     omega_pl = plasma_frequency(n_e)

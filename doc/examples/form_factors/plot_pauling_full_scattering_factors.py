@@ -6,12 +6,11 @@ This figure reproduces Fig.8 in :cite:`Pauling.1932` for elements up to
 :math:`Z=36`.
 """
 
-import numpy as onp
 import matplotlib.pyplot as plt
-import scienceplots
+import numpy as onp
+from jpu import numpy as jnpu
 
 import jaxrts
-from jpu import numpy as jnpu
 
 ureg = jaxrts.ureg
 

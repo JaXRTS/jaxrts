@@ -7,10 +7,10 @@ use the HNC approximation with different ion species.
 """
 
 from pathlib import Path
+
 import jax.numpy as jnp
 import jpu
 import matplotlib.pyplot as plt
-import scienceplots
 import numpy as onp
 
 import jaxrts

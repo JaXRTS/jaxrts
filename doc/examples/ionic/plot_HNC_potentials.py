@@ -3,15 +3,12 @@ HNC: Potentials
 ===============
 """
 
-import jaxrts
-from jaxrts import ureg
-from jaxrts import hypernetted_chain as hnc
-import jpu
 import jax.numpy as jnp
-
+import jpu
 import matplotlib.pyplot as plt
 
-import scienceplots
+import jaxrts
+from jaxrts import ureg
 
 plt.style.use("science")
 

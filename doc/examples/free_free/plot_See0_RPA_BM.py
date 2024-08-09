@@ -18,19 +18,14 @@ contribution in ``E``). Therefore, the "full" RPA is required as part of the
 module.
 """
 
-import matplotlib.pyplot as plt
-import numpy as onp
-import scienceplots
 import time
 
-import time
+import jax
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
 
 import jaxrts
 import jaxrts.free_free as free_free
-
-import jax.numpy as jnp
-
-import jax
 
 ureg = jaxrts.units.ureg
 
@@ -180,7 +175,7 @@ for T in [
             else ""
         ),
         linestyle="dotted",
-        color=f"black",
+        color="black",
     )
     count += 1
 

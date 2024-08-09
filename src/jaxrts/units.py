@@ -1,6 +1,11 @@
-import jpu
+"""
+This submodule defines the unit registry for calculations involving
+dimensionful quantities.
+"""
+
 import jax.numpy as jnp
-from pint import Quantity, Unit
+import jpu
+from pint import Quantity, Unit  # noqa: F401
 
 ureg = jpu.UnitRegistry()
 

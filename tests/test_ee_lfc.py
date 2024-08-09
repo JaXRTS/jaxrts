@@ -1,10 +1,7 @@
 import pathlib
 
-import numpy as onp
 import jax.numpy as jnp
-import jpu.numpy as jnpu
-import jax
-import pytest
+import numpy as onp
 
 import jaxrts
 

@@ -4,36 +4,35 @@ implemented.
 """
 
 import abc
-from copy import deepcopy
 import logging
+from copy import deepcopy
+from typing import TYPE_CHECKING
 
 import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
-from .units import ureg, Quantity, to_array
+from . import (
+    bound_free,
+    ee_localfieldcorrections,
+    form_factors,
+    free_free,
+    hnc_potentials,
+    hypernetted_chain,
+    ion_feature,
+    ipd,
+    plasma_physics,
+    static_structure_factors,
+)
+from .elements import MixElement, electron_distribution_ionized_state
+from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
 from .setup import (
     Setup,
     convolve_stucture_factor_with_instrument,
     dispersion_corrected_k,
     get_probe_setup,
 )
-from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
-from .elements import electron_distribution_ionized_state, MixElement
-from . import (
-    bound_free,
-    form_factors,
-    free_free,
-    hnc_potentials,
-    hypernetted_chain,
-    ion_feature,
-    plasma_physics,
-    static_structure_factors,
-    ipd,
-    ee_localfieldcorrections,
-)
-
-from typing import TYPE_CHECKING
+from .units import Quantity, to_array, ureg
 
 if TYPE_CHECKING:
     from .plasmastate import PlasmaState
@@ -64,14 +63,12 @@ class Model(metaclass=abc.ABCMeta):
         defaults if necessary.
         Please log assumtpions, properly
         """
-        pass
 
     def check(self, plasma_state: "PlasmaState") -> None:
         """
         Test if the model is applicable to the PlasmaState. Might raise logged
         messages and errors.
         """
-        pass
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -229,6 +226,13 @@ class Neglect(Model):
         elif self.model_key == "ipd":
             return jnp.zeros_like(plasma_state.n_i) * (1 * ureg.electron_volt)
 
+    @jax.jit
+    def evaluate_raw(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        if self.model_key in scattering_models:
+            return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
+
 
 # ion-feature
 # -----------
@@ -353,20 +357,6 @@ class ArkhipovIonFeat(IonFeatModel):
         )
         # Add a dimension, so that the shape is (1x1)
         return S_ii[:, jnp.newaxis]
-
-    # @jax.jit
-    # def Rayleigh_weight(
-    #     self, plasma_state: "PlasmaState", setup: Setup
-    # ) -> jnp.ndarray:
-    #     fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
-    #     population = electron_distribution_ionized_state(plasma_state.Z_core)[
-    #         :, jnp.newaxis
-    #     ]
-    #     q = plasma_state.evaluate("screening", setup)
-    #     f = jnp.sum(fi * population)
-    #     S_ii = self.S_ii(plasma_state, setup)
-    #     w_R = jnp.abs(f + q.m_as(ureg.dimensionless)) ** 2 * S_ii
-    #     return w_R
 
 
 class Gregori2003IonFeat(IonFeatModel):
@@ -1621,9 +1611,7 @@ class SchumacherImpulse(ScatteringModel):
                 fi = plasma_state["form-factors"].evaluate(
                     plasma_state, setup
                 )[:, idx]
-                new_r_k = (
-                    1 - jnp.sum(population * (fi) ** 2) / Z_c
-                )
+                new_r_k = 1 - jnp.sum(population * (fi) ** 2) / Z_c
                 # Catch the division by zero error
                 new_r_k = jax.lax.cond(Z_c == 0, lambda: 1.0, lambda: new_r_k)
                 return new_r_k
@@ -1758,23 +1746,6 @@ class IchimaruChemPotential(Model):
         return plasma_physics.chem_pot_interpolationIchimaru(
             plasma_state.T_e, plasma_state.n_e
         )
-
-
-class IdealElectronChemPotential(Model):
-    """
-    A fitting formula for the chemical potential of a plasma between the
-    classical and the quantum regime, given by :cite:`Gregori.2003`.
-    Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
-    """
-
-    __name__ = "IdealElectronGregoriChemPotential"
-    allowed_keys = ["chemical potential"]
-
-    @jax.jit
-    def evaluate(
-        self, plasma_state: "PlasmaState", setup: Setup
-    ) -> jnp.ndarray:
-        return
 
 
 class ConstantChemPotential(Model):
@@ -2073,9 +2044,6 @@ class ConstantScreeningLength(Model):
 
 
 class LinearResponseScreeningGericke2010(Model):
-    allowed_keys = ["screening"]
-    __name__ = "LinearResponseScreeningGericke2010"
-
     """
     The screening density :math:`q` is calculated using a result from linear
     response, by
@@ -2095,6 +2063,9 @@ class LinearResponseScreeningGericke2010(Model):
     jaxtrs.ion_feature.free_electron_susceptilibily
         Function used to calculate :math:`\\xi{ee}`
     """
+
+    allowed_keys = ["screening"]
+    __name__ = "LinearResponseScreeningGericke2010"
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -2168,12 +2139,9 @@ class DebyeHueckelScreening(Model):
     """
     Debye Hueckel screening as presented by :cite:`Chapman.2015`.
 
-    Should be identical to :py:class:`~.LinearResponseScreening`, if the
-    free-free model is a RPA model.
-
     See also
     --------
-    jaxrts.ion_feature.q_LChapman2015
+    jaxrts.ion_feature.q_DebyeHueckelChapman2015
         The function used to calculate ``q``.
     """
 
@@ -2199,9 +2167,6 @@ class DebyeHueckelScreening(Model):
 
 
 class LinearResponseScreening(Model):
-    allowed_keys = ["screening"]
-    __name__ = "LinearResponseScreening"
-
     """
     The screening density :math:`q` is calculated using a result from linear
     response, by
@@ -2219,6 +2184,9 @@ class LinearResponseScreening(Model):
     Uses the :py:meth:`~.FreeFreeModel.susceptibility` method of the chosen
     Free Free model.
     """
+
+    allowed_keys = ["screening"]
+    __name__ = "LinearResponseScreening"
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -2247,8 +2215,6 @@ class LinearResponseScreening(Model):
 
 
 class Gregori2004Screening(Model):
-    allowed_keys = ["screening"]
-    __name__ = "Gregori2004Screenig"
     """
     Calculating the screening from free electrons according to
     :cite:`Gregori.2004`.
@@ -2258,6 +2224,9 @@ class Gregori2004Screening(Model):
     jaxrts.ion_feature.q_Gregori2004
         Calculation of the screening by (quasi) free electrons
     """
+
+    allowed_keys = ["screening"]
+    __name__ = "Gregori2004Screenig"
 
     @jax.jit
     def evaluate(
@@ -2584,6 +2553,12 @@ class AverageAtom_Sii(Model):
 
 
 class BM_V_eiSModel(Model):
+    """
+    These models implement potentials which can be when calculating the Born
+    collision frequencies in :py:class:`~.BornMermin` and derived free-free
+    scattering models.
+    """
+
     @abc.abstractmethod
     def V(self, plasma_state: "PlasmaState", k: Quantity) -> jnp.ndarray: ...
 
@@ -2598,6 +2573,18 @@ class BM_V_eiSModel(Model):
 
 
 class DebyeHueckel_BM_V(BM_V_eiSModel):
+    """
+    A Debye Hückel potential, using the
+    :py:meth:`jaxrts.plasmastate.PlasmaState.screening_length` method to get
+    the screening length.
+
+    See Also
+    --------
+
+    jaxrts.free_free.statically_screened_ie_debye_potential
+        The Potential used
+    """
+
     allowed_keys = ["BM V_eiS"]
     __name__ = "DebyeHueckel_BM_V"
 
@@ -2618,6 +2605,23 @@ class DebyeHueckel_BM_V(BM_V_eiSModel):
 
 
 class FiniteWavelength_BM_V(BM_V_eiSModel):
+    """
+    Uses finite wavelength screening to screen the bare Coulomb potential,
+    i.e., :math:`V_{s} = \\frac{V_\\mathrm{Coulomb}}{\\vareps_{RPA}(k, E=0)}`
+
+    We use the pure RPA result to calculate the dielectric funtion, and use the
+    :cite:`Dandrea.1986` fitting formula.
+
+    See Also
+    --------
+
+    jaxrts.plasma_physics.coulomb_potential_fourier
+        The Coulomb potential in k space
+    jaxrts.free_free.dielectric_function_RPA_Dandrea1986
+        The function used to calculate the dielectric function in random phase
+        approximation using numerically inexpensive fitting functions.
+    """
+
     allowed_keys = ["BM V_eiS"]
     __name__ = "FiniteWavelength_BM_V"
 

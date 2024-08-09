@@ -8,9 +8,9 @@ published in :cite:`Fukushima.2015`.
 """
 
 import matplotlib.pyplot as plt
-import jaxrts
 import numpy as onp
-import scienceplots
+
+import jaxrts
 
 plt.style.use("science")
 

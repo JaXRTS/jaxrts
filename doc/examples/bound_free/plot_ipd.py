@@ -6,12 +6,10 @@ This example shows different IOD models implemented in the code for Carbon at
 100eV and for varying densities.
 """
 
-import jaxrts
-
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
-import scienceplots
 
+import jaxrts
 
 ureg = jaxrts.ureg
 

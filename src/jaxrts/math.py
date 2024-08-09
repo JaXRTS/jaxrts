@@ -1,8 +1,11 @@
-from jax import numpy as jnp
-import jax
-from quadax import quadgk
+"""
+This submodule is dedicated to math functions which occur frequently in the
+calculations.
+"""
 
-import numpy as np
+import jax
+from jax import numpy as jnp
+from quadax import quadgk
 
 
 @jax.jit
@@ -10,17 +13,20 @@ def fermi_integral(x, n):
     """
     The Fermi integral of order n.
     """
-    norm = jax.scipy.special.gamma(n+1)
+    norm = jax.scipy.special.gamma(n + 1)
 
     def integrand(t):
         return jnp.power(t, n) / (jnp.exp(t - x[:, jnp.newaxis]) + 1)
+
     result, _ = quadgk(integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10)
 
     return result / norm
 
 
 def numerical_inverse_fermi_integral(x, n):
-    pass
+    """
+    WIP
+    """
 
 
 @jax.jit
@@ -44,21 +50,24 @@ def _R1_mk(a, b, x):
 
 @jax.jit
 def _F_n(x, a, b, c, d, n):
-    norm = jax.scipy.special.gamma(n+1)
-    return jnp.where(
-        x < 2,
-        jnp.exp(x) * _R1_mk(a, b, jnp.exp(x)),
-        x ** (n + 1) * _R1_mk(c, d, x ** (-2)),
-    ) / norm
+    norm = jax.scipy.special.gamma(n + 1)
+    return (
+        jnp.where(
+            x < 2,
+            jnp.exp(x) * _R1_mk(a, b, jnp.exp(x)),
+            x ** (n + 1) * _R1_mk(c, d, x ** (-2)),
+        )
+        / norm
+    )
 
 
 @jax.jit
 def _X_n(x, a, b, c, d, n):
-    norm = jax.scipy.special.gamma(n+1)
+    norm = jax.scipy.special.gamma(n + 1)
     x *= norm
     return jnp.where(
         x < 4 * norm,
-        jnp.log( norm *x * _R1_mk(a, b, x)),
+        jnp.log(norm * x * _R1_mk(a, b, x)),
         x ** (1 / (1 + n)) * _R1_mk(c, d, x ** (-1 / (1 + n))),
     )
 
@@ -71,7 +80,7 @@ def inverse_fermi_12_fukushima_single_prec(x):
     :cite:`Fukushima.2015`. The approximation is improved
     compared to :cite:`Antia.1993`.
     """
-    norm = jax.scipy.special.gamma(1/2+1.0)
+    norm = jax.scipy.special.gamma(1 / 2 + 1.0)
     x *= norm
 
     # Boundaries for the approximation
@@ -406,11 +415,12 @@ def fermi_52_rational_approximation_antia(x):
 @jax.jit
 def inverse_fermi_12_rational_approximation_antia(x):
     """
-    Calculates F_{1/2} using a rational function approximation as described in Antia 1993.
-
+    Calculates F_{1/2} using a rational function approximation as described in
+    :cite:`Antia.1993`.
     """
 
-    # Set parameters of the approximating functions (see Antia 1993 eq. (6)) for fixed k_1 = m_1 = 7.
+    # Set parameters of the approximating functions (see Antia 1993 eq. (6))
+    # for fixed k_1 = m_1 = 7.
 
     a = jnp.array(
         [

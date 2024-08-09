@@ -1,7 +1,6 @@
-import pytest
+import numpy as onp
 
 from jaxrts import elements
-import numpy as onp
 
 
 def test_element_creatation() -> None:

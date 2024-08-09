@@ -5,10 +5,10 @@ Multi-Species Plasmas
 This example calculates a synthetic spectrum of a CHO plasma.
 """
 
-from jax import numpy as jnp
-import matplotlib.pyplot as plt
-import scienceplots
 from functools import partial
+
+import matplotlib.pyplot as plt
+from jax import numpy as jnp
 
 import jaxrts
 

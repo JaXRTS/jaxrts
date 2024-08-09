@@ -1,7 +1,6 @@
-import pytest
-import jaxrts
-
 from jax import numpy as jnp
+
+import jaxrts
 
 
 def test_antia_inversion():

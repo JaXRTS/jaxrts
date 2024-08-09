@@ -16,14 +16,13 @@ This plot shows quite plainly, notable differences between various models.
 
 """
 
-import jaxrts
-from jaxrts import hypernetted_chain as hnc
-from jaxrts import hnc_potentials
 import jax.numpy as jnp
 import jpu
-from jaxrts import ureg
 import matplotlib.pyplot as plt
-import scienceplots
+
+import jaxrts
+from jaxrts import hnc_potentials
+from jaxrts import ureg
 
 plt.style.use("science")
 

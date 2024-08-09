@@ -1,10 +1,9 @@
-import pytest
+import copy
+import logging
 
 from jax import numpy as jnp
-import jaxrts
-import copy
 
-import logging
+import jaxrts
 
 ureg = jaxrts.ureg
 
@@ -14,6 +13,7 @@ test_state = jaxrts.PlasmaState(
     mass_density=jnp.array([3.5]) * ureg.gram / ureg.centimeter**3,
     T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
 )
+
 
 def test_PlasmaStateEquality():
     logging.warning(test_state.models.keys())

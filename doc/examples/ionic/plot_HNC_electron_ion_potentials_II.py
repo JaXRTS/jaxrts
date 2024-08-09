@@ -7,9 +7,9 @@ from the results of linear response.
 The examples here reproduce the findings by :cite:`Gericke.2010`.
 """
 
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import scienceplots  # noqa F401
-import jax.numpy as jnp
 
 import jaxrts
 from jaxrts import ureg

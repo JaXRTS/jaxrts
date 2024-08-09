@@ -11,22 +11,19 @@ It also shows how to attach :py:class:`jaxrts.models.Model` objects to a
 with :py:meth:`jaxrts.plasma_state.PlasmaState.probe`.
 """
 
-import jaxrts
-
-import jax.numpy as jnp
-
-from jaxrts.models import (
-    Neglect,
-    Gregori2003IonFeat,
-    RPA_NoDamping,
-    SchumacherImpulse,
-)
-
 from functools import partial
 
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import scienceplots  # noqa: F401
 
+import jaxrts
+from jaxrts.models import (
+    Gregori2003IonFeat,
+    Neglect,
+    RPA_NoDamping,
+    SchumacherImpulse,
+)
 
 ureg = jaxrts.ureg
 

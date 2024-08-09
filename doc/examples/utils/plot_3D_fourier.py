@@ -9,19 +9,12 @@ transform.
 
 from time import time
 
-import sys
-
-sys.path.append(
-    "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
-)
-
-import jaxrts.hypernetted_chain as hnc
-import jpu.numpy as jnpu
-from jaxrts import ureg
 import jax.numpy as jnp
+import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
 
-import scienceplots
+import jaxrts.hypernetted_chain as hnc
+from jaxrts import ureg
 
 plt.style.use("science")
 
@@ -80,7 +73,7 @@ for setting in settings:
     V_k_ogata = hnc._3Dfour_ogata(k, r, V_r[jnp.newaxis, jnp.newaxis, :])
     ogatatime = time() - t0
     print(
-        f"Time for ogata: {ogatatime:.4f}s. ({ogatatime / sinetime:.1f}x sinetime)."
+        f"Time for ogata: {ogatatime:.4f}s. ({ogatatime / sinetime:.1f}x sinetime)."  # noqa: 501
     )
 
     # Do the back transform

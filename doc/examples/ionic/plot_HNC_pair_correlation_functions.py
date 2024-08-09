@@ -13,13 +13,13 @@ The statically screened potential assumes :math:`V_l = 0` and reprocuced the
 Figure in the literature by :cite:`Wunsch.2011`.
 """
 
-import jaxrts
-from jaxrts import hypernetted_chain as hnc
 import jax.numpy as jnp
 import jpu
-from jaxrts import ureg
 import matplotlib.pyplot as plt
-import scienceplots
+
+import jaxrts
+from jaxrts import hypernetted_chain as hnc
+from jaxrts import ureg
 
 plt.style.use("science")
 

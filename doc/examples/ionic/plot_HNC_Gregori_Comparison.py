@@ -6,16 +6,12 @@ This figure is reproducing Fig. 2 in :cite:`Schwarz.2007`, showing the notable
 difference of the two approaches to the static structure factor :math:`S_{ii}`.
 """
 
-from pathlib import Path
 import jax.numpy as jnp
-import jpu
 import matplotlib.pyplot as plt
-import scienceplots
-import numpy as onp
 
 import jaxrts
-from jaxrts import hypernetted_chain as hnc
 from jaxrts import hnc_potentials
+from jaxrts import hypernetted_chain as hnc
 from jaxrts import ureg
 
 plt.style.use("science")

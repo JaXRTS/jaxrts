@@ -9,13 +9,11 @@ the usage of :py:class:`jaxrts.models.DetailedBalace`.
 """
 
 from functools import partial
-import matplotlib.pyplot as plt
-import numpy as onp
-import scienceplots
-
-import jaxrts
 
 import jax.numpy as jnp
+import matplotlib.pyplot as plt
+
+import jaxrts
 
 ureg = jaxrts.units.ureg
 

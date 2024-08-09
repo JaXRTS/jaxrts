@@ -2,18 +2,16 @@
 Plot static structure Factors in the Approximation by Arkhipov and Devletov
 ===========================================================================
 
-This scripts plots :math:`S_{ee}`, :math:`S_{ei}`, and :math:`S_{ii}` for 
-Carbon with an ionization of 4.5 at :math:`T = 13\\text{eV}` and 
+This scripts plots :math:`S_{ee}`, :math:`S_{ei}`, and :math:`S_{ii}` for
+Carbon with an ionization of 4.5 at :math:`T = 13\\text{eV}` and
 :math:`n_e = 1\\times 10^{22} 1 / \\text{cm}^3`, in the approach presented
 by :cite:`Arkhipov.1998`.
 """
 
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
-import scienceplots
 
 import jaxrts
-
-import jax.numpy as jnp
 
 ureg = jaxrts.units.ureg
 

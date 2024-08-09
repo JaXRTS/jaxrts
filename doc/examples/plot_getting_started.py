@@ -6,11 +6,13 @@ This example showcases a simple, one-component plasma, and might be a good
 starting point.
 """
 
+from functools import partial
+
+import matplotlib.pyplot as plt
+
 # jax provides a submodule which can be (mostly) used as a drop-in replacement
 # for numpy. We use jnp to avoid confusion.
 from jax import numpy as jnp
-import matplotlib.pyplot as plt
-from functools import partial
 
 import jaxrts
 

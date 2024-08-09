@@ -1,11 +1,10 @@
 import pathlib
 
-import numpy as onp
-import pytest
 import jax
-
 import jax.numpy as jnp
 import jpu.numpy as jnpu
+import numpy as onp
+import pytest
 
 import jaxrts
 
@@ -111,16 +110,10 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         else:
             assert onp.max(error) < 0.1
             assert onp.quantile(error, 0.8) < 0.05
-        # import matplotlib.pyplot as plt
-
-        # plt.plot(energy_shift, calc_See_Chapman, color=f"C{count}", alpha=0.5)
-        # plt.plot(energy_shift, literature_See, color=f"C{count}", ls=":")
-
         # Test the Chapman interpolation
         error_Chapman = onp.abs(calc_See - calc_See_Chapman)
         assert onp.max(error_Chapman) < 0.01
         count += 1
-    # plt.show()
 
 
 def test_glenzer2009_fig9a_reprduction() -> None:
@@ -334,8 +327,12 @@ def test_BornCollisionFrequency_reproduces_literature_Fortmann2010() -> None:
 
         E_f = jaxrts.plasma_physics.fermi_energy(n_e)
         E = jnp.logspace(-1, 2) * E_f
-        E_over_Ef_real, nu_real = onp.genfromtxt(data_dir/f"Re_rs{r_s:.0f}.csv", unpack=True, delimiter = ",")
-        E_over_Ef_imag, nu_imag = onp.genfromtxt(data_dir/f"Im_rs{r_s:.0f}.csv", unpack=True, delimiter = ",")
+        E_over_Ef_real, nu_real = onp.genfromtxt(
+            data_dir / f"Re_rs{r_s:.0f}.csv", unpack=True, delimiter=","
+        )
+        E_over_Ef_imag, nu_imag = onp.genfromtxt(
+            data_dir / f"Im_rs{r_s:.0f}.csv", unpack=True, delimiter=","
+        )
         nu = jaxrts.free_free.collision_frequency_BA_0K(
             E, S_ii, V_eiS, n_e, Zf
         )
@@ -350,11 +347,10 @@ def test_BornCollisionFrequency_reproduces_literature_Fortmann2010() -> None:
         interpnu_imag = jnp.interp(
             E_over_Ef_imag,
             (E / E_f).m_as(ureg.dimensionless),
-            jnp.imag(dimless_nu)
+            jnp.imag(dimless_nu),
         )
         assert jnp.max(jnp.abs(nu_real - interpnu_real)) < 0.05
         assert jnp.max(jnp.abs(nu_imag - interpnu_imag)) < 0.05
-
 
 
 def test_Fortmann_with_LFC_reproduces_literature() -> None:

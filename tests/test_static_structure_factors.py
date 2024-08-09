@@ -1,9 +1,10 @@
 import pathlib
 
-import pytest
 import numpy as onp
-import jaxrts
+import pytest
 from jax import numpy as jnp
+
+import jaxrts
 
 ureg = jaxrts.ureg
 
@@ -140,8 +141,6 @@ def test_gregori2006_figure_1_reproduction_Sei():
         T_e_prime, n_e, m_i, Z_f
     )
     k_De = jaxrts.static_structure_factors._k_D_AD(T_e_prime, n_e)
-
-    import matplotlib.pyplot as plt
 
     for f in data_dir.glob("*.csv"):
         k_over_kDe, lit_Sei = onp.genfromtxt(f, delimiter=",", unpack=True)

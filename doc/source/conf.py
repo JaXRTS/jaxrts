@@ -43,16 +43,17 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 
-
 # Sphinx gallery
 from sphinx_gallery.scrapers import matplotlib_scraper
+
 
 class matplotlib_svg_scraper(object):
     def __repr__(self):
         return self.__class__.__name__
 
     def __call__(self, *args, **kwargs):
-        return matplotlib_scraper(*args, format='svg', **kwargs)
+        return matplotlib_scraper(*args, format="svg", **kwargs)
+
 
 sphinx_gallery_conf = {
     "examples_dirs": ["../examples"],
@@ -76,10 +77,13 @@ bibtex_bibfiles = ["literature.bib"]
 
 html_theme = "sphinx_rtd_theme"
 
+import pathlib
+
 # Automatically create an overview page for the models implemented
 import sys
-import pathlib
+
 sys.path.append(str(pathlib.Path.cwd()))
 
 from available_model_overview import generate_available_model_overview_page
+
 generate_available_model_overview_page()

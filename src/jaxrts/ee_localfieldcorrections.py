@@ -1,25 +1,24 @@
-from .units import ureg, Quantity
+"""
+This submodule is dedicated to the calculation of static and dynamic local
+field corrections. structure.
+"""
 
-from typing import List
-
-from quadax import quadts as quad
-
-import jax
-from jax import jit
-from jax import numpy as jnp
-from jpu import numpy as jnpu
 import logging
 
-logger = logging.getLogger(__name__)
+import jax
+from jax import numpy as jnp
+from jpu import numpy as jnpu
+from quadax import quadts as quad
 
-from .math import fermi_neg12_rational_approximation_antia
 from .plasma_physics import (
     coupling_param,
-    fermi_wavenumber,
     fermi_energy,
-    plasma_frequency,
+    fermi_wavenumber,
     interparticle_spacing,
 )
+from .units import Quantity, ureg
+
+logger = logging.getLogger(__name__)
 
 
 @jax.jit
@@ -67,7 +66,6 @@ def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     H_0 = (C_sc * Gamma_ee ** (3 / 2)) / (
         (C_sc / jnp.sqrt(3)) ** 4 + Gamma_ee**4
     ) ** (1 / 4)
-
 
     xi = (
         (1 * ureg.electron_mass * ureg.elementary_charge**4)
@@ -145,18 +143,20 @@ def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     Improved version of Utsumi and Ichimaru, based on QMC results. (Farid et
     al. 1993)
     """
-    rs = (interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)).m_as(ureg.dimensionless)
+    rs = (interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)).m_as(
+        ureg.dimensionless
+    )
 
-    lamb = (4 / (9 * jnp.pi)) ** (1/3)
+    lamb = (4 / (9 * jnp.pi)) ** (1 / 3)
 
     k_F = 1 / (lamb * rs)
-    E_F = k_F ** 2 / 2
-    w_p = (3 / rs ** 3) ** (1/2)
+    E_F = k_F**2 / 2
+    w_p = (3 / rs**3) ** (1 / 2)
     # w_p = plasma_frequency(n_e)
     # E_F = fermi_energy(n_e)
     # k_F = fermi_wavenumber(n_e)
     Q = (k / fermi_wavenumber(n_e)).m_as(ureg.dimensionless)
-    
+
     rs2dEc_drs = (0.0621814 + 0.61024 * rs ** (1 / 2)) / (
         1 + 9.81379 * rs ** (1 / 2) + 2.82224 * rs + 0.736411 * rs ** (3 / 2)
     )
@@ -217,10 +217,10 @@ def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     z = 4 * (4 / (9 * jnp.pi)) ** (1 / 6) * (rs / jnp.pi) ** (1 / 2)
     g0_ee = 1 / 8 * (z / jax.scipy.special.i1(z)) ** 2
 
-    b0A = (2 / 3 * (1 - g0_ee))
-    b0B = (48 * E_F**2 / (35 * w_p**2) * delta_4)
-    b0C = (-16 / 25 * (E_F**2 / w_p**2) * (2 * delta_2 + delta_2**2))
-    bm2 = (4 / 5 * E_F**2 / w_p**2 * delta_2)
+    b0A = 2 / 3 * (1 - g0_ee)
+    b0B = 48 * E_F**2 / (35 * w_p**2) * delta_4
+    b0C = -16 / 25 * (E_F**2 / w_p**2) * (2 * delta_2 + delta_2**2)
+    bm2 = 4 / 5 * E_F**2 / w_p**2 * delta_2
     b0 = b0A + b0B + b0C
 
     A = 63 / 64 * a + 15 / 4096 * (b0A - 2 * (b0B + b0C) - 16 * bm2)
@@ -252,7 +252,8 @@ def eelfc_interpolationgregori2007(
         eelfc_utsumiichimaru(k, T_e, n_e)
         + Theta * eelfc_geldartvosko(k, T_e, n_e)
     ) / (1 + Theta)
-    
+
+
 @jax.jit
 def eelfc_interpolationgregori_farid(
     k: Quantity, T_e: Quantity, n_e: Quantity
@@ -263,10 +264,8 @@ def eelfc_interpolationgregori_farid(
     )
 
     return (
-        eelfc_farid(k, T_e, n_e)
-        + Theta * eelfc_geldartvosko(k, T_e, n_e)
+        eelfc_farid(k, T_e, n_e) + Theta * eelfc_geldartvosko(k, T_e, n_e)
     ) / (1 + Theta)
-
 
 
 # Dynamic local-field corrections
@@ -284,14 +283,17 @@ def eelfc_dynamic_dabrowski1986(
     n_e: Quantity,
 ):
     """
-    Interpolation scheme for the dynamics LFC incorporating sum rules as described by 'Dabrowski:1986'.
+    Interpolation scheme for the dynamics LFC incorporating sum rules as
+    described by 'Dabrowski:1986'.
     """
     omega = E / (1 * ureg.hbar)
     alpha = (4 / (9 * jnp.pi)) ** (1 / 3)
     rs = interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)
     C = 23 / (60 * alpha * rs)
 
-    # D = jax.scipy.special.gamma(3/4) / (jnp.sqrt(jnp.pi) * jax.scipy.special.gamma(5/4))
+    # D = jax.scipy.special.gamma(3 / 4) / (
+    #     jnp.sqrt(jnp.pi) * jax.scipy.special.gamma(5 / 4)
+    # )
     D = 0.763
 
     # Calculation of the imaginary part of the dynamic LFC
@@ -308,9 +310,8 @@ def eelfc_dynamic_dabrowski1986(
         (real_part_g_ee_static_limit - real_part_g_ee_short_wl_limit)
         / (C * D * k**2)
     ) ** (4 / 3)
-    im_G_ee_k_w = (a_k * omega) / (1 + b_k * omega**2) ** (5 / 4)
+    (a_k * omega) / (1 + b_k * omega**2) ** (5 / 4)
 
     # Calculation of the real part of the dynamic LFC
 
     # WIP
-    pass

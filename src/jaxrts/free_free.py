@@ -3,45 +3,36 @@ This submodule is dedicated to the calculation of the free electron dynamic
 structure.
 """
 
-from .units import ureg, Quantity
-from .plasma_physics import (
-    fermi_energy,
-    fermi_wavenumber,
-    coulomb_potential_fourier,
-    kin_energy,
-    fermi_dirac,
-    plasma_frequency,
-    noninteracting_susceptibility_from_eps_RPA,
-    wiegner_seitz_radius,
-    epsilon_from_susceptibility,
-)
-
-from .ee_localfieldcorrections import xi_lfc_corrected
-from .ipd import inverse_screening_length_e
-
-from .static_structure_factors import S_ii_AD
-from . import math
-import time
-from typing import List
+import logging
 from functools import partial
+from typing import List
 
 import jax
+import jpu
 from jax import jit
 from jax import numpy as jnp
 from jpu import numpy as jnpu
-import numpy as onp
+from quadax import quadgk
 
-from quadax import quadgk, quadts, romberg, STATUS
-
-import logging
+from . import math
+from .ee_localfieldcorrections import xi_lfc_corrected
+from .plasma_physics import (
+    coulomb_potential_fourier,
+    epsilon_from_susceptibility,
+    fermi_dirac,
+    fermi_energy,
+    fermi_wavenumber,
+    kin_energy,
+    noninteracting_susceptibility_from_eps_RPA,
+    plasma_frequency,
+    wiegner_seitz_radius,
+)
+from .units import Quantity, ureg
 
 logger = logging.getLogger(__name__)
 
-import jpu
 
 jax.config.update("jax_enable_x64", True)
-
-from .helpers import timer
 
 
 @jit
@@ -1284,7 +1275,8 @@ def collision_frequency_BA_Chapman_interp(
         )
         # eps_part = (
         #     jnp.conjugate(
-        #         dielectric_function_RPA_no_damping(q, interp_E, chem_pot, T) - eps_zero
+        #         dielectric_function_RPA_no_damping(q, interp_E, chem_pot, T)
+        #         - eps_zero
         #     )
         #     / jnp.abs(eps_zero) ** 2
         # )

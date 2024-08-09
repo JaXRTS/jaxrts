@@ -7,14 +7,12 @@ The following plot is a reproduction of Fig 1b in :cite:`Gregori.2003`.
 
 # TO-DO: Add also Fig. 1 a+c
 
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as onp
-import scienceplots
 
 import jaxrts
 import jaxrts.free_free as free_free
-
-import jax.numpy as jnp
 
 ureg = jaxrts.units.ureg
 

@@ -1,24 +1,18 @@
 """
-This submodule is dedicated to calculate the contribution of tightly bound electrons to the dynamic structure factor.
+This submodule is dedicated to calculate the contribution of tightly bound
+electrons to the dynamic structure factor.
 """
-
-from .units import ureg, Quantity
-from typing import List
-
-import jax
-from jax import jit
-import jax.numpy as jnp
-import jpu.numpy as jnpu
-from jax.scipy.special import factorial
-import numpy as onp
 
 import logging
 
-logger = logging.getLogger(__name__)
+import jax.numpy as jnp
+import jpu.numpy as jnpu
+from jax import jit
+from jax.scipy.special import factorial
 
-from .form_factors import pauling_all_ff
-from .plasma_physics import thomson_momentum_transfer
-import jpu
+from .units import Quantity, ureg
+
+logger = logging.getLogger(__name__)
 
 
 def _xi(n: int, Zeff: Quantity, omega: Quantity, k: Quantity):
