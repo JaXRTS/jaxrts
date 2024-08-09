@@ -6,7 +6,7 @@
 
 ## Disclaimer
 
-This module is very much work in progress, and experimental in itself, but also in it's dependencies. These scripts are an attempt to summarize published XRTS theory into code usable to compare to experiments, as the state-of-the art software for this purpose, the Multicomponent Scattering Code MCSS by Dave Chapman is not freely available.
+This module is very much work in progress, and experimental in itself, but also in it's dependencies. These scripts are an attempt to summarize published XRTS theory into code usable to compare to experiments, as the state-of-the art software for this purpose, the Multi-Component Scattering Spectra Code MCSS by Dave Chapman is not freely available.
 
 We would not have been able to write this without the seminal work by D. Chapman, G. Gregori, K. Wünsch and D. O. Gericke. A full bibliography can be found under `doc/source/literature.bib`.
 
