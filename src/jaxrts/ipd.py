@@ -57,7 +57,7 @@ def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:
 def inverse_screening_length_e(q: Quantity, ne: Quantity, Te: Quantity):
     """
     Inverse screening length for arbitrary degeneracy as needed for WDM
-    applications.
+    applications. (Taken from :cite:`Baggott.2017`)
     """
 
     chem_pot = chem_pot_interpolation(Te, ne)
@@ -91,6 +91,24 @@ def ipd_debye_hueckel(
     """
     The correction to the ionization potential for the m-th ionization stage in
     Debye-Hueckel approximation.
+    
+    Parameters
+    ----------
+    Z_i
+        The (mean) charge state of the ions.
+    n_e
+        Electron density. Units of 1/[length]**3.
+    n_i
+        Ion density. Units of 1/[length]**3.
+    T_e
+        The electron temperature.
+    T_i
+        The ion temperature.
+        
+    Returns
+    -------
+    Quantity
+        The ipd shift in units of electronvolt.
 
     .. note::
 
@@ -130,11 +148,21 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     """
     The correction to the ionization potential for the m-th ionization stage in
     the ion-sphere model. The ion-sphere model considers the ions to be
-    strongly correlated. (see also More 1981)
-
+    strongly correlated. (see also cite:`Zimmermann.1980`)
+    
     Parameters
     ----------
-
+    Z_i
+        The (mean) charge state of the ions.
+    n_e
+        Electron density. Units of 1/[length]**3.
+    n_i
+        Ion density. Units of 1/[length]**3.
+        
+    Returns
+    -------
+    Quantity
+        The ipd shift in units of electronvolt.
     """
 
     pref = 9 / 5  # Zimmermann & More 1980
@@ -164,8 +192,25 @@ def ipd_stewart_pyatt(
     The correction to the ionization potential in the Stewart-Pyatt model using
     the small bound state approximation. This model is founded on the
     Thomas-Fermi Model for the electrons and extends it to include ions in the
-    vicinity of a given nucleus.
-
+    vicinity of a given nucleus. Taken from cite:`Röpke.2019` Eq. (2).
+    
+    Parameters
+    ----------
+    Z_i
+        The (mean) charge state of the ions.
+    n_e
+        Electron density. Units of 1/[length]**3.
+    n_i
+        Ion density. Units of 1/[length]**3.
+    T_e
+        The electron temperature.
+    T_i
+        The ion temperature.
+        
+    Returns
+    -------
+    Quantity
+        The ipd shift in units of electronvolt.
     .. note::
 
        The Stewart-Pyatt value is always below both the Debye and ion sphere
@@ -210,9 +255,28 @@ def ipd_ecker_kroell(
     The correction to the ionization potential for the m-th ionization stage in
     the Ecker-Kroell model.
     This model is similar to the model of Stewart-Pyatt and divided the radial
-    dimension into three regions. For details see Ecker&Kroell 1963.
-    """
+    dimension into three regions. For details see :cite:`EckerKroell.1963`.
+    
+    Parameters
+    ----------
+    Z_i
+        The (mean) charge state of the ions.
+    n_e
+        Electron density. Units of 1/[length]**3.
+    n_i
+        Ion density. Units of 1/[length]**3.
+    T_e
+        The electron temperature.
+    T_i
+        The ion temperature.
+        
+    Returns
+    -------
+    Quantity
+        The ipd shift in units of electronvolt.
 
+    """
+    
     lambda_Di = jnpu.sqrt(
         ureg.epsilon_0
         * ureg.boltzmann_constant
@@ -258,9 +322,27 @@ def ipd_pauli_blocking(
 ) -> Quantity:
     """
     The correction to the ionization potential due to Pauli blocking, as
-    described in Röpke et al. 2019.
+    described in cite:`Röpke.2019`.
+    
+    Parameters
+    ----------
+    Z_i
+        The (mean) charge state of the ions.
+    n_e
+        Electron density. Units of 1/[length]**3.
+    n_i
+        Ion density. Units of 1/[length]**3.
+    T_e
+        The electron temperature.
+    T_i
+        The ion temperature.
+        
+    Returns
+    -------
+    Quantity
+        The ipd shift in units of electronvolt.
     """
-
+    
     chem_pot = chem_pot_interpolation(Te, ne)
 
     # Reduced Bohr radius
