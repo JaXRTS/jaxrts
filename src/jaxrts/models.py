@@ -1706,9 +1706,9 @@ class PaulingFormFactors(Model):
     quantum numbers `n` and `l`, assuming a hydrogen-like atom. Published in
     :cite:`Pauling.1932`.
 
-    Uses :py:func:`jaxrts.form_factors.pauling_effective_charge` to calculate
-    the effective charge of the atom's core and then calculates form factors
-    with :py:func:`jaxrts.form_factors.pauling_all_ff`.
+    Uses Z - :py:func:`jaxrts.form_factors.pauling_size_screening_constants` to
+    calculate the effective charge of the atom's core and then calculates form
+    factors with :py:func:`jaxrts.form_factors.pauling_all_ff`.
     """
 
     allowed_keys = ["form-factors"]
@@ -1718,7 +1718,12 @@ class PaulingFormFactors(Model):
     def evaluate(
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
-        Zstar = form_factors.pauling_effective_charge(plasma_state.Z_A)
+        Zstar = (
+            plasma_state.Z_A
+            - form_factors.pauling_size_screening_constants(
+                plasma_state.Z_core
+            )
+        )
         ff = form_factors.pauling_all_ff(setup.k, Zstar)
         # population = plasma_state.ions[0].electron_distribution
         # return jnp.where(population > 0, ff, 0)
