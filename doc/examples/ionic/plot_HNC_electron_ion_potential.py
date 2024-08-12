@@ -11,7 +11,7 @@ This plot shows quite plainly, notable differences between various models.
 
     We are not able to reproduce Fig. 4.6 from :cite:`Wunsch.2011`. Even if
     :math:`\\lambda_{ab}` is fixed to a forcing the Deutsch Potential to the
-    currect value at :math:`r = 0`, would need to modify the temperature to
+    correct value at :math:`r = 0`, would need to modify the temperature to
     match the Klimontvich-Kraeft potential.
 
 """

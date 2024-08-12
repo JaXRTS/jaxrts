@@ -42,7 +42,7 @@ def test_NeglectModel():
 
 
 def test_KeyError_on_not_allowed_model_key():
-    # This shoud work and return no error
+    # This should work and return no error
     test_state["ionic scattering"] = jaxrts.models.Gregori2003IonFeat()
 
     # But now we should get an error

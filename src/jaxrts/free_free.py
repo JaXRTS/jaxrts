@@ -168,7 +168,7 @@ def S0ee_from_dielectric_func_FDT(
         Can be an interval of values.
     dielectric_function: List:
         The dielectric function, normally dependent on :math:`k` and :math:`E`.
-        Several aproximations for this are given in this submodule, e.g.
+        Several approximations for this are given in this submodule, e.g.
         :py:func:`~.dielectric_function_salpeter`.
 
     Returns
@@ -225,7 +225,7 @@ def S0ee_from_susceptibility_FDT(
         Can be an interval of values.
     dielectric_function: List:
         The dielectric function, normally dependent on :math:`k` and :math:`E`.
-        Several aproximations for this are given in this submodule, e.g.
+        Several approximations for this are given in this submodule, e.g.
         :py:func:`~.dielectric_function_salpeter`.
 
     Returns
@@ -831,7 +831,7 @@ def dielectric_function_RPA_Dandrea1986(
     n_e: Quantity,
 ):
     """
-    Calculate the dielectric function in random phase approximation by usind
+    Calculate the dielectric function in random phase approximation by using
     the fitts given by :cite:`Dandrea.1986`, which should give a notable
     increase in the calculation time over solving the integrals, numerically.
 
@@ -911,7 +911,7 @@ def dielectric_function_RPA(
     The the dielectric function including potentially a complex argument for E.
     See, e.g., :cite:`Schorner.2023`, eqn (A7) and (A8).
 
-    In comparsion to :py:func:`~dielectric_function_RPA_no_damping`, this
+    In comparison to :py:func:`~dielectric_function_RPA_no_damping`, this
     function should be slower to evaluate, as one cannot find an analytical
     expression for the imaginary component, but the result is used when damping
     is required, e.g., in the Born-Mermin approximation.

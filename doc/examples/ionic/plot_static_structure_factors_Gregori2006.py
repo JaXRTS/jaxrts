@@ -52,7 +52,7 @@ for i, T_i_over_T_e in enumerate([0.1, 0.5, 1.0]):
     # This is the q calculated by Gregori.2006
     simple_q = jnp.sqrt(Z_f) * Sei / Sii
     # For comparison, also calculate the full q using e.g. Gregri 2003 and
-    # assert that these results are not too diffrent.
+    # assert that these results are not too different.
     q = jaxrts.ion_feature.q_Gregori2004(k, m_i, n_e, T_e, T_i, Z_f)
     q = jnp.real(q.m_as(ureg.dimensionless))
 

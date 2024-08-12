@@ -14,7 +14,7 @@ ureg = jaxrts.ureg
 def test_BM_glenzer2009_fig9b_reprduction() -> None:
     # This should be the same data as gregori.2003, fig 1b. But the data
     # presented in 2009 does provide reasonable units.
-    # This is in to test the Borm Mermin appoximation, only.
+    # This is in to test the Borm Mermin approximation, only.
 
     # Set the scattering parameters
     lambda_0 = 4.13 * ureg.nanometer
@@ -102,7 +102,7 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         # the literature
         error = onp.abs(calc_See - literature_See)
 
-        # The low-temperature curve has some notable difference in the hight of
+        # The low-temperature curve has some notable difference in the height of
         # the peak. However, we accept it here, for now.
         if count == 0:
             assert onp.max(error) < 0.35
@@ -284,7 +284,7 @@ def calculate_fwhm(data, x):
     left_idx = jnp.nanmin(idx)
     right_idx = jnp.nanmax(idx)
 
-    # Interpolate lineary between the points found
+    # Interpolate linearly between the points found
     left_x = jnp.interp(
         peak_value / 2,
         jnp.array(

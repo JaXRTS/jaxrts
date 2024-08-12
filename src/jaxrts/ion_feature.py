@@ -117,7 +117,7 @@ def q_FiniteWLChapman2015(
 ) -> Quantity:
     """
     Calculates the Finite wavelength screening presented in
-    :cite:`Chapman.2015`, eqn (3). This function relies on the Dandrea
+    :cite:`Chapman.2015b`, eqn (3). This function relies on the Dandrea
     interpolation fit of the non-interacting susceptibility for a faster
     computation (see
     :py:func:`jaxrts.free_free.noninteracting_susceptibility_Dandrea1986`).
@@ -132,7 +132,7 @@ def q_FiniteWLChapman2015(
         energies of the incident photons (unit: 1 / [length]).
     V_ei : Quantity
         The Potential between electrons and ions. Should have the the shape
-        ``(n, m)``, where n is the numer of ion species considered, and ``m =
+        ``(n, m)``, where n is the number of ion species considered, and ``m =
         len(k)``.
     T : Quantity
         The electron temperature in units of [temperature].
@@ -164,7 +164,7 @@ def q_DebyeHueckelChapman2015(
     Z_f: Quantity | jnp.ndarray,
 ) -> Quantity:
     """
-    Calculates the Debye Hückel screening presented in :cite:`Chapman.2015`,
+    Calculates the Debye Hückel screening presented in :cite:`Chapman.2015b`,
     eqn (5).
 
     Parameters
@@ -173,7 +173,7 @@ def q_DebyeHueckelChapman2015(
         Length of the scattering number (given by the scattering angle and the
         energies of the incident photons (unit: 1 / [length]).
     kappa : Quantity
-        The inverse sceening lenght, units of 1 / [length]
+        The inverse sceening length, units of 1 / [length]
     Z_f : Quantity, jnp.ndarray
         The ionization / mean charge state of the ions. Should be one entry per
         ion considered.

@@ -232,7 +232,7 @@ def test_gregori2006_figure_1_reproduction_q():
         # This is the q calculated by Gregori.2006
         simple_q = jnp.sqrt(Z_f) * calc_Sei / calc_Sii
         # For comparison, also calculate the full q using e.g. Gregri 2003 and
-        # assert that these results are not too diffrent.
+        # assert that these results are not too different.
         calc_q = jaxrts.ion_feature.q_Gregori2004(k, m_i, n_e, T_e, T_i, Z_f)
 
         assert (

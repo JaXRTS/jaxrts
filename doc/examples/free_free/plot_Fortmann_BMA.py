@@ -35,7 +35,7 @@ def calculate_fwhm(data, x):
     left_idx = jnp.nanmin(idx)
     right_idx = jnp.nanmax(idx)
 
-    # Interpolate lineary between the points found
+    # Interpolate linearly between the points found
     left_x = jnp.interp(
         peak_value / 2,
         jnp.array(
