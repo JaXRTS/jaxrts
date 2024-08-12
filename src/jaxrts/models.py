@@ -2095,7 +2095,7 @@ class LinearResponseScreeningGericke2010(Model):
 
 class FiniteWavelengthScreening(Model):
     """
-    Finite wavelenth screening as presented by :cite:`Chapman.2015`.
+    Finite wavelenth screening as presented by :cite:`Chapman.2015b`.
 
     Should be identical to :py:class:`~.LinearResponseScreening`, if the
     free-free model is a RPA model.
@@ -2137,7 +2137,7 @@ class FiniteWavelengthScreening(Model):
 
 class DebyeHueckelScreening(Model):
     """
-    Debye Hueckel screening as presented by :cite:`Chapman.2015`.
+    Debye Hueckel screening as presented by :cite:`Chapman.2015b`.
 
     See also
     --------

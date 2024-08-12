@@ -117,7 +117,7 @@ def q_FiniteWLChapman2015(
 ) -> Quantity:
     """
     Calculates the Finite wavelength screening presented in
-    :cite:`Chapman.2015`, eqn (3). This function relies on the Dandrea
+    :cite:`Chapman.2015b`, eqn (3). This function relies on the Dandrea
     interpolation fit of the non-interacting susceptibility for a faster
     computation (see
     :py:func:`jaxrts.free_free.noninteracting_susceptibility_Dandrea1986`).
@@ -164,7 +164,7 @@ def q_DebyeHueckelChapman2015(
     Z_f: Quantity | jnp.ndarray,
 ) -> Quantity:
     """
-    Calculates the Debye Hückel screening presented in :cite:`Chapman.2015`,
+    Calculates the Debye Hückel screening presented in :cite:`Chapman.2015b`,
     eqn (5).
 
     Parameters
