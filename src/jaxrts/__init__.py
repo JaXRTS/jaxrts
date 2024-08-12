@@ -8,6 +8,7 @@ from . import (
     free_free,
     helpers,
     hnc_potentials,
+    instrument_function,
     ion_feature,
     math,
     models,
