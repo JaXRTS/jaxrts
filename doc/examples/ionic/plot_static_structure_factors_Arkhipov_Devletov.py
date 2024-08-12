@@ -48,7 +48,7 @@ plt.plot(
 )
 
 plt.xlabel(r"$k$ [1/$\AA$]")
-plt.ylabel(r"Static stucture factor [arb. units]")
+plt.ylabel(r"Static structure factor [arb. units]")
 
 plt.legend()
 plt.tight_layout()

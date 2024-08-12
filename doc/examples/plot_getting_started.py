@@ -16,7 +16,7 @@ from jax import numpy as jnp
 
 import jaxrts
 
-# We use the jpu package (which is enabeling the usage of pint with jax) to
+# We use the jpu package (which is enabling the usage of pint with jax) to
 # handle units. See below for how to use this
 ureg = jaxrts.ureg
 

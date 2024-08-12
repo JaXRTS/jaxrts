@@ -61,7 +61,7 @@ class Model(metaclass=abc.ABCMeta):
         As different prerequisites exist for different models, make sure to
         test that all relevant information is given in the PlasmaState, amend
         defaults if necessary.
-        Please log assumtpions, properly
+        Please log assumptions, properly
         """
 
     def check(self, plasma_state: "PlasmaState") -> None:
@@ -106,7 +106,7 @@ class ScatteringModel(Model):
 
        As these extra functionalities are only relevant when re-sampling and
        convolution with an instrument function is reasonable, the
-       :py:class:`~.Model` s used to decribe ionic scattering are currently not
+       :py:class:`~.Model` s used to describe ionic scattering are currently not
        instances of :py:class:`~.ScatteringModel` as the convolution with a
        delta function would just result in numerical issues.
 
@@ -126,7 +126,7 @@ class ScatteringModel(Model):
         #: However, as the computation might be expensive, you can reduce the
         #: number of relevant :math:`k` s by setting this attribute. After the
         #: evaluation, the resulting scatting signal is interpolated to the
-        #: relevant :math:`k` s and then convolved with the instument function.
+        #: relevant :math:`k` s and then convolved with the instrument function.
         self.sample_points = sample_points
 
     @abc.abstractmethod
@@ -159,7 +159,7 @@ class ScatteringModel(Model):
         low-resulution :py:class`~.setup.Setup`. Calculate the
         instrument-function free scattering intensity with this or the given
         ``setup``, interpolate it, if needed and then convolve it with the
-        instument function.
+        instrument function.
         """
         if self.sample_points is None:
             raw = self.evaluate_raw(plasma_state, setup, *args, **kwargs)
@@ -325,7 +325,7 @@ class ArkhipovIonFeat(IonFeatModel):
     --------
 
     jaxrts.static_structure_factors.S_ii_AD
-        Calculation of the static ion ion stucture factor given by
+        Calculation of the static ion ion structure factor given by
         :cite:`Arkhipov.1998`.
     jaxrts.models.PaulingFormFactors
         The default model for the atomic form factors
@@ -478,7 +478,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
     ) -> None:
-        #: The minmal radius for evaluating the potentials.
+        #: The minimal radius for evaluating the potentials.
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
@@ -596,7 +596,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
     ) -> None:
-        #: The minmal radius for evaluating the potentials.
+        #: The minimal radius for evaluating the potentials.
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
@@ -1980,7 +1980,7 @@ class Gericke2010ScreeningLength(Model):
 
 class ArbitraryDegeneracyScreeningLength(Model):
     """
-    A screening length valid for arbitraty degeneracy.
+    A screening length valid for arbitrary degeneracy.
 
     See Also
     --------
@@ -2391,7 +2391,7 @@ class ElectronicLFCConstant(Model):
 
 def averagePlasmaState(state: "PlasmaState") -> "PlasmaState":
     """
-    Create an average plasma state that shares the models of the origional.
+    Create an average plasma state that shares the models of the original.
     """
     mean_Z = jnpu.sum(state.Z_A * state.number_fraction)[jnp.newaxis]
     mean_Z_free = jnpu.sum(state.Z_free * state.number_fraction)[jnp.newaxis]
@@ -2455,7 +2455,7 @@ class Sum_Sii(Model):
 
 class AverageAtom_Sii(Model):
     """
-    This model performes a HNC calculation, assuming one average atom with a
+    This model performs a HNC calculation, assuming one average atom with a
     given, average charge state. While it might lead to reasonable results,
     this is not tested and takes some computation time.
     """
@@ -2469,7 +2469,7 @@ class AverageAtom_Sii(Model):
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
     ) -> None:
-        #: The minmal radius for evaluating the potentials.
+        #: The minimal radius for evaluating the potentials.
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
@@ -2609,7 +2609,7 @@ class FiniteWavelength_BM_V(BM_V_eiSModel):
     Uses finite wavelength screening to screen the bare Coulomb potential,
     i.e., :math:`V_{s} = \\frac{V_\\mathrm{Coulomb}}{\\vareps_{RPA}(k, E=0)}`
 
-    We use the pure RPA result to calculate the dielectric funtion, and use the
+    We use the pure RPA result to calculate the dielectric function, and use the
     :cite:`Dandrea.1986` fitting formula.
 
     See Also

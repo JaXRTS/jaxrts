@@ -154,7 +154,7 @@ def _Delta_AD(
         )
         + A * k**2 * k_De**2
         # The original paper :cite:`Arkhipov.1998` differs in the subsequent
-        # line. This has beed rectified by the authors their paper from 2000.
+        # line. This has been rectified by the authors their paper from 2000.
         * (k**2 + k_Di**2 / (1 + k**2 * lamii**2))
         * jnpu.exp(-(k**2) / (4 * b))
     )
@@ -183,7 +183,7 @@ def _T_rs_Greg2006(
     Returns
     -------
     Quantity
-        The effecive temperature. If both temperatures are identical, than the
+        The effective temperature. If both temperatures are identical, than the
         result is this temperature.
     """
     return (m_s * T_r + m_r * T_s) / (m_r + m_s)

@@ -623,7 +623,7 @@ class Element:
 
         #: The name of the element
         self.name: str = _element_names[self.Z]
-        #: The electron distribution, retuned as a flat array
+        #: The electron distribution, returned as a flat array
         self.electron_distribution = electron_distribution_ionized_state(
             self.Z
         )

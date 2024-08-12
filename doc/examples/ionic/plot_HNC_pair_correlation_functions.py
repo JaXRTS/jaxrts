@@ -9,7 +9,7 @@ increasing density when temperature stays constant).
 We assume fully ionized hydrogen at a temperature of 10 eV, and a statistically
 screened / a full Coulomb potential.
 
-The statically screened potential assumes :math:`V_l = 0` and reprocuced the
+The statically screened potential assumes :math:`V_l = 0` and reproduced the
 Figure in the literature by :cite:`Wunsch.2011`.
 """
 

@@ -346,7 +346,7 @@ class KelbgPotential(HNCPotential):
             \\right)
             \\right]
 
-        In the aboce equation, :math:`\\mathrm{erf}` is the Gaussian error
+        In the above equation, :math:`\\mathrm{erf}` is the Gaussian error
         function.
 
         For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
@@ -403,7 +403,7 @@ class KlimontovichKraeftPotential(HNCPotential):
             r\\right]^{-1}
 
 
-        In the aboce equation, :math:`\\xi{e i} = (Z e^2 \\beta) / (\\lambda_{e
+        In the above equation, :math:`\\xi{e i} = (Z e^2 \\beta) / (\\lambda_{e
         i} 4 \\pi \\varepsilon_0)`.
 
         :math:`Z e^{2} = q^2`, and :math:`\\beta = 1/(k_B T)` (see note above)
@@ -463,7 +463,7 @@ class EmptyCorePotential(HNCPotential):
 
        This potential is only defined for the electron-ion interaction. Hence,
        it will always and automatically set ~:py:meth:`include_electrons` to
-       ``True``. For the rest, we reurn a Coulomb-potential -- but this is
+       ``True``. For the rest, we return a Coulomb-potential -- but this is
        really just to be compatible with the other potentials defined here.
 
     """
@@ -543,7 +543,7 @@ class SoftCorePotential(HNCPotential):
 
        This potential is only defined for the electron-ion interaction. Hence,
        it will always and automatically set ~:py:meth:`include_electrons` to
-       ``True``. For the rest, we reurn a Coulomb-potential -- but this is
+       ``True``. For the rest, we return a Coulomb-potential -- but this is
        really just to be compatible with the other potentials defined here.
 
     """
@@ -598,7 +598,7 @@ class SoftCorePotential(HNCPotential):
     def full_k(self, plasma_state, k):
         _k = k[jnp.newaxis, jnp.newaxis, :]
         # Define a auxiliary short-range version of this potential; While it is
-        # not used, acutally, it is easier to Fourier transform.
+        # not used, actually, it is easier to Fourier transform.
         exp_part = jpu.numpy.exp(
             -(
                 (self._transform_r / self.r_cut(plasma_state)).m_as(
