@@ -531,6 +531,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         # Interpolate this to the k given by the setup
 
         S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
+     
         return S_ab
 
     # The following is required to jit a Model
