@@ -1304,9 +1304,14 @@ class JAXRTSViz(QWidget):
                         print("Please check entry!")
                         return
                 else:
-                    self.current_state[typ] = eval(
-                        "jaxrts.models." + probing_values_and_models[typ]
-                    )()
+                    if typ=="bound-free scattering":
+                        self.current_state[typ] = eval(
+                            "jaxrts.models." + probing_values_and_models[typ]
+                        )(r_k = 1.0)
+                    else:
+                        self.current_state[typ] = eval(
+                            "jaxrts.models." + probing_values_and_models[typ]
+                        )()  
                 self.current_models.append(probing_values_and_models[typ])
 
             try:
