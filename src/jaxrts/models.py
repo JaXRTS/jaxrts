@@ -2188,11 +2188,11 @@ class FiniteWavelengthScreening(Model):
         )
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
-            lambda: q,
-        )
+        q = jnpu.where(
+            plasma_state.Z_free == 0,
+            0,
+            q[:, 0]
+        )[:, jnp.newaxis]
         return q
 
 
@@ -2226,11 +2226,11 @@ class DebyeHueckelScreening(Model):
         )
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
-            lambda: q,
-        )
+        q = jnpu.where(
+            plasma_state.Z_free == 0,
+            0,
+            q[:, 0]
+        )[:, jnp.newaxis]
         return q
 
 
@@ -2281,11 +2281,11 @@ class LinearResponseScreening(Model):
         q = xi * Vei[-1, :-1]
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
-            lambda: q,
-        )
+        q = jnpu.where(
+            plasma_state.Z_free == 0,
+            0,
+            q[:, 0]
+        )[:, jnp.newaxis]
         return q
 
 
@@ -2321,11 +2321,11 @@ class Gregori2004Screening(Model):
         )[:, jnp.newaxis]
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
-            lambda: q,
-        )
+        q = jnpu.where(
+            plasma_state.Z_free == 0,
+            0,
+            q[:, 0]
+        )[:, jnp.newaxis]
         return q
 
 
