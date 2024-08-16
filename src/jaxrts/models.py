@@ -2095,6 +2095,12 @@ class LinearResponseScreeningGericke2010(Model):
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
         q = xi * Vei[-1, :-1]
+        # Screening vanishes if there are no free electrons
+        q = jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
+            lambda: q,
+        )
         return q
 
 
@@ -2137,7 +2143,14 @@ class FiniteWavelengthScreening(Model):
         q = ion_feature.q_FiniteWLChapman2015(
             setup.k, Vei, plasma_state.T_e, plasma_state.n_e, lfc
         )
-        return jnp.real(q.m_as(ureg.dimensionless))
+        q = jnp.real(q.m_as(ureg.dimensionless))
+        # Screening vanishes if there are no free electrons
+        q = jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
+            lambda: q,
+        )
+        return q
 
 
 class DebyeHueckelScreening(Model):
@@ -2168,7 +2181,14 @@ class DebyeHueckelScreening(Model):
             kappa,
             plasma_state.Z_f,
         )
-        return jnp.real(q.m_as(ureg.dimensionless))
+        q = jnp.real(q.m_as(ureg.dimensionless))
+        # Screening vanishes if there are no free electrons
+        q = jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
+            lambda: q,
+        )
+        return q
 
 
 class LinearResponseScreening(Model):
@@ -2216,7 +2236,14 @@ class LinearResponseScreening(Model):
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
         q = xi * Vei[-1, :-1]
-        return jnp.real(q.m_as(ureg.dimensionless))
+        q = jnp.real(q.m_as(ureg.dimensionless))
+        # Screening vanishes if there are no free electrons
+        q = jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
+            lambda: q,
+        )
+        return q
 
 
 class Gregori2004Screening(Model):
@@ -2249,7 +2276,14 @@ class Gregori2004Screening(Model):
             plasma_state.T_e,
             plasma_state.Z_free,
         )[:, jnp.newaxis]
-        return jnp.real(q.m_as(ureg.dimensionless))
+        q = jnp.real(q.m_as(ureg.dimensionless))
+        # Screening vanishes if there are no free electrons
+        q = jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
+            lambda: q,
+        )
+        return q
 
 
 # Electron-Electron Local Field Correction Models
