@@ -531,6 +531,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         # Interpolate this to the k given by the setup
 
         S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
+     
         return S_ab
 
     # The following is required to jit a Model
@@ -1054,6 +1055,7 @@ class BornMerminFull(FreeFreeModel):
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
         )
+
         return See_0 * mean_Z_free
 
     @jax.jit
@@ -1183,7 +1185,9 @@ class BornMermin(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * mean_Z_free
+        res = See_0 * mean_Z_free
+        
+        return res
 
     @jax.jit
     def susceptibility(
