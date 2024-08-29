@@ -19,6 +19,7 @@ from functools import partial
 import jax.numpy as jnp
 import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import numpy as onp
 
 import jaxrts
@@ -174,65 +175,77 @@ def plot_mcss_comparison(mcss_file):
         state.evaluate("free-free scattering", setup)
         # + state.evaluate("bound-free scattering", setup)
     )
-    plt.plot(
-        (setup.measured_energy).m_as(ureg.electron_volt),
-        (I / norm).m_as(ureg.dimensionless),
-        color="C0",
-        label="JaXRTS",
-    )
-    plt.plot(
-        (setup.measured_energy).m_as(ureg.electron_volt),
-        (state.evaluate("bound-free scattering", setup) / norm).m_as(
-            ureg.dimensionless
-        ),
-        color="C0",
-        ls="dashed",
-        label="JaXRTS, bf",
-        alpha=0.7,
-    )
-    plt.plot(
-        (setup.measured_energy).m_as(ureg.electron_volt),
-        (state.evaluate("free-free scattering", setup) / norm).m_as(
-            ureg.dimensionless
-        ),
-        color="C0",
-        ls="dotted",
-        label="JaXRTS, ff",
-        alpha=0.7,
-    )
-    plt.plot(
-        (setup.measured_energy).m_as(ureg.electron_volt),
-        (state.evaluate("ionic scattering", setup) / norm).m_as(
-            ureg.dimensionless
-        ),
-        color="C0",
-        ls="dashdot",
-        label="JaXRTS, elastic",
-        alpha=0.7,
-    )
-    MCSS_Norm = jnp.max(S_ff)
-    plt.plot(central_energy - E, S_tot / MCSS_Norm, color="C1", label="MCSS")
-    plt.plot(
-        central_energy - E,
-        S_bf / MCSS_Norm,
-        color="C1",
-        ls="dashed",
-        label="MCSS, bf",
-        alpha=0.7,
-    )
-    plt.plot(
-        central_energy - E,
-        S_ff / MCSS_Norm,
-        color="C1",
-        ls="dotted",
-        label="MCSS, ff",
-        alpha=0.7,
-    )
-    plt.title(name)
+    
+    fig, ax0 = plt.subplots()
+    inset_ax = inset_axes(ax0, width="50%", height="50%", loc='upper left', bbox_to_anchor=[0.3, 0.6, 0.4, 0.4])
 
-    plt.xlabel("E [eV]")
-    plt.ylabel("Scattering intensity [a.u.]")
-    plt.legend()
+    for ax in [ax0, inset_ax]:
+        ax.plot(
+            (setup.measured_energy).m_as(ureg.electron_volt),
+            (I / norm).m_as(ureg.dimensionless),
+            color="C0",
+            label="JaXRTS",
+        )
+        ax.plot(
+            (setup.measured_energy).m_as(ureg.electron_volt),
+            (state.evaluate("bound-free scattering", setup) / norm).m_as(
+                ureg.dimensionless
+            ),
+            color="C0",
+            ls="dashed",
+            label="JaXRTS, bf",
+            alpha=0.7,
+        )
+        ax.plot(
+            (setup.measured_energy).m_as(ureg.electron_volt),
+            (state.evaluate("free-free scattering", setup) / norm).m_as(
+                ureg.dimensionless
+            ),
+            color="C0",
+            ls="dotted",
+            label="JaXRTS, ff",
+            alpha=0.7,
+        )
+        ax.plot(
+            (setup.measured_energy).m_as(ureg.electron_volt),
+            (state.evaluate("ionic scattering", setup) / norm).m_as(
+                ureg.dimensionless
+            ),
+            color="C0",
+            ls="dashdot",
+            label="JaXRTS, elastic",
+            alpha=0.7,
+        )
+        MCSS_Norm = jnp.max(S_ff)
+        ax.plot(central_energy - E, S_tot / MCSS_Norm, color="C1", label="MCSS")
+        ax.plot(
+            central_energy - E,
+            S_bf / MCSS_Norm,
+            color="C1",
+            ls="dashed",
+            label="MCSS, bf",
+            alpha=0.7,
+        )
+        ax.plot(
+            central_energy - E,
+            S_ff / MCSS_Norm,
+            color="C1",
+            ls="dotted",
+            label="MCSS, ff",
+            alpha=0.7,
+        )
+
+    # Step 4: Set the new x and y limits to zoom in on a specific part of the plot
+    inset_ax.set_xlim(8600, 9200)
+    inset_ax.set_ylim(-0.1, 1.5)
+    inset_ax.set_title("Zoom-in")
+    
+    ax0.set_title(name)
+
+    ax0.set_xlabel("E [eV]")
+    ax0.set_ylabel("Scattering intensity [a.u.]")
+    ax0.legend()
+    ax0.set_xlim(8600, 9200)
 
     print(f" One plot took {time.time()-tcyclestart}s.")
     plt.tight_layout()
@@ -243,5 +256,6 @@ def plot_mcss_comparison(mcss_file):
 for mcss_file in (file_dir / "../tests/mcss_samples").glob("mcss*.txt"):
     print(mcss_file)
     plot_mcss_comparison(mcss_file)
+    exit()
 
 print(f"Full excecution took {time.time()-tstart}s.")
