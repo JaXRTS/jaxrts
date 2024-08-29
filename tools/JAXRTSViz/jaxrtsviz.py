@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
+import json
 
-sys.path.append(str(Path(__file__).parents[1] / "src"))
+sys.path.append(str(Path(__file__).parents[2] / "src"))
 
 import sys
 from functools import partial
@@ -136,7 +137,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("JAXRTSViz")
-        self.setGeometry(20, 20, 1100, 850)
+        self.setGeometry(20, 20, 1200, 850)
         # Create a CustomTabWidget
         self.tabs = CustomTabWidget()
         self.setCentralWidget(self.tabs)
@@ -625,6 +626,14 @@ class JAXRTSViz(QWidget):
         self.probe_button.setFixedSize(120, 60)
         self.probe_button.setFont(QFont(None, 12))
         self.probe_button.clicked.connect(self.toggle_probe)
+        
+        self.save_button = QPushButton("Save")
+        self.save_button.setFixedSize(60, 30)
+        self.save_button.clicked.connect(self.save_state)
+
+        self.load_button = QPushButton("Load")
+        self.load_button.setFixedSize(60, 30)
+        self.load_button.clicked.connect(self.load_state)
 
         self.toggle_probe_button = QCheckBox()
         self.toggle_probe_button.stateChanged.connect(
@@ -636,6 +645,11 @@ class JAXRTSViz(QWidget):
 
         self.probe_button_layout.addWidget(
             self.probe_button, alignment=QtCore.Qt.AlignCenter
+        )
+        self.probe_button_layout.addWidget(self.save_button, alignment=QtCore.Qt.AlignRight
+        )
+        self.probe_button_layout.addWidget(
+            self.load_button, alignment=QtCore.Qt.AlignRight
         )
         self.probe_button_layout.addWidget(
             self.toggle_probe_button, alignment=QtCore.Qt.AlignRight
@@ -718,8 +732,8 @@ class JAXRTSViz(QWidget):
         self.console_worker.start()
 
         # Redirect stdout and stderr
-        sys.stdout = EmittingStream(text_written=self.update_console_output)
-        sys.stderr = EmittingStream(text_written=self.update_console_output)
+        # sys.stdout = EmittingStream(text_written=self.update_console_output)
+        # sys.stderr = EmittingStream(text_written=self.update_console_output)
 
         main_layout2.addWidget(self.console_output, 2)
 
@@ -737,6 +751,43 @@ class JAXRTSViz(QWidget):
             )
         )
         self.model_dropdown_menu.addAction(action)
+        
+    def save_state(self):
+        state = {}
+        for textbox in self.textboxes:
+            state[textbox.objectName()] = textbox.text()
+        for combobox in self.comboBoxesList:
+            state[combobox.objectName()] = combobox.currentText()
+        state['toggle_probe'] = self.toggle_probe_button.isChecked()
+        
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save State", "", "JSON Files (*.json)")
+        if file_name:
+            with open(file_name, 'w') as f:
+                json.dump(state, f)
+            print(f"State saved to {file_name}")
+
+    def load_state(self):
+        file_name, _ = QFileDialog.getOpenFileName(self, "Load State", "", "JSON Files (*.json)")
+        if file_name:
+            with open(file_name, 'r') as f:
+                state = json.load(f)
+            
+            for textbox in self.textboxes:
+                if textbox.objectName() in state:
+                    textbox.setText(state[textbox.objectName()])
+            
+            for combobox in self.comboBoxesList:
+                if combobox.objectName() in state:
+                    index = combobox.findText(state[combobox.objectName()])
+                    if index >= 0:
+                        combobox.setCurrentIndex(index)
+            
+            if 'toggle_probe' in state:
+                self.toggle_probe_button.setChecked(state['toggle_probe'])
+            
+            print(f"State loaded from {file_name}")
+            self.is_compiled = False
+            self.toolbar.compile_status.repaint()
 
     def add_spectra(self):
         fdialog = QFileDialog.Options()
@@ -769,7 +820,7 @@ class JAXRTSViz(QWidget):
                 intensity,
                 label=file_name.split("/")[-1].split(".txt")[0],
                 s=3,
-                color=base_colors[len(self.spectra_data)],
+                color=list(base_colors.values())[len(self.spectra_data)],
             )
             self.canvas.ax.legend()
             self.canvas.draw()
@@ -919,7 +970,7 @@ class JAXRTSViz(QWidget):
                             for m in list(
                                 self.Allmodels["free-free scattering"]
                             )
-                            if "BornMermin" not in m
+                            # if "BornMermin" not in m
                         ]
                     )
             except:
@@ -1179,7 +1230,7 @@ class JAXRTSViz(QWidget):
             self.toolbar.repaint()
             self.canvas.ax.plot(
                 (self.current_setup.measured_energy).m_as(ureg.electron_volt),
-                I.m_as(ureg.second),
+                I.m_as(ureg.second) / jnp.max(I.m_as(ureg.second)),
                 label="Model " + str(len(self.model_data)),
                 color=list(base_colors.keys())[len(self.model_data)],
             )
@@ -1253,9 +1304,14 @@ class JAXRTSViz(QWidget):
                         print("Please check entry!")
                         return
                 else:
-                    self.current_state[typ] = eval(
-                        "jaxrts.models." + probing_values_and_models[typ]
-                    )()
+                    if typ=="bound-free scattering":
+                        self.current_state[typ] = eval(
+                            "jaxrts.models." + probing_values_and_models[typ]
+                        )(r_k = 1.0)
+                    else:
+                        self.current_state[typ] = eval(
+                            "jaxrts.models." + probing_values_and_models[typ]
+                        )()  
                 self.current_models.append(probing_values_and_models[typ])
 
             try:
@@ -1280,7 +1336,7 @@ class JAXRTSViz(QWidget):
             self.toolbar.repaint()
             self.canvas.ax.plot(
                 (self.current_setup.measured_energy).m_as(ureg.electron_volt),
-                I.m_as(ureg.second),
+                I.m_as(ureg.second) / jnp.max(I.m_as(ureg.second)),
                 label="Model " + str(len(self.model_data)),
                 color=list(base_colors.keys())[len(self.model_data)],
             )

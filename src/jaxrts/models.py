@@ -531,6 +531,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         # Interpolate this to the k given by the setup
 
         S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
+     
         return S_ab
 
     # The following is required to jit a Model
@@ -846,8 +847,14 @@ class QCSalpeterApproximation(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
         )
 
-        return See_0 * jnp.sum(
+        ff = See_0 * jnp.sum(
             plasma_state.Z_free * plasma_state.number_fraction
+        )
+        # Return 0 scattering if there are no free electrons
+        return jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+            lambda: ff,
         )
 
     @jax.jit
@@ -913,8 +920,14 @@ class RPA_NoDamping(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
         )
 
-        return See_0 * jnp.sum(
+        ff = See_0 * jnp.sum(
             plasma_state.Z_free * plasma_state.number_fraction
+        )
+        # Return 0 scattering if there are no free electrons
+        return jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+            lambda: ff,
         )
 
     @jax.jit
@@ -972,8 +985,14 @@ class RPA_DandreaFit(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
         )
 
-        return See_0 * jnp.sum(
+        ff = See_0 * jnp.sum(
             plasma_state.Z_free * plasma_state.number_fraction
+        )
+        # Return 0 scattering if there are no free electrons
+        return jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+            lambda: ff,
         )
 
     @jax.jit
@@ -1054,7 +1073,13 @@ class BornMerminFull(FreeFreeModel):
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
         )
-        return See_0 * mean_Z_free
+        ff = See_0 * mean_Z_free
+        # Return 0 scattering if there are no free electrons
+        return jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+            lambda: ff,
+        )
 
     @jax.jit
     def susceptibility(
@@ -1183,7 +1208,13 @@ class BornMermin(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * mean_Z_free
+        ff = See_0 * mean_Z_free
+        # Return 0 scattering if there are no free electrons
+        return jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+            lambda: ff,
+        )
 
     @jax.jit
     def susceptibility(
@@ -1330,7 +1361,13 @@ class BornMermin_Fit(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * mean_Z_free
+        ff = See_0 * mean_Z_free
+        # Return 0 scattering if there are no free electrons
+        return jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+            lambda: ff,
+        )
 
     @jax.jit
     def susceptibility(
@@ -1478,7 +1515,13 @@ class BornMermin_Fortmann(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
         )
-        return See_0 * mean_Z_free
+        ff = See_0 * mean_Z_free
+        # Return 0 scattering if there are no free electrons
+        return jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+            lambda: ff,
+        )
 
     @jax.jit
     def susceptibility(
@@ -2095,6 +2138,12 @@ class LinearResponseScreeningGericke2010(Model):
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
         q = xi * Vei[-1, :-1]
+        # Screening vanishes if there are no free electrons
+        q = jax.lax.cond(
+            jnp.sum(plasma_state.Z_free) == 0,
+            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
+            lambda: q,
+        )
         return q
 
 
@@ -2137,7 +2186,14 @@ class FiniteWavelengthScreening(Model):
         q = ion_feature.q_FiniteWLChapman2015(
             setup.k, Vei, plasma_state.T_e, plasma_state.n_e, lfc
         )
-        return jnp.real(q.m_as(ureg.dimensionless))
+        q = jnp.real(q.m_as(ureg.dimensionless))
+        # Screening vanishes if there are no free electrons
+        q = jnpu.where(
+            plasma_state.Z_free == 0,
+            0,
+            q[:, 0]
+        )[:, jnp.newaxis]
+        return q
 
 
 class DebyeHueckelScreening(Model):
@@ -2168,7 +2224,14 @@ class DebyeHueckelScreening(Model):
             kappa,
             plasma_state.Z_f,
         )
-        return jnp.real(q.m_as(ureg.dimensionless))
+        q = jnp.real(q.m_as(ureg.dimensionless))
+        # Screening vanishes if there are no free electrons
+        q = jnpu.where(
+            plasma_state.Z_free == 0,
+            0,
+            q[:, 0]
+        )[:, jnp.newaxis]
+        return q
 
 
 class LinearResponseScreening(Model):
@@ -2216,7 +2279,14 @@ class LinearResponseScreening(Model):
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
         q = xi * Vei[-1, :-1]
-        return jnp.real(q.m_as(ureg.dimensionless))
+        q = jnp.real(q.m_as(ureg.dimensionless))
+        # Screening vanishes if there are no free electrons
+        q = jnpu.where(
+            plasma_state.Z_free == 0,
+            0,
+            q[:, 0]
+        )[:, jnp.newaxis]
+        return q
 
 
 class Gregori2004Screening(Model):
@@ -2249,7 +2319,14 @@ class Gregori2004Screening(Model):
             plasma_state.T_e,
             plasma_state.Z_free,
         )[:, jnp.newaxis]
-        return jnp.real(q.m_as(ureg.dimensionless))
+        q = jnp.real(q.m_as(ureg.dimensionless))
+        # Screening vanishes if there are no free electrons
+        q = jnpu.where(
+            plasma_state.Z_free == 0,
+            0,
+            q[:, 0]
+        )[:, jnp.newaxis]
+        return q
 
 
 # Electron-Electron Local Field Correction Models

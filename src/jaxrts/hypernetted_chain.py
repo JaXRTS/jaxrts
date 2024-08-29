@@ -231,47 +231,6 @@ def realfftnp(y):
 
 
 @jax.jit
-def OLDsinft(y):
-    # In the original version, we modified y in place. This can be ok, but do
-    # we want it, here?
-    # y = y.copy()
-    n = len(y)
-
-    wr = 1.0
-    wi = 0.0
-
-    n2 = n + 2
-
-    theta = jnp.pi / n
-    wtemp = jnp.sin(0.5 * theta)
-    wpr = -2.0 * wtemp**2
-    wpi = jnp.sin(theta)
-
-    y = y.at[0].set(0.0)
-    for j in range(2, (n >> 1) + 2, 1):
-        wtemp = wr
-        wr = (wtemp) * wpr - wi * wpi + wr
-        wi = wi * wpr + wtemp * wpi + wi
-        y1 = wi * (y[j - 1] + y[n2 - j - 1])  # Construct the auxiliary array
-        y2 = 0.5 * (y[j - 1] - y[n2 - j - 1])
-        y = y.at[j - 1].set(y1 + y2)  # Terms j and N - j are related
-        y = y.at[n2 - j - 1].set(y1 - y2)
-
-    y = realfftnp(y)  # Transform the auxiliary array
-    # y = realfft(y)
-
-    sum_val = 0.0
-    y = y.at[0].set(y[0] * 0.5)
-    y = y.at[1].set(0.0)
-    for j in range(1, n, 2):
-        # print(n)
-        sum_val += y[j - 1]
-        y = y.at[j - 1].set(y[j])
-        y = y.at[j].set(sum_val)
-    return y
-
-
-@jax.jit
 def sinft(y):
     """
     See :cite:`Press.1994`.
@@ -319,7 +278,6 @@ def zaf_dst(f, dst_type):
     """
     window_length = len(f)
 
-    # Check if the DST type is I, II, III, or IV
     if dst_type == 1:
         # Compute the DST-I using the FFT
         out = jnp.zeros(2 * window_length + 2)
@@ -327,10 +285,6 @@ def zaf_dst(f, dst_type):
         out = out.at[window_length + 2 :].set(-f[::-1])
         out = jnp.fft.fft(out)
         out = -jnp.imag(out[1 : window_length + 1]) / 2
-
-        # Post-process the results to make the DST-I matrix orthogonal
-        # out = out * jnp.sqrt(2 / (window_length + 1))
-
         return out
 
     elif dst_type == 2:
@@ -342,11 +296,6 @@ def zaf_dst(f, dst_type):
         )
         out = jnp.fft.fft(out)
         out = -jnp.imag(out[1 : window_length + 1]) / 2
-
-        # Post-process the results to make the DST-II matrix orthogonal
-        # out[-1] = out[-1] / jnp.sqrt(2)
-        # out = out * jnp.sqrt(2 / window_length)
-
         return out
 
     elif dst_type == 3:
@@ -367,10 +316,6 @@ def zaf_dst(f, dst_type):
         )
         out = jnp.fft.fft(out)
         out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
-
-        # Post-process the results to make the DST-III matrix orthogonal
-        # out = out * jnp.sqrt(2 / window_length)
-
         return out
 
     elif dst_type == 4:
@@ -387,10 +332,6 @@ def zaf_dst(f, dst_type):
         )
         out = jnp.fft.fft(out)
         out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
-
-        # Post-process the results to make the DST-IV matrix orthogonal
-        # out = out * jnp.sqrt(2 / window_length)
-
         return out
 
 
