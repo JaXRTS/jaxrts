@@ -1,3 +1,14 @@
+"""
+Compare our results to spectra generated with MCSS, written by D. Chapman
+:cite:`Chapman.2016`.
+
+.. note::
+
+    We observed differences in the bound free feature, which we attribute to
+    different binding energies implemented.
+
+"""
+
 import pathlib
 import sys
 
@@ -58,7 +69,7 @@ def load_data_from_mcss_file_name(name):
     rho = re.findall(r"rho=[0-9.]*", name)[0][4:]
     T = re.findall(r"T=[0-9.]*", name)[0][2:]
     ff = re.findall(r"ff=[a-zA-Z_]*_lfc", name)[0][3:-4]
-    lfc = re.findall(r"lfc=[a-zA-Z_]*", name)[0][3:-1]
+    lfc = re.findall(r"lfc=[A-Z_]*_r", name)[0][4:-2]
     rk = re.findall(r"rk=[0-9a-zA-Z]*", name)[0][3:]
     try:
         rk = float(rk)
@@ -128,9 +139,7 @@ def plot_mcss_comparison(mcss_file):
 
     state["chemical potential"] = jaxrts.models.IchimaruChemPotential()
 
-    if lfc.lower() == "none":
-        state["ee-lfc"] = jaxrts.models.ElectronicLFCConstant(1)
-    elif lfc.lower() == "static_interp":
+    if lfc.lower() == "static_interp":
         state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
     state["ipd"] = jaxrts.models.Neglect()
     state["screening length"] = (
@@ -171,9 +180,9 @@ def plot_mcss_comparison(mcss_file):
         state.evaluate("free-free scattering", setup)
         # + state.evaluate("bound-free scattering", setup)
     )
-    
+
     fig, ax0 = plt.subplots()
-    inset_ax = inset_axes(ax0, width="50%", height="50%", loc='upper left')
+    inset_ax = inset_axes(ax0, width="50%", height="50%", loc="upper left")
 
     for ax in [ax0, inset_ax]:
         ax.plot(
@@ -213,7 +222,9 @@ def plot_mcss_comparison(mcss_file):
             alpha=0.7,
         )
         MCSS_Norm = jnp.max(S_ff)
-        ax.plot(central_energy - E, S_tot / MCSS_Norm, color="C1", label="MCSS")
+        ax.plot(
+            central_energy - E, S_tot / MCSS_Norm, color="C1", label="MCSS"
+        )
         ax.plot(
             central_energy - E,
             S_bf / MCSS_Norm,
@@ -231,13 +242,12 @@ def plot_mcss_comparison(mcss_file):
             alpha=0.7,
         )
 
-    # Step 4: Set the new x and y limits to zoom in on a specific part of the plot
     inset_ax.set_xlim(8600, 9200)
     inset_ax.set_ylim(-0.1, 1.5)
     inset_ax.yaxis.set_label_position("right")
     inset_ax.yaxis.tick_right()
     inset_ax.set_xlabel("E [eV]")
-    
+
     ax0.set_title(name, fontsize=7)
 
     ax0.set_xlabel("E [eV]")
@@ -254,6 +264,5 @@ def plot_mcss_comparison(mcss_file):
 for mcss_file in (file_dir / "../tests/mcss_samples").glob("mcss*.txt"):
     print(mcss_file)
     plot_mcss_comparison(mcss_file)
-    exit()
 
 print(f"Full excecution took {time.time()-tstart}s.")
