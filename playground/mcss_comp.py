@@ -7,10 +7,6 @@ jax.config.update("jax_compilation_cache_dir", "/tmp/jax_cache")
 jax.config.update("jax_persistent_cache_min_entry_size_bytes", -1)
 jax.config.update("jax_persistent_cache_min_compile_time_secs", 0.2)
 
-sys.path.append(
-    "C:/Users/Samuel/Desktop/PhD/Python_Projects/JAXRTS/jaxrts/src"
-)
-
 import os
 import re
 import time
@@ -177,7 +173,7 @@ def plot_mcss_comparison(mcss_file):
     )
     
     fig, ax0 = plt.subplots()
-    inset_ax = inset_axes(ax0, width="50%", height="50%", loc='upper left', bbox_to_anchor=[0.3, 0.6, 0.4, 0.4])
+    inset_ax = inset_axes(ax0, width="50%", height="50%", loc='upper left')
 
     for ax in [ax0, inset_ax]:
         ax.plot(
@@ -238,9 +234,11 @@ def plot_mcss_comparison(mcss_file):
     # Step 4: Set the new x and y limits to zoom in on a specific part of the plot
     inset_ax.set_xlim(8600, 9200)
     inset_ax.set_ylim(-0.1, 1.5)
-    inset_ax.set_title("Zoom-in")
+    inset_ax.yaxis.set_label_position("right")
+    inset_ax.yaxis.tick_right()
+    inset_ax.set_xlabel("E [eV]")
     
-    ax0.set_title(name)
+    ax0.set_title(name, fontsize=7)
 
     ax0.set_xlabel("E [eV]")
     ax0.set_ylabel("Scattering intensity [a.u.]")
