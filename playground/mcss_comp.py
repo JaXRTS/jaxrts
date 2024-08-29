@@ -37,7 +37,7 @@ ureg = jaxrts.ureg
 file_dir = pathlib.Path(__file__).parent
 mcss_file = (
     file_dir
-    / "../tests/mcss_samples/without_rk/no_ipd/mcss_C[frac=0.5_Z_f=3.0]O[frac=0.5_Z_f=3.0]_E=8975eV_theta=120_rho=1.8gcc_T=10.0eV_RPA_NOLFC.txt"
+    / "../tests/mcss_samples/mcss_C[Z_f=3.5]_E=8978eV_theta=40_rho=1.0gcc_T=50.0eV_ff=DANDREA_RPA_FIT_lfc=NONE_rk=auto.txt"
 )
 
 
@@ -62,6 +62,14 @@ def load_data_from_mcss_file_name(name):
     ang = re.findall(r"theta=[0-9.]*", name)[0][6:]
     rho = re.findall(r"rho=[0-9.]*", name)[0][4:]
     T = re.findall(r"T=[0-9.]*", name)[0][2:]
+    ff = re.findall(r"ff=[a-zA-Z_]*_lfc", name)[0][3:-4]
+    lfc = re.findall(r"lfc=[a-zA-Z_]*", name)[0][3:-1]
+    rk = re.findall(r"rk=[0-9a-zA-Z]*", name)[0][3:]
+    try:
+        rk = float(rk)
+    except ValueError:
+        rk = None
+
     return (
         elements,
         Zf,
@@ -70,11 +78,14 @@ def load_data_from_mcss_file_name(name):
         float(ang),
         float(rho),
         float(T),
+        ff,
+        lfc,
+        rk,
     )
 
 
 name = mcss_file.stem
-elements, Zf, number_frac, central_energy, theta, rho, T_e = (
+elements, Zf, number_frac, central_energy, theta, rho, T_e, ff, lfc, rk = (
     load_data_from_mcss_file_name(name)
 )
 
@@ -92,6 +103,7 @@ state = jaxrts.PlasmaState(
     mass_density=rho * ureg.gram / ureg.centimeter**3 * mass_fraction,
     T_e=T_e * ureg.electron_volt / ureg.k_B,
 )
+state = state.expand_integer_ionization_states()
 
 sharding = jax.sharding.PositionalSharding(jax.devices())
 energy = (
@@ -113,23 +125,28 @@ setup = jaxrts.setup.Setup(
     ),
 )
 
-# state["chemical potential"] = jaxrts.models.ConstantChemPotential(
-#     0 * ureg.electron_volt
-# )
+state["chemical potential"] = jaxrts.models.IchimaruChemPotential()
 
-state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
-state["ee-lfc"] = jaxrts.models.ElectronicLFCConstant(1)
-state["ipd"] = jaxrts.models.StewartPyattIPD()
+
+if lfc.lower() == "none":
+    state["ee-lfc"] = jaxrts.models.ElectronicLFCConstant(1)
+elif lfc.lower() == "static_interp":
+    state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
 state["ipd"] = jaxrts.models.Neglect()
 state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
-# state["screening length"] = jaxrts.models.ConstantScreeningLength(ureg("4.38E-2 nm"))
 state["electron-ion Potential"] = jaxrts.hnc_potentials.CoulombPotential()
 state["screening"] = jaxrts.models.FiniteWavelengthScreening()
 state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHueckelPotential()
 state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
-state["BM S_ii"] = jaxrts.models.AverageAtom_Sii()
-state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann()
-state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=1)
+if len(state.ions) > 1:
+    state["BM S_ii"] = jaxrts.models.AverageAtom_Sii()
+else:
+    state["BM S_ii"] = jaxrts.models.Sum_Sii()
+if ff.lower() == "dandrea_rpa_fit":
+    state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
+elif ff.lower() == "born_mermin":
+    state["free-free scattering"] = jaxrts.models.BornMermin()
+state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=rk)
 state["free-bound scattering"] = jaxrts.models.Neglect()
 
 print("W_R")
@@ -140,10 +157,6 @@ print("n_e:")
 print(state.n_e.to(1 / ureg.centimeter**3))
 print("chemPot")
 print(state.evaluate("chemical potential", setup) / (1 * ureg.k_B * state.T_e))
-# print(setup.full_k.to(1 / ureg.angstrom))
-# print(
-#     jaxrts.setup.dispersion_corrected_k(setup, state.n_e).to(1 / ureg.angstrom)
-# )
 
 I = state.probe(setup)
 t0 = time.time()
@@ -157,7 +170,7 @@ plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
     (I / norm).m_as(ureg.dimensionless),
     color="C0",
-    label="BMA (LFC=StaticInterp, naive)",
+    label="JaXRTS",
 )
 plt.plot(
     (setup.measured_energy).m_as(ureg.electron_volt),
@@ -166,6 +179,7 @@ plt.plot(
     ),
     color="C0",
     ls="dashed",
+    label="JaXRTS, bf",
     alpha=0.7,
 )
 plt.plot(
@@ -175,6 +189,7 @@ plt.plot(
     ),
     color="C0",
     ls="dotted",
+    label="JaXRTS, ff",
     alpha=0.7,
 )
 plt.plot(
@@ -184,32 +199,7 @@ plt.plot(
     ),
     color="C0",
     ls="dashdot",
-    alpha=0.7,
-)
-state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
-print(state["ionic scattering"].Rayleigh_weight(state, setup))
-
-_I = state.probe(setup)
-_norm = jnpu.max(
-    state.evaluate("free-free scattering", setup)
-    # + state.evaluate("bound-free scattering", setup)
-)
-print(jnpu.max(I) / norm / (jnpu.max(_I) / _norm))
-I = _I
-norm = _norm
-plt.plot(
-    (setup.measured_energy).m_as(ureg.electron_volt),
-    (I / norm).m_as(ureg.dimensionless),
-    color="C2",
-    label="RPA",
-)
-plt.plot(
-    (setup.measured_energy).m_as(ureg.electron_volt),
-    (state.evaluate("free-free scattering", setup) / norm).m_as(
-        ureg.dimensionless
-    ),
-    color="C2",
-    ls="dotted",
+    label="JaXRTS, elastic",
     alpha=0.7,
 )
 MCSS_Norm = jnp.max(S_ff)
@@ -219,6 +209,7 @@ plt.plot(
     S_bf / MCSS_Norm,
     color="C1",
     ls="dashed",
+    label="MCSS, bf",
     alpha=0.7,
 )
 plt.plot(
@@ -226,6 +217,7 @@ plt.plot(
     S_ff / MCSS_Norm,
     color="C1",
     ls="dotted",
+    label="MCSS, ff",
     alpha=0.7,
 )
 

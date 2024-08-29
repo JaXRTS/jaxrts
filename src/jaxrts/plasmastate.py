@@ -75,6 +75,36 @@ class PlasmaState:
         model.model_key = key
         self.models[key] = model
 
+    def expand_integer_ionization_states(self) -> "PlasmaState":
+        """
+        Creates a new PlasmaState with twice the amount of ion species, where
+        each of the ions has an integer charge state and the number of ions is
+        adjusted so that the mean charge is the (potentially fractional) charge
+        of self.
+        """
+        doub_ion_list = [i for i in self.ions for _ in range(2)]
+        doub_Ti = jpu.numpy.repeat(self.T_i, 2)
+        doub_Z = jpu.numpy.repeat(self.Z_free, 2)
+        new_Z = jpu.numpy.where(
+            jnp.arange(len(doub_Z)) % 2 == 0,
+            jnp.floor(doub_Z),
+            jnp.ceil(doub_Z),
+        )
+        xi = jnp.where(
+            jnp.arange(len(doub_Z)) % 2 == 0,
+            1 - (doub_Z - jnp.floor(doub_Z)),
+            doub_Z - jnp.floor(doub_Z),
+        )
+        doub_rho = jpu.numpy.repeat(self.mass_density, 2)
+
+        return PlasmaState(
+            doub_ion_list,
+            Z_free=new_Z,
+            mass_density=xi * doub_rho,
+            T_e=self.T_e,
+            T_i=doub_Ti,
+        )
+
     def update_default_model(
         self, model_name: str, model_class: ABCMeta
     ) -> None:
