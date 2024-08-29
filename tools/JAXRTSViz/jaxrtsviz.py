@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("JAXRTSViz")
-        self.setGeometry(20, 20, 1100, 850)
+        self.setGeometry(20, 20, 1200, 850)
         # Create a CustomTabWidget
         self.tabs = CustomTabWidget()
         self.setCentralWidget(self.tabs)
@@ -1336,7 +1336,7 @@ class JAXRTSViz(QWidget):
             self.toolbar.repaint()
             self.canvas.ax.plot(
                 (self.current_setup.measured_energy).m_as(ureg.electron_volt),
-                I.m_as(ureg.second),
+                I.m_as(ureg.second) / jnp.max(I.m_as(ureg.second)),
                 label="Model " + str(len(self.model_data)),
                 color=list(base_colors.keys())[len(self.model_data)],
             )
