@@ -276,17 +276,6 @@ def test_realfft_realfftnp_equaltity():
     assert jnp.quantile(jnp.abs(f_fft1 - f_fft2), 0.99) < 1e-8
 
 
-def test_sinft_OLDsinft_equaltity():
-    N = 2**7
-    r = jnp.linspace(0.02, 20.0, N)
-
-    f = r / (1 + r**2)
-    f_fft1 = jaxrts.hypernetted_chain.sinft(f.copy())
-    f_fft2 = jaxrts.hypernetted_chain.OLDsinft(f.copy())
-    # There seems to be a small difference in index 1.
-    assert jnp.max(jnp.abs(f_fft1 - f_fft2)) < 1e-8
-
-
 def test_sinft_self_inverse():
     N = 2**14
     r = jnp.linspace(0.00, 20.0, N)
