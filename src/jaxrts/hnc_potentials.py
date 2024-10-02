@@ -206,6 +206,29 @@ class HNCPotential(metaclass=abc.ABCMeta):
         )
         return l_ab
 
+    def __add__(self, other) -> "PotentialSum":
+        if not isinstance(other, HNCPotential):
+            raise NotImplementedError(
+                "You can only add other HNCPotentials to an HNCPotential."
+            )
+        if isinstance(self, PotentialSum):
+            list_of_potentials = self.potentials
+        else:
+            list_of_potentials = [self]
+        if isinstance(other, PotentialSum):
+            list_of_potentials = [*list_of_potentials, *other.potentials]
+        else:
+            list_of_potentials.append(other)
+        return PotentialSum(list_of_potentials)
+
+    def __mul__(self, other) -> "ScaledPotential":
+        if not isinstance(other, (float, int)):
+            raise NotImplementedError(
+                "You can only add scale an HNCPotentials with a float."
+                + f"Other is type {type(other)}."
+            )
+        return ScaledPotential(self, factor=other)
+
     # The following is required to jit a state
     def _tree_flatten(self):
         children = (self._transform_r,)
@@ -221,6 +244,187 @@ class HNCPotential(metaclass=abc.ABCMeta):
         (obj._transform_r,) = children
         obj.model_key = aux_data["model_key"]
         obj.include_electrons = aux_data["include_electrons"]
+        return obj
+
+
+class PotentialSum(HNCPotential):
+    """
+    A sum of several :py:class:`HNCPotential` s. Can be used e.g., if
+    higher-order corrections should be added to a model.
+    """
+
+    __name__ = "PotentialSum"
+
+    def __init__(self, list_of_potentials: list[HNCPotential]) -> None:
+        self.potentials = list_of_potentials
+        self.include_electrons = any(
+            [pot.include_electrons for pot in self.potentials]
+        )
+        self.model_key = ""
+
+    @property
+    def include_electrons(self):
+        return self._include_electrons
+
+    @include_electrons.setter
+    def include_electrons(self, value: bool):
+        self._include_electrons = value
+        # Pass the setting if electrons should be included down to all the
+        # potentials considered
+        for pot in self.potentials:
+            pot.include_electrons = value
+
+    @property
+    def description(self) -> str:
+        return f"Sum of {[pot.__name__ for pot in self.potentials]}"
+
+    @jax.jit
+    def full_r(self, plasma_state, r: Quantity) -> Quantity:
+        unit = ureg.electron_volt
+        out = jnp.array(
+            [pot.full_r(plasma_state, r).m_as(unit) for pot in self.potentials]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    @jax.jit
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        unit = ureg.electron_volt
+        out = jnp.array(
+            [pot.long_r(plasma_state, r).m_as(unit) for pot in self.potentials]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    @jax.jit
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        unit = ureg.electron_volt
+        out = jnp.array(
+            [
+                pot.short_r(plasma_state, r).m_as(unit)
+                for pot in self.potentials
+            ]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    @jax.jit
+    def full_k(self, plasma_state, k: Quantity) -> Quantity:
+        unit = ureg.electron_volt * ureg.angstrom**3
+        out = jnp.array(
+            [pot.full_k(plasma_state, k).m_as(unit) for pot in self.potentials]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    @jax.jit
+    def long_k(self, plasma_state, k: Quantity) -> Quantity:
+        unit = ureg.electron_volt * ureg.angstrom**3
+        out = jnp.array(
+            [pot.long_k(plasma_state, k).m_as(unit) for pot in self.potentials]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    @jax.jit
+    def short_k(self, plasma_state, k: Quantity) -> Quantity:
+        unit = ureg.electron_volt * ureg.angstrom**3
+        out = jnp.array(
+            [
+                pot.short_k(plasma_state, k).m_as(unit)
+                for pot in self.potentials
+            ]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    # The following is required to jit a state
+    def _tree_flatten(self):
+        children = (self.potentials,)
+        aux_data = {
+            "include_electrons": self._include_electrons,
+            "model_key": self.model_key,
+        }  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.potentials,) = children
+        obj.model_key = aux_data["model_key"]
+        obj._include_electrons = aux_data["include_electrons"]
+        return obj
+
+
+class ScaledPotential(HNCPotential):
+    """
+    A :py:class:`HNCPotential`, scaled with a factor
+    """
+
+    __name__ = "ScaledPotential"
+
+    def __init__(self, potential: HNCPotential, factor: float = 1.0) -> None:
+        self.potential = potential
+        self.factor = factor
+        self.include_electrons = self.potential.include_electrons
+        self.model_key = ""
+
+    @property
+    def include_electrons(self):
+        return self._include_electrons
+
+    @include_electrons.setter
+    def include_electrons(self, value: bool):
+        self._include_electrons = value
+        # Pass the setting if electrons should be included down to all the
+        # potentials considered
+        self.potential.include_electrons = value
+
+    @property
+    def description(self) -> str:
+        return f"{self.potential.__name__}, scaled with {self.factor}"
+
+    @jax.jit
+    def full_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.potential.full_r(plasma_state, r) * self.factor
+
+    @jax.jit
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.potential.long_r(plasma_state, r) * self.factor
+
+    @jax.jit
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.potential.short_r(plasma_state, r) * self.factor
+
+    @jax.jit
+    def full_k(self, plasma_state, k: Quantity) -> Quantity:
+        return self.potential.full_k(plasma_state, k) * self.factor
+
+    @jax.jit
+    def long_k(self, plasma_state, k: Quantity) -> Quantity:
+        return self.potential.long_k(plasma_state, k) * self.factor
+
+    @jax.jit
+    def short_k(self, plasma_state, k: Quantity) -> Quantity:
+        return self.potential.short_k(plasma_state, k) * self.factor
+
+    def __mul__(self, other) -> "ScaledPotential":
+        if not isinstance(other, (float, int)):
+            raise NotImplementedError(
+                "You can only add scale an HNCPotentials with a float. "
+                + f"Other is type {type(other)}."
+            )
+        return ScaledPotential(self.potential, factor=other * self.factor)
+
+    # The following is required to jit a state
+    def _tree_flatten(self):
+        children = (self.potential, self.factor)
+        aux_data = {
+            "include_electrons": self._include_electrons,
+            "model_key": self.model_key,
+        }  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.potential, obj.factor) = children
+        obj.model_key = aux_data["model_key"]
+        obj._include_electrons = aux_data["include_electrons"]
         return obj
 
 
@@ -785,6 +989,8 @@ for _pot in [
     EmptyCorePotential,
     KelbgPotential,
     KlimontovichKraeftPotential,
+    PotentialSum,
+    ScaledPotential,
     SoftCorePotential,
 ]:
     jax.tree_util.register_pytree_node(
