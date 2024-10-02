@@ -361,10 +361,19 @@ _3Dfour = _3Dfour_sine
 
 
 @jax.jit
-def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
+def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0):
     """
     Calculate the Pair distribution function in the Hypernetted Chain approach,
     as it was published by :cite:`Wunsch.2011`.
+
+    The `mix` argument should lie within the interval [0, 1) and controls
+    the amount by which the short-range nodal diagram term `N_ab` is updated
+    with each iteration. `mix=0` corresponds to fully using the newly obtained
+    result, while increasing `mix` mixes more of the previous iteration's value
+    to `N_ab`. This addition to the HNC scheme presented by :cite:`Wunsch.2011`
+    was introduced in the MCSS User Guide :cite:`Chapman.2016` and is
+    especially relevant e.g., at low temperatures, where the HNC scheme becomes
+    numerically unstable.
     """
     delta = 1e-6
 
@@ -421,7 +430,7 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
 
         Ns_k = h_k - cs_k
 
-        Ns_r_new = (
+        Ns_r_new_full = (
             _3Dfour(
                 r,
                 k,
@@ -429,6 +438,8 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni):
             )
             / (2 * jnp.pi) ** 3
         )
+
+        Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
 
         log_g_r_new = Ns_r_new - v_s
 
