@@ -210,6 +210,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         if not isinstance(other, HNCPotential):
             raise NotImplementedError(
                 "You can only add other HNCPotentials to an HNCPotential."
+                + f"Other is type {type(other)}."
             )
         if isinstance(self, PotentialSum):
             list_of_potentials = self.potentials
@@ -966,6 +967,40 @@ class SoftCorePotential(HNCPotential):
         return obj
 
 
+class SpinAveragedEEExchange(HNCPotential):
+    """
+    See :cite:`Wunsch.2008`, Eqn (18).
+    """
+
+    __name__ = "SpinAveragedEEExchange"
+
+    @jax.jit
+    def full_r(self, plasma_state, r):
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+        exchange = (
+            (ureg.k_B * self.T(plasma_state))
+            * jnp.log(2)
+            * jpu.numpy.exp(
+                -1
+                / (jnp.pi * jnp.log(2))
+                * (_r / self.lambda_ab(plasma_state)) ** 2
+            )
+            * jnp.eye(len(self.mu(plasma_state)))[:, :, jnp.newaxis]
+        )
+        # Set the parts that are not electron_electron exchange to zero
+        exchange = (
+            exchange.m_as(ureg.electron_volt)
+            .at[: len(plasma_state.ions), : len(plasma_state.ions), :]
+            .set(
+                jnp.zeros(
+                    (len(plasma_state.ions), len(plasma_state.ions), len(_r))
+                )
+            )
+            * ureg.electron_volt
+        )
+        return exchange
+
+
 @jax.jit
 def transformPotential(V, r) -> Quantity:
     """
@@ -992,6 +1027,7 @@ for _pot in [
     PotentialSum,
     ScaledPotential,
     SoftCorePotential,
+    SpinAveragedEEExchange,
 ]:
     jax.tree_util.register_pytree_node(
         _pot,
