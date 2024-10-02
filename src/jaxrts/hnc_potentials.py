@@ -4,7 +4,7 @@ HNC Potentials
 
 This module contains a set of Parameters to be used when performing HNC
 calculations. This includes that the potential is split into a long-range and a
-shortrange part and is also Fourier-transformed to k-space.
+short-range part and is also Fourier-transformed to k-space.
 """
 
 import abc
@@ -38,7 +38,7 @@ def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
 class HNCPotential(metaclass=abc.ABCMeta):
     """
     Potentials, intended to be used in the HNC scheme. Per default, the results
-    of methonds evaluating this Potential (in k or r space), return a
+    of methods evaluating this Potential (in k or r space), return a
     :math:`(n\\times n\\times m)` matrix, where ``n`` is the number of ion
     species and ``m`` is the number of r or k points.
     However, if :py:attr:`~.include_electrons` is ``True``, electrons are added
@@ -112,7 +112,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
     @jax.jit
     def short_k(self, plasma_state, k: Quantity) -> Quantity:
         """
-        The Foutier transform of :py:meth:`~short_r`.
+        The Fourier transform of :py:meth:`~short_r`.
         """
         V_k, _k = transformPotential(
             self.short_r(plasma_state, self._transform_r), self._transform_r
@@ -252,7 +252,7 @@ class CoulombPotential(HNCPotential):
         """
         .. math::
 
-            q^2 / (k^2 * \\varepsilon_0) * (\\alpha**2 / (k^2 + \\alpha^2))
+            q^2 / (k^2 \\varepsilon_0) \\cdot (\\alpha^2 / (k^2 + \\alpha^2))
 
         """
         _k = k[jnp.newaxis, jnp.newaxis, :]
@@ -337,7 +337,7 @@ class KelbgPotential(HNCPotential):
 
         .. math::
 
-            V_{a b}^{\\mathrm{Deutsch}}(r) =
+            V_{a b}^{\\mathrm{Kelbg}}(r) =
             \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
             \\left[1-\\exp\\left(-\\frac{r^2}{\\lambda_{a b}^2}\\right) +
             \\frac{\\sqrt\\pi r}{\\lambda_{a b}}
@@ -373,6 +373,70 @@ class KelbgPotential(HNCPotential):
             )
         )
 
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        """
+
+        .. math::
+
+            V_{a b}^{\\mathrm{Kelbg}}(r) =
+            \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
+            \\left[
+            \\frac{\\sqrt\\pi r}{\\lambda_{a b}}
+            \\left(1-\\mathrm{erf}
+            \\left(\\frac{r}{\\lambda_{a b}}\\right)
+            \\right)
+            \\right]
+
+        In the above equation, :math:`\\mathrm{erf}` is the Gaussian error
+        function.
+
+        For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
+        \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`.
+        """
+
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+
+        return (
+            self.q2(plasma_state)
+            / (4 * jnp.pi * ureg.epsilon_0 * _r)
+            * (
+                (jnp.sqrt(jnp.pi) * _r / self.lambda_ab(plasma_state))
+                * (
+                    1
+                    - jax.scipy.special.erf(
+                        (_r / self.lambda_ab(plasma_state)).m_as(
+                            ureg.dimensionless
+                        )
+                    )
+                )
+            )
+        )
+
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        """
+
+        .. math::
+
+            V_{a b}^{\\mathrm{Kelbg}}(r) =
+            \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
+            \\left[1-\\exp\\left(-\\frac{r^2}{\\lambda_{a b}^2}\\right)
+            \\right]
+
+        In the above equation, :math:`\\mathrm{erf}` is the Gaussian error
+        function.
+
+        For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
+        \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`.
+        """
+
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+
+        return (
+            self.q2(plasma_state)
+            / (4 * jnp.pi * ureg.epsilon_0 * _r)
+            * (1 - jpu.numpy.exp(-(_r**2) / self.lambda_ab(plasma_state) ** 2))
+        )
+
 
 class KlimontovichKraeftPotential(HNCPotential):
     """
@@ -383,7 +447,7 @@ class KlimontovichKraeftPotential(HNCPotential):
         This potential is only defined for electron-ion interactions. However,
         for the output to have the same shape as other potentials, we calculate
         it for all inputs. The most sensible treatment is to only use the
-        off-diagnonal entries for the `ei` Potential.
+        off-diagonal entries for the `ei` Potential.
 
     """
 
@@ -449,6 +513,47 @@ class DeutschPotential(HNCPotential):
             * (1 - jpu.numpy.exp(-_r / self.lambda_ab(plasma_state)))
         )
 
+    @jax.jit
+    def full_k(self, plasma_state, k: Quantity):
+        """
+        .. math::
+
+            q^2 / (k^2 * \\varepsilon_0) *
+            ((1/\\lambda{a b})**2 / (k^2 + (1/\\lambda{a b})^2))
+
+        """
+        _k = k[jnp.newaxis, jnp.newaxis, :]
+
+        return (
+            self.q2(plasma_state)
+            / (_k**2 * ureg.epsilon_0)
+            * (1 / self.lambda_ab(plasma_state)) ** 2
+            / (_k**2 + (1 / self.lambda_ab(plasma_state)) ** 2)
+        )
+
+    @jax.jit
+    def long_k(self, plasma_state, k: Quantity):
+        return self.full_k(plasma_state, k)
+
+    @jax.jit
+    def long_r(self, plasma_state, r: Quantity):
+        return self.full_r(plasma_state, r)
+
+    @jax.jit
+    def short_k(self, plasma_state, k: Quantity) -> Quantity:
+        return (
+            jnp.zeros([*self.q2(plasma_state).shape[:2], len(k)])
+            * ureg.electron_volt
+            * ureg.angstrom**3
+        )
+
+    @jax.jit
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        return (
+            jnp.zeros([*self.q2(plasma_state).shape[:2], len(r)])
+            * ureg.electron_volt
+        )
+
 
 class EmptyCorePotential(HNCPotential):
     """
@@ -457,7 +562,7 @@ class EmptyCorePotential(HNCPotential):
     For all radii smaller than `r_cut` (this is the short-range part of the
     potential, for now), the potential is forced to zero.
 
-    We definie `r_cut` in the :py:class:`jaxrts.PlasmaState`.
+    We define `r_cut` in the :py:class:`jaxrts.PlasmaState`.
 
     .. warning::
 
@@ -497,17 +602,6 @@ class EmptyCorePotential(HNCPotential):
         ) * (self.q2(plasma_state) / (4 * jnp.pi * ureg.epsilon_0 * _r))
 
     @jax.jit
-    def long_r(self, plasma_state, r: Quantity) -> Quantity:
-        return self.full_r(plasma_state, r)
-
-    @jax.jit
-    def short_r(self, plasma_state, r: Quantity) -> Quantity:
-        return (
-            jnp.zero(*self.q2(plasma_state).shape[:2], len(r))
-            * ureg.electron_volt
-        )
-
-    @jax.jit
     def full_k(self, plasma_state, k):
         _k = k[jnp.newaxis, jnp.newaxis, :]
         return (
@@ -518,13 +612,24 @@ class EmptyCorePotential(HNCPotential):
         )
 
     @jax.jit
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.full_r(plasma_state, r)
+
+    @jax.jit
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        return (
+            jnp.zeros([*self.q2(plasma_state).shape[:2], len(r)])
+            * ureg.electron_volt
+        )
+
+    @jax.jit
     def long_k(self, plasma_state, k: Quantity) -> Quantity:
         return self.full_k(plasma_state, k)
 
     @jax.jit
     def short_k(self, plasma_state, k: Quantity) -> Quantity:
         return (
-            jnp.zero(*self.q2(plasma_state).shape[:2], len(k))
+            jnp.zeros([*self.q2(plasma_state).shape[:2], len(k)])
             * ureg.electron_volt
             * ureg.angstrom**3
         )
@@ -537,7 +642,7 @@ class SoftCorePotential(HNCPotential):
     cutoff. It's strength is given by the attribute :py:attr:`~.beta`.
     See :cite:`Gericke.2010`.
 
-    We definie `r_cut` in the :py:class:`jaxrts.PlasmaState`.
+    We define `r_cut` in the :py:class:`jaxrts.PlasmaState`.
 
     .. warning::
 
@@ -592,7 +697,7 @@ class SoftCorePotential(HNCPotential):
 
     @jax.jit
     def short_r(self, plasma_state, r: Quantity) -> Quantity:
-        return jnp.zero(*self.q.shape[:2], len(r)) * ureg.electron_volt
+        return jnp.zeros([*self.q.shape[:2], len(r)]) * ureg.electron_volt
 
     @jax.jit
     def full_k(self, plasma_state, k):
@@ -634,7 +739,7 @@ class SoftCorePotential(HNCPotential):
     @jax.jit
     def short_k(self, plasma_state, k: Quantity) -> Quantity:
         return (
-            jnp.zero(*self.q.shape[:2], len(k))
+            jnp.zeros([*self.q.shape[:2], len(k)])
             * ureg.electron_volt
             * ureg.angstrom**3
         )
