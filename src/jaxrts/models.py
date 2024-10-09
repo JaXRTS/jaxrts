@@ -538,7 +538,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         # Interpolate this to the k given by the setup
 
         S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
-     
+
         return S_ab
 
     # The following is required to jit a Model
@@ -2202,11 +2202,7 @@ class FiniteWavelengthScreening(Model):
         )
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jnpu.where(
-            plasma_state.Z_free == 0,
-            0,
-            q[:, 0]
-        )[:, jnp.newaxis]
+        q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
         return q
 
 
@@ -2240,11 +2236,7 @@ class DebyeHueckelScreening(Model):
         )
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jnpu.where(
-            plasma_state.Z_free == 0,
-            0,
-            q[:, 0]
-        )[:, jnp.newaxis]
+        q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
         return q
 
 
@@ -2295,11 +2287,7 @@ class LinearResponseScreening(Model):
         q = xi * Vei[-1, :-1]
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jnpu.where(
-            plasma_state.Z_free == 0,
-            0,
-            q[:, 0]
-        )[:, jnp.newaxis]
+        q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
         return q
 
 
@@ -2335,11 +2323,7 @@ class Gregori2004Screening(Model):
         )[:, jnp.newaxis]
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jnpu.where(
-            plasma_state.Z_free == 0,
-            0,
-            q[:, 0]
-        )[:, jnp.newaxis]
+        q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
         return q
 
 
