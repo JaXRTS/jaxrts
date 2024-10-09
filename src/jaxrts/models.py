@@ -29,7 +29,6 @@ from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
 from .setup import (
     Setup,
     convolve_stucture_factor_with_instrument,
-    dispersion_corrected_k,
     get_probe_setup,
 )
 from .units import Quantity, to_array, ureg
@@ -838,7 +837,7 @@ class QCSalpeterApproximation(FreeFreeModel):
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_Salpeter(
             k,
             plasma_state.T_e,
@@ -910,7 +909,7 @@ class RPA_NoDamping(FreeFreeModel):
         self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
     ) -> jnp.ndarray:
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_RPA_no_damping(
             k,
             plasma_state.T_e,
@@ -976,7 +975,7 @@ class RPA_DandreaFit(FreeFreeModel):
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_RPA_Dandrea(
             k,
             plasma_state.T_e,
@@ -1061,7 +1060,7 @@ class BornMerminFull(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA(
             k,
             plasma_state.T_e,
@@ -1195,7 +1194,7 @@ class BornMermin(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
             k,
             plasma_state.T_e,
@@ -1348,7 +1347,7 @@ class BornMermin_Fit(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interpFit(
             k,
             plasma_state.T_e,
@@ -1499,7 +1498,7 @@ class BornMermin_Fortmann(FreeFreeModel):
             return plasma_state["BM V_eiS"].V(plasma_state, k)
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         mean_Z_free = jnpu.sum(
             plasma_state.Z_free * plasma_state.number_fraction
         )
@@ -1627,8 +1626,9 @@ class SchumacherImpulse(ScatteringModel):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
+        _
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         omega_0 = setup.energy / ureg.hbar
         omega = omega_0 - setup.measured_energy / ureg.hbar
         x = plasma_state.number_fraction
@@ -2358,7 +2358,7 @@ class ElectronicLFCGeldartVosko(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         return ee_localfieldcorrections.eelfc_geldartvosko(
             k, plasma_state.T_e, plasma_state.n_e
         )
@@ -2388,7 +2388,7 @@ class ElectronicLFCUtsumiIchimaru(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         return ee_localfieldcorrections.eelfc_utsumiichimaru(
             k, plasma_state.T_e, plasma_state.n_e
         )
@@ -2418,7 +2418,7 @@ class ElectronicLFCStaticInterpolation(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
             k, plasma_state.T_e, plasma_state.n_e
         )

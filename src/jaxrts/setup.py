@@ -21,6 +21,7 @@ class Setup:
         energy: Quantity,
         measured_energy: Quantity,
         instrument: Callable,
+        correct_k_dispersion: bool = True,
     ):
 
         #: The scattering angle of the experiment
@@ -35,6 +36,13 @@ class Setup:
         #: instrument spread. The curve should be normed so that the integral
         #: from `-inf` to `inf` should be one.
         self.instrument: Callable = jax.tree_util.Partial(instrument)
+        #: In an experiment, the value of k is dependent on the measured energy
+        #: at this position on the detector. When including this effect, the
+        #: returned spectrum will, however, violate detailed balance. It might
+        #: therefore be instructive  to set this value (which is ``True`` be
+        #: default) to ``False`` to #: check, e.g. temperature differences when
+        #: applying ITCF analysis methods.
+        self.correct_k_dispersion: bool = correct_k_dispersion
 
     @property
     def k(self) -> Quantity:
@@ -51,16 +59,44 @@ class Setup:
         The scattering vector length probed in the experiment at each energy
         channel.
         """
-        k_in = self.energy / ureg.hbar / ureg.c
-        k_out = self.measured_energy / ureg.hbar / ureg.c
+        if self.correct_k_dispersion:
+            k_in = self.energy / ureg.hbar / ureg.c
+            k_out = self.measured_energy / ureg.hbar / ureg.c
 
-        k = jnpu.sqrt(
-            (k_out**2 + k_in**2)
-            - (
-                (2 * k_out * k_in)
-                * jnpu.cos(jnpu.deg2rad(self.scattering_angle))
+            k = jnpu.sqrt(
+                (k_out**2 + k_in**2)
+                - (
+                    (2 * k_out * k_in)
+                    * jnpu.cos(jnpu.deg2rad(self.scattering_angle))
+                )
             )
-        )
+        else:
+            k = self.k * jnpu.ones_like(self.measured_energy)
+        return k
+
+    @jax.jit
+    def dispersion_corrected_k(self, n_e: Quantity) -> Quantity:
+        """
+        Returns the dispersion corrected wavenumber.
+        """
+
+        if self.correct_k_dispersion:
+            omega_in = self.energy / ureg.hbar
+            omega_out = self.measured_energy / ureg.hbar
+            omega_pl = plasma_frequency(n_e)
+            k_in = omega_in / ureg.c
+            k_out = omega_out / ureg.c
+
+            # Do the dispersion correction:
+            k_in *= jnpu.sqrt(1 - omega_pl**2 / omega_in**2)
+            k_out *= jnpu.sqrt(1 - omega_pl**2 / omega_out**2)
+
+            k = jnpu.sqrt(
+                (k_out**2 + k_in**2)
+                - (2 * k_out * k_in * jnpu.cos(self.scattering_angle))
+            )
+        else:
+            k = self.k * jnpu.ones_like(self.measured_energy)
         return k
 
     @property
@@ -79,7 +115,7 @@ class Setup:
             self.measured_energy,
             self.instrument,
         )
-        aux_data = ()  # static values
+        aux_data = (self.correct_k_dispersion,)  # static values
         return (children, aux_data)
 
     @classmethod
@@ -91,30 +127,8 @@ class Setup:
             obj.measured_energy,
             obj.instrument,
         ) = children
+        (obj.correct_k_dispersion,) = aux_data
         return obj
-
-
-@jax.jit
-def dispersion_corrected_k(setup: Setup, n_e: Quantity) -> Quantity:
-    """
-    Returns the dispersion corrected wavenumber.
-    """
-
-    omega_in = setup.energy / ureg.hbar
-    omega_out = setup.measured_energy / ureg.hbar
-    omega_pl = plasma_frequency(n_e)
-    k_in = omega_in / ureg.c
-    k_out = omega_out / ureg.c
-
-    # Do the dispersion correction:
-    k_in *= jnpu.sqrt(1 - omega_pl**2 / omega_in**2)
-    k_out *= jnpu.sqrt(1 - omega_pl**2 / omega_out**2)
-
-    k = jnpu.sqrt(
-        (k_out**2 + k_in**2)
-        - (2 * k_out * k_in * jnpu.cos(setup.scattering_angle))
-    )
-    return k
 
 
 @jax.jit
@@ -174,7 +188,11 @@ def get_probe_setup(k: Quantity, setup: Setup) -> Setup:
         / (2 * jnpu.sin(setup.scattering_angle / 2))
     )
     return Setup(
-        setup.scattering_angle, E, setup.measured_energy, setup.instrument
+        setup.scattering_angle,
+        E,
+        setup.measured_energy,
+        setup.instrument,
+        setup.correct_k_dispersion,
     )
 
 
