@@ -4,7 +4,7 @@ HNC Potentials
 
 This module contains a set of Parameters to be used when performing HNC
 calculations. This includes that the potential is split into a long-range and a
-shortrange part and is also Fourier-transformed to k-space.
+short-range part and is also Fourier-transformed to k-space.
 """
 
 import abc
@@ -38,7 +38,7 @@ def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
 class HNCPotential(metaclass=abc.ABCMeta):
     """
     Potentials, intended to be used in the HNC scheme. Per default, the results
-    of methonds evaluating this Potential (in k or r space), return a
+    of methods evaluating this Potential (in k or r space), return a
     :math:`(n\\times n\\times m)` matrix, where ``n`` is the number of ion
     species and ``m`` is the number of r or k points.
     However, if :py:attr:`~.include_electrons` is ``True``, electrons are added
@@ -112,7 +112,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
     @jax.jit
     def short_k(self, plasma_state, k: Quantity) -> Quantity:
         """
-        The Foutier transform of :py:meth:`~short_r`.
+        The Fourier transform of :py:meth:`~short_r`.
         """
         V_k, _k = transformPotential(
             self.short_r(plasma_state, self._transform_r), self._transform_r
@@ -206,6 +206,30 @@ class HNCPotential(metaclass=abc.ABCMeta):
         )
         return l_ab
 
+    def __add__(self, other) -> "PotentialSum":
+        if not isinstance(other, HNCPotential):
+            raise NotImplementedError(
+                "You can only add other HNCPotentials to an HNCPotential."
+                + f"Other is type {type(other)}."
+            )
+        if isinstance(self, PotentialSum):
+            list_of_potentials = self.potentials
+        else:
+            list_of_potentials = [self]
+        if isinstance(other, PotentialSum):
+            list_of_potentials = [*list_of_potentials, *other.potentials]
+        else:
+            list_of_potentials.append(other)
+        return PotentialSum(list_of_potentials)
+
+    def __mul__(self, other) -> "ScaledPotential":
+        if not isinstance(other, (float, int)):
+            raise NotImplementedError(
+                "You can only add scale an HNCPotentials with a float."
+                + f"Other is type {type(other)}."
+            )
+        return ScaledPotential(self, factor=other)
+
     # The following is required to jit a state
     def _tree_flatten(self):
         children = (self._transform_r,)
@@ -221,6 +245,187 @@ class HNCPotential(metaclass=abc.ABCMeta):
         (obj._transform_r,) = children
         obj.model_key = aux_data["model_key"]
         obj.include_electrons = aux_data["include_electrons"]
+        return obj
+
+
+class PotentialSum(HNCPotential):
+    """
+    A sum of several :py:class:`HNCPotential` s. Can be used e.g., if
+    higher-order corrections should be added to a model.
+    """
+
+    __name__ = "PotentialSum"
+
+    def __init__(self, list_of_potentials: list[HNCPotential]) -> None:
+        self.potentials = list_of_potentials
+        self.include_electrons = any(
+            [pot.include_electrons for pot in self.potentials]
+        )
+        self.model_key = ""
+
+    @property
+    def include_electrons(self):
+        return self._include_electrons
+
+    @include_electrons.setter
+    def include_electrons(self, value: bool):
+        self._include_electrons = value
+        # Pass the setting if electrons should be included down to all the
+        # potentials considered
+        for pot in self.potentials:
+            pot.include_electrons = value
+
+    @property
+    def description(self) -> str:
+        return f"Sum of {[pot.__name__ for pot in self.potentials]}"
+
+    @jax.jit
+    def full_r(self, plasma_state, r: Quantity) -> Quantity:
+        unit = ureg.electron_volt
+        out = jnp.array(
+            [pot.full_r(plasma_state, r).m_as(unit) for pot in self.potentials]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    @jax.jit
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        unit = ureg.electron_volt
+        out = jnp.array(
+            [pot.long_r(plasma_state, r).m_as(unit) for pot in self.potentials]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    @jax.jit
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        unit = ureg.electron_volt
+        out = jnp.array(
+            [
+                pot.short_r(plasma_state, r).m_as(unit)
+                for pot in self.potentials
+            ]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    @jax.jit
+    def full_k(self, plasma_state, k: Quantity) -> Quantity:
+        unit = ureg.electron_volt * ureg.angstrom**3
+        out = jnp.array(
+            [pot.full_k(plasma_state, k).m_as(unit) for pot in self.potentials]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    @jax.jit
+    def long_k(self, plasma_state, k: Quantity) -> Quantity:
+        unit = ureg.electron_volt * ureg.angstrom**3
+        out = jnp.array(
+            [pot.long_k(plasma_state, k).m_as(unit) for pot in self.potentials]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    @jax.jit
+    def short_k(self, plasma_state, k: Quantity) -> Quantity:
+        unit = ureg.electron_volt * ureg.angstrom**3
+        out = jnp.array(
+            [
+                pot.short_k(plasma_state, k).m_as(unit)
+                for pot in self.potentials
+            ]
+        )
+        return jnp.sum(out, axis=0) * unit
+
+    # The following is required to jit a state
+    def _tree_flatten(self):
+        children = (self.potentials,)
+        aux_data = {
+            "include_electrons": self._include_electrons,
+            "model_key": self.model_key,
+        }  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.potentials,) = children
+        obj.model_key = aux_data["model_key"]
+        obj._include_electrons = aux_data["include_electrons"]
+        return obj
+
+
+class ScaledPotential(HNCPotential):
+    """
+    A :py:class:`HNCPotential`, scaled with a factor
+    """
+
+    __name__ = "ScaledPotential"
+
+    def __init__(self, potential: HNCPotential, factor: float = 1.0) -> None:
+        self.potential = potential
+        self.factor = factor
+        self.include_electrons = self.potential.include_electrons
+        self.model_key = ""
+
+    @property
+    def include_electrons(self):
+        return self._include_electrons
+
+    @include_electrons.setter
+    def include_electrons(self, value: bool):
+        self._include_electrons = value
+        # Pass the setting if electrons should be included down to all the
+        # potentials considered
+        self.potential.include_electrons = value
+
+    @property
+    def description(self) -> str:
+        return f"{self.potential.__name__}, scaled with {self.factor}"
+
+    @jax.jit
+    def full_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.potential.full_r(plasma_state, r) * self.factor
+
+    @jax.jit
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.potential.long_r(plasma_state, r) * self.factor
+
+    @jax.jit
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.potential.short_r(plasma_state, r) * self.factor
+
+    @jax.jit
+    def full_k(self, plasma_state, k: Quantity) -> Quantity:
+        return self.potential.full_k(plasma_state, k) * self.factor
+
+    @jax.jit
+    def long_k(self, plasma_state, k: Quantity) -> Quantity:
+        return self.potential.long_k(plasma_state, k) * self.factor
+
+    @jax.jit
+    def short_k(self, plasma_state, k: Quantity) -> Quantity:
+        return self.potential.short_k(plasma_state, k) * self.factor
+
+    def __mul__(self, other) -> "ScaledPotential":
+        if not isinstance(other, (float, int)):
+            raise NotImplementedError(
+                "You can only add scale an HNCPotentials with a float. "
+                + f"Other is type {type(other)}."
+            )
+        return ScaledPotential(self.potential, factor=other * self.factor)
+
+    # The following is required to jit a state
+    def _tree_flatten(self):
+        children = (self.potential, self.factor)
+        aux_data = {
+            "include_electrons": self._include_electrons,
+            "model_key": self.model_key,
+        }  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.potential, obj.factor) = children
+        obj.model_key = aux_data["model_key"]
+        obj._include_electrons = aux_data["include_electrons"]
         return obj
 
 
@@ -252,7 +457,7 @@ class CoulombPotential(HNCPotential):
         """
         .. math::
 
-            q^2 / (k^2 * \\varepsilon_0) * (\\alpha**2 / (k^2 + \\alpha^2))
+            q^2 / (k^2 \\varepsilon_0) \\cdot (\\alpha^2 / (k^2 + \\alpha^2))
 
         """
         _k = k[jnp.newaxis, jnp.newaxis, :]
@@ -337,7 +542,7 @@ class KelbgPotential(HNCPotential):
 
         .. math::
 
-            V_{a b}^{\\mathrm{Deutsch}}(r) =
+            V_{a b}^{\\mathrm{Kelbg}}(r) =
             \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
             \\left[1-\\exp\\left(-\\frac{r^2}{\\lambda_{a b}^2}\\right) +
             \\frac{\\sqrt\\pi r}{\\lambda_{a b}}
@@ -373,6 +578,70 @@ class KelbgPotential(HNCPotential):
             )
         )
 
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        """
+
+        .. math::
+
+            V_{a b}^{\\mathrm{Kelbg}}(r) =
+            \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
+            \\left[
+            \\frac{\\sqrt\\pi r}{\\lambda_{a b}}
+            \\left(1-\\mathrm{erf}
+            \\left(\\frac{r}{\\lambda_{a b}}\\right)
+            \\right)
+            \\right]
+
+        In the above equation, :math:`\\mathrm{erf}` is the Gaussian error
+        function.
+
+        For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
+        \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`.
+        """
+
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+
+        return (
+            self.q2(plasma_state)
+            / (4 * jnp.pi * ureg.epsilon_0 * _r)
+            * (
+                (jnp.sqrt(jnp.pi) * _r / self.lambda_ab(plasma_state))
+                * (
+                    1
+                    - jax.scipy.special.erf(
+                        (_r / self.lambda_ab(plasma_state)).m_as(
+                            ureg.dimensionless
+                        )
+                    )
+                )
+            )
+        )
+
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        """
+
+        .. math::
+
+            V_{a b}^{\\mathrm{Kelbg}}(r) =
+            \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
+            \\left[1-\\exp\\left(-\\frac{r^2}{\\lambda_{a b}^2}\\right)
+            \\right]
+
+        In the above equation, :math:`\\mathrm{erf}` is the Gaussian error
+        function.
+
+        For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
+        \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`.
+        """
+
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+
+        return (
+            self.q2(plasma_state)
+            / (4 * jnp.pi * ureg.epsilon_0 * _r)
+            * (1 - jpu.numpy.exp(-(_r**2) / self.lambda_ab(plasma_state) ** 2))
+        )
+
 
 class KlimontovichKraeftPotential(HNCPotential):
     """
@@ -383,7 +652,7 @@ class KlimontovichKraeftPotential(HNCPotential):
         This potential is only defined for electron-ion interactions. However,
         for the output to have the same shape as other potentials, we calculate
         it for all inputs. The most sensible treatment is to only use the
-        off-diagnonal entries for the `ei` Potential.
+        off-diagonal entries for the `ei` Potential.
 
     """
 
@@ -449,6 +718,47 @@ class DeutschPotential(HNCPotential):
             * (1 - jpu.numpy.exp(-_r / self.lambda_ab(plasma_state)))
         )
 
+    @jax.jit
+    def full_k(self, plasma_state, k: Quantity):
+        """
+        .. math::
+
+            q^2 / (k^2 * \\varepsilon_0) *
+            ((1/\\lambda{a b})**2 / (k^2 + (1/\\lambda{a b})^2))
+
+        """
+        _k = k[jnp.newaxis, jnp.newaxis, :]
+
+        return (
+            self.q2(plasma_state)
+            / (_k**2 * ureg.epsilon_0)
+            * (1 / self.lambda_ab(plasma_state)) ** 2
+            / (_k**2 + (1 / self.lambda_ab(plasma_state)) ** 2)
+        )
+
+    @jax.jit
+    def long_k(self, plasma_state, k: Quantity):
+        return self.full_k(plasma_state, k)
+
+    @jax.jit
+    def long_r(self, plasma_state, r: Quantity):
+        return self.full_r(plasma_state, r)
+
+    @jax.jit
+    def short_k(self, plasma_state, k: Quantity) -> Quantity:
+        return (
+            jnp.zeros([*self.q2(plasma_state).shape[:2], len(k)])
+            * ureg.electron_volt
+            * ureg.angstrom**3
+        )
+
+    @jax.jit
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        return (
+            jnp.zeros([*self.q2(plasma_state).shape[:2], len(r)])
+            * ureg.electron_volt
+        )
+
 
 class EmptyCorePotential(HNCPotential):
     """
@@ -457,7 +767,7 @@ class EmptyCorePotential(HNCPotential):
     For all radii smaller than `r_cut` (this is the short-range part of the
     potential, for now), the potential is forced to zero.
 
-    We definie `r_cut` in the :py:class:`jaxrts.PlasmaState`.
+    We define `r_cut` in the :py:class:`jaxrts.PlasmaState`.
 
     .. warning::
 
@@ -497,17 +807,6 @@ class EmptyCorePotential(HNCPotential):
         ) * (self.q2(plasma_state) / (4 * jnp.pi * ureg.epsilon_0 * _r))
 
     @jax.jit
-    def long_r(self, plasma_state, r: Quantity) -> Quantity:
-        return self.full_r(plasma_state, r)
-
-    @jax.jit
-    def short_r(self, plasma_state, r: Quantity) -> Quantity:
-        return (
-            jnp.zero(*self.q2(plasma_state).shape[:2], len(r))
-            * ureg.electron_volt
-        )
-
-    @jax.jit
     def full_k(self, plasma_state, k):
         _k = k[jnp.newaxis, jnp.newaxis, :]
         return (
@@ -518,13 +817,24 @@ class EmptyCorePotential(HNCPotential):
         )
 
     @jax.jit
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.full_r(plasma_state, r)
+
+    @jax.jit
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        return (
+            jnp.zeros([*self.q2(plasma_state).shape[:2], len(r)])
+            * ureg.electron_volt
+        )
+
+    @jax.jit
     def long_k(self, plasma_state, k: Quantity) -> Quantity:
         return self.full_k(plasma_state, k)
 
     @jax.jit
     def short_k(self, plasma_state, k: Quantity) -> Quantity:
         return (
-            jnp.zero(*self.q2(plasma_state).shape[:2], len(k))
+            jnp.zeros([*self.q2(plasma_state).shape[:2], len(k)])
             * ureg.electron_volt
             * ureg.angstrom**3
         )
@@ -537,7 +847,7 @@ class SoftCorePotential(HNCPotential):
     cutoff. It's strength is given by the attribute :py:attr:`~.beta`.
     See :cite:`Gericke.2010`.
 
-    We definie `r_cut` in the :py:class:`jaxrts.PlasmaState`.
+    We define `r_cut` in the :py:class:`jaxrts.PlasmaState`.
 
     .. warning::
 
@@ -592,7 +902,7 @@ class SoftCorePotential(HNCPotential):
 
     @jax.jit
     def short_r(self, plasma_state, r: Quantity) -> Quantity:
-        return jnp.zero(*self.q.shape[:2], len(r)) * ureg.electron_volt
+        return jnp.zeros([*self.q.shape[:2], len(r)]) * ureg.electron_volt
 
     @jax.jit
     def full_k(self, plasma_state, k):
@@ -634,7 +944,7 @@ class SoftCorePotential(HNCPotential):
     @jax.jit
     def short_k(self, plasma_state, k: Quantity) -> Quantity:
         return (
-            jnp.zero(*self.q.shape[:2], len(k))
+            jnp.zeros([*self.q.shape[:2], len(k)])
             * ureg.electron_volt
             * ureg.angstrom**3
         )
@@ -655,6 +965,40 @@ class SoftCorePotential(HNCPotential):
         obj.model_key = aux_data["model_key"]
         obj.include_electrons = aux_data["include_electrons"]
         return obj
+
+
+class SpinAveragedEEExchange(HNCPotential):
+    """
+    See :cite:`Wunsch.2008`, Eqn (18).
+    """
+
+    __name__ = "SpinAveragedEEExchange"
+
+    @jax.jit
+    def full_r(self, plasma_state, r):
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+        exchange = (
+            (ureg.k_B * self.T(plasma_state))
+            * jnp.log(2)
+            * jpu.numpy.exp(
+                -1
+                / (jnp.pi * jnp.log(2))
+                * (_r / self.lambda_ab(plasma_state)) ** 2
+            )
+            * jnp.eye(len(self.mu(plasma_state)))[:, :, jnp.newaxis]
+        )
+        # Set the parts that are not electron_electron exchange to zero
+        exchange = (
+            exchange.m_as(ureg.electron_volt)
+            .at[: len(plasma_state.ions), : len(plasma_state.ions), :]
+            .set(
+                jnp.zeros(
+                    (len(plasma_state.ions), len(plasma_state.ions), len(_r))
+                )
+            )
+            * ureg.electron_volt
+        )
+        return exchange
 
 
 @jax.jit
@@ -680,7 +1024,10 @@ for _pot in [
     EmptyCorePotential,
     KelbgPotential,
     KlimontovichKraeftPotential,
+    PotentialSum,
+    ScaledPotential,
     SoftCorePotential,
+    SpinAveragedEEExchange,
 ]:
     jax.tree_util.register_pytree_node(
         _pot,
