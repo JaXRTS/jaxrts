@@ -16,6 +16,7 @@ from . import (
     bound_free,
     ee_localfieldcorrections,
     form_factors,
+    free_bound,
     free_free,
     hnc_potentials,
     hypernetted_chain,
@@ -1626,7 +1627,6 @@ class SchumacherImpulse(ScatteringModel):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
-        _
     ) -> jnp.ndarray:
         k = setup.dispersion_corrected_k(plasma_state.n_e)
         omega_0 = setup.energy / ureg.hbar
@@ -1677,7 +1677,6 @@ class SchumacherImpulse(ScatteringModel):
             out += jnpu.where(
                 jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
             )
-
         return out
 
     def _tree_flatten(self):
@@ -1726,17 +1725,12 @@ class DetailedBalance(ScatteringModel):
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
         energy_shift = setup.measured_energy - setup.energy
-        mirrored_setup = Setup(
-            setup.scattering_angle,
-            setup.energy,
-            setup.energy - energy_shift,
-            setup.instrument,
-        )
+        mirrored_setup = free_bound.FreeBoundFlippedSetup(setup)
         db_factor = jnpu.exp(-energy_shift / (plasma_state.T_e * ureg.k_B))
-        free_bound = plasma_state["bound-free scattering"].evaluate_raw(
+        fb = plasma_state["bound-free scattering"].evaluate_raw(
             plasma_state, mirrored_setup
         )
-        return free_bound * db_factor
+        return fb * db_factor
 
 
 # Form Factor Models
