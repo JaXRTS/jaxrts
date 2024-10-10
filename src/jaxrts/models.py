@@ -106,8 +106,8 @@ class ScatteringModel(Model):
 
        As these extra functionalities are only relevant when re-sampling and
        convolution with an instrument function is reasonable, the
-       :py:class:`~.Model` s used to describe ionic scattering are currently not
-       instances of :py:class:`~.ScatteringModel` as the convolution with a
+       :py:class:`~.Model` s used to describe ionic scattering are currently
+       not instances of :py:class:`~.ScatteringModel` as the convolution with a
        delta function would just result in numerical issues.
 
     It furthermore allows a user to set the :py:attr:`~.sample_points`
@@ -126,7 +126,8 @@ class ScatteringModel(Model):
         #: However, as the computation might be expensive, you can reduce the
         #: number of relevant :math:`k` s by setting this attribute. After the
         #: evaluation, the resulting scatting signal is interpolated to the
-        #: relevant :math:`k` s and then convolved with the instrument function.
+        #: relevant :math:`k` s and then convolved with the instrument
+        #: function.
         self.sample_points = sample_points
 
     @abc.abstractmethod
@@ -531,7 +532,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         # Interpolate this to the k given by the setup
 
         S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
-     
+
         return S_ab
 
     # The following is required to jit a Model
@@ -2685,8 +2686,8 @@ class FiniteWavelength_BM_V(BM_V_eiSModel):
     Uses finite wavelength screening to screen the bare Coulomb potential,
     i.e., :math:`V_{s} = \\frac{V_\\mathrm{Coulomb}}{\\vareps_{RPA}(k, E=0)}`
 
-    We use the pure RPA result to calculate the dielectric function, and use the
-    :cite:`Dandrea.1986` fitting formula.
+    We use the pure RPA result to calculate the dielectric function, and use
+    the :cite:`Dandrea.1986` fitting formula.
 
     See Also
     --------

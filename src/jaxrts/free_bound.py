@@ -22,7 +22,7 @@ class FreeBoundFlippedSetup(Setup):
     :py:class:`jaxrts.models.Model`
 
     .. warning ::
-       
+
        Due to the nature of this object, :py:meth:`~.full_k` and
        :py:meth:`~.dispersion_corrected_k` are not monotonically rising with
        :py:attr:`~.measured_energy`, anymore, but rather falling.
