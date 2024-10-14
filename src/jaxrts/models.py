@@ -477,6 +477,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         rmin: Quantity = 0.001 * ureg.a_0,
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
+        mix: float = 0.0,
     ) -> None:
         #: The minimal radius for evaluating the potentials.
         self.r_min: Quantity = rmin
@@ -485,6 +486,12 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
+        #: Value in [0, 1); desribes how much of the last iterations' nodal
+        #: correction term should be added to the newly obtained `N_ab`. A
+        #: value of zero corresponds to no parts of the old solution. Can be
+        #: increased when HNC becomes numerically unstable due to high coupling
+        #: strengths.
+        self.mix: float = mix
         super().__init__()
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -531,12 +538,12 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         # Interpolate this to the k given by the setup
 
         S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
-     
+
         return S_ab
 
     # The following is required to jit a Model
     def _tree_flatten(self):
-        children = (self.r_min, self.r_max)
+        children = (self.r_min, self.r_max, self.mix)
         aux_data = (
             self.model_key,
             self.pot,
@@ -547,7 +554,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
         obj.model_key, obj.pot = aux_data
-        obj.r_min, obj.r_max = children
+        obj.r_min, obj.r_max, obj.mix = children
 
         return obj
 
@@ -596,6 +603,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         rmin: Quantity = 0.001 * ureg.a_0,
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
+        mix: float = 0.0,
     ) -> None:
         #: The minimal radius for evaluating the potentials.
         self.r_min: Quantity = rmin
@@ -604,6 +612,12 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
+        #: Value in [0, 1); desribes how much of the last iterations' nodal
+        #: correction term should be added to the newly obtained `N_ab`. A
+        #: value of zero corresponds to no parts of the old solution. Can be
+        #: increased when HNC becomes numerically unstable due to high coupling
+        #: strengths.
+        self.mix: float = mix
         super().__init__()
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -770,7 +784,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
 
     # The following is required to jit a Model
     def _tree_flatten(self):
-        children = (self.r_min, self.r_max)
+        children = (self.r_min, self.r_max, self.mix)
         aux_data = (
             self.model_key,
             self.pot,
@@ -781,7 +795,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
         obj.model_key, obj.pot = aux_data
-        obj.r_min, obj.r_max = children
+        obj.r_min, obj.r_max, obj.mix = children
 
         return obj
 
@@ -2188,11 +2202,7 @@ class FiniteWavelengthScreening(Model):
         )
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jnpu.where(
-            plasma_state.Z_free == 0,
-            0,
-            q[:, 0]
-        )[:, jnp.newaxis]
+        q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
         return q
 
 
@@ -2226,11 +2236,7 @@ class DebyeHueckelScreening(Model):
         )
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jnpu.where(
-            plasma_state.Z_free == 0,
-            0,
-            q[:, 0]
-        )[:, jnp.newaxis]
+        q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
         return q
 
 
@@ -2281,11 +2287,7 @@ class LinearResponseScreening(Model):
         q = xi * Vei[-1, :-1]
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jnpu.where(
-            plasma_state.Z_free == 0,
-            0,
-            q[:, 0]
-        )[:, jnp.newaxis]
+        q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
         return q
 
 
@@ -2321,11 +2323,7 @@ class Gregori2004Screening(Model):
         )[:, jnp.newaxis]
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
-        q = jnpu.where(
-            plasma_state.Z_free == 0,
-            0,
-            q[:, 0]
-        )[:, jnp.newaxis]
+        q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
         return q
 
 
