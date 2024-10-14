@@ -1,6 +1,7 @@
 __version__ = "0.1.0"
 
 from . import (
+    analysis,
     bound_free,
     elements,
     form_factors,
@@ -26,6 +27,7 @@ from .units import ureg
 __all__ = [
     "Element",
     "PlasmaState",
+    "analysis",
     "bound_free",
     "elements",
     "form_factors",
