@@ -304,3 +304,44 @@ def test_sinft_analytical_result():
 
     f_fft = jaxrts.hypernetted_chain.sinft(f.copy()) / jnp.sqrt(len(r) / (2))
     assert jnp.max(jnp.abs(f_ft_analytical - f_fft)) < 1e-8
+
+
+def test_HNC_Potential_algebra():
+    state = jaxrts.PlasmaState(
+        ions=[jaxrts.Element("H"), jaxrts.Element("Be")],
+        Z_free=[0.9, 2.5],
+        mass_density=[
+            1.21e23 / ureg.centimeter**3 * jaxrts.Element("H").atomic_mass,
+            1.21e23 / ureg.centimeter**3 * jaxrts.Element("Be").atomic_mass,
+        ],
+        T_e=12 * ureg.electron_volt / ureg.k_B,
+        T_i=[
+            12 * ureg.electron_volt / ureg.k_B,
+            12 * ureg.electron_volt / ureg.k_B,
+        ],
+    )
+    test_r = jnp.linspace(0.1, 4) * ureg.angstrom
+
+    potential1 = hnc_potentials.CoulombPotential()
+
+    potential2 = potential1 * -1
+    potential3 = potential2 * 1
+    assert potential1.__name__ in potential2.description
+    assert potential1.__name__ in potential3.description
+
+    potential4 = potential1 + potential2
+    assert potential1.__name__ in potential4.description
+    assert (
+        jnp.abs(potential4.full_r(state, test_r).m_as(ureg.electron_volt))
+        <= 1e-10
+    ).all()
+    potential5 = (potential1 + potential1) * 2
+    assert (
+        jnp.abs(
+            (
+                potential5.full_k(state, 1 / test_r)
+                - 4 * potential1.full_k(state, 1 / test_r)
+            ).m_as(ureg.electron_volt * ureg.angstrom**3)
+        )
+        <= 1e-10
+    ).all()
