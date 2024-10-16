@@ -320,7 +320,7 @@ class ArkhipovIonFeat(IonFeatModel):
 
     Requires a 'form-factors' model (defaults to
     :py:class:`~PaulingFormFactors`) and a 'screening' model (defaults to
-    :py:class:`Gregori2004Screenig`).
+    :py:class:`Gregori2004Screening`).
 
     See Also
     --------
@@ -985,7 +985,7 @@ class RPA_DandreaFit(FreeFreeModel):
         factor.
     """
 
-    __name__ = "PRA_DandreaFit"
+    __name__ = "RPA_DandreaFit"
 
     @jax.jit
     def evaluate_raw(
@@ -2298,7 +2298,7 @@ class Gregori2004Screening(Model):
     """
 
     allowed_keys = ["screening"]
-    __name__ = "Gregori2004Screenig"
+    __name__ = "Gregori2004Screening"
 
     @jax.jit
     def evaluate(
