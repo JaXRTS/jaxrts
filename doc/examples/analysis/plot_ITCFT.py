@@ -6,7 +6,11 @@ This example showcases how apply the analysis functions to get temperatures
 from the Laplace transform of the structure, as proposed by
 :cite:`Dornheim.2022`.
 """
+import sys
 
+sys.path.append(
+    r"C:\Users\Samuel\Desktop\PhD\Python_Projects\JAXRTS\jaxrts\src"
+)
 from functools import partial
 
 import jax
@@ -102,7 +106,7 @@ fig, ax = plt.subplots()
 E_shift = -(setup.measured_energy - setup.energy)
 instrument = setup.instrument(E_shift / (1 * ureg.hbar))
 for i, x in enumerate([10, 20, 30, 40]):
-    minimizer = jaxrts.analysis._ITCFT(
+    minimizer = jaxrts.analysis.ITCF(
         S_ee, E_shift, instrument, E_shift, ureg(f"{x}eV")
     )
 
