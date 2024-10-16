@@ -159,6 +159,14 @@ def convolve_stucture_factor_with_instrument(
     conv_grid = (
         setup.measured_energy - jnpu.mean(setup.measured_energy)
     ) / ureg.hbar
+
+    # Shift the grid by the minimal difference to zero.
+    # This ensures that the position of a peak will not move during
+    # convolution. See the test
+    # test_setup.test_peak_position_stability_with_convolution.
+    # Even a small shift might be very relevant for ITCF based analysis and
+    # tests.
+    conv_grid += jnpu.min(jnpu.absolute(conv_grid))
     return (
         jnp.convolve(
             Sfac.m_as(ureg.second),
