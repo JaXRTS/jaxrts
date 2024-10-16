@@ -26,7 +26,7 @@ def twoSidedLaplace(
     # Integrate in energy space (this way, the integral is numerically more
     # stable compared to omega_space. This results in a dimensionless result,
     # when considering dynamic structure factors
-    kernel = intensity * jnpu.exp(-tau * E_shift) * ureg.hbar
+    kernel = intensity * jnpu.exp(-tau * E_shift) / ureg.hbar
     kernel_unit = kernel.units
     # Set the kernel to 0 where the energy is outside of the defined range,
     # i.e., don't include it for the integral
@@ -92,7 +92,7 @@ class _ITCFT:
 
     @jax.jit
     def _L(self, tau_dimensionless):
-        tau = tau_dimensionless/(1 * ureg.kiloelectron_volt)
+        tau = tau_dimensionless / (1 * ureg.kiloelectron_volt)
         return self.L(tau)
 
     @jax.jit
