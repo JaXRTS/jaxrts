@@ -1,6 +1,7 @@
 """
 Some analysis functions, mainly used for benchmarking and testing.
 """
+from functools import partial
 
 import jax
 from jax import numpy as jnp
@@ -76,6 +77,7 @@ class _ITCFT:
         instrument: Quantity,
         instrument_E: Quantity,
         E_cut: Quantity,
+        raw: bool,
     ) -> (Quantity, Quantity):
         """
         1. Calculate :math:`\\mathscr{L}[S] where S is the real dynamic
@@ -89,6 +91,9 @@ class _ITCFT:
         self.instrument = instrument
         self.instrument_E = instrument_E
         self.E_cut = E_cut
+        #: If ``raw==True``, don't deconvolve with the instrument function.
+        #: This can be used for testing, benchmarking and toubleshooting.
+        self.raw = raw
 
     @jax.jit
     def _L(self, tau_dimensionless):
@@ -97,13 +102,20 @@ class _ITCFT:
 
     @jax.jit
     def L(self, tau):
-        L_inst = twoSidedLaplace(
-            self.instrument, tau, self.instrument_E, -self.E_cut, self.E_cut
-        )
         L_S_ee = twoSidedLaplace(
             self.S_ee_conv, tau, self.E_shift, -self.E_cut, self.E_cut
         )
-        return (L_S_ee / L_inst).m_as(ureg.dimensionless)
+        L_inst = twoSidedLaplace(
+            self.instrument,
+            tau,
+            self.instrument_E,
+            -self.E_cut,
+            self.E_cut,
+        )
+        if self.raw:
+            return L_S_ee.m_as(ureg.dimensionless)
+        else:
+            return (L_S_ee / L_inst).m_as(ureg.dimensionless)
 
     @jax.jit
     def get_T(self, tau_max):
@@ -127,7 +139,7 @@ class _ITCFT:
             self.instrument_E,
             self.E_cut,
         )
-        aux_data = ()
+        aux_data = (self.raw,)
         return (children, aux_data)
 
     @classmethod
@@ -140,15 +152,17 @@ class _ITCFT:
             obj.instrument_E,
             obj.E_cut,
         ) = children
+        (obj.raw,) = aux_data
         return obj
 
 
-@jax.jit
+@partial(jax.jit, static_argnames="raw")
 def ITCFT(
     S_ee_conv: Quantity,
     tau_max: Quantity,
     setup: Setup,
     E_cut: Quantity,
+    raw: bool = False,
 ) -> (Quantity, Quantity):
     """
     1. Calculate :math:`\\mathscr{L}[S] where S is the real dynamic structure
@@ -161,7 +175,9 @@ def ITCFT(
     # shift.
     E_shift = -(setup.measured_energy - setup.energy)
     instrument = setup.instrument(E_shift / (1 * ureg.hbar))
-    ITCF_minimizer = _ITCFT(S_ee_conv, E_shift, instrument, E_shift, E_cut)
+    ITCF_minimizer = _ITCFT(
+        S_ee_conv, E_shift, instrument, E_shift, E_cut, raw
+    )
     return ITCF_minimizer.get_T(tau_max)
 
 
