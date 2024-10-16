@@ -1000,6 +1000,23 @@ class RPA_DandreaFit(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
         )
 
+        # Interpolate to avoid the nan value for E == 0
+        w_pl = plasma_physics.plasma_frequency(plasma_state.n_e)
+        interpE = jnp.array([-1e-6, 1e-6]) * (1 * ureg.hbar) * w_pl
+
+        See_interp = free_free.S0_ee_RPA_Dandrea(
+            setup.k,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            interpE,
+            plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
+        )
+
+        See_0 = jnpu.where(
+            setup.measured_energy - setup.energy == 0,
+            jnpu.mean(See_interp),
+            See_0,
+        )
         ff = See_0 * jnp.sum(
             plasma_state.Z_free * plasma_state.number_fraction
         )
