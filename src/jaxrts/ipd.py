@@ -91,7 +91,7 @@ def ipd_debye_hueckel(
     """
     The correction to the ionization potential for the m-th ionization stage in
     Debye-Hueckel approximation.
-    
+
     Parameters
     ----------
     Z_i
@@ -104,7 +104,7 @@ def ipd_debye_hueckel(
         The electron temperature.
     T_i
         The ion temperature.
-        
+
     Returns
     -------
     Quantity
@@ -149,7 +149,7 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     The correction to the ionization potential for the m-th ionization stage in
     the ion-sphere model. The ion-sphere model considers the ions to be
     strongly correlated. (see also cite:`Zimmermann.1980`)
-    
+
     Parameters
     ----------
     Z_i
@@ -158,7 +158,7 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
         Electron density. Units of 1/[length]**3.
     n_i
         Ion density. Units of 1/[length]**3.
-        
+
     Returns
     -------
     Quantity
@@ -193,7 +193,7 @@ def ipd_stewart_pyatt(
     the small bound state approximation. This model is founded on the
     Thomas-Fermi Model for the electrons and extends it to include ions in the
     vicinity of a given nucleus. Taken from cite:`Röpke.2019` Eq. (2).
-    
+
     Parameters
     ----------
     Z_i
@@ -206,7 +206,7 @@ def ipd_stewart_pyatt(
         The electron temperature.
     T_i
         The ion temperature.
-        
+
     Returns
     -------
     Quantity
@@ -256,7 +256,7 @@ def ipd_ecker_kroell(
     the Ecker-Kroell model.
     This model is similar to the model of Stewart-Pyatt and divided the radial
     dimension into three regions. For details see :cite:`EckerKroell.1963`.
-    
+
     Parameters
     ----------
     Z_i
@@ -269,14 +269,14 @@ def ipd_ecker_kroell(
         The electron temperature.
     T_i
         The ion temperature.
-        
+
     Returns
     -------
     Quantity
         The ipd shift in units of electronvolt.
 
     """
-    
+
     lambda_Di = jnpu.sqrt(
         ureg.epsilon_0
         * ureg.boltzmann_constant
@@ -323,7 +323,7 @@ def ipd_pauli_blocking(
     """
     The correction to the ionization potential due to Pauli blocking, as
     described in cite:`Röpke.2019`.
-    
+
     Parameters
     ----------
     Z_i
@@ -336,13 +336,13 @@ def ipd_pauli_blocking(
         The electron temperature.
     T_i
         The ion temperature.
-        
+
     Returns
     -------
     Quantity
         The ipd shift in units of electronvolt.
     """
-    
+
     chem_pot = chem_pot_interpolation(Te, ne)
 
     # Reduced Bohr radius

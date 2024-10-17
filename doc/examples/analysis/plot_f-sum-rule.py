@@ -7,16 +7,10 @@ from the Laplace transform of the structure, as proposed by
 :cite:`Dornheim.2022`.
 """
 
-import sys
-
-sys.path.append(
-    r"C:\Users\Samuel\Desktop\PhD\Python_Projects\JAXRTS\jaxrts\src"
-)
 from functools import partial
 
 import jax
 from jax import numpy as jnp
-from jax import random
 from jpu import numpy as jnpu
 
 import matplotlib.pyplot as plt
@@ -59,15 +53,8 @@ state["free-bound scattering"] = jaxrts.models.DetailedBalance()
 
 
 S_ee = state.probe(setup)
-# fig, ax = plt.subplots()
-# ax.plot(setup.measured_energy.m_as(ureg.electron_volt), S_ee.m_as(ureg.second))
-# plt.show()
-# We compare two approaches, the default minimization finding with the more
-# forward grid finding
-tau = jnp.linspace(1, 60, 500) / (1 * ureg.kiloelectron_volt)
 
 # x is the cut-off Energy
-
 x = jnp.linspace(1, 1800) * ureg.electron_volt
 
 fsum = jax.vmap(

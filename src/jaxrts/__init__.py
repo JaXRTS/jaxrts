@@ -27,6 +27,7 @@ from .units import ureg
 __all__ = [
     "Element",
     "PlasmaState",
+    "Setup",
     "analysis",
     "bound_free",
     "elements",

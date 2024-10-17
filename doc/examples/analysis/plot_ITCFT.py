@@ -6,16 +6,11 @@ This example showcases how apply the analysis functions to get temperatures
 from the Laplace transform of the structure, as proposed by
 :cite:`Dornheim.2022`.
 """
-import sys
 
-sys.path.append(
-    r"C:\Users\Samuel\Desktop\PhD\Python_Projects\JAXRTS\jaxrts\src"
-)
 from functools import partial
 
 import jax
 from jax import numpy as jnp
-from jax import random
 from jpu import numpy as jnpu
 
 import matplotlib.pyplot as plt
@@ -34,10 +29,10 @@ state = jaxrts.PlasmaState(
     T_e=40 * ureg.electron_volt / ureg.k_B,
 )
 setup = jaxrts.Setup(
-    scattering_angle=ureg("60°"),
+    scattering_angle=ureg("30°"),
     energy=ureg("9000 eV"),
     measured_energy=ureg("9000 eV")
-    + jnp.linspace(-200, 200, 5000) * ureg.electron_volt,
+    + jnp.linspace(-200, 200, 500) * ureg.electron_volt,
     instrument=partial(
         jaxrts.instrument_function.instrument_gaussian,
         sigma=ureg("3eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
@@ -62,8 +57,8 @@ S_ee = state.probe(setup)
 tau = jnp.linspace(1, 60, 500) / (1 * ureg.kiloelectron_volt)
 
 # x is the cut-off Energy
-
 x = jnp.linspace(1, 180) * ureg.electron_volt
+
 T_grid, L_grid = jax.vmap(
     jaxrts.analysis.ITCFT_grid, in_axes=(None, None, None, 0), out_axes=(0, 1)
 )(S_ee, tau, setup, x)
@@ -105,7 +100,7 @@ fig, ax = plt.subplots()
 
 E_shift = -(setup.measured_energy - setup.energy)
 instrument = setup.instrument(E_shift / (1 * ureg.hbar))
-for i, x in enumerate([10, 20, 30, 40]):
+for i, x in enumerate([20, 40, 80, 120]):
     minimizer = jaxrts.analysis.ITCF(
         S_ee, E_shift, instrument, E_shift, ureg(f"{x}eV")
     )
@@ -125,7 +120,7 @@ for i, x in enumerate([10, 20, 30, 40]):
     )
     ax.plot(
         tau,
-        L_grid,
+        L_grid.m_as(ureg.dimensionless),
         ls="solid",
         color=f"C{i}",
         alpha=0.5,
@@ -133,13 +128,13 @@ for i, x in enumerate([10, 20, 30, 40]):
     )
     ax.scatter(
         [0.5 / (T_grid * ureg.k_B).m_as(ureg.kiloelectron_volt)],
-        [jnpu.min(L_grid)],
+        [jnpu.min(L_grid).m_as(ureg.dimensionless)],
         color="black",
         label="minimum grid" if i == 0 else None,
     )
     ax.scatter(
         [0.5 / (T_auto * ureg.k_B).m_as(ureg.kiloelectron_volt)],
-        [jnpu.min(L_grid)],
+        [jnpu.min(L_grid).m_as(ureg.dimensionless)],
         color="black",
         marker="x",
         label="minumum auto" if i == 0 else None,

@@ -866,11 +866,14 @@ class QCSalpeterApproximation(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
-        )  / plasma_state.mean_Z_A
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
+        )
 
     @jax.jit
     def susceptibility(
@@ -939,11 +942,14 @@ class RPA_NoDamping(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
-        ) / plasma_state.mean_Z_A
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
+        )
 
     @jax.jit
     def susceptibility(
@@ -1021,11 +1027,14 @@ class RPA_DandreaFit(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
-        ) / plasma_state.mean_Z_A
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
+        )
 
     @jax.jit
     def susceptibility(
@@ -1107,11 +1116,14 @@ class BornMerminFull(FreeFreeModel):
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
-        ) / plasma_state.mean_Z_A
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
+        )
 
     @jax.jit
     def susceptibility(
@@ -1242,11 +1254,14 @@ class BornMermin(FreeFreeModel):
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
-        ) / plasma_state.mean_Z_A
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
+        )
 
     @jax.jit
     def susceptibility(
@@ -1395,11 +1410,14 @@ class BornMermin_Fit(FreeFreeModel):
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
-        ) / plasma_state.mean_Z_A
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
+        )
 
     @jax.jit
     def susceptibility(
@@ -1549,11 +1567,14 @@ class BornMermin_Fortmann(FreeFreeModel):
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
-        ) / plasma_state.mean_Z_A
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
+        )
 
     @jax.jit
     def susceptibility(
