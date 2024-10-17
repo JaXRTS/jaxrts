@@ -1,10 +1,16 @@
 """
-Imaginary time correlation function thermometry
-===============================================
+f-sum rule for the dynamic stucture factor
+==========================================
 
-This example showcases how apply the analysis functions to get temperatures
-from the Laplace transform of the structure, as proposed by
-:cite:`Dornheim.2022`.
+This example shows the computation of the f-sum rule for an example spectrum as
+suggested by :cite:`Dornheim.2024`.
+If fully ionized, we see excellent agreement for the RPA, and also the
+Born-Mermin approximation for the free-free scattering yields in reasonable
+results. 
+The implemented bound-free Model, however, does violate the f-sum rule. One
+could leverage this to fix a value for
+:py:attr:`jaxrts.models.SchumacherImpulse.r_k`, so that the f-sum rule would be
+fulfilled.
 """
 
 from functools import partial
