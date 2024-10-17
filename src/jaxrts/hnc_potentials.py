@@ -1042,6 +1042,54 @@ class SoftCorePotential(HNCPotential):
         return obj
 
 
+class SpinSeparatedEEExchange(HNCPotential):
+    """
+    See :cite:`Wunsch.2008`, Eqn (17), Citing :cite:`Huang.1987`. Eqn. (9.57),
+    however, there is a factor of 2 * sqrt(pi) difference in the definition of
+    lambda. (one is from :cite:`Deutsch.1982` presenting a reduced quantity
+    :math:`\\lambda_{ee}`, and then them having another factor of
+    :math:`\\sqrt{2}` in the mass term. We here present the corrected version
+    of the equation, which reproduces Figure 6. in :cite:`Wunsch.2008` and
+    results in a higher repusion than the :py:class:`~.SpinAveragedEEExchange`,
+    which should be expected.
+    """
+
+    __name__ = "SpinSeparatedEEExchange"
+
+    def __init__(
+        self,
+    ):
+        """
+        Sets :py:attr:`~.include_electrons` to ``"SpinSeparated"``,
+        automatically.
+        """
+        super().__init__()
+        self.include_electrons = "SpinSeparated"
+
+    @jax.jit
+    def full_r(self, plasma_state, r):
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+        exchange = (
+            (-1 * ureg.k_B * self.T(plasma_state))
+            * jpu.numpy.log(
+                1 - jpu.numpy.exp(-(_r**2 / self.lambda_ab(plasma_state) ** 2)/2)
+            )
+            * jnp.eye(len(self.mu(plasma_state)))[:, :, jnp.newaxis]
+        )
+        # Set the parts that are not electron_electron exchange to zero
+        exchange = (
+            exchange.m_as(ureg.electron_volt)
+            .at[: len(plasma_state.ions), : len(plasma_state.ions), :]
+            .set(
+                jnp.zeros(
+                    (len(plasma_state.ions), len(plasma_state.ions), len(_r))
+                )
+            )
+            * ureg.electron_volt
+        )
+        return exchange
+
+
 class SpinAveragedEEExchange(HNCPotential):
     """
     See :cite:`Wunsch.2008`, Eqn (18).
@@ -1103,6 +1151,7 @@ for _pot in [
     ScaledPotential,
     SoftCorePotential,
     SpinAveragedEEExchange,
+    SpinSeparatedEEExchange,
 ]:
     jax.tree_util.register_pytree_node(
         _pot,

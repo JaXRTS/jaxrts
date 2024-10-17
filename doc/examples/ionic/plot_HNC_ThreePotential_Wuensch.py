@@ -31,7 +31,7 @@ pot = 16
 r = jpu.numpy.linspace(1e-1 * ureg.a0, 5e3 * ureg.a0, 2**pot)
 
 d = jpu.numpy.cbrt(
-    3 / (4 * jnp.pi * (state.n_i[:, jnp.newaxis] + state.n_i[jnp.newaxis, :]))
+    3 / (4 * jnp.pi * (state.n_i[:, jnp.newaxis] + state.n_i[jnp.newaxis, :])/2)
 )
 
 dr = r[1] - r[0]
