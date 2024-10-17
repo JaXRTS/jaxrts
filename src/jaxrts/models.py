@@ -25,7 +25,7 @@ from . import (
     plasma_physics,
     static_structure_factors,
 )
-from .elements import MixElement, electron_distribution_ionized_state
+from .elements import MixElement, electron_distribution_ionized_state, mean_charge
 from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
 from .setup import (
     Setup,
@@ -870,7 +870,7 @@ class QCSalpeterApproximation(FreeFreeModel):
             jnp.sum(plasma_state.Z_free) == 0,
             lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
             lambda: ff,
-        )
+        )  / mean_charge(plasma_state.ions)
 
     @jax.jit
     def susceptibility(
@@ -943,7 +943,7 @@ class RPA_NoDamping(FreeFreeModel):
             jnp.sum(plasma_state.Z_free) == 0,
             lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
             lambda: ff,
-        )
+        ) / mean_charge(plasma_state.ions)
 
     @jax.jit
     def susceptibility(
@@ -1025,7 +1025,7 @@ class RPA_DandreaFit(FreeFreeModel):
             jnp.sum(plasma_state.Z_free) == 0,
             lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
             lambda: ff,
-        )
+        ) / mean_charge(plasma_state.ions)
 
     @jax.jit
     def susceptibility(
@@ -1111,7 +1111,7 @@ class BornMerminFull(FreeFreeModel):
             jnp.sum(plasma_state.Z_free) == 0,
             lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
             lambda: ff,
-        )
+        ) / mean_charge(plasma_state.ions)
 
     @jax.jit
     def susceptibility(
@@ -1246,7 +1246,7 @@ class BornMermin(FreeFreeModel):
             jnp.sum(plasma_state.Z_free) == 0,
             lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
             lambda: ff,
-        )
+        ) / mean_charge(plasma_state.ions)
 
     @jax.jit
     def susceptibility(
@@ -1399,7 +1399,7 @@ class BornMermin_Fit(FreeFreeModel):
             jnp.sum(plasma_state.Z_free) == 0,
             lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
             lambda: ff,
-        )
+        ) / mean_charge(plasma_state.ions)
 
     @jax.jit
     def susceptibility(
@@ -1553,7 +1553,7 @@ class BornMermin_Fortmann(FreeFreeModel):
             jnp.sum(plasma_state.Z_free) == 0,
             lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
             lambda: ff,
-        )
+        ) / mean_charge(plasma_state.ions)
 
     @jax.jit
     def susceptibility(
@@ -1709,7 +1709,7 @@ class SchumacherImpulse(ScatteringModel):
             out += jnpu.where(
                 jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
             )
-        return out
+        return out / mean_charge(plasma_state.ions)
 
     def _tree_flatten(self):
         children = ()
@@ -1762,7 +1762,7 @@ class DetailedBalance(ScatteringModel):
         fb = plasma_state["bound-free scattering"].evaluate_raw(
             plasma_state, mirrored_setup
         )
-        return fb * db_factor
+        return fb * db_factor / mean_charge(plasma_state.ions)
 
 
 # Form Factor Models
@@ -2215,7 +2215,7 @@ class FiniteWavelengthScreening(Model):
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
         q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
-        return q
+        return q / mean_charge(plasma_state.ions)
 
 
 class DebyeHueckelScreening(Model):

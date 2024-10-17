@@ -29,16 +29,16 @@ ureg = jaxrts.ureg
 plt.style.use("science")
 
 state = jaxrts.PlasmaState(
-    ions=[jaxrts.Element("C")],
-    Z_free=jnp.array([3]),
+    ions=[jaxrts.Element("N")],
+    Z_free=jnp.array([7]),
     mass_density=jnp.array([1]) * ureg.gram / ureg.centimeter**3,
     T_e=40 * ureg.electron_volt / ureg.k_B,
 )
 setup = jaxrts.Setup(
     scattering_angle=ureg("60°"),
-    energy=ureg("9000 eV"),
-    measured_energy=ureg("9000 eV")
-    + jnp.linspace(-200, 200, 5000) * ureg.electron_volt,
+    energy=ureg("9 keV"),
+    measured_energy=ureg("9 keV")
+    + jnp.linspace(-2000, 2000, 5000) * ureg.electron_volt,
     instrument=partial(
         jaxrts.instrument_function.instrument_gaussian,
         sigma=ureg("5eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
@@ -51,12 +51,14 @@ setup.correct_k_dispersion = False
 state["screening length"] = jaxrts.models.ArbitraryDegeneracyScreeningLength()
 state["screening"] = jaxrts.models.LinearResponseScreening()
 state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
-state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
-state["bound-free scattering"] = jaxrts.models.SchumacherImpulse()
+# state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
+state["free-free scattering"] = jaxrts.models.BornMermin_Fit()
+state["BM S_ii"] = jaxrts.models.Sum_Sii()
+state["bound-free scattering"] = jaxrts.models.Neglect()
 state["free-bound scattering"] = jaxrts.models.DetailedBalance()
 
 
-S_ee = state.probe(setup) / 6 
+S_ee = state.probe(setup)
 # fig, ax = plt.subplots()
 # ax.plot(setup.measured_energy.m_as(ureg.electron_volt), S_ee.m_as(ureg.second))
 # plt.show()
@@ -66,7 +68,7 @@ tau = jnp.linspace(1, 60, 500) / (1 * ureg.kiloelectron_volt)
 
 # x is the cut-off Energy
 
-x = jnp.linspace(1, 180) * ureg.electron_volt
+x = jnp.linspace(1, 1800) * ureg.electron_volt
 
 fsum = jax.vmap(
     jaxrts.analysis.ITCF_fsum,

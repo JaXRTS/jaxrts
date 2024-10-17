@@ -2,7 +2,7 @@
 This submodule contains data for different chemical elements.
 """
 
-from typing import Any
+from typing import Any, List
 
 import jax
 import jpu.numpy as jnpu
@@ -696,3 +696,9 @@ class MixElement(Element):
         )
 
         self.atomic_radius_calc = 0 * ureg.picometer
+
+def mean_charge(elements : List[Element]):
+    """
+    Returns the mean charge of a list of :py:class:`~.Element`.
+    """
+    return jnp.mean(jnp.array([e.Z for e in elements]))
