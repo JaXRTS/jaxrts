@@ -19,7 +19,7 @@ def test_screening_reproduces_Chapman2015():
         ureg("100eV") / ureg.k_B,
     )
     V_ei = jaxrts.hnc_potentials.CoulombPotential()
-    V_ei.include_electrons = True
+    V_ei.include_electrons = "SpinAveraged"
 
     # Check that the density is ok by comparing the fermi energy
     assert jnpu.absolute(

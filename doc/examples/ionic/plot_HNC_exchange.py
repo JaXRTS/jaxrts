@@ -69,7 +69,7 @@ for ElectronIonPotential, ElectronElectronPotential, ls in [
         ElectronElectronPotential,
         CoulombPotential,
     ]:
-        Potential.include_electrons = True
+        Potential.include_electrons = "SpinAveraged"
 
     unit = ureg.electron_volt
     V_s = IonIonPotential.full_r(state, r).m_as(unit)

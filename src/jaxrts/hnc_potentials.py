@@ -9,6 +9,7 @@ short-range part and is also Fourier-transformed to k-space.
 
 import abc
 import logging
+from typing import Literal
 
 import jax
 import jax.interpreters
@@ -41,9 +42,9 @@ class HNCPotential(metaclass=abc.ABCMeta):
     of methods evaluating this Potential (in k or r space), return a
     :math:`(n\\times n\\times m)` matrix, where ``n`` is the number of ion
     species and ``m`` is the number of r or k points.
-    However, if :py:attr:`~.include_electrons` is ``True``, electrons are added
-    as another ion species, and so one the first two dimensions get an
-    additional entry.
+    However, if :py:attr:`~.include_electrons` is ``"SpinAveraged"`` or
+    ``"SpinSeparated"``, electrons are added as another ion species, and so one
+    the first two dimensions get one or two additional entries, respectively.
     """
 
     allowed_keys = [
@@ -54,15 +55,22 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
+        include_electrons: Literal[
+            "off", "SpinAveraged", "SpinSeparated"
+        ] = "off",
     ):
         self._transform_r = jpu.numpy.linspace(1e-3, 1e3, 2**14) * ureg.a_0
 
         self.model_key = ""
 
-        #: If `True`, the electrons are added as the n+1th ion species to the
-        #: potential. The relevant entries are the last row and column,
-        #: respectively (i.e., the colored lines in the image above).
-        self.include_electrons: bool = False
+        #: If `"SpinAveraged"`, the electrons are added as the n+1th ion
+        #: species to the potential. The relevant entries are the last row and
+        #: column, respectively (i.e., the colored lines in the image above).
+        #: If `"SpinSeparated"`, two species of electrons (with half the
+        #: electron number density, each) are added as the n+1th and n+2th ion.
+        self.include_electrons: Literal[
+            "off", "SpinAveraged", "SpinSeparated"
+        ] = include_electrons
 
     def check(self, plasma_state) -> None:
         """
@@ -72,9 +80,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         """
 
     def prepare(self, plasma_state, key: str) -> None:
-        # Set include-electrons to True
-        if key in ["electron-ion Potential", "electron-electron Potential"]:
-            self.include_electrons = True
+        pass
 
     @abc.abstractmethod
     def full_r(self, plasma_state, r: Quantity) -> Quantity: ...
@@ -137,16 +143,22 @@ class HNCPotential(metaclass=abc.ABCMeta):
         """
         This is :math:`q^2`!
         """
-        if self.include_electrons:
+        if self.include_electrons == "SpinAveraged":
             Z = to_array([*plasma_state.Z_free, -1])
+        elif self.include_electrons == "SpinSeparated":
+            Z = to_array([*plasma_state.Z_free, -1, -1])
         else:
             Z = plasma_state.Z_free
         charge = construct_q_matrix(Z * ureg.elementary_charge)
         return charge[:, :, jnp.newaxis]
 
     def alpha(self, plasma_state):
-        if self.include_electrons:
+        if self.include_electrons == "SpinAveraged":
             n = to_array([*plasma_state.n_i, plasma_state.n_e])
+        elif self.include_electrons == "SpinSeparated":
+            n = to_array(
+                [*plasma_state.n_i, plasma_state.n_e / 2, plasma_state.n_e / 2]
+            )
         else:
             n = plasma_state.n_i
         a = construct_alpha_matrix(n)
@@ -156,8 +168,16 @@ class HNCPotential(metaclass=abc.ABCMeta):
         """
         The geometric mean of two masses (or reciprocal sum)
         """
-        if self.include_electrons:
+        if self.include_electrons == "SpinAveraged":
             m = to_array([*plasma_state.atomic_masses, 1 * ureg.electron_mass])
+        elif self.include_electrons == "SpinSeparated":
+            m = to_array(
+                [
+                    *plasma_state.atomic_masses,
+                    1 * ureg.electron_mass,
+                    1 * ureg.electron_mass,
+                ]
+            )
         else:
             m = plasma_state.atomic_masses
         mu = jpu.numpy.outer(m, m) / (m[:, jnp.newaxis] + m[jnp.newaxis, :])
@@ -173,9 +193,20 @@ class HNCPotential(metaclass=abc.ABCMeta):
            \\bar{T}_{ab} = \\frac{T_a m_b + T_b m_a}{m_a m_b}
 
         """
-        if self.include_electrons:
+        if self.include_electrons == "SpinAveraged":
             m = to_array([*plasma_state.atomic_masses, 1 * ureg.electron_mass])
             T = to_array([*plasma_state.T_i, plasma_state.T_e])
+        elif self.include_electrons == "SpinSeparated":
+            m = to_array(
+                [
+                    *plasma_state.atomic_masses,
+                    1 * ureg.electron_mass,
+                    1 * ureg.electron_mass,
+                ]
+            )
+            T = to_array(
+                [*plasma_state.T_i, plasma_state.T_e, plasma_state.T_e]
+            )
         else:
             m = plasma_state.atomic_masses
             T = plasma_state.T_i
@@ -187,15 +218,40 @@ class HNCPotential(metaclass=abc.ABCMeta):
         required to be used with an :py:class:~.HNCPotential`. However, this
         quantity is only relevant if we consider electron-ion interactions.
         Hence, the returned array will be 0 for all ion-ion pairs and the
-        electron-electron pair.
+        electron-electron pair(s).
         """
         r = jnp.zeros_like(self.q2(plasma_state).magnitude, dtype=float)
-        if self.include_electrons:
+        if self.include_electrons == "SpinAveraged":
             r = r.at[:-1, -1, :].set(
-                plasma_state.ion_core_radius.m_as(ureg.angstrom)
+                plasma_state.ion_core_radius.m_as(ureg.angstrom)[
+                    :, jnp.newaxis
+                ]
             )
             r = r.at[-1, :-1, :].set(
-                plasma_state.ion_core_radius.m_as(ureg.angstrom)
+                plasma_state.ion_core_radius.m_as(ureg.angstrom)[
+                    :, jnp.newaxis
+                ]
+            )
+        elif self.include_electrons == "SpinSeparated":
+            r = r.at[:-2, -2, :].set(
+                plasma_state.ion_core_radius.m_as(ureg.angstrom)[
+                    :, jnp.newaxis
+                ]
+            )
+            r = r.at[:-2, -1, :].set(
+                plasma_state.ion_core_radius.m_as(ureg.angstrom)[
+                    :, jnp.newaxis
+                ]
+            )
+            r = r.at[-1, :-2, :].set(
+                plasma_state.ion_core_radius.m_as(ureg.angstrom)[
+                    :, jnp.newaxis
+                ]
+            )
+            r = r.at[-2, :-2, :].set(
+                plasma_state.ion_core_radius.m_as(ureg.angstrom)[
+                    :, jnp.newaxis
+                ]
             )
         return r * ureg.angstrom
 
@@ -258,9 +314,22 @@ class PotentialSum(HNCPotential):
 
     def __init__(self, list_of_potentials: list[HNCPotential]) -> None:
         self.potentials = list_of_potentials
-        self.include_electrons = any(
-            [pot.include_electrons for pot in self.potentials]
-        )
+        if any(
+            [
+                pot.include_electrons == "SpinSeparated"
+                for pot in self.potentials
+            ]
+        ):
+            self.include_electrons = "SpinSeparated"
+        elif any(
+            [
+                pot.include_electrons == "SpinAveraged"
+                for pot in self.potentials
+            ]
+        ):
+            self.include_electrons = "SpinAveraged"
+        else:
+            self.include_electrons = "off"
         self.model_key = ""
 
     @property
@@ -268,7 +337,9 @@ class PotentialSum(HNCPotential):
         return self._include_electrons
 
     @include_electrons.setter
-    def include_electrons(self, value: bool):
+    def include_electrons(
+        self, value: Literal["off", "SpinSeparated", "SpinAveraged"]
+    ):
         self._include_electrons = value
         # Pass the setting if electrons should be included down to all the
         # potentials considered
@@ -369,7 +440,9 @@ class ScaledPotential(HNCPotential):
         return self._include_electrons
 
     @include_electrons.setter
-    def include_electrons(self, value: bool):
+    def include_electrons(
+        self, value: Literal["off", "SpinAveraged", "SpinSeparated"]
+    ):
         self._include_electrons = value
         # Pass the setting if electrons should be included down to all the
         # potentials considered
@@ -773,8 +846,9 @@ class EmptyCorePotential(HNCPotential):
 
        This potential is only defined for the electron-ion interaction. Hence,
        it will always and automatically set ~:py:meth:`include_electrons` to
-       ``True``. For the rest, we return a Coulomb-potential -- but this is
-       really just to be compatible with the other potentials defined here.
+       ``"SpinAveraged"``. For the rest, we return a Coulomb-potential -- but
+       this is really just to be compatible with the other potentials defined
+       here.
 
     """
 
@@ -787,7 +861,7 @@ class EmptyCorePotential(HNCPotential):
         self,
     ):
         super().__init__()
-        self.include_electrons = True
+        self.include_electrons = "SpinAveraged"
 
     @jax.jit
     def full_r(self, plasma_state, r: Quantity) -> Quantity:
@@ -853,8 +927,9 @@ class SoftCorePotential(HNCPotential):
 
        This potential is only defined for the electron-ion interaction. Hence,
        it will always and automatically set ~:py:meth:`include_electrons` to
-       ``True``. For the rest, we return a Coulomb-potential -- but this is
-       really just to be compatible with the other potentials defined here.
+       ``"SpinAveraged"``. For the rest, we return a Coulomb-potential -- but
+       this is really just to be compatible with the other potentials defined
+       here.
 
     """
 
@@ -871,7 +946,7 @@ class SoftCorePotential(HNCPotential):
         #: edge
         self.beta = beta
         super().__init__()
-        self.include_electrons = True
+        self.include_electrons = "SpinAveraged"
 
     @jax.jit
     def full_r(self, plasma_state, r: Quantity) -> Quantity:

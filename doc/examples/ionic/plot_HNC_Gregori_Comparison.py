@@ -40,9 +40,9 @@ KK = hnc_potentials.KlimontovichKraeftPotential()
 Kelbg = hnc_potentials.KelbgPotential()
 Coulomb = hnc_potentials.CoulombPotential()
 
-KK.include_electrons = True
-Kelbg.include_electrons = True
-Coulomb.include_electrons = True
+KK.include_electrons = "SpinAveraged"
+Kelbg.include_electrons = "SpinAveraged"
+Coulomb.include_electrons = "SpinAveraged"
 
 for idx, frac in enumerate([1.0, 2.0, 4.0]):
     state.T_i = jaxrts.units.to_array([state.T_e / frac])

@@ -32,8 +32,8 @@ def test_electron_ion_potentials_literature_values_schwarz():
     KK = hnc_potentials.KlimontovichKraeftPotential()
     Kelbg = hnc_potentials.KelbgPotential()
 
-    KK.include_electrons = True
-    Kelbg.include_electrons = True
+    KK.include_electrons = "SpinAveraged"
+    Kelbg.include_electrons = "SpinAveraged"
 
     ei = (-KK.full_r(state, r) / (ureg.k_B * KK.T(state)))[1, 0, :].m_as(
         ureg.dimensionless
@@ -159,7 +159,7 @@ def test_linear_response_screening_gericke2010_literature():
         "Coulomb.csv",
     ]
     for idx, pot in enumerate([empty_core, soft_core2, soft_core6, coulomb]):
-        pot.include_electrons = True
+        pot.include_electrons = "SpinAveraged"
         import logging
 
         logging.warning(idx)
