@@ -1741,11 +1741,14 @@ class DetailedBalance(ScatteringModel):
 
     .. note::
 
-       We would recommend to have an `evaluate_raw` for the bound-free model,
-       which should return the bound-free scattering intensity **not
+       This model requires to have an `evaluate_raw` method for the bound-free
+       model, which should return the bound-free scattering intensity **not
        convolved** with an instrument function.
-       While this Model works in any way, a model as described above should be
-       numerically more stable.
+
+    .. note::
+
+       The typical normalization factor (average ionization) is not required
+       here, as the bound-free model should already incorporate this.
 
     """
 
@@ -1762,7 +1765,7 @@ class DetailedBalance(ScatteringModel):
         fb = plasma_state["bound-free scattering"].evaluate_raw(
             plasma_state, mirrored_setup
         )
-        return fb * db_factor / plasma_state.mean_Z_A
+        return fb * db_factor
 
 
 # Form Factor Models
