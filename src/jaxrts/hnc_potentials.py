@@ -788,7 +788,12 @@ class DeutschPotential(HNCPotential):
         return (
             self.q2(plasma_state)
             / (4 * jnp.pi * ureg.epsilon_0 * _r)
-            * (1 - jpu.numpy.exp(-_r / self.lambda_ab(plasma_state)))
+            * (
+                1
+                - jpu.numpy.exp(
+                    -_r / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))
+                )
+            )
         )
 
     @jax.jit
@@ -806,7 +811,10 @@ class DeutschPotential(HNCPotential):
             self.q2(plasma_state)
             / (_k**2 * ureg.epsilon_0)
             * (1 / self.lambda_ab(plasma_state)) ** 2
-            / (_k**2 + (1 / self.lambda_ab(plasma_state)) ** 2)
+            / (
+                _k**2
+                + (1 / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))) ** 2
+            )
         )
 
     @jax.jit
@@ -1072,7 +1080,7 @@ class SpinSeparatedEEExchange(HNCPotential):
         exchange = (
             (-1 * ureg.k_B * self.T(plasma_state))
             * jpu.numpy.log(
-                1 - jpu.numpy.exp(-(_r**2 / self.lambda_ab(plasma_state) ** 2)/2)
+                1 - jpu.numpy.exp(-(_r**2 / self.lambda_ab(plasma_state) ** 2))
             )
             * jnp.eye(len(self.mu(plasma_state)))[:, :, jnp.newaxis]
         )
@@ -1106,7 +1114,7 @@ class SpinAveragedEEExchange(HNCPotential):
             * jpu.numpy.exp(
                 -1
                 / (jnp.pi * jnp.log(2))
-                * (_r / self.lambda_ab(plasma_state)) ** 2
+                * (_r / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))) ** 2
             )
             * jnp.eye(len(self.mu(plasma_state)))[:, :, jnp.newaxis]
         )
