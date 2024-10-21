@@ -33,8 +33,8 @@ state = jaxrts.PlasmaState(
 # Increasing max(r) results in better fits for the Sii@low k, but increases
 # computation time
 pot = 16
-r = jpu.numpy.linspace(2e-2 * ureg.a0, 5e3 * ureg.a0, 2**pot)
-mix = 0.5
+r = jpu.numpy.linspace(5e-2 * ureg.a0, 1e3 * ureg.a0, 2**pot)
+mix = 0.9
 
 d = jpu.numpy.cbrt(3 / (4 * jnp.pi * state.n_i))
 
