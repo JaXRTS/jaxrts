@@ -97,12 +97,19 @@ class ITCF:
         self.raw = raw
 
     @jax.jit
-    def _L(self, tau_dimensionless):
+    def _F(self, tau_dimensionless):
         tau = tau_dimensionless / (1 * ureg.kiloelectron_volt)
-        return self.L(tau)
+        return self.F(tau)
 
     @jax.jit
-    def L(self, tau):
+    def __call__(self, tau):
+        """
+        Alias to :py:meth:`~.F`.
+        """
+        return self.F(tau)
+
+    @jax.jit
+    def F(self, tau):
         L_S_ee = twoSidedLaplace(
             self.S_ee_conv, tau, self.E_shift, -self.E_cut, self.E_cut
         )
@@ -124,7 +131,7 @@ class ITCF:
         t_max = tau_max.m_as(1 / ureg.kiloelectron_volt)
 
         sol, iterations = secant_extrema_finding(
-            jax.tree_util.Partial(self._L), t_min, t_max
+            jax.tree_util.Partial(self._F), t_min, t_max
         )
 
         minimizing_tau = sol / (1 * ureg.kiloelectron_volt)
@@ -166,7 +173,7 @@ def ITCFT(
     raw: bool = False,
 ) -> (Quantity, Quantity):
     """
-    1. Calculate :math:`\\mathscr{L}[S] where S is the real dynamic structure
+    1. Calculate :math:`F=\\mathscr{L}[S] where S is the real dynamic structure
        factor (i.e., not convolved with the instrument function) See
        :cite:`Dornheim.2022`, Eqn (2).
     2. Find the :math:`\\tau` for which the Laplace transform is minimal
@@ -174,10 +181,8 @@ def ITCFT(
     """
     # Note the sign, here! Lower energy in a spectrum is a positive energy
     # shift.
-    E_shift = -(setup.measured_energy - setup.energy)
-    instrument = setup.instrument(E_shift / (1 * ureg.hbar))
-    ITCF_minimizer = ITCF(S_ee_conv, E_shift, instrument, E_shift, E_cut, raw)
-    return ITCF_minimizer.get_T(tau_max)
+    ITCF_func = ITCF_from_setup(S_ee_conv, setup, E_cut, raw)
+    return ITCF_func.get_T(tau_max)
 
 
 @jax.jit
@@ -188,7 +193,7 @@ def ITCFT_grid(
     E_cut: Quantity,
 ) -> (Quantity, Quantity):
     """
-    1. Calculate :math:`\\mathscr{L}[S] where S is the real dynamic structure
+    1. Calculate :math:`F=\\mathscr{L}[S] where S is the real dynamic structure
        factor (i.e., not convolved with the instrument function) See
        :cite:`Dornheim.2022`, Eqn (2).
     2. Find the :math:`\\tau` for which the Laplace transform is minimal
@@ -201,12 +206,22 @@ def ITCFT_grid(
     return _ITCFT_grid(S_ee_conv, tau, E_shift, instrument, E_shift, E_cut)
 
 
-jax.tree_util.register_pytree_node(
-    ITCF,
-    ITCF._tree_flatten,
-    ITCF._tree_unflatten,
-)
-
+@partial(jax.jit, static_argnames="raw")
+def ITCF_from_setup(
+    S_ee_conv: Quantity,
+    setup: Setup,
+    E_cut: Quantity,
+    raw: bool = False,
+) -> "ITCF":
+    """
+    Returns a :py:class:`~.ITCF`object from the given given
+    :py:class:`jaxrts.setup.Setup` instance and a dynamic structure factor.
+    If ``raw`` is True, the returned object will omit the deconvolution
+    with the instrument function.
+    """
+    E_shift = -(setup.measured_energy - setup.energy)
+    instrument = setup.instrument(E_shift / (1 * ureg.hbar))
+    return ITCF(S_ee_conv, E_shift, instrument, E_shift, E_cut, raw)
 
 @partial(jax.jit, static_argnames="raw")
 def ITCF_fsum(
@@ -216,7 +231,7 @@ def ITCF_fsum(
     raw: bool = False,
 ) -> (Quantity, Quantity):
     """
-    1. Calculate :math:`\\mathscr{L}[S] where S is the real dynamic structure
+    1. Calculate :math:`F=\\mathscr{L}[S] where S is the real dynamic structure
        factor (i.e., not convolved with the instrument function) See
        :cite:`Dornheim.2022`, Eqn (2).
     2. Calculate the derivative of the Laplace transform at :math:`\\tau = 0`.
@@ -224,29 +239,31 @@ def ITCF_fsum(
     """
     # Note the sign, here! Lower energy in a spectrum is a positive energy
     # shift.
-    E_shift = -(setup.measured_energy - setup.energy)
-    instrument = setup.instrument(E_shift / (1 * ureg.hbar))
-    ITCF_func = ITCF(S_ee_conv, E_shift, instrument, E_shift, E_cut, raw)
-    return (jax.grad(ITCF_func._L)(0.0)) * 1 * ureg.kiloelectron_volt
+    ITCF_func = ITCF_from_setup(S_ee_conv, setup, E_cut, raw)
+    return (jax.grad(ITCF_func._F)(0.0)) * 1 * ureg.kiloelectron_volt
 
 
 @partial(jax.jit, static_argnames="raw")
-def ITCF_norm(
+def ITCF_ssf(
     S_ee_conv: Quantity,
     setup: Setup,
     E_cut: Quantity,
     raw: bool = False,
 ) -> (Quantity, Quantity):
     """
-    1. Calculate :math:`\\mathscr{L}[S] where S is the real dynamic structure
+    1. Calculate :math:`F=\\mathscr{L}[S] where S is the real dynamic structure
        factor (i.e., not convolved with the instrument function) See
        :cite:`Dornheim.2022`, Eqn (2).
-    2. Calculate the derivative of the Laplace transform at :math:`\\tau = 0`.
-    3. Get the f-sum.
+    2. Calculate :math:`F(0/eV) = S_ee(k)`, the static structure factor
     """
     # Note the sign, here! Lower energy in a spectrum is a positive energy
     # shift.
-    E_shift = -(setup.measured_energy - setup.energy)
-    instrument = setup.instrument(E_shift / (1 * ureg.hbar))
-    ITCF_func = ITCF(S_ee_conv, E_shift, instrument, E_shift, E_cut, raw)
-    return ITCF_func._L(0.0)
+    ITCF_func = ITCF_from_setup(S_ee_conv, setup, E_cut, raw)
+    return ITCF_func._F(0.0)
+
+
+jax.tree_util.register_pytree_node(
+    ITCF,
+    ITCF._tree_flatten,
+    ITCF._tree_unflatten,
+)
