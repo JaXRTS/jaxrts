@@ -21,22 +21,35 @@ def twoSidedLaplace(
     E_min: Quantity | None = None,
     E_max: Quantity | None = None,
 ):
+    """
+    Perform the two-sided Lapace transform of intensity numerically.
+
+    .. math::
+
+       \\mathscr{L}[I] = \\int_{E_{min}}^{E_{max}}
+       I \\exp(-\\tau E) \\mathrm{d}E
+
+    """
     # Set default values for E_min and E_max if they are not given
     E_min = jnpu.min(E_shift) if E_min is None else E_min
     E_max = jnpu.max(E_shift) if E_max is None else E_max
 
+    # Sort energy and intensity for the integration
+    inten_sorted = intensity[jnpu.argsort(E_shift)]
+    E_sorted = E_shift[jnpu.argsort(E_shift)]
+
     # Integrate in energy space (this way, the integral is numerically more
     # stable compared to omega_space. This results in a dimensionless result,
     # when considering dynamic structure factors
-    kernel = intensity * jnpu.exp(-tau * E_shift) / ureg.hbar
+    kernel = inten_sorted * jnpu.exp(-tau * E_sorted) / ureg.hbar
     kernel_unit = kernel.units
     # Set the kernel to 0 where the energy is outside of the defined range,
     # i.e., don't include it for the integral
     cut_kernel = jnpu.where(
-        (E_shift >= E_min) & (E_shift <= E_max), kernel.m_as(kernel_unit), 0
+        (E_sorted >= E_min) & (E_sorted <= E_max), kernel.m_as(kernel_unit), 0
     )
     return (
-        jnp.trapezoid(cut_kernel, (E_shift).m_as(ureg.electron_volt))
+        jnp.trapezoid(cut_kernel, (E_sorted).m_as(ureg.electron_volt))
         * kernel_unit
         * ureg.electron_volt
     )
@@ -52,7 +65,7 @@ def _ITCFT_grid(
     E_cut: Quantity,
 ) -> (Quantity, Quantity):
     """
-    1. Calculate :math:`\\mathscr{L}[S] where S is the real dynamic structure
+    1. Calculate :math:`\\mathscr{L}[S]` where S is the real dynamic structure
        factor (i.e., not convolved with the instrument function) See
        :cite:`Dornheim.2022`, Eqn (2).
     2. Find the :math:`\\tau` for which the Laplace transform is minimal
@@ -81,11 +94,9 @@ class ITCF:
         raw: bool = False,
     ) -> (Quantity, Quantity):
         """
-        1. Calculate :math:`\\mathscr{L}[S] where S is the real dynamic
+        1. Calculate :math:`F=\\mathscr{L}[S]` where S is the real dynamic
            structure factor (i.e., not convolved with the instrument function)
            See :cite:`Dornheim.2022`, Eqn (2).
-        2. Find the :math:`\\tau` for which the Laplace transform is minimal
-        3. Get the corresponding temperature
         """
         self.S_ee_conv = S_ee_conv
         self.E_shift = E_shift
@@ -110,6 +121,9 @@ class ITCF:
 
     @jax.jit
     def F(self, tau):
+        """
+        Calculate the Laplace Transform for the given structure factor.
+        """
         L_S_ee = twoSidedLaplace(
             self.S_ee_conv, tau, self.E_shift, -self.E_cut, self.E_cut
         )
@@ -127,6 +141,12 @@ class ITCF:
 
     @jax.jit
     def get_T(self, tau_max):
+        """
+        1. Find the :math:`\\tau` for which the Laplace transform is minimal
+        2. Get the corresponding temperature
+
+        See :cite:`Dornheim.2022`.
+        """
         t_min = 1e-8  # / ureg.kiloelectron_volt
         t_max = tau_max.m_as(1 / ureg.kiloelectron_volt)
 
@@ -173,8 +193,8 @@ def ITCFT(
     raw: bool = False,
 ) -> (Quantity, Quantity):
     """
-    1. Calculate :math:`F=\\mathscr{L}[S] where S is the real dynamic structure
-       factor (i.e., not convolved with the instrument function) See
+    1. Calculate :math:`F=\\mathscr{L}[S]` where S is the real dynamic
+       structure factor (i.e., not convolved with the instrument function) See
        :cite:`Dornheim.2022`, Eqn (2).
     2. Find the :math:`\\tau` for which the Laplace transform is minimal
     3. Get the corresponding temperature
@@ -193,8 +213,11 @@ def ITCFT_grid(
     E_cut: Quantity,
 ) -> (Quantity, Quantity):
     """
-    1. Calculate :math:`F=\\mathscr{L}[S] where S is the real dynamic structure
-       factor (i.e., not convolved with the instrument function) See
+    This function is akin to :py:func:`~.ITCFT`, but rather than an adoptive
+    minimization, it runs on a naive :math:`\\tau` grid.
+
+    1. Calculate :math:`F=\\mathscr{L}[S]` where S is the real dynamic
+       structure factor (i.e., not convolved with the instrument function) See
        :cite:`Dornheim.2022`, Eqn (2).
     2. Find the :math:`\\tau` for which the Laplace transform is minimal
     3. Get the corresponding temperature
@@ -219,9 +242,12 @@ def ITCF_from_setup(
     If ``raw`` is True, the returned object will omit the deconvolution
     with the instrument function.
     """
+    # Note the sign, here! Lower energy in a spectrum is a positive energy
+    # shift.
     E_shift = -(setup.measured_energy - setup.energy)
     instrument = setup.instrument(E_shift / (1 * ureg.hbar))
     return ITCF(S_ee_conv, E_shift, instrument, E_shift, E_cut, raw)
+
 
 @partial(jax.jit, static_argnames="raw")
 def ITCF_fsum(
@@ -231,8 +257,12 @@ def ITCF_fsum(
     raw: bool = False,
 ) -> (Quantity, Quantity):
     """
-    1. Calculate :math:`F=\\mathscr{L}[S] where S is the real dynamic structure
-       factor (i.e., not convolved with the instrument function) See
+    Calculate the f-sum rule by evaluating the first derivative of the Laplace
+    transform at 0/eV.
+    See :cite:`Dornheim.2024`.
+
+    1. Calculate :math:`F=\\mathscr{L}[S]` where S is the real dynamic
+       structure factor (i.e., not convolved with the instrument function) See
        :cite:`Dornheim.2022`, Eqn (2).
     2. Calculate the derivative of the Laplace transform at :math:`\\tau = 0`.
     3. Get the f-sum.
@@ -251,8 +281,11 @@ def ITCF_ssf(
     raw: bool = False,
 ) -> (Quantity, Quantity):
     """
-    1. Calculate :math:`F=\\mathscr{L}[S] where S is the real dynamic structure
-       factor (i.e., not convolved with the instrument function) See
+    Calculate the Static structure Factor by evaluating the Laplace transform
+    at 0/eV.
+
+    1. Calculate :math:`F=\\mathscr{L}[S]` where S is the real dynamic
+       structure factor (i.e., not convolved with the instrument function) See
        :cite:`Dornheim.2022`, Eqn (2).
     2. Calculate :math:`F(0/eV) = S_ee(k)`, the static structure factor
     """

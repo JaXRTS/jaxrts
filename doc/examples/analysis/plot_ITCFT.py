@@ -102,12 +102,12 @@ E_shift = -(setup.measured_energy - setup.energy)
 instrument = setup.instrument(E_shift / (1 * ureg.hbar))
 for i, x in enumerate([20, 40, 80, 120]):
     minimizer = jaxrts.analysis.ITCF(
-        S_ee, E_shift, instrument, E_shift, ureg(f"{x}eV")
+        S_ee, E_shift, instrument, E_shift, ureg(f"{x}eV"), raw=False
     )
 
     T_auto = minimizer.get_T(60 / (1 * ureg.kiloelectron_volt))
     tau = jnp.linspace(1e-8, 60)
-    L_auto = [minimizer.L(t * (1 / ureg.kiloelectron_volt)) for t in tau]
+    L_auto = [minimizer(t * (1 / ureg.kiloelectron_volt)) for t in tau]
     T_grid, L_grid = jaxrts.analysis.ITCFT_grid(
         S_ee, tau / (1 * ureg.kiloelectron_volt), setup, ureg(f"{x}eV")
     )
