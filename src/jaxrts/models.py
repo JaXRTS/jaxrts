@@ -16,6 +16,7 @@ from . import (
     bound_free,
     ee_localfieldcorrections,
     form_factors,
+    free_bound,
     free_free,
     hnc_potentials,
     hypernetted_chain,
@@ -29,7 +30,6 @@ from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
 from .setup import (
     Setup,
     convolve_stucture_factor_with_instrument,
-    dispersion_corrected_k,
     get_probe_setup,
 )
 from .units import Quantity, to_array, ureg
@@ -106,8 +106,8 @@ class ScatteringModel(Model):
 
        As these extra functionalities are only relevant when re-sampling and
        convolution with an instrument function is reasonable, the
-       :py:class:`~.Model` s used to describe ionic scattering are currently not
-       instances of :py:class:`~.ScatteringModel` as the convolution with a
+       :py:class:`~.Model` s used to describe ionic scattering are currently
+       not instances of :py:class:`~.ScatteringModel` as the convolution with a
        delta function would just result in numerical issues.
 
     It furthermore allows a user to set the :py:attr:`~.sample_points`
@@ -126,7 +126,8 @@ class ScatteringModel(Model):
         #: However, as the computation might be expensive, you can reduce the
         #: number of relevant :math:`k` s by setting this attribute. After the
         #: evaluation, the resulting scatting signal is interpolated to the
-        #: relevant :math:`k` s and then convolved with the instrument function.
+        #: relevant :math:`k` s and then convolved with the instrument
+        #: function.
         self.sample_points = sample_points
 
     @abc.abstractmethod
@@ -319,7 +320,7 @@ class ArkhipovIonFeat(IonFeatModel):
 
     Requires a 'form-factors' model (defaults to
     :py:class:`~PaulingFormFactors`) and a 'screening' model (defaults to
-    :py:class:`Gregori2004Screenig`).
+    :py:class:`Gregori2004Screening`).
 
     See Also
     --------
@@ -852,7 +853,7 @@ class QCSalpeterApproximation(FreeFreeModel):
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_Salpeter(
             k,
             plasma_state.T_e,
@@ -865,10 +866,13 @@ class QCSalpeterApproximation(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
         )
 
     @jax.jit
@@ -924,7 +928,7 @@ class RPA_NoDamping(FreeFreeModel):
         self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
     ) -> jnp.ndarray:
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_RPA_no_damping(
             k,
             plasma_state.T_e,
@@ -938,10 +942,13 @@ class RPA_NoDamping(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
         )
 
     @jax.jit
@@ -984,13 +991,13 @@ class RPA_DandreaFit(FreeFreeModel):
         factor.
     """
 
-    __name__ = "PRA_DandreaFit"
+    __name__ = "RPA_DandreaFit"
 
     @jax.jit
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup, *args, **kwargs
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_RPA_Dandrea(
             k,
             plasma_state.T_e,
@@ -999,14 +1006,34 @@ class RPA_DandreaFit(FreeFreeModel):
             plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
         )
 
+        # Interpolate to avoid the nan value for E == 0
+        w_pl = plasma_physics.plasma_frequency(plasma_state.n_e)
+        interpE = jnp.array([-1e-6, 1e-6]) * (1 * ureg.hbar) * w_pl
+
+        See_interp = free_free.S0_ee_RPA_Dandrea(
+            setup.k,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            interpE,
+            plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
+        )
+
+        See_0 = jnpu.where(
+            setup.measured_energy - setup.energy == 0,
+            jnpu.mean(See_interp),
+            See_0,
+        )
         ff = See_0 * jnp.sum(
             plasma_state.Z_free * plasma_state.number_fraction
         )
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
         )
 
     @jax.jit
@@ -1075,7 +1102,7 @@ class BornMerminFull(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA(
             k,
             plasma_state.T_e,
@@ -1089,10 +1116,13 @@ class BornMerminFull(FreeFreeModel):
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
         )
 
     @jax.jit
@@ -1209,7 +1239,7 @@ class BornMermin(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
             k,
             plasma_state.T_e,
@@ -1224,10 +1254,13 @@ class BornMermin(FreeFreeModel):
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
         )
 
     @jax.jit
@@ -1362,7 +1395,7 @@ class BornMermin_Fit(FreeFreeModel):
             plasma_state.Z_free * plasma_state.number_fraction
         )
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interpFit(
             k,
             plasma_state.T_e,
@@ -1377,10 +1410,13 @@ class BornMermin_Fit(FreeFreeModel):
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
         )
 
     @jax.jit
@@ -1513,7 +1549,7 @@ class BornMermin_Fortmann(FreeFreeModel):
             return plasma_state["BM V_eiS"].V(plasma_state, k)
 
         mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         mean_Z_free = jnpu.sum(
             plasma_state.Z_free * plasma_state.number_fraction
         )
@@ -1531,10 +1567,13 @@ class BornMermin_Fortmann(FreeFreeModel):
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
-        return jax.lax.cond(
-            jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
-            lambda: ff,
+        return (
+            jax.lax.cond(
+                jnp.sum(plasma_state.Z_free) == 0,
+                lambda: jnp.zeros_like(setup.measured_energy) * ureg.second,
+                lambda: ff,
+            )
+            / plasma_state.mean_Z_A
         )
 
     @jax.jit
@@ -1642,7 +1681,7 @@ class SchumacherImpulse(ScatteringModel):
         plasma_state: "PlasmaState",
         setup: Setup,
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         omega_0 = setup.energy / ureg.hbar
         omega = omega_0 - setup.measured_energy / ureg.hbar
         x = plasma_state.number_fraction
@@ -1691,8 +1730,7 @@ class SchumacherImpulse(ScatteringModel):
             out += jnpu.where(
                 jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
             )
-
-        return out
+        return out / plasma_state.mean_Z_A
 
     def _tree_flatten(self):
         children = ()
@@ -1724,11 +1762,14 @@ class DetailedBalance(ScatteringModel):
 
     .. note::
 
-       We would recommend to have an `evaluate_raw` for the bound-free model,
-       which should return the bound-free scattering intensity **not
+       This model requires to have an `evaluate_raw` method for the bound-free
+       model, which should return the bound-free scattering intensity **not
        convolved** with an instrument function.
-       While this Model works in any way, a model as described above should be
-       numerically more stable.
+
+    .. note::
+
+       The typical normalization factor (average ionization) is not required
+       here, as the bound-free model should already incorporate this.
 
     """
 
@@ -1740,17 +1781,12 @@ class DetailedBalance(ScatteringModel):
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
         energy_shift = setup.measured_energy - setup.energy
-        mirrored_setup = Setup(
-            setup.scattering_angle,
-            setup.energy,
-            setup.energy - energy_shift,
-            setup.instrument,
-        )
+        mirrored_setup = free_bound.FreeBoundFlippedSetup(setup)
         db_factor = jnpu.exp(-energy_shift / (plasma_state.T_e * ureg.k_B))
-        free_bound = plasma_state["bound-free scattering"].evaluate_raw(
+        fb = plasma_state["bound-free scattering"].evaluate_raw(
             plasma_state, mirrored_setup
         )
-        return free_bound * db_factor
+        return fb * db_factor
 
 
 # Form Factor Models
@@ -2203,7 +2239,7 @@ class FiniteWavelengthScreening(Model):
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
         q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
-        return q
+        return q / plasma_state.mean_Z_A
 
 
 class DebyeHueckelScreening(Model):
@@ -2303,7 +2339,7 @@ class Gregori2004Screening(Model):
     """
 
     allowed_keys = ["screening"]
-    __name__ = "Gregori2004Screenig"
+    __name__ = "Gregori2004Screening"
 
     @jax.jit
     def evaluate(
@@ -2356,7 +2392,7 @@ class ElectronicLFCGeldartVosko(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         return ee_localfieldcorrections.eelfc_geldartvosko(
             k, plasma_state.T_e, plasma_state.n_e
         )
@@ -2386,7 +2422,7 @@ class ElectronicLFCUtsumiIchimaru(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         return ee_localfieldcorrections.eelfc_utsumiichimaru(
             k, plasma_state.T_e, plasma_state.n_e
         )
@@ -2416,7 +2452,7 @@ class ElectronicLFCStaticInterpolation(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        k = dispersion_corrected_k(setup, plasma_state.n_e)
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
         return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
             k, plasma_state.T_e, plasma_state.n_e
         )
@@ -2689,8 +2725,8 @@ class FiniteWavelength_BM_V(BM_V_eiSModel):
     Uses finite wavelength screening to screen the bare Coulomb potential,
     i.e., :math:`V_{s} = \\frac{V_\\mathrm{Coulomb}}{\\vareps_{RPA}(k, E=0)}`
 
-    We use the pure RPA result to calculate the dielectric function, and use the
-    :cite:`Dandrea.1986` fitting formula.
+    We use the pure RPA result to calculate the dielectric function, and use
+    the :cite:`Dandrea.1986` fitting formula.
 
     See Also
     --------

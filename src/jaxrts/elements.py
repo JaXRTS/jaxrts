@@ -2,7 +2,7 @@
 This submodule contains data for different chemical elements.
 """
 
-from typing import Any
+from typing import Any, List
 
 import jax
 import jpu.numpy as jnpu

@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 def xi_lfc_corrected(
     xi: Quantity | jnp.ndarray, v: Quantity, lfc: Quantity | jnp.ndarray
 ):
-
     """
     This function corrects the susceptibility according to the local field correction formalism.
     """
@@ -39,7 +38,6 @@ def xi_lfc_corrected(
 
 @jax.jit
 def eelfc_hubbard(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
-    
     """
     Static local field correction introduced and based on :cite:`Hubbard.1957`.
     """
@@ -50,7 +48,6 @@ def eelfc_hubbard(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
 
 @jax.jit
 def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
-    
     """
     Static local field correction introduced and based on :cite:`Geldart.1966`.
     """
@@ -109,7 +106,6 @@ def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
 def eelfc_utsumiichimaru(
     k: Quantity, T_e: Quantity, n_e: Quantity
 ) -> Quantity:
-
     """
     Static local field correction introduced and based on :cite:`UtsumiIchimaru.1982`.
     """
@@ -155,7 +151,7 @@ def eelfc_utsumiichimaru(
 @jax.jit
 def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     """
-    Improved version of Utsumi and Ichimaru, based on QMC results (:cite:`Farid.1993`). 
+    Improved version of Utsumi and Ichimaru, based on QMC results (:cite:`Farid.1993`).
     """
     rs = (interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)).m_as(
         ureg.dimensionless
@@ -257,7 +253,6 @@ def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
 def eelfc_interpolationgregori2007(
     k: Quantity, T_e: Quantity, n_e: Quantity
 ) -> Quantity:
-    
     """
     Interpolation function between the UtsumiIchimaru result (high-degeneracy)
     for the local field correction and the GeldartVosko result (low-degeneracy).
@@ -278,7 +273,6 @@ def eelfc_interpolationgregori2007(
 def eelfc_interpolationgregori_farid(
     k: Quantity, T_e: Quantity, n_e: Quantity
 ) -> Quantity:
-    
     """
     Interpolation function between the Farid result (high-degeneracy)
     for the local field correction and the GeldartVosko result (low-degeneracy).

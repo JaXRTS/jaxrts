@@ -8,6 +8,7 @@ from time import time
 
 import jax
 from jax import numpy as jnp
+from jax.scipy.optimize import minimize
 
 from .units import Quantity, ureg
 
@@ -172,6 +173,71 @@ class JittableDict(dict):
         for key, val in zip(aux_data, children):
             obj[key] = val
         return obj
+
+
+@jax.jit
+def secant_extrema_finding(func, xmin, xmax, tol=1e-7, max_iter=1e5):
+    """
+    Use the secant method to find the extrema of a function within specified
+    bounds. This is achieved by calling :py:func:`jax.grad` on the function
+    func.
+
+    Parameters
+    ----------
+    func : callable
+        The function to minimize. It should take a single input and return a
+        scalar output.
+    xmin : float
+        The minimum bound for the variable x.
+    xmax : float
+        The maximum bound for the variable x.
+    tol : float, optional
+        The tolerance for the stopping criteria. The default is 1e-7.
+    max_iter : int, optional
+        The maximum number of iterations to perform. The default is 100000.
+
+    Returns
+    -------
+    float
+        The x value that minimizes the function within the specified bounds.
+
+    Examples
+    --------
+    >>> def example_func(x):
+    ...     return (x - 2) ** 2
+    >>> minimum, iter = secant_minimum_finding(example_func, 0, 4)
+    >>> print(minimum)
+    2.0
+    """
+
+    f = jax.grad(func)
+
+    x0 = (xmin + xmax) / 2
+    x1 = xmax
+
+    def body_fun(state):
+        x0, x1, i = state
+        f0 = f(x0)
+        f1 = f(x1)
+
+        # Secant method update
+        x_next = x1 - f1 * (x1 - x0) / (f1 - f0)
+        x_next = jnp.clip(x_next, xmin, xmax)
+
+        # Update the state
+        return x1, x_next, i + 1
+
+    def cond_fun(state):
+        x0, x1, i = state
+        f0 = f(x0)
+        f1 = f(x1)
+        return (jnp.abs(f0 - f1) >= tol) & (i < max_iter)
+
+    # Initialize the state
+    state = (x0, x1, 0)
+    final_state = jax.lax.while_loop(cond_fun, body_fun, state)
+
+    return final_state[1], final_state[2]
 
 
 jax.tree_util.register_pytree_node(
