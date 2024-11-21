@@ -1750,12 +1750,14 @@ class SchumacherImpulse(ScatteringModel):
 
         return obj
 
+
 class SchumacherImpulseFitRk(ScatteringModel):
     """
     Bound-free scattering based on the Schumacher Impulse Approximation
     :cite:`Schumacher.1975`. The implementation considers the first order
     asymmetric correction to the impulse approximation, as given in the
-    aforementioned paper.
+    aforementioned paper. The r_k factor is fitted to fulfill the f-sum rule.
+    Note, that this implementation is still experimental.
 
     Requires a 'form-factors' model (defaults to
     :py:class:`~PaulingFormFactors`).
@@ -1768,12 +1770,6 @@ class SchumacherImpulseFitRk(ScatteringModel):
     __name__ = "SchumacherImpulseFitRk"
 
     def __init__(self) -> None:
-        """
-        r_k is the correction given in :cite:`Gregori.2004`. If None, or if a
-        negative value is given, we use the folula given by
-        :cite:`Gregori.2004`. Otherwise, it is just the value provided by the
-        user.
-        """
         super().__init__()
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -1789,41 +1785,48 @@ class SchumacherImpulseFitRk(ScatteringModel):
 
         # Calculate r_k through f-sum rule
 
-        fsum_theory = (
-            -1 * ureg.hbar**2 * setup.k**2 / (2 * ureg.electron_mass)
+        fsum_theory = -1 * ureg.hbar**2 * setup.k**2 / (2 * ureg.electron_mass)
+
+        setup_dispersion_off = Setup(
+            setup.scattering_angle,
+            setup.energy,
+            setup.measured_energy,
+            setup.instrument,
+            False,
         )
 
-        setup_dispersion_off = Setup(setup.scattering_angle, setup.energy, setup.measured_energy, setup.instrument, False)
-
-        bf = SchumacherImpulse(r_k=1.0).evaluate_raw(plasma_state, setup_dispersion_off)
+        bf = SchumacherImpulse(r_k=1.0).evaluate_raw(
+            plasma_state, setup_dispersion_off
+        )
 
         energy_shift = setup.measured_energy - setup.energy
 
         mirrored_setup = free_bound.FreeBoundFlippedSetup(setup_dispersion_off)
         db_factor = jnpu.exp(-energy_shift / (plasma_state.T_e * ureg.k_B))
-        fb = SchumacherImpulse(r_k=1.0).evaluate_raw(plasma_state, mirrored_setup) * db_factor
-
-        r_k = (
-            fsum_theory
-            - ITCF_fsum(
-                plasma_state["free-free scattering"].evaluate_raw(plasma_state, setup_dispersion_off),
-                raw=True,
-                setup=setup_dispersion_off,
-                E_cut=jnpu.max(
-                    setup.measured_energy - setup.energy
-                ),
+        fb = (
+            SchumacherImpulse(r_k=1.0).evaluate_raw(
+                plasma_state, mirrored_setup
             )
-        ) / (
-            ITCF_fsum(
-                fb
-                + bf,
-                raw=True,
-                setup=setup_dispersion_off,
-                E_cut=jnpu.max(
-                    setup.measured_energy - setup.energy
-                ),
-            )
+            * db_factor
         )
+
+        free_free_fsum = ITCF_fsum(
+            plasma_state["free-free scattering"].evaluate_raw(
+                plasma_state, setup_dispersion_off
+            ),
+            raw=True,
+            setup=setup_dispersion_off,
+            E_cut=jnpu.max(setup.measured_energy - setup.energy),
+        )
+
+        fb_bf_fsum = ITCF_fsum(
+            fb + bf,
+            raw=True,
+            setup=setup_dispersion_off,
+            E_cut=jnpu.max(setup.measured_energy - setup.energy),
+        )
+
+        r_k = (fsum_theory - free_free_fsum) / (fb_bf_fsum)
         return r_k.m_as(ureg.dimensionless)
 
     @jax.jit
@@ -1832,7 +1835,9 @@ class SchumacherImpulseFitRk(ScatteringModel):
         plasma_state: "PlasmaState",
         setup: Setup,
     ) -> jnp.ndarray:
-        return SchumacherImpulse(r_k=1.0).evaluate_raw(plasma_state, setup) * self.r_k(plasma_state, setup)
+        return SchumacherImpulse(r_k=1.0).evaluate_raw(
+            plasma_state, setup
+        ) * self.r_k(plasma_state, setup)
 
     def _tree_flatten(self):
         children = ()
