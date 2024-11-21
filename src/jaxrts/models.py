@@ -12,6 +12,8 @@ import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
+from .analysis import ITCF_fsum
+
 from . import (
     bound_free,
     ee_localfieldcorrections,
@@ -1748,6 +1750,105 @@ class SchumacherImpulse(ScatteringModel):
 
         return obj
 
+class SchumacherImpulseFitRk(ScatteringModel):
+    """
+    Bound-free scattering based on the Schumacher Impulse Approximation
+    :cite:`Schumacher.1975`. The implementation considers the first order
+    asymmetric correction to the impulse approximation, as given in the
+    aforementioned paper.
+
+    Requires a 'form-factors' model (defaults to
+    :py:class:`~PaulingFormFactors`).
+
+    Requires an 'ipd' model (defaults to
+    :py:class:`~Neglect`).
+    """
+
+    allowed_keys = ["bound-free scattering"]
+    __name__ = "SchumacherImpulseFitRk"
+
+    def __init__(self) -> None:
+        """
+        r_k is the correction given in :cite:`Gregori.2004`. If None, or if a
+        negative value is given, we use the folula given by
+        :cite:`Gregori.2004`. Otherwise, it is just the value provided by the
+        user.
+        """
+        super().__init__()
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model("ipd", Neglect())
+
+    @jax.jit
+    def r_k(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+    ) -> jnp.ndarray:
+
+        # Calculate r_k through f-sum rule
+
+        fsum_theory = (
+            -1 * ureg.hbar**2 * setup.k**2 / (2 * ureg.electron_mass)
+        )
+
+        setup_dispersion_off = Setup(setup.scattering_angle, setup.energy, setup.measured_energy, setup.instrument, False)
+
+        bf = SchumacherImpulse(r_k=1.0).evaluate_raw(plasma_state, setup_dispersion_off)
+
+        energy_shift = setup.measured_energy - setup.energy
+
+        mirrored_setup = free_bound.FreeBoundFlippedSetup(setup_dispersion_off)
+        db_factor = jnpu.exp(-energy_shift / (plasma_state.T_e * ureg.k_B))
+        fb = SchumacherImpulse(r_k=1.0).evaluate_raw(plasma_state, mirrored_setup) * db_factor
+
+        r_k = (
+            fsum_theory
+            - ITCF_fsum(
+                plasma_state["free-free scattering"].evaluate_raw(plasma_state, setup_dispersion_off),
+                raw=True,
+                setup=setup_dispersion_off,
+                E_cut=jnpu.max(
+                    setup.measured_energy - setup.energy
+                ),
+            )
+        ) / (
+            ITCF_fsum(
+                fb
+                + bf,
+                raw=True,
+                setup=setup_dispersion_off,
+                E_cut=jnpu.max(
+                    setup.measured_energy - setup.energy
+                ),
+            )
+        )
+        return r_k.m_as(ureg.dimensionless)
+
+    @jax.jit
+    def evaluate_raw(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+    ) -> jnp.ndarray:
+        return SchumacherImpulse(r_k=1.0).evaluate_raw(plasma_state, setup) * self.r_k(plasma_state, setup)
+
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.sample_points = aux_data
+
+        return obj
+
 
 # free-bound Models
 # -----------------
@@ -2803,6 +2904,7 @@ _all_models = [
     RPA_NoDamping,
     ScatteringModel,
     SchumacherImpulse,
+    SchumacherImpulseFitRk,
     Sum_Sii,
     StewartPyattIPD,
     ThreePotentialHNCIonFeat,
