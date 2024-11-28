@@ -651,69 +651,117 @@ class KelbgPotential(HNCPotential):
             )
         )
 
+    @jax.jit
     def short_r(self, plasma_state, r: Quantity) -> Quantity:
-        """
+        return self.full_r(plasma_state, r) - self.long_r(plasma_state, r)
 
-        .. math::
-
-            V_{a b}^{\\mathrm{Kelbg}}(r) =
-            \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
-            \\left[
-            \\frac{\\sqrt\\pi r}{\\lambda_{a b}}
-            \\left(1-\\mathrm{erf}
-            \\left(\\frac{r}{\\lambda_{a b}}\\right)
-            \\right)
-            \\right]
-
-        In the above equation, :math:`\\mathrm{erf}` is the Gaussian error
-        function.
-
-        For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
-        \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`.
-        """
-
-        _r = r[jnp.newaxis, jnp.newaxis, :]
-
-        return (
-            self.q2(plasma_state)
-            / (4 * jnp.pi * ureg.epsilon_0 * _r)
-            * (
-                (jnp.sqrt(jnp.pi) * _r / self.lambda_ab(plasma_state))
-                * (
-                    1
-                    - jax.scipy.special.erf(
-                        (_r / self.lambda_ab(plasma_state)).m_as(
-                            ureg.dimensionless
-                        )
-                    )
-                )
-            )
-        )
-
+    @jax.jit
     def long_r(self, plasma_state, r: Quantity) -> Quantity:
         """
+        The long-range behavior of the Deutsch-Potentials should be the
+        identical to the Coulomb-Potential. Therefore, define a long-range term
+        with is the Coulomb-Potential, which also has the known Fourier
+        transform.
 
         .. math::
 
-            V_{a b}^{\\mathrm{Kelbg}}(r) =
-            \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
-            \\left[1-\\exp\\left(-\\frac{r^2}{\\lambda_{a b}^2}\\right)
-            \\right]
+           q^2 / (4 jnp.pi \\varepsilon_0 r) \\cdot (1 - \\exp(-\\alpha r))
 
-        In the above equation, :math:`\\mathrm{erf}` is the Gaussian error
-        function.
-
-        For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
-        \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`.
         """
-
         _r = r[jnp.newaxis, jnp.newaxis, :]
+        c_full_r = self.q2(plasma_state) / (4 * jnp.pi * ureg.epsilon_0 * _r)
+        return c_full_r * (1 - jpu.numpy.exp(-self.alpha(plasma_state) * _r))
+
+    @jax.jit
+    def long_k(self, plasma_state, k: Quantity):
+        """
+        The known Fourier transform of the Coulomb's potential long-range part.
+
+        .. math::
+
+            q^2 / (k^2 \\varepsilon_0) \\cdot (\\alpha^2 / (k^2 + \\alpha^2))
+
+        """
+        _k = k[jnp.newaxis, jnp.newaxis, :]
 
         return (
             self.q2(plasma_state)
-            / (4 * jnp.pi * ureg.epsilon_0 * _r)
-            * (1 - jpu.numpy.exp(-(_r**2) / self.lambda_ab(plasma_state) ** 2))
+            / (_k**2 * ureg.epsilon_0)
+            * self.alpha(plasma_state) ** 2
+            / (_k**2 + self.alpha(plasma_state) ** 2)
         )
+
+    # ===
+    # These short-and longrange terms were calculate by splitting the Kelbg
+    # potential, directly. However, a Fourier transform of the long-range part
+    # might not be easy. Instead, we leverage that for big k, the Kelbg and
+    # Coulomb-Potential should be the same (see above).
+    # ===
+    # def short_r(self, plasma_state, r: Quantity) -> Quantity:
+    #     """
+
+    #     .. math::
+
+    #         V_{a b}^{\\mathrm{Kelbg}}(r) =
+    #         \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
+    #         \\left[
+    #         \\frac{\\sqrt\\pi r}{\\lambda_{a b}}
+    #         \\left(1-\\mathrm{erf}
+    #         \\left(\\frac{r}{\\lambda_{a b}}\\right)
+    #         \\right)
+    #         \\right]
+
+    #     In the above equation, :math:`\\mathrm{erf}` is the Gaussian error
+    #     function.
+
+    #     For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
+    #     \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`
+    #     .
+    #     """
+
+    #     _r = r[jnp.newaxis, jnp.newaxis, :]
+
+    #     return (
+    #         self.q2(plasma_state)
+    #         / (4 * jnp.pi * ureg.epsilon_0 * _r)
+    #         * (
+    #             (jnp.sqrt(jnp.pi) * _r / self.lambda_ab(plasma_state))
+    #             * (
+    #                 1
+    #                 - jax.scipy.special.erf(
+    #                     (_r / self.lambda_ab(plasma_state)).m_as(
+    #                         ureg.dimensionless
+    #                     )
+    #                 )
+    #             )
+    #         )
+    #     )
+
+    # def long_r(self, plasma_state, r: Quantity) -> Quantity:
+    #     """
+
+    #     .. math::
+
+    #         V_{a b}^{\\mathrm{Kelbg}}(r) =
+    #         \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}
+    #         \\left[1-\\exp\\left(-\\frac{r^2}{\\lambda_{a b}^2}\\right)
+    #         \\right]
+
+    #     In the above equation, :math:`\\mathrm{erf}` is the Gaussian error
+    #     function.
+
+    #     For :math:`r\\rightarrow 0: V_{a b} \\rightarrow
+    #     \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`
+    #     .
+    #     """
+
+    #     _r = r[jnp.newaxis, jnp.newaxis, :]
+
+    #     return (
+    #         self.q2(plasma_state)
+    #         / (4 * jnp.pi * ureg.epsilon_0 * _r)
+    #         * (1 - jpu.numpy.exp(-(_r**2) / self.lambda_ab(plasma_state) ** 2))
+    #     )
 
 
 class KlimontovichKraeftPotential(HNCPotential):
@@ -818,26 +866,43 @@ class DeutschPotential(HNCPotential):
         )
 
     @jax.jit
-    def long_k(self, plasma_state, k: Quantity):
-        return self.full_k(plasma_state, k)
-
-    @jax.jit
-    def long_r(self, plasma_state, r: Quantity):
-        return self.full_r(plasma_state, r)
-
-    @jax.jit
-    def short_k(self, plasma_state, k: Quantity) -> Quantity:
-        return (
-            jnp.zeros([*self.q2(plasma_state).shape[:2], len(k)])
-            * ureg.electron_volt
-            * ureg.angstrom**3
-        )
-
-    @jax.jit
     def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        return self.full_r(plasma_state, r) - self.long_r(plasma_state, r)
+
+    @jax.jit
+    def long_r(self, plasma_state, r: Quantity) -> Quantity:
+        """
+        The long-range behavior of the Deutsch-Potentials should be the
+        identical to the Coulomb-Potential. Therefore, define a long-range term
+        with is the Coulomb-Potential, which also has the known Fourier
+        transform.
+
+        .. math::
+
+           q^2 / (4 jnp.pi \\varepsilon_0 r) \\cdot (1 - \\exp(-\\alpha r))
+
+        """
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+        c_full_r = self.q2(plasma_state) / (4 * jnp.pi * ureg.epsilon_0 * _r)
+        return c_full_r * (1 - jpu.numpy.exp(-self.alpha(plasma_state) * _r))
+
+    @jax.jit
+    def long_k(self, plasma_state, k: Quantity):
+        """
+        The known Fourier transform of the Coulomb's potential long-range part.
+
+        .. math::
+
+            q^2 / (k^2 \\varepsilon_0) \\cdot (\\alpha^2 / (k^2 + \\alpha^2))
+
+        """
+        _k = k[jnp.newaxis, jnp.newaxis, :]
+
         return (
-            jnp.zeros([*self.q2(plasma_state).shape[:2], len(r)])
-            * ureg.electron_volt
+            self.q2(plasma_state)
+            / (_k**2 * ureg.epsilon_0)
+            * self.alpha(plasma_state) ** 2
+            / (_k**2 + self.alpha(plasma_state) ** 2)
         )
 
 
