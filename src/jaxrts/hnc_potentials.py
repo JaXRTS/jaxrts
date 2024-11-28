@@ -190,7 +190,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
         .. math::
 
-           \\bar{T}_{ab} = \\frac{T_a m_b + T_b m_a}{m_a m_b}
+           \\bar{T}_{ab} = \\frac{T_a m_b + T_b m_a}{m_a + m_b}
 
         """
         if self.include_electrons == "SpinAveraged":
