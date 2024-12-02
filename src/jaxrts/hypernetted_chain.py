@@ -462,7 +462,7 @@ def mass_weighted_T(m, T):
 
     .. math::
 
-       \\bar{T}_{ab} = \\frac{T_a m_b + T_b m_a}{m_a m_b}
+       \\bar{T}_{ab} = \\frac{T_a m_b + T_b m_a}{m_a + m_b}
 
     """
     return (
