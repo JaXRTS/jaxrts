@@ -451,6 +451,10 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0):
     return jpu.numpy.exp(log_g_r), niter
 
 
+def geometric_mean_T(T):
+
+    return jpu.numpy.sqrt(T[jnp.newaxis, :] * T[:, jnp.newaxis])
+
 def mass_weighted_T(m, T):
     """
     The mass weighted temperature average of a pair, according to

@@ -16,7 +16,7 @@ import jax.interpreters
 import jpu
 from jax import numpy as jnp
 
-from jaxrts.hypernetted_chain import _3Dfour, hnc_interp, mass_weighted_T
+from jaxrts.hypernetted_chain import _3Dfour, hnc_interp, mass_weighted_T, geometric_mean_T
 from jaxrts.units import Quantity, to_array, ureg
 
 logger = logging.getLogger(__name__)
