@@ -19,6 +19,7 @@ from jax import numpy as jnp
 from jaxrts.hypernetted_chain import (
     _3Dfour,
     _3Dfour_ogata,
+    fourier_transform_sine,
     hnc_interp,
     mass_weighted_T,
     geometric_mean_T,
@@ -37,13 +38,86 @@ logger = logging.getLogger(__name__)
 
 
 @jax.jit
-def pauli_potential_from_classical_map(
+def pauli_potential_from_classical_map_SpinAveraged(
     r1: jnp.ndarray, r2: jnp.ndarray, n_e: Quantity, T: Quantity
 ):
     """
-    This method utilizes the exact non-interacting solution for the pair distribution function (PDF) as input.
-    The effective potential is then derived iteratively to reproduce the input PDF using the HNC algorithm.
-    This approach effectively inverts the HNC framework to determine the interaction potential from a known PDF.
+    This method utilizes the exact non-interacting solution for the pair
+    distribution function (PDF) as input. The effective potential is then
+    derived iteratively to reproduce the input PDF using the HNC algorithm.
+    This approach effectively inverts the HNC framework to determine the
+    interaction potential from a known PDF.
+    """
+
+    SMALL = 1e-14
+
+    # Step 1: Calculate g^0_T(r)
+
+    k_F = fermi_wavenumber(n_e)
+
+    dr1 = r1[1] - r1[0]
+    dk1 = jnp.pi / (len(r1) * dr1)
+    k1 = jnp.pi / r1[-1] + jnp.arange(len(r1)) * dk1
+    dr2 = r2[1] - r2[0]
+    dk2 = jnp.pi / (len(r2) * dr2)
+    k2 = jnp.pi / r2[-1] + jnp.arange(len(r2)) * dk2
+
+    # Use this instead ...
+    chem_pot = chem_pot_sommerfeld_fermi_interpolation(T, n_e)
+
+    # Calculate Fermi distribution
+    n_k = fermi_dirac(k1, chem_pot, T)
+    F_T_r = (
+        (6 * jnp.pi**2 / k_F**3)
+        * fourier_transform_sine(r1, k1, n_k)
+        / (2 * jnp.pi) ** 3
+    )
+
+    g0_T_r = 1 - (F_T_r**2).m_as(ureg.dimensionless)
+    # Average between the interacting and the non-interacting g (the latter is
+    # just unity! for all k)
+
+    g0_T_r = g0_T_r / 2 + 1 / 2
+
+    # Clip g0, as negative values are problematic
+    g0_T_r = jnp.where(g0_T_r <= 0.0, SMALL, g0_T_r)
+
+    # Interpolate g0 to the r-spacing on which the HNC alogrithm is performed
+    # on
+    g0_T_r = jnp.interp(
+        r2.m_as(ureg.a0),
+        r1.m_as(ureg.a0),
+        g0_T_r,
+        left=SMALL,
+        right=1.0,
+    )
+
+    # Step 2: Invert HNC algorithm to calculate the potential which produces
+    # g0_T_r (this is the Pauli exclusion potential by construction)
+
+    h0_T_r = g0_T_r - 1
+    Ns_r = jpu.numpy.log(g0_T_r)
+
+    N_k = fourier_transform_sine(k2, r2, Ns_r * ureg.dimensionless)
+    h0_T_k = fourier_transform_sine(k2, r2, h0_T_r * ureg.dimensionless)
+
+    cs_k = h0_T_k - N_k
+    c_k = h0_T_k / (1 + n_e * h0_T_k)
+
+    # Step 3: Calculate V_(k)
+    return k2, (cs_k - c_k) * (1 * ureg.boltzmann_constant * T), g0_T_r
+
+
+@jax.jit
+def pauli_potential_from_classical_map_SpinSeparated(
+    r1: jnp.ndarray, r2: jnp.ndarray, n_e: Quantity, T: Quantity
+):
+    """
+    This method utilizes the exact non-interacting solution for the pair
+    distribution function (PDF) as input. The effective potential is then
+    derived iteratively to reproduce the input PDF using the HNC algorithm.
+    This approach effectively inverts the HNC framework to determine the
+    interaction potential from a known PDF.
     """
 
     n = to_array([n_e / 2, n_e / 2])
@@ -62,7 +136,9 @@ def pauli_potential_from_classical_map(
     k2 = jnp.pi / r2[-1] + jnp.arange(len(r2)) * dk2
 
     # Don't use Maxwellian, bro ...
-    # chem_pot = 1 * ureg.boltzmann_constant * T * jpu.numpy.log(degeneracy_param(d, T))
+    # chem_pot = (
+    #     1 * ureg.boltzmann_constant * T * jpu.numpy.log(degeneracy_param(d, T))
+    # )
 
     # Use this instead ...
     chem_pot = chem_pot_sommerfeld_fermi_interpolation(T, d)
@@ -81,7 +157,15 @@ def pauli_potential_from_classical_map(
 
     # This is only valid for T=0, keeping it for documentation reasons
 
-    # g_same = 1 - (3 * (jpu.numpy.sin(k_F * r) - (k_F * r)  * jpu.numpy.cos(k_F * r)) / (k_F * r) ** 3).m_as(ureg.dimensionless)**2
+    # g_same = (
+    #     1
+    #     - (
+    #         3
+    #         * (jpu.numpy.sin(k_F * r) - (k_F * r) * jpu.numpy.cos(k_F * r))
+    #         / (k_F * r) ** 3
+    #     ).m_as(ureg.dimensionless)
+    #     ** 2
+    # )
     # g_diff = jnp.ones(r.shape)
     # g0_T_r_analytic = jnp.array([[g_same, g_diff], [g_diff, g_same]])
 
@@ -97,7 +181,8 @@ def pauli_potential_from_classical_map(
     g0_T_r = jnp.array(
         [[g0_T_r, jnp.ones_like(r2)], [jnp.ones_like(r2), g0_T_r]]
     )
-    # Step 2: Invert HNC algorithm to calculate the potential which produces g0_T_r (this is the Pauli exclusion potential by construction)
+    # Step 2: Invert HNC algorithm to calculate the potential which produces
+    # g0_T_r (this is the Pauli exclusion potential by construction)
 
     h0_T_r = g0_T_r - 1
     Ns_r = jpu.numpy.log(g0_T_r)
@@ -1223,10 +1308,7 @@ class PauliClassicalMap(HNCPotential):
 
     __name__ = "PauliClassicalMap"
 
-    def __init__(
-        self,
-        use_T_eff = True
-    ):
+    def __init__(self, use_T_eff=True):
         """
         Sets :py:attr:`~.include_electrons` to ``"SpinSeparated"``,
         automatically.
@@ -1248,7 +1330,7 @@ class PauliClassicalMap(HNCPotential):
         T = plasma_state.T_e
 
         if self.use_T_eff:
-           
+
             rs = wiegner_seitz_radius(plasma_state.n_e / 2) / ureg.a_0
             Tq = (
                 fermi_energy(plasma_state.n_e / 2)
@@ -1259,23 +1341,51 @@ class PauliClassicalMap(HNCPotential):
             T = jpu.numpy.sqrt(Tq**2 + T**2)
 
         r_calc = jpu.numpy.linspace(1e-10 * ureg.a0, 50 * ureg.a0, 2**pot)
-        k_, exchange, _ = pauli_potential_from_classical_map(
-            r_calc, _r, plasma_state.n_e, T 
-        )
+        if self.include_electrons == "SpinSeparated":
+            k_, exchange, _ = pauli_potential_from_classical_map_SpinSeparated(
+                r_calc, _r, plasma_state.n_e, T
+            )
 
-        # Set the parts that are not electron_electron exchange to zero
-        potential = jnp.zeros(
-            (len(plasma_state.ions) + 2, len(plasma_state.ions) + 2, len(k))
-        )
-        potential = (
-            (
-                potential.at[-2:, -2:, :].set(
-                    exchange.m_as(ureg.electron_volt * ureg.angstrom**3)
+            # Set the parts that are not electron_electron exchange to zero
+            potential = jnp.zeros(
+                (
+                    len(plasma_state.ions) + 2,
+                    len(plasma_state.ions) + 2,
+                    len(k),
                 )
             )
-            * ureg.electron_volt
-            * ureg.angstrom**3
-        )
+            potential = (
+                (
+                    potential.at[-2:, -2:, :].set(
+                        exchange.m_as(ureg.electron_volt * ureg.angstrom**3)
+                    )
+                )
+                * ureg.electron_volt
+                * ureg.angstrom**3
+            )
+        elif self.include_electrons == "SpinAveraged":
+            k_, exchange, _ = pauli_potential_from_classical_map_SpinAveraged(
+                r_calc, _r, plasma_state.n_e, T
+            )
+
+            # Set the parts that are not electron_electron exchange to zero
+            potential = jnp.zeros(
+                (
+                    len(plasma_state.ions) + 1,
+                    len(plasma_state.ions) + 1,
+                    len(k),
+                )
+            )
+            potential = (
+                (
+                    potential.at[-1:, -1:, :].set(
+                        exchange.m_as(ureg.electron_volt * ureg.angstrom**3)
+                    )
+                )
+                * ureg.electron_volt
+                * ureg.angstrom**3
+            )
+
         return potential
 
     @jax.jit
@@ -1293,7 +1403,7 @@ class PauliClassicalMap(HNCPotential):
         children = (self._transform_r,)
         aux_data = {
             "include_electrons": self.include_electrons,
-            "use_T_eff" : self.use_T_eff,
+            "use_T_eff": self.use_T_eff,
             "model_key": self.model_key,
         }  # static values
         return (children, aux_data)
