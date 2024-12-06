@@ -179,6 +179,29 @@ def wiegner_seitz_radius(n_e: Quantity) -> Quantity:
     return (3 / (4 * jnp.pi * n_e)) ** (1 / 3)
 
 
+def chem_pot_sommerfeld_fermi_interpolation(T: Quantity, n_e: Quantity):
+
+    """Interpolation function for the chemical potential of a non-interacting (ideal) fermi gas
+    given in the paper of 'Cowan.2019'"""
+
+    E_F = fermi_energy(n_e)
+    T_F = E_F / (1 * ureg.boltzmann_constant)
+
+    x = T / T_F
+
+    # Low temperature interpolation formula
+    lowT = 1 - jnp.pi**2 / 12 * x**2 - jnp.pi**4 / 80 * x**4
+
+    # High temperature interpolation formula
+    highT = (
+        x * jnpu.log(4 / 3 / jnp.sqrt(jnp.pi) / x ** (3 / 2))
+        + 1 / 3 * jnp.sqrt(2 / jnp.pi) / x ** (1 / 2)
+        - (16 * jnp.sqrt(3) - 27) / (81 * jnp.pi) / x**2
+    )
+
+    return jnpu.where(lowT < highT, highT, lowT) * E_F
+
+
 def chem_pot_interpolationIchimaru(T: Quantity, n_e: Quantity) -> Quantity:
     """
     Interpolation function for the chemical potential between the classical and

@@ -16,10 +16,114 @@ import jax.interpreters
 import jpu
 from jax import numpy as jnp
 
-from jaxrts.hypernetted_chain import _3Dfour, hnc_interp, mass_weighted_T, geometric_mean_T
+from jaxrts.hypernetted_chain import (
+    _3Dfour,
+    _3Dfour_ogata,
+    hnc_interp,
+    mass_weighted_T,
+    geometric_mean_T,
+)
+from jaxrts.plasma_physics import (
+    fermi_wavenumber,
+    fermi_dirac,
+    degeneracy_param,
+    wiegner_seitz_radius,
+    fermi_energy,
+    chem_pot_sommerfeld_fermi_interpolation,
+)
 from jaxrts.units import Quantity, to_array, ureg
 
 logger = logging.getLogger(__name__)
+
+
+@jax.jit
+def pauli_potential_from_classical_map(
+    r1: jnp.ndarray, r2: jnp.ndarray, n_e: Quantity, T: Quantity
+):
+    """
+    This method utilizes the exact non-interacting solution for the pair distribution function (PDF) as input.
+    The effective potential is then derived iteratively to reproduce the input PDF using the HNC algorithm.
+    This approach effectively inverts the HNC framework to determine the interaction potential from a known PDF.
+    """
+
+    n = to_array([n_e / 2, n_e / 2])
+
+    d = jnp.eye(n.shape[0]) * n
+
+    # Step 1: Calculate g^0_T(r)
+
+    k_F = fermi_wavenumber(d)
+
+    dr1 = r1[1] - r1[0]
+    dk1 = jnp.pi / (len(r1) * dr1)
+    k1 = jnp.pi / r1[-1] + jnp.arange(len(r1)) * dk1
+    dr2 = r2[1] - r2[0]
+    dk2 = jnp.pi / (len(r2) * dr2)
+    k2 = jnp.pi / r2[-1] + jnp.arange(len(r2)) * dk2
+
+    # Don't use Maxwellian, bro ...
+    # chem_pot = 1 * ureg.boltzmann_constant * T * jpu.numpy.log(degeneracy_param(d, T))
+
+    # Use this instead ...
+    chem_pot = chem_pot_sommerfeld_fermi_interpolation(T, d)
+
+    # Calculate Fermi distribution
+    n_k = fermi_dirac(
+        k1[jnp.newaxis, jnp.newaxis, :], chem_pot[:, :, jnp.newaxis], T
+    )
+    F_T_r = (
+        (6 * jnp.pi**2 / k_F**3)[:, :, jnp.newaxis]
+        * _3Dfour(r1, k1, n_k)
+        / (2 * jnp.pi) ** 3
+    )
+
+    g0_T_r = 1 - (F_T_r**2).m_as(ureg.dimensionless)
+
+    # This is only valid for T=0, keeping it for documentation reasons
+
+    # g_same = 1 - (3 * (jpu.numpy.sin(k_F * r) - (k_F * r)  * jpu.numpy.cos(k_F * r)) / (k_F * r) ** 3).m_as(ureg.dimensionless)**2
+    # g_diff = jnp.ones(r.shape)
+    # g0_T_r_analytic = jnp.array([[g_same, g_diff], [g_diff, g_same]])
+
+    # Clip g0, as negative values are problematic
+    g0_T_r = jnp.where(g0_T_r <= 0.0, 1e-14, g0_T_r)
+    g0_T_r = jnp.interp(
+        r2.m_as(ureg.a0),
+        r1.m_as(ureg.a0),
+        g0_T_r[0, 0, :],
+        left=1e-14,
+        right=1.0,
+    )
+    g0_T_r = jnp.array(
+        [[g0_T_r, jnp.ones_like(r2)], [jnp.ones_like(r2), g0_T_r]]
+    )
+    # Step 2: Invert HNC algorithm to calculate the potential which produces g0_T_r (this is the Pauli exclusion potential by construction)
+
+    h0_T_r = g0_T_r - 1
+    Ns_r = jpu.numpy.log(g0_T_r)
+
+    N_k = _3Dfour(k2, r2, Ns_r * ureg.dimensionless)
+    h0_T_k = _3Dfour(k2, r2, h0_T_r * ureg.dimensionless)
+
+    cs_k = h0_T_k - N_k
+
+    def ozr_inverted(input_vec):
+        """
+        Inverted Ornstein-Zernicke Relation
+        """
+        return jpu.numpy.matmul(
+            input_vec,
+            jnp.linalg.inv(
+                (jnp.eye(n.shape[0]) + jpu.numpy.matmul(d, input_vec)).m_as(
+                    ureg.dimensionless
+                )
+            ),
+        )
+
+    c_k = jax.vmap(ozr_inverted, in_axes=2, out_axes=2)(h0_T_k)
+
+    # Step 3: Calculate V_(k)
+    return k2, (cs_k - c_k) * (1 * ureg.boltzmann_constant * T), g0_T_r
 
 
 @jax.jit
@@ -59,7 +163,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
             "off", "SpinAveraged", "SpinSeparated"
         ] = "off",
     ):
-        self._transform_r = jpu.numpy.linspace(1e-3, 1e3, 2**14) * ureg.a_0
+        self._transform_r = jpu.numpy.linspace(1e-3, 1e3, 2**17) * ureg.a_0
 
         self.model_key = ""
 
@@ -1115,6 +1219,95 @@ class SoftCorePotential(HNCPotential):
         return obj
 
 
+class PauliClassicalMap(HNCPotential):
+
+    __name__ = "PauliClassicalMap"
+
+    def __init__(
+        self,
+        use_T_eff = True
+    ):
+        """
+        Sets :py:attr:`~.include_electrons` to ``"SpinSeparated"``,
+        automatically.
+        """
+
+        super().__init__()
+        self.use_T_eff = use_T_eff
+        self.include_electrons = "SpinSeparated"
+
+    @jax.jit
+    def full_k(self, plasma_state, k):
+
+        dk = k[1] - k[0]
+        dr = jnp.pi / (len(k) * dk)
+        _r = jnp.pi / k[-1] + jnp.arange(len(k)) * dr
+
+        pot = 19
+
+        T = plasma_state.T_e
+
+        if self.use_T_eff:
+           
+            rs = wiegner_seitz_radius(plasma_state.n_e / 2) / ureg.a_0
+            Tq = (
+                fermi_energy(plasma_state.n_e / 2)
+                / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
+                / (1 * ureg.boltzmann_constant)
+            )
+
+            T = jpu.numpy.sqrt(Tq**2 + T**2)
+
+        r_calc = jpu.numpy.linspace(1e-10 * ureg.a0, 50 * ureg.a0, 2**pot)
+        k_, exchange, _ = pauli_potential_from_classical_map(
+            r_calc, _r, plasma_state.n_e, T 
+        )
+
+        # Set the parts that are not electron_electron exchange to zero
+        potential = jnp.zeros(
+            (len(plasma_state.ions) + 2, len(plasma_state.ions) + 2, len(k))
+        )
+        potential = (
+            (
+                potential.at[-2:, -2:, :].set(
+                    exchange.m_as(ureg.electron_volt * ureg.angstrom**3)
+                )
+            )
+            * ureg.electron_volt
+            * ureg.angstrom**3
+        )
+        return potential
+
+    @jax.jit
+    def full_r(self, plasma_state, r):
+
+        dr = r[1] - r[0]
+        dk = jnp.pi / (len(r) * dr)
+        k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+
+        V_P_r = _3Dfour(r, k, self.full_k(plasma_state, k)) / (2 * jnp.pi) ** 3
+
+        return V_P_r
+
+    def _tree_flatten(self):
+        children = (self._transform_r,)
+        aux_data = {
+            "include_electrons": self.include_electrons,
+            "use_T_eff" : self.use_T_eff,
+            "model_key": self.model_key,
+        }  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj._transform_r,) = children
+        obj.model_key = aux_data["model_key"]
+        obj.include_electrons = aux_data["include_electrons"]
+        obj.use_T_eff = aux_data["use_T_eff"]
+        return obj
+
+
 class SpinSeparatedEEExchange(HNCPotential):
     """
     See :cite:`Wunsch.2008`, Eqn (17), Citing :cite:`Huang.1987`. Eqn. (9.57),
@@ -1224,6 +1417,7 @@ for _pot in [
     ScaledPotential,
     SoftCorePotential,
     SpinAveragedEEExchange,
+    PauliClassicalMap,
     SpinSeparatedEEExchange,
 ]:
     jax.tree_util.register_pytree_node(
