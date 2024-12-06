@@ -1316,7 +1316,6 @@ class PauliClassicalMap(HNCPotential):
 
         super().__init__()
         self.use_T_eff = use_T_eff
-        self.include_electrons = "SpinSeparated"
 
     @jax.jit
     def full_k(self, plasma_state, k):
@@ -1329,19 +1328,18 @@ class PauliClassicalMap(HNCPotential):
 
         T = plasma_state.T_e
 
-        if self.use_T_eff:
-
-            rs = wiegner_seitz_radius(plasma_state.n_e / 2) / ureg.a_0
-            Tq = (
-                fermi_energy(plasma_state.n_e / 2)
-                / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
-                / (1 * ureg.boltzmann_constant)
-            )
-
-            T = jpu.numpy.sqrt(Tq**2 + T**2)
-
         r_calc = jpu.numpy.linspace(1e-10 * ureg.a0, 50 * ureg.a0, 2**pot)
         if self.include_electrons == "SpinSeparated":
+            if self.use_T_eff:
+
+                rs = wiegner_seitz_radius(plasma_state.n_e / 2) / ureg.a_0
+                Tq = (
+                    fermi_energy(plasma_state.n_e / 2)
+                    / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
+                    / (1 * ureg.boltzmann_constant)
+                )
+
+                T = jpu.numpy.sqrt(Tq**2 + T**2)
             k_, exchange, _ = pauli_potential_from_classical_map_SpinSeparated(
                 r_calc, _r, plasma_state.n_e, T
             )
@@ -1364,6 +1362,16 @@ class PauliClassicalMap(HNCPotential):
                 * ureg.angstrom**3
             )
         elif self.include_electrons == "SpinAveraged":
+            if self.use_T_eff:
+
+                rs = wiegner_seitz_radius(plasma_state.n_e) / ureg.a_0
+                Tq = (
+                    fermi_energy(plasma_state.n_e)
+                    / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
+                    / (1 * ureg.boltzmann_constant)
+                )
+
+                T = jpu.numpy.sqrt(Tq**2 + T**2)
             k_, exchange, _ = pauli_potential_from_classical_map_SpinAveraged(
                 r_calc, _r, plasma_state.n_e, T
             )
