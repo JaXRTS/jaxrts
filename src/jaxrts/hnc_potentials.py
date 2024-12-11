@@ -1308,14 +1308,14 @@ class PauliClassicalMap(HNCPotential):
 
     __name__ = "PauliClassicalMap"
 
-    def __init__(self, use_T_eff=True):
+    def __init__(self):
         """
         Sets :py:attr:`~.include_electrons` to ``"SpinSeparated"``,
         automatically.
         """
 
         super().__init__()
-        self.use_T_eff = use_T_eff
+        self.include_electrons = "SpinSeparated"
 
     @jax.jit
     def full_k(self, plasma_state, k):
@@ -1326,22 +1326,11 @@ class PauliClassicalMap(HNCPotential):
 
         pot = 19
 
-        T = plasma_state.T_e
-
         r_calc = jpu.numpy.linspace(1e-10 * ureg.a0, 50 * ureg.a0, 2**pot)
         if self.include_electrons == "SpinSeparated":
-            if self.use_T_eff:
 
-                rs = wiegner_seitz_radius(plasma_state.n_e / 2) / ureg.a_0
-                Tq = (
-                    fermi_energy(plasma_state.n_e / 2)
-                    / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
-                    / (1 * ureg.boltzmann_constant)
-                )
-
-                T = jpu.numpy.sqrt(Tq**2 + T**2)
             k_, exchange, _ = pauli_potential_from_classical_map_SpinSeparated(
-                r_calc, _r, plasma_state.n_e, T
+                r_calc, _r, plasma_state.n_e, plasma_state.T_e
             )
 
             # Set the parts that are not electron_electron exchange to zero
@@ -1362,18 +1351,8 @@ class PauliClassicalMap(HNCPotential):
                 * ureg.angstrom**3
             )
         elif self.include_electrons == "SpinAveraged":
-            if self.use_T_eff:
-
-                rs = wiegner_seitz_radius(plasma_state.n_e) / ureg.a_0
-                Tq = (
-                    fermi_energy(plasma_state.n_e)
-                    / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
-                    / (1 * ureg.boltzmann_constant)
-                )
-
-                T = jpu.numpy.sqrt(Tq**2 + T**2)
             k_, exchange, _ = pauli_potential_from_classical_map_SpinAveraged(
-                r_calc, _r, plasma_state.n_e, T
+                r_calc, _r, plasma_state.n_e, plasma_state.Teff_e
             )
 
             # Set the parts that are not electron_electron exchange to zero
@@ -1411,7 +1390,6 @@ class PauliClassicalMap(HNCPotential):
         children = (self._transform_r,)
         aux_data = {
             "include_electrons": self.include_electrons,
-            "use_T_eff": self.use_T_eff,
             "model_key": self.model_key,
         }  # static values
         return (children, aux_data)
@@ -1422,7 +1400,6 @@ class PauliClassicalMap(HNCPotential):
         (obj._transform_r,) = children
         obj.model_key = aux_data["model_key"]
         obj.include_electrons = aux_data["include_electrons"]
-        obj.use_T_eff = aux_data["use_T_eff"]
         return obj
 
 
