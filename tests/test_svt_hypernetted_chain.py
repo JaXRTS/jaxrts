@@ -15,6 +15,7 @@ import jaxrts
 import jaxrts.hypernetted_chain as hnc
 from jaxrts import hnc_potentials
 from jaxrts.units import Quantity, to_array, ureg
+import matplotlib.pyplot as plt
 
 from jaxrts.hypernetted_chain import pair_distribution_function_two_component_SVT_HNC
 
@@ -127,7 +128,9 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots()
 
-    ax.plot(r, g)
+    ax.plot(r, g[0, 0, :], label = "ii")
+    ax.plot(r, g[0, 1, :], label = "ei")
+    ax.plot(r, g[1, 1, :], label = "ee")
     ax.set_xlabel("r")
     ax.set_ylabel("g(r)")
 

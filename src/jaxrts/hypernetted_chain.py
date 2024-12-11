@@ -31,8 +31,6 @@ def compute_fixpoint(func, x0):
         x_next = func(x)
         error = jpu.numpy.absolute((x_next - x))
 
-        jax.debug.print(f"{x}")
-
         return (error >= delta * 1 * ureg.bohr**3).any() & (i < max_iters)
 
     x, num_iters = jax.lax.while_loop(cond, body, (x0, 0))
@@ -403,6 +401,8 @@ def pair_distribution_function_two_component_SVT_HNC(
 
     beta = 1 / (ureg.boltzmann_constant * T_ab)
 
+    _T_ab = T_ab[:, :, 0]
+
     v_s = beta * V_s
     v_l_k = beta * V_l_k
 
@@ -410,8 +410,7 @@ def pair_distribution_function_two_component_SVT_HNC(
     Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
 
     d = jnp.eye(ni.shape[0]) * ni
-
-    B = m_ab / T_ab
+    B = m_ab / _T_ab
     _m = 2 * jpu.numpy.diagonal(m_ab)
 
     m = 1.0 / (jnp.diag(_m.m_as(ureg.gram)) * 1 * ureg.gram)
@@ -429,22 +428,19 @@ def pair_distribution_function_two_component_SVT_HNC(
             input_vec,
         )
 
-    jax.debug.print(f"{ozr(input_vec)}")
-
     def svt_ozr(input_vec):
         """
         The modified Ornstein-Zernicke Relation
         """
-
         def func(h):
+
             return input_vec + m * ni * B * (
-                jpu.numpy.matmul(T_ab * input_vec, h)
-                + jpu.numpy.matmul(h, T_ab * input_vec)
+                jpu.numpy.matmul(_T_ab * input_vec, h)
+                + jpu.numpy.matmul(h, _T_ab * input_vec)
             )
 
-        jax.debug.print(f"{func(input_vec)}")
-
-        h = compute_fixpoint(func, ozr(input_vec))
+        h, niter = compute_fixpoint(func, ozr(input_vec))
+        return h
 
     def condition(val):
         """
