@@ -17,7 +17,7 @@ from jaxrts import hnc_potentials
 from jaxrts.units import Quantity, to_array, ureg
 import matplotlib.pyplot as plt
 
-from jaxrts.hypernetted_chain import pair_distribution_function_two_component_SVT_HNC
+from jaxrts.hypernetted_chain import pair_distribution_function_two_component_SVT_HNC, pair_distribution_function_HNC
 
 if __name__ == "__main__":
 
@@ -29,9 +29,9 @@ if __name__ == "__main__":
 
     exchange = True
 
-    pot = 19
+    pot = 18
     mix = 0.6
-    r = jnpu.linspace(1e-3 * ureg.a0, 1000 * ureg.a0, 2**pot)
+    r = jnpu.linspace(1e-3 * ureg.a0, 1e3 * ureg.a0, 2**pot)
 
     dr = r[1] - r[0]
     dk = jnp.pi / (len(r) * dr)
@@ -118,10 +118,15 @@ if __name__ == "__main__":
 
     m_ab = reduced_mass_matrix(1.0 * ureg.proton_mass, 1.0 * ureg.electron_mass)
 
+    g, niter = pair_distribution_function_HNC(
+        V_s, V_l_k, r, T, ni, mix=mix
+    )
+    print(g, niter)
+
     print(m_ab)
 
     g, niter = pair_distribution_function_two_component_SVT_HNC(
-        V_s, V_l_k, r, T, m_ab, ni, mix=0.0
+        V_s, V_l_k, r, T, m_ab, ni, mix=mix
     )
 
     print(g, niter)

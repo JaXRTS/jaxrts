@@ -428,18 +428,18 @@ def pair_distribution_function_two_component_SVT_HNC(
             input_vec,
         )
 
-    def svt_ozr(input_vec):
+    def svt_ozr(c_k):
         """
         The modified Ornstein-Zernicke Relation
         """
         def func(h):
 
-            return input_vec + m * ni * B * (
-                jpu.numpy.matmul(_T_ab * input_vec, h)
-                + jpu.numpy.matmul(h, _T_ab * input_vec)
+            return c_k + m * d * B * (
+                jpu.numpy.matmul(_T_ab * c_k, h)
+                + jpu.numpy.matmul(h, _T_ab * c_k)
             )
 
-        h, niter = compute_fixpoint(func, ozr(input_vec))
+        h, niter = compute_fixpoint(func, ozr(c_k))
         return h
 
     def condition(val):
