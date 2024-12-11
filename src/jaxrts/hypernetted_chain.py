@@ -432,6 +432,7 @@ def pair_distribution_function_two_component_SVT_HNC(
         """
         The modified Ornstein-Zernicke Relation
         """
+
         def func(h):
 
             return c_k + m * d * B * (
@@ -484,6 +485,109 @@ def pair_distribution_function_two_component_SVT_HNC(
         return log_g_r_new, Ns_r_new, Ns_r, i + 1
 
     init = (log_g_r0, Ns_r0, Ns_r0 - 1, 0)
+    log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
+
+    return jpu.numpy.exp(log_g_r), niter
+
+
+@jax.jit
+def pair_distribution_function_two_component_SVT_HNC_ei(
+    V_s, V_l_k, r, T_ab, ni, mix=0.0
+):
+    """
+    See Shaffer.2017, Eqns. 16 & 17
+    """
+    delta = 1e-6
+
+    dr = r[1] - r[0]
+    dk = jnp.pi / (len(r) * dr)
+
+    k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+
+    beta = 1 / (ureg.boltzmann_constant * T_ab)
+
+    v_s = beta * V_s
+    v_l_k = beta * V_l_k
+
+    log_g_r0 = -(v_s).to(ureg.dimensionless)
+    Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
+
+    def svt_ozr_ei(c_k):
+        """
+        The modified Ornstein-Zernicke Relation
+        """
+        bracket = c_k[0, 0] + (
+            (ni[1] * c_k[1, 1])
+            / (1 - ni[1] * c_k[1, 1])
+            * T_ab[0, 0, 0]
+            / T_ab[1, 1, 0]
+            * c_k[1, 0]
+        )
+        hii = bracket / (1 - bracket * ni[1])
+        hei = (c_k[0, 1] + ni[1] * hii * c_k[0, 1]) / (1 - ni[1] * c_k[0, 0])
+        hee = (c_k[1, 1] + ni[1] * hei * c_k[0, 1]) / (1 - ni[1] * c_k[0, 0])
+
+        return (
+            jnp.array(
+                [
+                    [hii.m_as(ureg.angstrom**3), hei.m_as(ureg.angstrom**3)],
+                    [hei.m_as(ureg.angstrom**3), hee.m_as(ureg.angstrom**3)],
+                ]
+            )
+            * ureg.angstrom**3
+        )
+
+    def condition(val):
+        """
+        If this is False, the loop will stop. Abort if too many steps were
+        reached, or if convergence was reached.
+        """
+        _, Ns_r, Ns_r_old, n_iter = val
+        err = jpu.numpy.sum((Ns_r - Ns_r_old) ** 2)
+        return (n_iter < 2000) & jnp.all(err > delta)
+
+    def step(val):
+        log_g_r, Ns_r, _, i = val
+
+        h_r = jpu.numpy.expm1(log_g_r)
+
+        cs_r = h_r - Ns_r
+
+        cs_k = _3Dfour(k, r, cs_r)
+
+        c_k = cs_k - v_l_k
+
+        # Ornstein-Zernike relation
+        h_k = jax.vmap(svt_ozr_ei, in_axes=2, out_axes=2)(c_k)
+
+        Ns_k = h_k - cs_k
+
+        Ns_r_new_full = (
+            _3Dfour(
+                r,
+                k,
+                Ns_k,
+            )
+            / (2 * jnp.pi) ** 3
+        )
+
+        Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
+
+        log_g_r_new = Ns_r_new - v_s
+
+        return (
+            log_g_r_new.m_as(ureg.dimensionless),
+            Ns_r_new.m_as(ureg.dimensionless),
+            Ns_r,
+            i + 1,
+        )
+
+    init = (
+        log_g_r0.m_as(ureg.dimensionless),
+        Ns_r0.m_as(ureg.dimensionless),
+        Ns_r0.m_as(ureg.dimensionless) - 1,
+        0,
+    )
     log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
 
     return jpu.numpy.exp(log_g_r), niter
