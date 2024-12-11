@@ -517,15 +517,12 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
         The modified Ornstein-Zernicke Relation
         """
         bracket = c_k[0, 0] + (
-            (ni[1] * c_k[1, 1])
-            / (1 - ni[1] * c_k[1, 1])
-            * T_ab[0, 0, 0]
-            / T_ab[1, 1, 0]
-            * c_k[1, 0]
+            ((ni[1] * c_k[1, 1]) / (1 - ni[1] * c_k[1, 1]))
+            * (T_ab[1, 1, 0] / T_ab[0, 0, 0] * c_k[1, 0])
         )
         hii = bracket / (1 - bracket * ni[1])
-        hei = (c_k[0, 1] + ni[1] * hii * c_k[0, 1]) / (1 - ni[1] * c_k[0, 0])
-        hee = (c_k[1, 1] + ni[1] * hei * c_k[0, 1]) / (1 - ni[1] * c_k[0, 0])
+        hei = (c_k[0, 1] + ni[0] * hii * c_k[0, 1]) / (1 - ni[1] * c_k[1, 1])
+        hee = (c_k[1, 1] + ni[0] * hei * c_k[0, 1]) / (1 - ni[1] * c_k[1, 1])
 
         return (
             jnp.array(
