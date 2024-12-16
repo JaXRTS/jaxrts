@@ -17,7 +17,10 @@ from jaxrts import hnc_potentials
 from jaxrts.units import Quantity, to_array, ureg
 import matplotlib.pyplot as plt
 
-from jaxrts.hypernetted_chain import pair_distribution_function_two_component_SVT_HNC, pair_distribution_function_HNC
+import jax
+jax.config.update("jax_enable_x64", True)
+
+from jaxrts.hypernetted_chain import pair_distribution_function_two_component_SVT_HNC, pair_distribution_function_HNC, S_ii_HNC
 
 if __name__ == "__main__":
 
@@ -27,11 +30,10 @@ if __name__ == "__main__":
         number_fraction, ions
     )
 
-    exchange = True
-
-    pot = 18
-    mix = 0.6
-    r = jnpu.linspace(1e-3 * ureg.a0, 1e3 * ureg.a0, 2**pot)
+    exchange = False
+    pot = 19
+    mix = 0.8
+    r = jnpu.linspace(1e-6 * ureg.a0, 100.0 * ureg.a0, 2**pot)
 
     dr = r[1] - r[0]
     dk = jnp.pi / (len(r) * dr)
@@ -40,16 +42,16 @@ if __name__ == "__main__":
     plasma_state = jaxrts.PlasmaState(
         ions=ions,
         Z_free=jnp.array([1.0]),
-        mass_density=ureg(f"{10}g/cc") * mass_fraction,
-        T_e=300 * ureg.electron_volt / ureg.boltzmann_constant,
-        T_i=[300 * ureg.electron_volt / ureg.boltzmann_constant],
+        mass_density=ureg(f"{20.0}g/cc") * mass_fraction,
+        T_e=1000.0 * ureg.electron_volt / ureg.boltzmann_constant,
+        T_i=[1000.0 * ureg.electron_volt / ureg.boltzmann_constant],
     )
 
     IonIonPotential = jaxrts.hnc_potentials.CoulombPotential()
     ElectronIonPotential = jaxrts.hnc_potentials.KelbgPotential()
     ElectronElectronPotential = jaxrts.hnc_potentials.KelbgPotential()
 
-    ExchangePotential = jaxrts.hnc_potentials.SpinAveragedEEExchange()
+    ExchangePotential = jaxrts.hnc_potentials.PauliClassicalMap()
 
     CoulombPotential = jaxrts.hnc_potentials.CoulombPotential()
 
@@ -121,22 +123,39 @@ if __name__ == "__main__":
     g, niter = pair_distribution_function_HNC(
         V_s, V_l_k, r, T, ni, mix=mix
     )
-    print(g, niter)
 
-    print(m_ab)
-
-    g, niter = pair_distribution_function_two_component_SVT_HNC(
+    g_svt, niter = pair_distribution_function_two_component_SVT_HNC(
         V_s, V_l_k, r, T, m_ab, ni, mix=mix
     )
 
-    print(g, niter)
+    fig, ax = plt.subplots(ncols = 2, figsize = (8, 6))
 
-    fig, ax = plt.subplots()
+    ax[0].plot(r, g[1, 1, :], label = "ee", linestyle = "dashed")
+    ax[0].plot(r, g_svt[1, 1, :], label = "ee SVT", alpha = 0.6)
 
-    ax.plot(r, g[0, 0, :], label = "ii")
-    ax.plot(r, g[0, 1, :], label = "ei")
-    ax.plot(r, g[1, 1, :], label = "ee")
-    ax.set_xlabel("r")
-    ax.set_ylabel("g(r)")
+    ax[0].set_xlabel("r")
+    ax[0].set_xlim(0, 4)
+
+    ax[0].legend()
+    ax[0].set_ylabel(r"$g_\text{ee}(r)$")
+
+    S_ab_HNC = S_ii_HNC(k, g, n, r).m_as(
+        ureg.dimensionless
+    )
+
+    S_ab_HNC_SVT = S_ii_HNC(k, g_svt, n, r).m_as(
+        ureg.dimensionless
+    )
+
+    ax[1].plot(k.m_as(1 / ureg.angstrom), S_ab_HNC[1, 1, :], label = "classic", alpha = 0.6)
+    # ax[1].plot(k, S_ab_HNC_SVT[1, 1, :], label = "SVT", linestyle = "dashed")
+
+    ax[1].set_xlabel("k")
+    ax[1].set_xlim(0, 4)
+
+    ax[1].legend()
+    ax[1].set_ylabel(r"$S_\text{ee}(k)$")
+
+    plt.tight_layout()
 
     plt.show()

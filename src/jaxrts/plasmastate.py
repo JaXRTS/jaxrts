@@ -196,6 +196,14 @@ class PlasmaState:
             / (1 * ureg.boltzmann_constant)
         )
 
+        # Quantum temperature as used by Gregori.2003
+        # Tq = (
+        #     fermi_energy(self.n_e)
+        #     / (1.3251 - 0.1779 * jpu.numpy.sqrt(rs))
+        #     / (1 * ureg.boltzmann_constant)
+        # )
+
+
         return jpu.numpy.sqrt(Tq**2 + self.T_e**2)
 
     @property

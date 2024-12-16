@@ -492,7 +492,7 @@ def pair_distribution_function_two_component_SVT_HNC(
 
 @jax.jit
 def pair_distribution_function_two_component_SVT_HNC_ei(
-    V_s, V_l_k, r, T_ab, ni, mix=0.0
+    V_s, V_l_k, r, T_ab, n, m, mix=0.0
 ):
     """
     See Shaffer.2017, Eqns. 16 & 17
@@ -516,13 +516,132 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
         """
         The modified Ornstein-Zernicke Relation
         """
-        bracket = c_k[0, 0] + (
-            ((ni[1] * c_k[1, 0]) / (1 - ni[1] * c_k[1, 1]))
-            * (T_ab[1, 1, 0] / T_ab[0, 0, 0] * c_k[1, 0])
+        # bracket = c_k[0, 0] + (
+        #     ((ni[1] * c_k[1, 0]) / (1 - ni[1] * c_k[1, 1]))
+        #     * T_ab[1, 1, 0]
+        #     / T_ab[0, 0, 0]
+        #     * (c_k[1, 0])
+        # )
+        # hii = bracket / (1 - bracket * ni[0])
+        # hei = (c_k[0, 1] + ni[0] * hii * c_k[0, 1]) / (1 - ni[1] * c_k[1, 1])
+        # hee = (c_k[1, 1] + ni[0] * hei * c_k[0, 1]) / (1 - ni[1] * c_k[1, 1])
+
+        cee = c_k[1, 1]
+        cei = c_k[1, 0]
+        cii = c_k[0, 0]
+
+        beta_e = beta[1, 1, 0]
+        beta_i = beta[0, 0, 0]
+        beta_ei = beta[1, 0, 0]
+
+        ni = n[0]
+        ne = n[1]
+
+        me = m[1]
+        mi = m[0]
+
+        hei = (
+            beta_ei
+            * (
+                beta_e * beta_i * cei * me
+                + beta_e * beta_i * cei * mi
+                - beta_e * beta_i * cee * cei * mi * ne
+                - beta_e * beta_i * cei * cii * me * ni
+            )
+        ) / (
+            beta_e * beta_i * beta_ei * me
+            + beta_e * beta_i * beta_ei * mi
+            + beta_i * beta_ei**2 * cee**2 * mi * ne**2
+            + beta_e * beta_ei**2 * cii**2 * me * ni**2
+            - beta_i * beta_ei**2 * cee * mi * ne
+            - beta_e * beta_ei**2 * cii * me * ni
+            - beta_e**2 * beta_i * cei**2 * me * ne * ni
+            - beta_e * beta_i**2 * cei**2 * mi * ne * ni
+            - beta_e * beta_i * beta_ei * cee * me * ne
+            - beta_e * beta_i * beta_ei * cee * mi * ne
+            - beta_e * beta_i * beta_ei * cii * me * ni
+            - beta_e * beta_i * beta_ei * cii * mi * ni
+            + beta_e * beta_i**2 * cee * cei**2 * mi * ne**2 * ni
+            - beta_e * beta_ei**2 * cee * cii**2 * me * ne * ni**2
+            + beta_e**2 * beta_i * cei**2 * cii * me * ne * ni**2
+            - beta_i * beta_ei**2 * cee**2 * cii * mi * ne**2 * ni
+            + beta_e * beta_ei**2 * cee * cii * me * ne * ni
+            + beta_i * beta_ei**2 * cee * cii * mi * ne * ni
+            + beta_e * beta_i * beta_ei * cee * cii * me * ne * ni
+            + beta_e * beta_i * beta_ei * cee * cii * mi * ne * ni
         )
-        hii = bracket / (1 - bracket * ni[0])
-        hei = (c_k[0, 1] + ni[0] * hii * c_k[0, 1]) / (1 - ni[1] * c_k[1, 1])
-        hee = (c_k[1, 1] + ni[0] * hei * c_k[0, 1]) / (1 - ni[1] * c_k[1, 1])
+
+        hee = -(
+            beta_i * beta_ei**2 * cee**2 * mi * ne
+            - beta_e**2 * beta_i * cei**2 * me * ni
+            - beta_e**2 * beta_i * cei**2 * mi * ni
+            - beta_e * beta_i * beta_ei * cee * me
+            - beta_e * beta_i * beta_ei * cee * mi
+            + beta_e * beta_ei**2 * cee * cii * me * ni
+            - beta_e * beta_ei**2 * cee * cii**2 * me * ni**2
+            + beta_e**2 * beta_i * cei**2 * cii * me * ni**2
+            + beta_e * beta_i * beta_ei * cee * cii * me * ni
+            + beta_e * beta_i * beta_ei * cee * cii * mi * ni
+            + beta_e * beta_i**2 * cee * cei**2 * mi * ne * ni
+            - beta_i * beta_ei**2 * cee**2 * cii * mi * ne * ni
+        ) / (
+            beta_e * beta_i * beta_ei * me
+            + beta_e * beta_i * beta_ei * mi
+            + beta_i * beta_ei**2 * cee**2 * mi * ne**2
+            + beta_e * beta_ei**2 * cii**2 * me * ni**2
+            - beta_i * beta_ei**2 * cee * mi * ne
+            - beta_e * beta_ei**2 * cii * me * ni
+            - beta_e**2 * beta_i * cei**2 * me * ne * ni
+            - beta_e * beta_i**2 * cei**2 * mi * ne * ni
+            - beta_e * beta_i * beta_ei * cee * me * ne
+            - beta_e * beta_i * beta_ei * cee * mi * ne
+            - beta_e * beta_i * beta_ei * cii * me * ni
+            - beta_e * beta_i * beta_ei * cii * mi * ni
+            + beta_e * beta_i**2 * cee * cei**2 * mi * ne**2 * ni
+            - beta_e * beta_ei**2 * cee * cii**2 * me * ne * ni**2
+            + beta_e**2 * beta_i * cei**2 * cii * me * ne * ni**2
+            - beta_i * beta_ei**2 * cee**2 * cii * mi * ne**2 * ni
+            + beta_e * beta_ei**2 * cee * cii * me * ne * ni
+            + beta_i * beta_ei**2 * cee * cii * mi * ne * ni
+            + beta_e * beta_i * beta_ei * cee * cii * me * ne * ni
+            + beta_e * beta_i * beta_ei * cee * cii * mi * ne * ni
+        )
+
+        hii = (
+            beta_e * beta_i**2 * cei**2 * me * ne
+            + beta_e * beta_i**2 * cei**2 * mi * ne
+            - beta_e * beta_ei**2 * cii**2 * me * ni
+            + beta_e * beta_i * beta_ei * cii * me
+            + beta_e * beta_i * beta_ei * cii * mi
+            - beta_i * beta_ei**2 * cee * cii * mi * ne
+            - beta_e * beta_i**2 * cee * cei**2 * mi * ne**2
+            + beta_i * beta_ei**2 * cee**2 * cii * mi * ne**2
+            - beta_e * beta_i * beta_ei * cee * cii * me * ne
+            - beta_e * beta_i * beta_ei * cee * cii * mi * ne
+            + beta_e * beta_ei**2 * cee * cii**2 * me * ne * ni
+            - beta_e**2 * beta_i * cei**2 * cii * me * ne * ni
+        ) / (
+            beta_e * beta_i * beta_ei * me
+            + beta_e * beta_i * beta_ei * mi
+            + beta_i * beta_ei**2 * cee**2 * mi * ne**2
+            + beta_e * beta_ei**2 * cii**2 * me * ni**2
+            - beta_i * beta_ei**2 * cee * mi * ne
+            - beta_e * beta_ei**2 * cii * me * ni
+            - beta_e**2 * beta_i * cei**2 * me * ne * ni
+            - beta_e * beta_i**2 * cei**2 * mi * ne * ni
+            - beta_e * beta_i * beta_ei * cee * me * ne
+            - beta_e * beta_i * beta_ei * cee * mi * ne
+            - beta_e * beta_i * beta_ei * cii * me * ni
+            - beta_e * beta_i * beta_ei * cii * mi * ni
+            + beta_e * beta_i**2 * cee * cei**2 * mi * ne**2 * ni
+            - beta_e * beta_ei**2 * cee * cii**2 * me * ne * ni**2
+            + beta_e**2 * beta_i * cei**2 * cii * me * ne * ni**2
+            - beta_i * beta_ei**2 * cee**2 * cii * mi * ne**2 * ni
+            + beta_e * beta_ei**2 * cee * cii * me * ne * ni
+            + beta_i * beta_ei**2 * cee * cii * mi * ne * ni
+            + beta_e * beta_i * beta_ei * cee * cii * me * ne * ni
+            + beta_e * beta_i * beta_ei * cee * cii * mi * ne * ni
+        )
 
         return (
             jnp.array(
