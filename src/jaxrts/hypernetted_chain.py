@@ -12,32 +12,6 @@ from jax import numpy as jnp
 
 from jaxrts.units import Quantity, ureg
 
-
-@partial(jax.jit, static_argnames=["func"])
-def compute_fixpoint(func, x0):
-
-    max_iters = 1000
-    delta = 1e-8
-
-    def body(state):
-        x, i = state
-
-        x_next = func(x)
-        return x_next, i + 1
-
-    def cond(state):
-        x, i = state
-
-        x_next = func(x)
-        error = jpu.numpy.absolute((x_next - x))
-
-        return (error >= delta * 1 * ureg.bohr**3).any() & (i < max_iters)
-
-    x, num_iters = jax.lax.while_loop(cond, body, (x0, 0))
-
-    return x, num_iters
-
-
 # Helper functions.
 @jax.jit
 def psi(t):

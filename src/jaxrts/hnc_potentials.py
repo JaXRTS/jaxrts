@@ -292,7 +292,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
             "off", "SpinAveraged", "SpinSeparated"
         ] = "off",
     ):
-        self._transform_r = jpu.numpy.linspace(1e-4, 1e6, 2**22) * ureg.a_0
+        self._transform_r = jpu.numpy.linspace(1e-4, 1e4, 2**21) * ureg.a_0
 
         self.model_key = ""
 
@@ -1369,7 +1369,7 @@ class PauliClassicalMap(HNCPotential):
         _r = jnp.pi / k[-1] + jnp.arange(len(k)) * dr
 
         pot = 21
-        r_calc = jpu.numpy.linspace(1e-3 * ureg.a0, 1e3 * ureg.a0, 2**pot)
+        r_calc = jpu.numpy.linspace(1e-3 * ureg.a0, 1e4 * ureg.a0, 2**pot)
 
         if self.include_electrons == "SpinSeparated":
 
@@ -1532,7 +1532,7 @@ class SpinAveragedEEExchange(HNCPotential):
             * jpu.numpy.exp(
                 (-1
                 / (jnp.pi * jnp.log(2))
-                * (_r / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))) ** 2).m_as(ureg.dimensionless)
+                * ((_r / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))).m_as(ureg.dimensionless)) ** 2)
             )
             * jnp.eye(plasma_state.nions + 1)[:, :, jnp.newaxis]
         )

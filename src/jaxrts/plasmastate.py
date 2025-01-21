@@ -190,18 +190,18 @@ class PlasmaState:
         Return the effective electron temperature.
         """
         rs = wiegner_seitz_radius(self.n_e) / ureg.a_0
-        Tq = (
-            fermi_energy(self.n_e)
-            / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
-            / (1 * ureg.boltzmann_constant)
-        )
-
-        # Quantum temperature as used by Gregori.2003
         # Tq = (
         #     fermi_energy(self.n_e)
-        #     / (1.3251 - 0.1779 * jpu.numpy.sqrt(rs))
+        #     / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
         #     / (1 * ureg.boltzmann_constant)
         # )
+
+        # Quantum temperature as used by Gregori.2003
+        Tq = (
+            fermi_energy(self.n_e)
+            / (1.3251 - 0.1779 * jpu.numpy.sqrt(rs))
+            / (1 * ureg.boltzmann_constant)
+        )
 
 
         return jpu.numpy.sqrt(Tq**2 + self.T_e**2)
