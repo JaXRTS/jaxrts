@@ -7,14 +7,14 @@ readme = "README.md"
 packages = [{include = "jaxrts", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10,<3.13"
 pint = "=0.23.0"
 jpu = "^0.0.3"
 numpy = "^1.25.0"
-matplotlib = "^3.8.3"
+matplotlib = "^3.10"
 sphinxcontrib-bibtex = "^2.6.2"
 scienceplots = "^2.1.1"
-quadax = {git = "https://github.com/f0uriest/quadax"}
+quadax = "^0.2.5"
 hankel = "^1.2.2"
 jax = "=0.4.28"
 jaxlib = "=0.4.28"

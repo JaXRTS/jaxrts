@@ -502,7 +502,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         plasma_state.update_default_model(
             "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
         )
-        plasma_state["ion-ion Potential"].include_electrons = False
+        plasma_state["ion-ion Potential"].include_electrons = "off"
 
     @property
     def r(self):
@@ -643,7 +643,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
             "electron-ion Potential",
             "electron-electron Potential",
         ]:
-            plasma_state[key].include_electrons = True
+            plasma_state[key].include_electrons = "SpinAveraged"
 
     @property
     def r(self):
@@ -2276,7 +2276,9 @@ class LinearResponseScreeningGericke2010(Model):
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
         )
-        plasma_state["electron-ion Potential"].include_electrons = True
+        plasma_state["electron-ion Potential"].include_electrons = (
+            "SpinAveraged"
+        )
 
     @jax.jit
     def evaluate(
@@ -2324,7 +2326,9 @@ class FiniteWavelengthScreening(Model):
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
         )
-        plasma_state["electron-ion Potential"].include_electrons = True
+        plasma_state["electron-ion Potential"].include_electrons = (
+            "SpinAveraged"
+        )
 
     @jax.jit
     def evaluate(
@@ -2409,7 +2413,9 @@ class LinearResponseScreening(Model):
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
         )
-        plasma_state["electron-ion Potential"].include_electrons = True
+        plasma_state["electron-ion Potential"].include_electrons = (
+            "SpinAveraged"
+        )
 
     @jax.jit
     def evaluate(
@@ -2705,7 +2711,7 @@ class AverageAtom_Sii(Model):
         plasma_state.update_default_model(
             "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
         )
-        plasma_state["ion-ion Potential"].include_electrons = False
+        plasma_state["ion-ion Potential"].include_electrons = "off"
 
     @property
     def r(self):

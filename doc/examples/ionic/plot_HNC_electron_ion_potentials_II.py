@@ -46,7 +46,7 @@ names = [
     "Coulomb",
 ]
 for idx, pot in enumerate([empty_core, soft_core2, soft_core6, coulomb]):
-    pot.include_electrons = True
+    pot.include_electrons = "SpinAveraged"
     ax[0].plot(
         r.m_as(ureg.a_0),
         pot.full_r(state, r).m_as(ureg.rydberg)[0, 1, :],

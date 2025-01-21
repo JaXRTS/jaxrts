@@ -43,9 +43,9 @@ KK = hnc_potentials.KlimontovichKraeftPotential()
 Kelbg = hnc_potentials.KelbgPotential()
 Deutsch = hnc_potentials.DeutschPotential()
 
-KK.include_electrons = True
-Kelbg.include_electrons = True
-Deutsch.include_electrons = True
+KK.include_electrons = "SpinAveraged"
+Kelbg.include_electrons = "SpinAveraged"
+Deutsch.include_electrons = "SpinAveraged"
 
 # Get lambda_ab from the limit of Deutsch:
 # for r-> 0: V_Deutsch -> q1q2/(4 pi eps_0 lam_ab)

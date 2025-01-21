@@ -7,6 +7,7 @@ import jpu
 import numpy as np
 from jax import numpy as jnp
 
+from .plasma_physics import wiegner_seitz_radius, fermi_energy
 from .elements import Element
 from .helpers import JittableDict
 from .models import DebyeHueckelScreeningLength, ElectronicLFCConstant
@@ -48,6 +49,7 @@ class PlasmaState:
             self.T_e = T_e[0]
         else:
             self.T_e = T_e
+
         if T_i is None:
             T_i = T_e * jnp.ones(self.nions)
         self.T_i = to_array(T_i)
@@ -188,6 +190,28 @@ class PlasmaState:
     @property
     def n_e(self):
         return (jpu.numpy.sum(self.n_i * self.Z_free)).to_base_units()
+
+    @property
+    def Teff_e(self):
+        """
+        Return the effective electron temperature. Quantum temperature as used by :cite:`Gregori.2003`.
+        """
+        rs = wiegner_seitz_radius(self.n_e) / ureg.a_0
+        # This is another definition of Tq, not from Gregori et al.
+        # Tq = (
+        #     fermi_energy(self.n_e)
+        #     / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
+        #     / (1 * ureg.boltzmann_constant)
+        # )
+
+        Tq = (
+            fermi_energy(self.n_e)
+            / (1.3251 - 0.1779 * jpu.numpy.sqrt(rs))
+            / (1 * ureg.boltzmann_constant)
+        )
+
+
+        return jpu.numpy.sqrt(Tq**2 + self.T_e**2)
 
     @property
     def ee_coupling(self):
