@@ -161,6 +161,13 @@ class PlasmaState:
         return len(self.ions)
 
     @property
+    def mean_Z_A(self) -> float:
+        """
+        The mean atomic number.
+        """
+        return jnp.sum(self.Z_A * self.number_fraction)
+
+    @property
     def Z_core(self) -> jnp.ndarray:
         """
         The number of electrons still bound to the ion.
