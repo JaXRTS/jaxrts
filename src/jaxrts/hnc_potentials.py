@@ -37,8 +37,6 @@ from jaxrts.units import Quantity, to_array, ureg
 
 logger = logging.getLogger(__name__)
 
-import matplotlib.pyplot as plt
-
 @jax.jit
 def pauli_potential_from_classical_map_SpinAveraged(
     r1: jnp.ndarray, r2: jnp.ndarray, n_e: Quantity, T: Quantity
@@ -158,12 +156,7 @@ def pauli_potential_from_classical_map_SpinSeparated(
     dk2 = jnp.pi / (len(r2) * dr2)
     k2 = jnp.pi / r2[-1] + jnp.arange(len(r2)) * dk2
 
-    # Don't use Maxwellian, bro ...
-    # chem_pot = (
-    #     1 * ureg.boltzmann_constant * T * jpu.numpy.log(degeneracy_param(d, T))
-    # )
-
-    # Use this instead ...
+    # Don't use Maxwellian distribution (see Bredow 2017), use this instead
     chem_pot = chem_pot_sommerfeld_fermi_interpolation(T, d)
 
     # Calculate Fermi distribution

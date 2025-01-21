@@ -358,118 +358,12 @@ _3Dfour_ogata = jax.vmap(
 
 _3Dfour = _3Dfour_sine
 
-
-@jax.jit
-def pair_distribution_function_two_component_SVT_HNC(
-    V_s, V_l_k, r, T_ab, m_ab, ni, mix=0.0
-):
-    """
-    Please explain.
-    """
-    delta = 1e-6
-
-    dr = r[1] - r[0]
-    dk = jnp.pi / (len(r) * dr)
-
-    k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
-
-    beta = 1 / (ureg.boltzmann_constant * T_ab)
-
-    _T_ab = T_ab[:, :, 0]
-
-    v_s = beta * V_s
-    v_l_k = beta * V_l_k
-
-    log_g_r0 = -(v_s).to(ureg.dimensionless)
-    Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
-
-    d = jnp.eye(ni.shape[0]) * ni
-    B = m_ab / _T_ab
-    _m = 2 * jpu.numpy.diagonal(m_ab)
-
-    m = 1.0 / (jnp.diag(_m.m_as(ureg.gram)) * 1 * ureg.gram)
-
-    def ozr(input_vec):
-        """
-        Ornstein-Zernicke Relation
-        """
-        return jpu.numpy.matmul(
-            jnp.linalg.inv(
-                (jnp.eye(ni.shape[0]) - jpu.numpy.matmul(input_vec, d)).m_as(
-                    ureg.dimensionless
-                )
-            ),
-            input_vec,
-        )
-
-    def svt_ozr(c_k):
-        """
-        The modified Ornstein-Zernicke Relation
-        """
-
-        def func(h):
-
-            return c_k + m * d * B * (
-                jpu.numpy.matmul(_T_ab * c_k, h)
-                + jpu.numpy.matmul(h, _T_ab * c_k)
-            )
-
-        h, niter = compute_fixpoint(func, ozr(c_k))
-        return h
-
-    def condition(val):
-        """
-        If this is False, the loop will stop. Abort if too many steps were
-        reached, or if convergence was reached.
-        """
-        _, Ns_r, Ns_r_old, n_iter = val
-        err = jpu.numpy.sum((Ns_r - Ns_r_old) ** 2)
-        return (n_iter < 2000) & jnp.all(err > delta)
-
-    def step(val):
-        log_g_r, Ns_r, _, i = val
-
-        h_r = jpu.numpy.expm1(log_g_r)
-
-        cs_r = h_r - Ns_r
-
-        cs_k = _3Dfour(k, r, cs_r)
-        hkold = _3Dfour(k, r, h_r)
-
-        c_k = cs_k - v_l_k
-
-        # Ornstein-Zernike relation
-        h_k = jax.vmap(svt_ozr, in_axes=2, out_axes=2)(c_k)
-
-        Ns_k = h_k - cs_k
-
-        Ns_r_new_full = (
-            _3Dfour(
-                r,
-                k,
-                Ns_k,
-            )
-            / (2 * jnp.pi) ** 3
-        )
-
-        Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
-
-        log_g_r_new = Ns_r_new - v_s
-
-        return log_g_r_new, Ns_r_new, Ns_r, i + 1
-
-    init = (log_g_r0, Ns_r0, Ns_r0 - 1, 0)
-    log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
-
-    return jpu.numpy.exp(log_g_r), niter
-
-
 @jax.jit
 def pair_distribution_function_two_component_SVT_HNC_ei(
     V_s, V_l_k, r, T_ab, n, m, mix=0.0
 ):
     """
-    See Shaffer.2017, Eqns. 16 & 17
+    See Shaffer.2017, solved Eqns. 7
     """
     delta = 1e-6
 
@@ -490,15 +384,6 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
         """
         The modified Ornstein-Zernicke Relation
         """
-        # bracket = c_k[0, 0] + (
-        #     ((ni[1] * c_k[1, 0]) / (1 - ni[1] * c_k[1, 1]))
-        #     * T_ab[1, 1, 0]
-        #     / T_ab[0, 0, 0]
-        #     * (c_k[1, 0])
-        # )
-        # hii = bracket / (1 - bracket * ni[0])
-        # hei = (c_k[0, 1] + ni[0] * hii * c_k[0, 1]) / (1 - ni[1] * c_k[1, 1])
-        # hee = (c_k[1, 1] + ni[0] * hei * c_k[0, 1]) / (1 - ni[1] * c_k[1, 1])
 
         cee = c_k[1, 1]
         cei = c_k[1, 0]
@@ -775,6 +660,14 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0):
 
 
 def geometric_mean_T(T):
+    """
+    Returns the geometric mean of a given temperature pair, according to
+    :cite:`Schwarz.2007`.
+    
+    .. math::
+
+       \\bar{T}_{ab} = \\sqrt{T_aT_b}
+    """
 
     return jpu.numpy.sqrt(T[jnp.newaxis, :] * T[:, jnp.newaxis])
 
