@@ -187,16 +187,16 @@ class PlasmaState:
     @property
     def Teff_e(self):
         """
-        Return the effective electron temperature.
+        Return the effective electron temperature. Quantum temperature as used by :cite:`Gregori.2003`.
         """
         rs = wiegner_seitz_radius(self.n_e) / ureg.a_0
+        # This is another definition of Tq, not from Gregori et al.
         # Tq = (
         #     fermi_energy(self.n_e)
         #     / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
         #     / (1 * ureg.boltzmann_constant)
         # )
 
-        # Quantum temperature as used by Gregori.2003
         Tq = (
             fermi_energy(self.n_e)
             / (1.3251 - 0.1779 * jpu.numpy.sqrt(rs))

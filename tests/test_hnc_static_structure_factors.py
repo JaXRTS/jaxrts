@@ -2,8 +2,6 @@ import jpu
 import matplotlib.pyplot as plt
 from jax import numpy as jnp
 
-import sys
-sys.path.append(r"C:\Users\Samuel\Desktop\PhD\Python-Projects\JAXRTS\jaxrts\src")
 import jaxrts
 import jaxrts.hypernetted_chain as hnc
 from jaxrts.units import ureg
