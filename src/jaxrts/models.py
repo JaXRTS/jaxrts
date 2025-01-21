@@ -1017,7 +1017,7 @@ class RPA_DandreaFit(FreeFreeModel):
             plasma_state.T_e,
             plasma_state.n_e,
             interpE,
-            plasma_state["ee-lfc"].evaluate_fullk(plasma_state, setup),
+            plasma_state["ee-lfc"].evaluate(plasma_state, setup),
         )
 
         See_0 = jnpu.where(
