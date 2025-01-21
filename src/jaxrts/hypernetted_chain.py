@@ -363,7 +363,7 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
     V_s, V_l_k, r, T_ab, n, m, mix=0.0
 ):
     """
-    See Shaffer.2017, solved Eqns. 7
+    See :cite:`Shaffer.2017`, solved Eqns. 7. This reference fixes some typos in the seminal work of :cite:`Seuferling.1989`.
     """
     delta = 1e-6
 

@@ -43,7 +43,7 @@ def pauli_potential_from_classical_map_SpinAveraged(
 ):
     """
     This method utilizes the exact non-interacting solution for the pair
-    distribution function (PDF) as input. The effective potential is then
+    distribution function (PDF) as input (see :cite:`Bredow.2017`). The effective potential is then
     derived iteratively to reproduce the input PDF using the HNC algorithm.
     This approach effectively inverts the HNC framework to determine the
     interaction potential from a known PDF.
