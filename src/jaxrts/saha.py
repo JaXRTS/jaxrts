@@ -6170,7 +6170,7 @@ def saha_eq(gi: float, gj: float, T_e: Quantity, energy_diff: Quantity):
         / (1 * ureg.planck_constant**3)
     ) * jnpu.exp(((-energy_diff) / (1 * ureg.boltzmann_constant * T_e)))
 
-@partial(jax.jit, static_argnames = ["element_list"])
+# @partial(jax.jit, static_argnames = ["element_list"])
 def solve_saha(
     element_list, T_e: Quantity, ion_number_densities: Quantity
 ):
@@ -6187,9 +6187,8 @@ def solve_saha(
         stat_weight = jnp.array(_stat_weight[element.symbol])
         Eb = jnp.array(ionization_energies[element.Z]) * ( 1 * ureg.electron_volt)
         
-
         diag = jnp.diag(
-            (1/typical_ne *
+            (-1/typical_ne *
                 saha_eq(
                     stat_weight[:-1],
                     stat_weight[1:],
@@ -6211,15 +6210,18 @@ def solve_saha(
 
         _diag = jnp.diag(jnp.ones(len(element_list) + onp.sum(Z)) * ne, -1)
         out = M + _diag
-        out = out.at[-1, -1].set(ne)
+        out = out.at[-1, -1].set(ne[0])
         return out
 
     def det_M(ne):
-        return jnp.linalg.det(insert_ne(M, ne))
+        res = jnp.abs(jnp.linalg.det(insert_ne(M, ne)))
+        return res
 
-    sol_ne = Bisection(det_M, lower = 0, upper = 1e25)
+    sol_ne = jax.scipy.optimize.minimize(det_M, x0=jnp.array([1000.0]), method="BFGS").x
 
-    M = insert_ne(M, sol_ne.run().params)
+    print(sol_ne)
+
+    M = insert_ne(M, sol_ne)
 
     MM = jnp.array(M)
     M1 = MM[0:(len(MM[0]) - 1), 0:(len(MM[0]) - 1)]
@@ -6228,7 +6230,7 @@ def solve_saha(
     # The solution in form of (nh0,nh1,nhe0,nhe1,nhe2,...)
     ionised_number_densities = jnp.linalg.solve(M1, M2)
 
-    return ionised_number_densities
+    return ionised_number_densities * typical_ne
     
 
 def calc_Zfree_saha(plasma_state):
