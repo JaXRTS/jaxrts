@@ -671,6 +671,8 @@ class Element:
     def __repr__(self) -> str:
         return f"Element {self.name} ({self.symbol}) Z={self.Z}"
 
+    def __hash__(self) -> int:
+        return self.Z
 
 class MixElement(Element):
     """
