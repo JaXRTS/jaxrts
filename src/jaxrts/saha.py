@@ -6160,77 +6160,128 @@ ionization_energies = {
     118: [],
 }
 
+h = 2 * jnp.pi
+k_B = 1.0
+m_e = 511e3  # [eV]
+
+@jax.jit
+def bisection(func, a, b, tolerance=1E-8, max_iter=5000):
+
+    def condition(state):
+        prev_x, next_x, count = state
+    
+        return (
+            (count < max_iter)
+            & (jnp.abs(func(next_x)) > tolerance)
+            & (jnp.abs(prev_x - next_x) > tolerance)
+        )
+
+    def body(state):
+        a,b,i = state
+        c = (a+b) / 2 # middlepoint
+        bound = jnp.where(jnp.sign(func(c)) == jnp.sign(func(a)), b, a)
+        return bound, c, i+1
+
+    initial_state = (a, b, 0)
+
+    _, final_state, iterations = jax.lax.while_loop(condition, body, initial_state)
+
+    return final_state, iterations
 
 @jax.jit
 def saha_eq(gi: float, gj: float, T_e: Quantity, energy_diff: Quantity):
 
-    return (gi / gj) * (
-        (2 * jnp.pi * 1 * ureg.electron_mass * ureg.boltzmann_constant * T_e)
+    # Maybe a factor of 2 is missing?
+    return (gj / gi) * (
+        (2 * jnp.pi * 1 * m_e * k_B * T_e)
         ** 1.5
-        / (1 * ureg.planck_constant**3)
-    ) * jnpu.exp(((-energy_diff) / (1 * ureg.boltzmann_constant * T_e)))
+        / (1 * h**3)
+    ) * jnpu.exp(((-energy_diff) / (1 * k_B * T_e)))
 
 # @partial(jax.jit, static_argnames = ["element_list"])
 def solve_saha(
     element_list, T_e: Quantity, ion_number_densities: Quantity
 ):
 
+    print("Ion densities input: ", ion_number_densities)
+    print("Temperature input: ", T_e)
     Z = [i.Z for i in element_list]
     M = jnp.zeros((len(element_list) + onp.sum(Z) + 1, len(element_list) + onp.sum(Z) + 1))
 
-    typical_ne = 1E20 / ureg.cc
+    # typical_ne = ion_number_densities[0].copy()
+    # print(ion_number_densities[0])
+
+    max_ne = jnp.sum(jnp.array([elem.Z for elem in element_list]) * ion_number_densities)
 
     skip = 0
     ionization_states = []
-    for element in element_list:
-        # Flip the array, so that the weights start with no ioniyation and go to max
+    for ion_dens, element in zip(ion_number_densities, element_list):
+        # Flip the array, so that the weights start with no ionization and go to max
         stat_weight = jnp.array(_stat_weight[element.symbol])
-        Eb = jnp.array(ionization_energies[element.Z]) * ( 1 * ureg.electron_volt)
+        Eb = jnp.array(ionization_energies[element.Z]) 
+        #* ( 1 * ureg.electron_volt)
         
         diag = jnp.diag(
-            (-1/typical_ne *
+            ((-1)*
                 saha_eq(
                     stat_weight[:-1],
                     stat_weight[1:],
                     T_e,
                     Eb,
-                )).m_as(ureg.dimensionless)
+                )
+                )#.m_as(ureg.dimensionless)
         )
         dens_row = jnp.ones((element.Z + 1))
 
         M = M.at[skip:skip + element.Z, skip:skip + element.Z].set(diag)
         M = M.at[skip: skip + element.Z + 1, skip + element.Z].set(dens_row)
+
+        M=M.at[-1, skip + element.Z].set(ion_dens)
         
         skip += element.Z + 1
         ionization_states += list(jnp.arange(element.Z + 1))
 
     M = M.at[:-1,-1].set(jnp.array(ionization_states))
 
+    onp.set_printoptions(precision=1)
+
     def insert_ne(_M, ne):
 
-        _diag = jnp.diag(jnp.ones(len(element_list) + onp.sum(Z)) * ne, -1)
+        ne_line = jnp.ones(len(element_list) + onp.sum(Z)) * ne
+
+        skip = -1
+        for element in element_list:
+
+            ne_line = ne_line.at[skip+element.Z + 1].set(0.0)
+            skip += element.Z + 1
+
+        _diag = jnp.diag(ne_line, -1)
         out = M + _diag
-        out = out.at[-1, -1].set(ne[0])
-        return out
+        out = out.at[-1, -1].set(ne)
+        return out.T
 
     def det_M(ne):
-        res = jnp.abs(jnp.linalg.det(insert_ne(M, ne)))
+        res = jnp.linalg.det(insert_ne(M, ne))
         return res
 
-    sol_ne = jax.scipy.optimize.minimize(det_M, x0=jnp.array([1000.0]), method="BFGS").x
+    # sol_ne = jax.scipy.optimize.minimize(det_M, x0=jnp.array([1.0E18]), method="BFGS").x
 
-    print(sol_ne)
+    print("Max n_e:", max_ne)
+    sol_ne, iterations = bisection(jax.tree_util.Partial(det_M), 0.0, max_ne, tolerance = 1E-10)
+    print("Needed iterations for bisection:", iterations)
 
+    # ne = jnp.logspace(15, 17, 1000)
+    # sol_ne = ne[jnp.argmin(jnp.array([det_M(_ne) for _ne in ne]))]
+    print("Solution n_e: ", sol_ne)
     M = insert_ne(M, sol_ne)
-
+    print("M = ", M)
     MM = jnp.array(M)
-    M1 = MM[0:(len(MM[0]) - 1), 0:(len(MM[0]) - 1)]
-    M2 = MM[0:(len(MM[0]) - 1), (len(MM[0]) - 1)]
-
+    M1 = MM[:(len(MM[0]) - 1), 0:(len(MM[0]) - 1)]
+    M2 = MM[:(len(MM[0]) - 1), (len(MM[0]) - 1)]
     # The solution in form of (nh0,nh1,nhe0,nhe1,nhe2,...)
     ionised_number_densities = jnp.linalg.solve(M1, M2)
 
-    return ionised_number_densities * typical_ne
+    return ionised_number_densities
     
 
 def calc_Zfree_saha(plasma_state):
