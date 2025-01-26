@@ -214,21 +214,20 @@ def calculate_mean_free_charge_saha(plasma_state):
     indices = jnp.cumsum(
         jnp.array([0] + list([ion.Z + 1 for ion in plasma_state.ions]))
     )
-    Z_total = jnp.array(
-        [
-            jnp.sum(sol[indices[i] : indices[i + 1]])
-            for i in range(len(indices) - 1)
-        ]
-    )
-    Z_free = jnp.array(
-        [
-            jnp.sum(
-                sol[indices[i] : indices[i + 1]]
-                / Z_total[i]
-                * jnp.arange(plasma_state.ions[i].Z + 1)
-            )
-            for i in range(len(indices) - 1)
-        ]
-    )
+    Z_total = []
+    Z_free = []
+    for i in range(len(indices) - 1):
+        idx = jnp.arange(len(sol))
+        relevant_part = jnp.where(
+            (idx >= indices[i]) & (idx < indices[i + 1]), sol, 0
+        )
+        ionizations = jnp.where(
+            (idx >= indices[i]) & (idx < indices[i + 1]),
+            jnp.arange(len(sol)) - indices[i],
+            0,
+        )
+        Z_total.append(jnp.sum(relevant_part))
+        Z_free.append(jnp.sum(relevant_part / Z_total[i] * ionizations))
+    Z_free = jnp.array(Z_free)
 
     return Z_free
