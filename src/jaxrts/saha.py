@@ -5,10 +5,10 @@ from .units import Quantity, ureg
 import numpy as onp
 import jax
 
-from jaxopt import Bisection
 import jax.numpy as jnp
 import jpu.numpy as jnpu
 
+# fmt: off
 _stat_weight = {
     "H": [2, 1], "He": [1, 2, 1], "Li": [2, 1, 2, 1], "Be": [1, 2, 1, 2, 1], "B": [2, 1, 2, 1, 2, 1],
     "C": [1, 2, 1, 2, 1, 2, 1], "N": [4, 1, 2, 1, 2, 1, 2, 1], "O": [5, 4, 1, 2, 1, 2, 1, 2, 1],
@@ -53,9 +53,7 @@ ionization_energies = {
     30: [9.394197, 17.96439, 39.7233, 59.573, 203.0, 82.6, 108.0, 133.9, 173.9, 238.0, 274.4, 310.8, 417.6, 453.4, 697.5, 490.6, 540.0, 577.8, 613.3, 737.366, 1846.8, 1961.0, 2085.0, 2214.0, 11864.9401, 2358.0, 2491.5, 2669.9, 2781.996, 12388.9427],
     31: [5.999302, 20.51514, 30.72576, 63.241, 211.0, 86.01, 112.7, 140.8, 169.9, 244.0, 280.0, 319.0, 356.0, 471.2, 677.0, 508.8, 548.3, 599.8, 640.0, 765.7, 807.308, 2010.0, 2129.0, 2258.0, 2984.426, 2391.0, 2543.9, 2683.0, 2868.0, 12696]
 }
-# h = 2 * jnp.pi
-# k_B = 1.0
-# m_e = 511e3  # [eV]
+# fmt: on
 
 h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
@@ -115,7 +113,7 @@ def solve_saha(element_list, T_e: Quantity, ion_number_densities: Quantity):
         jnp.array([elem.Z for elem in element_list]) * ion_number_densities
     )
 
-    ne_scale = max_ne * 1E5
+    ne_scale = max_ne * 1e5
 
     skip = 0
     ionization_states = []
@@ -195,8 +193,8 @@ def solve_saha(element_list, T_e: Quantity, ion_number_densities: Quantity):
 
     return ionised_number_densities * ne_scale
 
-def calculate_mean_free_charge_saha(plasma_state):
 
+def calculate_mean_free_charge_saha(plasma_state):
     """
     Calculates the mean charge of each ion in a plasma using the Saha-Boltzmann equation.
 
@@ -206,7 +204,7 @@ def calculate_mean_free_charge_saha(plasma_state):
     Returns:
     jnp.ndarray: An array containing the mean charge of each ion in the plasma.
     """
-    
+
     sol = solve_saha(
         tuple(plasma_state.ions),
         plasma_state.T_e,
@@ -214,15 +212,23 @@ def calculate_mean_free_charge_saha(plasma_state):
     ).m_as(1 / ureg.cc)
 
     indices = jnp.cumsum(
-    jnp.array([0] + list([ion.Z+1 for ion in plasma_state.ions]))
-)
-    Z_total = jnp.array([
-        jnp.sum(sol[indices[i]:indices[i+1]])
-        for i in range(len(indices) - 1)
-    ])
-    Z_free = jnp.array([
-        jnp.sum(sol[indices[i]:indices[i+1]] / Z_total[i] * jnp.arange(plasma_state.ions[i].Z + 1))
-        for i in range(len(indices) - 1)
-    ])
+        jnp.array([0] + list([ion.Z + 1 for ion in plasma_state.ions]))
+    )
+    Z_total = jnp.array(
+        [
+            jnp.sum(sol[indices[i] : indices[i + 1]])
+            for i in range(len(indices) - 1)
+        ]
+    )
+    Z_free = jnp.array(
+        [
+            jnp.sum(
+                sol[indices[i] : indices[i + 1]]
+                / Z_total[i]
+                * jnp.arange(plasma_state.ions[i].Z + 1)
+            )
+            for i in range(len(indices) - 1)
+        ]
+    )
 
     return Z_free
