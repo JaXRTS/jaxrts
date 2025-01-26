@@ -1,8 +1,14 @@
-from jaxrts.saha import solve_saha
+from jaxrts.saha import solve_saha, calculate_mean_free_charge_saha
 from jaxrts.elements import Element
 from jaxrts.units import ureg, to_array
 from tqdm import tqdm
 import jpu.numpy as jnpu
+
+import jaxrts
+
+import time
+
+import jax.numpy as jnp
 
 import matplotlib.pyplot as plt
 
@@ -51,41 +57,101 @@ def rho_to_ne(rho, m_a, Z=1):
 
 if __name__ == "__main__":
 
-    H = Element("H")
-    He = Element("He")
 
-    xdata, ydata = load_csv_data([f"plot-data({i}).csv" for i in range(4)])
+    ions = [jaxrts.Element("C"), jaxrts.Element("H"), jaxrts.Element("O"), jaxrts.Element("Co")]
+    number_fraction = jnp.array([1 / 3, 1/ 3, 1 / 3-0.06, 0.06])  # Sample composition: C5H8O2
+    mass_fraction = jaxrts.helpers.mass_from_number_fraction(number_fraction, ions)
 
-    T = jnpu.linspace(0.1 * ureg.electron_volt / ureg.boltzmann_constant, 2 * ureg.electron_volt / ureg.boltzmann_constant, 200)
-    
+    plasma_state = jaxrts.PlasmaState(
+        ions=ions,
+        Z_free=jnp.ones_like(mass_fraction),
+        mass_density=ureg("260mg/cc") * mass_fraction,
+        T_e=jnp.array([40]) * ureg.electron_volt / ureg.k_B,
+    )
+
+    # for k in range(1):
+    #     t0 = time.time()
+    #     Zf = calculate_mean_free_charge_saha(plasma_state)
+    #     print(f"Time needed: {time.time()-t0}")
+
+
+    # exit()
+
+    Z_free = [[],[],[],[]]
+    Tes = jnp.logspace(-1, 3, 1000)* ureg.electron_volt / ureg.k_B
+    for Te in tqdm(Tes):
+        plasma_state.T_e = Te
+        res = calculate_mean_free_charge_saha(plasma_state)
+        Z_free[0].append(res[0])
+        Z_free[1].append(res[1])
+        Z_free[2].append(res[2])
+        Z_free[3].append(res[3])
+
     fig, ax = plt.subplots()
-    i=0
-    for ne in [1E16 / ureg.meter**3, 1E19 / ureg.meter**3, 1E22 / ureg.meter**3, 1E25 / ureg.meter**3]:
+
+    ax.plot(Tes.m_as(ureg.electron_volt / ureg.k_B), Z_free[0], label = r"$Z_C$")
+    ax.plot(Tes.m_as(ureg.electron_volt / ureg.k_B), Z_free[1], label = r"$Z_H$")
+    ax.plot(Tes.m_as(ureg.electron_volt / ureg.k_B), Z_free[2], label = r"$Z_O$")
+    ax.plot(Tes.m_as(ureg.electron_volt / ureg.k_B), Z_free[3], label = r"$Z_{Co}$")
+    ax.set_xscale("log")
+    ax.set_xlabel("T [eV]")
+    ax.set_ylabel("Ionization")
+    plt.show()
+    exit()
+    Al = Element("Al")
+
+    xdata, ydata = load_csv_data(["dash.csv", "solid.csv", "dashdot.csv", "longdash.csv"])
+
+    T = jnp.logspace(
+        -3,
+        1,
+        1000,
+    ) * ureg.kiloelectron_volt / ureg.boltzmann_constant
+
+    fig, ax = plt.subplots()
+    i = 0
+
+    for ne in [
+        rho_to_ne(0.027 * ureg.gram / ureg.cc, Al.atomic_mass),
+        rho_to_ne(0.00027 * ureg.gram / ureg.cc, Al.atomic_mass),
+        rho_to_ne(270.0 * ureg.gram / ureg.cc, Al.atomic_mass),
+        rho_to_ne(2.7 * ureg.gram / ureg.cc, Al.atomic_mass)
+    ]:
         ionizations = []
         for Tv in tqdm(T):
-            sol = solve_saha(tuple([H]), Tv.to(ureg.electron_volt / ureg.boltzmann_constant), to_array([ne]))
+            sol = solve_saha(
+                tuple([Al]),
+                Tv.to(ureg.electron_volt / ureg.boltzmann_constant),
+                to_array([ne]),
+            )
 
-            ionization_state_charge = np.array([0, 1])
+            ionization_state_charge = np.array(range(14))
 
-            sol = sol.m_as(1/ureg.cc)
-            fractions = sol / np.array([np.sum(sol[:2]), np.sum(sol[:2])])
-            #, #np.sum(sol[2:]), np.sum(sol[2:]), np.sum(sol[2:])])
+            sol = sol.m_as(1 / ureg.cc)
+            fractions = sol / np.sum(sol)
+            # , #np.sum(sol[2:]), np.sum(sol[2:]), np.sum(sol[2:])])
 
-            Z_free = jnpu.sum(fractions * ionization_state_charge)
-        
+            Z_free = np.sum(fractions * ionization_state_charge)
+
             ionizations.append(Z_free)
 
-        ax.plot(T.m_as(ureg.electron_volt / ureg.boltzmann_constant), ionizations, label = f"n_e = {ne}", color=f"C{i}")
+        ionizations = np.array(ionizations)
+
+        ax.plot(
+            T.m_as(ureg.kiloelectron_volt / ureg.boltzmann_constant),
+            ionizations,
+            label=f"n_e = {ne}",
+            color=f"C{i}",
+        )
         i += 1
 
-    i=0
+    i = 0
     for xv, yv in zip(xdata, ydata):
-        ax.scatter(xv, np.array(yv) / 100.0, color=f"C{i}", s=15)
-        i+=1
+        ax.scatter(xv, np.array(yv), color=f"C{i}", s=15)
+        i += 1
 
-    ax.set_title("Hydrogen Plasma")
+    ax.set_title("Aluminium Plasma")
     ax.set_ylabel("Mean Free Charge")
-    ax.set_xlabel("Temperature [eV]")
+    ax.set_xlabel("Temperature [keV]")
+    ax.set_xscale("log")
     plt.show()
-    # print("Z_Free_avg: H:", np.sum(Z_free[:2]))
-    #, "He:", np.sum(Z_free[2:]))
