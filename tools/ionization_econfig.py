@@ -1,7 +1,24 @@
-# coding: utf-8
 import mendeleev
+from jaxrts.helpers import orbital_map, orbital_array
+
+def parse_econf(config):
+    """
+    Parse the electron configuration from mendeleev into an jaxrts orbital map
+    style array.
+    """
+    out = orbital_array()
+    for key in config.keys():
+        value = config[key]
+        orbital_name = f"{key[0]}{key[1]}"
+        out = out.at[orbital_map[orbital_name]].set(value)
+    return out
+
 
 def get_J(config):
+    """
+    Calculate the combined angular momentum J = L + S from an electronic
+    configuration.
+    """
     J = 0.0
     for key in config.keys():
         value = config[key]
@@ -57,7 +74,7 @@ cutoffZ = 36
 
 ionization_econf = {
     element.atomic_number: [
-        element.ec.ionize(z).conf for z in range(element.atomic_number + 1)
+        parse_econf(element.ec.ionize(z).conf) for z in range(element.atomic_number + 1)
     ]
     for element in elements
     if element.atomic_number <= cutoffZ
@@ -76,5 +93,5 @@ ionization_energies = {
     if element.atomic_number <= cutoffZ
 }
 print(ionization_energies)
-# print(ionization_econf)
+print(ionization_econf)
 print(ionization_g)
