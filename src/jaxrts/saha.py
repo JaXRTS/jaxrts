@@ -164,7 +164,8 @@ def calculate_mean_free_charge_saha(plasma_state):
         tuple(plasma_state.ions),
         plasma_state.T_e,
         (plasma_state.mass_density / plasma_state.atomic_masses),
-    ).m_as(1 / ureg.cc)
+    )
+    sol = sol.m_as(1 / ureg.cc)
 
     indices = jnp.cumsum(
         jnp.array([0] + list([ion.Z + 1 for ion in plasma_state.ions]))
