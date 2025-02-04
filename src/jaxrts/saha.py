@@ -1,4 +1,5 @@
 from .elements import Element
+
 from typing import List
 from functools import partial
 from .units import Quantity, ureg
@@ -15,7 +16,7 @@ m_e = 1 * ureg.electron_mass
 
 
 @jax.jit
-def bisection(func, a, b, tolerance=1e-4, max_iter=1e4):
+def bisection(func, a, b, tolerance=1e-4, max_iter=1e4, min_iter=40):
 
     def condition(state):
         prev_x, next_x, count = state
@@ -24,12 +25,12 @@ def bisection(func, a, b, tolerance=1e-4, max_iter=1e4):
             (count < max_iter)
             & (jnp.abs(func(next_x)) > tolerance)
             & (jnp.abs(prev_x - next_x) > tolerance)
-        )
+        ) | (count < min_iter)
 
     def body(state):
         a, b, i = state
         c = (a + b) / 2  # middlepoint
-        bound = jnp.where(jnp.sign(func(c)) == jnp.sign(func(a)), b, a)
+        bound = jnp.where(jnp.sign(func(c)) == jnp.sign(func(b)), a, b)
         return bound, c, i + 1
 
     initial_state = (a, b, 0)
@@ -67,29 +68,28 @@ def solve_saha(element_list, T_e: Quantity, ion_number_densities: Quantity):
         jnp.array([elem.Z for elem in element_list]) * ion_number_densities
     )
 
-    ne_scale = max_ne * 1e5
+    # ne_scale = max_ne
+    ne_scale = 1e0 / (1 * ureg.m**3)
 
     skip = 0
     ionization_states = []
+
     for ion_dens, element in zip(ion_number_densities, element_list):
 
         stat_weight = element.ionization.statistical_weights
         Eb = element.ionization.energies
 
-        diag = jnp.diag(
-            (
-                (-1)
-                * (
-                    saha_equation(
-                        stat_weight[:-1],
-                        stat_weight[1:][::-1],
-                        T_e,
-                        Eb,
-                    )
-                    / ne_scale
-                )
-            ).m_as(ureg.dimensionless)
-        )
+        coeff = (
+            saha_equation(
+                stat_weight[:-1],
+                stat_weight[1:],
+                T_e,
+                Eb,
+            )
+            / ne_scale
+        ).m_as(ureg.dimensionless)
+
+        diag = jnp.diag((-1) * coeff)
         dens_row = jnp.ones((element.Z + 1))
 
         M = M.at[skip : skip + element.Z, skip : skip + element.Z].set(diag)
@@ -123,15 +123,16 @@ def solve_saha(element_list, T_e: Quantity, ion_number_densities: Quantity):
         res = jnp.linalg.det(insert_ne(M, ne))
         return res
 
-    # print("Max n_e:", max_ne)
     sol_ne, iterations = bisection(
         jax.tree_util.Partial(det_M),
-        0.0,
+        0,
         (max_ne / ne_scale).m_as(ureg.dimensionless),
-        tolerance=1e-12,
-        max_iter=1e5,
+        tolerance=1e-2,
+        max_iter=1e2,
+        min_iter=0,
     )
-    # jax.debug.print("Needed iterations for bisection: {x}", x=iterations)
+
+    # jax.debug.print("Needed iterations for convergence: {x}", x=iterations)
 
     M = insert_ne(M, sol_ne)
 
@@ -142,21 +143,24 @@ def solve_saha(element_list, T_e: Quantity, ion_number_densities: Quantity):
     # The solution in form of (nh0,nh1,nhe0,nhe1,nhe2,...)
     ionised_number_densities = jnp.linalg.solve(M1, M2)
 
-    return ionised_number_densities * ne_scale
+    return ionised_number_densities * ne_scale, sol_ne * ne_scale
 
 
 def calculate_mean_free_charge_saha(plasma_state):
     """
-    Calculates the mean charge of each ion in a plasma using the Saha-Boltzmann equation.
+    Calculates the mean charge of each ion in a plasma using the Saha-Boltzmann
+    equation.
 
     Parameters:
+    -----------
     plasma_state (PlasmaState): The plasma state object.
 
     Returns:
+    --------
     jnp.ndarray: An array containing the mean charge of each ion in the plasma.
     """
 
-    sol = solve_saha(
+    sol, _ = solve_saha(
         tuple(plasma_state.ions),
         plasma_state.T_e,
         (plasma_state.mass_density / plasma_state.atomic_masses),
