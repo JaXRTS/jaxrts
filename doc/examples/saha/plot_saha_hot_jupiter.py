@@ -4,7 +4,7 @@ Saha equation for hot jupiter materials
 
 This example showcases the use of the saha equation solver. This example
 consideres abundances as reported by :cite:`Lodders.2010`, and reproduces a
-plot generated with M. Schlötter's MALGS programm -- which is discussed, e.g.
+plot generated with M. Schöttler's MALGS programm -- which is discussed, e.g.
 in :cite:`Kumar.2021`.
 """
 

@@ -1,0 +1,1 @@
+The data was created with the MALGS tool written by Manuel Schöttler. In the given curves, only an ionization for up to 2+ is considered. While MALGS is capable of considering some molecules, the calculation here is only atomar, and therefore suitable for comparison with our code.
