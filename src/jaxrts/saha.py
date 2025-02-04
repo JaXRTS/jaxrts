@@ -1,4 +1,5 @@
 from .elements import Element
+from .setup import Setup
 
 from typing import List
 from functools import partial
@@ -54,7 +55,12 @@ def saha_equation(gi: float, gj: float, T_e: Quantity, energy_diff: Quantity):
 
 
 @partial(jax.jit, static_argnames=["element_list"])
-def solve_saha(element_list, T_e: Quantity, ion_number_densities: Quantity):
+def solve_saha(
+    element_list,
+    T_e: Quantity,
+    ion_number_densities: Quantity,
+    contiuum_lowering: Quantity = 0 * ureg.electron_volt,
+):
 
     Z = [i.Z for i in element_list]
     M = jnp.zeros(
@@ -77,7 +83,8 @@ def solve_saha(element_list, T_e: Quantity, ion_number_densities: Quantity):
     for ion_dens, element in zip(ion_number_densities, element_list):
 
         stat_weight = element.ionization.statistical_weights
-        Eb = element.ionization.energies
+        Eb = element.ionization.energies + contiuum_lowering
+        Eb = jnpu.where(Eb < 0, 0, Eb)
 
         coeff = (
             saha_equation(
@@ -104,7 +111,7 @@ def solve_saha(element_list, T_e: Quantity, ion_number_densities: Quantity):
 
     M = M.at[:-1, -1].set(jnp.array(ionization_states))
 
-    def insert_ne(_M, ne):
+    def insert_ne(M, ne):
 
         ne_line = jnp.ones(len(element_list) + onp.sum(Z)) * ne
 
@@ -119,12 +126,12 @@ def solve_saha(element_list, T_e: Quantity, ion_number_densities: Quantity):
         out = out.at[-1, -1].set(ne)
         return out.T
 
-    def det_M(ne):
+    def det_M(M, ne):
         res = jnp.linalg.det(insert_ne(M, ne))
         return res
 
     sol_ne, iterations = bisection(
-        jax.tree_util.Partial(det_M),
+        jax.tree_util.Partial(lambda ne: det_M(M=M, ne=ne)),
         0,
         (max_ne / ne_scale).m_as(ureg.dimensionless),
         tolerance=1e-2,
@@ -146,24 +153,36 @@ def solve_saha(element_list, T_e: Quantity, ion_number_densities: Quantity):
     return ionised_number_densities * ne_scale, sol_ne * ne_scale
 
 
-def calculate_mean_free_charge_saha(plasma_state):
+def calculate_mean_free_charge_saha(plasma_state, ipd=True):
     """
     Calculates the mean charge of each ion in a plasma using the Saha-Boltzmann
     equation.
 
-    Parameters:
-    -----------
-    plasma_state (PlasmaState): The plasma state object.
+    Parameters
+    ----------
+    plasma_state : PlasmaState
+        The plasma state object.
+    ipd : bool
+        If true, the ipd correction of the plasma state is used to reduce the
+        continuum. Note: the IPD can very much depend on the ionization state.
+        this could result in some circular dependency.
 
-    Returns:
-    --------
-    jnp.ndarray: An array containing the mean charge of each ion in the plasma.
+    Returns
+    -------
+    jnp.ndarray
+        An array containing the mean charge of each ion in the plasma.
     """
 
+    if ipd:
+        cl = jnpu.mean(plasma_state["ipd"].evaluate(plasma_state, None))
+        cl = jnpu.where(jnp.isnan(cl.magnitude), 0 * ureg.electron_volt, cl)
+    else:
+        cl = 0 * ureg.electron_volt
     sol, _ = solve_saha(
         tuple(plasma_state.ions),
         plasma_state.T_e,
         (plasma_state.mass_density / plasma_state.atomic_masses),
+        contiuum_lowering=cl,
     )
     sol = sol.m_as(1 / ureg.cc)
 
