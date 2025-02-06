@@ -61,12 +61,14 @@ def create_latex_string(elements):
 
     tex_string += r"$"
 
+    if tex_string == r"$$":
+        return ""
     return tex_string
 
 
 def chemical_to_list(chem_str):
     elem_list = {}
-    res = re.split("(\d+)", chem_str)
+    res = re.split(r"(\d+)", chem_str)
     try:
         element_names = res.copy()[::2]
         element_names.remove("")
