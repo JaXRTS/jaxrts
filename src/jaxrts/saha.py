@@ -175,8 +175,8 @@ def solve_saha(
     # Set up the empty matrix
     M = jnp.zeros(
         (
-            len(element_list) + onp.sum(Z) + 1,
-            len(element_list) + onp.sum(Z) + 1,
+            len(element_list) + int(onp.sum(Z)) + 1,
+            len(element_list) + int(onp.sum(Z)) + 1,
         )
     )
 
@@ -243,7 +243,7 @@ def solve_saha(
         Add n_e to the off-diagonal end the last entry (last row and column.
         """
 
-        ne_line = jnp.ones(len(element_list) + onp.sum(Z)) * ne
+        ne_line = jnp.ones(len(element_list) + int(onp.sum(Z))) * ne
 
         skip = -1
         for element in element_list:
