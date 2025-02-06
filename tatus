@@ -1,0 +1,3133 @@
+[33mcommit c13f1094be97e6e5325fd1360d7a32d79a6e1307[m[33m ([m[1;36mHEAD -> [m[1;32msaha[m[33m, [m[1;31morigin/saha[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Feb 5 10:40:03 2025 +0100
+
+    Documentation
+
+[33mcommit bdf6641d1de63988d052d16941adec6fa0bd9160[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Feb 4 18:02:08 2025 +0100
+
+    Allow to use the plasma_state's IPD for continuum lowering
+
+[33mcommit d27d6a335b703fb90e16a68aab5fbd19cedfc6eb[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Feb 4 16:06:09 2025 +0100
+
+    test saha against literature, fix name spelling
+
+[33mcommit bd78db805e4f65b26125f5ceef92c011fa959e7f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Feb 4 15:37:59 2025 +0100
+
+    example
+
+[33mcommit 4ec56fcacbbe0bc21c1f6754ec0c3629c181f31f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Feb 4 13:27:39 2025 +0100
+
+    Fix error in calculate_mean_free_charge_saha
+
+[33mcommit be54e691f7aeee34a46c7cf5f9fd824b4965bb90[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Feb 4 13:08:25 2025 +0100
+
+    Initial "it works" for the saha eqn
+
+[33mcommit 24758c716af217a6e76a39bc25301f7506bda7e0[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jan 31 18:42:01 2025 +0100
+
+    BEAKING: factor out ionization energies etc. to elements
+    
+    On the way, fix that now 4s is populated before 3d
+
+[33mcommit 29b2ade6c50fc50d214e5950f387c6970afd15c1[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jan 29 10:45:55 2025 +0100
+
+    Statistical weights from mendeleev
+
+[33mcommit fbcfa10c80c472bddd8d06a29de062e51fda1651[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sun Jan 26 12:50:18 2025 +0100
+
+    Make calculate_mean_free_change_saha jit-able
+
+[33mcommit 092294f6357b9e4cccf65e2b5725d0b7b612b395[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sun Jan 26 11:28:02 2025 +0100
+
+    Remove unnecessary dependency, add saha to top-level
+
+[33mcommit 0c10fef809cc989c4c6801e03513ef16f96c4a8a[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Sun Jan 26 11:12:38 2025 +0100
+
+    added function that calculates Zfree from a plasma_state
+
+[33mcommit d2f03f0ed6b5513b3d9ba5a6b14ccedff3732f21[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Jan 24 09:13:56 2025 +0100
+
+    fixed wrong commit, now with units
+
+[33mcommit 1ba07bf72b2b2a9bdd7ac578c7d46a47e2e97be1[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Jan 24 09:08:09 2025 +0100
+
+    saha version with units
+
+[33mcommit 524df14180a896d9922136d10b8e47c45b0b2062[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Jan 23 19:58:06 2025 +0100
+
+    saha reproduces github code results
+
+[33mcommit b88e6423557ee053cb6c80e4bd3ac5970c194edc[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Jan 22 19:38:11 2025 +0100
+
+    solve_saha seems to spit out reasonable numbers on first sight, still bugged
+
+[33mcommit 9bb1eec01ff30b53b9721de7122437c7e75553c1[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Jan 22 18:31:42 2025 +0100
+
+    attempt of implementing saha eq
+
+[33mcommit cdd7d67ce0b16df2182e853c193185352f022976[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Merge: c18980a 83c540c
+Author: sschumach <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jan 21 15:58:45 2025 +0100
+
+    Merge pull request #5 from JaXRTS/DandreaFit_dimension_error
+    
+    Fix Dandrea Fit
+
+[33mcommit 83c540cefe3e2e9d444469e20513d815d237b6b9[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jan 21 15:55:13 2025 +0100
+
+    Fix Dandrea Fit
+    
+    A dimensionality error occured when calculating S_ee for small energy
+    transfers in the Dandrea fit, to interpolate nan values.
+    This is fixed by not using the energy-corrected k for these values
+
+[33mcommit c18980a054e7755423fe140c3a1ed63ebb4c62a2[m[33m ([m[1;31mgithub/main[m[33m)[m
+Author: sschumach <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jan 21 15:36:57 2025 +0100
+
+    Bump version
+
+[33mcommit 19028b98364bff95d790ad6ac201b8709850e831[m
+Author: sschumach <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jan 21 15:36:30 2025 +0100
+
+    Update pyproject.toml
+
+[33mcommit fd0a055637c5bb454442f2dac68a6fb56fd44d86[m
+Merge: b751cdf ad56210
+Author: sschumach <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jan 21 15:34:56 2025 +0100
+
+    Merge pull request #4 from JaXRTS/ClassicalMap
+    
+    Classical map
+
+[33mcommit ad56210f24f37d0766fb1653ce7b4d313cfb350f[m[33m ([m[1;31mgithub/ClassicalMap[m[33m)[m
+Merge: 6358be0 20b4ac4
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jan 21 15:31:55 2025 +0100
+
+    Merge branch 'ClassicalMap' of github.com:JaXRTS/jaxrts into ClassicalMap
+
+[33mcommit 6358be081a727a8dd718c4f2a95431335a368444[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jan 21 15:31:30 2025 +0100
+
+    Quantum temperature literature
+
+[33mcommit 20b4ac471fb1a374a7f456753292cc68524060e4[m
+Merge: d98c7e2 b751cdf
+Author: sschumach <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jan 21 15:15:49 2025 +0100
+
+    Merge branch 'main' into ClassicalMap
+
+[33mcommit d98c7e228faaedb9db3dfb11d47b738e343c5ee1[m[33m ([m[1;31morigin/ClassicalMap[m[33m)[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jan 21 15:12:20 2025 +0100
+
+    literature
+
+[33mcommit c3ead1aae79485ad5bdffad0d0990740d03a5614[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jan 21 14:44:48 2025 +0100
+
+    clean-up
+
+[33mcommit f556f3db9fcf51b08e95173f201043aea66a9677[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jan 21 14:01:45 2025 +0100
+
+    changes in r_transform size
+
+[33mcommit 2d9fd7f8dddb56568beb3a72bb984831b0adac30[m
+Merge: 732ff28 8a6593a
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Dec 20 19:49:50 2024 +0100
+
+    Merge branch 'ClassicalMap' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into ClassicalMap
+
+[33mcommit 8a6593adb8327a69cea37f34e5198b55aab2886c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Dec 20 16:37:25 2024 +0100
+
+    Example comparing exchange
+
+[33mcommit 732ff28d5f6835e2941aa240d27c91df249772e7[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon Dec 16 15:53:59 2024 +0100
+
+    using exact extended OZ relation in the SVT-HNC approach
+
+[33mcommit cb258a178630c0a8d991f629213033df03636e5e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Dec 12 15:17:42 2024 +0100
+
+    small typo in Shaffer.2017
+
+[33mcommit 2d2619ca851ac97dd99707225b3b40564ed86afe[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Dec 11 17:37:39 2024 +0100
+
+    Indices
+
+[33mcommit cadc99da6b96375b6efe77f8e860a00fbf5c5571[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Dec 11 17:18:17 2024 +0100
+
+    Add Shaffer SVT-HNC for an ion-electron pair
+
+[33mcommit ed6597a0694a4ab0a14fa2c82dfb1ff00eb35697[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Dec 11 14:40:06 2024 +0100
+
+    Fix: Same results for svt and hnc
+
+[33mcommit e49bc3f59781f0fc24100117fcacbd4480bfcb94[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Dec 11 14:26:46 2024 +0100
+
+    Fix shape error. However, result is nan
+
+[33mcommit 12e5ecbe1e018e5e82a2ae7588bf4da6564c1d18[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Dec 11 12:30:04 2024 +0100
+
+    adding test for svt
+
+[33mcommit de973dd9630ea200c428fc24f37ec5611719ef6f[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Dec 11 12:29:18 2024 +0100
+
+    adding svt option for hnc
+
+[33mcommit 56d5ba693bb58468b9203b1926c7817e5ae8b6fa[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Dec 6 16:04:58 2024 +0100
+
+    investigate effective temperature: calculate E-Fermi with n_e
+
+[33mcommit 404f77d3b05ef3416f872a408d0e62f1c1a315cc[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Dec 6 16:03:12 2024 +0100
+
+    Try to extend the CHNC to SpinAveraged
+
+[33mcommit 6b60da459a5e4605c34e52240c1ad3878bc7c0a6[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Dec 6 15:45:53 2024 +0100
+
+    adding classical map as option for exchange potential calculation
+
+[33mcommit d9eabe4926b90c377325257597970214c2bc8685[m[33m ([m[1;31morigin/2SpinElectronPotential[m[33m)[m
+Merge: d033b74 9817362
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon Dec 2 14:18:23 2024 +0100
+
+    Merge branch '2SpinElectronPotential' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into 2SpinElectronPotential
+
+[33mcommit d033b74f90850ec9411dd6973fd11dcfa4233675[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon Dec 2 14:18:18 2024 +0100
+
+    geometric mean for plasma state temperature
+
+[33mcommit 981736243420798baa38e22361382ab8c3337922[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Nov 28 15:27:32 2024 +0100
+
+    For Kelbg and Deutsch potentials, use Coulomb-Long-Range Part
+
+[33mcommit fd1cf9135595caf0ca60d569331a56a0961a85df[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Nov 28 11:13:31 2024 +0100
+
+    Fix documentation: Temperature averaging for multi-component HNC
+
+[33mcommit b751cdf7cf711c36593871e4603e8548362b59d0[m
+Merge: 1bc3456 abf966e
+Author: jluetgert <julian.luetgert@uni-rostock.de>
+Date:   Thu Nov 21 17:38:34 2024 +0100
+
+    Merge pull request #3 from JaXRTS/rk_fit
+    
+    Adding a Bound-Free Model using a fit for r_k
+
+[33mcommit abf966e5cfbeb8616d486876dda0cfdae41e05fb[m[33m ([m[1;31morigin/rk_fit[m[33m, [m[1;31mgithub/rk_fit[m[33m)[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Nov 21 17:34:23 2024 +0100
+
+    adding better readability to the rk fit model
+
+[33mcommit 6769070f475ce3af966c71a38f3827a8f1bdd73b[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Nov 21 17:28:17 2024 +0100
+
+    rk fit to fulfill fsum rule added
+
+[33mcommit 085c9e23c943f3b5e824ee8a87cd9b34e3564c50[m
+Merge: 6e55c02 6fff98c
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon Oct 21 16:47:02 2024 +0100
+
+    Merge branch '2SpinElectronPotential' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into 2SpinElectronPotential
+
+[33mcommit 1bc3456660fd8ea388d0fe4a1813e77cd6c2a636[m
+Merge: 08ecb31 68ee9e3
+Author: sschumach <samuel.schumacher@uni-rostock.de>
+Date:   Mon Oct 21 15:46:05 2024 +0100
+
+    Merge pull request #2 from JaXRTS/dispersion-corrected-k
+    
+    Turning off k dispersion corrections, enabling ITCF functionalities, norm fix
+
+[33mcommit 68ee9e303fac993f889785a8f75ff5df85aa476c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Oct 21 16:24:44 2024 +0200
+
+    Tests, some documentation, sort energy to fix sign
+
+[33mcommit e6a4cd36031c5563d9c24b1497502fe4e89b9a3e[m[33m ([m[1;31morigin/dispersion-corrected-k[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Oct 21 11:15:28 2024 +0200
+
+    Convenience renames and helper functions.
+
+[33mcommit 6fff98cfcbd767e59e30a47f23cbeedb553cb8eb[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Oct 18 16:04:38 2024 +0200
+
+    experimental: Change Deutsch and Huang thermal wavelengths
+
+[33mcommit 6e55c0275101e2a6acb2213534ecfa252ec251f9[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Oct 18 16:04:38 2024 +0200
+
+    experimental: Change Deutsch and Huang thermal wavelengths
+
+[33mcommit 60256f865b2d4219af1acebb2a4672ede591b5a8[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Oct 17 17:23:42 2024 +0200
+
+    Docstring for f-sum rule example
+
+[33mcommit 2f584a52c5a338fdcc769965971678ce4d31e837[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Oct 17 17:13:56 2024 +0200
+
+    Linting, slight modifications to the example
+
+[33mcommit cefe890724fec9f2b3283add73a8979fd58af3f1[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Oct 17 17:13:29 2024 +0200
+
+    Fix: free-bound does not need scaling factor
+
+[33mcommit 22eef447fca8adae3db6f4adf18d48eb1052bf82[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Oct 17 16:09:04 2024 +0200
+
+    Add SpinSeparatedEEExchangePotential, adopt example
+
+[33mcommit 546eb54b61b186c871bae6db0500e360ab88f784[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Oct 17 15:00:25 2024 +0200
+
+    Move mean_Z_A from a function to a property of Plasma State
+
+[33mcommit 31e669c6842c794561e5f5820cec9ab44fb6c225[m[33m ([m[1;31morigin/f-sum-rule[m[33m)[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Oct 17 14:46:15 2024 +0100
+
+    dividing every contribution by the average element Z for the correct norm
+
+[33mcommit 3fc976e2be99d31bebba00c2ed03471847abdb5f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Oct 17 10:23:45 2024 +0200
+
+    Breaking: Change type of hnc_potentials.HNCPotential.include_electons from bool -> Literal
+    
+    This change will allow for Spin-Separated exchange potentials
+
+[33mcommit c04b1d4feae94d32f945af5104edad8cb3174d05[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Oct 16 18:06:20 2024 +0100
+
+    adding fsum rule calculation
+
+[33mcommit 82a130bca8c06a681daac626de62fafc8b5971cd[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 16 15:59:27 2024 +0200
+
+    Fix: Avoid nan value for ω=0 in Dandrea RPA
+
+[33mcommit 5fad1de942f3e024e2601874bf637758e7c13a73[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 16 15:58:44 2024 +0200
+
+    Allow for ITCFT without an instrument deconvolution
+
+[33mcommit db7b8aeb951a2904530136d574a1ec8875e6f09f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 16 15:43:54 2024 +0200
+
+    Fix typos in Model __name__ attributes
+
+[33mcommit 3e20638dd6280d5ed6e087b71cc1ce5be8e1731e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 16 15:41:38 2024 +0200
+
+    Add a shift to the convolution-grid when it does not contain 0.
+    
+    This fixes the position of a peak when convolved with a function
+    symmetric around zero.
+
+[33mcommit d2b2804feeef09f3c789c299278c8749fcbf1c50[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 16 15:40:46 2024 +0200
+
+    Make Lapace Transform of Structure Factors dimensionless
+
+[33mcommit 1c3560f67eb6e233bc6c3f0cf087f462e9390cfe[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Oct 15 15:54:31 2024 +0200
+
+    ITCFT Example
+
+[33mcommit 5524e5ec96918fb09b320958a5684722d2e8113c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Oct 14 18:08:45 2024 +0200
+
+    Example for the ITCFT (not finished)
+
+[33mcommit c8cedffd33dc80ee61db806559b018250ab23d0b[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Oct 14 18:07:41 2024 +0200
+
+    Calculate ITCFT without using a grid for tau
+
+[33mcommit 492e02e64925c1f6bff7ef819b1adf075058963a[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Oct 14 14:41:53 2024 +0200
+
+    First working version of an ITCF temperature analysis function
+
+[33mcommit aae7aada31aa2340b2e89e1355b03c4af5181b78[m
+Merge: 21e8a43 08ecb31
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Oct 14 12:22:34 2024 +0200
+
+    Merge branch 'main' into dispersion-corrected-k
+
+[33mcommit 08ecb311c8868d9e1aa02acdf2f6e884539a0fed[m
+Merge: 215a36e 512bfc9
+Author: sschumach <samuel.schumacher@uni-rostock.de>
+Date:   Mon Oct 14 10:13:17 2024 +0100
+
+    Merge pull request #1 from JaXRTS/HNC-QuantumPseudopotentials
+    
+    HNC quantum pseudopotentials
+
+[33mcommit 21e8a43223d89b473ba8bbf125e043f0014522b6[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Oct 10 12:43:18 2024 +0200
+
+    linting
+
+[33mcommit dbed1bf70d0fb469d553a8eadb72267baa4ec3be[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Oct 10 12:40:42 2024 +0200
+
+    Bugfix: Free-bound k dispersion (see example)
+
+[33mcommit e3ef39d27aea9c72dc9d776a05944a84179bd6c6[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 9 17:08:55 2024 +0200
+
+    Allow to turn off dispersion correction of k in setup
+
+[33mcommit 512bfc90d2ef6180c79c7b8acf2301d80098898d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 9 10:56:09 2024 +0200
+
+    linting
+
+[33mcommit b90d8681ead7fe602fe9a105828e93201aaec3df[m[33m ([m[1;31morigin/HNC-QuantumPseudopotentials[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 2 17:00:19 2024 +0200
+
+    Add SpinAveragedEEExchange Potential and example
+
+[33mcommit a4de53ef2a962d3a51879dd2bb9ef48fe9535f08[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 2 15:14:53 2024 +0200
+
+    Allow for simple algebra with HNC Potentials
+
+[33mcommit 718bd250c0f77a87024d594e589e7ab10282c72b[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 2 13:56:03 2024 +0200
+
+    Add example for q. pseud. Pot. from Wünsch.2008
+
+[33mcommit 3d9d78a950e7aace0dbda379df4e9332f25ac529[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 2 13:44:32 2024 +0200
+
+    Allow to mix in old iteration to HNC for stability
+
+[33mcommit ef65253855a16ef89ef8eab5d74bd8d0583c0e76[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Oct 2 13:09:26 2024 +0200
+
+    Fixes in HNC Potentials (spelling and jnp.zero -> jnp.zeros)
+
+[33mcommit 215a36e4d45ea1061f2f97dbac432b21b813914e[m
+Author: jluetgert <julian.luetgert@uni-rostock.de>
+Date:   Fri Aug 30 13:13:33 2024 +0200
+
+    Update LICENSE
+
+[33mcommit 1e906290b346fa8a8fa344c9d553d98265e142b1[m
+Author: sschumach <samuel.schumacher@uni-rostock.de>
+Date:   Fri Aug 30 00:55:54 2024 +0200
+
+    Update LICENSE
+
+[33mcommit 7b26aa1d42d9eec878b780944f1eb2b177963c9e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 29 17:43:10 2024 +0200
+
+    Add license
+
+[33mcommit 64f6728ea0ee21ebd7a45dcbfa774d0b52218205[m
+Merge: 70417ae bd898ec
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 29 17:36:55 2024 +0200
+
+    Merge pull request 'online_patches' (#21) from online_patches into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/21
+
+[33mcommit bd898ec89a9307eeecd2ea8118c3a512288c856c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 29 17:33:15 2024 +0200
+
+    Fixes in the read-in of the mcss reader
+
+[33mcommit 46e557be7506775139cc1e2718c860e87cb65d5c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 29 17:00:40 2024 +0200
+
+    Fix inset in mcss comparison script
+
+[33mcommit ee7ea643661fe111e56ca1c8a8881a9f2eb67a39[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Aug 29 16:51:32 2024 +0200
+
+    mcss comparison plotting inset
+
+[33mcommit c0c4cb3dbdfb7952a1b0460bca9765d8f339eb71[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 29 16:38:47 2024 +0200
+
+    Remove old test
+
+[33mcommit 38e335448aec2ef74e837185f271f60b8355d375[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 29 16:31:42 2024 +0200
+
+    Create comparison overview figures
+
+[33mcommit addb907201ecdd483ea0ac6b24b3f17f304b876f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 29 16:04:15 2024 +0200
+
+    Remove old artifacts
+
+[33mcommit 92572b31dd7015f0928a92de067491d27c9bfd3c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 29 16:02:05 2024 +0200
+
+    Adopt reader for new MCSS files
+
+[33mcommit c93851193de66a2df14ca6c81602ba22ef1224e0[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Aug 29 13:42:57 2024 +0200
+
+    fixed r_k setting
+
+[33mcommit 0eabd7b47bbc7c9178bbadb317da3061e3ba485b[m
+Merge: 5ef25b9 540f8e3
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Aug 29 13:07:53 2024 +0200
+
+    Merge branch 'online_patches' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into online_patches
+
+[33mcommit 540f8e3a48fe27e621ccd5d89b13fb5a0226df1c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 29 13:07:11 2024 +0200
+
+    New mcss test files
+
+[33mcommit 5ef25b96f5a79cf22e40dc9714e9f6aff2e20696[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Aug 29 13:05:29 2024 +0200
+
+    new parameter encoding for mcss spectra just dropped
+
+[33mcommit 35be3e9b16df70bf8924abce62f35bff8afb0bf1[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Aug 29 12:57:50 2024 +0200
+
+    samples using mean_charge=True
+
+[33mcommit 513a247c9d916bd272af3be9d3bc2984048db9b6[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Aug 28 13:27:51 2024 +0200
+
+    new set of mcss samples using mean_charge_state=False
+
+[33mcommit 4002215fc5bad23aee6122e9c6ef8d98dff1c93e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Aug 16 22:24:20 2024 +0200
+
+    set q for ion per species to 0
+
+[33mcommit 35646dfeeba7fc423461c556cb1380eb3710d1af[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Aug 16 22:21:50 2024 +0200
+
+    fix rk=1 in tool
+
+[33mcommit a43f81bd3faccb5b22b9dd9b968d592af3ded3f5[m
+Merge: 84a4996 ecddb29
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Aug 16 21:51:42 2024 +0200
+
+    Merge branch 'online_patches' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into online_patches
+
+[33mcommit 84a499655ede9730f944c8b3663edaeb5d59dee9[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Aug 16 21:50:46 2024 +0200
+
+    Set free free to 0 (instead of nan) when Z_free == 0
+
+[33mcommit ecddb29e8b4c99304ed96b568f3596c5fb4878c5[m
+Merge: 64d5e2a fb97341
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Aug 16 21:38:49 2024 +0200
+
+    Merge branch 'doc' into online_patches
+
+[33mcommit fb97341993c9db26ba8311eb4fe59f7deb1c7f84[m[33m ([m[1;31morigin/doc[m[33m)[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Aug 16 21:35:46 2024 +0200
+
+    save and load for JAXRTSViuz states
+
+[33mcommit 64d5e2ab2e870f083ca31570788095cab06be363[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Aug 16 21:33:49 2024 +0200
+
+    Set q to zero if sum(Z_free) == 0
+
+[33mcommit 369d52f94616c6f40a7412ec3498c7093e016045[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Aug 15 22:25:13 2024 +0200
+
+    citations for local field corrections
+
+[33mcommit 70417ae2aad8854c39788ce605e7ab892e130f6c[m
+Merge: 5fc84c5 78a21d7
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 15 14:21:11 2024 +0200
+
+    Merge pull request 'data-sources' (#20) from data-sources into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/20
+
+[33mcommit 78a21d72efaf040189a48d6fb54be65ac0212a3e[m[33m ([m[1;31morigin/data-sources[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 15 14:19:00 2024 +0200
+
+    Add bibliographic information to Lin.2017 and Zeng.2022
+
+[33mcommit 8dd62ae3e7a1757b5c055cfd0e0efd49c47eeee9[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Aug 14 16:42:44 2024 +0200
+
+    Add individual literature notes to extracted, digitalized data
+
+[33mcommit 5fc84c5915208923e62530bc8667a9ac3d3e1a3d[m
+Merge: f94d9cb 82dfceb
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Aug 13 16:51:06 2024 +0200
+
+    Merge pull request 'Calculation of effective charges for ions' (#19) from form_factorZ into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/19
+
+[33mcommit 82dfceb3abcce9904f26247ba0296cf90218cf39[m[33m ([m[1;31morigin/form_factorZ[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Aug 12 14:47:51 2024 +0200
+
+    Calculation of effective charges for ions
+
+[33mcommit f94d9cb64c397d74deb1e29e68ab4edf66fb9d5a[m
+Merge: b59c664 b1882d1
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Aug 12 14:45:26 2024 +0200
+
+    Merge pull request 'literature, spelling' (#18) from doc into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/18
+
+[33mcommit b1882d163c6bfe960ba9e6530a870a38eff8dae8[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Aug 12 14:45:06 2024 +0200
+
+    Fix import of instrument_functions
+
+[33mcommit 5063e453a3cd3af1743d3de3456f52fed063a4b0[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Aug 12 14:17:23 2024 +0200
+
+    some cleanup literature
+
+[33mcommit 71d8d8aefd7202667b87bec10d2fb093f6bc24ae[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Aug 12 10:29:14 2024 +0200
+
+    Spelling
+
+[33mcommit fa4eea7e90f78fd2db94d17b02c24b428fc59f82[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Aug 12 10:13:55 2024 +0200
+
+    Add references to the literature list
+
+[33mcommit 4614d765f9b6bde7d836c0f81d44deca24d63219[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Sun Aug 11 20:09:04 2024 +0200
+
+    literature not saved in the last commit
+
+[33mcommit 3de294f28fbd56b23eb75e286d43f70f37eedf56[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Sun Aug 11 15:35:21 2024 +0200
+
+    Literature added for ipd models
+
+[33mcommit b59c664c787984c7966a34abf5d6d54c0e226ade[m
+Merge: 9cf6bf0 8045bb1
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Aug 9 12:53:10 2024 +0200
+
+    Merge pull request 'Fix MCSS name' (#17) from doc into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/17
+
+[33mcommit 8045bb1421a01c0868896006a2875a8f5809135c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Aug 9 12:52:56 2024 +0200
+
+    Fix MCSS name
+
+[33mcommit 9cf6bf02ac97f7c40def7b311db8d17cc47496ae[m
+Merge: 20bda12 b20b708
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Aug 9 10:15:04 2024 +0200
+
+    Merge pull request 'doc' (#15) from doc into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/15
+
+[33mcommit b20b7085f02125107d800c90c3fabe1dc97d9a36[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 17:44:31 2024 +0200
+
+    linting
+
+[33mcommit ec294a928f8c1c7655363c19287067ab32a8fc76[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 16:57:41 2024 +0200
+
+    Move module overview in a file of it's own
+
+[33mcommit f43e0d5205598b46c78d946752f0a6c9b732e569[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 16:41:36 2024 +0200
+
+    Hide private objects from the models overview page
+
+[33mcommit 5647f71e98bd416343939645dc3d7d2e105060e4[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 15:33:08 2024 +0200
+
+    Allow to add notes for different model keys, literature fixes
+
+[33mcommit b42e880c41e386317b94882eaa7ea22fff79a753[m
+Merge: 95f78da 20bda12
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 15:17:14 2024 +0200
+
+    Merge branch 'main' into doc
+
+[33mcommit 20bda1297bb823b2c952ee39d250562872ffaeac[m
+Merge: d4b46c0 d416264
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 15:17:03 2024 +0200
+
+    Merge pull request 'bound_free_div0' (#16) from bound_free_div0 into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/16
+
+[33mcommit d4162641da3a1850e0d801fd99cb2e080a64d413[m[33m ([m[1;31morigin/bound_free_div0[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 15:16:11 2024 +0200
+
+    Fix bound-free & multiple species with r_k
+
+[33mcommit f1834a1474cea8dd1ff127c29658a32f08c57adc[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 14:08:28 2024 +0200
+
+    Bound free division by zero
+
+[33mcommit 95f78da9127e2670e19bfcd3e0b39657055be677[m
+Merge: 309afba 670b49f
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Aug 8 13:41:24 2024 +0200
+
+    Merge branch 'doc' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into doc
+
+[33mcommit 309afbafb36192c2c1b819466e567f90791a8d8a[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Aug 8 13:41:20 2024 +0200
+
+    fixed some spelling etc.
+
+[33mcommit 670b49f2634706ad9495922763e976c3225b5b3c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 13:06:35 2024 +0200
+
+    Add HNC Potentials to the overview list
+
+[33mcommit 6d0ba32197ab062765af0d71292e9dfa3a954bba[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 12:54:06 2024 +0200
+
+    Add docstrings for BM V_eiS models, add Shift docstring for screening models
+
+[33mcommit d4b46c087c3310b2009ddab5bb2d77aaf276b1d6[m
+Merge: 71e7fe9 cb8208f
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 12:25:52 2024 +0200
+
+    Merge pull request 'doc & GUI' (#14) from doc into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/14
+
+[33mcommit cb8208f2f5b933737b933c511e283d8af72ea62d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 12:25:07 2024 +0200
+
+    Fix errors in examples, test and documentation
+
+[33mcommit 859b1c091c354d0b48c507a36c062a70f8118d14[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Aug 8 10:47:32 2024 +0200
+
+    Automatically generated model overview.
+
+[33mcommit 20010bc0d979b2e50f80bb2dd129bf5e7345d175[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Aug 7 17:28:03 2024 +0200
+
+    Fix error introduced in last commit, use density fraction for mcss
+
+[33mcommit 694b468b2756763b72f1f70a84802181ebd99452[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Aug 7 17:21:01 2024 +0200
+
+    multicomponent example
+
+[33mcommit 91a2e926f04601be35264d980217e0e95745da41[m
+Merge: 966c0b9 71e7fe9
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Aug 7 16:18:55 2024 +0200
+
+    Merge branch 'main' into doc
+
+[33mcommit 71e7fe9a2b7f97668b31cc12b729591bd7ee9e8b[m
+Merge: 813312c 71feb15
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Aug 7 16:16:20 2024 +0200
+
+    Merge pull request 'New data for absoorption edge' (#13) from absorptionEdges into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/13
+
+[33mcommit 966c0b9977efb70e441a2ddfc61b2963a7d9786a[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Aug 7 16:15:18 2024 +0200
+
+    Work on the README and a simple example
+
+[33mcommit c9b7cf377263c5b024fa6c7f9cd9e8f9257fc4ac[m
+Merge: f0f6e34 813312c
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Aug 7 16:07:02 2024 +0200
+
+    Merge branch 'doc' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into doc
+
+[33mcommit f0f6e34afd0787bcdf208bcaa147d496262fe1e4[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Aug 7 16:05:31 2024 +0200
+
+    fixed Neglect Model handling for IPD
+
+[33mcommit 71feb1575cae8f0c2b42441b82a86443de289499[m[33m ([m[1;31morigin/absorptionEdges[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Aug 7 15:17:35 2024 +0200
+
+    New data for absoorption edge
+
+[33mcommit 813312c4b210c0ea85fdf2230231e508495563ad[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Aug 5 13:04:34 2024 +0200
+
+    Multicomponent issues with BMA and Bound-Free
+
+[33mcommit 397fb301bfc45a95873d7d21ae9bbf16bd80442b[m[33m ([m[1;31morigin/JAXRTSViz[m[33m)[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon Jul 22 18:07:56 2024 +0200
+
+    implemented several features to the jaxrts tool
+
+[33mcommit 3fb12b2f64722e34deb8d755104d99e06283fc49[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Jul 19 20:36:23 2024 +0200
+
+    stable version, removing the option for BM when more than one ion species is selected, since it currently doesnt work
+
+[33mcommit fc672a9965cff375733d343a19a8434726e24c3f[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Jul 19 18:27:15 2024 +0200
+
+    currently multi-component option does fail, probably because of wrong shapes somewhere
+
+[33mcommit ac570c724340f2d730df446b126e272f1434a659[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Jul 19 17:39:43 2024 +0200
+
+    working gui, still needs bugfixes
+
+[33mcommit 8b7bef2bcd2ea5d7554be59a36c459ee2da0c16f[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Jul 19 16:09:43 2024 +0200
+
+    fixed fwhm bug
+
+[33mcommit 65f7e35cce90bb9784c3caa7ab93f22840fb6f30[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Jul 19 14:19:35 2024 +0200
+
+    working version of jaxrtsviz
+
+[33mcommit 581a5db649e26c907236ab9da9a17a7bbe9a19ee[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Jul 18 19:33:44 2024 +0200
+
+    adding jaxrtsviz gui
+
+[33mcommit 43f421c912d5d4afc715cd4d7cb21635c47a8b97[m
+Merge: ac463f3 cbab06a
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 18 19:14:44 2024 +0200
+
+    Merge pull request 'ee_LFC' (#12) from ScreeningModels into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/12
+
+[33mcommit cbab06a5d57643385c624e37bd485dfc12c1bd02[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 18 19:09:07 2024 +0200
+
+    IPD test and Example
+
+[33mcommit 17103cb504683ecddc6518e8c72c17eb0173ae34[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 18 18:34:21 2024 +0200
+
+    Allow S_ii models for BornMermin collision Frequency.
+    
+    These are currently quite experimental
+
+[33mcommit 1c256d5674efc3d861e29a993900d71475870209[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 18 16:57:41 2024 +0200
+
+    Fix math examples and tests
+
+[33mcommit c1d516e493b43118a168e55db3a7803768129979[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 18 16:44:21 2024 +0200
+
+    Fix Screening Length model & Fermi Integral Norms
+
+[33mcommit 6426b0ec983c4fa983e4439a66e88411e28f81af[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 18 14:05:26 2024 +0200
+
+    Test new Finite Wavelength screening model against literature
+
+[33mcommit a7f6bd917c161d2e64068de705ecb17123934a90[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 18 12:06:09 2024 +0200
+
+    New screening Models from Chapman.2015, rename old model to more fitting LinearResponseScreening
+
+[33mcommit 6baaa613a3acb7b5fab546ab20c3df0b9afe836b[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 18 09:32:41 2024 +0200
+
+    Interpolate the susceptitiblity lineary for BM models and ω→0
+
+[33mcommit 26cf501f9704a1fa04d1761c3f45db093cf7bc78[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 17 18:06:10 2024 +0200
+
+    Add BornMermin_Fortmann to the list of models
+
+[33mcommit f5ce98af8e3a014d5eb9fd8897027be157ba264a[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 17 16:56:04 2024 +0200
+
+    Try to test Fortmann Example, shows differences, allow different V in BM
+    
+    Implement 0K collision frequency, make mmodels for the Born Mermin V_ei
+    Potentials
+
+[33mcommit 7d28b01294db7857e302d4660c6f28f1ba2b705b[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 15 16:00:13 2024 +0200
+
+    Example from Fortmann.2010
+
+[33mcommit 826a45305e49bb11ee4ee0a4cbcab6c5aa06007e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 15 12:27:10 2024 +0200
+
+    Fix spelling of Ichimaru
+
+[33mcommit 27aac9e19a4df8403abaf3f00cf4d68bf64dfc0e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 15 12:25:12 2024 +0200
+
+    Add Formann BMA, Rename susceptibility functions to make applicability clearer
+
+[33mcommit b32df7e2c5ee53bcfc18a9691b33b4e428cc7117[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 15 09:16:46 2024 +0200
+
+    Rename BornMermin models, to reflect that the Interpolation is the default
+
+[33mcommit 1640d0c50adb955ff049fd66d7d6c5726b706faf[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Jul 12 16:23:54 2024 +0200
+
+    reverting commented lines
+
+[33mcommit 130a144783e9b8f45c72899205127bdd6b29eeab[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 12 16:09:41 2024 +0200
+
+    S_i has to be integrated in the collision frequency
+    
+    This increases the compilation time of a setup for quite a bit, if the
+    Born-Mermin approximation is used.
+    Evaluation seemed to be ok, once the file was compiled
+
+[33mcommit cec1b12546ddfca7b536f50cb5cda0071a654d64[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 12 14:52:33 2024 +0200
+
+    Fix error in IPD inverse screening length
+
+[33mcommit c192d082fccfe9208b9c9d4335766f079c0cb180[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 12 14:36:31 2024 +0200
+
+    Shape of the output of Gregori.2004 screening model
+
+[33mcommit c7262b7b3a6caa2fc58416782157ad0065fe3da4[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 12 14:26:18 2024 +0200
+
+    Upgrade jax, enables cache-to-disk, which saves notable time
+
+[33mcommit 39dbdfabc99c3fe97c6e142f838accea8203390c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 12 12:04:11 2024 +0200
+
+    Allow for Born Mermin models to get the real Sii of the state
+
+[33mcommit a00a2db814e60362ea099fd2a1f84ffc73149ca7[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 12 10:53:41 2024 +0200
+
+    Build IonFeatModel class, which summarizes the common methods
+
+[33mcommit 9c5a1f3d6515e43c9b014c8278a04381273a7857[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 12 09:38:48 2024 +0200
+
+    Create a FreeFreeModel MetaClass
+
+[33mcommit f1dca2e26f354dbf5f61ed7ddfbe0acfe0429e71[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 11 18:59:39 2024 +0200
+
+    Revert screening length calculation
+
+[33mcommit a6d1453bd7527aa2718116f4f9f51ce34dfd7391[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 11 18:11:02 2024 +0200
+
+    Set default LFC to no LFC, change integrator for BM with Fit
+
+[33mcommit 96d734f187b40d16932423840b11b166a50587c5[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 11 17:58:56 2024 +0200
+
+    BornMermin Model using the Dandrea fit
+
+[33mcommit 98d954beb5f5e6eef126fdce5aff9927fa69e952[m
+Merge: 6058241 e8f5677
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Jul 11 16:55:34 2024 +0200
+
+    Merge branch 'ScreeningModels' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into ScreeningModels
+
+[33mcommit 605824112bb19bf6a89f80d8c5f71beaf935d3a2[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Jul 11 16:55:30 2024 +0200
+
+    fixed ipd models
+
+[33mcommit e8f5677810ac931350ad468d850cc01b8e7333fd[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 11 12:55:43 2024 +0200
+
+    Write a model for Dandrea; Notably faster than RPA
+
+[33mcommit a45d95888d645cf4ca243a75736fde57a1fb4b24[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 11 12:45:21 2024 +0200
+
+    Add Dandrea interpolation for the RPA
+
+[33mcommit 667198ad89f9cf4d53486d05bbababe4d8250204[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jul 9 18:00:23 2024 +0200
+
+    Set default for lfc to false
+
+[33mcommit ee98efe45e0d0fb11f4120909ce9d9e4bc1cdb34[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jul 9 15:43:26 2024 +0200
+
+    ee_lfc example
+
+[33mcommit 8b8d443de5942cff9ea0eba7cdb4f2d646efb723[m
+Merge: 6b6bb34 44bfc57
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jul 9 15:41:11 2024 +0200
+
+    Merge branch 'ScreeningModels' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into ScreeningModels
+
+[33mcommit 6b6bb3434109105c331774cee168f34c433ac930[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jul 9 15:40:26 2024 +0200
+
+    Change StaticInterp to use Farid. Deploy evaluate_fullk to lfc, fix boundfree for Z_C=0
+
+[33mcommit 44bfc57be84a6214f29fdf6b25886c22e0e9ed38[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jul 9 15:00:28 2024 +0200
+
+    adding hydrogen mcss examples
+
+[33mcommit 39a7bc992e6b9eabdb36d7f932d6b1deacd83630[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jul 9 14:03:00 2024 +0200
+
+    fixed sign mistakes in farid lfc
+
+[33mcommit 08d5127ba6c7965fd024c4e89631ad4bb929e012[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jul 9 13:50:31 2024 +0200
+
+    interpolation formula for farid lfc added
+
+[33mcommit 0aa0ced051591c102e4c09a0cb078f99923d92fd[m
+Merge: fd2ae09 1fdeffb
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jul 9 13:45:33 2024 +0200
+
+    Merge branch 'ScreeningModels' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into ScreeningModels
+
+[33mcommit fd2ae09648bfaf1760c9bfd268fea73b9259cc54[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jul 9 13:45:30 2024 +0200
+
+    farid lfc corrected
+
+[33mcommit 1fdeffbffd04c09607b693cc950248e75474cc6b[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jul 9 13:42:38 2024 +0200
+
+    Rename noninteracting susceptibility, fix division by eps0
+
+[33mcommit 1fe77ca139f33595be44e3fc42632f1a96072313[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jul 9 13:01:07 2024 +0200
+
+    Wewrite to real test
+
+[33mcommit 6986bd15562ae3aa5748f5afafe8f850ec5286f7[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jul 9 12:56:45 2024 +0200
+
+    Test Gregori.2007 static interp, fix error
+
+[33mcommit 22ee45299857851e97a75787232e271022f11aea[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jul 9 12:04:54 2024 +0200
+
+    added lfc model by farid et al
+
+[33mcommit cff9b4f75a5fbf2bac58a3c61587709c10444fa0[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jul 9 10:13:31 2024 +0200
+
+    fixed naming error in lfc
+
+[33mcommit 37ab73fe2d668e8362bd6cd8312268f9ff48f37d[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon Jul 8 17:10:31 2024 +0200
+
+    inserted lfc correction option in the calculation pipeline
+
+[33mcommit 390175ffb938b1fa7342ca74552cab9c561ffec9[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 8 14:34:04 2024 +0200
+
+    Move from epsilon to xi als the fundamental quantity
+
+[33mcommit 906b6bf7ee80d0d85d98540a1912ec6b9d41ef90[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon Jul 8 13:53:16 2024 +0200
+
+    adding lfc models
+
+[33mcommit ac463f3c13a263eef956468095d1ea186ca76c6c[m
+Merge: 58e522c 1c9fb78
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 8 13:42:12 2024 +0200
+
+    Merge pull request 'ScreeningModels' (#11) from ScreeningModels into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/11
+
+[33mcommit 1c9fb787b20ed6fd76b6b641a884f50493b5695e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 8 12:06:33 2024 +0200
+
+    Fix sign
+
+[33mcommit 8bbcef2866fc415d4b90e1b55ab100ea44a7962c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 8 11:14:43 2024 +0200
+
+    Set include_electrons for electron-electron and electron-ion potentials, automatically
+
+[33mcommit 245544ef7800bdcb9c3f5d1cdc18f11a166461dd[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 8 11:08:51 2024 +0200
+
+    Add screening model that calculates `q` from the free-free epsilon.
+
+[33mcommit 91c1d7bf78c47d0f1e96c2b0ea65e584d723360a[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 8 09:58:57 2024 +0200
+
+    Fix reference
+
+[33mcommit 374145b4e40575939cf8fc1499fbd63396df2132[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 8 09:41:23 2024 +0200
+
+    Factor out GregoriScreeningModel
+
+[33mcommit b46ed4ccb5917627f6470ed52c248ed9716ebef7[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jul 8 09:18:20 2024 +0200
+
+    rename OnePotentialHNCIonFeat, factor out LinearResponseScreeningGericke2010
+
+[33mcommit 58e522cbd6d5eb3a64c05bf0e64e5e77a41acbc6[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 5 16:17:35 2024 +0200
+
+    Add MCSS comparison script
+
+[33mcommit bd46bfc19c0db7d5686c50df48bd027bc2e72810[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 5 13:38:55 2024 +0200
+
+    Add loop in bound-free for several ion species
+
+[33mcommit 195d9d489952b7eeb8caef66167521b938e5f5fe[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 5 12:52:25 2024 +0200
+
+    Fix calculation of full Zf
+
+[33mcommit 37ee4edde7472327c4cba7170f4b774e972764ed[m
+Merge: 80bb69f 97aa506
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 5 12:26:59 2024 +0200
+
+    Merge branch 'main' into FreeFreeRework
+
+[33mcommit 80bb69fd951f8254b865e1b63a43903d940db47c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 5 12:25:25 2024 +0200
+
+    RPA_NoDamping and QCSalpeterApproximation Models work with multi-component
+
+[33mcommit 97aa506eff060aad2cf8147d132d880633afa284[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Jul 5 12:13:44 2024 +0200
+
+    added CO mcss example
+
+[33mcommit 69ca05e577645f646c38736b5cc4412a429b0733[m
+Merge: b1524ce bc2fc17
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 5 10:41:32 2024 +0200
+
+    Merge branch 'main' into FreeFreeRework
+
+[33mcommit bc2fc17a02ddce285fed40b5a787f02a00312895[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 5 10:39:52 2024 +0200
+
+    Rename IchimaruChemPotential to the better-fitting name, fix A factor
+
+[33mcommit b1524cef580e01a18801d788ae579842f7c391cf[m
+Merge: 5f30528 24f16f3
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 5 09:49:53 2024 +0200
+
+    Merge branch 'main' into FreeFreeRework
+
+[33mcommit 24f16f3844a3eb47269a97946164eb7d060eac43[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 5 09:36:18 2024 +0200
+
+    Fix Zeff in bound-free
+
+[33mcommit 5f305288cfccd2e6b648e5ef5f94a9ab99db2c71[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jul 5 09:34:53 2024 +0200
+
+    Readablility of new k, form move form factors in conditional
+
+[33mcommit ddf0cf733dcda5dbafbc2d7632e1795fbd8a1518[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Jul 4 15:02:02 2024 +0200
+
+    added mcss examples using no lfc
+
+[33mcommit 7225d8de7037d67668f80284142ccb9b7736f280[m[33m ([m[1;31morigin/FreeFreeRework[m[33m)[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Jul 4 15:01:03 2024 +0200
+
+    added nolfc mcss examples
+
+[33mcommit 1cbf7488b8f4763f82733d8bfbc919d7f5fc3903[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 4 11:10:57 2024 +0200
+
+    Allow individual k's for every E measured
+
+[33mcommit d997e72cdb25c9128f04dc82e09bc2a6adf755f2[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 4 10:18:43 2024 +0200
+
+    jpu fixes in compton shift
+
+[33mcommit 3997ed0c2b1a32e6b2a47bb305d66dd01e801d57[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Jul 4 10:12:31 2024 +0200
+
+    added function for compton shift
+
+[33mcommit 4c69bdf10e8fb9360a69d31c2fd0ea918ec2ea3c[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Jul 4 10:07:06 2024 +0200
+
+    fixed an upsie in the rpa examples
+
+[33mcommit 816d028ad0df68f2daf311205f1fa8c28e7f5a83[m
+Merge: 3e52f6d 9f1344e
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Jul 4 10:00:45 2024 +0200
+
+    Merge branch 'main' of gitea.hed.physik.uni-rostock.de:lue/jaxrts
+
+[33mcommit 3e52f6d0ffca401782b852622c7afdab8842c2b2[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Jul 4 10:00:42 2024 +0200
+
+    added mcss RPA examples
+
+[33mcommit 9f1344e43f74043a00cbc33ca4c5cdba5ebc52a6[m
+Merge: 23e8253 0c2b80f
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Jul 4 08:47:29 2024 +0200
+
+    Merge pull request 'ImprovedScreeningLength' (#10) from ImprovedScreeningLength into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/10
+
+[33mcommit 0c2b80ff6fd762a1b550a2715a5d05c99da1660c[m
+Merge: 3b82d49 23e8253
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 17:47:43 2024 +0200
+
+    Merge branch 'main' into ImprovedScreeningLength
+
+[33mcommit 3b82d49e352a3ad54d4c4beb0456cec5e86a7621[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 17:45:14 2024 +0200
+
+    Promote the screening model proper model
+
+[33mcommit 23e82530545e11ed5f7174e2ec9d2182d34b83dd[m
+Merge: b69d657 65fbce3
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 17:43:00 2024 +0200
+
+    Merge pull request 'BFRework' (#9) from BFRework into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/9
+
+[33mcommit 07d9fae714eae7783d626b2519559d9be7eb8e28[m
+Merge: 11db64e b69d657
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 17:27:14 2024 +0200
+
+    Merge branch 'main' into ImprovedScreeningLength
+
+[33mcommit 65fbce36d452653f375822af35013a627b165354[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 16:58:40 2024 +0200
+
+    Add further functions by Schumacher.1975
+
+[33mcommit 481f3ba8a41f783d0110164b227df019912bf1a8[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 16:35:51 2024 +0200
+
+    Comment out interactive test
+
+[33mcommit e3254e36c983a0c0bd624a0df9eb6b20d1ba5c20[m
+Merge: e276303 b69d657
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 15:05:42 2024 +0200
+
+    Merge branch 'main' into BFRework
+
+[33mcommit b69d657219a5e4e4d0d32dbab2a9e3165682c2ec[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Jul 3 14:55:20 2024 +0200
+
+    fixed no_ipd example
+
+[33mcommit 77415369fe68fc023a5879db875413a3bd653275[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Jul 3 14:37:08 2024 +0200
+
+    added mcss examples without ipd
+
+[33mcommit e27630340a50fd03b2c6711243145332661e9124[m
+Merge: 37fae02 76d1e0e
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 14:23:22 2024 +0200
+
+    Merge branch 'main' into BFRework
+
+[33mcommit e3182e63448604b06f3fb5b42b9b0b4fef2e941c[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Jul 3 14:22:49 2024 +0200
+
+    added two component mcss example
+
+[33mcommit 76d1e0e99b3c1c1fca8e5e3bc01b2634eea21ce6[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Jul 3 14:17:10 2024 +0200
+
+    fixed mcss sample headers
+
+[33mcommit 543495006e9c1ef4f63d733a70fb593c8eee6cc9[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Jul 3 14:08:17 2024 +0200
+
+    added mcss samples w and w/ rk factor
+
+[33mcommit 37fae025919a9113c9b50ccd02ffac2cb84a2166[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 10:44:07 2024 +0200
+
+    Allow the user to set an r_k, move the B part out of the r_k calculation
+
+[33mcommit 0e716494b5b71d5c4d6adc4f43911a588372cdd7[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 09:39:54 2024 +0200
+
+    Add an option to turn off the Gregori.2024 r_k (i.e., set it to unity)
+
+[33mcommit ce137742d3650914f5dcfd753a89eea52b61c8bb[m
+Merge: a65f0b4 9ba70cf
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 09:29:54 2024 +0200
+
+    Merge branch 'main' into BFRework
+
+[33mcommit 9ba70cfd637750d214637279d3ebbac8a36755e4[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jul 3 09:28:49 2024 +0200
+
+    BUGFIX [HNC] Use full f, not only f1s, when calculating rayleigh weight
+
+[33mcommit a65f0b4cfe6f7eca1cbd1d1c3f8cdcd39971d21f[m
+Merge: 63190cf b881bfc
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jul 2 16:32:07 2024 +0200
+
+    Merge branch 'main' into BFRework
+
+[33mcommit 63190cfaf3c32a51fa98f0dc08b2a7ff99268d8c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jul 2 16:13:38 2024 +0200
+
+    Factor out phi21_Schum75
+
+[33mcommit b881bfc443cac03ee2767a9d8d760c13110376bc[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Jun 21 14:31:38 2024 +0200
+
+    added mcss sample spectra for comparison
+
+[33mcommit 70d5aa0642a2d6e8e703b2a628900706a9c1ccf1[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jun 19 22:42:09 2024 +0200
+
+    Set default IPD to neglect
+
+[33mcommit cca75feaa9588be9d765a8b967ff7c84faa10f80[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jun 19 00:45:17 2024 +0200
+
+    Write shortcut to evaluate a model without stating "state" twice
+
+[33mcommit b03ba04df8f89b9e5dcf9915d2ba2dc8c6878961[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Jun 19 00:44:59 2024 +0200
+
+    Don't allow negative binding energies
+
+[33mcommit 2cbf973228d3059fa242178332f1a609555cdca2[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 18 23:25:32 2024 +0200
+
+    Re-add the old BM functions for the bound-free scattering. BF-test
+    
+    Trying to reproduce Fig. 3.7 of D. Chapman's PhD thesis is currenlty not
+    working. Is there a mistake in the code?
+
+[33mcommit 11db64e51452a6859785a3b154cc57450243784c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 18 19:34:16 2024 +0200
+
+    Try an improved screening function
+
+[33mcommit 883ff3a36d6042a7969ed4783c93905b2176c51d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 18 19:18:39 2024 +0200
+
+    Remove the doubled entry in the literature file
+
+[33mcommit 96dd5861b4fee01b57eecf4be8d49707e56722c0[m
+Merge: e71720b 8e0c64c
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 18 19:17:05 2024 +0200
+
+    Merge pull request 'ipd models added' (#8) from ipd into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/8
+
+[33mcommit 8e0c64cb37efc976430071079cab6bd5aee17d0e[m[33m ([m[1;31morigin/ipd[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 18 19:15:11 2024 +0200
+
+    Put ConstIPD to the others
+
+[33mcommit fc6b24dea28767f4cc08fa2e756d0a154be97ece[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 18 19:13:57 2024 +0200
+
+    Fix the broken test
+
+[33mcommit 815b9448d30db9c6aa5f58d1ca54df62c433f8e9[m
+Merge: cd14a3d e71720b
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 18 19:09:41 2024 +0200
+
+    Merge branch 'main' into ipd
+
+[33mcommit e71720be71eeab730c59be799398ae438db7efe6[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 18 19:08:34 2024 +0200
+
+    Use electrons in ion-electron Potential for LinearResponse HNC
+
+[33mcommit cd14a3de5d081577bff4439432e4d352a3853f4a[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Jun 18 18:55:54 2024 +0200
+
+    ipd models added
+
+[33mcommit 7267e83812d526c74b566872568cf4aacf4f0857[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 18 17:27:39 2024 +0200
+
+    Bound free rewrite, to be easier to read. Go from BM to Schumacher Impulse
+
+[33mcommit 2656b00d650bc565932a27a40a16955fb86e590a[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 18 15:54:42 2024 +0200
+
+    Constant IPD, example of kraus.2018 data, bug fixes
+
+[33mcommit 21f918d8e2ae50c7b402a10bb689e9ac8e69326f[m[33m ([m[1;31morigin/jittedModels[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sat Jun 15 01:17:19 2024 +0200
+
+    fix bugs introduced when jitting the models
+
+[33mcommit 62800d587a9a2969a51d61222a4dfac707d922e0[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jun 7 22:33:19 2024 +0200
+
+    Try example with sharding
+    
+    Speedups are huge. needs testing, though
+
+[33mcommit a0f472d7a48ffeec0bb756c0f158000f0e5ee41a[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jun 7 21:41:26 2024 +0200
+
+    Adopt probing, fix bugs, adjust doc examples
+
+[33mcommit 83d9574f3b0bcfea16323b87998785a4722a1ecf[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jun 7 18:59:50 2024 +0200
+
+    [WIP] Rewrite models and hncpotentials to work without plasmastate as an attribute
+
+[33mcommit e17ce8e1bdef0b737827f84454cb9c1f7c35aeaf[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Jun 7 15:42:19 2024 +0200
+
+    Allow to jit models and setups
+
+[33mcommit 805e5998d8325e95c8297001e28505ad58f7f2c2[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 4 15:26:57 2024 +0200
+
+    Test calculation of the linear response screening function against Gericke.2010
+
+[33mcommit 43ee2b7dc757f13a956bc19d37152007f6716857[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Jun 4 15:07:45 2024 +0200
+
+    plot_electron-ion-potentials.py -> plot_HNC_electron_ion_potentials_II.py
+
+[33mcommit f9c7e07a7c9920de3c1675fb8bead9d1651d31b3[m
+Merge: 8a6325f 2b5eb8c
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jun 3 17:17:21 2024 +0200
+
+    Merge branch 'playground'
+
+[33mcommit 2b5eb8c83c90dbe66206421b4ab740b9c79cb599[m[33m ([m[1;31morigin/playground[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jun 3 17:14:59 2024 +0200
+
+    Breaking: Remove density fraction from the PlasmaStates
+
+[33mcommit 8a6325f93c4d3da5464eb58ae50af7496b655a55[m
+Merge: 1af4585 57147f9
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jun 3 16:56:24 2024 +0200
+
+    Merge pull request 'Hypernetted Chain for Ionic feature' (#7) from playground into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/7
+
+[33mcommit 57147f94d32070927f1bb4b601dae0b6f83231d3[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jun 3 16:50:54 2024 +0200
+
+    Add more figures from Gericke.2010
+
+[33mcommit 31829606264855e96ed776efdd7bec229b9564ec[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jun 3 15:33:51 2024 +0200
+
+    Soft Core Potential
+
+[33mcommit 0079838c68cc1c3bd385938ecb16004792dd5a03[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jun 3 15:31:11 2024 +0200
+
+    Trace ion_core_radius and DH_screening_length transparently
+
+[33mcommit 1b863e4539b1dec666bb036b7428415374c39d0c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jun 3 14:03:29 2024 +0200
+
+    Add an EmptyCorePotential, used in SolidStatePhysics
+
+[33mcommit 14eb084f9fce985d0d8c8ff3c08f3d2036a5bc4e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jun 3 10:22:48 2024 +0200
+
+    Fix list has no attribute magnitude error
+
+[33mcommit 72b02e218361c0f5f6c928776a1ab5d6deb6fad6[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jun 3 10:15:45 2024 +0200
+
+    Fix the "Truth value ambiguous error by tracing HNCPotential._transform_r
+
+[33mcommit b7f1bb98167778421fd6b760fe05c202d6798bf2[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Jun 3 10:01:39 2024 +0200
+
+    Have the default DH_screening_length to be a negative number
+
+[33mcommit c9c9106426fa07df663ab9bdcb0c36f6142b300e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sat Jun 1 16:08:16 2024 +0200
+
+    Allow to manually overwrite DH_screening_length of a plasma state
+
+[33mcommit 56d70e303501c795713d881a2357ed73d464d02a[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 31 16:43:49 2024 +0200
+
+    Make HNCPotentials and PlasmaStates jitable
+    
+    This should solve the issue that HNCPotential's methods could not be
+    jitted
+    
+    However, we now need a setter for DH_screening length
+
+[33mcommit 2be012b2f73351c1922a465400ed0747b916f47d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 31 13:07:18 2024 +0200
+
+    Add a linear response option for the scattering
+    
+    This currently includes not jit-compiling the the `HNCPotential`'s
+    methods, as the V_ab change size their size when using
+    `include_electrons` -> This has to be fixed...
+
+[33mcommit 7074e78ef668283271dc27e5640f004f06869459[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu May 30 17:39:10 2024 +0200
+
+    Add missing dependency
+
+[33mcommit d50ed77255a927cd46167625caf903a23b9c0d59[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 27 14:35:45 2024 +0200
+
+    Add functions for Atomic and ionic radii
+
+[33mcommit 0b9ead7200722fe3569c58ff26613a8bc294eb73[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sun May 26 12:44:59 2024 +0200
+
+    Add a model to calculate the ionic feature with HNC (untested)
+
+[33mcommit 8edeb140c5cec3da7917b9ac3da8e8875aefd6b5[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sun May 26 11:01:06 2024 +0200
+
+    Dokumentation: Images showing dimensions in HNC
+
+[33mcommit 89b9a90a4cfd0a329b3f12391f29335c16fa8b34[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 24 16:07:39 2024 +0200
+
+    Add new definition for q, according go Glenzer & Redmer
+
+[33mcommit a490c0c3ecd97579ad9a5f236b93ad0a557cdd5d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 24 16:04:48 2024 +0200
+
+    Move Potentials out of hypernetted_chain
+    
+    `HNCPotential`s is now a new class, every Type of potential a class as
+    well, each instance accepting a PlasmaState. This way, one solves the
+    necessity to define 3 to 4 functions for every kind of potential
+
+[33mcommit 3e3f252b755f94ce8d3f4d9ae82fbcf3aec67444[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu May 23 21:15:09 2024 +0200
+
+    Fix the units striped errors
+
+[33mcommit c9b447a731b9bb5fbd08d8f0f1d7aeee5b793d4f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu May 23 17:20:41 2024 +0200
+
+    Quality of live: Allow lists as input to the PlasmaState
+
+[33mcommit 7c16697a3320457f6f52e85160aa96199e4b6b87[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu May 23 13:40:17 2024 +0200
+
+    Don't use exp in the convergence criterium
+
+[33mcommit e5fb69cf6eb85cfc091aaba5daef3d4558b186d6[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue May 21 19:39:57 2024 +0200
+
+    Try to make the HNC more robust
+
+[33mcommit 0e6771a8becdf8d30f4a8afca377033abd486897[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 17 14:42:31 2024 +0200
+
+    Test potential calculation against Schwarz.2007
+
+[33mcommit 19e7dae4edf030b7362bf51e525b07f687701ad1[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 17 13:42:56 2024 +0200
+
+    Fig 4.6 in Wünsch, currently broken
+
+[33mcommit cd16157b60be7ddba48ccde86787ebff102b4f99[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu May 16 17:11:34 2024 +0200
+
+    3 untested Potentials
+
+[33mcommit 1bdfc87f517609c74f8d74ddc243bd4ca13ab592[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed May 15 10:44:58 2024 +0200
+
+    BREAKING: rename ion_feature.q → ion_feature.q_Gregori2004
+
+[33mcommit 997f7e687145a441fa9491e9603e56c120bba21c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed May 15 09:17:38 2024 +0200
+
+    Add a test against fig. 4.12 in Wünsch.2011
+
+[33mcommit ac64e2055def0789f62ff045dfb643ca6ce8b7c1[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed May 15 09:02:50 2024 +0200
+
+    Fix literature
+
+[33mcommit edc27a91268f7e0cf303a2b2eeed361f8ac6c8ec[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed May 15 09:01:36 2024 +0200
+
+    Plot literature values in S plot
+
+[33mcommit 956eabcb89576541f6f6e8e349cb26a97f73874f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue May 14 18:58:19 2024 +0200
+
+    Fix S_ii_HNC definition
+
+[33mcommit 5bd1eed3240d1a0ca97eb36ca5256233bd41a768[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue May 14 17:39:35 2024 +0200
+
+    Add benchmark example of ogata vs sine
+
+[33mcommit 731075f80c70bd57a06c5dd85b6784535f2ac540[m
+Merge: f707e7f 599c150
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon May 13 18:27:05 2024 +0200
+
+    Merge branch 'playground' of gitea.hed.physik.uni-rostock.de:lue/jaxrts into playground
+
+[33mcommit f707e7f1f86dc4be7eccd6ddc32fdd5c5e844c6e[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon May 13 18:27:01 2024 +0200
+
+    ogata fft seems to work now, for some cases
+
+[33mcommit 599c1504ccef75410bb6cdc93159d7d23e59e95c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 13 17:29:18 2024 +0200
+
+    Wünsch2011 Fig. 4.12 reproduction (by assuming some values)
+
+[33mcommit 2983df09fdca76ad30c57c1dc542545b7264bf67[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 13 13:32:53 2024 +0200
+
+    Vectorize ogata. NOTE: Units are not working
+
+[33mcommit 81d23d55cabed7d2dca5fcd42b474fec1bcf112e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 13 11:16:49 2024 +0200
+
+    transformPotential norm; statically screened → V_l == 0
+
+[33mcommit 6ad232c49bebea97af8fe424c7e335fb3fa6f8d0[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 10 12:13:30 2024 +0200
+
+    Create a 3d fourier function + linting
+    
+    This serves 2 purposes:
+      - It makes the code more readable
+      - Swapping sine with the hankel transform should be easy.
+
+[33mcommit 39c6aeccddc35bf571f19066a0af29bff5839f60[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed May 8 15:48:28 2024 +0200
+
+    added fourier transform routine through hankel transform
+
+[33mcommit 33e92f7bb4c3185706530f44649e65e09d1d5a02[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed May 8 14:07:50 2024 +0200
+
+    Move examples in the new sub-dir structure
+
+[33mcommit d624f1cddafa58bb602b5063318387a7c06af313[m
+Merge: 93702a1 1af4585
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed May 8 11:06:39 2024 +0200
+
+    Merge branch 'main' into playground
+
+[33mcommit 1af4585ddb93c0e968c4876f7a27dc9ff673ec32[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed May 8 11:05:41 2024 +0200
+
+    Stucture example gallery, output SVG's
+
+[33mcommit 1461d426b971983c785bdf629077241d3a8b5b65[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue May 7 17:29:09 2024 +0200
+
+    BMA Fixes, Chapman interpolation and RPA Improvements (#5)
+    
+    This PR  fixes the Born Mermin approximation, benchmark it, allow for simplifying the BMA calculation using the Chapman interpolation and also improves on  the RPA result
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/5
+
+[33mcommit 93702a11be18fc5b2be30efaaa2eec96b0b9f9c0[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 6 16:46:42 2024 +0200
+
+    Fix jaxxed dst
+
+[33mcommit ccefa9b1d9d8890388ffccb93945e612a81bd336[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 6 14:05:00 2024 +0200
+
+    Units when extrapolating S_ii
+
+[33mcommit 3ac2022d9a8102adb8a7d6e4d931bdc09d9a5789[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 6 13:40:17 2024 +0200
+
+    rename potentials
+
+[33mcommit 27fb8227b49346ef2748ebfed6d22a6c602eb191[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 6 13:32:17 2024 +0200
+
+    hypernetted chain test: Use analytical Potential
+    
+    This reduces the prerequisites of the test (to acc. < 4%)
+
+[33mcommit 40dee84c13ae08c1a8438226e0b8f9711b38ac12[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 6 13:29:12 2024 +0200
+
+    Add Zaf implementation of the dsf
+
+[33mcommit 6cece09f668cc3d3d74c57b40031f9450a61b763[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 6 13:15:02 2024 +0200
+
+    HNC Sii: The first index is forced to 1. Set it to the entry [1].
+
+[33mcommit ef9b8924bdc60ce77cdb3b17c3eede20e5dd3027[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 6 13:09:35 2024 +0200
+
+    Fix jumpy Sii
+
+[33mcommit b5e5f2ea0643f7b66a19c07c55f4031af544263a[m
+Merge: cac10b3 735e427
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon May 6 10:38:49 2024 +0200
+
+    merging minor changes in test_hypernetted_chain
+
+[33mcommit cac10b30023d80e18d1ae8b372715ff9d026ed40[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon May 6 10:36:21 2024 +0200
+
+    testing Sii from HNC
+
+[33mcommit 735e427c34bdae900d69eca191a506e5b7576594[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon May 6 09:20:21 2024 +0200
+
+    Don't multiply alpha matrix with two.
+
+[33mcommit 421609bca923095b1742b9413ec51ebcdb0457a4[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 3 18:41:46 2024 +0200
+
+    Rename .py files to .csv files
+
+[33mcommit 7f8371f959840e5b93290940548b3c35d776cc41[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 3 18:20:21 2024 +0200
+
+    Add Wünsch comparison; currently not working
+
+[33mcommit 2a98e69a63bf0f5de0fab0573143ac4ffe36b022[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 3 17:23:34 2024 +0200
+
+    Test against literature Values from K. Wünsch's PhD Thesis
+
+[33mcommit 89fb0dc6dbaaa1ec7cda4eaf5e1673bca94cee9d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 3 15:37:45 2024 +0200
+
+    Reproduce Wünsch 2011 data
+
+[33mcommit 82fdd50c7c6f1522f6b6cc929e1a3cd433e8c37e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri May 3 12:41:26 2024 +0200
+
+    Add function to fourier transform a potential
+
+[33mcommit dd7b82f32aa954c6d78aa05e298fcc06c28a3a70[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu May 2 17:03:15 2024 +0200
+
+    Cleanup
+
+[33mcommit 33080fa9d1122f15e4219ca3cb6ece6ff5bb6238[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu May 2 15:04:34 2024 +0200
+
+    It works?
+
+[33mcommit a6006193369e0ef116fff89a1f8c1ea531adc708[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu May 2 13:33:49 2024 +0200
+
+    test realfft and sinft
+
+[33mcommit 4ad3938bf21d79d507326b4acba2a623f832363b[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Apr 30 19:38:30 2024 +0200
+
+    Implement units. It is broken
+
+[33mcommit fe6ad50c83bb3a3a256d9cefbff5180dc4e10529[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Apr 30 16:35:22 2024 +0200
+
+    Speedup by not using the loops in sinft
+
+[33mcommit b8c6a58aeb98f73c7255930d6426b25c0e80e544[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Apr 25 15:05:14 2024 +0200
+
+    some approaches to the fourier transform
+
+[33mcommit f86e058179540a8739ddedea78d39ba07263ef99[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Apr 24 17:17:01 2024 +0200
+
+    Display the x axis in units of d
+
+[33mcommit 5bd14ae49e622a408afc2276908e89f58f6c1f53[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Apr 24 16:36:47 2024 +0200
+
+    Work on condition of while loop
+
+[33mcommit 86d7b6c189becfe04dfd3599b1254aceef293c37[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Apr 24 15:52:44 2024 +0200
+
+    Add max numer of iterations to the loop
+
+[33mcommit 9fd413d33802a7f2e64b6340f24ccdda7d07674e[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Apr 24 15:24:47 2024 +0200
+
+    first attempt of hnc
+
+[33mcommit a289fdde3ef993521f6fc6562f09fededeff659c[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Apr 24 10:24:12 2024 +0200
+
+    start hnc approach implementation
+
+[33mcommit eeedd122b6e482ff624e5a6bd121d8178b2d1dca[m
+Merge: 3fcf199 fa4fa96
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Mar 22 17:39:47 2024 +0100
+
+    Merge pull request 'Refactor Models' (#4) from refactor-models into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/4
+
+[33mcommit fa4fa96318fd199818f2f32b8ce916483fad28db[m[33m ([m[1;31morigin/refactor-models[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 22 17:24:21 2024 +0100
+
+    Allow to re-sample the setup
+    
+    However, this is not really speeding up most of the calculations,
+    currently.
+    Maybe this will become relevant for huge k sampled
+
+[33mcommit e57c15022890573e2419f362927e4522ce56cf01[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 22 16:06:19 2024 +0100
+
+    Introduce ScatteringModel
+    
+    This class has convenience Methods for the convolution with a source
+    function.
+    In future, it should also enable re-sampling, easily
+
+[33mcommit 7b632bbcb310f4d0cce6ec1b061ebce5d205e2e4[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 22 15:00:11 2024 +0100
+
+    Introduce `allowed_keys` to models and respect if for `models.Neglect`
+    
+    `models.Neglect` is now enabled to return different arrays when calling
+    the evaluate method. This is also available to other models, if
+    necessary.
+
+[33mcommit 3fcf199a4d38a5d6bc6a72b7fa04d443658ae9bc[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Mar 21 18:33:53 2024 +0100
+
+    Fix T_i error in Born-Mermin
+    
+    Due to the Arkhipov functions requiring a second temperature, we broke
+    the Born-Mermin Model
+
+[33mcommit 863e4384a9bddbb04ea4dc42c9f7d390b7c87830[m
+Merge: f6303bf 9b047fd
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Mar 19 12:29:21 2024 +0100
+
+    Merge pull request 'Add free-bound scattering as presented by Böhme.2023' (#2) from free-bound into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/2
+
+[33mcommit 9b047fdfb250d99d596bc8d05540e7fe5ee23b03[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 18 14:27:27 2024 +0100
+
+    Small changes for the documentation
+
+[33mcommit dc7d259f8683d8f20c041d62a418f80161b45093[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 18 14:24:05 2024 +0100
+
+    Add literature to bibtex file
+
+[33mcommit 719313ddc594b4a98d5232d44a84b80205cc2d67[m[33m ([m[1;31morigin/free-bound[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 18 14:17:22 2024 +0100
+
+    Add free-bound scattering as presented by Böhme.2023
+
+[33mcommit f6303bf5b7d9c3790b5cfd71ee25ed6150f3b379[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Mar 14 16:16:29 2024 +0100
+
+    Use jit-able electron configuration for the definition of an element
+
+[33mcommit 376824dd2737d2fa8fe7776311a8b0a74d39b658[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Mar 12 17:19:37 2024 +0100
+
+    Refactor electron_distribution_ionized_state to be jit-able
+
+[33mcommit 91efc644821f56181b4d88446a0f8a636f38f729[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Mar 12 16:31:36 2024 +0100
+
+    Make fermi_energy more robust (sometimes, strange multiple of units occurred)
+
+[33mcommit f495696ecfdeb4844ab96dce47589a6c19893e95[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Mar 12 09:42:19 2024 +0100
+
+    Allow lower numpy versions for compatibility with pymc
+    
+    https://github.com/pymc-devs/pymc/issues/7043
+
+[33mcommit ad776fe3f5c1c31fc914d1ce0803ade72ee1e878[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 11 17:03:12 2024 +0100
+
+    Add some info to the README
+
+[33mcommit 8bdf09f81cf71cdb212773108daae1cf5b1a4f47[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 11 16:50:16 2024 +0100
+
+    Small fixes in the documentation
+    
+    plot_reproduce_Gregori2003_fig6: The correct quantity is n_e, not n_i
+
+[33mcommit 19e44e169c0522943436cc12a82db7a821587ceb[m
+Merge: 5c0a888 7e8c39c
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon Mar 11 16:39:39 2024 +0100
+
+    Merge pull request 'Gregori2006' (#1) from gregori2006 into main
+    
+    Reviewed-on: https://gitea.hed.physik.uni-rostock.de/lue/jaxrts/pulls/1
+
+[33mcommit 7e8c39ce0efa026dae182d6f30c2ca68487d1788[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 11 16:14:31 2024 +0100
+
+    Write Models for BohmStaver and Gregori2006
+
+[33mcommit 52e88111df3e80801500c80ee1ed927a91459851[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 11 15:34:05 2024 +0100
+
+    Write an example for the documentation to reproduce Fig.6 in
+    Gregori.2006
+
+[33mcommit 9fa5b9e25f671ec088d9ad92d7893ac34bc2d06f[m[33m ([m[1;31morigin/gregori2006[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 11 14:49:39 2024 +0100
+
+    Test against literature, Fix errors found this way
+
+[33mcommit 4410ee193f5bf361f83835d3be779498440e347c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sun Mar 10 20:43:14 2024 +0100
+
+    Amend S_ee_AD to account for the second term presented by Gregori.2006
+
+[33mcommit 03f1a541fe777b683d2e7bd9bf995440f686a713[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sun Mar 10 20:36:21 2024 +0100
+
+    Use the appropriate temperatures in the lambdas, S and gs
+
+[33mcommit 78b7380060677687ed85eb5b584b383ae0a733d9[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sun Mar 10 20:29:40 2024 +0100
+
+    Add functions for effective ion and mix temperatures
+
+[33mcommit f868a414d4108990021bdb384d936e5b29097492[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sun Mar 10 20:04:00 2024 +0100
+
+    Add a second temperature (T_i) to the relevant functions from Arkhipov
+
+[33mcommit 5c0a888fd5c2cd181be342fa7d5760f85a8d33d5[m
+Merge: 6ed14c1 fc3510f
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Sun Mar 10 13:15:14 2024 +0100
+
+    Merge branch 'main' of gitea.hed.physik.uni-rostock.de:lue/jaxrts
+
+[33mcommit 6ed14c1e944f7d9cb715defcad6b98598e36b048[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Sun Mar 10 13:13:24 2024 +0100
+
+    changes to ipd
+
+[33mcommit fc3510f513bda766d6f49867e79e756f5af8708e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Mar 7 20:23:21 2024 +0100
+
+    Move the debug file in an example, reproducing Gregori2003, fig6
+
+[33mcommit a7450949bd6f0809bbd321953d37abb050cd1c5b[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Mar 7 19:01:30 2024 +0100
+
+    Move the models into the model submodule
+
+[33mcommit 8741139ed4b6d98da72a5aa9811bd323ceccb883[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Mar 7 14:33:00 2024 +0100
+
+    documentation
+
+[33mcommit b194b1c2ea931bf0c9952bbe225d23f95cde2cd3[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Mar 7 14:32:17 2024 +0100
+
+    approximation of collision freq integral in bma
+
+[33mcommit dd21d2f483657e5363046009f05014ef8d8b80ea[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Mar 7 14:13:56 2024 +0100
+
+    fixed BMA
+
+[33mcommit 9d00ad6a06db8f2133de2157b404cd0f9b26be98[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Mar 7 13:21:52 2024 +0100
+
+    Start moving models out of debug
+
+[33mcommit f544cfb447f9e61b881e9c48e6ff9fc5b9038522[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Mar 7 10:01:05 2024 +0100
+
+    Introduce `update_default_model`
+
+[33mcommit 0f4d44a38f0711177987a5902155ac8a1c34c6e3[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Mar 7 09:19:31 2024 +0100
+
+    BREAKING: Make `Models` items of a `State`
+
+[33mcommit 1e60621a637dbb5f9fcff67f712fe56f396eee2b[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Mar 7 09:05:28 2024 +0100
+
+    BREAKING: Rename electron_feature to free_free submodule
+
+[33mcommit 8f7bfac8b99b460927927336e4cc5e6481f6abd2[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Mar 6 16:47:49 2024 +0100
+
+    move to properties for Setup and PlasmaState
+
+[33mcommit ed1d2707da1a1ac53cd185bbe7fba9cadc068022[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Wed Mar 6 15:58:25 2024 +0100
+
+    started ipd model module
+
+[33mcommit c4f4366710059bfc1ed541923837031a8d852457[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Mar 6 14:09:42 2024 +0100
+
+    Set all models to work with Gregori overviews
+
+[33mcommit 145af969c37493fdc5ef1b2485440aae6dccebe4[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Mar 5 18:34:13 2024 +0100
+
+    Gregori2003IonFeat model
+
+[33mcommit 08a7628d49b41aa582080e90f2bdc73e69aef7d5[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Mar 5 17:28:12 2024 +0100
+
+    Units when convolving
+
+[33mcommit f04d75e9e06f2d9c33fdc51b691ae8cb7cb230ff[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Mar 5 17:05:31 2024 +0100
+
+    Spelling
+
+[33mcommit cb52c72a55fdd05663cccc7f5cc43870c3e3cc44[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Mar 5 17:04:01 2024 +0100
+
+    Factor out electron_distribution of ionized states
+
+[33mcommit e1a413228fee2cf733146b8516ad7f02f5d95674[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Mar 5 16:40:22 2024 +0100
+
+    use weakly bound electrons in elastic part
+
+[33mcommit 1552952d5610c9f9ada69a25b8a676ab625cc31a[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 4 21:14:20 2024 +0100
+
+    Units for bound-free scattering
+
+[33mcommit b4532892c7f4d6f7f86611e4867c4acbaae23e88[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 4 18:18:03 2024 +0100
+
+    Add the Schumacher Model
+    
+    NOTE: This model is not correct in how units are handled, currently
+
+[33mcommit a1a010b2f27e14dbc1b708d71f3af71a1604b608[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Mon Mar 4 15:00:56 2024 +0100
+
+    fixed born-mermin integral
+
+[33mcommit 38bb1d6a2c5c247c1750b6a132b852bde6220dcf[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 4 14:28:17 2024 +0100
+
+    Factor out the convolution
+
+[33mcommit bd94497d1434efd24f68044d72fd31244a71a9dd[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 4 14:03:20 2024 +0100
+
+    Add QCSA Model, showing agreement with RPA
+
+[33mcommit 3db5c8efa95837127f4a5f234774b607161584c2[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 4 14:01:15 2024 +0100
+
+    Add Born-Mermin to debug function.
+    
+    Note: There is quite a disagreement to the RPA result
+
+[33mcommit b67877237b7576d6f32c1c49b776d922c829a9cc[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Mar 4 13:32:40 2024 +0100
+
+    Some tests to see if the concept is ok
+
+[33mcommit d950ba5a488558bb7258132147b2001f2b7085e4[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Sat Mar 2 16:59:30 2024 +0100
+
+    BM approximation working, very slowing atm
+
+[33mcommit 1d671dbd3e1d2ad90df25a5489661786ff924e6a[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sat Mar 2 14:20:45 2024 +0100
+
+    Fix atomic mass of an Element object
+
+[33mcommit 6df4365e5b5eae2088b8e6174aabd9a6911c03d1[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sat Mar 2 14:17:54 2024 +0100
+
+    Make 'probe' easier
+
+[33mcommit d4ea92fa0d38bf0f81ac4ae07c4b78fb98431872[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Sat Mar 2 13:59:45 2024 +0100
+
+    Simplify PlasmaState
+
+[33mcommit c9e29d9b7246ba505090042dd8d11b217e558b04[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 17:50:02 2024 +0100
+
+    Update README.md
+
+[33mcommit 58b80ffe1407adc3d7a272a21535c4082d5b4dd3[m[33m ([m[1;33mtag: latest[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 17:43:14 2024 +0100
+
+    Don't generate documentation automatically
+
+[33mcommit 03496d24ef145607f732d78aeaff13be4167ef3c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 17:32:12 2024 +0100
+
+    test dockerfile
+
+[33mcommit 4706c97966cc190072cac78697889992ab8800ec[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 17:23:49 2024 +0100
+
+    Import scienceplots
+
+[33mcommit c0d53d72a5e5edc31a3ece05151ce8dc49f6fdac[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 17:21:54 2024 +0100
+
+    Link documentation in the README
+
+[33mcommit 4bf179169855fb27c0f8b70ccabb521793128d23[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 17:19:54 2024 +0100
+
+    Fix some errors in the docs
+
+[33mcommit b3c8f114bf127724234fb849bbfe442b9a1785d5[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 17:13:39 2024 +0100
+
+    Use quadrature for the Quantum Corrected Salpeter approximation
+
+[33mcommit cc507e1d5eccca12f8f9aa8e1b7f83edcde55fa1[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 16:56:07 2024 +0100
+
+    Use Quadrature for the RPA
+
+[33mcommit 96f97aaf54dd8c222fabd6dab288f56b689f84d2[m
+Merge: c9683a5 ac71171
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Mar 1 16:46:56 2024 +0100
+
+    Merge branch 'main' of gitea.hed.physik.uni-rostock.de:lue/jaxrts
+
+[33mcommit c9683a52191fed330d132d450250fbc6c41dab84[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Mar 1 16:46:52 2024 +0100
+
+    attempting to solve quad errors
+
+[33mcommit ac71171e4a274a696759adebad8ed488d91ae7d9[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 16:30:52 2024 +0100
+
+    Add Arkhipov.2000 data for testing
+
+[33mcommit b75d4d8a95214c7d29892606736e4ed5aacfa58b[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 16:30:38 2024 +0100
+
+    Add drone pipeline
+
+[33mcommit 5cb39236413ef14d26a5437fafe37a00800fa0a1[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 16:21:08 2024 +0100
+
+    Write an example for the inversion of the Fermi integral
+
+[33mcommit 225eb4c67d3df401f888115c6b89949b9a39d8b0[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Mar 1 16:18:49 2024 +0100
+
+    Abstract model class finished
+
+[33mcommit 66cc4ffa5e0aba46d98ce92bf5d3d9522e9f6421[m
+Merge: fa36691 3c38862
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 16:01:16 2024 +0100
+
+    Merge branch 'main' of gitea.hed.physik.uni-rostock.de:lue/jaxrts
+
+[33mcommit fa36691145f21f652de263d257a134fc34f3ebe0[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 16:00:20 2024 +0100
+
+    Write a test for the inversion of the fermi intgral
+
+[33mcommit 3c388623268590be00e994f4715c281b43fa9f15[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Mar 1 15:51:21 2024 +0100
+
+    modules for setup and models added
+
+[33mcommit f105939cf67fd53afba04e4757bb0dc8af7324f7[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 15:18:54 2024 +0100
+
+    Include the ion-ion and electron-ion pair correlation functions
+
+[33mcommit 808a67db03544e2da070a173a9c6c1c3567d3417[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 15:14:04 2024 +0100
+
+    Test with the pair-correlation function by Arkhipov.2000
+
+[33mcommit 8c6c6bb7643ce2e87241945ff1691b8e98a0a30f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 09:21:03 2024 +0100
+
+    Make _F_n, _X_n and _R1_mk private
+
+[33mcommit 6887a475ccbb6da699784ac2ca59174c29e82219[m
+Merge: 19388e4 e153b31
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Mar 1 09:13:10 2024 +0100
+
+    renaming fermi integral approximation functions
+
+[33mcommit 19388e4ae968e60acc4725bc666dbca59d700bf1[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Mar 1 09:11:20 2024 +0100
+
+    renaming fermi integral approximation functions
+
+[33mcommit e153b31bed2d62a78042dd766c5da85987aa0467[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 09:00:27 2024 +0100
+
+    Check diffrence between Arkhipov and Gregori by comparison to Arkhipov.2000
+
+[33mcommit 1312483174d613920289351c633ff64bf9c08ec5[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Mar 1 08:47:06 2024 +0100
+
+    Add literature to bibliography
+
+[33mcommit 6238600bd412a4c6f04be2ecddbd54ec2b5030d7[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Feb 29 20:47:45 2024 +0100
+
+    Added updated approximation for inverse fermi integral based on Fukishima 2015
+
+[33mcommit bc83e86b91b3e0bf5db5cb760e03d251077caa57[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Feb 29 15:36:24 2024 +0100
+
+    added inverse fermi intergral approximation for n = 1/2
+
+[33mcommit 2a7a4a57b339b8d353dc6167437cecc41efb1404[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 29 13:21:30 2024 +0100
+
+    Remove artifact of the mock function
+
+[33mcommit 4ab833262fb7aab8f6b71a99b843ec687d49d8b6[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 29 13:13:20 2024 +0100
+
+    Factor out the effective temperature for static structure factors as Arkhipov does not use them
+
+[33mcommit 6c2aabedaa486727dea07bc61b58d91d022a0c4a[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Feb 29 12:58:40 2024 +0100
+
+    merge
+
+[33mcommit 51bb6eb1d3b0e696e5d3954ee6a9ad501c86dfb1[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Feb 29 12:58:07 2024 +0100
+
+    merged local with master
+
+[33mcommit 59102fc8e45d3d3e1ce77eac4e6cb4e6f001cc1d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 29 12:46:04 2024 +0100
+
+    Don't use T_cf Interpolation when testing against Arkhipov
+
+[33mcommit 9f198dd87cbd00d28a4015397c929ad140e92237[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Tue Feb 27 18:54:42 2024 +0100
+
+    added timer helper
+
+[33mcommit f35fd72ef7031d962b14c26f870bef30ea85531f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Feb 27 16:39:25 2024 +0100
+
+    Add test for Arkhipov Data, showing differences
+
+[33mcommit e3c9093158b90222f6d345989e40760d3847bb11[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Tue Feb 27 15:39:08 2024 +0100
+
+    Fix errors
+    
+    Tested by eye against the Arkhipov paper, real test follows
+
+[33mcommit 6ca0fd943c6af393322ffc29de8798548a3564e8[m[33m ([m[1;31morigin/GregoriStatic[m[33m)[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 23 20:04:47 2024 +0100
+
+    Convert to base units before plotting; reasonable result
+    
+    However, testing still has to be done. Graphs for a possible
+    verification are given in Arkhipov's publication
+
+[33mcommit 88b7dd6d46edd16e8efbacbaaac6b310b18d8bbb[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 23 19:39:13 2024 +0100
+
+    Write an example and fix errors
+    
+    However, this has to be checked, S_ei is huge.
+
+[33mcommit 003aab29580ae71469122b9fdcaf6f4e817017de[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 23 16:44:39 2024 +0100
+
+    Code the static S_12
+
+[33mcommit 4e25be69fcde3db5fa324645034e9d70b98b8f0d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 23 09:52:04 2024 +0100
+
+    Untested implementation of the Phi_12 from Gregori.2003
+
+[33mcommit b73a1f81d58ebf8752818c44e0107ee816768b0d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 22 21:54:51 2024 +0100
+
+    Coding up static structure factors.
+
+[33mcommit 7b8bc74be7011e9771eee59d36f4becc20a72076[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Feb 21 15:18:43 2024 +0100
+
+    Rename some functions and files
+
+[33mcommit cf1b3dc30de771bfd3f8a073bdd65585b8fda2a5[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Feb 21 14:25:20 2024 +0100
+
+    Write a test for the RPA
+
+[33mcommit d2900851404e3bcda29873ebb9bdbeb5df763453[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Feb 21 12:52:33 2024 +0100
+
+    Fix plotted formula
+
+[33mcommit 7436ee7832c75f58784d68b55905ebf6ffdd24ee[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Feb 21 12:49:50 2024 +0100
+
+    Fix epsilion RPA
+
+[33mcommit 22615753385e5b29d7745c599dfdea0f5646db60[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Wed Feb 21 11:19:05 2024 +0100
+
+    First attempt of an RPA See from Max' and M. Bonitz' remarks
+
+[33mcommit 19e3eacda45a7db06dd4211ad8949aa18bb5ebb8[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 16:38:19 2024 +0100
+
+    Fix the sign change in the electron feature
+
+[33mcommit b7ed42cda2437ed2ace4375cc7410f087b52ce72[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 16:37:07 2024 +0100
+
+    remove the impulse approximation test reproducing kraus.2012
+
+[33mcommit ea22cbdd044d929ea3d84ec84d1e77b3be0bcb1c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 16:36:03 2024 +0100
+
+    Fix some pint and numpy errors
+
+[33mcommit 1c065baa0993048f6bbf90177761c05c553df328[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 15:59:18 2024 +0100
+
+    Rename functions to show the underlying approximations more clearly
+
+[33mcommit b388c48694567f2e441c3aa59e80681c0a35926c[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 15:33:44 2024 +0100
+
+    Rename S0_ee to S0_ee salpeter
+
+[33mcommit 291d6baf457c186a931a46cf7d7189ccfb2d0c2f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 15:22:03 2024 +0100
+
+    Fix: using numpy
+
+[33mcommit 40d4c8d802698e13c6125489cfacc34dcbaf608e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 15:12:29 2024 +0100
+
+    Add quadax for quad with jax
+    
+    Note: This project is quite new and currently, the dependencies are not
+    handled too well.
+    I am installing it from the latest git commit, for now...
+
+[33mcommit 734f87c929deb9c8190ec1d510bd7d4f78acfee5[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 15:07:45 2024 +0100
+
+    poetry update
+
+[33mcommit f4169c3cf3f0bf6b14f2bf34aebc24ead2334bba[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 14:34:54 2024 +0100
+
+    Go back to to including the fine structure constant in the Zeff
+
+[33mcommit c50b16dab017febcf7fea00fdb2c87a1accbc651[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 13:49:55 2024 +0100
+
+    Add an intro statement
+
+[33mcommit ed95d4a4e2a492dee89ff0f28d0a0a87a2c07cdf[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Mon Feb 19 10:34:55 2024 +0100
+
+    Add function to calculate the plasma frequency
+
+[33mcommit 212ad23c680f94b8fb9f76d66865a43813c41b64[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Sat Feb 17 13:37:45 2024 +0100
+
+    minor changes
+
+[33mcommit 05ab305376205452a53d5813bc1ecbbcede5a86f[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Sat Feb 17 07:25:22 2024 +0100
+
+    added convenience module for instrument functions + example
+
+[33mcommit 0cefbf0257c47bd477a91379ad8bc5f0f65395a6[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Feb 16 19:30:41 2024 +0100
+
+    reversed S_ee
+
+[33mcommit 5f942d35a0ec443a0ec393feac328239d12efb38[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 17:20:36 2024 +0100
+
+    Try to adjust the bound-free part to Gergori.2004
+
+[33mcommit 3545cedb4e6e283da361a205aeeaf8e5172c1bcf[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 16:35:44 2024 +0100
+
+    Sketch of the bound-free scattering from Gregori.2004.
+    
+    Is faulty, data from the paper cannot be reproduced
+
+[33mcommit 6544bb4a600f51171dafa2efd9a78c15156011fb[m
+Merge: bd39dc4 ec7ef54
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 16:32:48 2024 +0100
+
+    Merge branch 'main' of gitea.hed.physik.uni-rostock.de:lue/jaxrts
+
+[33mcommit bd39dc4b789d14d2a05a58bcf0f2e048ce7b98f6[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 16:31:35 2024 +0100
+
+    remove "core_electrons"
+
+[33mcommit 4d926701aaef84f1a9bc6107ccf1b9ef587dd56d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 16:30:09 2024 +0100
+
+    Try to link elements.Element in the example
+    
+    However, this does not work
+
+[33mcommit ec7ef5489d04fbeee06892515973e63effaeb0f5[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Feb 16 16:28:25 2024 +0100
+
+    screening charge ambiguity
+
+[33mcommit d913f2d71836301f04c0709c3758a2f3336eec18[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 16:20:18 2024 +0100
+
+    Reproduce Fig. 8 from Pauling and Sherman
+
+[33mcommit 3f43389a625c7bbe8633d509bac88f67f1f03364[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Feb 16 16:10:29 2024 +0100
+
+    plot changes ion_feature
+
+[33mcommit 506cb41f9b567e1918cfb59d7275be6d3dc61e48[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 16:07:48 2024 +0100
+
+    Write a class with information for chemical elements
+
+[33mcommit 710a71e9eac69f013292901576278b839ab8aae2[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Feb 16 16:03:01 2024 +0100
+
+    fix import error
+
+[33mcommit c4f2d6dde94687b8dbea34d1a21f5268eef35dc6[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Fri Feb 16 15:47:28 2024 +0100
+
+    added ion_feature
+
+[33mcommit 73d3ff46a899db2982f1d68e1394b8ab97a566a6[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 15:20:57 2024 +0100
+
+    function to invert dicts
+
+[33mcommit 5fe392f281afe6c317e56eb5348efadc2f7a7e6a[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 14:49:17 2024 +0100
+
+    Test form factors against Paulings tabulated values
+
+[33mcommit b866636cd4b6919c85857d821f2fcd5f6a1df74e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 12:54:07 2024 +0100
+
+    Write orbital_map and orbital_array
+
+[33mcommit 22b7ce999bd3c04982ccd8c799b17ec5f32f3f7f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 12:42:28 2024 +0100
+
+    Limit ourselfs to n<=4
+
+[33mcommit a30ad7c80bba93a4bb71b6af0ed46a6ad7df4a1f[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 12:19:22 2024 +0100
+
+    renamed:    tests/test_from_factors.py -> tests/test_form_factors.py
+
+[33mcommit 43904a43b87d69db0b3cb73e137e58dfe9d958d3[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 11:28:23 2024 +0100
+
+    [documentation] add button to show source code
+
+[33mcommit 32df4279863a0698f4584ea39c3dd4d75ff3f949[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 11:28:02 2024 +0100
+
+    Test electron_feature calculation from Gregori.2003
+
+[33mcommit aca26f0fd25e7c820ae41514ce05eb11474bdb01[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 10:31:47 2024 +0100
+
+    Fix warning in example
+
+[33mcommit 34c4a333bdfa30aac0c8ef5a2d54bfd23ad5314d[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 10:28:01 2024 +0100
+
+    Create __init__.py by hand
+
+[33mcommit 1b5a4268e2d8cf731ec6d5e25b77dd5573ce4566[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 10:16:25 2024 +0100
+
+    save generated output of examples in gen_examples
+
+[33mcommit 411a4032fdde3545a686e0a5277f8a7e57a66492[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 10:09:12 2024 +0100
+
+    Add .gitignore
+
+[33mcommit 9150402a9831c7ea4dd1afaf054b61e528f5d1bb[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 10:07:37 2024 +0100
+
+    Fix sphinx error, remove __pycache__ directory
+
+[33mcommit d3e51b79677d657813f78d68bea568c8e49a9f99[m
+Merge: 24893ba 6e156cb
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Fri Feb 16 10:03:28 2024 +0100
+
+    Merge branch 'main' of gitea.hed.physik.uni-rostock.de:lue/jaxrts
+
+[33mcommit 24893ba1e8eeabe27a3f21c6eac2daaf371bcb04[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 23:07:42 2024 +0100
+
+    Add screening constants table from Pauling and Sherman
+
+[33mcommit e74ff610a0f954cf8121535fddabfa163d228aeb[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 22:08:39 2024 +0100
+
+    Add form factors for n=3 and n=4
+
+[33mcommit 6e156cb257153153a7b9808961e89e86daa5c476[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Feb 15 20:55:48 2024 +0100
+
+    quick import bugfix
+
+[33mcommit 898b59194eaa6776c34932a408a7012b24939a55[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Feb 15 20:53:13 2024 +0100
+
+    implemented free electron dynamic structure + example
+
+[33mcommit f698b1a27dbe1fdcc582079c89783c95d75e1df8[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 17:53:40 2024 +0100
+
+    Make example executable
+
+[33mcommit f4192ac09a038292ae4b068f28b6479b8040ffce[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 17:45:29 2024 +0100
+
+    Add title to example
+
+[33mcommit a000509f6ae732ad2e102a1cf8bd05fbd1b23dbe[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 17:44:20 2024 +0100
+
+    example for atomic form factors
+
+[33mcommit 781093235ffa0750fd972bb0efe9198563b4196e[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 17:28:14 2024 +0100
+
+    jit compile the functions
+
+[33mcommit 6a0fd8444158dd11d4f2994d5aabde5e44499ecc[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 17:23:55 2024 +0100
+
+    Pauling and Shereman form factors
+
+[33mcommit c7063963eaa4107ddda83c42918991046c6ddd8e[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Feb 15 17:18:32 2024 +0100
+
+    import fix
+
+[33mcommit 76a0e1c34fd2316081d03cc08c9d09d4802c667c[m
+Merge: b805b69 b572035
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 17:15:37 2024 +0100
+
+    Merge branch 'main' of gitea.hed.physik.uni-rostock.de:lue/jaxrts
+
+[33mcommit b805b690c7236a859130a4536fef9e590ea6d6cb[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 17:15:09 2024 +0100
+
+    Add units to init
+
+[33mcommit b5720350eb0c9824585e091ecc7a59556b03f1cb[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Feb 15 17:14:22 2024 +0100
+
+    plasmastate fix import
+
+[33mcommit d463b23621d625e37da2c2de0432a2ce0ccbfde8[m
+Author: Samuel <samuel.schumacher@uni-rostock.de>
+Date:   Thu Feb 15 17:11:59 2024 +0100
+
+    units and plasmastate updates
+
+[33mcommit 0568a7b1508ec00d16b0e47361aaa97293349484[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 16:40:39 2024 +0100
+
+    specify the actual name of the module
+
+[33mcommit 59d9c9bb99e06fe5b1c48f0b7a19edd670140864[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 16:38:26 2024 +0100
+
+    Add the bibliography to the docs
+
+[33mcommit 8e9dc389e989450c7576f69625e8595cc6b0f4d3[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 16:36:19 2024 +0100
+
+    Add sphinxcontrib-bibtex and an example entry
+
+[33mcommit f29e6ed3fea52c12515b5d70e3e1165d0de9f882[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 16:23:22 2024 +0100
+
+    Reset the name to JaXRTS
+
+[33mcommit c0f70dab8b3d2988332c078a056526fa51edf2d9[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 16:18:56 2024 +0100
+
+    Further explore the structure
+
+[33mcommit d6cbd00b621647d6664acc7b5de665485e5796d5[m
+Author: lue <julian.luetgert@uni-rostock.de>
+Date:   Thu Feb 15 15:56:57 2024 +0100
+
+    Inital structure of the project
