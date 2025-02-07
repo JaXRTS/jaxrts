@@ -191,11 +191,14 @@ def solve_saha(
 
     # Interpolate between a small ne and the maximal ne, depending on the
     # temperature to avoid numerical instabilities
-    ne_scale = jnpu.interp(
-        T_e,
-        jnp.array([5, 1000]) * 1 * ureg.electron_volt / k_B,
-        jnp.array([1, max_ne.m_as(1 / ureg.m**3)]) * (1 / ureg.m**3)
-    )
+    _ne_range = jnp.array([1, max_ne.m_as(1 / ureg.m**3)])
+    ne_scale = jnp.interp(
+        (T_e * k_B).m_as(ureg.electron_volt),
+        jnp.array([5, 1000]),
+        _ne_range,
+        left=_ne_range[0],
+        right=_ne_range[-1],
+    ) * (1 / ureg.m**3)
 
     # Offset (each element will have a block of size Z+1) This value specifies
     # the block.
