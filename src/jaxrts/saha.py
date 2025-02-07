@@ -13,7 +13,7 @@ import jpu.numpy as jnpu
 import numpy as onp
 
 from .elements import Element
-from .units import Quantity, ureg
+from .units import Quantity, ureg, to_array
 
 h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
@@ -187,7 +187,10 @@ def solve_saha(
     )
 
     # ne_scale = max_ne
-    ne_scale = 1e0 / (1 * ureg.m**3)
+    # ne_scale = 1e0 / (1 * ureg.m**3)
+
+    # Interpolate between a small ne and the maximal ne, depending on the temperature to avoid numerical instabilities
+    ne_scale = jnpu.clip(((max_ne - 1e0 / (1 * ureg.m**3)) / ((1000 - 5) * ureg.electron_volt / ureg.boltzmann_constant) * (T_e - 5 * ureg.electron_volt / ureg.boltzmann_constant) + 1e0 / (1 * ureg.m**3)).m_as(1/ureg.m**3), 1e0, max_ne.m_as(1 / ureg.m**3)) / (1 * ureg.m**3)
 
     # Offset (each element will have a block of size Z+1) This value specifies
     # the block.

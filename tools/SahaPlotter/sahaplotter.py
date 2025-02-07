@@ -216,19 +216,11 @@ class MainWindow(QMainWindow):
                 "Pauli-Blocking",
             ]
         )
-        self.option_dropdown.currentIndexChanged.connect(
-            self.update_selected_ipd
-        )
+        self.option_dropdown.currentIndexChanged.connect(self.update_selected_ipd)
         input_column.addWidget(self.option_dropdown)
 
         self.selected_ipd = "None"  # Default selection
 
-        form_layout.addLayout(label_column)
-        form_layout.addLayout(input_column)
-
-        input_layout.addLayout(form_layout)
-        left_layout.addLayout(input_layout)
-        main_layout.addLayout(left_layout, stretch=2)
 
     def update_selected_ipd(self, index):
         self.selected_ipd = self.option_dropdown.itemText(index)
