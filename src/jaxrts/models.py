@@ -251,7 +251,7 @@ class IonFeatModel(Model):
     def S_ii(
         self,
         plasma_state: "PlasmaState",
-        k: Quantity,
+        setup: Setup,
     ) -> jnp.ndarray: ...
 
     @jax.jit
@@ -454,6 +454,35 @@ class Gregori2006IonFeat(IonFeatModel):
         )
         # Add a dimension, so that the shape is (1x1)
         return S_ii[:, jnp.newaxis]
+
+
+class FixedSii(IonFeatModel):
+    """
+    Model for the ion feature with a fixed value for :math:`S_{ii}`.
+    """
+
+    __name__ = "FixedSii"
+
+    def __init__(self, Sii) -> None:
+        self._S_ii = Sii
+
+    @jax.jit
+    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+        return self._S_ii
+
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self._S_ii,)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj._S_ii,) = children
+
+        return obj
 
 
 class OnePotentialHNCIonFeat(IonFeatModel):
@@ -2897,6 +2926,7 @@ _all_models = [
     ElectronicLFCUtsumiIchimaru,
     FiniteWavelengthScreening,
     FiniteWavelength_BM_V,
+    FixedSii,
     Gericke2010ScreeningLength,
     Gregori2003IonFeat,
     Gregori2004Screening,
