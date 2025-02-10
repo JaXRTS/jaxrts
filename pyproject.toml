@@ -1,39 +1,43 @@
-[tool.poetry]
+[project]
 name = "jaxrts"
 version = "0.2.0"
 description = ""
-authors = ["J. Lütgert, S. Schumacher"]
+authors = [
+  { name = "J. Lütgert", email = "julian.luetgert@uni-rostock.de" },
+  { name = "S. Schumacher", email = "samuel.schumacher@uni-rostock.de" },
+]
 readme = "README.md"
-packages = [{include = "jaxrts", from = "src"}]
-
-[tool.poetry.dependencies]
-python = "^3.10,<3.13"
-pint = "=0.23.0"
-jpu = "^0.0.3"
-numpy = "^1.25.0"
-matplotlib = "^3.10"
-sphinxcontrib-bibtex = "^2.6.2"
-scienceplots = "^2.1.1"
-quadax = "^0.2.5"
-hankel = "^1.2.2"
-jax = "=0.4.28"
-jaxlib = "=0.4.28"
+dependencies = [
+  "pint (>=0.24.4)",
+  "numpy (>=2.2.2)",
+  "matplotlib >= 3.10",
+  "quadax >= 0.2.5",
+  "hankel >= 1.2.2",
+  "jax (>=0.5.0)",
+  "jaxlib (>=0.5.0)",
+  "jpu @ git+https://www.github.com/dfm/jpu",
+]
+requires-python = "^3.10,<3.14"
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "^7.0.0"
-black = "^24.2.0"
-ipython = "^8.21.0"
-pytest = "^8.0.0"
-
+flake8 = "^7.1.1"
+black = "^24.10.0"
+ipython = "^8.32.0"
+pytest = "^8.3.4"
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "^7.2.6"
+sphinx = "^7.4.7"
 sphinx-rtd-theme = "^2.0.0"
 sphinx-gallery = "^0.15.0"
-sphinx-toolbox = "^3.5.0"
+sphinx-toolbox = "^3.8.2"
+sphinxcontrib-bibtex = "^2.6.3"
+scienceplots = "^2.1.1"
+
+[tool.poetry]
+packages = [{ include = "jaxrts", from = "src" }]
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
