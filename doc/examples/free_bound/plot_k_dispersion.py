@@ -132,10 +132,10 @@ for axis in [ax, ax_inset2]:
 ax.legend()
 
 ax_inset1.set_xlim(5010, 5090)
-ax_inset1.set_ylim(ymin=1.7e-18, ymax=2.7e-18)
+ax_inset1.set_ylim(ymin=0.3e-18, ymax=0.5e-18)
 
 ax_inset2.set_xlim(4865, 4955)
-ax_inset2.set_ylim(ymin=8.9e-18, ymax=9.9e-18)
+ax_inset2.set_ylim(ymin=1.45e-18, ymax=1.65e-18)
 
 ax.set_ylabel("$I$ [s]")
 ax.set_xlabel("$E$ [eV]")
