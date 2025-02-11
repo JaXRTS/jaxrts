@@ -107,7 +107,8 @@ def eelfc_utsumiichimaru(
     k: Quantity, T_e: Quantity, n_e: Quantity
 ) -> Quantity:
     """
-    Static local field correction introduced and based on :cite:`UtsumiIchimaru.1982`.
+    Static local field correction introduced and based on
+    :cite:`UtsumiIchimaru.1982`.
     """
 
     rs = interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)
