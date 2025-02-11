@@ -861,6 +861,64 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         return obj
 
 
+class PeakCollection(IonFeatModel):
+    """
+    A model for approximating :py:meth:`~.PeakCollection.S_ii` as a sum of
+    peaks. Can be used to model, e.g., ideal powder diffraction, where elastic
+    signal would only be expected at certain values of :math:`k`.
+    """
+
+    __name__ = "PeakCollection"
+
+    def __init__(
+        self,
+        k_pos: Quantity,
+        intensity: jnp.ndarray,
+        peak_function: callable,
+    ):
+        """
+        Parameters
+        ----------
+        k_pos: Quantity
+            The position of the peaks in :math:`k` space.
+        intensity: jnp.ndarray
+            The intensity of the peaks. Should have the same length as `k_pos`.
+        peak_function: callable
+            The shape of each peak. This function is expected to be normed over
+            the integral over all :math:`k`, should be centered around 0, and
+            expects to require exactly 1 argument, the position in k space.
+            The `peak_function` should return a shape that is compatible with
+            :py:attr:jaxrts.PlasmaState.nions`. I.e., the output should be a
+            `(nxn)` matrix where `n` is the number of ion species considered.
+        """
+        self.k_pos = to_array(k_pos)
+        self.intensity = to_array(intensity)
+        self.peak_function = jax.tree_util.Partial(peak_function)
+        super().__init__()
+
+    @jax.jit
+    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+        # Create an array with the correct dimensions
+        out = 0 * self.peak_function(1 / ureg.angstrom)
+        for center, factor in zip(self.k_pos, self.intensity):
+            out += self.peak_function(setup.k - center) * factor
+        return out
+
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.k_pos, self.intensity, self.peak_function)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj.k_pos, obj.intensity, obj.peak_function) = children
+
+        return obj
+
+
 # Free-free models
 # ----------------
 #
@@ -3083,6 +3141,7 @@ _all_models = [
     OnePotentialHNCIonFeat,
     PauliBlockingIPD,
     PaulingFormFactors,
+    PeakCollection,
     QCSalpeterApproximation,
     RPA_DandreaFit,
     RPA_NoDamping,
