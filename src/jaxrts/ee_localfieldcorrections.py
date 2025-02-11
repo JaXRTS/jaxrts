@@ -26,7 +26,8 @@ def xi_lfc_corrected(
     xi: Quantity | jnp.ndarray, v: Quantity, lfc: Quantity | jnp.ndarray
 ):
     """
-    This function corrects the susceptibility according to the local field correction formalism.
+    This function corrects the susceptibility according to the local field
+    correction formalism.
     """
     return xi / (1 - v * (1 - lfc) * xi)
 
@@ -152,7 +153,8 @@ def eelfc_utsumiichimaru(
 @jax.jit
 def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     """
-    Improved version of Utsumi and Ichimaru, based on QMC results (:cite:`Farid.1993`).
+    Improved version of Utsumi and Ichimaru, based on QMC results
+    (:cite:`Farid.1993`).
     """
     rs = (interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)).m_as(
         ureg.dimensionless
@@ -305,7 +307,7 @@ def eelfc_dynamic_dabrowski1986(
 ):
     """
     Interpolation scheme for the dynamics LFC incorporating sum rules as
-    described by 'Dabrowski:1986'.
+    described by :cite:`Dabrowski:1986`.
     """
     omega = E / (1 * ureg.hbar)
     alpha = (4 / (9 * jnp.pi)) ** (1 / 3)
