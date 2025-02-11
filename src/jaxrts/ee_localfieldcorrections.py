@@ -307,7 +307,7 @@ def eelfc_dynamic_dabrowski1986(
 ):
     """
     Interpolation scheme for the dynamics LFC incorporating sum rules as
-    described by :cite:`Dabrowski:1986`.
+    described by `Dabrowski.1986`.
     """
     omega = E / (1 * ureg.hbar)
     alpha = (4 / (9 * jnp.pi)) ** (1 / 3)
