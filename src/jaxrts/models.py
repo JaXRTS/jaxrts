@@ -2951,9 +2951,9 @@ _all_models = [
     ThreePotentialHNCIonFeat,
 ]
 
-for model in _all_models:
+for _model in _all_models:
     jax.tree_util.register_pytree_node(
-        model,
-        model._tree_flatten,
-        model._tree_unflatten,
+        _model,
+        _model._tree_flatten,
+        _model._tree_unflatten,
     )
