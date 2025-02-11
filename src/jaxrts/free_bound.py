@@ -23,10 +23,13 @@ class FreeBoundFlippedSetup(Setup):
 
     .. warning ::
 
-       Due to the nature of this object, :py:meth:`~.full_k` and
-       :py:meth:`~.dispersion_corrected_k` are not monotonically rising with
-       :py:attr:`~.measured_energy`, anymore, but rather falling.
-       In other words, the k values do not correspond to the probing energy.
+       Due to the nature of this object,
+       :py:meth:`~FreeBoundFlippedSetup.full_k` and
+       :py:meth:`~FreeBoundFlippedSetup.dispersion_corrected_k` are not
+       monotonically rising with
+       :py:attr:`~FreeBoundFlippedSetup.measured_energy`, anymore, but rather
+       falling. In other words, the k values do not correspond to the probing
+       energy.
 
     """
 
