@@ -2053,6 +2053,39 @@ class ConstantChemPotential(Model):
 # ========================
 
 
+class ConstantDebyeTemp(Model):
+    """
+    A model of constant Debye Temperature.
+    """
+
+    allowed_keys = ["Debye temperature"]
+    __name__ = "ConstantDebyeTemp"
+
+    def __init__(self, value):
+        self.value = value
+        super().__init__()
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        return self.value
+
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.value,)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj.value,) = children
+
+        return obj
+
+
 class BohmStaver(Model):
     """
     The Bohm-Staver relation for the Debye temperature, valid for 'simple
@@ -3021,6 +3054,7 @@ _all_models = [
     BornMermin_Fit,
     BornMermin_Fortmann,
     ConstantChemPotential,
+    ConstantDebyeTemp,
     ConstantIPD,
     ConstantScreeningLength,
     DebyeHueckelIPD,
