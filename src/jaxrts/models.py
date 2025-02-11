@@ -615,7 +615,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         - an 'electron-electron Potential' The red entries in the picutre below
           (defaults to :py:class:`~KelbgPotental`).
 
-    .. image:: ../../_images/ThreePotentialHNC.svg
+    .. image:: ../images/ThreePotentialHNC.svg
        :width: 600
 
     See Also
