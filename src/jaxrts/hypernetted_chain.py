@@ -272,8 +272,8 @@ def zaf_dst(f, dst_type):
     Compute the discrete sine transform (DST) using the fast Fourier transform
     (FFT).
 
-    Taken from `Zaf
-    Python<https://github.com/zafarrafii/Zaf-Python/tree/master>`_
+    Taken from `Zaf Python
+    <https://github.com/zafarrafii/Zaf-Python/tree/master>`_
     """
     window_length = len(f)
 

@@ -240,6 +240,13 @@ class Neglect(Model):
 # ion-feature
 # -----------
 class IonFeatModel(Model):
+    """
+    These set of models describe the scattering by electrons tightly bound to
+    the ions, causing quasi-elastic scattering. `IonFeatModels` have to define
+    a method :py:meth:`~.S_ii` which returns the static ion-ion structure
+    factor.
+    """
+
     #: A list of keywords where this model is adequate for
     allowed_keys: list[str] = ["ionic scattering"]
 
@@ -263,6 +270,28 @@ class IonFeatModel(Model):
         """
         This is the result from Wünsch, to calculate the Rayleigh weight for
         multiple species.
+
+        .. math::
+
+           W_R = \\sum_{\\langle a, b\\rangle} \\sqrt{x_a x_b}
+           (f_a + q_a) (f_b + q_b) S_{ab}
+
+
+        Where
+
+        * The sum runs over all unique pars of atoms :math:`a` and :math`b`.
+
+        * :math:`x` is the number fraction of the ion species :math:`a`, and
+          :math:`b`, respectively.
+
+        * :math:`f_x` are the form factors, based on the `plasma_state`'s
+          ``'form-factors'`` model.
+
+        * :math:`q_x` describe the screening by free electrons, which can be
+          set via the `plasma_state`'s ``'screening'`` model.
+
+        * :math:`S_{ab}` is the static ion-ion structure factor, which has to
+          be provided by the :py:meth:`~.S_ii` method.
         """
         S_ab = self.S_ii(plasma_state, setup)
         # Get the formfactor from the plasma state
@@ -615,7 +644,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         - an 'electron-electron Potential' The red entries in the picutre below
           (defaults to :py:class:`~KelbgPotental`).
 
-    .. image:: ../../_images/ThreePotentialHNC.svg
+    .. image:: ../images/ThreePotentialHNC.svg
        :width: 600
 
     See Also
@@ -840,6 +869,12 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
 
 
 class FreeFreeModel(ScatteringModel):
+    """
+    A class of models suitable for ``'free-free scattering'``. These models
+    have to define a :py:meth:`~.susceptibility` method, which can be used by a
+    ``'screening'`` model, later.
+    """
+
     #: A list of keywords where this model is adequate for
     allowed_keys: list[str] = ["free-free scattering"]
 
@@ -2050,8 +2085,7 @@ class BohmStaver(Model):
 
 class ConstantIPD(Model):
     """
-    A model that returns an empty with zeros in (units of seconds) for every
-    energy probed.
+    A model that returns constant value for the IPD.
     """
 
     allowed_keys = ["ipd"]
@@ -2083,6 +2117,14 @@ class ConstantIPD(Model):
 
 
 class DebyeHueckelIPD(Model):
+    """
+    Debye Hückel IPD Model
+
+    See Also
+    --------
+    jaxrts.ipd.ipd_debye_hueckel
+        Function used to calculate the IPD
+    """
 
     allowed_keys = ["ipd"]
     __name__ = "DebyeHueckel"
@@ -2099,6 +2141,14 @@ class DebyeHueckelIPD(Model):
 
 
 class StewartPyattIPD(Model):
+    """
+    Stewart Pyatt IPD Model.
+
+    See Also
+    --------
+    jaxrts.ipd.ipd_stewart_pyatt
+        Function used to calculate the IPD
+    """
 
     allowed_keys = ["ipd"]
     __name__ = "StewartPyatt"
@@ -2115,6 +2165,14 @@ class StewartPyattIPD(Model):
 
 
 class IonSphereIPD(Model):
+    """
+    Ion Sphere IPD Model.
+
+    See Also
+    --------
+    jaxrts.ipd.ipd_ion_sphere
+        Function used to calculate the IPD
+    """
 
     allowed_keys = ["ipd"]
     __name__ = "IonSphere"
@@ -2127,6 +2185,14 @@ class IonSphereIPD(Model):
 
 
 class EckerKroellIPD(Model):
+    """
+    Ecker Kröll IPD Model.
+
+    See Also
+    --------
+    jaxrts.ipd.ipd_ecker_kroell
+        Function used to calculate the IPD
+    """
 
     allowed_keys = ["ipd"]
     __name__ = "EckerKroell"
@@ -2143,6 +2209,14 @@ class EckerKroellIPD(Model):
 
 
 class PauliBlockingIPD(Model):
+    """
+    Pauli Blocking IPD Model.
+
+    See Also
+    --------
+    jaxrts.ipd.ipd_pauli_blocking
+        Function used to calculate the IPD
+    """
 
     allowed_keys = ["ipd"]
     __name__ = "PauliBlocking"
@@ -2510,6 +2584,16 @@ class Gregori2004Screening(Model):
 
 
 class ElectronicLFCGeldartVosko(Model):
+    """
+    Static local field correction model by Geldart and Vosko
+    :cite:`Geldart.1966`
+
+    See Also
+    --------
+    jaxrts.ee_localfieldcorrections.eelfc_geldartvosko
+        Function used to calculate the LFC
+    """
+
     allowed_keys = ["ee-lfc"]
     __name__ = "GeldartVosko Static LFC"
 
@@ -2540,6 +2624,16 @@ class ElectronicLFCGeldartVosko(Model):
 
 
 class ElectronicLFCUtsumiIchimaru(Model):
+    """
+    Static local field correction model by Utsumi and Ichimaru
+    :cite:`UtsumiIchimaru.1982`.
+
+    See Also
+    --------
+    jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru
+        Function used to calculate the LFC.
+    """
+
     allowed_keys = ["ee-lfc"]
     __name__ = "UtsumiIchimaru Static LFC"
 
@@ -2570,6 +2664,17 @@ class ElectronicLFCUtsumiIchimaru(Model):
 
 
 class ElectronicLFCStaticInterpolation(Model):
+    """
+    Static local field correction model that interpolates between the
+    high-degeneracy result by Farid :cite:`Farid.1993` and the Geldart result
+    :cite:`Geldart.1966`. See, e.g. :cite:`Fortmann.2010`.
+
+    See Also
+    --------
+    jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori_farid
+        Function used to calculate the LFC.
+    """
+
     allowed_keys = ["ee-lfc"]
     __name__ = "Static Interpolation"
 
@@ -2600,6 +2705,10 @@ class ElectronicLFCStaticInterpolation(Model):
 
 
 class ElectronicLFCConstant(Model):
+    """
+    A constant local field correction which can be defined by the user.
+    """
+
     allowed_keys = ["ee-lfc"]
     __name__ = "None"
 
@@ -2951,9 +3060,9 @@ _all_models = [
     ThreePotentialHNCIonFeat,
 ]
 
-for model in _all_models:
+for _model in _all_models:
     jax.tree_util.register_pytree_node(
-        model,
-        model._tree_flatten,
-        model._tree_unflatten,
+        _model,
+        _model._tree_flatten,
+        _model._tree_unflatten,
     )

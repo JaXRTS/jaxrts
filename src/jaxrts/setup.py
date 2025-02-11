@@ -183,7 +183,7 @@ def get_probe_setup(k: Quantity, setup: Setup) -> Setup:
     """
     Returns a :py:class:`~.Setup`, which has the same properties of setup, but
     a different `k`. This is realized by modifying the
-    :py:attr:`~.measured_energy` attribute of setup.
+    :py:attr:`~.Setup.measured_energy` attribute of setup.
 
     This helper function can be useful when evaluating e.g., `S_ii` Models at a
     different `k` than realized in an experiment, as it is required, e.g., for

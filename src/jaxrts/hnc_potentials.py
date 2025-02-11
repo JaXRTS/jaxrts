@@ -1347,8 +1347,8 @@ class PauliClassicalMap(HNCPotential):
 
     def __init__(self):
         """
-        Sets :py:attr:`~.include_electrons` to ``"SpinSeparated"``,
-        automatically.
+        Sets :py:attr:`~PauliClassicalMap.include_electrons` to
+        ``"SpinSeparated"``, automatically.
         """
 
         super().__init__()
@@ -1478,8 +1478,8 @@ class SpinSeparatedEEExchange(HNCPotential):
         self,
     ):
         """
-        Sets :py:attr:`~.include_electrons` to ``"SpinSeparated"``,
-        automatically.
+        Sets :py:attr:`~SpinSeparatedEEExchange.include_electrons` to
+        ``"SpinSeparated"``, automatically.
         """
         super().__init__()
         self.include_electrons = "SpinSeparated"

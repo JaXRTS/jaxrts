@@ -92,6 +92,12 @@ def ipd_debye_hueckel(
     The correction to the ionization potential for the m-th ionization stage in
     Debye-Hueckel approximation.
 
+    .. note::
+
+       The Debye-Hueckel approximation is physically meaningful only when
+       the coupling parameter << 1, such that Coulomb forces are weak
+       perturbations.
+
     Parameters
     ----------
     Z_i
@@ -109,12 +115,6 @@ def ipd_debye_hueckel(
     -------
     Quantity
         The ipd shift in units of electronvolt.
-
-    .. note::
-
-       The Debye-Hueckel approximation is physically meaningful only when
-       the coupling parameter << 1, such that Coulomb forces are weak
-       perturbations.
     """
     # The Debye (screening) wavenumber for the electrons for arbitrary
     # degeneracy
@@ -148,7 +148,7 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     """
     The correction to the ionization potential for the m-th ionization stage in
     the ion-sphere model. The ion-sphere model considers the ions to be
-    strongly correlated. (see also cite:`Zimmermann.1980`)
+    strongly correlated. (see also :cite:`Zimmermann.1980`)
 
     Parameters
     ----------
@@ -192,7 +192,12 @@ def ipd_stewart_pyatt(
     The correction to the ionization potential in the Stewart-Pyatt model using
     the small bound state approximation. This model is founded on the
     Thomas-Fermi Model for the electrons and extends it to include ions in the
-    vicinity of a given nucleus. Taken from cite:`Röpke.2019` Eq. (2).
+    vicinity of a given nucleus. Taken from :cite:`Ropke.2019` Eq. (2).
+
+    .. note::
+
+       The Stewart-Pyatt value is always below both the Debye and ion sphere
+       results.
 
     Parameters
     ----------
@@ -211,10 +216,6 @@ def ipd_stewart_pyatt(
     -------
     Quantity
         The ipd shift in units of electronvolt.
-    .. note::
-
-       The Stewart-Pyatt value is always below both the Debye and ion sphere
-       results.
     """
 
     R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
@@ -322,7 +323,7 @@ def ipd_pauli_blocking(
 ) -> Quantity:
     """
     The correction to the ionization potential due to Pauli blocking, as
-    described in cite:`Röpke.2019`.
+    described in :cite:`Ropke.2019`.
 
     Parameters
     ----------
