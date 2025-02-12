@@ -494,6 +494,7 @@ class FixedSii(IonFeatModel):
 
     def __init__(self, Sii) -> None:
         self._S_ii = Sii
+        super().__init__()
 
     @jax.jit
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
@@ -915,6 +916,91 @@ class PeakCollection(IonFeatModel):
         obj = object.__new__(cls)
         (obj.model_key,) = aux_data
         (obj.k_pos, obj.intensity, obj.peak_function) = children
+
+        return obj
+
+
+class DebyeWallerSolid(IonFeatModel):
+    """
+    This model approximates the static structure factor (SSF) of a solid at
+    finite temperature as suggested by :cite:`Gregori.2006`. It assumes the SSF
+    to consist of a crystall peak feature :math:`b(k)`, which are damped by the
+    debye Waller factor :math:`2W`, and an increasing, diffuse scattering part,
+    which is decribed py the static structure factor :math:`S_\\text{plasma}`
+    of the plasma (or liquid)-seeming contributions.
+
+    .. math::
+
+       S_{ii}(k) = S_\\text{plasma}(k)
+       \\left[(1 - \\exp(-2W)) + \\exp(-2W)b(k)\\right]
+
+    .. note::
+
+       For the temperatures this model might be used,
+       :math:`S_\\text{plasma}(k) = 1` has been used in the literature, before
+       to extract Debye temperatures from DFT-MD Simulations. See
+       :cite:`Schuster.2020`.
+
+    This function uses the :py:class:`jaxrts.plasmastate.PlasmaState` ``'Debye
+    temperature'`` model to calculate the Debye Waller factor.
+
+    See Also
+    --------
+    jaxrts.static_structure_factors.debyeWallerFactor
+       Function used to calculate the Debye Waller Factor. Note that the
+       implementation used based on :cite:`Murphy.2008` does differ from the
+       formula in :cite:`Gregori.2006`.
+    """
+
+    __name__ = "DebyeWallerSolid"
+
+    def __init__(
+        self,
+        S_plasma: IonFeatModel,
+        b: IonFeatModel,
+    ):
+        """
+        Parameters
+        ----------
+        S_plasma: IonFeatModel
+            A model for the static structure factor of the plasma-like
+            scattering contribution.
+        b: IonFeatModel
+            A model for the lattice bragg-peak structure. Likely a
+            :py:class:`~.PeakCollection`.
+        """
+        self.S_plasma = S_plasma
+        self.b = b
+        super().__init__()
+
+    @jax.jit
+    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+        debyeTemperature = plasma_state.evaluate("Debye temperature", setup)
+        DWFactor = static_structure_factors.debyeWallerFactor(
+            setup.k,
+            jnpu.sum(
+                plasma_state.atomic_masses * plasma_state.number_fraction
+            ).m_as(ureg.atomic_mass_constant)
+            * (1 * ureg.gram / ureg.mol),
+            debyeTemperature,
+            jnpu.sum(plasma_state.T_i * plasma_state.number_fraction),
+        )
+        S_plasma = self.S_plasma.S_ii(plasma_state, setup)
+        b = self.b.S_ii(plasma_state, setup)
+
+        return S_plasma * (1 - DWFactor + DWFactor * b)
+
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.S_plasma, self.b)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj.S_plasma, obj.b) = children
 
         return obj
 
@@ -3119,6 +3205,7 @@ _all_models = [
     DebyeHueckelScreening,
     DebyeHueckelScreeningLength,
     DebyeHueckel_BM_V,
+    DebyeWallerSolid,
     DetailedBalance,
     EckerKroellIPD,
     ElectronicLFCConstant,
