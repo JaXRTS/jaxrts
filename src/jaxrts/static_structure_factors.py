@@ -698,3 +698,36 @@ def g_ei_ABD(
     Phi_ei_r = 4 * jnp.pi / r * integ
 
     return jnpu.exp(-Phi_ei_r / (ureg.k_B * T_ei)) * (1 * ureg.dimensionless)
+
+
+def debyeWallerFactor(
+    k: Quantity, atomic_mass: Quantity, debye_temp: Quantity, temp: Quantity
+) -> Quantity:
+    """
+    Reduction of an XRD peak due to an increase in temperature (without taking
+    to account possible phase transitions), according to :cite:`Murphy.2008`.
+    """
+
+    Q = k / (2 * jnp.pi)
+
+    def phi(y):
+        """
+        Eqn (6)
+        """
+        y = y.m_as(ureg.dimensionless)
+        return (1 / y) * jnp.array(
+            quad(
+                lambda x: x / (jnp.exp(x) - 1),
+                interval=jnp.array([0.0, y]),
+                epsabs=1e-20,
+                epsrel=1e-20,
+            )[0]
+        )
+
+    # Eqn (5):
+    TwoM = (
+        (3 * ureg.planck_constant**2 * ureg.N_A * Q**2)
+        / (atomic_mass * ureg.k_B * debye_temp)
+        * (temp / debye_temp * phi(debye_temp / temp) + 1 / 4)
+    )
+    return jnpu.exp(-TwoM).m_as(ureg.dimensionless)

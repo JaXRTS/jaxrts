@@ -3,6 +3,7 @@ import pathlib
 import numpy as onp
 import pytest
 from jax import numpy as jnp
+import jpu.numpy as jnpu
 
 import jaxrts
 
@@ -258,3 +259,34 @@ def test_gregori2006_figure_1_reproduction_q():
             )
             < 3e-2
         )
+
+
+def test_debye_waller_murphy_2008():
+    """
+    Reproduce Fig 2 of :cite:`Murphy.2008`.
+    """
+    SMALL = 0.08
+
+    # Taken from Table I in :cite:`Murphy.2008`.
+    thetadict = {
+        ureg("300K"): ureg("322K"),
+        ureg("600K"): ureg("321K"),
+        ureg("900K"): ureg("316K"),
+        ureg("1200K"): ureg("310K"),
+    }
+
+    data_dir = pathlib.Path(__file__).parent / "data/Murphy2008"
+    for f in data_dir.glob("*.csv"):
+        T = ureg(f.stem.split(".")[-1])
+        theta = thetadict[T]
+        # Copper
+        m = ureg("63.5g/mol")
+
+        Q2, lnI = onp.genfromtxt(f, unpack=True, delimiter=",")
+        Q2 *= 1 / ureg.angstrom**2
+
+        k = jnpu.sqrt(Q2) * (2 * jnp.pi)
+
+        I = jaxrts.static_structure_factors.debyeWallerFactor(k, m, theta, T)
+
+        assert jnp.all(jnp.abs(lnI - jnp.log(I)) < SMALL)
