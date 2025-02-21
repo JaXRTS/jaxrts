@@ -3,7 +3,8 @@ LatticeDebyeModel for approximating diffuse scattering in crystals
 ==================================================================
 
 This example showcases the increased diffuse scattering in heated crystals by
-the Debye Waller Effect.
+the Debye Waller Effect, as implemented by the
+:py:class:`jaxrts.models.DebyeWallerSolid` model.
 
 For :math:`S_\\text{Plasma}` the model assumes a fixed value of unity, for all
 :math:`k`.

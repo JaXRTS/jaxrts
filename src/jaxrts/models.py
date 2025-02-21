@@ -988,7 +988,7 @@ class DebyeWallerSolid(IonFeatModel):
         S_plasma = self.S_plasma.S_ii(plasma_state, setup)
         b = self.b.S_ii(plasma_state, setup)
 
-        return S_plasma * (1 - DWFactor + DWFactor * b)
+        return S_plasma * ((1 - DWFactor) + (DWFactor * b))
 
     # The following is required to jit a Model
     def _tree_flatten(self):
