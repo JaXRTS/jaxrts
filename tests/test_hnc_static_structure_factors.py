@@ -1,4 +1,4 @@
-import jpu
+import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
 from jax import numpy as jnp
 
@@ -28,11 +28,13 @@ def main():
             1 / ureg.angstrom**3
         )
 
-        d = jpu.numpy.cbrt(
+        d = jnpu.cbrt(
             3 / (4 * jnp.pi * (n_i[:, jnp.newaxis] + n_i[jnp.newaxis, :]) / 2)
         )
 
-        q = jaxrts.hnc_potentials.construct_q_matrix(jnp.array([1]) * Z * ureg.elementary_charge)
+        q = jaxrts.hnc_potentials.construct_q_matrix(
+            jnp.array([1]) * Z * ureg.elementary_charge
+        )
 
         Gamma = (
             Z**2
@@ -41,7 +43,7 @@ def main():
             / (4 * jnp.pi * 1 * ureg.epsilon_0 * d)
         ) / (1 * ureg.boltzmann_constant * T)
 
-        r = jpu.numpy.linspace(0.001 * ureg.angstrom, 1000 * ureg.a0, 2**14)
+        r = jnpu.linspace(0.001 * ureg.angstrom, 1000 * ureg.a0, 2**14)
 
         alpha = jaxrts.hnc_potentials.construct_alpha_matrix(n_i)
 
@@ -55,7 +57,9 @@ def main():
         # V_l = hnc.V_screened_C_l_r(r, q, alpha)
         # V_l_k, _ = hnc.transformPotential(V_l, r)
 
-        g, niter = jaxrts.hypernetted_chain.pair_distribution_function_HNC(V_s, V_l_k, r, T, n_i)
+        g, niter = jaxrts.hypernetted_chain.pair_distribution_function_HNC(
+            V_s, V_l_k, r, T, n_i
+        )
 
         S_k = jaxrts.hypernetted_chain.S_ii_HNC(k, g, n_i, r)
 

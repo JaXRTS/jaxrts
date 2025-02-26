@@ -13,7 +13,7 @@ from typing import Literal
 
 import jax
 import jax.interpreters
-import jpu
+import jpu.numpy as jnpu
 from jax import numpy as jnp
 
 from jaxrts.hypernetted_chain import (
@@ -36,6 +36,7 @@ from jaxrts.plasma_physics import (
 from jaxrts.units import Quantity, to_array, ureg
 
 logger = logging.getLogger(__name__)
+
 
 @jax.jit
 def pauli_potential_from_classical_map_SpinAveraged(
@@ -97,7 +98,7 @@ def pauli_potential_from_classical_map_SpinAveraged(
     # g0_T_r (this is the Pauli exclusion potential by construction)
 
     h0_T_r = g0_T_r - 1
-    Ns_r = jpu.numpy.log(g0_T_r)
+    Ns_r = jnpu.log(g0_T_r)
 
     N_k = fourier_transform_sine(k2, r2, Ns_r * ureg.dimensionless)
     h0_T_k = fourier_transform_sine(k2, r2, h0_T_r * ureg.dimensionless)
@@ -105,17 +106,21 @@ def pauli_potential_from_classical_map_SpinAveraged(
     cs_k = h0_T_k - N_k
     c_k = h0_T_k / (1 + n_e * h0_T_k)
 
-    potential = ((cs_k - c_k) * (1 * ureg.boltzmann_constant * T))
+    potential = (cs_k - c_k) * (1 * ureg.boltzmann_constant * T)
 
     # Interpolate values close to origin to fix divergences
 
-    index1 = jnp.argmax(jnp.where(k2.m_as(1 / ureg.angstrom) < 0.8, jnp.arange(k2.size), -1.0))
-    index2 = jnp.argmax(jnp.where(k2.m_as(1 / ureg.angstrom) < 1.0, jnp.arange(k2.size), -1.0))
+    index1 = jnp.argmax(
+        jnp.where(k2.m_as(1 / ureg.angstrom) < 0.8, jnp.arange(k2.size), -1.0)
+    )
+    index2 = jnp.argmax(
+        jnp.where(k2.m_as(1 / ureg.angstrom) < 1.0, jnp.arange(k2.size), -1.0)
+    )
 
-    f1 = potential.at[index1].get() * 1 * ureg.electron_volt * ureg.a0 **3
-    f2 = potential.at[index2].get() * 1 * ureg.electron_volt * ureg.a0 **3
-    x1 = k2.at[index1].get() / (1 * ureg.a0) 
-    x2 = k2.at[index2].get() / (1 * ureg.a0) 
+    f1 = potential.at[index1].get() * 1 * ureg.electron_volt * ureg.a0**3
+    f2 = potential.at[index2].get() * 1 * ureg.electron_volt * ureg.a0**3
+    x1 = k2.at[index1].get() / (1 * ureg.a0)
+    x2 = k2.at[index2].get() / (1 * ureg.a0)
 
     def interp_func(x):
 
@@ -124,7 +129,7 @@ def pauli_potential_from_classical_map_SpinAveraged(
 
         return a * x**2 + c
 
-    potential = jpu.numpy.where((k2 < x1), interp_func(k2), potential)
+    potential = jnpu.where((k2 < x1), interp_func(k2), potential)
 
     return k2, potential, g0_T_r
 
@@ -177,7 +182,7 @@ def pauli_potential_from_classical_map_SpinSeparated(
     #     1
     #     - (
     #         3
-    #         * (jpu.numpy.sin(k_F * r) - (k_F * r) * jpu.numpy.cos(k_F * r))
+    #         * (jnpu.sin(k_F * r) - (k_F * r) * jnpu.cos(k_F * r))
     #         / (k_F * r) ** 3
     #     ).m_as(ureg.dimensionless)
     #     ** 2
@@ -201,7 +206,7 @@ def pauli_potential_from_classical_map_SpinSeparated(
     # g0_T_r (this is the Pauli exclusion potential by construction)
 
     h0_T_r = g0_T_r - 1
-    Ns_r = jpu.numpy.log(g0_T_r)
+    Ns_r = jnpu.log(g0_T_r)
 
     N_k = _3Dfour(k2, r2, Ns_r * ureg.dimensionless)
     h0_T_k = _3Dfour(k2, r2, h0_T_r * ureg.dimensionless)
@@ -212,10 +217,10 @@ def pauli_potential_from_classical_map_SpinSeparated(
         """
         Inverted Ornstein-Zernicke Relation
         """
-        return jpu.numpy.matmul(
+        return jnpu.matmul(
             input_vec,
             jnp.linalg.inv(
-                (jnp.eye(n.shape[0]) + jpu.numpy.matmul(d, input_vec)).m_as(
+                (jnp.eye(n.shape[0]) + jnpu.matmul(d, input_vec)).m_as(
                     ureg.dimensionless
                 )
             ),
@@ -225,14 +230,18 @@ def pauli_potential_from_classical_map_SpinSeparated(
 
     potential = (cs_k - c_k) * (1 * ureg.boltzmann_constant * T)
 
-    index1 = jnp.argmax(jnp.where(k2.m_as(1 / ureg.angstrom) < 1.0, jnp.arange(k2.size), -1.0))
-    index2 = jnp.argmax(jnp.where(k2.m_as(1 / ureg.angstrom) < 2.0, jnp.arange(k2.size), -1.0))
+    index1 = jnp.argmax(
+        jnp.where(k2.m_as(1 / ureg.angstrom) < 1.0, jnp.arange(k2.size), -1.0)
+    )
+    index2 = jnp.argmax(
+        jnp.where(k2.m_as(1 / ureg.angstrom) < 2.0, jnp.arange(k2.size), -1.0)
+    )
 
-    f1 = potential.at[1,1, index1].get() * 1 * ureg.electron_volt * ureg.a0 **3
-    
-    f2 = potential.at[1,1, index2].get() * 1 * ureg.electron_volt * ureg.a0 **3
+    f1 = potential.at[1, 1, index1].get() * 1 * ureg.electron_volt * ureg.a0**3
 
-    x1 = k2.at[index1].get() / (1 * ureg.a0) 
+    f2 = potential.at[1, 1, index2].get() * 1 * ureg.electron_volt * ureg.a0**3
+
+    x1 = k2.at[index1].get() / (1 * ureg.a0)
     x2 = k2.at[index2].get() / (1 * ureg.a0)
 
     def interp_func(x):
@@ -242,7 +251,7 @@ def pauli_potential_from_classical_map_SpinSeparated(
 
         return a * x**2 + c
 
-    potential = jpu.numpy.where((k2 < x1), interp_func(k2), potential)
+    potential = jnpu.where((k2 < x1), interp_func(k2), potential)
 
     # Step 3: Calculate V_(k)
     return k2, potential, g0_T_r
@@ -250,7 +259,7 @@ def pauli_potential_from_classical_map_SpinSeparated(
 
 @jax.jit
 def construct_alpha_matrix(n: jnp.ndarray | Quantity):
-    d = jpu.numpy.cbrt(
+    d = jnpu.cbrt(
         3 / (4 * jnp.pi * (n[:, jnp.newaxis] * n[jnp.newaxis, :]) ** (1 / 2))
     )
 
@@ -259,7 +268,7 @@ def construct_alpha_matrix(n: jnp.ndarray | Quantity):
 
 @jax.jit
 def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
-    return jpu.numpy.outer(q, q)
+    return jnpu.outer(q, q)
 
 
 class HNCPotential(metaclass=abc.ABCMeta):
@@ -285,7 +294,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
             "off", "SpinAveraged", "SpinSeparated"
         ] = "off",
     ):
-        self._transform_r = jpu.numpy.linspace(1e-4, 1e4, 2**21) * ureg.a_0
+        self._transform_r = jnpu.linspace(1e-4, 1e4, 2**21) * ureg.a_0
 
         self.model_key = ""
 
@@ -322,7 +331,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
-        return self.full_r(plasma_state, r) * jpu.numpy.exp(
+        return self.full_r(plasma_state, r) * jnpu.exp(
             -self.alpha(plasma_state) * _r
         )
 
@@ -338,7 +347,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
         return self.full_r(plasma_state, r) * (
-            1 - jpu.numpy.exp(-self.alpha(plasma_state) * _r)
+            1 - jnpu.exp(-self.alpha(plasma_state) * _r)
         )
 
     @jax.jit
@@ -406,7 +415,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
             )
         else:
             m = plasma_state.atomic_masses
-        mu = jpu.numpy.outer(m, m) / (m[:, jnp.newaxis] + m[jnp.newaxis, :])
+        mu = jnpu.outer(m, m) / (m[:, jnp.newaxis] + m[jnp.newaxis, :])
         return mu[:, :, jnp.newaxis]
 
     def T(self, plasma_state):
@@ -483,7 +492,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
     def lambda_ab(self, plasma_state):
         # Compared to Gregori.2003, there is a pi missing
-        l_ab = ureg.hbar * jpu.numpy.sqrt(
+        l_ab = ureg.hbar * jnpu.sqrt(
             1 / (2 * self.mu(plasma_state) * ureg.k_B * self.T(plasma_state))
         )
         return l_ab
@@ -802,7 +811,7 @@ class DebyeHueckelPotential(HNCPotential):
         return (
             self.q2(plasma_state)
             / (4 * jnp.pi * ureg.epsilon_0 * _r)
-            * jpu.numpy.exp(-self.kappa(plasma_state) * r)
+            * jnpu.exp(-self.kappa(plasma_state) * r)
         )
 
     @jax.jit
@@ -864,7 +873,7 @@ class KelbgPotential(HNCPotential):
             / (4 * jnp.pi * ureg.epsilon_0 * _r)
             * (
                 1
-                - jpu.numpy.exp(-(_r**2) / self.lambda_ab(plasma_state) ** 2)
+                - jnpu.exp(-(_r**2) / self.lambda_ab(plasma_state) ** 2)
                 + (jnp.sqrt(jnp.pi) * _r / self.lambda_ab(plasma_state))
                 * (
                     1
@@ -896,7 +905,7 @@ class KelbgPotential(HNCPotential):
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
         c_full_r = self.q2(plasma_state) / (4 * jnp.pi * ureg.epsilon_0 * _r)
-        return c_full_r * (1 - jpu.numpy.exp(-self.alpha(plasma_state) * _r))
+        return c_full_r * (1 - jnpu.exp(-self.alpha(plasma_state) * _r))
 
     @jax.jit
     def long_k(self, plasma_state, k: Quantity):
@@ -986,7 +995,7 @@ class KelbgPotential(HNCPotential):
     #     return (
     #         self.q2(plasma_state)
     #         / (4 * jnp.pi * ureg.epsilon_0 * _r)
-    #         * (1 - jpu.numpy.exp(-(_r**2) / self.lambda_ab(plasma_state) ** 2))
+    #         * (1 - jnpu.exp(-(_r**2) / self.lambda_ab(plasma_state) ** 2))
     #     )
 
 
@@ -1036,7 +1045,7 @@ class KlimontovichKraeftPotential(HNCPotential):
         factor = ureg.k_B * self.T(plasma_state) * xi**2
         denominator = (
             16
-            * jpu.numpy.absolute(self.q2(plasma_state))
+            * jnpu.absolute(self.q2(plasma_state))
             / (4 * jnp.pi * ureg.epsilon_0)
         )
         return pref * (1 + (factor / denominator) * _r) ** (-1)
@@ -1064,7 +1073,7 @@ class DeutschPotential(HNCPotential):
             / (4 * jnp.pi * ureg.epsilon_0 * _r)
             * (
                 1
-                - jpu.numpy.exp(
+                - jnpu.exp(
                     -_r / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))
                 )
             )
@@ -1110,7 +1119,7 @@ class DeutschPotential(HNCPotential):
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
         c_full_r = self.q2(plasma_state) / (4 * jnp.pi * ureg.epsilon_0 * _r)
-        return c_full_r * (1 - jpu.numpy.exp(-self.alpha(plasma_state) * _r))
+        return c_full_r * (1 - jnpu.exp(-self.alpha(plasma_state) * _r))
 
     @jax.jit
     def long_k(self, plasma_state, k: Quantity):
@@ -1186,7 +1195,7 @@ class EmptyCorePotential(HNCPotential):
             self.q2(plasma_state)
             / ureg.vacuum_permittivity
             / _k**2
-            * jpu.numpy.cos(_k * self.r_cut(plasma_state))
+            * jnpu.cos(_k * self.r_cut(plasma_state))
         )
 
     @jax.jit
@@ -1258,7 +1267,7 @@ class SoftCorePotential(HNCPotential):
 
         """
         _r = r[jnp.newaxis, jnp.newaxis, :]
-        exp_part = 1 - jpu.numpy.exp(
+        exp_part = 1 - jnpu.exp(
             -(
                 (_r / self.r_cut(plasma_state)).m_as(ureg.dimensionless)
                 ** self.beta
@@ -1283,7 +1292,7 @@ class SoftCorePotential(HNCPotential):
         _k = k[jnp.newaxis, jnp.newaxis, :]
         # Define a auxiliary short-range version of this potential; While it is
         # not used, actually, it is easier to Fourier transform.
-        exp_part = jpu.numpy.exp(
+        exp_part = jnpu.exp(
             -(
                 (self._transform_r / self.r_cut(plasma_state)).m_as(
                     ureg.dimensionless
@@ -1362,7 +1371,7 @@ class PauliClassicalMap(HNCPotential):
         _r = jnp.pi / k[-1] + jnp.arange(len(k)) * dr
 
         pot = 21
-        r_calc = jpu.numpy.linspace(1e-3 * ureg.a0, 1e4 * ureg.a0, 2**pot)
+        r_calc = jnpu.linspace(1e-3 * ureg.a0, 1e4 * ureg.a0, 2**pot)
 
         if self.include_electrons == "SpinSeparated":
 
@@ -1388,8 +1397,10 @@ class PauliClassicalMap(HNCPotential):
                 * ureg.angstrom**3
             )
         elif self.include_electrons == "SpinAveraged":
-            k_, exchange, g0_T_r = pauli_potential_from_classical_map_SpinAveraged(
-                r_calc, _r, plasma_state.n_e, plasma_state.T_e
+            k_, exchange, g0_T_r = (
+                pauli_potential_from_classical_map_SpinAveraged(
+                    r_calc, _r, plasma_state.n_e, plasma_state.T_e
+                )
             )
 
             # Set the parts that are not electron_electron exchange to zero
@@ -1427,8 +1438,8 @@ class PauliClassicalMap(HNCPotential):
 
         # f1 = V_P_r.m_as(ureg.electron_volt).at[index1].get() * 1 * ureg.electron_volt
         # f2 = V_P_r.m_as(ureg.electron_volt).at[index2].get() * 1 * ureg.electron_volt
-        # x1 = r.m_as(ureg.a0).at[index1].get() * (1 * ureg.a0) 
-        # x2 = r.m_as(ureg.a0).at[index2].get() * (1 * ureg.a0) 
+        # x1 = r.m_as(ureg.a0).at[index1].get() * (1 * ureg.a0)
+        # x2 = r.m_as(ureg.a0).at[index2].get() * (1 * ureg.a0)
 
         # def interp_func(x):
 
@@ -1437,9 +1448,8 @@ class PauliClassicalMap(HNCPotential):
 
         #     return a * x + c
 
-
         # print(interp_func(r))
-        # V_P_r = jpu.numpy.where((r.m_as(ureg.a0) < x1.m_as(ureg.a0)), interp_func(r), V_P_r)
+        # V_P_r = jnpu.where((r.m_as(ureg.a0) < x1.m_as(ureg.a0)), interp_func(r), V_P_r)
 
         return V_P_r
 
@@ -1489,8 +1499,8 @@ class SpinSeparatedEEExchange(HNCPotential):
         _r = r[jnp.newaxis, jnp.newaxis, :]
         exchange = (
             (-1 * ureg.k_B * self.T(plasma_state))
-            * jpu.numpy.log(
-                1 - jpu.numpy.exp(-(_r**2 / self.lambda_ab(plasma_state) ** 2))
+            * jnpu.log(
+                1 - jnpu.exp(-(_r**2 / self.lambda_ab(plasma_state) ** 2))
             )
             * jnp.eye(len(self.mu(plasma_state)))[:, :, jnp.newaxis]
         )
@@ -1522,10 +1532,18 @@ class SpinAveragedEEExchange(HNCPotential):
         exchange = (
             (ureg.k_B * self.T(plasma_state))
             * jnp.log(2)
-            * jpu.numpy.exp(
-                (-1
-                / (jnp.pi * jnp.log(2))
-                * ((_r / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))).m_as(ureg.dimensionless)) ** 2)
+            * jnpu.exp(
+                (
+                    -1
+                    / (jnp.pi * jnp.log(2))
+                    * (
+                        (
+                            _r
+                            / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))
+                        ).m_as(ureg.dimensionless)
+                    )
+                    ** 2
+                )
             )
             * jnp.eye(plasma_state.nions + 1)[:, :, jnp.newaxis]
         )
@@ -1533,11 +1551,7 @@ class SpinAveragedEEExchange(HNCPotential):
         exchange = (
             exchange.m_as(ureg.electron_volt)
             .at[: plasma_state.nions, : plasma_state.nions, :]
-            .set(
-                jnp.zeros(
-                    (plasma_state.nions, plasma_state.nions, len(_r))
-                )
-            )
+            .set(jnp.zeros((plasma_state.nions, plasma_state.nions, len(_r))))
             * ureg.electron_volt
         )
         return exchange
@@ -1552,8 +1566,6 @@ class SpinAveragedEEExchange(HNCPotential):
         V_P_k = _3Dfour(k, r, self.full_r(plasma_state, r))
 
         return V_P_k
-
-
 
 
 @jax.jit

@@ -180,7 +180,6 @@ def wiegner_seitz_radius(n_e: Quantity) -> Quantity:
 
 
 def chem_pot_sommerfeld_fermi_interpolation(T: Quantity, n_e: Quantity):
-
     """Interpolation function for the chemical potential of a non-interacting (ideal) fermi gas
     given in the paper of :cite:`Cowan.2019`.
     """

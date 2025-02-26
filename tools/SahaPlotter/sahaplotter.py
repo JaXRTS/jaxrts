@@ -34,7 +34,6 @@ import jaxrts.elements
 
 import jax.numpy as jnp
 import jpu.numpy as jnpu
-import jpu
 
 import jaxrts
 

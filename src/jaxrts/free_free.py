@@ -8,7 +8,6 @@ from functools import partial
 from typing import List
 
 import jax
-import jpu
 from jax import jit
 from jax import numpy as jnp
 from jpu import numpy as jnpu
@@ -106,16 +105,16 @@ def dielectric_function_salpeter(
 
     omega = (E / (1 * ureg.planck_constant / (2 * jnp.pi))).to_base_units()
 
-    v_t = jpu.numpy.sqrt(
+    v_t = jnpu.sqrt(
         ((1 * ureg.boltzmann_constant) * T_e) / (1 * ureg.electron_mass)
     ).to_base_units()
 
-    x_e = (omega / (jpu.numpy.sqrt(2) * k * v_t)).to_base_units()
+    x_e = (omega / (jnpu.sqrt(2) * k * v_t)).to_base_units()
 
     kappa = (
         (1 * ureg.planck_constant / (2 * jnp.pi))
         * k
-        / (2 * jpu.numpy.sqrt(2) * (1 * ureg.electron_mass) * v_t)
+        / (2 * jnpu.sqrt(2) * (1 * ureg.electron_mass) * v_t)
     ).to_base_units()
 
     # The electron plasma frequency
@@ -179,7 +178,7 @@ def S0ee_from_dielectric_func_FDT(
 
     res = -(
         (1 * ureg.hbar)
-        / (1 - jpu.numpy.exp(-(E / (1 * ureg.boltzmann_constant * T_e))))
+        / (1 - jnpu.exp(-(E / (1 * ureg.boltzmann_constant * T_e))))
         * (
             ((1 * ureg.vacuum_permittivity) * k**2)
             / (jnp.pi * (1 * ureg.elementary_charge) ** 2 * n_e)
@@ -236,7 +235,7 @@ def S0ee_from_susceptibility_FDT(
     Vee = coulomb_potential_fourier(-1, -1, k)
     res = -(
         ((1 * ureg.hbar) / (jnp.pi * n_e * Vee))
-        / (1 - jpu.numpy.exp(-(E / (1 * ureg.boltzmann_constant * T_e))))
+        / (1 - jnpu.exp(-(E / (1 * ureg.boltzmann_constant * T_e))))
         * jnp.imag((susceptibility * Vee).m_as(ureg.dimensionless))
     ).to_base_units()
 
@@ -1050,13 +1049,13 @@ def inverse_screening_length_exact(T: Quantity, chem_pot: Quantity):
     )
     integral_debye *= (1 * ureg.electron_volt) ** (1 / 2)
 
-    return jpu.numpy.sqrt(prefactor_debye * integral_debye)
+    return jnpu.sqrt(prefactor_debye * integral_debye)
 
 
 @jit
 def inverse_screening_length_non_degenerate(n_e: Quantity, T: Quantity):
 
-    return jpu.numpy.sqrt(
+    return jnpu.sqrt(
         n_e
         * ureg.elementary_charge**2
         / (ureg.epsilon_0 * ureg.boltzmann_constant * T)
