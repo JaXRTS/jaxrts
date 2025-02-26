@@ -7,7 +7,7 @@ from functools import partial
 
 import jax
 import jax.interpreters
-import jpu
+import jpu.numpy as jnpu
 from jax import numpy as jnp
 
 from jaxrts.units import Quantity, ureg
@@ -66,7 +66,7 @@ def fourier_transform_ogata(k, r, f, N, h):
     y_k = jnp.pi * psi(h * r_k) / h
 
     def internal(onek):
-        f_int = jpu.numpy.interp(
+        f_int = jnpu.interp(
             x=y_k / onek,
             xp=r,
             fp=f * r ** (3 / 2),
@@ -79,7 +79,7 @@ def fourier_transform_ogata(k, r, f, N, h):
         w_k = bessel_2ndkind_0_5(jnp.pi * r_k) / bessel_3_2(jnp.pi * r_k)
         series_sum = jnp.pi * w_k * f_int * bessel_0_5(y_k) * dpsi_k
 
-        res = (jpu.numpy.nansum(series_sum) / onek**3) * (onek ** (3 / 2))
+        res = (jnpu.nansum(series_sum) / onek**3) * (onek ** (3 / 2))
 
         return res * (2 * jnp.pi) ** (3 / 2)
 
@@ -518,13 +518,13 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
         reached, or if convergence was reached.
         """
         _, Ns_r, Ns_r_old, n_iter = val
-        err = jpu.numpy.sum((Ns_r - Ns_r_old) ** 2)
+        err = jnpu.sum((Ns_r - Ns_r_old) ** 2)
         return (n_iter < 2000) & jnp.all(err > delta)
 
     def step(val):
         log_g_r, Ns_r, _, i = val
 
-        h_r = jpu.numpy.expm1(log_g_r)
+        h_r = jnpu.expm1(log_g_r)
 
         cs_r = h_r - Ns_r
 
@@ -565,7 +565,7 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
     )
     log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
 
-    return jpu.numpy.exp(log_g_r), niter
+    return jnpu.exp(log_g_r), niter
 
 
 @jax.jit
@@ -604,9 +604,9 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0):
         """
         Ornstein-Zernicke Relation
         """
-        return jpu.numpy.matmul(
+        return jnpu.matmul(
             jnp.linalg.inv(
-                (jnp.eye(ni.shape[0]) - jpu.numpy.matmul(input_vec, d)).m_as(
+                (jnp.eye(ni.shape[0]) - jnpu.matmul(input_vec, d)).m_as(
                     ureg.dimensionless
                 )
             ),
@@ -619,13 +619,13 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0):
         reached, or if convergence was reached.
         """
         _, Ns_r, Ns_r_old, n_iter = val
-        err = jpu.numpy.sum((Ns_r - Ns_r_old) ** 2)
+        err = jnpu.sum((Ns_r - Ns_r_old) ** 2)
         return (n_iter < 2000) & jnp.all(err > delta)
 
     def step(val):
         log_g_r, Ns_r, _, i = val
 
-        h_r = jpu.numpy.expm1(log_g_r)
+        h_r = jnpu.expm1(log_g_r)
 
         cs_r = h_r - Ns_r
 
@@ -656,7 +656,7 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0):
     init = (log_g_r0, Ns_r0, Ns_r0 - 1, 0)
     log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
 
-    return jpu.numpy.exp(log_g_r), niter
+    return jnpu.exp(log_g_r), niter
 
 
 def geometric_mean_T(T):
@@ -669,7 +669,7 @@ def geometric_mean_T(T):
        \\bar{T}_{ab} = \\sqrt{T_aT_b}
     """
 
-    return jpu.numpy.sqrt(T[jnp.newaxis, :] * T[:, jnp.newaxis])
+    return jnpu.sqrt(T[jnp.newaxis, :] * T[:, jnp.newaxis])
 
 
 def mass_weighted_T(m, T):
@@ -707,7 +707,7 @@ def S_ii_HNC(k: Quantity, pdf, ni, r):
                 r,
                 pdf - 1.0,
             )
-            * jpu.numpy.sqrt(jpu.numpy.outer(ni, ni))[:, :, jnp.newaxis]
+            * jnpu.sqrt(jnpu.outer(ni, ni))[:, :, jnp.newaxis]
         )
     ).m_as(ureg.dimensionless)
 
@@ -718,7 +718,7 @@ def S_ii_HNC(k: Quantity, pdf, ni, r):
 
 #: The equivalent of jnp.interp for HNC-shaped arrays
 hnc_interp = jax.vmap(
-    jax.vmap(jpu.numpy.interp, in_axes=(None, None, 0), out_axes=0),
+    jax.vmap(jnpu.interp, in_axes=(None, None, 0), out_axes=0),
     in_axes=(None, None, 1),
     out_axes=1,
 )

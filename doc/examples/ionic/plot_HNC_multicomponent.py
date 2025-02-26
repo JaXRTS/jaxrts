@@ -9,7 +9,7 @@ use the HNC approximation with different ion species.
 from pathlib import Path
 
 import jax.numpy as jnp
-import jpu
+import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
 import numpy as onp
 
@@ -35,10 +35,10 @@ state = jaxrts.PlasmaState(
 )
 
 pot = 15
-r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 1000 * ureg.a0, 2**pot)
+r = jnpu.linspace(0.0001 * ureg.angstrom, 1000 * ureg.a0, 2**pot)
 
 # We add densities, here. Maybe this is wrong.
-d = jpu.numpy.cbrt(
+d = jnpu.cbrt(
     3 / (4 * jnp.pi * (state.n_i[:, jnp.newaxis] + state.n_i[jnp.newaxis, :]))
 )
 

@@ -17,7 +17,7 @@ This plot shows quite plainly, notable differences between various models.
 """
 
 import jax.numpy as jnp
-import jpu
+import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
 
 import jaxrts
@@ -54,7 +54,7 @@ lambda_ab = -KK.q2(state) / (4 * jnp.pi * ureg.epsilon_0 * 5 * ureg.rydberg)
 
 
 n = jaxrts.units.to_array([state.n_i[0], state.n_e])
-d = jpu.numpy.cbrt(
+d = jnpu.cbrt(
     3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :]) / 2)
 )
 

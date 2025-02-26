@@ -11,7 +11,7 @@ interaction.
 
 import jax.numpy as jnp
 import jaxrts
-import jpu
+import jpu.numpy as jnpu
 
 import matplotlib.pyplot as plt
 import scienceplots  # noqa: F401
@@ -28,9 +28,9 @@ state = jaxrts.PlasmaState(
 )
 
 pot = 16
-r = jpu.numpy.linspace(1e-1 * ureg.a0, 5e3 * ureg.a0, 2**pot)
+r = jnpu.linspace(1e-1 * ureg.a0, 5e3 * ureg.a0, 2**pot)
 
-d = jpu.numpy.cbrt(
+d = jnpu.cbrt(
     3 / (4 * jnp.pi * (state.n_i[:, jnp.newaxis] + state.n_i[jnp.newaxis, :])/2)
 )
 

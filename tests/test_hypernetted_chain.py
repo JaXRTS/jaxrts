@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-import jpu
+import jpu.numpy as jnpu
 import numpy as onp
 from jax import numpy as jnp
 
@@ -74,7 +74,7 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
     )
 
     for Gamma, pot in zip([1, 10, 30, 100], [13, 13, 15, 16]):
-        r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 2**pot)
+        r = jnpu.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 2**pot)
 
         dr = r[1] - r[0]
         dk = jnp.pi / (len(r) * dr)
@@ -107,7 +107,7 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
             delimiter=", ",
         )
 
-        d = jpu.numpy.cbrt(
+        d = jnpu.cbrt(
             3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :]) / 2)
         )
         g, niter = hnc.pair_distribution_function_HNC(
@@ -172,7 +172,7 @@ def test_linear_response_screening_gericke2010_literature():
             delimiter=",",
         )
         klit *= 1 / ureg.a_0
-        q_interp = jpu.numpy.interp(klit, k, q[0, 1, :])
+        q_interp = jnpu.interp(klit, k, q[0, 1, :])
         assert (
             jnp.max(jnp.abs(q_interp.m_as(ureg.dimensionless) - qlit)) < 0.03
         )
@@ -197,10 +197,10 @@ def test_multicomponent_wunsch2011_literature():
     )
 
     pot = 15
-    r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 1000 * ureg.a0, 2**pot)
+    r = jnpu.linspace(0.0001 * ureg.angstrom, 1000 * ureg.a0, 2**pot)
 
     # We add densities, here. Maybe this is wrong.
-    d = jpu.numpy.cbrt(
+    d = jnpu.cbrt(
         3
         / (
             4
@@ -238,17 +238,17 @@ def test_multicomponent_wunsch2011_literature():
             unpack=True,
             delimiter=",",
         )
-        g_interp = jpu.numpy.interp(xlit * d[0, 0], r, g[idx])
-        S_interp = jpu.numpy.interp(klit / d[0, 0], k, S_ii[idx])
+        g_interp = jnpu.interp(xlit * d[0, 0], r, g[idx])
+        S_interp = jnpu.interp(klit / d[0, 0], k, S_ii[idx])
         assert (
             jnp.max(
-                jpu.numpy.absolute(glit - g_interp).m_as(ureg.dimensionless)
+                jnpu.absolute(glit - g_interp).m_as(ureg.dimensionless)
             )
             < 0.03
         )
         assert (
             jnp.max(
-                jpu.numpy.absolute(Slit - S_interp).m_as(ureg.dimensionless)
+                jnpu.absolute(Slit - S_interp).m_as(ureg.dimensionless)
             )
             < 0.03
         )

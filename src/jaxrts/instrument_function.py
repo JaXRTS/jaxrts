@@ -8,7 +8,7 @@ from pathlib import Path
 
 import jax
 import jax.numpy as jnp
-import jpu
+import jpu.numpy as jnpu
 import numpy as onp
 
 from .units import Quantity
@@ -33,7 +33,7 @@ def instrument_gaussian(
 
     """
 
-    return (1.0 / (sigma * jnp.sqrt(2 * jnp.pi))) * jpu.numpy.exp(
+    return (1.0 / (sigma * jnp.sqrt(2 * jnp.pi))) * jnpu.exp(
         -0.5 * x**2 / sigma**2
     )
 

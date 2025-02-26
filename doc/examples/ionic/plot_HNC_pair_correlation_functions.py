@@ -14,7 +14,7 @@ Figure in the literature by :cite:`Wunsch.2011`.
 """
 
 import jax.numpy as jnp
-import jpu
+import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
 
 import jaxrts
@@ -35,7 +35,7 @@ state = jaxrts.PlasmaState(
 
 for idx, Gamma in enumerate([1, 10, 30, 100]):
     pot = [13, 13, 15, 16][idx]
-    r = jpu.numpy.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 2**pot)
+    r = jnpu.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 2**pot)
     dr = r[1] - r[0]
     dk = jnp.pi / (len(r) * dr)
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
@@ -55,7 +55,7 @@ for idx, Gamma in enumerate([1, 10, 30, 100]):
     n = jaxrts.units.to_array([n])
     state.mass_density = dens
 
-    d = jpu.numpy.cbrt(
+    d = jnpu.cbrt(
         3
         / (
             4

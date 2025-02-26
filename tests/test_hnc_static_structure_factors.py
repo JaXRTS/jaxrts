@@ -1,4 +1,4 @@
-import jpu
+import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
 from jax import numpy as jnp
 
@@ -28,7 +28,7 @@ def main():
             1 / ureg.angstrom**3
         )
 
-        d = jpu.numpy.cbrt(
+        d = jnpu.cbrt(
             3 / (4 * jnp.pi * (n_i[:, jnp.newaxis] + n_i[jnp.newaxis, :]) / 2)
         )
 
@@ -41,7 +41,7 @@ def main():
             / (4 * jnp.pi * 1 * ureg.epsilon_0 * d)
         ) / (1 * ureg.boltzmann_constant * T)
 
-        r = jpu.numpy.linspace(0.001 * ureg.angstrom, 1000 * ureg.a0, 2**14)
+        r = jnpu.linspace(0.001 * ureg.angstrom, 1000 * ureg.a0, 2**14)
 
         alpha = jaxrts.hnc_potentials.construct_alpha_matrix(n_i)
 
