@@ -54,9 +54,7 @@ lambda_ab = -KK.q2(state) / (4 * jnp.pi * ureg.epsilon_0 * 5 * ureg.rydberg)
 
 
 n = jaxrts.units.to_array([state.n_i[0], state.n_e])
-d = jnpu.cbrt(
-    3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :]) / 2)
-)
+d = jnpu.cbrt(3 / (4 * jnp.pi * (n[:, jnp.newaxis] + n[jnp.newaxis, :]) / 2))
 
 print(lambda_ab.to(ureg.angstrom))
 

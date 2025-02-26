@@ -37,6 +37,7 @@ from jaxrts.units import Quantity, to_array, ureg
 
 logger = logging.getLogger(__name__)
 
+
 @jax.jit
 def pauli_potential_from_classical_map_SpinAveraged(
     r1: jnp.ndarray, r2: jnp.ndarray, n_e: Quantity, T: Quantity
@@ -105,17 +106,21 @@ def pauli_potential_from_classical_map_SpinAveraged(
     cs_k = h0_T_k - N_k
     c_k = h0_T_k / (1 + n_e * h0_T_k)
 
-    potential = ((cs_k - c_k) * (1 * ureg.boltzmann_constant * T))
+    potential = (cs_k - c_k) * (1 * ureg.boltzmann_constant * T)
 
     # Interpolate values close to origin to fix divergences
 
-    index1 = jnp.argmax(jnp.where(k2.m_as(1 / ureg.angstrom) < 0.8, jnp.arange(k2.size), -1.0))
-    index2 = jnp.argmax(jnp.where(k2.m_as(1 / ureg.angstrom) < 1.0, jnp.arange(k2.size), -1.0))
+    index1 = jnp.argmax(
+        jnp.where(k2.m_as(1 / ureg.angstrom) < 0.8, jnp.arange(k2.size), -1.0)
+    )
+    index2 = jnp.argmax(
+        jnp.where(k2.m_as(1 / ureg.angstrom) < 1.0, jnp.arange(k2.size), -1.0)
+    )
 
-    f1 = potential.at[index1].get() * 1 * ureg.electron_volt * ureg.a0 **3
-    f2 = potential.at[index2].get() * 1 * ureg.electron_volt * ureg.a0 **3
-    x1 = k2.at[index1].get() / (1 * ureg.a0) 
-    x2 = k2.at[index2].get() / (1 * ureg.a0) 
+    f1 = potential.at[index1].get() * 1 * ureg.electron_volt * ureg.a0**3
+    f2 = potential.at[index2].get() * 1 * ureg.electron_volt * ureg.a0**3
+    x1 = k2.at[index1].get() / (1 * ureg.a0)
+    x2 = k2.at[index2].get() / (1 * ureg.a0)
 
     def interp_func(x):
 
@@ -225,14 +230,18 @@ def pauli_potential_from_classical_map_SpinSeparated(
 
     potential = (cs_k - c_k) * (1 * ureg.boltzmann_constant * T)
 
-    index1 = jnp.argmax(jnp.where(k2.m_as(1 / ureg.angstrom) < 1.0, jnp.arange(k2.size), -1.0))
-    index2 = jnp.argmax(jnp.where(k2.m_as(1 / ureg.angstrom) < 2.0, jnp.arange(k2.size), -1.0))
+    index1 = jnp.argmax(
+        jnp.where(k2.m_as(1 / ureg.angstrom) < 1.0, jnp.arange(k2.size), -1.0)
+    )
+    index2 = jnp.argmax(
+        jnp.where(k2.m_as(1 / ureg.angstrom) < 2.0, jnp.arange(k2.size), -1.0)
+    )
 
-    f1 = potential.at[1,1, index1].get() * 1 * ureg.electron_volt * ureg.a0 **3
-    
-    f2 = potential.at[1,1, index2].get() * 1 * ureg.electron_volt * ureg.a0 **3
+    f1 = potential.at[1, 1, index1].get() * 1 * ureg.electron_volt * ureg.a0**3
 
-    x1 = k2.at[index1].get() / (1 * ureg.a0) 
+    f2 = potential.at[1, 1, index2].get() * 1 * ureg.electron_volt * ureg.a0**3
+
+    x1 = k2.at[index1].get() / (1 * ureg.a0)
     x2 = k2.at[index2].get() / (1 * ureg.a0)
 
     def interp_func(x):
@@ -1388,8 +1397,10 @@ class PauliClassicalMap(HNCPotential):
                 * ureg.angstrom**3
             )
         elif self.include_electrons == "SpinAveraged":
-            k_, exchange, g0_T_r = pauli_potential_from_classical_map_SpinAveraged(
-                r_calc, _r, plasma_state.n_e, plasma_state.T_e
+            k_, exchange, g0_T_r = (
+                pauli_potential_from_classical_map_SpinAveraged(
+                    r_calc, _r, plasma_state.n_e, plasma_state.T_e
+                )
             )
 
             # Set the parts that are not electron_electron exchange to zero
@@ -1427,8 +1438,8 @@ class PauliClassicalMap(HNCPotential):
 
         # f1 = V_P_r.m_as(ureg.electron_volt).at[index1].get() * 1 * ureg.electron_volt
         # f2 = V_P_r.m_as(ureg.electron_volt).at[index2].get() * 1 * ureg.electron_volt
-        # x1 = r.m_as(ureg.a0).at[index1].get() * (1 * ureg.a0) 
-        # x2 = r.m_as(ureg.a0).at[index2].get() * (1 * ureg.a0) 
+        # x1 = r.m_as(ureg.a0).at[index1].get() * (1 * ureg.a0)
+        # x2 = r.m_as(ureg.a0).at[index2].get() * (1 * ureg.a0)
 
         # def interp_func(x):
 
@@ -1436,7 +1447,6 @@ class PauliClassicalMap(HNCPotential):
         #     c = f1 - a * x1
 
         #     return a * x + c
-
 
         # print(interp_func(r))
         # V_P_r = jnpu.where((r.m_as(ureg.a0) < x1.m_as(ureg.a0)), interp_func(r), V_P_r)
@@ -1523,9 +1533,17 @@ class SpinAveragedEEExchange(HNCPotential):
             (ureg.k_B * self.T(plasma_state))
             * jnp.log(2)
             * jnpu.exp(
-                (-1
-                / (jnp.pi * jnp.log(2))
-                * ((_r / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))).m_as(ureg.dimensionless)) ** 2)
+                (
+                    -1
+                    / (jnp.pi * jnp.log(2))
+                    * (
+                        (
+                            _r
+                            / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))
+                        ).m_as(ureg.dimensionless)
+                    )
+                    ** 2
+                )
             )
             * jnp.eye(plasma_state.nions + 1)[:, :, jnp.newaxis]
         )
@@ -1533,11 +1551,7 @@ class SpinAveragedEEExchange(HNCPotential):
         exchange = (
             exchange.m_as(ureg.electron_volt)
             .at[: plasma_state.nions, : plasma_state.nions, :]
-            .set(
-                jnp.zeros(
-                    (plasma_state.nions, plasma_state.nions, len(_r))
-                )
-            )
+            .set(jnp.zeros((plasma_state.nions, plasma_state.nions, len(_r))))
             * ureg.electron_volt
         )
         return exchange
@@ -1552,8 +1566,6 @@ class SpinAveragedEEExchange(HNCPotential):
         V_P_k = _3Dfour(k, r, self.full_r(plasma_state, r))
 
         return V_P_k
-
-
 
 
 @jax.jit

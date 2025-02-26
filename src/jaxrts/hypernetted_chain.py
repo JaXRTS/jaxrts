@@ -12,6 +12,7 @@ from jax import numpy as jnp
 
 from jaxrts.units import Quantity, ureg
 
+
 # Helper functions.
 @jax.jit
 def psi(t):
@@ -358,6 +359,7 @@ _3Dfour_ogata = jax.vmap(
 
 _3Dfour = _3Dfour_sine
 
+
 @jax.jit
 def pair_distribution_function_two_component_SVT_HNC_ei(
     V_s, V_l_k, r, T_ab, n, m, mix=0.0
@@ -663,7 +665,7 @@ def geometric_mean_T(T):
     """
     Returns the geometric mean of a given temperature pair, according to
     :cite:`Schwarz.2007`.
-    
+
     .. math::
 
        \\bar{T}_{ab} = \\sqrt{T_aT_b}

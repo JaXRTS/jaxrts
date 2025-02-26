@@ -241,15 +241,11 @@ def test_multicomponent_wunsch2011_literature():
         g_interp = jnpu.interp(xlit * d[0, 0], r, g[idx])
         S_interp = jnpu.interp(klit / d[0, 0], k, S_ii[idx])
         assert (
-            jnp.max(
-                jnpu.absolute(glit - g_interp).m_as(ureg.dimensionless)
-            )
+            jnp.max(jnpu.absolute(glit - g_interp).m_as(ureg.dimensionless))
             < 0.03
         )
         assert (
-            jnp.max(
-                jnpu.absolute(Slit - S_interp).m_as(ureg.dimensionless)
-            )
+            jnp.max(jnpu.absolute(Slit - S_interp).m_as(ureg.dimensionless))
             < 0.03
         )
 

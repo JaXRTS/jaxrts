@@ -32,7 +32,9 @@ def main():
             3 / (4 * jnp.pi * (n_i[:, jnp.newaxis] + n_i[jnp.newaxis, :]) / 2)
         )
 
-        q = jaxrts.hnc_potentials.construct_q_matrix(jnp.array([1]) * Z * ureg.elementary_charge)
+        q = jaxrts.hnc_potentials.construct_q_matrix(
+            jnp.array([1]) * Z * ureg.elementary_charge
+        )
 
         Gamma = (
             Z**2
@@ -55,7 +57,9 @@ def main():
         # V_l = hnc.V_screened_C_l_r(r, q, alpha)
         # V_l_k, _ = hnc.transformPotential(V_l, r)
 
-        g, niter = jaxrts.hypernetted_chain.pair_distribution_function_HNC(V_s, V_l_k, r, T, n_i)
+        g, niter = jaxrts.hypernetted_chain.pair_distribution_function_HNC(
+            V_s, V_l_k, r, T, n_i
+        )
 
         S_k = jaxrts.hypernetted_chain.S_ii_HNC(k, g, n_i, r)
 

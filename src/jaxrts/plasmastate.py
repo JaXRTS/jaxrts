@@ -210,7 +210,6 @@ class PlasmaState:
             / (1 * ureg.boltzmann_constant)
         )
 
-
         return jnpu.sqrt(Tq**2 + self.T_e**2)
 
     @property

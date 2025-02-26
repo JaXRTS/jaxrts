@@ -12,9 +12,7 @@ from jaxrts import ureg
 
 plt.style.use("science")
 
-r = jnpu.linspace(0.001 * ureg.angstrom, 10 * ureg.a0, 2**12).to(
-    ureg.angstrom
-)
+r = jnpu.linspace(0.001 * ureg.angstrom, 10 * ureg.a0, 2**12).to(ureg.angstrom)
 
 dr = r[1] - r[0]
 dk = jnp.pi / (len(r) * dr)
