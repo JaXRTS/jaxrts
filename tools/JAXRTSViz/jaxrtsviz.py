@@ -1010,7 +1010,7 @@ class JAXRTSViz(QWidget):
         delete_row_button = QPushButton("-")
         delete_row_button.setFixedSize(20, 20)
         delete_row_button.clicked.connect(
-            lambda x: self.remove_row(x, self.elements_counter)
+            lambda x: self.remove_row(self.elements_counter)
         )
         self.button_layout.addWidget(delete_row_button)
         row_layout = QHBoxLayout()
@@ -1033,7 +1033,10 @@ class JAXRTSViz(QWidget):
         self.is_compiled = False
         self.toolbar.compile_status.repaint()
 
-    def remove_row(self, x, k):
+    def remove_row(self, k):
+        """
+        Remove a given element with indes `k`.
+        """
 
         for layout in self.dropdown_layouts:
             if layout.objectName() == "Element" + str(k):
@@ -1042,11 +1045,11 @@ class JAXRTSViz(QWidget):
                     item = layout.takeAt(0)
                     widget = item.widget()
                     if widget:
+                        if widget in self.textboxes:
+                            self.textboxes.remove(widget)
+                        if widget in self.comboBoxesList:
+                            self.comboBoxesList.remove(widget)
                         widget.deleteLater()
-                    else:
-                        sublayout = item.layout()
-                        if sublayout:
-                            self.remove_row(sublayout)
 
         self.elements_counter -= 1
 
