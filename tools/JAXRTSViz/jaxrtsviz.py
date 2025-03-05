@@ -1009,8 +1009,10 @@ class JAXRTSViz(QWidget):
         text_box2.setMaximumWidth(70)
         delete_row_button = QPushButton("-")
         delete_row_button.setFixedSize(20, 20)
+        # The lambda function is required with a second argument, so that
+        # elements_counter is fixed at it's current value.
         delete_row_button.clicked.connect(
-            lambda x: self.remove_row(self.elements_counter)
+            lambda x, elements_counter=self.elements_counter: self.remove_row(elements_counter)
         )
         self.button_layout.addWidget(delete_row_button)
         row_layout = QHBoxLayout()
