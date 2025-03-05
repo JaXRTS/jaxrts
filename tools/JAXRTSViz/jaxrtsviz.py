@@ -1,4 +1,5 @@
 import sys
+import argparse
 from pathlib import Path
 import json
 
@@ -93,8 +94,9 @@ class ConstantValueInputDialog(QDialog):
 
 
 class CustomTabWidget(QTabWidget):
-    def __init__(self, parent=None):
+    def __init__(self, debug: bool, parent=None):
         super().__init__(parent)
+        self.debug = debug
         self.opentabs = 1
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(self.close_tab)
@@ -106,7 +108,7 @@ class CustomTabWidget(QTabWidget):
 
     def add_new_tab(self):
         # Create a new JAXRTSViz widget
-        new_tab = JAXRTSViz()
+        new_tab = JAXRTSViz(self.debug)
         self.opentabs += 1
         # Insert the new tab before the "+" tab
         index = self.count() - 1
@@ -132,12 +134,12 @@ class CustomTabWidget(QTabWidget):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, debug):
         super().__init__()
         self.setWindowTitle("JAXRTSViz")
         self.setGeometry(20, 20, 1200, 850)
         # Create a CustomTabWidget
-        self.tabs = CustomTabWidget()
+        self.tabs = CustomTabWidget(debug=debug)
         self.setCentralWidget(self.tabs)
 
 
@@ -293,7 +295,7 @@ class CustomToolbar(NavigationToolbar):
 
 class JAXRTSViz(QWidget):
 
-    def __init__(self):
+    def __init__(self, debug: bool):
         super().__init__()
 
         self.base_models = [
@@ -303,6 +305,7 @@ class JAXRTSViz(QWidget):
             "free-bound scattering",
             "BM S_ii",
         ]
+        self.debug = debug
         self.current_models = []
         self.current_fwhm = 0.0
 
@@ -739,8 +742,9 @@ class JAXRTSViz(QWidget):
         self.console_worker.start()
 
         # Redirect stdout and stderr
-        # sys.stdout = EmittingStream(text_written=self.update_console_output)
-        # sys.stderr = EmittingStream(text_written=self.update_console_output)
+        if not self.debug:
+            sys.stdout = EmittingStream(text_written=self.update_console_output)
+            sys.stderr = EmittingStream(text_written=self.update_console_output)
 
         main_layout2.addWidget(self.console_output, 2)
 
@@ -1456,7 +1460,10 @@ class JAXRTSViz(QWidget):
 
 def main():
     app = QApplication(sys.argv)
-    main_window = MainWindow()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--debug", action="store_true", help="Don't re-route output for easier debugging")
+    args=parser.parse_args()
+    main_window = MainWindow(args.debug)
     main_window.show()
     sys.exit(app.exec_())
 
