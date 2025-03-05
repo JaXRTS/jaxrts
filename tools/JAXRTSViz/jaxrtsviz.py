@@ -320,7 +320,7 @@ class JAXRTSViz(QWidget):
         self.is_compiled = False
 
         self.offset_elements = 27
-        self.elements_counter = 0
+        self.elements_counter = 1
 
         self.atomic_number = {
             v: k for k, v in jaxrts.elements._element_symbols.items()
@@ -783,14 +783,12 @@ class JAXRTSViz(QWidget):
             with open(file_name, "r") as f:
                 state = json.load(f)
 
+            self.remove_all_additional_rows()
             # Extend the list of elements when loading a saved state
             number_of_elements = len(
                 [key for key in state.keys() if key.startswith("f_Element")]
             )
-            missing_elements = max(
-                0, number_of_elements - self.elements_counter - 1
-            )
-            for _ in range(missing_elements):
+            for _ in range(number_of_elements - 1):
                 self.add_new_row()
 
             for textbox in self.textboxes:
@@ -967,9 +965,7 @@ class JAXRTSViz(QWidget):
                 pass
 
     def add_new_row(self):
-
         self.elements_counter += 1
-
         for cb in self.comboBoxesList:
             try:
                 if "ionic scattering" in cb.objectName():
@@ -1035,9 +1031,22 @@ class JAXRTSViz(QWidget):
         self.is_compiled = False
         self.toolbar.compile_status.repaint()
 
+    def remove_all_additional_rows(self):
+        """
+        Removes all elements but the k==1 row.
+        """
+        to_remove = []
+        for layout in self.dropdown_layouts:
+            layout_name = layout.objectName()
+            if layout_name.startswith("Element"):
+                k = int(layout_name[len("Element"):])
+                to_remove.append(k)
+        for k in to_remove:
+            self.remove_row(k)
+
     def remove_row(self, k):
         """
-        Remove a given element with indes `k`.
+        Remove a given element with index `k`.
         """
 
         for layout in self.dropdown_layouts:
@@ -1080,8 +1089,6 @@ class JAXRTSViz(QWidget):
                         )
                 except:
                     pass
-
-        self.elements_counter = max(1, self.elements_counter)
 
     def on_toggle_probe(self, state, button):
         button.setEnabled(not self.toggle_probe_button.isChecked())
