@@ -757,40 +757,54 @@ class JAXRTSViz(QWidget):
             )
         )
         self.model_dropdown_menu.addAction(action)
-        
+
     def save_state(self):
         state = {}
         for textbox in self.textboxes:
             state[textbox.objectName()] = textbox.text()
         for combobox in self.comboBoxesList:
             state[combobox.objectName()] = combobox.currentText()
-        state['toggle_probe'] = self.toggle_probe_button.isChecked()
-        
-        file_name, _ = QFileDialog.getSaveFileName(self, "Save State", "", "JSON Files (*.json)")
+        state["toggle_probe"] = self.toggle_probe_button.isChecked()
+
+        file_name, _ = QFileDialog.getSaveFileName(
+            self, "Save State", "", "JSON Files (*.json)"
+        )
         if file_name:
-            with open(file_name, 'w') as f:
+            with open(file_name, "w") as f:
                 json.dump(state, f)
             print(f"State saved to {file_name}")
 
     def load_state(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Load State", "", "JSON Files (*.json)")
+        file_name, _ = QFileDialog.getOpenFileName(
+            self, "Load State", "", "JSON Files (*.json)"
+        )
         if file_name:
-            with open(file_name, 'r') as f:
+            with open(file_name, "r") as f:
                 state = json.load(f)
-            
+
+            # Extend the list of elements when loading a saved state
+            number_of_elements = len(
+                [key for key in state.keys() if key.startswith("f_Element")]
+            )
+            missing_elements = max(
+                0, number_of_elements - self.elements_counter - 1
+            )
+            for _ in range(missing_elements):
+                self.add_new_row()
+
             for textbox in self.textboxes:
                 if textbox.objectName() in state:
                     textbox.setText(state[textbox.objectName()])
-            
+
             for combobox in self.comboBoxesList:
                 if combobox.objectName() in state:
                     index = combobox.findText(state[combobox.objectName()])
                     if index >= 0:
                         combobox.setCurrentIndex(index)
-            
-            if 'toggle_probe' in state:
-                self.toggle_probe_button.setChecked(state['toggle_probe'])
-            
+
+            if "toggle_probe" in state:
+                self.toggle_probe_button.setChecked(state["toggle_probe"])
+
             print(f"State loaded from {file_name}")
             self.is_compiled = False
             self.toolbar.compile_status.repaint()
