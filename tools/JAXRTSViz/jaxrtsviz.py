@@ -59,14 +59,6 @@ from jaxrts.units import to_array, ureg
 base_colors = mcolors.BASE_COLORS
 
 
-def save_state():
-    pass
-
-
-def load_state():
-    pass
-
-
 class ConstantValueInputDialog(QDialog):
     def __init__(self, typ, unit_v):
         super().__init__()
@@ -269,11 +261,13 @@ class CustomToolbar(NavigationToolbar):
         self.models_norm_to_elastic.setFont(QFont(None, 8))
         self.models_norm_to_inelastic = QRadioButton("Norm to inelastic peak")
         self.models_norm_to_inelastic.setFont(QFont(None, 8))
+        self.models_remove_selected = QPushButton("delete")
+        self.models_remove_selected.setFont(QFont(None, 8))
 
         # Create a button group to ensure only one radio button can be selected at a time
         button_group = QButtonGroup(self)
         button_group.addButton(self.models_norm_to_elastic)
-        button_group.addButton(self.models_norm_to_inelastic)
+        button_group.addButton(self.models_remove_selected)
 
         # Create a layout to hold the radio buttons
         radiobutton_layout = QVBoxLayout()
@@ -281,6 +275,7 @@ class CustomToolbar(NavigationToolbar):
         radiobutton_layout.addWidget(self.comboBoxModels)
         radiobutton_layout.addWidget(self.models_norm_to_elastic)
         radiobutton_layout.addWidget(self.models_norm_to_inelastic)
+        radiobutton_layout.addWidget(self.models_remove_selected)
 
         # Create a widget to contain the layout
         radiobutton_widget = QWidget()
@@ -313,7 +308,9 @@ class JAXRTSViz(QWidget):
 
         self.instrument_function_data = []
         self.spectra_data = []
-        self.model_data = []
+        self.model_couter = 0
+        self.data_couter = 0
+        self.plotted_lines = {"Data": {}, "Models": {}}
 
         self.spectra_model_names = {"Data": [], "Models": []}
 
@@ -632,7 +629,7 @@ class JAXRTSViz(QWidget):
         self.probe_button.setFixedSize(120, 60)
         self.probe_button.setFont(QFont(None, 12))
         self.probe_button.clicked.connect(self.toggle_probe)
-        
+
         self.save_button = QPushButton("Save")
         self.save_button.setFixedSize(60, 30)
         self.save_button.clicked.connect(self.save_state)
@@ -652,7 +649,8 @@ class JAXRTSViz(QWidget):
         self.probe_button_layout.addWidget(
             self.probe_button, alignment=QtCore.Qt.AlignCenter
         )
-        self.probe_button_layout.addWidget(self.save_button, alignment=QtCore.Qt.AlignRight
+        self.probe_button_layout.addWidget(
+            self.save_button, alignment=QtCore.Qt.AlignRight
         )
         self.probe_button_layout.addWidget(
             self.load_button, alignment=QtCore.Qt.AlignRight
@@ -679,6 +677,9 @@ class JAXRTSViz(QWidget):
             self.canvas, self, is_compiled=self.is_compiled
         )
         self.toolbar.addData.clicked.connect(self.add_spectra)
+        self.toolbar.models_remove_selected.clicked.connect(
+            self.remove_selected_model
+        )
         # self.figure, self.ax = plt.subplots(figsize=(6, 6))  # Adjust the width and height as needed
 
         right_layout.addWidget(self.toolbar)
@@ -995,9 +996,8 @@ class JAXRTSViz(QWidget):
                     )
             except:
                 pass
-        counter = self.elements_counter
         combo_box = QComboBox()
-        combo_box.setObjectName("Element" + str(counter))
+        combo_box.setObjectName("Element" + str(self.elements_counter))
         combo_box.setMaximumWidth(70)
         combo_box.addItems(list(jaxrts.elements._element_symbols.values()))
 
@@ -1010,7 +1010,7 @@ class JAXRTSViz(QWidget):
         delete_row_button = QPushButton("-")
         delete_row_button.setFixedSize(20, 20)
         delete_row_button.clicked.connect(
-            lambda x: self.remove_row(x, counter)
+            lambda x: self.remove_row(x, self.elements_counter)
         )
         self.button_layout.addWidget(delete_row_button)
         row_layout = QHBoxLayout()
@@ -1030,7 +1030,6 @@ class JAXRTSViz(QWidget):
         self.textboxes.append(text_box2)
         self.comboBoxesList.append(combo_box)
 
-        self.elements_counter += 1
         self.is_compiled = False
         self.toolbar.compile_status.repaint()
 
@@ -1234,30 +1233,26 @@ class JAXRTSViz(QWidget):
             self.probe_button.setEnabled(True)
 
             # self.canvas.ax.clear()
-            self.model_data.append(
-                [
-                    (self.current_setup.measured_energy).m_as(
-                        ureg.electron_volt
-                    ),
-                    I.m_as(ureg.second),
-                ]
-            )
             self.spectra_model_names["Models"].append(
-                "Model " + str(len(self.model_data))
+                "Model " + str(self.model_couter)
             )
             global base_colors
             self.toolbar.update_combobox_entries(self.spectra_model_names)
             self.toolbar.repaint()
-            self.canvas.ax.plot(
+            plot = self.canvas.ax.plot(
                 (self.current_setup.measured_energy).m_as(ureg.electron_volt),
                 I.m_as(ureg.second) / jnp.max(I.m_as(ureg.second)),
-                label="Model " + str(len(self.model_data)),
-                color=list(base_colors.keys())[len(self.model_data)],
+                label="Model " + str(self.model_couter),
+                color=list(base_colors.keys())[self.model_couter],
+            )
+            self.plotted_lines["Models"].update(
+                {self.spectra_model_names["Models"][-1]: plot}
             )
             self.canvas.ax.set_xlabel("E [eV]")
             self.canvas.ax.set_ylabel("I [1/s]")
             self.canvas.ax.legend()
             self.canvas.draw()
+            self.model_couter += 1
 
         else:
 
@@ -1324,14 +1319,14 @@ class JAXRTSViz(QWidget):
                         print("Please check entry!")
                         return
                 else:
-                    if typ=="bound-free scattering":
+                    if typ == "bound-free scattering":
                         self.current_state[typ] = eval(
                             "jaxrts.models." + probing_values_and_models[typ]
-                        )(r_k = 1.0)
+                        )(r_k=1.0)
                     else:
                         self.current_state[typ] = eval(
                             "jaxrts.models." + probing_values_and_models[typ]
-                        )()  
+                        )()
                 self.current_models.append(probing_values_and_models[typ])
 
             try:
@@ -1341,29 +1336,26 @@ class JAXRTSViz(QWidget):
                 return
 
             self.is_compiled = True
-            self.model_data.append(
-                [
-                    (self.current_setup.measured_energy).m_as(
-                        ureg.electron_volt
-                    ),
-                    I.m_as(ureg.second),
-                ]
-            )
             self.spectra_model_names["Models"].append(
-                "Model " + str(len(self.model_data))
+                "Model " + str(self.model_couter)
             )
             self.toolbar.update_combobox_entries(self.spectra_model_names)
             self.toolbar.repaint()
-            self.canvas.ax.plot(
+            plot = self.canvas.ax.plot(
                 (self.current_setup.measured_energy).m_as(ureg.electron_volt),
                 I.m_as(ureg.second) / jnp.max(I.m_as(ureg.second)),
-                label="Model " + str(len(self.model_data)),
-                color=list(base_colors.keys())[len(self.model_data)],
+                label="Model " + str(self.model_couter),
+                color=list(base_colors.keys())[self.model_couter],
+            )
+            self.plotted_lines["Models"].update(
+                {self.spectra_model_names["Models"][-1]: plot}
             )
             self.canvas.ax.set_xlabel("E [eV]")
             self.canvas.ax.set_ylabel("I [1/s]")
             self.canvas.ax.legend()
             self.canvas.draw()
+
+            self.model_couter += 1
 
             # Update plasma parameters
 
@@ -1440,6 +1432,14 @@ class JAXRTSViz(QWidget):
             self.probe_button.setEnabled(True)
             self.is_compiled = True
             self.toolbar.compile_status.repaint()
+
+    def remove_selected_model(self):
+        selected_model = self.toolbar.comboBoxModels.currentText()
+        self.plotted_lines["Models"][selected_model][0].remove()
+        self.spectra_model_names["Models"].remove(selected_model)
+        self.canvas.ax.legend()
+        self.canvas.draw()
+        self.toolbar.update_combobox_entries(self.spectra_model_names)
 
 
 def main():
