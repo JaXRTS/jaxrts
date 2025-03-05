@@ -743,8 +743,12 @@ class JAXRTSViz(QWidget):
 
         # Redirect stdout and stderr
         if not self.debug:
-            sys.stdout = EmittingStream(text_written=self.update_console_output)
-            sys.stderr = EmittingStream(text_written=self.update_console_output)
+            sys.stdout = EmittingStream(
+                text_written=self.update_console_output
+            )
+            sys.stderr = EmittingStream(
+                text_written=self.update_console_output
+            )
 
         main_layout2.addWidget(self.console_output, 2)
 
@@ -1012,7 +1016,9 @@ class JAXRTSViz(QWidget):
         # The lambda function is required with a second argument, so that
         # elements_counter is fixed at it's current value.
         delete_row_button.clicked.connect(
-            lambda x, elements_counter=self.elements_counter: self.remove_row(elements_counter)
+            lambda x, elements_counter=self.elements_counter: self.remove_row(
+                elements_counter
+            )
         )
         self.button_layout.addWidget(delete_row_button)
         row_layout = QHBoxLayout()
@@ -1043,7 +1049,7 @@ class JAXRTSViz(QWidget):
         for layout in self.dropdown_layouts:
             layout_name = layout.objectName()
             if layout_name.startswith("Element"):
-                k = int(layout_name[len("Element"):])
+                k = int(layout_name[len("Element") :])
                 to_remove.append(k)
         for k in to_remove:
             self.remove_row(k)
@@ -1461,8 +1467,13 @@ class JAXRTSViz(QWidget):
 def main():
     app = QApplication(sys.argv)
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--debug", action="store_true", help="Don't re-route output for easier debugging")
-    args=parser.parse_args()
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Don't re-route output for easier debugging",
+    )
+    args = parser.parse_args()
     main_window = MainWindow(args.debug)
     main_window.show()
     sys.exit(app.exec_())
