@@ -97,7 +97,9 @@ class TestSSFInstance:
     )
     test_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
     test_state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
-    test_state["bound-free scattering"] = jaxrts.models.SchumacherImpulse()
+    test_state["bound-free scattering"] = (
+        jaxrts.models.SchumacherImpulseFitRk()
+    )
     test_state["free-bound scattering"] = jaxrts.models.DetailedBalance()
 
     def test_sff_to_unity_fully_ionized(self):
@@ -114,9 +116,8 @@ class TestSSFInstance:
 
     def test_sff_to_unity_with_bound_free_contrib(self):
         """
-        Setting r_k to auto should be fine, here, because it goes to 1 for
-        :math:`k\\rightarrow \\infty`. However, there is the binding energy and
-        further unknowns.
+        The SchumacherRkFit is using the fsum rule. Check that if that is
+        fulfilled, we reach the correct SFF limit.
         """
         self.test_state.Z_free = (
             self.test_state.Z_A - jnp.ones(len(self.test_state.ions)) * 2
@@ -128,8 +129,8 @@ class TestSSFInstance:
         ssf = jaxrts.analysis.ITCF_ssf(
             S_ee, self.test_setup, ureg("14.8keV"), raw=False
         )
-        assert jnpu.absolute(ssf_raw - 1) < 0.05
-        assert jnpu.absolute(ssf - 1) < 0.05
+        assert jnpu.absolute(ssf_raw - 1) < 0.02
+        assert jnpu.absolute(ssf - 1) < 0.02
 
 
 class TestFsumRuleInstance:
