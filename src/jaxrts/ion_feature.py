@@ -6,7 +6,7 @@ import logging
 
 import jax
 import jax.numpy as jnp
-import jpu
+import jpu.numpy as jnpu
 from jax import jit
 
 from .free_free import (
@@ -64,10 +64,10 @@ def q_Gregori2004(
     S_ee = S_ee_AD(k, T_e, T_i, n_e, m_ion, Z_f)
     S_ii = S_ii_AD(k, T_e, T_i, n_e, m_ion, Z_f)
 
-    C_ei = (jpu.numpy.sqrt(Z_f) * S_ei) / (S_ee * S_ii - S_ei**2)
+    C_ei = (jnpu.sqrt(Z_f) * S_ei) / (S_ee * S_ii - S_ei**2)
 
     # This would be the q given by Glenzer.2009, instead
-    # return jpu.numpy.sqrt(Z_f) * S_ei / S_ii
+    # return jnpu.sqrt(Z_f) * S_ei / S_ii
 
     return (
         C_ei
@@ -104,7 +104,7 @@ def q_Glenzer2009(
     q(k):  Quantity
         The screening charge.
     """
-    return jpu.numpy.sqrt(Z_f) * S_ei / S_ii
+    return jnpu.sqrt(Z_f) * S_ei / S_ii
 
 
 @jit

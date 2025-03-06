@@ -3,7 +3,7 @@ from abc import ABCMeta
 from typing import List
 
 import jax
-import jpu
+import jpu.numpy as jnpu
 import numpy as np
 from jax import numpy as jnp
 
@@ -85,9 +85,9 @@ class PlasmaState:
         of self.
         """
         doub_ion_list = [i for i in self.ions for _ in range(2)]
-        doub_Ti = jpu.numpy.repeat(self.T_i, 2)
-        doub_Z = jpu.numpy.repeat(self.Z_free, 2)
-        new_Z = jpu.numpy.where(
+        doub_Ti = jnpu.repeat(self.T_i, 2)
+        doub_Z = jnpu.repeat(self.Z_free, 2)
+        new_Z = jnpu.where(
             jnp.arange(len(doub_Z)) % 2 == 0,
             jnp.floor(doub_Z),
             jnp.ceil(doub_Z),
@@ -97,7 +97,7 @@ class PlasmaState:
             1 - (doub_Z - jnp.floor(doub_Z)),
             doub_Z - jnp.floor(doub_Z),
         )
-        doub_rho = jpu.numpy.repeat(self.mass_density, 2)
+        doub_rho = jnpu.repeat(self.mass_density, 2)
 
         return PlasmaState(
             doub_ion_list,
@@ -189,7 +189,7 @@ class PlasmaState:
 
     @property
     def n_e(self):
-        return (jpu.numpy.sum(self.n_i * self.Z_free)).to_base_units()
+        return (jnpu.sum(self.n_i * self.Z_free)).to_base_units()
 
     @property
     def Teff_e(self):
@@ -200,18 +200,17 @@ class PlasmaState:
         # This is another definition of Tq, not from Gregori et al.
         # Tq = (
         #     fermi_energy(self.n_e)
-        #     / (1.594 - 0.3160 * jpu.numpy.sqrt(rs) + 0.024 * rs)
+        #     / (1.594 - 0.3160 * jnpu.sqrt(rs) + 0.024 * rs)
         #     / (1 * ureg.boltzmann_constant)
         # )
 
         Tq = (
             fermi_energy(self.n_e)
-            / (1.3251 - 0.1779 * jpu.numpy.sqrt(rs))
+            / (1.3251 - 0.1779 * jnpu.sqrt(rs))
             / (1 * ureg.boltzmann_constant)
         )
 
-
-        return jpu.numpy.sqrt(Tq**2 + self.T_e**2)
+        return jnpu.sqrt(Tq**2 + self.T_e**2)
 
     @property
     def ee_coupling(self):
@@ -239,7 +238,7 @@ class PlasmaState:
 
     @property
     def ion_core_radius(self):
-        return jpu.numpy.where(
+        return jnpu.where(
             self._overwritten["ion_core_radius"] > 0 * ureg.angstrom,
             self._overwritten["ion_core_radius"],
             self._lookup_ion_core_radius(),
@@ -268,7 +267,7 @@ class PlasmaState:
         """
         Return the number fraction of the elements.
         """
-        x = self.n_i / jpu.numpy.sum(self.n_i)
+        x = self.n_i / jnpu.sum(self.n_i)
         return x.m_as(ureg.dimensionless)
 
     def db_wavelength(self, kind: List | str):
@@ -285,7 +284,7 @@ class PlasmaState:
                 wavelengths.append(
                     (
                         (1 * ureg.planck_constant)
-                        / jpu.numpy.sqrt(
+                        / jnpu.sqrt(
                             2.0
                             * jnp.pi
                             * 1
@@ -300,7 +299,7 @@ class PlasmaState:
                 wavelengths.append(
                     (
                         (1 * ureg.planck_constant)
-                        / jpu.numpy.sqrt(
+                        / jnpu.sqrt(
                             2.0
                             * jnp.pi
                             * 1

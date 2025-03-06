@@ -12,7 +12,7 @@ objects can be added.
 
 import jax.numpy as jnp
 import jaxrts
-import jpu
+import jpu.numpy as jnpu
 
 import matplotlib.pyplot as plt
 import scienceplots  # noqa: F401
@@ -33,10 +33,10 @@ state = jaxrts.PlasmaState(
 # Increasing max(r) results in better fits for the Sii@low k, but increases
 # computation time
 pot = 16
-r = jpu.numpy.linspace(5e-2 * ureg.a0, 1e3 * ureg.a0, 2**pot)
+r = jnpu.linspace(5e-2 * ureg.a0, 1e3 * ureg.a0, 2**pot)
 mix = 0.9
 
-d = jpu.numpy.cbrt(3 / (4 * jnp.pi * state.n_i))
+d = jnpu.cbrt(3 / (4 * jnp.pi * state.n_i))
 
 dr = r[1] - r[0]
 dk = jnp.pi / (len(r) * dr)
