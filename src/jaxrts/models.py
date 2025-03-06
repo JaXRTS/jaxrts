@@ -338,7 +338,6 @@ class IonFeatModel(Model):
         return res / plasma_state.mean_Z_A
 
 
-
 class ArkhipovIonFeat(IonFeatModel):
     """
     Model for the ion feature of the scattering, presented in
@@ -2044,9 +2043,12 @@ class SchumacherImpulseFitRk(ScatteringModel):
         plasma_state: "PlasmaState",
         setup: Setup,
     ) -> jnp.ndarray:
-        return SchumacherImpulse(r_k=1.0).evaluate_raw(
+        val = SchumacherImpulse(r_k=1.0).evaluate_raw(
             plasma_state, setup
         ) * self.r_k(plasma_state, setup)
+        return jnpu.where(
+            jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
+        )
 
     def _tree_flatten(self):
         children = ()
