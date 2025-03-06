@@ -335,7 +335,8 @@ class IonFeatModel(Model):
         res = w_R * setup.instrument(
             (setup.measured_energy - setup.energy) / ureg.hbar
         )
-        return res
+        return res / plasma_state.mean_Z_A
+
 
 
 class ArkhipovIonFeat(IonFeatModel):
@@ -2629,7 +2630,7 @@ class FiniteWavelengthScreening(Model):
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
         q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
-        return q / plasma_state.mean_Z_A
+        return q
 
 
 class DebyeHueckelScreening(Model):
