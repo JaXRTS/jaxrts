@@ -29,7 +29,7 @@ class NNModel(nnx.Module):
         # data is defined, replace these values.
         self.norm_theta = nnx.Variable(1.0)
         self.norm_rho = nnx.Variable(1.0)
-        self.norm_Z = nnx.Variable(1.0)
+        self.norm_Z = nnx.Variable([1.0])
         self.norm_k_over_qk = nnx.Variable(1.0)
 
     @nnx.jit
@@ -41,10 +41,10 @@ class NNModel(nnx.Module):
         return x
 
     def set_norms(self, theta, rho, Z, k_over_qk):
-        self.norm_theta = nnx.Variable(float(theta))
-        self.norm_rho = nnx.Variable(float(rho))
-        self.norm_Z = nnx.Variable(float(Z))
-        self.norm_k_over_qk = nnx.Variable(float(k_over_qk))
+        self.norm_theta = nnx.Variable(theta)
+        self.norm_rho = nnx.Variable(rho)
+        self.norm_Z = nnx.Variable(Z)
+        self.norm_k_over_qk = nnx.Variable(k_over_qk)
 
     @property
     def norms(self):
@@ -81,12 +81,10 @@ class NNModel(nnx.Module):
         return self.din, self.dhid, self.dout
 
 
-one_component_model = NNModel(
-    4, [64, 1024, 1024], 1, nnx.Rngs(359120493)
-)
+one_component_model = NNModel(4, [64, 1024, 1024], 1, nnx.Rngs(359120493))
 
 
-class OneComponentNNModel(jaxrts.models.IonFeatModel):
+class NNSiiModel(jaxrts.models.IonFeatModel):
     def __init__(self, checkpoint_dir):
         # This requires that the network shape was saved in the checkpoint
         # directory. This is done in a slightly hacky way, see the train.py
@@ -94,21 +92,36 @@ class OneComponentNNModel(jaxrts.models.IonFeatModel):
         with open(checkpoint_dir / "SHAPE") as f:
             shape = json.load(f)
         shape.update({"rngs": nnx.Rngs(0)})
-        abstract_model = nnx.eval_shape(
-            lambda: NNModel(**shape)
-        )
+        abstract_model = nnx.eval_shape(lambda: NNModel(**shape))
 
         graphdef, abstract_state = nnx.split(
             abstract_model,
         )
 
         checkpointer = ocp.StandardCheckpointer()
-        model_state = checkpointer.restore(checkpoint_dir, target=abstract_state)
+        model_state = checkpointer.restore(
+            checkpoint_dir, target=abstract_state
+        )
 
         self.graphdef = graphdef
         self.model_state = model_state
         super().__init__()
 
+    # The following is required to jit a Model
+    def _tree_flatten(self):
+        children = (self.graphdef, self.model_state)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj.graphdef, obj.model_state) = children
+        return obj
+
+
+class OneComponentNNModel(NNSiiModel):
     @jax.jit
     def S_ii(
         self,
@@ -131,7 +144,7 @@ class OneComponentNNModel(jaxrts.models.IonFeatModel):
                     ureg.gram / ureg.centimeter**3
                 )[0]
                 / nn_model.norm_rho,
-                plasma_state.Z_free[0] / nn_model.norm_Z,
+                plasma_state.Z_free[0] / nn_model.norm_Z[0],
                 (setup.k * (1 * ureg.hbar) / q_k).m_as(ureg.dimensionless)
                 / nn_model.norm_k_over_qk,
             ]
@@ -141,22 +154,12 @@ class OneComponentNNModel(jaxrts.models.IonFeatModel):
 
         return jnp.array([Sii]) * ureg.dimensionless
 
-    # The following is required to jit a Model
-    def _tree_flatten(self):
-        children = (self.graphdef, self.model_state)
-        aux_data = (self.model_key,)  # static values
-        return (children, aux_data)
 
-    @classmethod
-    def _tree_unflatten(cls, aux_data, children):
-        obj = object.__new__(cls)
-        (obj.model_key,) = aux_data
-        (obj.graphdef, obj.model_state) = children
-        return obj
+_models = [OneComponentNNModel]
 
-
-jax.tree_util.register_pytree_node(
-    OneComponentNNModel,
-    OneComponentNNModel._tree_flatten,
-    OneComponentNNModel._tree_unflatten,
-)
+for _m in _models:
+    jax.tree_util.register_pytree_node(
+        _m,
+        _m._tree_flatten,
+        _m._tree_unflatten,
+    )

@@ -17,7 +17,9 @@ import matplotlib.pyplot as plt
 import orbax.checkpoint as ocp
 import jax
 
-from model import one_component_model as model
+from model import NNModel
+
+model = NNModel(5, [64, 1024, 1024], 3, nnx.Rngs(int(1e6 * time.time()) % 42))
 
 optimizer = nnx.Optimizer(model, optax.adam(1e-3))
 
@@ -65,43 +67,104 @@ def eval_step(model, metrics: nnx.MultiMetric, x, y):
     metrics.update(loss=loss, mse=mse)  # In-place updates.
 
 
-class Dataset(data.Dataset):
-    def __init__(self, hdf5_file_path):
+class Dataset1C(data.Dataset):
+    def __init__(self, hdf5_file_path, spec1):
         with h5py.File(hdf5_file_path, "r") as hdf5_file:
             self.theta = hdf5_file["inputs"]["theta"][:]
             self.rho = hdf5_file["inputs"]["rho"][:]
-            self.Z = hdf5_file["inputs"]["Z"][:]
+            self.Z1 = hdf5_file["inputs"][f"Z_{spec1}"][:]
             self.k_over_qk = hdf5_file["inputs"]["k_over_qk"][:]
-            self.S_CC = hdf5_file["outputs"]["S_CC"][:]
+            self.S_11 = hdf5_file["outputs"][f"S_{spec1}{spec1}"][:]
 
-        self.theta = self.theta[~jnp.isnan(self.S_CC)]
-        self.rho = self.rho[~jnp.isnan(self.S_CC)]
-        self.Z = self.Z[~jnp.isnan(self.S_CC)]
-        self.k_over_qk = self.k_over_qk[~jnp.isnan(self.S_CC)]
-        self.S_CC = self.S_CC[~jnp.isnan(self.S_CC)]
+        mask = ~jnp.isnan(self.S_11)
+
+        self.theta = self.theta[mask]
+        self.rho = self.rho[mask]
+        self.Z1 = self.Z1[mask]
+        self.k_over_qk = self.k_over_qk[mask]
+        self.S_11 = self.S_11[mask]
 
         self.sf_theta = jnp.max(self.theta)
         self.sf_rho = jnp.max(self.rho)
-        self.sf_Z = jnp.max(self.Z)
+        self.sf_Z1 = jnp.max(self.Z1)
         self.sf_k_over_qk = jnp.max(self.k_over_qk)
 
         self.s_theta = self.theta / self.sf_theta
         self.s_rho = self.rho / self.sf_rho
-        self.s_Z = self.Z / self.sf_Z
+        self.s_Z1 = self.Z1 / self.sf_Z1
         self.s_k_over_qk = self.k_over_qk / self.sf_k_over_qk
 
     def __len__(self):
-        return len(self.S_CC)
+        return len(self.S_11)
 
     def __getitem__(self, idx):
         inputs = [
             self.s_theta[idx],
             self.s_rho[idx],
-            self.s_Z[idx],
+            self.s_Z1[idx],
             self.s_k_over_qk[idx],
         ]
         outputs = [
-            self.S_CC[idx],
+            self.S_11[idx],
+        ]
+
+        return onp.array(inputs), onp.array(outputs)
+
+
+class Dataset2C(data.Dataset):
+    def __init__(self, hdf5_file_path, spec1, spec2):
+        with h5py.File(hdf5_file_path, "r") as hdf5_file:
+            self.theta = hdf5_file["inputs"]["theta"][:]
+            self.rho = hdf5_file["inputs"]["rho"][:]
+            self.Z1 = hdf5_file["inputs"][f"Z_{spec1}"][:]
+            self.Z2 = hdf5_file["inputs"][f"Z_{spec2}"][:]
+            self.k_over_qk = hdf5_file["inputs"]["k_over_qk"][:]
+            self.S_11 = hdf5_file["outputs"][f"S_{spec1}{spec1}"][:]
+            self.S_12 = hdf5_file["outputs"][f"S_{spec1}{spec2}"][:]
+            self.S_22 = hdf5_file["outputs"][f"S_{spec2}{spec2}"][:]
+
+        mask = (
+            (~jnp.isnan(self.S_22))
+            & (~jnp.isnan(self.S_12))
+            & (~jnp.isnan(self.S_11))
+        )
+
+        self.theta = self.theta[mask]
+        self.rho = self.rho[mask]
+        self.Z1 = self.Z1[mask]
+        self.Z2 = self.Z2[mask]
+        self.k_over_qk = self.k_over_qk[mask]
+        self.S_11 = self.S_11[mask]
+        self.S_12 = self.S_12[mask]
+        self.S_22 = self.S_22[mask]
+
+        self.sf_theta = jnp.max(self.theta)
+        self.sf_rho = jnp.max(self.rho)
+        self.sf_Z1 = jnp.max(self.Z1)
+        self.sf_Z2 = jnp.max(self.Z2)
+        self.sf_k_over_qk = jnp.max(self.k_over_qk)
+
+        self.s_theta = self.theta / self.sf_theta
+        self.s_rho = self.rho / self.sf_rho
+        self.s_Z2 = self.Z2 / self.sf_Z2
+        self.s_Z1 = self.Z1 / self.sf_Z1
+        self.s_k_over_qk = self.k_over_qk / self.sf_k_over_qk
+
+    def __len__(self):
+        return len(self.S_11)
+
+    def __getitem__(self, idx):
+        inputs = [
+            self.s_theta[idx],
+            self.s_rho[idx],
+            self.s_Z1[idx],
+            self.s_Z2[idx],
+            self.s_k_over_qk[idx],
+        ]
+        outputs = [
+            self.S_11[idx],
+            self.S_12[idx],
+            self.S_22[idx],
         ]
 
         return onp.array(inputs), onp.array(outputs)
@@ -120,16 +183,19 @@ def numpy_collate(batch):
         return onp.array(batch)
 
 
-dataset = Dataset("data.h5")
+dataset = Dataset2C("/tmp/water.h5", "H", "O")
 # Set the norms, extracted from the dataset
 model.set_norms(
-    dataset.sf_theta, dataset.sf_rho, dataset.sf_Z, dataset.sf_k_over_qk
+    theta=float(dataset.sf_theta),
+    rho=float(dataset.sf_rho),
+    Z=[float(dataset.sf_Z1), float(dataset.sf_Z2)],
+    k_over_qk=float(dataset.sf_k_over_qk),
 )
 print(model.norms)
 
 train_dataset, test_dataset = data.random_split(dataset, [0.8, 0.2])
 
-batch_size = 40
+batch_size = 4
 train_loader = data.DataLoader(
     train_dataset,
     batch_size=batch_size,
@@ -184,7 +250,7 @@ def train_model(model, train_loader, test_loader, metrics, num_epochs=100):
             metrics_history[f"test_{metric}"].append(value)
         metrics.reset()  # Reset the metrics for the next training epoch.
         if (epoch_num > 0) & (epoch_num % 10 == 0):
-            checkpoint_path = ckpt_dir / f"epoch_{epoch_num}"
+            checkpoint_path = ckpt_dir / f"epoch_{epoch_num}/"
             (
                 _,
                 state,
@@ -194,6 +260,7 @@ def train_model(model, train_loader, test_loader, metrics, num_epochs=100):
                 checkpoint_path,
                 state,
             )
+            checkpointer.wait_until_finished()
             with open(checkpoint_path / "SHAPE", "w") as f:
                 shape = {
                     "din": model.din,
@@ -215,8 +282,8 @@ plt.show()
 
 
 t0 = time.time()
-print(model(jnp.array([0.4, 0.2, 0.5, 0.11])))
+print(model(jnp.array([0.4, 0.2, 0.5, 0.65, 0.11])))
 print(time.time() - t0)
 t0 = time.time()
-print(model(jnp.array([0.4, 0.2, 0.5, 0.11])))
+print(model(jnp.array([0.4, 0.2, 0.5, 0.65, 0.11])))
 print(time.time() - t0)
