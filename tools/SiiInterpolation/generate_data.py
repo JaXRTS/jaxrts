@@ -35,12 +35,12 @@ mass_fraction = jaxrts.helpers.mass_from_number_fraction(number_fraction, ions)
 
 plasma_state = jaxrts.PlasmaState(
     ions=ions,
-    Z_free=jnp.array([0.4, 4]),
+    Z_free=jnp.array([0.9, 5.2]),
     mass_density=mass_fraction
     * jnp.array([1.0])
     * ureg.gram
     / ureg.centimeter**3,
-    T_e=80 * ureg.electron_volt / ureg.k_B,
+    T_e=40 * ureg.electron_volt / ureg.k_B,
 )
 E_f = jaxrts.plasma_physics.fermi_energy(plasma_state.n_e)
 
@@ -116,23 +116,20 @@ def parallel_computation(data_no, theta, Z, rho, k_over_qk):
 
 
 if __name__ == "__main__":
-    rng = jax.random.PRNGKey(10404020250306)
-    key1, key2, key3, key4, key5 = jax.random.split(rng, 5)
+    rng = jax.random.PRNGKey(10404034513213)
+    key1, key2, key3, key4 = jax.random.split(rng, 4)
 
     theta = 10 ** jax.random.uniform(key1, (data_no,), minval=-2, maxval=2)
-    Z = jnp.array(
-        [
-            jax.random.uniform(key2, (data_no,), minval=0, maxval=i.Z)
-            for i in ions
-        ]
-    ).T
-    rho = jax.random.uniform(key4, (data_no,), minval=0.1, maxval=10)
-    k_over_qk = 10 ** jax.random.uniform(key5, (data_no,), minval=-2, maxval=1)
+    Z = (
+        jax.random.uniform(key2, (data_no, 2), minval=0, maxval=1)
+        * jnp.array([i.Z for i in ions])[jnp.newaxis, :]
+    )
+    rho = jax.random.uniform(key3, (data_no,), minval=0.1, maxval=10)
+    k_over_qk = 10 ** jax.random.uniform(key4, (data_no,), minval=-2, maxval=1)
 
     Sii = parallel_computation(data_no, theta, Z, rho, k_over_qk)
-    print(Sii)
 
-    hdf5_file_path = "water.h5"
+    hdf5_file_path = "CH.h5"
 
     # Save the NumPy array to an HDF5 file
     with h5py.File(hdf5_file_path, "w") as hdf5_file:
