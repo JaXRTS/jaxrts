@@ -35,12 +35,12 @@ mass_fraction = jaxrts.helpers.mass_from_number_fraction(number_fraction, ions)
 
 plasma_state = jaxrts.PlasmaState(
     ions=ions,
-    Z_free=jnp.array([2, 2]),
+    Z_free=jnp.array([0.4, 4]),
     mass_density=mass_fraction
-    * jnp.array([3.5])
+    * jnp.array([1.0])
     * ureg.gram
     / ureg.centimeter**3,
-    T_e=jnp.array([80, 80]) * ureg.electron_volt / ureg.k_B,
+    T_e=80 * ureg.electron_volt / ureg.k_B,
 )
 E_f = jaxrts.plasma_physics.fermi_energy(plasma_state.n_e)
 
@@ -74,7 +74,14 @@ def draw_data(theta, Z, rho, k_over_qk):
     probe_setup = jaxrts.setup.get_probe_setup(k, setup)
 
     plasma_state.T_e = theta * E_f / ureg.k_B
-    plasma_state.T_i = jnp.ones(len(ions),) * theta * E_f / ureg.k_B
+    plasma_state.T_i = (
+        jnp.ones(
+            len(ions),
+        )
+        * theta
+        * E_f
+        / ureg.k_B
+    )
 
     return plasma_state["ionic scattering"].S_ii(plasma_state, probe_setup)
 

@@ -17,7 +17,7 @@ ureg = jaxrts.ureg
 
 
 class NNModel(nnx.Module):
-    def __init__(self, din, dhid, dout, rngs: nnx.Rngs):
+    def __init__(self, din, dhid, dout, rngs: nnx.Rngs, no_of_atoms=1):
         self.linears = [nnx.Linear(din, dhid[0], rngs=rngs)]
         for i in range(len(dhid) - 1):
             self.linears.append(nnx.Linear(dhid[i], dhid[i + 1], rngs=rngs))
@@ -29,7 +29,7 @@ class NNModel(nnx.Module):
         # data is defined, replace these values.
         self.norm_theta = nnx.Variable(1.0)
         self.norm_rho = nnx.Variable(1.0)
-        self.norm_Z = nnx.Variable([1.0])
+        self.norm_Z = nnx.Variable([1.0] * no_of_atoms)
         self.norm_k_over_qk = nnx.Variable(1.0)
 
     @nnx.jit
@@ -155,7 +155,47 @@ class OneComponentNNModel(NNSiiModel):
         return jnp.array([Sii]) * ureg.dimensionless
 
 
-_models = [OneComponentNNModel]
+class TwoComponentNNModel(NNSiiModel):
+    @jax.jit
+    def S_ii(
+        self,
+        plasma_state: jaxrts.PlasmaState,
+        setup: jaxrts.Setup,
+    ) -> jnp.ndarray:
+
+        # This has to be done within a jax.jitted function.
+        nn_model = nnx.merge(self.graphdef, self.model_state)
+
+        E_f = jaxrts.plasma_physics.fermi_energy(plasma_state.n_e)
+        q_k = jnpu.sqrt(2 * ureg.electron_mass * E_f)
+
+        theta = (plasma_state.T_e * ureg.k_B / E_f).m_as(ureg.dimensionless)
+
+        x = jnp.array(
+            [
+                theta / nn_model.norm_theta,
+                jnp.sum(
+                    plasma_state.mass_density.m_as(
+                        ureg.gram / ureg.centimeter**3
+                    )
+                )
+                / nn_model.norm_rho,
+                plasma_state.Z_free[0] / nn_model.norm_Z[0],
+                plasma_state.Z_free[1] / nn_model.norm_Z[1],
+                (setup.k * (1 * ureg.hbar) / q_k).m_as(ureg.dimensionless)
+                / nn_model.norm_k_over_qk,
+            ]
+        )
+
+        Sii = nn_model(x)
+
+        return (
+            jnp.array([[Sii[0], Sii[1]], [Sii[1], Sii[2]]])
+            * ureg.dimensionless
+        )
+
+
+_models = [OneComponentNNModel, TwoComponentNNModel]
 
 for _m in _models:
     jax.tree_util.register_pytree_node(

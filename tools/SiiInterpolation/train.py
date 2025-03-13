@@ -183,7 +183,7 @@ def numpy_collate(batch):
         return onp.array(batch)
 
 
-dataset = Dataset2C("/tmp/water.h5", "H", "O")
+dataset = Dataset2C("water.h5", "H", "O")
 # Set the norms, extracted from the dataset
 model.set_norms(
     theta=float(dataset.sf_theta),
@@ -195,7 +195,7 @@ print(model.norms)
 
 train_dataset, test_dataset = data.random_split(dataset, [0.8, 0.2])
 
-batch_size = 4
+batch_size = 40
 train_loader = data.DataLoader(
     train_dataset,
     batch_size=batch_size,
@@ -225,7 +225,7 @@ ckpt_dir = ocp.test_utils.erase_and_create_empty("/tmp/checkpoints/")
 checkpointer = ocp.StandardCheckpointer()
 
 
-def train_model(model, train_loader, test_loader, metrics, num_epochs=100):
+def train_model(model, train_loader, test_loader, metrics, num_epochs=250):
     metrics_history = {
         "train_loss": [],
         "test_loss": [],
@@ -266,6 +266,7 @@ def train_model(model, train_loader, test_loader, metrics, num_epochs=100):
                     "din": model.din,
                     "dhid": model.dhid,
                     "dout": model.dout,
+                    "no_of_atoms": len(model.norm_Z),
                 }
                 json.dump(shape, f)
 
@@ -278,7 +279,8 @@ fig, ax = plt.subplots(1)
 ax.plot(metrics_hist["train_loss"], label="train_loss")
 ax.plot(metrics_hist["train_accuracy"], label="train_accuracy")
 ax.plot(metrics_hist["test_accuracy"], label="test_accuracy")
-plt.show()
+plt.yscale("log")
+plt.savefig("loss.png")
 
 
 t0 = time.time()
