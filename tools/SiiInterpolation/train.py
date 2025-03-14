@@ -93,22 +93,24 @@ class Dataset1C(data.Dataset):
         self.s_rho = self.rho / self.sf_rho
         self.s_Z1 = self.Z1 / self.sf_Z1
         self.s_k_over_qk = self.k_over_qk / self.sf_k_over_qk
+        self.inputs = onp.array(
+            [
+                self.s_theta,
+                self.s_rho,
+                self.s_Z1,
+                self.s_k_over_qk,
+            ]
+        )
+
+        self.outputs = [
+            self.S_11,
+        ]
 
     def __len__(self):
         return len(self.S_11)
 
     def __getitem__(self, idx):
-        inputs = [
-            self.s_theta[idx],
-            self.s_rho[idx],
-            self.s_Z1[idx],
-            self.s_k_over_qk[idx],
-        ]
-        outputs = [
-            self.S_11[idx],
-        ]
-
-        return onp.array(inputs), onp.array(outputs)
+        return self.inputs[:, idx], self.outputs[:, idx]
 
 
 class Dataset2C(data.Dataset):
@@ -153,24 +155,29 @@ class Dataset2C(data.Dataset):
         self.s_Z1 = self.Z1 / self.sf_Z1
         self.s_k_over_qk = self.k_over_qk / self.sf_k_over_qk
 
+        self.inputs = onp.array(
+            [
+                self.s_theta,
+                self.s_rho,
+                self.s_Z1,
+                self.s_Z2,
+                self.s_k_over_qk,
+            ]
+        )
+        self.outputs = onp.array(
+            [
+                self.S_11,
+                self.S_12,
+                self.S_22,
+            ]
+        )
+
     def __len__(self):
         return len(self.S_11)
 
     def __getitem__(self, idx):
-        inputs = [
-            self.s_theta[idx],
-            self.s_rho[idx],
-            self.s_Z1[idx],
-            self.s_Z2[idx],
-            self.s_k_over_qk[idx],
-        ]
-        outputs = [
-            self.S_11[idx],
-            self.S_12[idx],
-            self.S_22[idx],
-        ]
 
-        return onp.array(inputs), onp.array(outputs)
+        return self.inputs[:, idx], self.outputs[:, idx]
 
 
 # This collate function is taken from the JAX tutorial with PyTorch Data
