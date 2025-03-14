@@ -140,11 +140,14 @@ class OneComponentNNModel(NNSiiModel):
         x = jnp.array(
             [
                 theta / nn_model.norm_theta,
-                plasma_state.mass_density.m_as(
-                    ureg.gram / ureg.centimeter**3
-                )[0]
+                jnp.sum(
+                    plasma_state.mass_density.m_as(
+                        ureg.gram / ureg.centimeter**3
+                    )
+                )
                 / nn_model.norm_rho,
-                plasma_state.Z_free[0] / nn_model.norm_Z[0],
+                jnp.sum(plasma_state.number_fraction * plasma_state.Z_free)
+                / nn_model.norm_Z[0],
                 (setup.k * (1 * ureg.hbar) / q_k).m_as(ureg.dimensionless)
                 / nn_model.norm_k_over_qk,
             ]
@@ -171,6 +174,35 @@ class TwoComponentNNModel(NNSiiModel):
 
         theta = (plasma_state.T_e * ureg.k_B / E_f).m_as(ureg.dimensionless)
 
+        # Catch an ionization_exanded plasma state:
+        # Re-calculate plasma_state mean ionization
+        unique_elements = list(set(plasma_state.ions))
+        indices_element_0 = [
+            i
+            for i, x in enumerate(plasma_state.ions)
+            if x == unique_elements[0]
+        ]
+        indices_element_1 = [
+            i
+            for i, x in enumerate(plasma_state.ions)
+            if x == unique_elements[1]
+        ]
+        Z0 = 0
+
+        n0 = 0
+        for idx in indices_element_0:
+            Z0 += plasma_state.number_fraction[idx] * plasma_state.Z_free[idx]
+            n0 += plasma_state.number_fraction[idx]
+        Z0 /= n0
+
+        Z1 = 0
+        n1 = 0
+        for idx in indices_element_1:
+            Z1 += plasma_state.number_fraction[idx] * plasma_state.Z_free[idx]
+            n1 += plasma_state.number_fraction[idx]
+        Z1 /= n1
+
+        # Norm the inputs to the NN
         x = jnp.array(
             [
                 theta / nn_model.norm_theta,
@@ -180,8 +212,8 @@ class TwoComponentNNModel(NNSiiModel):
                     )
                 )
                 / nn_model.norm_rho,
-                plasma_state.Z_free[0] / nn_model.norm_Z[0],
-                plasma_state.Z_free[1] / nn_model.norm_Z[1],
+                Z0 / nn_model.norm_Z[0],
+                Z1 / nn_model.norm_Z[1],
                 (setup.k * (1 * ureg.hbar) / q_k).m_as(ureg.dimensionless)
                 / nn_model.norm_k_over_qk,
             ]
