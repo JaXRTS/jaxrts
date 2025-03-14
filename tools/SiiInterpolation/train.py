@@ -120,7 +120,10 @@ class Dataset2C(data.Dataset):
             self.Z2 = hdf5_file["inputs"][f"Z_{spec2}"][:]
             self.k_over_qk = hdf5_file["inputs"]["k_over_qk"][:]
             self.S_11 = hdf5_file["outputs"][f"S_{spec1}{spec1}"][:]
-            self.S_12 = hdf5_file["outputs"][f"S_{spec1}{spec2}"][:]
+            try:
+                self.S_12 = hdf5_file["outputs"][f"S_{spec1}{spec2}"][:]
+            except KeyError:
+                self.S_12 = hdf5_file["outputs"][f"S_{spec2}{spec1}"][:]
             self.S_22 = hdf5_file["outputs"][f"S_{spec2}{spec2}"][:]
 
         mask = (
