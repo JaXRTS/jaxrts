@@ -25,7 +25,16 @@ def calculate(plasma_state, setup):
 
 
 @jax.jit
-def prep_state(state, setup, rho=None, temp=None, Z=None, k=None):
+def calculate_WR(plasma_state, setup):
+    return plasma_state["ionic scattering"].Rayleigh_weight(
+        plasma_state, setup
+    )
+
+
+@jax.jit
+def prep_state(
+    state, setup, rho=None, temp=None, Z=None, k=None
+) -> (jaxrts.PlasmaState, jaxrts.Setup):
     if rho is not None:
         state.mass_density = (
             rho
@@ -65,7 +74,7 @@ calculate_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(
 )
 predict_state = deepcopy(plasma_state)
 predict_state["ionic scattering"] = TwoComponentNNModel(
-    pathlib.Path(__file__).parent / "checkpoints/epoch_190/"
+    pathlib.Path(__file__).parent / "checkpoints/H2O/"
 )
 
 predict_state, setup = prep_state(predict_state, setup, temp=50)
@@ -95,8 +104,12 @@ net_out = onp.array(calculate(predict_state, setup))
 t1 = time.time()
 calc_out = onp.array(calculate(calculate_state, setup))
 t2 = time.time()
-print(f"Net:  {net_out[0, 0]:.4f} ({t1-t0:.4f}s)")
-print(f"Calc: {calc_out[0, 0]:.4f} ({t2-t1:.4f}s)")
+print(
+    f"Net:  {net_out[0, 0]:.4f} ({t1-t0:.4f}s)   | W_R {calculate_WR(predict_state, setup)[0]:.3f}"
+)
+print(
+    f"Calc: {calc_out[0, 0]:.4f} ({t2-t1:.4f}s)   | W_R {calculate_WR(calculate_state, setup)[0]:.3f}"
+)
 print("======================")
 
 # Show the net prediction vs calculated data:
@@ -142,6 +155,10 @@ fig, ax = plt.subplots(
     figsize=(5 * plasma_state.nions, 5),
 )
 
+fig.suptitle(
+    f"Z: {predict_state.Z_free},"
+    + f" k = {setup.k.m_as(1/ureg.angstrom):.2f}/angstrom"
+)
 if isinstance(ax, mpl.axes._axes.Axes):
     ax = [ax]
 
@@ -214,6 +231,10 @@ fig, ax = plt.subplots(
     no_of_Sii,
     subplot_kw={"projection": "3d"},
     figsize=(5 * plasma_state.nions, 5),
+)
+fig.suptitle(
+    f"Z: {predict_state.Z_free},"
+    + f" T = {(predict_state.T_e * ureg.k_B).m_as(ureg.electron_volt)}eV"
 )
 
 if isinstance(ax, mpl.axes._axes.Axes):
@@ -290,6 +311,10 @@ fig, ax = plt.subplots(
     figsize=(5 * plasma_state.nions, 5),
 )
 
+fig.suptitle(
+    f"Z: {predict_state.Z_free},"
+    + f" rho = {jnpu.sum(predict_state.mass_density).m_as(ureg.gram/ureg.centimeter**3)}g/cc"  # noqa:E501
+)
 
 if isinstance(ax, mpl.axes._axes.Axes):
     ax = [ax]
