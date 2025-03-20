@@ -76,6 +76,8 @@ class Dataset1C(data.Dataset):
             self.k_over_qk = hdf5_file["inputs"]["k_over_qk"][:]
             self.S_11 = hdf5_file["outputs"][f"S_{spec1}{spec1}"][:]
 
+        self.elements = [spec1]
+
         mask = ~jnp.isnan(self.S_11)
 
         self.theta = self.theta[mask]
@@ -127,6 +129,8 @@ class Dataset2C(data.Dataset):
             except KeyError:
                 self.S_12 = hdf5_file["outputs"][f"S_{spec2}{spec1}"][:]
             self.S_22 = hdf5_file["outputs"][f"S_{spec2}{spec2}"][:]
+
+        self.elements = [spec1, spec2]
 
         mask = (
             (~jnp.isnan(self.S_22))
@@ -277,6 +281,7 @@ def train_model(model, train_loader, test_loader, metrics, num_epochs=250):
                     "dhid": model.dhid,
                     "dout": model.dout,
                     "no_of_atoms": len(model.norm_Z),
+                    "elements": train_loader.elements,
                 }
                 json.dump(shape, f)
 

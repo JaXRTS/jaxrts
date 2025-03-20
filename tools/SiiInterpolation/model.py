@@ -99,6 +99,7 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
         with open(checkpoint_dir / "SHAPE") as f:
             shape = json.load(f)
         shape.update({"rngs": nnx.Rngs(0)})
+        self.model_elements = shape.pop("elements")
         abstract_model = nnx.eval_shape(lambda: NNModel(**shape))
 
         graphdef, abstract_state = nnx.split(
@@ -124,15 +125,20 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
     # The following is required to jit a Model
     def _tree_flatten(self):
         children = (self.graphdef, self.model_state)
-        aux_data = (self.model_key,)  # static values
+        aux_data = (self.model_key, self.model_elements)  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        (obj.model_key,) = aux_data
+        (obj.model_key, obj.model_elements) = aux_data
         (obj.graphdef, obj.model_state) = children
         return obj
+
+
+
+def _sort_func(ion):
+    return ion.symbol
 
 
 class OneComponentNNModel(NNSiiModel):
@@ -190,16 +196,15 @@ class TwoComponentNNModel(NNSiiModel):
 
         # Catch an ionization_exanded plasma state:
         # Re-calculate plasma_state mean ionization
-        unique_elements = list(set(plasma_state.ions))
         indices_element_0 = [
             i
             for i, x in enumerate(plasma_state.ions)
-            if x == unique_elements[0]
+            if x == jaxrts.Element(self.model_elements[0])
         ]
         indices_element_1 = [
             i
             for i, x in enumerate(plasma_state.ions)
-            if x == unique_elements[1]
+            if x == jaxrts.Element(self.model_elements[1])
         ]
         Z0 = 0
 
