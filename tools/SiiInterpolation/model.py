@@ -6,7 +6,6 @@ NN with jaxrts.
 import json
 
 from flax import nnx
-from flax.training import orbax_utils
 import jaxrts
 import jax
 import jax.numpy as jnp
@@ -81,7 +80,15 @@ class NNModel(nnx.Module):
         return self.din, self.dhid, self.dout
 
 
-one_component_model = NNModel(4, [64, 1024, 1024], 1, nnx.Rngs(359120493))
+sharding = jax.sharding.NamedSharding(
+    jax.sharding.Mesh(jax.devices(), ("x",)),
+    jax.sharding.PartitionSpec(),
+)
+
+
+def set_sharding(x: jax.ShapeDtypeStruct) -> jax.ShapeDtypeStruct:
+    x.sharding = sharding
+    return x
 
 
 class NNSiiModel(jaxrts.models.IonFeatModel):
@@ -98,9 +105,16 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
             abstract_model,
         )
 
-        checkpointer = ocp.StandardCheckpointer()
-        model_state = checkpointer.restore(
-            checkpoint_dir, target=abstract_state
+        ckptr = ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler())
+
+        change_sharding_abstract_state = jax.tree_util.tree_map(
+            set_sharding, abstract_state
+        )
+
+        model_state = ckptr.restore(
+            checkpoint_dir,
+            args=ocp.args.StandardRestore(change_sharding_abstract_state),
+            target=abstract_state,
         )
 
         self.graphdef = graphdef
@@ -203,6 +217,7 @@ class TwoComponentNNModel(NNSiiModel):
         Z1 /= n1
 
         # Norm the inputs to the NN
+
         x = jnp.array(
             [
                 theta / nn_model.norm_theta,
