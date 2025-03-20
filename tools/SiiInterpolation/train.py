@@ -281,7 +281,7 @@ def train_model(model, train_loader, test_loader, metrics, num_epochs=250):
                     "dhid": model.dhid,
                     "dout": model.dout,
                     "no_of_atoms": len(model.norm_Z),
-                    "elements": train_loader.elements,
+                    "elements": dataset.elements,
                 }
                 json.dump(shape, f)
 
