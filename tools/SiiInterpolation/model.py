@@ -11,6 +11,7 @@ import jax
 import jax.numpy as jnp
 import jpu.numpy as jnpu
 import orbax.checkpoint as ocp
+import numpy as onp
 
 ureg = jaxrts.ureg
 
@@ -136,7 +137,6 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
         return obj
 
 
-
 def _sort_func(ion):
     return ion.symbol
 
@@ -175,7 +175,8 @@ class OneComponentNNModel(NNSiiModel):
 
         Sii = nn_model(x)
 
-        return jnp.array([Sii]) * ureg.dimensionless
+        S_out = jnp.eye(plasma_state.nions) * Sii
+        return S_out * ureg.dimensionless
 
 
 class TwoComponentNNModel(NNSiiModel):
@@ -194,17 +195,17 @@ class TwoComponentNNModel(NNSiiModel):
 
         theta = (plasma_state.T_e * ureg.k_B / E_f).m_as(ureg.dimensionless)
 
+        # Get the elements of the model:
+        element0 = jaxrts.Element(self.model_elements[0])
+        element1 = jaxrts.Element(self.model_elements[1])
+
         # Catch an ionization_exanded plasma state:
         # Re-calculate plasma_state mean ionization
         indices_element_0 = [
-            i
-            for i, x in enumerate(plasma_state.ions)
-            if x == jaxrts.Element(self.model_elements[0])
+            i for i, x in enumerate(plasma_state.ions) if x == element0
         ]
         indices_element_1 = [
-            i
-            for i, x in enumerate(plasma_state.ions)
-            if x == jaxrts.Element(self.model_elements[1])
+            i for i, x in enumerate(plasma_state.ions) if x == element1
         ]
         Z0 = 0
 
@@ -241,10 +242,25 @@ class TwoComponentNNModel(NNSiiModel):
 
         Sii = nn_model(x)
 
-        return (
-            jnp.array([[Sii[0], Sii[1]], [Sii[1], Sii[2]]])
-            * ureg.dimensionless
-        )
+        # Work with several ions of the same species, allow for a mutation of
+        # ion species in the plasma_state.
+        # This is a somewhat complicated mapping for
+        # [[Sii[0], Sii[1]],[Sii[1], Sii[2]]].
+        # This is to make it work with expanded state (approximately)
+
+        S_out = jnp.zeros((plasma_state.nions, plasma_state.nions))
+
+        for a in range(plasma_state.nions):
+            if plasma_state.ions[a] == element0:
+                _Sii = Sii[0]
+            elif plasma_state.ions[a] == element1:
+                _Sii = Sii[2]
+            S_out = S_out.at[a, a].set(_Sii)
+
+        S_out = S_out.at[0, -1].set(Sii[1])
+        S_out = S_out.at[-1, 0].set(Sii[1])
+
+        return S_out * ureg.dimensionless
 
 
 _models = [OneComponentNNModel, TwoComponentNNModel]

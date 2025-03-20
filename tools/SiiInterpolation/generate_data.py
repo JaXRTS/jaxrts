@@ -42,6 +42,8 @@ plasma_state = jaxrts.PlasmaState(
     / ureg.centimeter**3,
     T_e=40 * ureg.electron_volt / ureg.k_B,
 )
+# plasma_state = plasma_state.expand_integer_ionization_states()
+
 E_f = jaxrts.plasma_physics.fermi_energy(plasma_state.n_e)
 
 plasma_state["screening length"] = (
