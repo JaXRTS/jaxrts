@@ -6,6 +6,7 @@ import jpu.numpy as jnpu
 import numpy as onp
 import pathlib
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import time
 
 from model import OneComponentNNModel, TwoComponentNNModel
@@ -74,8 +75,8 @@ net_out = onp.array(calculate(predict_state, setup))
 t1 = time.time()
 calc_out = onp.array(calculate(calculate_state, setup))
 t2 = time.time()
-print(f"Net:  {net_out[1, 1]:.4f} ({t1-t0:.4f}s)")
-print(f"Calc: {calc_out[1, 1]:.4f} ({t2-t1:.4f}s)")
+print(f"Net:  {net_out[0, 0]:.4f} ({t1-t0:.4f}s)")
+print(f"Calc: {calc_out[0, 0]:.4f} ({t2-t1:.4f}s)")
 print("======================")
 
 t0 = time.time()
@@ -83,8 +84,8 @@ net_out = onp.array(calculate(predict_state, setup))
 t1 = time.time()
 calc_out = onp.array(calculate(calculate_state, setup))
 t2 = time.time()
-print(f"Net:  {net_out[1, 1]:.4f} ({t1-t0:.4f}s)")
-print(f"Calc: {calc_out[1, 1]:.4f} ({t2-t1:.4f}s)")
+print(f"Net:  {net_out[0, 0]:.4f} ({t1-t0:.4f}s)")
+print(f"Calc: {calc_out[0, 0]:.4f} ({t2-t1:.4f}s)")
 print("======================")
 
 predict_state, setup = prep_state(predict_state, setup, temp=30)
@@ -94,8 +95,8 @@ net_out = onp.array(calculate(predict_state, setup))
 t1 = time.time()
 calc_out = onp.array(calculate(calculate_state, setup))
 t2 = time.time()
-print(f"Net:  {net_out[1, 1]:.4f} ({t1-t0:.4f}s)")
-print(f"Calc: {calc_out[1, 1]:.4f} ({t2-t1:.4f}s)")
+print(f"Net:  {net_out[0, 0]:.4f} ({t1-t0:.4f}s)")
+print(f"Calc: {calc_out[0, 0]:.4f} ({t2-t1:.4f}s)")
 print("======================")
 
 # Show the net prediction vs calculated data:
@@ -140,6 +141,9 @@ fig, ax = plt.subplots(
     subplot_kw={"projection": "3d"},
     figsize=(5 * plasma_state.nions, 5),
 )
+
+if isinstance(ax, mpl.axes._axes.Axes):
+    ax = [ax]
 
 i = 0
 for k in range(calculated_Sii.shape[1]):
@@ -212,6 +216,9 @@ fig, ax = plt.subplots(
     figsize=(5 * plasma_state.nions, 5),
 )
 
+if isinstance(ax, mpl.axes._axes.Axes):
+    ax = [ax]
+
 i = 0
 for k in range(calculated_Sii.shape[1]):
     for l in range(k + 1):
@@ -282,6 +289,10 @@ fig, ax = plt.subplots(
     subplot_kw={"projection": "3d"},
     figsize=(5 * plasma_state.nions, 5),
 )
+
+
+if isinstance(ax, mpl.axes._axes.Axes):
+    ax = [ax]
 
 i = 0
 for k in range(calculated_Sii.shape[1]):
