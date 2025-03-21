@@ -273,13 +273,13 @@ class IonFeatModel(Model):
 
         .. math::
 
-           W_R = \\sum_{\\langle a, b\\rangle} \\sqrt{x_a x_b}
+           W_R = \\sum_{a, b} \\sqrt{x_a x_b}
            (f_a + q_a) (f_b + q_b) S_{ab}
 
 
         Where
 
-        * The sum runs over all unique pars of atoms :math:`a` and :math`b`.
+        * The sum runs over all pairs of atoms :math:`a` and :math`b`.
 
         * :math:`x` is the number fraction of the ion species :math:`a`, and
           :math:`b`, respectively.
@@ -315,16 +315,13 @@ class IonFeatModel(Model):
                 * S_ab[a, b]
             ).m_as(ureg.dimensionless)
 
-        def dont_add_wrt(a, b):
-            return jnp.array([0.0])
-
         # The W_R is calculated as a sum over all combinations of a_b
         ion_spec1, ion_spec2 = jnp.meshgrid(
             jnp.arange(plasma_state.nions),
             jnp.arange(plasma_state.nions),
         )
         for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
-            w_R += jax.lax.cond(a <= b, add_wrt, dont_add_wrt, a, b)
+            w_R += add_wrt(a, b)
         return w_R
 
     @jax.jit
@@ -336,6 +333,7 @@ class IonFeatModel(Model):
             (setup.measured_energy - setup.energy) / ureg.hbar
         )
         return res / plasma_state.mean_Z_A
+
 
 
 class ArkhipovIonFeat(IonFeatModel):
@@ -836,11 +834,8 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
                 * S_ab[a, b]
             ).m_as(ureg.dimensionless)
 
-        def dont_add_wrt(a, b):
-            return jnp.array([0.0])
-
         for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
-            w_R += jax.lax.cond(a <= b, add_wrt, dont_add_wrt, a, b)
+            w_R += add_wrt(a, b)
         # Scale the instrument function directly with w_R
         return w_R
 
@@ -2047,8 +2042,8 @@ class SchumacherImpulseFitRk(ScatteringModel):
             plasma_state, setup
         ) * self.r_k(plasma_state, setup)
         return jnpu.where(
-            jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
-        )
+                jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
+            )
 
     def _tree_flatten(self):
         children = ()
@@ -2986,16 +2981,13 @@ class Sum_Sii(Model):
                 ureg.dimensionless
             )[jnp.newaxis]
 
-        def dont_add_Sii(a, b):
-            return jnp.array([0.0])
-
         # The W_R is calculated as a sum over all combinations of a_b
         ion_spec1, ion_spec2 = jnp.meshgrid(
             jnp.arange(plasma_state.nions),
             jnp.arange(plasma_state.nions),
         )
         for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
-            S_ii += jax.lax.cond(a <= b, add_Sii, dont_add_Sii, a, b)
+            S_ii += add_Sii(a, b)
         return S_ii
 
 
