@@ -3,11 +3,11 @@ Rayleigh weights for integer expanded ionization states
 =======================================================
 
 This example compares the Rayleigh weights for a carbon plasma when a
-fractional ionization state is treated on a One-Component HNC calculaiton, and
+fractional ionization state is treated on a One-Component HNC calculation, and
 compares it to the two-component calculation when
-:py:meth:`jaxrts.PlasmaState.expand_integer_ionization_states` is called which
-creates a plasma state with two ion species of the same element, but different
-ionization numbers. The latter calculation will be more costly.
+:py:meth:`jaxrts.plasmastate.PlasmaState.expand_integer_ionization_states` is
+called which creates a plasma state with two ion species of the same element,
+but different ionization numbers. The latter calculation will be more costly.
 """
 
 from functools import partial
