@@ -1,6 +1,12 @@
 """
-Define the NN layout, and also create a jaxrts.Model for easily use a trained
-NN with jaxrts.
+Interpolate the Static structure factors by a neural network. In this file, we 
+define the NN layout, and also create a :py:class:`jaxrts.Model` which allows
+for easily using a trained NN with jaxrts.
+
+Models have to be trained, for each sample type, separately. Tools for doing so
+are provided in the `tools/SiiInterpolation/` directory of the jaxrts
+repository. The trained network is saved as an :py:mod:`orbax` checkpoint (with
+slight additions to save properties of the net architecture.
 """
 
 import json
@@ -159,7 +165,7 @@ class OneComponentNNModel(NNSiiModel):
 
         x = jnp.array(
             [
-                theta / nn_model.norm_theta,
+                jnp.sum(theta) / nn_model.norm_theta,
                 jnp.sum(
                     plasma_state.mass_density.m_as(
                         ureg.gram / ureg.centimeter**3

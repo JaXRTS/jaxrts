@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import orbax.checkpoint as ocp
 import jax
 
-from model import NNModel
+from jaxrts.experimental.SiiNN import NNModel
 
 model = NNModel(5, [64, 1024, 1024], 3, nnx.Rngs(int(1e6 * time.time()) % 42))
 

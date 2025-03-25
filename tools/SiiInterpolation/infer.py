@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import time
 
-from model import OneComponentNNModel, TwoComponentNNModel
+from jaxrts.experimental.SiiNN import OneComponentNNModel, TwoComponentNNModel
 from generate_data import plasma_state
 
 ureg = jaxrts.ureg
