@@ -1584,7 +1584,7 @@ def transformPotential(V, r) -> Quantity:
     return V_k, k
 
 
-for _pot in [
+_all_hnc_potentals = [
     CoulombPotential,
     DebyeHueckelPotential,
     DeutschPotential,
@@ -1597,7 +1597,9 @@ for _pot in [
     SpinAveragedEEExchange,
     PauliClassicalMap,
     SpinSeparatedEEExchange,
-]:
+]
+
+for _pot in _all_hnc_potentals:
     jax.tree_util.register_pytree_node(
         _pot,
         _pot._tree_flatten,
