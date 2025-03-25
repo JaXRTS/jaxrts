@@ -2884,7 +2884,7 @@ class ElectronicLFCConstant(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "None"
+    __name__ = "ElectronicLFCConstant"
 
     def __init__(self, value):
         self.value = value

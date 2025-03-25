@@ -30,6 +30,26 @@ def partialclass(cls, *args, **kwds):
     return NewCls
 
 
+def _flatten_obj(obj):
+    children, aux = obj._tree_flatten()
+    if hasattr(obj, "_children_labels"):
+        children = {l: c for (l, c) in zip(obj._children_labels, children)}
+    if hasattr(obj, "_aux_labels"):
+        aux = {l: a for (l, a) in zip(obj._aux_labels, aux)}
+    return (children, aux)
+
+
+def _parse_tree_save(obj, children, aux):
+    """
+    We do not unflatten, here, so allow in-place changes.
+    """
+    if hasattr(obj, "_children_labels"):
+        children = tuple([children[key] for key in obj._children_labels])
+    if hasattr(obj, "_aux_labels"):
+        aux = tuple([aux[key] for key in obj._aux_labels])
+    return (children, aux)
+
+
 class JaXRTSEncoder(json.JSONEncoder):
     """
     Decode class, taking care of all classes that might be decoded.
@@ -41,30 +61,40 @@ class JaXRTSEncoder(json.JSONEncoder):
         if isinstance(obj, PlasmaState):
             return {
                 "_type": "PlasmaState",
-                "value": obj._tree_flatten(),
+                "value": _flatten_obj(obj),
             }
         if isinstance(obj, HNCPotential):
-            out = obj._tree_flatten()
+            out = _flatten_obj(obj)
 
             # Get _transform_r. If it exists, it is the first entry in children
             if hasattr(obj, "_transform_r"):
-                _transform_r = out[0][0]
-                out = (
-                    (
+                if isinstance(out[0], dict):
+                    _transform_r = out[0]["_transform_r"]
+                    out[0]["_transform_r"] = (
                         {
                             "start": jnpu.min(_transform_r),
                             "stop": jnpu.max(_transform_r),
                             "num": len(_transform_r),
                         },
-                        *out[0][1:],
-                    ),
-                    out[1],
-                )
+                    )
+                else:
+                    _transform_r = out[0][0]
+                    out = (
+                        (
+                            {
+                                "start": jnpu.min(_transform_r),
+                                "stop": jnpu.max(_transform_r),
+                                "num": len(_transform_r),
+                            },
+                            *out[0][1:],
+                        ),
+                        out[1],
+                    )
             return {"_type": "HNCPotential", "value": (obj.__name__, out)}
         elif isinstance(obj, Model):
             return {
                 "_type": "Model",
-                "value": (obj.__name__, obj._tree_flatten()),
+                "value": (obj.__name__, _flatten_obj(obj)),
             }
         elif isinstance(obj, Element):
             return {
@@ -146,28 +176,31 @@ class JaXRTSDecoder(json.JSONDecoder):
             return Element(val)
         elif _type == "Model":
             name, tree = val
-            children, aux_data = tree
 
             model = self.models[name]
             new = object.__new__(model)
+
+            children, aux_data = _parse_tree_save(new, *tree)
             new = new._tree_unflatten(aux_data, children)
             return new
         elif _type == "HNCPotential":
             name, tree = val
-            children, aux_data = tree
 
             pot = self.hnc_potentials[name]
             new = object.__new__(pot)
+            children, aux_data = _parse_tree_save(new, *tree)
+
             new = new._tree_unflatten(aux_data, children)
 
             # Fix the transform_r
+            # This uses that _transform_r will always be the first entry of the
+            # children tuple.
             if hasattr(new, "_transform_r"):
                 new._transform_r = jnpu.linspace(**children[0])
             return new
         elif _type == "PlasmaState":
-            children, aux_data = val
-
             new = object.__new__(PlasmaState)
+            children, aux_data = _parse_tree_save(new, *val)
             new = new._tree_unflatten(aux_data, children)
             return new
         return obj

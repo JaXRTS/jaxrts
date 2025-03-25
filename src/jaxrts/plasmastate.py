@@ -329,6 +329,17 @@ class PlasmaState:
         """
         return self[key].evaluate(self, setup)
 
+    # Set labels for a save state that is better readable by humans
+    _children_labels = (
+        "Z_free",
+        "mass_density",
+        "T_e",
+        "T_i",
+        "ion_core_radius",
+        "models",
+    )
+    _aux_labels = ("ions",)
+
     # The following is required to jit a state
     def _tree_flatten(self):
         children = (
