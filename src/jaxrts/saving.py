@@ -66,6 +66,11 @@ class JaXRTSEncoder(json.JSONEncoder):
                 "_type": "PlasmaState",
                 "value": _flatten_obj(obj),
             }
+        if isinstance(obj, Setup):
+            return {
+                "_type": "Setup",
+                "value": _flatten_obj(obj),
+            }
         if isinstance(obj, HNCPotential):
             out = _flatten_obj(obj)
 
@@ -206,6 +211,11 @@ class JaXRTSDecoder(json.JSONDecoder):
             return new
         elif _type == "PlasmaState":
             new = object.__new__(PlasmaState)
+            children, aux_data = _parse_tree_save(new, *val)
+            new = new._tree_unflatten(aux_data, children)
+            return new
+        elif _type == "Setup":
+            new = object.__new__(Setup)
             children, aux_data = _parse_tree_save(new, *val)
             new = new._tree_unflatten(aux_data, children)
             return new

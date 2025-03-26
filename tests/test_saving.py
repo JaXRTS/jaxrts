@@ -76,6 +76,18 @@ def test_load_hnc_potential():
     assert len(loaded_hnc_pot._transform_r) == 200
 
 
+def test_load_setup():
+    with open(save_dir / "setup.json", "r") as f:
+        loaded_setup = saving.load(f, ureg)
+    assert (
+        jnp.abs(
+            loaded_setup.instrument(ureg("5/s")).m_as(ureg.second)
+            - 1.4867195147e-6
+        )
+        < 1e-9
+    )
+
+
 def test_function_saving_and_loading():
     test_function = jax.tree_util.Partial(
         jaxrts.instrument_function.instrument_gaussian
