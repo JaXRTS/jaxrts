@@ -4,7 +4,7 @@ import tempfile
 
 import jax
 import jaxrts
-import jaxrts.saving as save
+import jaxrts.saving as saving
 import jax.numpy as jnp
 
 ureg = jaxrts.ureg
@@ -47,7 +47,7 @@ def test_dump_state():
     with tempfile.NamedTemporaryFile() as tmp:
         # with open(save_dir / "state.json", "w") as f:
         with open(tmp.name, "w") as f:
-            save.dump(test_state, f, indent=2)
+            saving.dump(test_state, f, indent=2)
 
         hash_temp_file = hash_file(tmp.name)
     hash_stored_file = hash_file(save_dir / "state.json")
@@ -57,13 +57,13 @@ def test_dump_state():
 
 def test_load_state():
     with open(save_dir / "state.json", "r") as f:
-        loaded_state = save.load(f, ureg)
+        loaded_state = saving.load(f, ureg)
     assert loaded_state == test_state
 
 
 def test_load_model():
     with open(save_dir / "model.json", "r") as f:
-        loaded_model = save.load(f, ureg)
+        loaded_model = saving.load(f, ureg)
     assert isinstance(
         loaded_model, jaxrts.models.ArbitraryDegeneracyScreeningLength
     )
@@ -71,7 +71,7 @@ def test_load_model():
 
 def test_load_hnc_potential():
     with open(save_dir / "hnc_pot.json", "r") as f:
-        loaded_hnc_pot = save.load(f, ureg)
+        loaded_hnc_pot = saving.load(f, ureg)
     assert loaded_hnc_pot.model_key == ""
     assert len(loaded_hnc_pot._transform_r) == 200
 
@@ -82,7 +82,7 @@ def test_function_saving_and_loading():
     )
     with tempfile.NamedTemporaryFile() as tmp:
         with open(tmp.name, "w") as f:
-            save.dump(test_function, f)
+            saving.dump(test_function, f)
         with open(tmp.name, "r") as f:
-            loaded_function = save.load(f, jaxrts.ureg)
+            loaded_function = saving.load(f, jaxrts.ureg)
     assert test_function(3, 5) == loaded_function(3, 5)
