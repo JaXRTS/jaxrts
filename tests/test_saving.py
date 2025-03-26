@@ -2,6 +2,7 @@ import pathlib
 import hashlib
 import tempfile
 
+import jax
 import jaxrts
 import jaxrts.saving as save
 import jax.numpy as jnp
@@ -73,3 +74,15 @@ def test_load_hnc_potential():
         loaded_hnc_pot = save.load(f, ureg)
     assert loaded_hnc_pot.model_key == ""
     assert len(loaded_hnc_pot._transform_r) == 200
+
+
+def test_function_saving_and_loading():
+    test_function = jax.tree_util.Partial(
+        jaxrts.instrument_function.instrument_gaussian
+    )
+    with tempfile.NamedTemporaryFile() as tmp:
+        with open(tmp.name, "w") as f:
+            save.dump(test_function, f)
+        with open(tmp.name, "r") as f:
+            loaded_function = save.load(f, jaxrts.ureg)
+    assert test_function(3, 5) == loaded_function(3, 5)

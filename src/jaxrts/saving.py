@@ -3,7 +3,7 @@ This module allows for saving and loading :py:class:`jaxrts.models.Model` and
 :py:class:`jaxrts.plasmastate.PlasmaState`
 """
 
-import pickle
+import dill as pickle
 import base64
 import json
 from .plasmastate import PlasmaState
