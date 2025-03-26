@@ -98,3 +98,36 @@ def test_function_saving_and_loading():
         with open(tmp.name, "r") as f:
             loaded_function = saving.load(f, jaxrts.ureg)
     assert test_function(3, 5) == loaded_function(3, 5)
+
+
+class AlwaysPiModel(jaxrts.models.Model):
+    allowed_keys = ["test"]
+    __name__ = "AlwaysPiModel"
+
+    def evaluate(self, plasma_state, setup) -> jnp.ndarray:
+        return jnp.array([jnp.pi])
+
+
+def test_saving_and_restoring_custom_model():
+    state = jaxrts.PlasmaState(
+        ions=ions,
+        Z_free=jnp.array([0.9, 5.2]),
+        mass_density=mass_fraction
+        * jnp.array([1.0])
+        * ureg.gram
+        / ureg.centimeter**3,
+        T_e=40 * ureg.electron_volt / ureg.k_B,
+    )
+    state["test"] = AlwaysPiModel()
+
+    with tempfile.NamedTemporaryFile() as tmp:
+        with open(tmp.name, "w") as f:
+            saving.dump(state, f)
+        with open(tmp.name, "r") as f:
+            loaded_state = saving.load(
+                f,
+                jaxrts.ureg,
+                additional_mappings={"AlwaysPiModel": AlwaysPiModel},
+            )
+
+    assert loaded_state.evaluate("test", None) == jnp.pi
