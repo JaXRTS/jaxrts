@@ -284,7 +284,22 @@ def load(fp, unit_reg, additional_mappings={}, *args, **kwargs):
     Examples
     --------
     >>> with open("state.json", "w") as f:
-            state = load(f, unit_reg = jaxrts.ureg)
+    >>>     state = load(f, unit_reg = jaxrts.ureg)
+    
+    Custom models have to be passed to :py:func:`~load` as shown bellow.
+
+    >>> class AlwaysPiModel(jaxrts.models.Model):
+    >>>     allowed_keys = ["test"]
+    >>>     __name__ = "AlwaysPiModel"
+    >>>     def evaluate(self, plasma_state, setup) -> jnp.ndarray:
+    >>>         return jnp.array([jnp.pi])
+    >>> with open("file", "r") as f:
+    >>>     loaded_state = saving.load(
+    >>>         f,
+    >>>         jaxrts.ureg,
+    >>>         additional_mappings={"AlwaysPiModel": AlwaysPiModel},
+    >>>     )
+
     """
     dec = partialclass(
         JaXRTSDecoder, ureg=unit_reg, additional_mappings=additional_mappings
