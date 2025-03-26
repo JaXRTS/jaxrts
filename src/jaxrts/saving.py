@@ -3,22 +3,23 @@ This module allows for saving and loading :py:class:`jaxrts.models.Model` and
 :py:class:`jaxrts.plasmastate.PlasmaState`
 """
 
-import dill as pickle
 import base64
-import json
-from .plasmastate import PlasmaState
-from .models import Model
-import jaxrts
-from .elements import Element
-from .units import Quantity
-from .hnc_potentials import HNCPotential
-from jaxlib.xla_extension import ArrayImpl
-import jax
-import jpu.numpy as jnpu
-import jax.numpy as jnp
-import numpy as onp
-
 import functools
+import json
+
+import dill as pickle
+import jax
+import jax.numpy as jnp
+import jaxrts
+import jpu.numpy as jnpu
+import numpy as onp
+from jaxlib.xla_extension import ArrayImpl
+
+from .elements import Element
+from .hnc_potentials import HNCPotential
+from .models import Model
+from .plasmastate import PlasmaState
+from .units import Quantity
 
 
 def partialclass(cls, *args, **kwds):
