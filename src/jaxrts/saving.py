@@ -7,8 +7,8 @@ import json
 from .plasmastate import PlasmaState
 from .models import Model
 import jaxrts
-from .elements import Element, Ionization
-from .units import Quantity, to_array
+from .elements import Element
+from .units import Quantity
 from .hnc_potentials import HNCPotential
 from jaxlib.xla_extension import ArrayImpl
 import jpu.numpy as jnpu
@@ -16,7 +16,6 @@ import jax.numpy as jnp
 import numpy as onp
 
 import functools
-import collections
 
 
 def partialclass(cls, *args, **kwds):
@@ -108,11 +107,6 @@ class JaXRTSEncoder(json.JSONEncoder):
                 return {"_type": "Array", "value": list(onp.array(obj))}
             except TypeError:
                 return float(onp.array(obj))
-        elif isinstance(obj, Ionization):
-            return {
-                "_type": "Ionization",
-                "value": obj.__reduce__()[-1],
-            }
         elif isinstance(obj, onp.ndarray):
             return {
                 "_type": "ndArray",
@@ -204,3 +198,21 @@ class JaXRTSDecoder(json.JSONDecoder):
             new = new._tree_unflatten(aux_data, children)
             return new
         return obj
+
+
+def dump(obj, fp, *args, **kwargs):
+    kwargs.update({"cls": JaXRTSEncoder})
+    json.dump(obj, fp, *args, **kwargs)
+
+
+def dumps(obj, *args, **kwargs):
+    kwargs.update({"cls": JaXRTSEncoder})
+    return json.dumps(obj, *args, **kwargs)
+
+
+def load(fp, unit_reg, additional_mappings={}, *args, **kwargs):
+    dec = partialclass(
+        JaXRTSDecoder, ureg=unit_reg, additional_mappings=additional_mappings
+    )
+    kwargs.update({"cls": dec})
+    return json.load(fp, *args, **kwargs)
