@@ -3,7 +3,7 @@ Miscellaneous helper functions.
 """
 
 import logging
-from functools import wraps
+from functools import wraps, partialmethod
 from time import time
 
 import jax
@@ -238,6 +238,19 @@ def secant_extrema_finding(func, xmin, xmax, tol=1e-7, max_iter=1e5):
     final_state = jax.lax.while_loop(cond_fun, body_fun, state)
 
     return final_state[1], final_state[2]
+
+
+def partialclass(cls, *args, **kwds):
+    """
+    This is an equivalent to functools.partial, but for Classes.
+
+    See https://stackoverflow.com/a/38911383
+    """
+
+    class NewCls(cls):
+        __init__ = partialmethod(cls.__init__, *args, **kwds)
+
+    return NewCls
 
 
 jax.tree_util.register_pytree_node(

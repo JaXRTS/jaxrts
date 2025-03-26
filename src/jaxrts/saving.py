@@ -1,10 +1,16 @@
 """
 This module allows for saving and loading :py:class:`jaxrts.models.Model` and
-:py:class:`jaxrts.plasmastate.PlasmaState`
+:py:class:`jaxrts.plasmastate.PlasmaState` and others. Furthermore, this allows
+for serializing quantities, which was an issue when pickeling a PlasmaState.
+
+.. warning ::
+
+   Functions are pickled, and stored as a string. Generally, this method is
+   **unsave**.
+
 """
 
 import base64
-import functools
 import json
 
 import dill as pickle
@@ -16,21 +22,12 @@ import numpy as onp
 from jaxlib.xla_extension import ArrayImpl
 
 from .elements import Element
+from .helpers import partialclass
 from .hnc_potentials import HNCPotential
 from .models import Model
 from .plasmastate import PlasmaState
+from .setup import Setup
 from .units import Quantity
-
-
-def partialclass(cls, *args, **kwds):
-    """
-    See https://stackoverflow.com/a/38911383
-    """
-
-    class NewCls(cls):
-        __init__ = functools.partialmethod(cls.__init__, *args, **kwds)
-
-    return NewCls
 
 
 def _flatten_obj(obj):
@@ -55,7 +52,8 @@ def _parse_tree_save(obj, children, aux):
 
 class JaXRTSEncoder(json.JSONEncoder):
     """
-    Decode class, taking care of all classes that might be decoded.
+    Encoder class, taking care of all classes that are defined here and might
+    be decoded.
 
     See https://gist.github.com/simonw/7000493
     """
@@ -74,6 +72,9 @@ class JaXRTSEncoder(json.JSONEncoder):
         if isinstance(obj, HNCPotential):
             out = _flatten_obj(obj)
 
+            # _transform_r is a huge burden on filesize. And for the
+            # FourierTransform in it's current implementation, it should be
+            # spaced equidistantly, anyways. Reduce it therefore.
             # Get _transform_r. If it exists, it is the first entry in children
             if hasattr(obj, "_transform_r"):
                 if isinstance(out[0], dict):
@@ -137,12 +138,12 @@ class JaXRTSDecoder(json.JSONDecoder):
     """
     .. warning ::
 
-       In the current implementation, you cannot resotre custom models. To
-       restore them, you have to provide these in a custom mapping:
-
+       In the current implementation, you cannot easily restore custom models.
+       To restore them, you have to provide these in `additional_mappings`:
     """
 
     def __init__(self, ureg, additional_mappings={}, *args, **kwargs):
+        """ """
         self.ureg = ureg
         self.additional_mappings = additional_mappings
         json.JSONDecoder.__init__(
@@ -223,16 +224,68 @@ class JaXRTSDecoder(json.JSONDecoder):
 
 
 def dump(obj, fp, *args, **kwargs):
+    """
+    Save an object to file. Uses :py:func:`json.dump` under to hood, and
+    forwards args and kwargs to this function.
+
+    Parameters
+    ----------
+    obj
+        The object to serialize
+    fp
+        The file where to save the data to
+
+    Examples
+    --------
+    >>> with open("element.json", "w") as f:
+            dump(jaxrts.Element("C"), f, intend=2)
+    """
     kwargs.update({"cls": JaXRTSEncoder})
     json.dump(obj, fp, *args, **kwargs)
 
 
-def dumps(obj, *args, **kwargs):
+def dumps(obj, *args, **kwargs) -> str:
+    """
+    Serialize an object. Uses :py:func:`json.dumps` under to hood, and
+    forwards args and kwargs to this function.
+
+    Parameters
+    ----------
+    obj
+        The object to serialize
+
+    Returns
+    -------
+    Serialized string
+    """
     kwargs.update({"cls": JaXRTSEncoder})
     return json.dumps(obj, *args, **kwargs)
 
 
 def load(fp, unit_reg, additional_mappings={}, *args, **kwargs):
+    """
+    Load an object from file. Uses :py:func:`json.load` under to hood, and
+    forwards args and kwargs to this function.
+
+    Parameters
+    ----------
+    fp
+        The file to be loaded from.
+    unit_reg
+        The pint unit registry to use for loading.
+    additional_mappings: Optional
+        Additional models to be considered for loading. This is only relevant
+        when custom models were saved.
+
+    Returns
+    -------
+    The Deserialized object
+
+    Examples
+    --------
+    >>> with open("state.json", "w") as f:
+            state = load(f, unit_reg = jaxrts.ureg)
+    """
     dec = partialclass(
         JaXRTSDecoder, ureg=unit_reg, additional_mappings=additional_mappings
     )
