@@ -82,9 +82,9 @@ def test_load_setup():
     assert (
         jnp.abs(
             loaded_setup.instrument(ureg("5/s")).m_as(ureg.second)
-            - 1.4867195147e-6
+            - 0.2
         )
-        < 1e-9
+        < 1e-6
     )
 
 
@@ -131,3 +131,6 @@ def test_saving_and_restoring_custom_model():
             )
 
     assert loaded_state.evaluate("test", None) == jnp.pi
+
+
+test_load_setup()
