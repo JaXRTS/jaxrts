@@ -1,0 +1,22 @@
+{
+  "_type": "HNCPotential",
+  "value": [
+    "DebyeHueckelPotential",
+    [
+      [
+        {
+          "start": {
+            "_type": "Quantity",
+            "value": [0.0001, [["bohr", 1]]]
+          },
+          "stop": {
+            "_type": "Quantity",
+            "value": [10000.0, [["bohr", 1]]]
+          },
+          "num": 200
+        }
+      ],
+      { "include_electrons": "SpinAveraged", "model_key": "" }
+    ]
+  ]
+}

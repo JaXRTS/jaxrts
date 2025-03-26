@@ -1,0 +1,272 @@
+{
+  "_type": "PlasmaState",
+  "value": [
+    {
+      "Z_free": {
+        "_type": "Array",
+        "value": [
+          0.9,
+          5.2
+        ]
+      },
+      "mass_density": {
+        "_type": "Quantity",
+        "value": [
+          {
+            "_type": "Array",
+            "value": [
+              0.11190674437968359,
+              0.8880932556203164
+            ]
+          },
+          [
+            [
+              "gram",
+              1
+            ],
+            [
+              "centimeter",
+              -3
+            ]
+          ]
+        ]
+      },
+      "T_e": {
+        "_type": "Quantity",
+        "value": [
+          40.0,
+          [
+            [
+              "electron_volt",
+              1
+            ],
+            [
+              "boltzmann_constant",
+              -1
+            ]
+          ]
+        ]
+      },
+      "T_i": {
+        "_type": "Quantity",
+        "value": [
+          {
+            "_type": "Array",
+            "value": [
+              40.0,
+              40.0
+            ]
+          },
+          [
+            [
+              "electron_volt",
+              1
+            ],
+            [
+              "boltzmann_constant",
+              -1
+            ]
+          ]
+        ]
+      },
+      "ion_core_radius": {
+        "_type": "Quantity",
+        "value": [
+          {
+            "_type": "Array",
+            "value": [
+              -1.0,
+              -1.0
+            ]
+          },
+          [
+            [
+              "angstrom",
+              1
+            ]
+          ]
+        ]
+      },
+      "models": {
+        "screening length": {
+          "_type": "Model",
+          "value": [
+            "ArbitraryDegeneracyScreeningLength",
+            [
+              [],
+              [
+                "screening length"
+              ]
+            ]
+          ]
+        },
+        "ee-lfc": {
+          "_type": "Model",
+          "value": [
+            "ElectronicLFCConstant",
+            [
+              [
+                0.0
+              ],
+              [
+                "ee-lfc"
+              ]
+            ]
+          ]
+        },
+        "screening": {
+          "_type": "Model",
+          "value": [
+            "Gregori2004Screening",
+            [
+              [],
+              [
+                "screening"
+              ]
+            ]
+          ]
+        },
+        "free-free scattering": {
+          "_type": "Model",
+          "value": [
+            "Neglect",
+            [
+              [],
+              [
+                "free-free scattering"
+              ]
+            ]
+          ]
+        },
+        "bound-free scattering": {
+          "_type": "Model",
+          "value": [
+            "Neglect",
+            [
+              [],
+              [
+                "bound-free scattering"
+              ]
+            ]
+          ]
+        },
+        "free-bound scattering": {
+          "_type": "Model",
+          "value": [
+            "Neglect",
+            [
+              [],
+              [
+                "free-bound scattering"
+              ]
+            ]
+          ]
+        },
+        "ion-ion Potential": {
+          "_type": "HNCPotential",
+          "value": [
+            "DebyeHueckelPotential",
+            [
+              [
+                {
+                  "start": {
+                    "_type": "Quantity",
+                    "value": [
+                      0.0001,
+                      [
+                        [
+                          "bohr",
+                          1
+                        ]
+                      ]
+                    ]
+                  },
+                  "stop": {
+                    "_type": "Quantity",
+                    "value": [
+                      10000.0,
+                      [
+                        [
+                          "bohr",
+                          1
+                        ]
+                      ]
+                    ]
+                  },
+                  "num": 2097152
+                }
+              ],
+              {
+                "include_electrons": "off",
+                "model_key": "ion-ion Potential"
+              }
+            ]
+          ]
+        },
+        "form-factors": {
+          "_type": "Model",
+          "value": [
+            "PaulingFormFactors",
+            [
+              [],
+              [
+                "form-factors"
+              ]
+            ]
+          ]
+        },
+        "ionic scattering": {
+          "_type": "Model",
+          "value": [
+            "OnePotentialHNCIonFeat",
+            [
+              [
+                {
+                  "_type": "Quantity",
+                  "value": [
+                    0.001,
+                    [
+                      [
+                        "bohr",
+                        1
+                      ]
+                    ]
+                  ]
+                },
+                {
+                  "_type": "Quantity",
+                  "value": [
+                    100,
+                    [
+                      [
+                        "bohr",
+                        1
+                      ]
+                    ]
+                  ]
+                },
+                0.8
+              ],
+              [
+                "ionic scattering",
+                14
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "ions": [
+        {
+          "_type": "Element",
+          "value": "H"
+        },
+        {
+          "_type": "Element",
+          "value": "O"
+        }
+      ]
+    }
+  ]
+}
