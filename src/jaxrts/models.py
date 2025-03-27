@@ -1283,6 +1283,10 @@ class BornMerminFull(FreeFreeModel):
             "chemical potential", IchimaruChemPotential()
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
+        if len(plasma_state) == 1:
+            plasma_state.update_default_model("BM S_ii", Sum_Sii())
+        else:
+            plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
 
     @jax.jit
     def evaluate_raw(
@@ -1420,6 +1424,10 @@ class BornMermin(FreeFreeModel):
             "chemical potential", IchimaruChemPotential()
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
+        if len(plasma_state) == 1:
+            plasma_state.update_default_model("BM S_ii", Sum_Sii())
+        else:
+            plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
 
     @jax.jit
     def evaluate_raw(
@@ -1576,6 +1584,10 @@ class BornMermin_Fit(FreeFreeModel):
             "chemical potential", IchimaruChemPotential()
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
+        if len(plasma_state) == 1:
+            plasma_state.update_default_model("BM S_ii", Sum_Sii())
+        else:
+            plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
 
     @jax.jit
     def evaluate_raw(
@@ -1733,6 +1745,10 @@ class BornMermin_Fortmann(FreeFreeModel):
             "chemical potential", IchimaruChemPotential()
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
+        if len(plasma_state) == 1:
+            plasma_state.update_default_model("BM S_ii", Sum_Sii())
+        else:
+            plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
 
     @jax.jit
     def evaluate_raw(
