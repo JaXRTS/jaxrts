@@ -28,10 +28,19 @@ for module in [jaxrts.models]:
                         all_models[k].append(getattr(module, obj_name))
 
 available_model_keys = all_models.keys()
+invalid_multicomponent = [
+    jaxrts.models.ArkhipovIonFeat,
+    jaxrts.models.Gregori2003IonFeat,
+    jaxrts.models.Gregori2006IonFeat,
+]
 
 
 def _peak_function(x):
     return jnp.array([[1.2]]) * ureg.dimensionless
+
+
+def _peak_function2C(x):
+    return jnp.array([[1.2, 2.3], [3.4, 4.5]]) * ureg.dimensionless
 
 
 # Some models require additional parameters. Set them.
@@ -61,13 +70,13 @@ def additional_model_parameters(
         return (
             jnp.array([1, 2]) / (1 * ureg.angstrom),
             jnp.array([1, 1]),
-            _peak_function,
+            _peak_function if no_of_ions == 1 else _peak_function2C,
         )
     if model == jaxrts.models.DebyeWallerSolid:
         PowderModel = jaxrts.models.PeakCollection(
             jnp.array([1, 2]) / (1 * ureg.angstrom),
             jnp.array([1, 1]),
-            _peak_function,
+            _peak_function if no_of_ions == 1 else _peak_function2C,
         )
         S_plasmaModel = jaxrts.models.FixedSii(
             jnp.array([[1]]) * ureg.dimensionless
@@ -159,5 +168,30 @@ def test_all_models_can_be_evaluated_one_component():
                 )
                 out = one_comp_test_state.evaluate(key, test_setup)
                 assert out is not None
-            except:
+            except Exception:
+                raise AssertionError(f"Error evaluating {model} as {key}.")
+
+
+def test_all_models_can_be_evaluated_two_component():
+    for key in available_model_keys:
+        for model in all_models[key]:
+            # Ignore these models which are not working with multi-component
+            # PlasmaStates by design.
+            if model in invalid_multicomponent:
+                continue
+            try:
+                two_comp_test_state = jaxrts.PlasmaState(
+                    ions=[jaxrts.Element("C"), jaxrts.Element("Cl")],
+                    Z_free=jnp.array([2.1, 4.2]),
+                    mass_density=jnp.array([1.5, 1.5])
+                    * ureg.gram
+                    / ureg.centimeter**3,
+                    T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
+                )
+                two_comp_test_state[key] = model(
+                    *additional_model_parameters(model, 2)
+                )
+                out = two_comp_test_state.evaluate(key, test_setup)
+                assert out is not None
+            except Exception:
                 raise AssertionError(f"Error evaluating {model} as {key}.")
