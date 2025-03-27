@@ -30,8 +30,8 @@ for module in [jaxrts.models]:
 available_model_keys = all_models.keys()
 
 
-def _identity(x):
-    return (x / (1 / ureg.angstrom)).m_as(ureg.dimensionless)
+def _peak_function(x):
+    return jnp.array([[1.2]]) * ureg.dimensionless
 
 
 # Some models require additional parameters. Set them.
@@ -61,13 +61,13 @@ def additional_model_parameters(
         return (
             jnp.array([1, 2]) / (1 * ureg.angstrom),
             jnp.array([1, 1]),
-            _identity,
+            _peak_function,
         )
     if model == jaxrts.models.DebyeWallerSolid:
         PowderModel = jaxrts.models.PeakCollection(
             jnp.array([1, 2]) / (1 * ureg.angstrom),
             jnp.array([1, 1]),
-            _identity,
+            _peak_function,
         )
         S_plasmaModel = jaxrts.models.FixedSii(
             jnp.array([[1]]) * ureg.dimensionless
