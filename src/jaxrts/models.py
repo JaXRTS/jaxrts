@@ -2594,11 +2594,12 @@ class LinearResponseScreeningGericke2010(Model):
         Vei = plasma_state["electron-ion Potential"].full_k(
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
-        q = xi * Vei[-1, :-1]
+        q = (xi * Vei[-1, :-1]).to(ureg.dimensionless)
         # Screening vanishes if there are no free electrons
         q = jax.lax.cond(
             jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
+            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis]
+            * ureg.dimensionless,
             lambda: q,
         )
         return q
