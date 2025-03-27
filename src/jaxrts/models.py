@@ -2701,7 +2701,8 @@ class LinearResponseScreening(Model):
     :py:class:`~KlimontovichKraeftPotential`).
 
     Uses the :py:meth:`~.FreeFreeModel.susceptibility` method of the chosen
-    Free Free model.
+    Free Free model. If not free-free model is specified, set the default to
+    :py:class:`~.RPA_DandreaFit`.
     """
 
     allowed_keys = ["screening"]
@@ -2715,6 +2716,7 @@ class LinearResponseScreening(Model):
         plasma_state["electron-ion Potential"].include_electrons = (
             "SpinAveraged"
         )
+        plasma_state["free-free scattering"] = RPA_DandreaFit()
 
     @jax.jit
     def evaluate(
