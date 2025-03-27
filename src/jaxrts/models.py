@@ -937,6 +937,8 @@ class DebyeWallerSolid(IonFeatModel):
 
     This function uses the :py:class:`jaxrts.plasmastate.PlasmaState` ``'Debye
     temperature'`` model to calculate the Debye Waller factor.
+    Hence, it requires a 'Debye temperature' model (defaults to
+    :py:class:`~BohmStaver`).
 
     See Also
     --------
@@ -966,6 +968,11 @@ class DebyeWallerSolid(IonFeatModel):
         self.S_plasma = S_plasma
         self.b = b
         super().__init__()
+
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        super().prepare(plasma_state, key)
+        plasma_state.update_default_model("Debye temperature", BohmStaver())
 
     @jax.jit
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:

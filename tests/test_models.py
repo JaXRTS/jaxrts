@@ -53,7 +53,9 @@ def additional_model_parameters(
     if model == jaxrts.models.ElectronicLFCConstant:
         return (1.2,)
     if model == jaxrts.models.FixedSii:
-        return (jnp.ones((no_of_ions, no_of_ions)) * 1.23,)
+        return (
+            jnp.ones((no_of_ions, no_of_ions)) * 1.23 * ureg.dimensionless,
+        )
 
     if model == jaxrts.models.PeakCollection:
         return (
@@ -67,7 +69,9 @@ def additional_model_parameters(
             jnp.array([1, 1]),
             _identity,
         )
-        S_plasmaModel = jaxrts.models.FixedSii(jnp.array([[1]]))
+        S_plasmaModel = jaxrts.models.FixedSii(
+            jnp.array([[1]]) * ureg.dimensionless
+        )
         return (
             S_plasmaModel,
             PowderModel,
@@ -145,7 +149,9 @@ def test_all_models_can_be_evaluated_one_component():
                 one_comp_test_state = jaxrts.PlasmaState(
                     ions=[jaxrts.Element("C")],
                     Z_free=jnp.array([2]),
-                    mass_density=jnp.array([3.5]) * ureg.gram / ureg.centimeter**3,
+                    mass_density=jnp.array([3.5])
+                    * ureg.gram
+                    / ureg.centimeter**3,
                     T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
                 )
                 one_comp_test_state[key] = model(
