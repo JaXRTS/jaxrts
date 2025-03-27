@@ -2675,7 +2675,7 @@ class DebyeHueckelScreening(Model):
 
         kappa = 1 / plasma_state.screening_length
         q = ion_feature.q_DebyeHueckelChapman2015(
-            setup.k,
+            setup.k[jnp.newaxis],
             kappa,
             plasma_state.Z_free,
         )
