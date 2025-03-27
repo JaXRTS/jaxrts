@@ -141,14 +141,17 @@ def test_ModelEquality():
 def test_all_models_can_be_evaluated_one_component():
     for key in available_model_keys:
         for model in all_models[key]:
-            one_comp_test_state = jaxrts.PlasmaState(
-                ions=[jaxrts.Element("C")],
-                Z_free=jnp.array([2]),
-                mass_density=jnp.array([3.5]) * ureg.gram / ureg.centimeter**3,
-                T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
-            )
-            one_comp_test_state[key] = model(
-                *additional_model_parameters(model, 1)
-            )
-            out = one_comp_test_state.evaluate(key, test_setup)
-            assert out is not None
+            try:
+                one_comp_test_state = jaxrts.PlasmaState(
+                    ions=[jaxrts.Element("C")],
+                    Z_free=jnp.array([2]),
+                    mass_density=jnp.array([3.5]) * ureg.gram / ureg.centimeter**3,
+                    T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
+                )
+                one_comp_test_state[key] = model(
+                    *additional_model_parameters(model, 1)
+                )
+                out = one_comp_test_state.evaluate(key, test_setup)
+                assert out is not None
+            except:
+                raise AssertionError(f"Error evaluating {model} as {key}.")
