@@ -2109,6 +2109,11 @@ class DetailedBalance(ScatteringModel):
     __name__ = "DetailedBalance"
     allowed_keys = ["free-bound scattering"]
 
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "bound-free scattering", SchumacherImpulse()
+        )
+
     @jax.jit
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup
