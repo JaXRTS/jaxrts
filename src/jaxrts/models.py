@@ -969,7 +969,6 @@ class DebyeWallerSolid(IonFeatModel):
         self.b = b
         super().__init__()
 
-
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         super().prepare(plasma_state, key)
         plasma_state.update_default_model("Debye temperature", BohmStaver())
@@ -2985,6 +2984,11 @@ class Sum_Sii(Model):
     allowed_keys = ["BM S_ii"]
     __name__ = "Sum_Sii"
 
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "ionic scattering", OnePotentialHNCIonFeat()
+        )
+
     def evaluate(
         self,
         plasma_state: "PlasmaState",
@@ -3044,6 +3048,9 @@ class AverageAtom_Sii(Model):
             "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
         )
         plasma_state["ion-ion Potential"].include_electrons = "off"
+        plasma_state.update_default_model(
+            "ionic scattering", OnePotentialHNCIonFeat()
+        )
 
     @property
     def r(self):
