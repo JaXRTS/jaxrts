@@ -2671,7 +2671,7 @@ class DebyeHueckelScreening(Model):
         q = ion_feature.q_DebyeHueckelChapman2015(
             setup.k,
             kappa,
-            plasma_state.Z_f,
+            plasma_state.Z_free,
         )
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
