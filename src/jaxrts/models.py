@@ -1984,10 +1984,13 @@ class SchumacherImpulseFitRk(ScatteringModel):
     Note, that this implementation is still experimental.
 
     Requires a 'form-factors' model (defaults to
-    :py:class:`~PaulingFormFactors`).
+    :py:class:`~.PaulingFormFactors`).
 
     Requires an 'ipd' model (defaults to
-    :py:class:`~Neglect`).
+    :py:class:`~.Neglect`).
+    j
+    Requires a 'free-free scattering' model (defaults to
+    :py:class:`~.RPA_DandreaFit`).
     """
 
     allowed_keys = ["bound-free scattering"]
@@ -1999,6 +2002,9 @@ class SchumacherImpulseFitRk(ScatteringModel):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
+        plasma_state.update_default_model(
+            "free-free scattering", RPA_DandreaFit()
+        )
 
     @jax.jit
     def r_k(
