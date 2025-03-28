@@ -21,8 +21,6 @@ mult_comp_test_state = jaxrts.PlasmaState(
 )
 
 def plasmaStateEquality(state):
-    logging.warning(state.models.keys())
-
     # Test comparison with some random type
     assert state != 6
     # Test comparison with it's copy
