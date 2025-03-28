@@ -2455,7 +2455,7 @@ class DebyeHueckelScreeningLength(Model):
     """
 
     allowed_keys = ["screening length"]
-    __name__ = " DebyeHueckelScreeningLength"
+    __name__ = "DebyeHueckelScreeningLength"
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:

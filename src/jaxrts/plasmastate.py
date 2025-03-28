@@ -329,6 +329,17 @@ class PlasmaState:
         """
         return self[key].evaluate(self, setup)
 
+    # Set labels for a save state that is better readable by humans
+    _children_labels = (
+        "Z_free",
+        "mass_density",
+        "T_e",
+        "T_i",
+        "ion_core_radius",
+        "models",
+    )
+    _aux_labels = ("ions",)
+
     # The following is required to jit a state
     def _tree_flatten(self):
         children = (
@@ -370,7 +381,23 @@ class PlasmaState:
 
     def __eq__(self, other):
         if isinstance(other, PlasmaState):
-            return self._eq_characteristic() == other._eq_characteristic()
+            # Check that all _eq_characteristics are the same for both
+            # plasmastates
+            self_c, self_s, self_i, self_m = self._eq_characteristic()
+            other_c, other_s, other_i, other_m = other._eq_characteristic()
+
+            # Test the children. If any is not equal, return false
+            for s, o in zip(self_c, other_c):
+                eq = jnpu.equal(s, o)
+                if not isinstance(eq, bool):
+                    eq = eq.all()
+                if not eq:
+                    return False
+            # If all children are identical, compare the model_list, ions and
+            # model_keys
+            return (
+                (self_s == other_s) & (self_i == other_i) & (self_m == other_m)
+            )
         return NotImplemented
 
 
