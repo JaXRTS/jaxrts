@@ -1,5 +1,4 @@
 import copy
-import logging
 
 from jax import numpy as jnp
 
@@ -21,9 +20,9 @@ mult_comp_test_state = jaxrts.PlasmaState(
     T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
 )
 
-
 def plasmaStateEquality(state):
     logging.warning(state.models.keys())
+
     # Test comparison with some random type
     assert state != 6
     # Test comparison with it's copy
