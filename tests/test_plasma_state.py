@@ -1,5 +1,4 @@
 import copy
-import logging
 
 from jax import numpy as jnp
 
@@ -16,7 +15,6 @@ test_state = jaxrts.PlasmaState(
 
 
 def test_PlasmaStateEquality():
-    logging.warning(test_state.models.keys())
     # Test comparison with some random type
     assert test_state != 6
     # Test comparison with it's copy
