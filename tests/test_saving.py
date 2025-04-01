@@ -76,14 +76,24 @@ def test_load_hnc_potential():
     assert len(loaded_hnc_pot._transform_r) == 200
 
 
-def test_load_setup():
-    with open(save_dir / "setup.json", "r") as f:
-        loaded_setup = saving.load(f, ureg)
+def test_save_and_load_setup():
+    """
+    Just loading a setup might lead to issues, when they come from a different
+    system. Therefore, save and load a setup.
+    """
+    test_setup = jaxrts.Setup(
+        ureg("45 deg"),
+        4500 * ureg.electron_volt,
+        jnp.linspace(4000, 5000) * ureg.electron_volt,
+        lambda x: 1 / x,
+    )
+    with tempfile.NamedTemporaryFile() as tmp:
+        with open(tmp.name, "w") as f:
+            saving.dump(test_setup, f)
+        with open(tmp.name, "r") as f:
+            loaded_setup = saving.load(f, jaxrts.ureg)
     assert (
-        jnp.abs(
-            loaded_setup.instrument(ureg("5/s")).m_as(ureg.second)
-            - 0.2
-        )
+        jnp.abs(loaded_setup.instrument(ureg("5/s")).m_as(ureg.second) - 0.2)
         < 1e-6
     )
 
@@ -131,6 +141,3 @@ def test_saving_and_restoring_custom_model():
             )
 
     assert loaded_state.evaluate("test", None) == jnp.pi
-
-
-test_load_setup()

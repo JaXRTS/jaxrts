@@ -1,32 +1,16 @@
 import copy
 import logging
-from collections import defaultdict
-
 import pytest
 from jax import numpy as jnp
 
 import jaxrts
 
+from .helpers import get_all_models
+
 ureg = jaxrts.ureg
 
 
-# Get a list of all models defined within jaxrts
-all_models = defaultdict(list)
-
-for module in [jaxrts.models]:
-    for obj_name in dir(module):
-        if "__class__" in dir(obj_name):
-            attributes = getattr(module, obj_name)
-            if "allowed_keys" in dir(attributes):
-                keys = getattr(attributes, "allowed_keys")
-                if (
-                    ("Model" not in obj_name)
-                    & ("model" not in obj_name)
-                    & (not obj_name.startswith("_"))
-                ):
-                    for k in keys:
-                        all_models[k].append(getattr(module, obj_name))
-
+all_models = get_all_models()
 available_model_keys = all_models.keys()
 invalid_multicomponent = [
     jaxrts.models.ArkhipovIonFeat,
