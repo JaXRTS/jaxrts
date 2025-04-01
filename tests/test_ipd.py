@@ -11,6 +11,10 @@ from jaxrts.ipd import (
     ipd_stewart_pyatt,
 )
 
+from .helpers import get_all_models
+
+all_ipd_models = get_all_models()["ipd"]
+
 ureg = jaxrts.ureg
 
 
@@ -55,3 +59,19 @@ def test_ipd_zeng2022():
     assert jnpu.nanmax(jnp.absolute((ipdSP - ipdSP_calc) / ipdSP)[10:]) < 0.02
     assert jnpu.max(jnp.absolute((ipdDH - ipdDH_calc))[:10]) < 10  # eV
     assert jnpu.max(jnp.absolute((ipdSP - ipdSP_calc))[:10]) < 4  # eV
+
+
+def test_ipd_valid_for_Z_f_equals_0():
+    Zf_0_state = jaxrts.PlasmaState(
+        ions=[jaxrts.Element("C")],
+        Z_free=jnp.array([0]),
+        mass_density=jnp.array([3.5]) * ureg.gram / ureg.centimeter**3,
+        T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
+    )
+    for model in all_ipd_models:
+        if model == jaxrts.models.ConstantIPD:
+            args = (23.42 * ureg.electron_volt,)
+        else:
+            args = ()
+        Zf_0_state["ipd"] = model(*args)
+        assert jnpu.isfinite(Zf_0_state.evaluate("ipd", None))
