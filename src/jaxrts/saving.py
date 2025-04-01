@@ -6,8 +6,9 @@ for serializing quantities, which was an issue when pickeling a PlasmaState.
 .. warning ::
 
    Functions are pickled, and stored as a string. Hence, saving functions is
-   generally poorly supported and might be errorprone. Furtheremore, the method
-   is **unsave**.
+   generally poorly supported and might be error prone. It might work on your
+   machine, but interoperability between different machines or module versions
+   is not to be expected. Furthermore, the method is **unsave**.
 
 """
 
