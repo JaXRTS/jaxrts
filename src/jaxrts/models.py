@@ -937,6 +937,8 @@ class DebyeWallerSolid(IonFeatModel):
 
     This function uses the :py:class:`jaxrts.plasmastate.PlasmaState` ``'Debye
     temperature'`` model to calculate the Debye Waller factor.
+    Hence, it requires a 'Debye temperature' model (defaults to
+    :py:class:`~BohmStaver`).
 
     See Also
     --------
@@ -966,6 +968,10 @@ class DebyeWallerSolid(IonFeatModel):
         self.S_plasma = S_plasma
         self.b = b
         super().__init__()
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        super().prepare(plasma_state, key)
+        plasma_state.update_default_model("Debye temperature", BohmStaver())
 
     @jax.jit
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
@@ -1283,6 +1289,10 @@ class BornMerminFull(FreeFreeModel):
             "chemical potential", IchimaruChemPotential()
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
+        if len(plasma_state) == 1:
+            plasma_state.update_default_model("BM S_ii", Sum_Sii())
+        else:
+            plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
 
     @jax.jit
     def evaluate_raw(
@@ -1420,6 +1430,10 @@ class BornMermin(FreeFreeModel):
             "chemical potential", IchimaruChemPotential()
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
+        if len(plasma_state) == 1:
+            plasma_state.update_default_model("BM S_ii", Sum_Sii())
+        else:
+            plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
 
     @jax.jit
     def evaluate_raw(
@@ -1576,6 +1590,10 @@ class BornMermin_Fit(FreeFreeModel):
             "chemical potential", IchimaruChemPotential()
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
+        if len(plasma_state) == 1:
+            plasma_state.update_default_model("BM S_ii", Sum_Sii())
+        else:
+            plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
 
     @jax.jit
     def evaluate_raw(
@@ -1733,6 +1751,10 @@ class BornMermin_Fortmann(FreeFreeModel):
             "chemical potential", IchimaruChemPotential()
         )
         plasma_state.update_default_model("BM V_eiS", FiniteWavelength_BM_V())
+        if len(plasma_state) == 1:
+            plasma_state.update_default_model("BM S_ii", Sum_Sii())
+        else:
+            plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
 
     @jax.jit
     def evaluate_raw(
@@ -1962,10 +1984,13 @@ class SchumacherImpulseFitRk(ScatteringModel):
     Note, that this implementation is still experimental.
 
     Requires a 'form-factors' model (defaults to
-    :py:class:`~PaulingFormFactors`).
+    :py:class:`~.PaulingFormFactors`).
 
     Requires an 'ipd' model (defaults to
-    :py:class:`~Neglect`).
+    :py:class:`~.Neglect`).
+    j
+    Requires a 'free-free scattering' model (defaults to
+    :py:class:`~.RPA_DandreaFit`).
     """
 
     allowed_keys = ["bound-free scattering"]
@@ -1977,6 +2002,9 @@ class SchumacherImpulseFitRk(ScatteringModel):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
+        plasma_state.update_default_model(
+            "free-free scattering", RPA_DandreaFit()
+        )
 
     @jax.jit
     def r_k(
@@ -2086,6 +2114,11 @@ class DetailedBalance(ScatteringModel):
 
     __name__ = "DetailedBalance"
     allowed_keys = ["free-bound scattering"]
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "bound-free scattering", SchumacherImpulse()
+        )
 
     @jax.jit
     def evaluate_raw(
@@ -2422,7 +2455,7 @@ class DebyeHueckelScreeningLength(Model):
     """
 
     allowed_keys = ["screening length"]
-    __name__ = " DebyeHueckelScreeningLength"
+    __name__ = "DebyeHueckelScreeningLength"
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -2572,11 +2605,12 @@ class LinearResponseScreeningGericke2010(Model):
         Vei = plasma_state["electron-ion Potential"].full_k(
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
-        q = xi * Vei[-1, :-1]
+        q = (xi * Vei[-1, :-1]).to(ureg.dimensionless)
         # Screening vanishes if there are no free electrons
         q = jax.lax.cond(
             jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis],
+            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis]
+            * ureg.dimensionless,
             lambda: q,
         )
         return q
@@ -2653,9 +2687,9 @@ class DebyeHueckelScreening(Model):
 
         kappa = 1 / plasma_state.screening_length
         q = ion_feature.q_DebyeHueckelChapman2015(
-            setup.k,
+            setup.k[jnp.newaxis],
             kappa,
-            plasma_state.Z_f,
+            plasma_state.Z_free,
         )
         q = jnp.real(q.m_as(ureg.dimensionless))
         # Screening vanishes if there are no free electrons
@@ -2679,7 +2713,8 @@ class LinearResponseScreening(Model):
     :py:class:`~KlimontovichKraeftPotential`).
 
     Uses the :py:meth:`~.FreeFreeModel.susceptibility` method of the chosen
-    Free Free model.
+    Free Free model. If not free-free model is specified, set the default to
+    :py:class:`~.RPA_DandreaFit`.
     """
 
     allowed_keys = ["screening"]
@@ -2693,6 +2728,7 @@ class LinearResponseScreening(Model):
         plasma_state["electron-ion Potential"].include_electrons = (
             "SpinAveraged"
         )
+        plasma_state["free-free scattering"] = RPA_DandreaFit()
 
     @jax.jit
     def evaluate(
@@ -2884,7 +2920,7 @@ class ElectronicLFCConstant(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "None"
+    __name__ = "ElectronicLFCConstant"
 
     def __init__(self, value):
         self.value = value
@@ -2962,6 +2998,11 @@ class Sum_Sii(Model):
     allowed_keys = ["BM S_ii"]
     __name__ = "Sum_Sii"
 
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "ionic scattering", OnePotentialHNCIonFeat()
+        )
+
     def evaluate(
         self,
         plasma_state: "PlasmaState",
@@ -3021,6 +3062,9 @@ class AverageAtom_Sii(Model):
             "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
         )
         plasma_state["ion-ion Potential"].include_electrons = "off"
+        plasma_state.update_default_model(
+            "ionic scattering", OnePotentialHNCIonFeat()
+        )
 
     @property
     def r(self):

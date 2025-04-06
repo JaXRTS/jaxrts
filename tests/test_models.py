@@ -1,11 +1,79 @@
 import copy
-
+import logging
 import pytest
 from jax import numpy as jnp
 
 import jaxrts
 
+from .helpers import get_all_models
+
 ureg = jaxrts.ureg
+
+
+all_models = get_all_models()
+available_model_keys = all_models.keys()
+invalid_multicomponent = [
+    jaxrts.models.ArkhipovIonFeat,
+    jaxrts.models.Gregori2003IonFeat,
+    jaxrts.models.Gregori2006IonFeat,
+]
+
+
+def _peak_function(x):
+    return jnp.array([[1.2]]) * ureg.dimensionless
+
+
+def _peak_function2C(x):
+    return jnp.array([[1.2, 2.3], [3.4, 4.5]]) * ureg.dimensionless
+
+
+# Some models require additional parameters. Set them.
+def additional_model_parameters(
+    model: jaxrts.models.Model,
+    no_of_ions: int,
+) -> tuple:
+    """
+    Define possible additional parameters for Models
+    """
+    if model == jaxrts.models.ConstantChemPotential:
+        return (123.45 * ureg.electron_volt,)
+    if model == jaxrts.models.ConstantDebyeTemp:
+        return (314.1 * ureg.kelvin,)
+    if model == jaxrts.models.ConstantScreeningLength:
+        return (12.1 * ureg.angstrom,)
+    if model == jaxrts.models.ConstantIPD:
+        return (23.42 * ureg.electron_volt,)
+    if model == jaxrts.models.ElectronicLFCConstant:
+        return (1.2,)
+    if model == jaxrts.models.FixedSii:
+        return (
+            jnp.ones((no_of_ions, no_of_ions)) * 1.23 * ureg.dimensionless,
+        )
+
+    if model == jaxrts.models.PeakCollection:
+        return (
+            jnp.array([1, 2]) / (1 * ureg.angstrom),
+            jnp.array([1, 1]),
+            _peak_function if no_of_ions == 1 else _peak_function2C,
+        )
+    if model == jaxrts.models.DebyeWallerSolid:
+        PowderModel = jaxrts.models.PeakCollection(
+            jnp.array([1, 2]) / (1 * ureg.angstrom),
+            jnp.array([1, 1]),
+            _peak_function if no_of_ions == 1 else _peak_function2C,
+        )
+        S_plasmaModel = jaxrts.models.FixedSii(
+            jnp.array([[1]]) * ureg.dimensionless
+        )
+        return (
+            S_plasmaModel,
+            PowderModel,
+        )
+    return ()
+
+
+# You will encounter many warnings about setting defaults. This is fine, here.
+logging.getLogger("jaxrts").setLevel(logging.ERROR)
 
 test_state = jaxrts.PlasmaState(
     ions=[jaxrts.Element("C")],
@@ -65,3 +133,49 @@ def test_ModelEquality():
     # Now change the copy
     model.sample_points = 8
     assert test_state["free-free scattering"] != model
+
+
+def test_all_models_can_be_evaluated_one_component():
+    for key in available_model_keys:
+        for model in all_models[key]:
+            try:
+                one_comp_test_state = jaxrts.PlasmaState(
+                    ions=[jaxrts.Element("C")],
+                    Z_free=jnp.array([2]),
+                    mass_density=jnp.array([3.5])
+                    * ureg.gram
+                    / ureg.centimeter**3,
+                    T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
+                )
+                one_comp_test_state[key] = model(
+                    *additional_model_parameters(model, 1)
+                )
+                out = one_comp_test_state.evaluate(key, test_setup)
+                assert out is not None
+            except Exception:
+                raise AssertionError(f"Error evaluating {model} as {key}.")
+
+
+def test_all_models_can_be_evaluated_two_component():
+    for key in available_model_keys:
+        for model in all_models[key]:
+            # Ignore these models which are not working with multi-component
+            # PlasmaStates by design.
+            if model in invalid_multicomponent:
+                continue
+            try:
+                two_comp_test_state = jaxrts.PlasmaState(
+                    ions=[jaxrts.Element("C"), jaxrts.Element("Cl")],
+                    Z_free=jnp.array([2.1, 4.2]),
+                    mass_density=jnp.array([1.5, 1.5])
+                    * ureg.gram
+                    / ureg.centimeter**3,
+                    T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
+                )
+                two_comp_test_state[key] = model(
+                    *additional_model_parameters(model, 2)
+                )
+                out = two_comp_test_state.evaluate(key, test_setup)
+                assert out is not None
+            except Exception:
+                raise AssertionError(f"Error evaluating {model} as {key}.")

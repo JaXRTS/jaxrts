@@ -164,6 +164,8 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     Quantity
         The ipd shift in units of electronvolt.
     """
+    # This function is not well-defined for Zi==0:
+    Zi = jnp.clip(Zi, 1e-6)
 
     pref = 9 / 5  # Zimmermann & More 1980
     # pref = 3/2 # Standard prefactor
@@ -217,6 +219,9 @@ def ipd_stewart_pyatt(
     Quantity
         The ipd shift in units of electronvolt.
     """
+
+    # This function is not well-defined for Zi==0:
+    Zi = jnp.clip(Zi, 1e-6)
 
     R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
 
@@ -304,9 +309,13 @@ def ipd_ecker_kroell(
 
     C = (
         2.2
-        * jnpu.sqrt(ureg.elementary_charge**2 / (ureg.boltzmann_constant * Te))
+        * jnpu.sqrt(
+            ureg.elementary_charge**2
+            / (ureg.boltzmann_constant * Te)
+            / (4 * jnp.pi * ureg.epsilon_0)
+        )
         * n_c ** (1 / 6)
-    )
+    ).m_as(ureg.dimensionless)
 
     ipd_c1 = -1 * ureg.elementary_charge**2 / (ureg.epsilon_0 * lambda_Di) * Zi
     ipd_c2 = -C * ureg.elementary_charge**2 / (ureg.epsilon_0 * R_0) * Zi
@@ -343,6 +352,8 @@ def ipd_pauli_blocking(
     Quantity
         The ipd shift in units of electronvolt.
     """
+    # This function is not well-defined for Zi==0:
+    Zi = jnp.clip(Zi, 1e-6)
 
     chem_pot = chem_pot_interpolation(Te, ne)
 
