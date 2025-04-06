@@ -34,6 +34,13 @@ sphinx-toolbox = "^3.8.2"
 sphinxcontrib-bibtex = "^2.6.3"
 scienceplots = "^2.1.1"
 
+[tool.poetry.group.NN]
+optional = true
+
+[tool.poetry.group.NN.dependencies]
+flax = "^0.10.4"
+orbax = "^0.1.9"
+
 [tool.poetry]
 packages = [{ include = "jaxrts", from = "src" }]
 
