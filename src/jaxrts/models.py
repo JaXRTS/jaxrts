@@ -2873,6 +2873,47 @@ class ElectronicLFCUtsumiIchimaru(Model):
         )
 
 
+class ElectronicLFCDornheimAnalyticalInterp(Model):
+    """
+    Static local field correction model by Dornheim et al
+    :cite:`Dornheim.2021`. Their model is an analytical interpolation of
+    ab-initio PIMC simulations.
+
+    See Also
+    --------
+    jaxrts.ee_localfieldcorrections.eelfc_dornheim2021
+        Function used to calculate the LFC.
+    """
+
+    allowed_keys = ["ee-lfc"]
+    __name__ = "ElectronicLFCDornheimAnalyticalInterp"
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_dornheim2021(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_dornheim2021(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
+
 class ElectronicLFCStaticInterpolation(Model):
     """
     Static local field correction model that interpolates between the
