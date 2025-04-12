@@ -3288,6 +3288,7 @@ _all_models = [
     DetailedBalance,
     EckerKroellIPD,
     ElectronicLFCConstant,
+    ElectronicLFCDornheimAnalyticalInterp,
     ElectronicLFCGeldartVosko,
     ElectronicLFCStaticInterpolation,
     ElectronicLFCUtsumiIchimaru,
