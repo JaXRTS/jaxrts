@@ -8,6 +8,8 @@ import logging
 from copy import deepcopy
 from typing import TYPE_CHECKING
 
+from functools import partial
+
 import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
@@ -2322,6 +2324,20 @@ class ConstantIPD(Model):
 
         return obj
 
+    @jax.jit
+    def all_element_states(
+        self, plasma_state: "PlasmaState"
+    ) -> list[jnp.ndarray]:
+        out = []
+        for idx, element in enumerate(plasma_state.ions):
+            out.append(            jnp.array(
+                [
+                    self.value.m_as(ureg.electron_volt)
+                    for Z in jnp.arange(element.Z)
+                ]
+            ) * ureg.electron_volt)
+        return out
+
 
 class DebyeHueckelIPD(Model):
     """
@@ -2363,6 +2379,50 @@ class StewartPyattIPD(Model):
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
         return ipd.ipd_stewart_pyatt(
+            plasma_state.Z_free,
+            plasma_state.n_e,
+            plasma_state.n_i,
+            plasma_state.T_e,
+            plasma_state.T_i,
+        )
+
+    @jax.jit
+    def all_element_states(
+        self, plasma_state: "PlasmaState"
+    ) -> list[jnp.ndarray]:
+        out = []
+        for idx, element in enumerate(plasma_state.ions):
+            out.append(            jnp.array(
+                [
+                    ipd.ipd_stewart_pyatt(
+                        Z,
+                        plasma_state.n_i[idx] * (Z+1E-6),
+                        plasma_state.n_i[idx],
+                        plasma_state.T_e,
+                        plasma_state.T_i[idx],
+                    ).m_as(ureg.electron_volt)
+                    for Z in jnp.arange(element.Z)
+                ]
+            ) * ureg.electron_volt)
+        return out
+
+
+class MoreIPD(Model):
+    """
+    More IPD Model.
+
+    See Also
+    --------
+    jaxrts.ipd.ipd_more
+        Function used to calculate the IPD
+    """
+
+    allowed_keys = ["ipd"]
+    __name__ = "More"
+
+    @jax.jit
+    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
+        return ipd.ipd_more(
             plasma_state.Z_free,
             plasma_state.n_e,
             plasma_state.n_i,
@@ -3275,6 +3335,7 @@ _all_models = [
     SchumacherImpulseFitRk,
     Sum_Sii,
     StewartPyattIPD,
+    MoreIPD,
     ThreePotentialHNCIonFeat,
 ]
 

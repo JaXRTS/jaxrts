@@ -85,6 +85,34 @@ def inverse_screening_length_e(q: Quantity, ne: Quantity, Te: Quantity):
 
 
 @jax.jit
+def ipd_more(
+    Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity
+) -> Quantity:
+
+    r_debye = (
+        743.4
+        * jnpu.sqrt(
+            Te.m_as(ureg.electron_volt / ureg.k_B)
+            / (ne.m_as(1 / ureg.cc) * (1 + Zi))
+        )
+        * 1
+        * ureg.centimeter
+    )
+    r_ion = 0.62 * (Zi / ne.m_as(1 / ureg.cc)) ** (3 / 2) * 1 * ureg.centimeter
+
+    ipd_shift = (
+        -2.16e-7
+        * Zi
+        / r_ion.m_as(ureg.centimeter)
+        * ((1 + (r_debye / r_ion) ** 3) ** (2 / 3) - (r_debye / r_ion) ** 2)
+        * 1
+        * ureg.electron_volt
+    )
+
+    return ipd_shift.to(ureg.electron_volt)
+
+
+@jax.jit
 def ipd_debye_hueckel(
     Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity
 ) -> Quantity:
@@ -132,13 +160,14 @@ def ipd_debye_hueckel(
         * ureg.elementary_charge**2
         / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti)
     )
+    lambda_D = jnpu.sqrt(1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te / (ne * 1 * ureg.elementary_charge ** 2))
+
     # The ionization potential depression energy shift
     ipd_shift = (
-        -(Zi + 1)
+        -Zi
         * ureg.elementary_charge**2
-        * kappa_class
-        / (4 * jnp.pi * ureg.epsilon_0)
-    )
+        / (4 * jnp.pi * ureg.epsilon_0 * lambda_D)
+    ) 
 
     return ipd_shift.to(ureg.electron_volt)
 
@@ -167,7 +196,7 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     # This function is not well-defined for Zi==0:
     Zi = jnp.clip(Zi, 1e-6)
 
-    pref = 9 / 5  # Zimmermann & More 1980
+    # pref = 9 / 5  # Zimmermann & More 1980
     # pref = 3/2 # Standard prefactor
 
     # The ion-sphere radius, determined by the ion density n_i such that the
@@ -176,11 +205,10 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
 
     ipd_shift = (
-        -pref
-        * Zi**2
+        -3 * Zi
         * 1
         * ureg.elementary_charge**2
-        / (R_0 * 4 * jnp.pi * 1 * ureg.epsilon_0)
+        / (R_0 * 8 * jnp.pi * 1 * ureg.epsilon_0)
     )
 
     return ipd_shift.to(ureg.electron_volt)
@@ -223,27 +251,21 @@ def ipd_stewart_pyatt(
     # This function is not well-defined for Zi==0:
     Zi = jnp.clip(Zi, 1e-6)
 
+    # R_WS = (3 / (4 * jnp.pi * ni)) ** (1/3)
+    # R_0 = R_WS
+
     R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
 
-    # The Debye (screening) wavenumber for the electrons for arbitrary
-    # degeneracy
-    K_De = inverse_screening_length_e(-1 * ureg.elementary_charge, ne, Te)
-    # The Debye wavenumber for the ions
-    K_Di = jnpu.sqrt(
-        Zi**2
-        * 1
-        * ureg.elementary_charge**2
-        * ni
-        / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti)
-    )
-    kappa = jnpu.sqrt(K_De**2 + K_Di**2).to(1 / ureg.angstrom)
+    lambda_D = jnpu.sqrt(1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te / (ne * 1 * ureg.elementary_charge ** 2))
 
     # The ionization potential depression energy shift
-    s = 1 / (kappa * R_0)
+    
+    s = lambda_D / R_0
+
     ipd_shift = -(
         (
             3
-            * (Zi + 1)
+            * (Zi+1)
             * ureg.elementary_charge**2
             / (2 * 4 * jnp.pi * 1 * ureg.epsilon_0 * R_0)
         )
