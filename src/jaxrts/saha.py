@@ -26,6 +26,8 @@ h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
 m_e = 1 * ureg.electron_mass
 
+# fig, ax = plt.subplots()
+
 
 @jax.jit
 def bisection(func, a, b, tolerance=1e-4, max_iter=1e4, min_iter=40):
@@ -240,7 +242,10 @@ def solve_saha(
     for ion_dens, element, ipd in zip(ion_number_densities, element_list, continuum_lowering):
 
         stat_weight = element.ionization.statistical_weights
+
         Eb = element.ionization.energies + ipd
+
+        # jax.debug.print("{x}", x = Eb)
 
         # jax.debug.print("{x}, {z}", x=element.ionization.energies + ipd, z = continuum_lowering)
 
@@ -307,11 +312,10 @@ def solve_saha(
 
     det_M_func = lambda ne: det_M(M=M, ne=ne)
 
-    fig, ax = plt.subplots()
-    ne_plot = onp.linspace(0, 100, 100)
+    # ne_plot = onp.linspace(0, 100, 100)
     # ax.hlines(0.0, ne_plot[0], ne_plot[-1], color = "black", ls = "dashed")
-    ax.plot(ne_plot, [det_M_func(ne) for ne in ne_plot])
-    ax.set_yscale("symlog")
+    # ax.plot(ne_plot, [det_M_func(ne) for ne in ne_plot])
+    # ax.set_yscale("log")
 
     # Find n_e by finding the root where the determinant of M is 0
     # Use the bisection method, boundaries are fixed by max_ne and 0.
@@ -324,7 +328,7 @@ def solve_saha(
         min_iter=1e1,
     )
 
-    ax.vlines(sol_ne, 0, ne_scale.m_as(1 / ureg.meter ** 3), color = "black", ls = "dashed")
+    # ax.vlines(sol_ne, 0, ne_scale.m_as(1 / ureg.meter ** 3), color = "black", ls = "dashed")
 
     # jax.debug.print("Needed iterations for convergence: {x}", x=iterations)
 
@@ -333,8 +337,8 @@ def solve_saha(
     concrete_M = insert_ne(M, sol_ne)
 
     # Strip the last row and column. Use the latter as inhomogeneity.
-    M1 = concrete_M[: (len(concrete_M[0]) - 1), 0 : (len(concrete_M[0]) - 1)]
-    M2 = concrete_M[: (len(concrete_M[0]) - 1), (len(concrete_M[0]) - 1)]
+    M1 = concrete_M[: -1, : -1]
+    M2 = concrete_M[: -1, -1]
 
     # Get the solution of the set of linear equations of the form
     # (nIon0_0+,nIon0_1+, ..., nIon1_0+,nIon1_1+, ...)
@@ -346,10 +350,11 @@ def solve_saha(
 
     # jax.debug.print("{x}{y}", x = ion_number_densities, y = (sol_ne * ne_scale).m_as(ureg.gram / ureg.atomic_mass_constant / ureg.cc))
     Z_mean = to_array((sol_ne * ne_scale) / jnpu.sum(ion_number_densities)).m_as(ureg.dimensionless)
+    # print(len(res))
+    # print(jnp.abs(jnpu.sum((jnp.arange(len(res)) * res) / jnpu.sum(res)).m_as(ureg.dimensionless) - Z_mean) < 1E-3)
 
-    plt.show(block = False)
-    plt.pause(0.9)
-    plt.clf()
+    # plt.show(block = False)
+    # plt.pause(2.0)
 
     return to_array(res), Z_mean
 
@@ -484,7 +489,7 @@ def solve_gen_saha(
     for ion_dens, element, ipd in zip(ion_number_densities, element_list, continuum_lowering):
 
         stat_weight = element.ionization.statistical_weights
-        Eb = element.ionization.energies + ipd
+        Eb = jnpu.sort(element.ionization.energies + ipd)
 
         # Don't allow negative binding energies.
         # Eb = jnpu.where(Eb < 0, 0, Eb)
