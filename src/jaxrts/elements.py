@@ -1550,7 +1550,7 @@ def electron_distribution_ionized_state(Z_core: float) -> jnp.ndarray:
     jnp.ndarray
         An array of populations.
     """
-    S1s = jnpu.interp(Z_core, jnp.array([1, 2]), jnp.array([1, 2]))
+    S1s = jnpu.interp(Z_core, jnp.array([0, 2]), jnp.array([0, 2]))
     S2s = jnpu.interp(Z_core, jnp.array([2, 4]), jnp.array([0, 2]))
     S2p = jnpu.interp(Z_core, jnp.array([4, 10]), jnp.array([0, 6]))
     S3s = jnpu.interp(Z_core, jnp.array([10, 12]), jnp.array([0, 2]))
