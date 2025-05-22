@@ -238,6 +238,17 @@ class Neglect(Model):
         if self.model_key in scattering_models:
             return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
 
+    def all_element_states(
+        self, plasma_state: "PlasmaState"
+    ) -> list[jnp.ndarray]:
+        out = []
+        for idx, element in enumerate(plasma_state.ions):
+            out.append(
+                jnp.array([0 for Z in jnp.arange(element.Z)])
+                * ureg.electron_volt
+            )
+        return out
+
 
 # ion-feature
 # -----------
@@ -2330,12 +2341,15 @@ class ConstantIPD(Model):
     ) -> list[jnp.ndarray]:
         out = []
         for idx, element in enumerate(plasma_state.ions):
-            out.append(            jnp.array(
-                [
-                    self.value.m_as(ureg.electron_volt)
-                    for Z in jnp.arange(element.Z)
-                ]
-            ) * ureg.electron_volt)
+            out.append(
+                jnp.array(
+                    [
+                        self.value.m_as(ureg.electron_volt)
+                        for Z in jnp.arange(element.Z)
+                    ]
+                )
+                * ureg.electron_volt
+            )
         return out
 
 
@@ -2361,6 +2375,29 @@ class DebyeHueckelIPD(Model):
             plasma_state.T_e,
             plasma_state.T_i,
         )
+
+    @jax.jit
+    def all_element_states(
+        self, plasma_state: "PlasmaState"
+    ) -> list[jnp.ndarray]:
+        out = []
+        for idx, element in enumerate(plasma_state.ions):
+            out.append(
+                jnp.array(
+                    [
+                        ipd.ipd_debye_hueckel(
+                            Z,
+                            plasma_state.n_i[idx] * (Z + 1e-6),
+                            plasma_state.n_i[idx],
+                            plasma_state.T_e,
+                            plasma_state.T_i[idx],
+                        ).m_as(ureg.electron_volt)
+                        for Z in jnp.arange(element.Z)
+                    ]
+                )
+                * ureg.electron_volt
+            )
+        return out
 
 
 class StewartPyattIPD(Model):
@@ -2392,18 +2429,67 @@ class StewartPyattIPD(Model):
     ) -> list[jnp.ndarray]:
         out = []
         for idx, element in enumerate(plasma_state.ions):
-            out.append(            jnp.array(
-                [
-                    ipd.ipd_stewart_pyatt(
-                        Z,
-                        plasma_state.n_i[idx] * (Z+1E-6),
-                        plasma_state.n_i[idx],
-                        plasma_state.T_e,
-                        plasma_state.T_i[idx],
-                    ).m_as(ureg.electron_volt)
-                    for Z in jnp.arange(element.Z)
-                ]
-            ) * ureg.electron_volt)
+            out.append(
+                jnp.array(
+                    [
+                        ipd.ipd_stewart_pyatt(
+                            Z,
+                            plasma_state.n_i[idx] * (Z + 1e-6),
+                            plasma_state.n_i[idx],
+                            plasma_state.T_e,
+                            plasma_state.T_i[idx],
+                        ).m_as(ureg.electron_volt)
+                        for Z in jnp.arange(element.Z)
+                    ]
+                )
+                * ureg.electron_volt
+            )
+        return out
+
+class StewartPyattFullDegIPD(Model):
+    """
+    Stewart Pyatt IPD Model.
+
+    See Also
+    --------
+    jaxrts.ipd.ipd_stewart_pyatt_full_deg
+        Function used to calculate the IPD
+    """
+
+    allowed_keys = ["ipd"]
+    __name__ = "StewartPyattFullDeg"
+
+    @jax.jit
+    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
+        return ipd.ipd_stewart_pyatt_full_deg(
+            plasma_state.Z_free,
+            plasma_state.n_e,
+            plasma_state.n_i,
+            plasma_state.T_e,
+            plasma_state.T_i,
+        )
+
+    @jax.jit
+    def all_element_states(
+        self, plasma_state: "PlasmaState"
+    ) -> list[jnp.ndarray]:
+        out = []
+        for idx, element in enumerate(plasma_state.ions):
+            out.append(
+                jnp.array(
+                    [
+                        ipd.ipd_stewart_pyatt_full_deg(
+                            Z,
+                            plasma_state.n_i[idx] * (Z + 1e-6),
+                            plasma_state.n_i[idx],
+                            plasma_state.T_e,
+                            plasma_state.T_i[idx],
+                        ).m_as(ureg.electron_volt)
+                        for Z in jnp.arange(element.Z)
+                    ]
+                )
+                * ureg.electron_volt
+            )
         return out
 
 
@@ -3335,6 +3421,7 @@ _all_models = [
     SchumacherImpulseFitRk,
     Sum_Sii,
     StewartPyattIPD,
+    StewartPyattFullDegIPD,
     MoreIPD,
     ThreePotentialHNCIonFeat,
 ]

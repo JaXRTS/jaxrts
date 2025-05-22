@@ -14,51 +14,17 @@ from quadax import quadts as quad
 
 from .math import fermi_neg12_rational_approximation_antia
 from .units import Quantity, ureg
+from .plasma_physics import fermi_energy
+from .plasma_physics import (
+    chem_pot_interpolationIchimaru as chem_pot_interpolation,
+)
 
 logger = logging.getLogger(__name__)
 
 
 @jax.jit
-def chem_pot_interpolation(T: Quantity, n_e: Quantity) -> Quantity:
-    """
-    Interpolation function for the chemical potential between the classical and
-    quantum region, given in :cite:`Gregori.2003`, eqn. (19).
-
-    Parameters
-    ----------
-    T
-        The plasma temperature in Kelvin.
-    n_e
-        Electron density. Units of 1/[length]**3.
-
-    Returns
-    -------
-    Quantity
-        Chemical potential
-    """
-    A = 0.25945
-    B = 0.072
-    b = 0.858
-
-    E_f = ureg.hbar**2 / (2 * ureg.m_e) * (3 * jnp.pi**2 * n_e) ** (2 / 3)
-    Theta = (ureg.k_B * T / E_f).to_base_units()
-    f = (
-        (-3 / 2 * jnpu.log(Theta))
-        + (jnpu.log(4 / (3 * jnp.sqrt(jnp.pi))))
-        + (
-            (A * Theta ** (-b - 1) + B * Theta ** (-(b + 1) / 2))
-            / (1 + A * Theta ** (-b))
-        )
-    )
-    return f * ureg.k_B * T
-
-
-@jax.jit
 def inverse_screening_length_e(q: Quantity, ne: Quantity, Te: Quantity):
-    """
-    Inverse screening length for arbitrary degeneracy as needed for WDM
-    applications. (Taken from :cite:`Baggott.2017`)
-    """
+    """ """
 
     chem_pot = chem_pot_interpolation(Te, ne)
     beta = 1 / (1 * ureg.boltzmann_constant * Te)
@@ -67,19 +33,17 @@ def inverse_screening_length_e(q: Quantity, ne: Quantity, Te: Quantity):
         (chem_pot * beta).m_as(ureg.dimensionless)
     )
 
-    therm_wv = jnpu.sqrt(
-        (2 * jnp.pi * 1 * ureg.hbar**2)
-        / ((1 * ureg.electron_mass) * 1 * ureg.boltzmann_constant * Te)
-    )
+    E_F = fermi_energy(ne)
 
     k_sq = (
-        (q**2)
-        / (ureg.epsilon_0 * ureg.boltzmann_constant * Te)
-        * (2.0 / therm_wv**3)
+        12
+        * jnp.pi ** (5 / 2)
+        * (1 * ureg.elementary_charge**2 / (4 * jnp.pi * ureg.epsilon_0))
+        * ne
+        * beta
         * fermi_integral_neg1_2
+        / (beta * E_F) ** (3 / 2)
     )
-
-    # k_sq = pref * fermi_integral_neg1_2
 
     return jnpu.sqrt(k_sq).to(1 / ureg.angstrom)
 
@@ -117,14 +81,19 @@ def ipd_debye_hueckel(
         The ipd shift in units of electronvolt.
     """
 
-    kappa_class = jnpu.sqrt((1 * ureg.elementary_charge**2 / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te)) * jnpu.sqrt(jnpu.sum(Zi**2 * ni) + ne))
-    
+    kappa_class = jnpu.sqrt(
+        (
+            1
+            * ureg.elementary_charge**2
+            / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
+        )
+        * (jnpu.sum(Zi**2 * ni) + ne)
+    )
+
     # The ionization potential depression energy shift
     ipd_shift = kappa_class * (
-        -(Zi+1)
-        * ureg.elementary_charge**2
-        / (4 * jnp.pi * ureg.epsilon_0)
-    ) 
+        -(Zi + 1) * ureg.elementary_charge**2 / (4 * jnp.pi * ureg.epsilon_0)
+    )
 
     return ipd_shift.to(ureg.electron_volt)
 
@@ -159,12 +128,74 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
 
     ipd_shift = (
-        -3 * (Zi+1)
+        -3
+        * (Zi + 1)
         * 1
         * ureg.elementary_charge**2
         / (R_0 * 8 * jnp.pi * 1 * ureg.epsilon_0)
     )
 
+    return ipd_shift.to(ureg.electron_volt)
+
+
+@jax.jit
+def ipd_stewart_pyatt_full_deg(
+    Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity
+) -> Quantity:
+    """
+    See :cite:`Roepke.2019`. Using the full inverse screening length
+
+    Parameters
+    ----------
+    Z_i
+        The (mean) charge state of the ions.
+    n_e
+        Electron density. Units of 1/[length]**3.
+    n_i
+        Ion density. Units of 1/[length]**3.
+    T_e
+        The electron temperature.
+    T_i
+        The ion temperature.
+
+    Returns
+    -------
+    Quantity
+        The ipd shift in units of electronvolt.
+    """
+
+    # This function is not well-defined for Zi==0:
+    Zi = jnp.clip(Zi, 1e-6)
+
+    R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
+
+    kappa_i_sq = jnpu.sum(
+        Zi**2
+        * 1
+        * ureg.elementary_charge**2
+        * ni
+        / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti)
+    )
+    # We have to fix the dimension. This cannot be an array. Take the only
+    # (i.e., the first), element
+    kappa_e_sq = (
+        inverse_screening_length_e(1 * ureg.elementary_charge, ne, Te) ** 2
+    ).to(1 / ureg.angstrom**2)[0]
+
+    kappa = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
+    s = 1 / (R_0 * kappa)
+
+    # The ionization potential depression energy shift
+
+    ipd_shift = -(
+        (
+            3
+            * (Zi + 1)
+            * ureg.elementary_charge**2
+            / (2 * 4 * jnp.pi * 1 * ureg.epsilon_0 * R_0)
+        )
+        * ((1 + s**3) ** (2 / 3) - s**2)
+    )
     return ipd_shift.to(ureg.electron_volt)
 
 
@@ -207,20 +238,28 @@ def ipd_stewart_pyatt(
 
     R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
 
-    lambda_D = jnpu.sqrt(1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te / (ne * 1 * ureg.elementary_charge ** 2))
-
-    kappa_i_sq = jnpu.sum(Zi**2 * 1 * ureg.elementary_charge**2 * ni / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti))
-    kappa_e_sq = inverse_screening_length_e(1 * ureg.elementary_charge, ne, Te)
+    kappa_i_sq = jnpu.sum(
+        Zi**2
+        * 1
+        * ureg.elementary_charge**2
+        * ni
+        / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti)
+    )
+    kappa_e_sq = (
+        ne
+        * ureg.elementary_charge**2
+        / (4 * jnp.pi * 1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
+    )
 
     kappa = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
-    s = R_0 * kappa
+    s = 1 / (R_0 * kappa)
 
     # The ionization potential depression energy shift
-    
+
     ipd_shift = -(
         (
             3
-            * (Zi+1)
+            * (Zi + 1)
             * ureg.elementary_charge**2
             / (2 * 4 * jnp.pi * 1 * ureg.epsilon_0 * R_0)
         )
