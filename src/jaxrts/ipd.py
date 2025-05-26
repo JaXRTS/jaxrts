@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 @jax.jit
-def inverse_screening_length_e(q: Quantity, ne: Quantity, Te: Quantity):
+def inverse_screening_length_e(ne: Quantity, Te: Quantity):
     """ """
 
     chem_pot = chem_pot_interpolation(Te, ne)
@@ -179,7 +179,7 @@ def ipd_stewart_pyatt_full_deg(
     # We have to fix the dimension. This cannot be an array. Take the only
     # (i.e., the first), element
     kappa_e_sq = (
-        inverse_screening_length_e(1 * ureg.elementary_charge, ne, Te) ** 2
+        inverse_screening_length_e(ne, Te) ** 2
     ).to(1 / ureg.angstrom**2)[0]
 
     kappa = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
@@ -233,6 +233,8 @@ def ipd_stewart_pyatt(
         The ipd shift in units of electronvolt.
     """
 
+    T_F = fermi_energy(ne) / (1 * ureg.k_B)
+
     # This function is not well-defined for Zi==0:
     Zi = jnp.clip(Zi, 1e-6)
 
@@ -248,7 +250,7 @@ def ipd_stewart_pyatt(
     kappa_e_sq = (
         ne
         * ureg.elementary_charge**2
-        / (4 * jnp.pi * 1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
+        / (4 * jnp.pi * 1 * ureg.epsilon_0 * ureg.boltzmann_constant * (Te**4 + T_F**4)**(1/4))
     )
 
     kappa = jnpu.sqrt(kappa_i_sq + kappa_e_sq)

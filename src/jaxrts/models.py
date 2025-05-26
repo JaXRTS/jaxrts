@@ -2433,8 +2433,8 @@ class StewartPyattIPD(Model):
                 jnp.array(
                     [
                         ipd.ipd_stewart_pyatt(
-                            Z,
-                            plasma_state.n_i[idx] * (Z + 1e-6),
+                            plasma_state.Z_free[idx],
+                            plasma_state.n_e,
                             plasma_state.n_i[idx],
                             plasma_state.T_e,
                             plasma_state.T_i[idx],
@@ -2535,6 +2535,27 @@ class IonSphereIPD(Model):
         return ipd.ipd_ion_sphere(
             plasma_state.Z_free, plasma_state.n_e, plasma_state.n_i
         )
+
+    @jax.jit
+    def all_element_states(
+        self, plasma_state: "PlasmaState"
+    ) -> list[jnp.ndarray]:
+        out = []
+        for idx, element in enumerate(plasma_state.ions):
+            out.append(
+                jnp.array(
+                    [
+                        ipd.ipd_ion_sphere(
+                            plasma_state.Z_free[idx],
+                            plasma_state.n_e,
+                            plasma_state.n_i[idx],
+                        ).m_as(ureg.electron_volt)
+                        for Z in jnp.arange(element.Z)
+                    ]
+                )
+                * ureg.electron_volt
+            )
+        return out
 
 
 class EckerKroellIPD(Model):
