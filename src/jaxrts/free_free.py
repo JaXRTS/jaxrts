@@ -482,6 +482,164 @@ def _imag_diel_func_RPA(
 
 
 @jit
+def _real_diel_func_RPA_rewrite(
+    k: Quantity,
+    E: Quantity,
+    chem_pot: Quantity,
+    T: Quantity,
+) -> Quantity:
+    """
+    The real part of the dielectric function in Random Phase
+    Approximation.
+    See (2.103) and (2.104) of :cite:`Chapman.2015`.
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    E: Quantity
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+    chem_pot : Quantity
+        The chemical potential in units of energy.
+    T : Quantity
+        The plasma temperature in Kelvin.
+
+    Returns
+    -------
+    Quantity
+        The real part of the dielectric function
+    """
+    # Calculate the frequency shift
+    w = E / (1 * ureg.hbar)
+    v_e = jnpu.sqrt(ureg.k_B * T / ureg.electron_mass)
+
+    red_w = w / k / (jnp.sqrt(2) * v_e)
+    real_red_w = jnp.real(red_w.m_as(ureg.dimensionless))
+    imag_red_w = jnp.imag(red_w.m_as(ureg.dimensionless))
+
+    kap = ureg.hbar * k / 2 / jnpu.sqrt(2 * ureg.electron_mass * ureg.k_B * T)
+    eta = chem_pot / (1 * ureg.k_B * T)
+
+    lambda3 = ((1 * ureg.electron_mass * ureg.k_B * T) / (
+        2 * jnp.pi * ureg.hbar**2
+    )) ** (3 / 2)
+    prefactor = 1 / (2 * jnp.sqrt(jnp.pi) * ureg.k_B * T * kap / lambda3)
+
+
+    unit = 1 / jnpu.absolute(real_red_w)
+
+    def integrand(w):
+        w = w / unit
+        pref = (w - real_red_w) / (
+            (w - real_red_w) ** 2.0 + imag_red_w**2.0
+        ) + (w + real_red_w) / ((w + real_red_w) ** 2.0 + imag_red_w**2.0)
+        res = jnpu.log(1.0 + jnpu.exp(eta - (w + kap) ** 2.0)) - jnpu.log(
+            1.0 + jnpu.exp(eta - (w - kap) ** 2.0)
+        )
+        return (pref * res).m_as(ureg.dimensionless)
+
+    integral1, errl = quadgk(
+        integrand,
+        [0, 1.0],
+        epsabs=1e-15,
+        epsrel=1e-15,
+    )
+    integral2, errl = quadgk(
+        integrand,
+        [1.0, jnp.inf],
+        epsabs=1e-15,
+        epsrel=1e-15,
+    )
+    integral = integral1 + integral2
+    integral *= 1/unit
+    integral *= coulomb_potential_fourier(-1, -1, k)
+
+    return 1 - (prefactor * integral).to_base_units()
+
+
+@jit
+def _imag_diel_func_RPA_rewrite(
+    k: Quantity,
+    E: Quantity,
+    chem_pot: Quantity,
+    T: Quantity,
+) -> Quantity:
+    """
+    The real part of the dielectric function in Random Phase
+    Approximation.
+    See (2.103) and (2.104) of :cite:`Chapman.2015`.
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    E: Quantity
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+    chem_pot : Quantity
+        The chemical potential in units of energy.
+    T : Quantity
+        The plasma temperature in Kelvin.
+
+    Returns
+    -------
+    Quantity
+        The real part of the dielectric function
+    """
+    # Calculate the frequency shift
+    w = E / (1 * ureg.hbar)
+    v_e = jnpu.sqrt(ureg.k_B * T / ureg.electron_mass)
+
+    red_w = w / k / (jnp.sqrt(2) * v_e)
+    real_red_w = jnp.real(red_w.m_as(ureg.dimensionless))
+    imag_red_w = jnp.imag(red_w.m_as(ureg.dimensionless))
+
+    kap = ureg.hbar * k / 2 / jnpu.sqrt(2 * ureg.electron_mass * ureg.k_B * T)
+    eta = chem_pot / (1 * ureg.k_B * T)
+
+    lambda3 = ((1 * ureg.electron_mass * ureg.k_B * T) / (
+        2 * jnp.pi * ureg.hbar**2
+    )) ** (3 / 2)
+    prefactor = 1 / (2 * jnp.sqrt(jnp.pi) * ureg.k_B * T * kap / lambda3)
+
+    unit = 1 / jnpu.absolute(real_red_w)
+
+    def integrand(w):
+        w = w / unit
+
+        pref = 1.0 / ((w - real_red_w) ** 2.0 + imag_red_w**2.0) - 1.0 / (
+            (w + real_red_w) ** 2.0 + imag_red_w**2.0
+        )
+        res = imag_red_w * jnpu.log(
+            (1.0 + jnpu.exp(eta - (w + kap) ** 2.0))
+            / (1.0 + jnpu.exp(eta - (w - kap) ** 2.0))
+        )
+        return (pref * res).m_as(ureg.dimensionless)
+
+    integral1, errl = quadgk(
+        integrand,
+        [0.0, 1.0],
+        epsabs=1e-15,
+        epsrel=1e-15,
+    )
+    integral2, errl = quadgk(
+        integrand,
+        [1.0, jnp.inf],
+        epsabs=1e-15,
+        epsrel=1e-15,
+    )
+    integral = integral1 + integral2
+    integral *= 1 / unit
+
+    integral *= coulomb_potential_fourier(-1, -1, k)
+
+    return -1 * (prefactor * integral).to_base_units()
+
+
+@jit
 def _real_diel_func_RPA(
     k: Quantity,
     E: Quantity,
@@ -969,6 +1127,37 @@ def dielectric_function_RPA(
     """
     real = _real_diel_func_RPA(k, E, chem_pot, T)
     imag = _imag_diel_func_RPA(k, E, chem_pot, T)
+    return real.m_as(ureg.dimensionless) + 1j * imag.m_as(ureg.dimensionless)
+
+
+@jit
+def dielectric_function_RPA_rewrite(
+    k: Quantity, E: Quantity, chem_pot: Quantity, T: Quantity
+) -> Quantity:
+    """
+    The the dielectric function extended to incorporate a ei collisions.
+    See (2.103) and (2.104) of :cite:`Chapman.2015`.
+
+    Parameters
+    ----------
+    k : Quantity
+        Length of the scattering number (given by the scattering angle and the
+        energies of the incident photons (unit: 1 / [length]).
+    E: Quantity
+        The energy shift for which the free electron dynamic structure is
+        calculated.
+    chem_pot : Quantity
+        The chemical potential in units of energy.
+    T : Quantity
+        The plasma temperature in Kelvin.
+
+    Returns
+    -------
+    Quantity
+        The full dielectric function (complex number)
+    """
+    real = _real_diel_func_RPA_rewrite(k, E, chem_pot, T)
+    imag = _imag_diel_func_RPA_rewrite(k, E, chem_pot, T)
     return real.m_as(ureg.dimensionless) + 1j * imag.m_as(ureg.dimensionless)
 
 
