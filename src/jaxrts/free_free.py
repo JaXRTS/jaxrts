@@ -1204,7 +1204,7 @@ def S0_ee_RPA_no_damping(
     return S0ee_from_susceptibility_FDT(k, T_e, n_e, E, xi)
 
 
-@jit
+@partial(jit, static_argnames=("rpa_rewrite"))
 def S0_ee_RPA(
     k: Quantity,
     T_e: Quantity,
@@ -1212,6 +1212,7 @@ def S0_ee_RPA(
     E: Quantity | List,
     chem_pot: Quantity,
     lfc: Quantity = 0.0,
+    rpa_rewrite: bool = True,
 ) -> jnp.ndarray:
     """
     Calculates the free electron dynamics structure using the quantum corrected
@@ -1232,6 +1233,9 @@ def S0_ee_RPA(
         Can be an interval of values.
     chem_pot : Quantity
         The chemical potential in units of energy.
+    rpa_rewrite: bool, default ``True``
+        Use the rewrite of the RPA dielectric function from
+        :cite:`Chapman.2015`, rather than :cite:`Schoerner.2023`.
 
     Returns
     -------
@@ -1239,7 +1243,10 @@ def S0_ee_RPA(
            The free electron dynamic structure.
     """
     E = -E
-    eps = dielectric_function_RPA(k, E, chem_pot, T_e)
+    if rpa_rewrite:
+        eps = dielectric_function_RPA_rewrite(k, E, chem_pot, T_e)
+    else:
+        eps = dielectric_function_RPA(k, E, chem_pot, T_e)
     xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
     v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
     xi = xi_lfc_corrected(xi0, v_k, lfc)
@@ -1641,7 +1648,7 @@ def collision_frequency_BA_Chapman_interpFit(
     return interpolated_integral.to(1 / ureg.second)
 
 
-@jit
+@partial(jit, static_argnames=("rpa_rewrite"))
 def dielectric_function_BMA_full(
     k: Quantity,
     E: Quantity | List,
@@ -1651,6 +1658,7 @@ def dielectric_function_BMA_full(
     S_ii: callable,
     V_eiS: callable,
     Zf: float,
+    rpa_rewrite: bool = True,
 ) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which
@@ -1672,19 +1680,18 @@ def dielectric_function_BMA_full(
         E, jnpu.linspace(10 * jnpu.min(E), 10 * jnpu.max(E), 1000), coll_freq
     )
 
-    numerator = (1 + 1j * coll_freq / w) * (
-        dielectric_function_RPA(k, E + 1j * ureg.hbar * coll_freq, chem_pot, T)
-        - 1
-    )
-
-    denumerator = 1 + 1j * (coll_freq / w) * (
-        (
-            dielectric_function_RPA(
-                k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
-            )
-            - 1
+    if rpa_rewrite:
+        eps = dielectric_function_RPA_rewrite(
+            k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
         )
-    ) / (
+    else:
+        eps = dielectric_function_RPA(
+            k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+        )
+
+    numerator = (1 + 1j * coll_freq / w) * (eps - 1)
+
+    denumerator = 1 + 1j * (coll_freq / w) * ((eps - 1)) / (
         dielectric_function_RPA_no_damping(
             k, 0 * ureg.electron_volt, chem_pot, T, unsave=True
         )
@@ -1734,7 +1741,7 @@ def S0_ee_BMA(
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 
-@partial(jit, static_argnames=("no_of_points"))
+@partial(jit, static_argnames=("no_of_points", "rpa_rewrite"))
 def dielectric_function_BMA_chapman_interpFit(
     k: Quantity,
     E: Quantity | List,
@@ -1745,6 +1752,7 @@ def dielectric_function_BMA_chapman_interpFit(
     V_eiS: callable,
     Zf: float,
     no_of_points: int = 20,
+    rpa_rewrite: bool = True,
 ) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which
@@ -1775,10 +1783,21 @@ def dielectric_function_BMA_chapman_interpFit(
         dielectric_function_RPA_Dandrea1986(k, 0 * ureg.electron_volt, T, n_e)
         - 1
     )
-    pnu = (
-        dielectric_function_RPA(k, E + 1j * ureg.hbar * coll_freq, chem_pot, T)
-        - 1
-    )
+
+    if rpa_rewrite:
+        pnu = (
+            dielectric_function_RPA_rewrite(
+                k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+            )
+            - 1
+        )
+    else:
+        pnu = (
+            dielectric_function_RPA(
+                k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+            )
+            - 1
+        )
 
     numerator = (w + 1j * coll_freq) * p0 * pnu
     denumerator = p0 * w + 1j * coll_freq * pnu
@@ -1806,7 +1825,7 @@ def dielectric_function_BMA_Fortmann(
     return epsilon_from_susceptibility(xi, k)
 
 
-@partial(jit, static_argnames=("no_of_points"))
+@partial(jit, static_argnames=("no_of_points", "rpa_rewrite"))
 def susceptibility_BMA_Fortmann(
     k: Quantity,
     E: Quantity | List,
@@ -1818,6 +1837,7 @@ def susceptibility_BMA_Fortmann(
     Zf: float,
     lfc: float = 0,
     no_of_points: int = 20,
+    rpa_rewrite: bool = True,
 ) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which
@@ -1853,12 +1873,16 @@ def susceptibility_BMA_Fortmann(
     V_ee = coulomb_potential_fourier(-1, -1, k)
 
     # The dynamic (and therefore dumped) part
-    xi_0_dyn = noninteracting_susceptibility_from_eps_RPA(
-        dielectric_function_RPA(
+    if rpa_rewrite:
+        eps = dielectric_function_RPA_rewrite(
             k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
-        ),
-        k,
-    )
+        )
+    else:
+        eps = dielectric_function_RPA(
+            k, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+        )
+
+    xi_0_dyn = noninteracting_susceptibility_from_eps_RPA(eps, k)
     xi_OCP_dyn = xi_0_dyn / (1 - V_ee * (1 - lfc) * xi_0_dyn)
     # The static part, were E = 0eV)
     xi_0_stat = noninteracting_susceptibility_Dandrea1986(
@@ -1874,7 +1898,7 @@ def susceptibility_BMA_Fortmann(
     return pref * numerator / denominator
 
 
-@partial(jit, static_argnames=("no_of_points"))
+@partial(jit, static_argnames=("no_of_points", "rpa_rewrite"))
 def dielectric_function_BMA_chapman_interp(
     k: Quantity,
     E: Quantity | List,
@@ -1885,6 +1909,7 @@ def dielectric_function_BMA_chapman_interp(
     V_eiS: callable,
     Zf: float,
     no_of_points: int = 20,
+    rpa_rewrite: bool = True,
 ) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which
@@ -1917,12 +1942,20 @@ def dielectric_function_BMA_chapman_interp(
         )
         - 1
     )
-    pnu = (
-        dielectric_function_RPA(
-            k + 0j, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+    if rpa_rewrite:
+        pnu = (
+            dielectric_function_RPA_rewrite(
+                k + 0j, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+            )
+            - 1
         )
-        - 1
-    )
+    else:
+        pnu = (
+            dielectric_function_RPA(
+                k + 0j, E + 1j * ureg.hbar * coll_freq, chem_pot, T
+            )
+            - 1
+        )
 
     numerator = w * p0 * pnu + 1j * coll_freq * p0 * pnu
     denumerator = p0 * w + 1j * coll_freq * pnu
