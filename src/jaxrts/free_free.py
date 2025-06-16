@@ -522,11 +522,10 @@ def _real_diel_func_RPA_rewrite(
     kap = ureg.hbar * k / 2 / jnpu.sqrt(2 * ureg.electron_mass * ureg.k_B * T)
     eta = chem_pot / (1 * ureg.k_B * T)
 
-    lambda3 = ((1 * ureg.electron_mass * ureg.k_B * T) / (
-        2 * jnp.pi * ureg.hbar**2
-    )) ** (3 / 2)
+    lambda3 = (
+        (1 * ureg.electron_mass * ureg.k_B * T) / (2 * jnp.pi * ureg.hbar**2)
+    ) ** (3 / 2)
     prefactor = 1 / (2 * jnp.sqrt(jnp.pi) * ureg.k_B * T * kap / lambda3)
-
 
     unit = 1 / jnpu.absolute(real_red_w)
 
@@ -553,7 +552,7 @@ def _real_diel_func_RPA_rewrite(
         epsrel=1e-15,
     )
     integral = integral1 + integral2
-    integral *= 1/unit
+    integral *= 1 / unit
     integral *= coulomb_potential_fourier(-1, -1, k)
 
     return 1 - (prefactor * integral).to_base_units()
@@ -600,9 +599,9 @@ def _imag_diel_func_RPA_rewrite(
     kap = ureg.hbar * k / 2 / jnpu.sqrt(2 * ureg.electron_mass * ureg.k_B * T)
     eta = chem_pot / (1 * ureg.k_B * T)
 
-    lambda3 = ((1 * ureg.electron_mass * ureg.k_B * T) / (
-        2 * jnp.pi * ureg.hbar**2
-    )) ** (3 / 2)
+    lambda3 = (
+        (1 * ureg.electron_mass * ureg.k_B * T) / (2 * jnp.pi * ureg.hbar**2)
+    ) ** (3 / 2)
     prefactor = 1 / (2 * jnp.sqrt(jnp.pi) * ureg.k_B * T * kap / lambda3)
 
     unit = 1 / jnpu.absolute(real_red_w)
@@ -1301,7 +1300,7 @@ def statically_screened_ie_debye_potential(
     )
 
 
-@jit
+@partial(jit, static_argnames=("KKT"))
 def collision_frequency_BA_full(
     E: Quantity,
     T: Quantity,
@@ -1310,6 +1309,7 @@ def collision_frequency_BA_full(
     n_e: Quantity,
     chem_pot: Quantity,
     Zf: float,
+    KKT: bool = False,
 ):
     """
     Calculate the Born electron-ion collision frequency. See
@@ -1339,26 +1339,33 @@ def collision_frequency_BA_full(
             ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3
         )
         res *= -1j
-        return jnp.real(res)
+        return (
+            jnp.array([jnp.real(res), jnp.imag(res)]) if KKT else jnp.real(res)
+        )
 
-    integral_real, errl = quadgk(
+    integral, errl = quadgk(
         integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
     )
-    integral_real *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
-    integral_real *= prefactor
+    integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
+    integral *= prefactor
 
-    integral_imag = KramersKronigTransform(E, integral_real)
+    if KKT:
+        integral_real = integral
+        integral_imag = KramersKronigTransform(E, integral_real)
+    else:
+        integral_real, integral_imag = integral
 
     return (integral_real + 1j * integral_imag).to(1 / ureg.second)
 
 
-@jit
+@partial(jit, static_argnames=("KKT"))
 def collision_frequency_BA_0K(
     E: Quantity,
     S_ii: callable,
     V_eiS: callable,
     n_e: Quantity,
     Zf: float,
+    KKT: bool = False,
 ):
     """
     Calculate the Born electron-ion collision frequency at 0 K. See
@@ -1384,20 +1391,26 @@ def collision_frequency_BA_0K(
             ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3
         )
         res *= -1j
-        return jnp.real(res)
+        return (
+            jnp.array([jnp.real(res), jnp.imag(res)]) if KKT else jnp.real(res)
+        )
 
-    integral_real, errl = quadgk(
+    integral, errl = quadgk(
         integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
     )
-    integral_real *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
-    integral_real *= prefactor
+    integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
+    integral *= prefactor
 
-    integral_imag = KramersKronigTransform(E, integral_real)
+    if KKT:
+        integral_real = integral
+        integral_imag = KramersKronigTransform(E, integral_real)
+    else:
+        integral_real, integral_imag = integral
 
     return (integral_real + 1j * integral_imag).to(1 / ureg.second)
 
 
-@jit
+@partial(jit, static_argnames=("KKT"))
 def collision_frequency_BA_fullFit(
     E: Quantity,
     T: Quantity,
@@ -1405,6 +1418,7 @@ def collision_frequency_BA_fullFit(
     V_eiS: callable,
     n_e: Quantity,
     Zf: float,
+    KKT: bool = False,
 ):
     """
     Calculate the Born electron-ion collision frequency. See
@@ -1416,7 +1430,7 @@ def collision_frequency_BA_fullFit(
     w = E / (1 * ureg.hbar)
 
     prefactor = (
-        -1j
+        1
         * (ureg.epsilon_0)
         / (6 * jnp.pi**2 * Zf * ureg.elementary_charge**2 * ureg.electron_mass)
     )
@@ -1432,24 +1446,27 @@ def collision_frequency_BA_fullFit(
         res = (q**6 * V_eiS(q) ** 2 * S_ii(q) * eps_part * (1 / w)).m_as(
             ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3
         )
-        return jnp.array(
-            [
-                jnp.real(res),
-                jnp.imag(res),
-            ]
+        res *= -1j
+        return (
+            jnp.array([jnp.real(res), jnp.imag(res)]) if KKT else jnp.real(res)
         )
 
     integral, errl = quadgk(
         integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
     )
-    integral_real, integral_imag = integral
-    integral = integral_real + 1j * integral_imag
     integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
+    integral *= prefactor
 
-    return (prefactor * integral).to(1 / ureg.second)
+    if KKT:
+        integral_real = integral
+        integral_imag = KramersKronigTransform(E, integral_real)
+    else:
+        integral_real, integral_imag = integral
+
+    return (integral_real + 1j * integral_imag).to(1 / ureg.second)
 
 
-@partial(jit, static_argnames=("no_of_points"))
+@partial(jit, static_argnames=("no_of_points", "KKT"))
 def collision_frequency_BA_Chapman_interp(
     E: Quantity,
     T: Quantity,
@@ -1460,6 +1477,7 @@ def collision_frequency_BA_Chapman_interp(
     Zf: float,
     no_of_points: int = 20,
     E_cutoff: None | Quantity = None,
+    KKT: bool = False,
 ):
     """
     Calculate the electron-ion collision frequency for the Born approximation,
@@ -1513,14 +1531,16 @@ def collision_frequency_BA_Chapman_interp(
             q**6 * V_eiS(q) ** 2 * S_ii(q) * eps_part * (1 / interp_w)
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
         res *= -1j
-        return jnp.real(res)
+        return (
+            jnp.array([jnp.real(res), jnp.imag(res)]) if KKT else jnp.real(res)
+        )
 
-    integral_real, errl = quadgk(
+    integral, errl = quadgk(
         integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
     )
 
-    integral_real *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
-    integral_real *= prefactor
+    integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
+    integral *= prefactor
 
     extended_interp_E = (
         jnp.array(
@@ -1531,29 +1551,51 @@ def collision_frequency_BA_Chapman_interp(
         )
         * ureg.electron_volt
     )
-    extended_integral_real = jnp.array(
-        [
-            *(1 * integral_real[::-1]).m_as(1 / ureg.second),
-            *integral_real.m_as(1 / ureg.second),
-        ]
-    ) / (1 * ureg.second)
+    if KKT:
+        extended_integral_real = jnp.array(
+            [
+                *(1 * integral[::-1]).m_as(1 / ureg.second),
+                *integral.m_as(1 / ureg.second),
+            ]
+        ) / (1 * ureg.second)
 
-    interpolated_real = jnpu.interp(
-        E, extended_interp_E, extended_integral_real
-    )
-    extended_integral_imag = KramersKronigTransform(
-        extended_interp_E, extended_integral_real
-    )
-    interpolated_imag = jnpu.interp(
-        E, extended_interp_E, extended_integral_imag
-    )
+        interpolated_real = jnpu.interp(
+            E, extended_interp_E, extended_integral_real
+        )
+        extended_integral_imag = KramersKronigTransform(
+            extended_interp_E, extended_integral_real
+        )
+        interpolated_imag = jnpu.interp(
+            E, extended_interp_E, extended_integral_imag
+        )
+    else:
+        integral_real, integral_imag = integral
+        extended_integral_real = jnp.array(
+            [
+                *(1 * integral_real[::-1]).m_as(1 / ureg.second),
+                *integral_real.m_as(1 / ureg.second),
+            ]
+        ) / (1 * ureg.second)
+        extended_integral_imag = jnp.array(
+            [
+                *(-1 * integral_imag[::-1]).m_as(1 / ureg.second),
+                *integral_imag.m_as(1 / ureg.second),
+            ]
+        ) / (1 * ureg.second)
+
+        interpolated_real = jnpu.interp(
+            E, extended_interp_E, extended_integral_real
+        )
+        interpolated_imag = jnpu.interp(
+            E, extended_interp_E, extended_integral_imag
+        )
 
     interpolated_integral = interpolated_real + 1j * interpolated_imag
 
     return interpolated_integral.to(1 / ureg.second)
 
 
-@partial(jit, static_argnames=("no_of_points"))
+@partial(jit, static_argnames=("no_of_points", "KKT"))
 def collision_frequency_BA_Chapman_interpFit(
     E: Quantity,
     T: Quantity,
@@ -1563,6 +1605,7 @@ def collision_frequency_BA_Chapman_interpFit(
     Zf: float,
     no_of_points: int = 20,
     E_cutoff: None | Quantity = None,
+    KKT: bool = False,
 ):
     """
     Calculate the electron-ion collision frequency for the Born approximation,
@@ -1607,14 +1650,16 @@ def collision_frequency_BA_Chapman_interpFit(
             q**6 * V_eiS(q) ** 2 * S_ii(q) * eps_part * (1 / interp_w)
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
         res *= -1j
-        return jnp.real(res)
+        return (
+            jnp.array([jnp.real(res), jnp.imag(res)]) if KKT else jnp.real(res)
+        )
 
-    integral_real, errl = quadgk(
+    integral, errl = quadgk(
         integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
     )
 
-    integral_real *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
-    integral_real *= prefactor
+    integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
+    integral *= prefactor
 
     extended_interp_E = (
         jnp.array(
@@ -1625,30 +1670,52 @@ def collision_frequency_BA_Chapman_interpFit(
         )
         * ureg.electron_volt
     )
-    extended_integral_real = jnp.array(
-        [
-            *(1 * integral_real[::-1]).m_as(1 / ureg.second),
-            *integral_real.m_as(1 / ureg.second),
-        ]
-    ) / (1 * ureg.second)
 
-    interpolated_real = jnpu.interp(
-        E, extended_interp_E, extended_integral_real
-    )
+    if KKT:
+        extended_integral_real = jnp.array(
+            [
+                *(1 * integral[::-1]).m_as(1 / ureg.second),
+                *integral.m_as(1 / ureg.second),
+            ]
+        ) / (1 * ureg.second)
 
-    extended_integral_imag = KramersKronigTransform(
-        extended_interp_E, extended_integral_real
-    )
-    interpolated_imag = jnpu.interp(
-        E, extended_interp_E, extended_integral_imag
-    )
+        interpolated_real = jnpu.interp(
+            E, extended_interp_E, extended_integral_real
+        )
+        extended_integral_imag = KramersKronigTransform(
+            extended_interp_E, extended_integral_real
+        )
+        interpolated_imag = jnpu.interp(
+            E, extended_interp_E, extended_integral_imag
+        )
+    else:
+        integral_real, integral_imag = integral
+        extended_integral_real = jnp.array(
+            [
+                *(1 * integral_real[::-1]).m_as(1 / ureg.second),
+                *integral_real.m_as(1 / ureg.second),
+            ]
+        ) / (1 * ureg.second)
+        extended_integral_imag = jnp.array(
+            [
+                *(-1 * integral_imag[::-1]).m_as(1 / ureg.second),
+                *integral_imag.m_as(1 / ureg.second),
+            ]
+        ) / (1 * ureg.second)
+
+        interpolated_real = jnpu.interp(
+            E, extended_interp_E, extended_integral_real
+        )
+        interpolated_imag = jnpu.interp(
+            E, extended_interp_E, extended_integral_imag
+        )
 
     interpolated_integral = interpolated_real + 1j * interpolated_imag
 
     return interpolated_integral.to(1 / ureg.second)
 
 
-@partial(jit, static_argnames=("rpa_rewrite"))
+@partial(jit, static_argnames=("rpa_rewrite", "KKT"))
 def dielectric_function_BMA_full(
     k: Quantity,
     E: Quantity | List,
@@ -1659,6 +1726,7 @@ def dielectric_function_BMA_full(
     V_eiS: callable,
     Zf: float,
     rpa_rewrite: bool = True,
+    KKT: bool = False,
 ) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which
@@ -1675,6 +1743,7 @@ def dielectric_function_BMA_full(
         n_e,
         chem_pot,
         Zf,
+        KKT,
     )
     coll_freq = jnpu.interp(
         E, jnpu.linspace(10 * jnpu.min(E), 10 * jnpu.max(E), 1000), coll_freq
@@ -1718,7 +1787,7 @@ def S0_ee_RPA_Dandrea(
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 
-@jit
+@partial(jit, static_argnames=("rpa_rewrite", "KKT"))
 def S0_ee_BMA(
     k: Quantity,
     T: Quantity,
@@ -1729,11 +1798,15 @@ def S0_ee_BMA(
     Zf: float,
     E: Quantity | List,
     lfc: Quantity = 0.0,
+    rpa_rewrite: bool = True,
+    KKT: bool = False,
 ) -> jnp.ndarray:
 
     E = -E
 
-    eps = dielectric_function_BMA_full(k, E, chem_pot, T, n_e, S_ii, V_eiS, Zf)
+    eps = dielectric_function_BMA_full(
+        k, E, chem_pot, T, n_e, S_ii, V_eiS, Zf, rpa_rewrite, KKT
+    )
 
     xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
     v_k = (1 * ureg.elementary_charge**2) / ureg.vacuum_permittivity / k**2
@@ -1741,7 +1814,7 @@ def S0_ee_BMA(
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 
-@partial(jit, static_argnames=("no_of_points", "rpa_rewrite"))
+@partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def dielectric_function_BMA_chapman_interpFit(
     k: Quantity,
     E: Quantity | List,
@@ -1753,6 +1826,7 @@ def dielectric_function_BMA_chapman_interpFit(
     Zf: float,
     no_of_points: int = 20,
     rpa_rewrite: bool = True,
+    KKT: bool = False,
 ) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which
@@ -1776,7 +1850,7 @@ def dielectric_function_BMA_chapman_interpFit(
     E_cutoff = jnpu.absolute(E_cutoff)
 
     coll_freq = collision_frequency_BA_Chapman_interpFit(
-        E, T, S_ii, V_eiS, n_e, Zf, no_of_points, E_cutoff
+        E, T, S_ii, V_eiS, n_e, Zf, no_of_points, E_cutoff, KKT
     )
 
     p0 = (
@@ -1805,7 +1879,7 @@ def dielectric_function_BMA_chapman_interpFit(
     return (1 + numerator / denumerator).m_as(ureg.dimensionless)
 
 
-@partial(jit, static_argnames=("no_of_points"))
+@partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def dielectric_function_BMA_Fortmann(
     k: Quantity,
     E: Quantity | List,
@@ -1817,15 +1891,28 @@ def dielectric_function_BMA_Fortmann(
     Zf: float,
     lfc: float = 0,
     no_of_points: int = 20,
+    rpa_rewrite: bool = True,
+    KKT: bool = False,
 ) -> jnp.ndarray:
 
     xi = susceptibility_BMA_Fortmann(
-        k, E, chem_pot, T, n_e, S_ii, V_eiS, Zf, lfc, no_of_points
+        k,
+        E,
+        chem_pot,
+        T,
+        n_e,
+        S_ii,
+        V_eiS,
+        Zf,
+        lfc,
+        no_of_points,
+        rpa_rewrite,
+        KKT,
     )
     return epsilon_from_susceptibility(xi, k)
 
 
-@partial(jit, static_argnames=("no_of_points", "rpa_rewrite"))
+@partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def susceptibility_BMA_Fortmann(
     k: Quantity,
     E: Quantity | List,
@@ -1838,6 +1925,7 @@ def susceptibility_BMA_Fortmann(
     lfc: float = 0,
     no_of_points: int = 20,
     rpa_rewrite: bool = True,
+    KKT: bool = False,
 ) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which
@@ -1867,7 +1955,7 @@ def susceptibility_BMA_Fortmann(
     E_cutoff = jnpu.absolute(E_cutoff)
 
     coll_freq = collision_frequency_BA_Chapman_interpFit(
-        E, T, S_ii, V_eiS, n_e, Zf, no_of_points, E_cutoff
+        E, T, S_ii, V_eiS, n_e, Zf, no_of_points, E_cutoff, KKT
     )
 
     V_ee = coulomb_potential_fourier(-1, -1, k)
@@ -1898,7 +1986,7 @@ def susceptibility_BMA_Fortmann(
     return pref * numerator / denominator
 
 
-@partial(jit, static_argnames=("no_of_points", "rpa_rewrite"))
+@partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def dielectric_function_BMA_chapman_interp(
     k: Quantity,
     E: Quantity | List,
@@ -1910,6 +1998,7 @@ def dielectric_function_BMA_chapman_interp(
     Zf: float,
     no_of_points: int = 20,
     rpa_rewrite: bool = True,
+    KKT: bool = False,
 ) -> jnp.ndarray:
     """
     Calculates the Born-Mermin Approximation for the dielectric function, which
@@ -1933,7 +2022,16 @@ def dielectric_function_BMA_chapman_interp(
     E_cutoff = jnpu.absolute(E_cutoff)
 
     coll_freq = collision_frequency_BA_Chapman_interp(
-        E, T, S_ii, V_eiS, n_e, chem_pot, Zf, no_of_points, E_cutoff
+        E,
+        T,
+        S_ii,
+        V_eiS,
+        n_e,
+        chem_pot,
+        Zf,
+        no_of_points,
+        E_cutoff,
+        KKT,
     )
 
     p0 = (
@@ -1960,11 +2058,10 @@ def dielectric_function_BMA_chapman_interp(
     numerator = w * p0 * pnu + 1j * coll_freq * p0 * pnu
     denumerator = p0 * w + 1j * coll_freq * pnu
 
-
     return (1 + numerator / denumerator).m_as(ureg.dimensionless)
 
 
-@partial(jit, static_argnames=("no_of_points"))
+@partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def S0_ee_BMA_chapman_interp(
     k: Quantity,
     T: Quantity,
@@ -1976,12 +2073,14 @@ def S0_ee_BMA_chapman_interp(
     E: Quantity | List,
     lfc: Quantity = 0.0,
     no_of_points: int = 20,
+    rpa_rewrite: bool = True,
+    KKT: bool = False,
 ) -> jnp.ndarray:
 
     E = -E
 
     eps = dielectric_function_BMA_chapman_interp(
-        k, E, chem_pot, T, n_e, S_ii, V_eiS, Zf, no_of_points
+        k, E, chem_pot, T, n_e, S_ii, V_eiS, Zf, no_of_points, rpa_rewrite, KKT
     )
 
     xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
@@ -1991,7 +2090,7 @@ def S0_ee_BMA_chapman_interp(
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 
-@partial(jit, static_argnames=("no_of_points"))
+@partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def S0_ee_BMA_chapman_interpFit(
     k: Quantity,
     T: Quantity,
@@ -2003,12 +2102,24 @@ def S0_ee_BMA_chapman_interpFit(
     E: Quantity | List,
     lfc: Quantity = 0.0,
     no_of_points: int = 20,
+    rpa_rewrite: bool = True,
+    KKT: bool = False,
 ) -> jnp.ndarray:
 
     E = -E
 
     eps = dielectric_function_BMA_chapman_interpFit(
-        k, E, chem_pot, T, n_e, S_ii, V_eiS, Zf, no_of_points
+        k,
+        E,
+        chem_pot,
+        T,
+        n_e,
+        S_ii,
+        V_eiS,
+        Zf,
+        no_of_points,
+        rpa_rewrite,
+        KKT,
     )
 
     xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
@@ -2018,7 +2129,7 @@ def S0_ee_BMA_chapman_interpFit(
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
 
 
-@partial(jit, static_argnames=("no_of_points"))
+@partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def S0_ee_BMA_Fortmann(
     k: Quantity,
     T: Quantity,
@@ -2030,11 +2141,24 @@ def S0_ee_BMA_Fortmann(
     E: Quantity | List,
     lfc: Quantity = 0.0,
     no_of_points: int = 20,
+    rpa_rewrite: bool = True,
+    KKT: bool = False,
 ) -> jnp.ndarray:
 
     E = -E
 
     xi = susceptibility_BMA_Fortmann(
-        k, E, chem_pot, T, n_e, S_ii, V_eiS, Zf, lfc, no_of_points
+        k,
+        E,
+        chem_pot,
+        T,
+        n_e,
+        S_ii,
+        V_eiS,
+        Zf,
+        lfc,
+        no_of_points,
+        rpa_rewrite,
+        KKT,
     )
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
