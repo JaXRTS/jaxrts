@@ -26,7 +26,7 @@ from .plasma_physics import (
     plasma_frequency,
     wiegner_seitz_radius,
 )
-from .units import Quantity, ureg
+from .units import Quantity, ureg, to_array
 
 logger = logging.getLogger(__name__)
 
@@ -1493,8 +1493,10 @@ def collision_frequency_BA_Chapman_interp(
     if E_cutoff is None:
         E_cutoff = 1.1 * jnpu.max(E)
 
+    min_E = jnpu.min(jnpu.absolute(E))
+
     interp_E = jnpu.linspace(
-        1e-6 * E_pe,
+        1e-6 * E_pe if KKT else 1e-6 * E_pe + min_E,
         E_cutoff,
         no_of_points,
     )
@@ -1622,8 +1624,10 @@ def collision_frequency_BA_Chapman_interpFit(
     if E_cutoff is None:
         E_cutoff = 1.1 * jnpu.max(E)
 
+    min_E = jnpu.min(jnpu.absolute(E))
+
     interp_E = jnpu.linspace(
-        0.1 * (jnpu.min(E) + 1e-6 * E_pe),
+        1e-6 * E_pe if KKT else 1e-6 * E_pe + min_E,
         E_cutoff,
         no_of_points,
     )
@@ -1839,15 +1843,22 @@ def dielectric_function_BMA_chapman_interpFit(
 
     E_RPA = jnpu.linspace(0 * ureg.electron_volt, 10 * jnpu.max(E), 100)
     See_RPA = S0_ee_RPA_Dandrea(jnpu.mean(k), T, n_e, E_RPA)
+
     E_cutoff = (
         jnpu.min(
             jnpu.where(
-                See_RPA > jnpu.max(See_RPA * 0.01), E_RPA, jnpu.max(E_RPA)
+                See_RPA > jnpu.max(See_RPA * 1e-4), E_RPA, jnpu.max(E_RPA)
             )
         )
         * 1.5
     )
     E_cutoff = jnpu.absolute(E_cutoff)
+
+    # When not using the Kramers Kronig Transform, we can get away with a
+    # shorter range, as we don't need the real part to drop off to 0.
+    if not KKT:
+        max_probed_E = jnpu.max(jnpu.absolute(E))
+        E_cutoff = jnpu.min(to_array((E_cutoff, max_probed_E)))
 
     coll_freq = collision_frequency_BA_Chapman_interpFit(
         E, T, S_ii, V_eiS, n_e, Zf, no_of_points, E_cutoff, KKT
@@ -1947,12 +1958,18 @@ def susceptibility_BMA_Fortmann(
     E_cutoff = (
         jnpu.min(
             jnpu.where(
-                See_RPA > jnpu.max(See_RPA * 0.01), E_RPA, jnpu.max(E_RPA)
+                See_RPA > jnpu.max(See_RPA * 1e-4), E_RPA, jnpu.max(E_RPA)
             )
         )
         * 1.5
     )
     E_cutoff = jnpu.absolute(E_cutoff)
+
+    # When not using the Kramers Kronig Transform, we can get away with a
+    # shorter range, as we don't need the real part to drop off to 0.
+    if not KKT:
+        max_probed_E = jnpu.max(jnpu.absolute(E))
+        E_cutoff = jnpu.min(to_array((E_cutoff, max_probed_E)))
 
     coll_freq = collision_frequency_BA_Chapman_interpFit(
         E, T, S_ii, V_eiS, n_e, Zf, no_of_points, E_cutoff, KKT
@@ -2014,12 +2031,18 @@ def dielectric_function_BMA_chapman_interp(
     E_cutoff = (
         jnpu.min(
             jnpu.where(
-                See_RPA > jnpu.max(See_RPA * 0.01), E_RPA, jnpu.max(E_RPA)
+                See_RPA > jnpu.max(See_RPA * 1e-4), E_RPA, jnpu.max(E_RPA)
             )
         )
         * 1.5
     )
     E_cutoff = jnpu.absolute(E_cutoff)
+
+    # When not using the Kramers Kronig Transform, we can get away with a
+    # shorter range, as we don't need the real part to drop off to 0.
+    if not KKT:
+        max_probed_E = jnpu.max(jnpu.absolute(E))
+        E_cutoff = jnpu.min(to_array((E_cutoff, max_probed_E)))
 
     coll_freq = collision_frequency_BA_Chapman_interp(
         E,

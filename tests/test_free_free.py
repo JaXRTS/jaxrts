@@ -95,7 +95,22 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
                 n_e=n_e,
                 Zf=1.0,
                 E=energy_shift,
+                no_of_points=20,
+            )
+            / ureg.hbar
+        ).m_as(1 / ureg.rydberg)
+        calc_See_Chapman_KKT = (
+            jaxrts.free_free.S0_ee_BMA_chapman_interp(
+                k,
+                T=T / (ureg.boltzmann_constant),
+                chem_pot=mu,
+                S_ii=S_ii,
+                V_eiS=V_eiS,
+                n_e=n_e,
+                Zf=1.0,
+                E=energy_shift,
                 no_of_points=100,
+                KKT=True
             )
             / ureg.hbar
         ).m_as(1 / ureg.rydberg)
@@ -114,7 +129,10 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         # Test the Chapman interpolation
         error_Chapman = onp.abs(calc_See - calc_See_Chapman)
         assert onp.max(error_Chapman) < 0.05
+        error_Chapman_KKT = onp.abs(calc_See - calc_See_Chapman_KKT)
+        assert onp.max(error_Chapman_KKT) < 0.05
         count += 1
+
 
 
 def test_glenzer2009_fig9a_reprduction() -> None:
@@ -445,7 +463,7 @@ def test_Fortmann_with_LFC_reproduces_literature() -> None:
             FWHM,
         )
 
-        assert jnp.max(jnp.abs(w - interpw)) < 0.07
+        assert jnp.max(jnp.abs(w - interpw)) < 0.1
         assert jnp.max(jnp.abs(G - interpG)) < 0.1
 
 

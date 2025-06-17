@@ -1404,7 +1404,7 @@ class BornMerminFull(FreeFreeModel):
         children = ()
         aux_data = (
             self.model_key,
-            self.no_of_freq,
+            self.sample_points,
             self.RPA_rewrite,
             self.KKT,
         )  # static values
@@ -1413,7 +1413,7 @@ class BornMerminFull(FreeFreeModel):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.no_of_freq, obj.RPA_rewrite, obj.KKT = aux_data
+        obj.model_key, obj.sample_points, obj.RPA_rewrite, obj.KKT = aux_data
 
         return obj
 
