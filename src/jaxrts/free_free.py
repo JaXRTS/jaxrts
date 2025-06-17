@@ -1954,7 +1954,7 @@ def susceptibility_BMA_Fortmann(
     # Calculate the cut-off energy from the RPA
 
     E_RPA = jnpu.linspace(0 * ureg.electron_volt, 10 * jnpu.max(E), 100)
-    See_RPA = S0_ee_RPA_Dandrea(k, T, n_e, E_RPA)
+    See_RPA = S0_ee_RPA_Dandrea(jnpu.mean(k), T, n_e, E_RPA)
     E_cutoff = (
         jnpu.min(
             jnpu.where(
