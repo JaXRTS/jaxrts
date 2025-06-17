@@ -1340,7 +1340,7 @@ def collision_frequency_BA_full(
         )
         res *= -1j
         return (
-            jnp.array([jnp.real(res), jnp.imag(res)]) if KKT else jnp.real(res)
+            jnp.real(res) if KKT else jnp.array([jnp.real(res), jnp.imag(res)])
         )
 
     integral, errl = quadgk(
@@ -1392,7 +1392,7 @@ def collision_frequency_BA_0K(
         )
         res *= -1j
         return (
-            jnp.array([jnp.real(res), jnp.imag(res)]) if KKT else jnp.real(res)
+            jnp.real(res) if KKT else jnp.array([jnp.real(res), jnp.imag(res)])
         )
 
     integral, errl = quadgk(
@@ -1448,7 +1448,7 @@ def collision_frequency_BA_fullFit(
         )
         res *= -1j
         return (
-            jnp.array([jnp.real(res), jnp.imag(res)]) if KKT else jnp.real(res)
+            jnp.real(res) if KKT else jnp.array([jnp.real(res), jnp.imag(res)])
         )
 
     integral, errl = quadgk(
@@ -1532,7 +1532,7 @@ def collision_frequency_BA_Chapman_interp(
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
         res *= -1j
         return (
-            jnp.array([jnp.real(res), jnp.imag(res)]) if KKT else jnp.real(res)
+            jnp.real(res) if KKT else jnp.array([jnp.real(res), jnp.imag(res)])
         )
 
     integral, errl = quadgk(
@@ -1651,7 +1651,7 @@ def collision_frequency_BA_Chapman_interpFit(
         ).m_as(ureg.kilogram**2 * ureg.angstrom**4 / ureg.second**3)
         res *= -1j
         return (
-            jnp.array([jnp.real(res), jnp.imag(res)]) if KKT else jnp.real(res)
+            jnp.real(res) if KKT else jnp.array([jnp.real(res), jnp.imag(res)])
         )
 
     integral, errl = quadgk(

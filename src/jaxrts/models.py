@@ -1284,6 +1284,11 @@ class BornMerminFull(FreeFreeModel):
 
     __name__ = "BornMerminFull"
 
+    def __init__(self, RPA_rewrite: bool = True, KKT: bool = False) -> None:
+        super().__init__()
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
+
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "chemical potential", IchimaruChemPotential()
@@ -1327,6 +1332,8 @@ class BornMerminFull(FreeFreeModel):
             mean_Z_free,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1374,6 +1381,8 @@ class BornMerminFull(FreeFreeModel):
                 S_ii,
                 V_eiS,
                 mean_Z_free,
+                rpa_rewrite=self.RPA_rewrite,
+                KKT=self.KKT,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
             lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1390,6 +1399,23 @@ class BornMerminFull(FreeFreeModel):
             chi(E),
             jnpu.interp(E, interpE, interpchi),
         )
+
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (
+            self.model_key,
+            self.no_of_freq,
+            self.RPA_rewrite,
+            self.KKT,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.no_of_freq, obj.RPA_rewrite, obj.KKT = aux_data
+
+        return obj
 
 
 class BornMermin(FreeFreeModel):
@@ -1421,9 +1447,13 @@ class BornMermin(FreeFreeModel):
 
     __name__ = "BornMermin"
 
-    def __init__(self, no_of_freq: int = 20) -> None:
+    def __init__(
+        self, no_of_freq: int = 20, RPA_rewrite: bool = True, KKT: bool = False
+    ) -> None:
         super().__init__()
         self.no_of_freq: int = no_of_freq
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1469,6 +1499,8 @@ class BornMermin(FreeFreeModel):
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1518,6 +1550,8 @@ class BornMermin(FreeFreeModel):
                 V_eiS,
                 mean_Z_free,
                 self.no_of_freq,
+                rpa_rewrite=self.RPA_rewrite,
+                KKT=self.KKT,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
             lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1541,13 +1575,21 @@ class BornMermin(FreeFreeModel):
             self.model_key,
             self.sample_points,
             self.no_of_freq,
+            self.RPA_rewrite,
+            self.KKT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+        (
+            obj.model_key,
+            obj.sample_points,
+            obj.no_of_freq,
+            obj.RPA_rewrite,
+            obj.KKT,
+        ) = aux_data
 
         return obj
 
@@ -1581,9 +1623,13 @@ class BornMermin_Fit(FreeFreeModel):
 
     __name__ = "BornMermin_Fit"
 
-    def __init__(self, no_of_freq: int = 20) -> None:
+    def __init__(
+        self, no_of_freq: int = 20, RPA_rewrite: bool = True, KKT: bool = False
+    ) -> None:
         super().__init__()
         self.no_of_freq: int = no_of_freq
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1629,6 +1675,8 @@ class BornMermin_Fit(FreeFreeModel):
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1677,6 +1725,8 @@ class BornMermin_Fit(FreeFreeModel):
                 V_eiS,
                 mean_Z_free,
                 self.no_of_freq,
+                rpa_rewrite=self.RPA_rewrite,
+                KKT=self.KKT,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
             lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1700,13 +1750,21 @@ class BornMermin_Fit(FreeFreeModel):
             self.model_key,
             self.sample_points,
             self.no_of_freq,
+            self.RPA_rewrite,
+            self.KKT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+        (
+            obj.model_key,
+            obj.sample_points,
+            obj.no_of_freq,
+            obj.RPA_rewrite,
+            obj.KKT,
+        ) = aux_data
 
         return obj
 
@@ -1742,9 +1800,13 @@ class BornMermin_Fortmann(FreeFreeModel):
 
     __name__ = "BornMermin_Fortmann"
 
-    def __init__(self, no_of_freq: int = 20) -> None:
+    def __init__(
+        self, no_of_freq: int = 20, RPA_rewrite: bool = True, KKT: bool = False
+    ) -> None:
         super().__init__()
         self.no_of_freq: int = no_of_freq
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1790,6 +1852,8 @@ class BornMermin_Fortmann(FreeFreeModel):
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1838,6 +1902,8 @@ class BornMermin_Fortmann(FreeFreeModel):
             mean_Z_free,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         return xi
 
@@ -1847,13 +1913,21 @@ class BornMermin_Fortmann(FreeFreeModel):
             self.model_key,
             self.sample_points,
             self.no_of_freq,
+            self.RPA_rewrite,
+            self.KKT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+        (
+            obj.model_key,
+            obj.sample_points,
+            obj.no_of_freq,
+            obj.RPA_rewrite,
+            obj.KKT,
+        ) = aux_data
 
         return obj
 
