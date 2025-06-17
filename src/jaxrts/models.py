@@ -1270,6 +1270,17 @@ class BornMerminFull(FreeFreeModel):
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
 
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
+
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
     Requires a 'BM V_eiS' model (defaults to
@@ -1430,8 +1441,19 @@ class BornMermin(FreeFreeModel):
     The number of frequencies defaults to 20. To change it, just change the
     attribute of this model after initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin()
     >>> state["free-free scattering"].no_of_freq = 10
+
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -1606,8 +1628,19 @@ class BornMermin_Fit(FreeFreeModel):
     The number of frequencies defaults to 20. To change it, just change the
     attribute of this model after initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit()
     >>> state["free-free scattering"].no_of_freq = 10
+
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -1781,8 +1814,19 @@ class BornMermin_Fortmann(FreeFreeModel):
     The number of frequencies defaults to 20. To change it, just change the
     attribute of this model after initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann()
     >>> state["free-free scattering"].no_of_freq = 10
+
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
