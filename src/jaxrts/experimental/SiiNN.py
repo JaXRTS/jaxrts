@@ -107,7 +107,8 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
             shape = json.load(f)
         shape.update({"rngs": nnx.Rngs(0)})
         self.model_elements = shape.pop("elements")
-        abstract_model = nnx.eval_shape(lambda: NNModel(**shape))
+        model = NNModel(**shape)
+        abstract_model = nnx.eval_shape(lambda: model)
 
         graphdef, abstract_state = nnx.split(
             abstract_model,
