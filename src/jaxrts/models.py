@@ -1438,8 +1438,9 @@ class BornMermin(FreeFreeModel):
     at the probing frequency at :py:attr:`~.no_of_freq` points and
     interpolating between them, after.
 
-    The number of frequencies defaults to 20. To change it, just change the
-    attribute of this model after initializing it. i.e.
+    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
+    100 otherwise. To change it, just change the attribute of this model after
+    initializing it. i.e.
 
     >>> state["free-free scattering"] = jaxrts.models.BornMermin()
     >>> state["free-free scattering"].no_of_freq = 10
@@ -1470,10 +1471,16 @@ class BornMermin(FreeFreeModel):
     __name__ = "BornMermin"
 
     def __init__(
-        self, no_of_freq: int = 20, RPA_rewrite: bool = True, KKT: bool = False
+        self,
+        no_of_freq: int | None = None,
+        RPA_rewrite: bool = True,
+        KKT: bool = False,
     ) -> None:
         super().__init__()
-        self.no_of_freq: int = no_of_freq
+        if no_of_freq is not None:
+            self.no_of_freq: int = no_of_freq
+        else:
+            self.no_of_freq: int = 100 if KKT else 20
         self.RPA_rewrite: bool = RPA_rewrite
         self.KKT: bool = KKT
 
@@ -1625,8 +1632,9 @@ class BornMermin_Fit(FreeFreeModel):
     un-damped RPA, numerically. However, the damped RPA is still evaluated
     using the integral.
 
-    The number of frequencies defaults to 20. To change it, just change the
-    attribute of this model after initializing it. i.e.
+    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
+    100 otherwise. To change it, just change the attribute of this model after
+    initializing it. i.e.
 
     >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit()
     >>> state["free-free scattering"].no_of_freq = 10
@@ -1657,10 +1665,16 @@ class BornMermin_Fit(FreeFreeModel):
     __name__ = "BornMermin_Fit"
 
     def __init__(
-        self, no_of_freq: int = 20, RPA_rewrite: bool = True, KKT: bool = False
+        self,
+        no_of_freq: int | None = None,
+        RPA_rewrite: bool = True,
+        KKT: bool = False,
     ) -> None:
         super().__init__()
-        self.no_of_freq: int = no_of_freq
+        if no_of_freq is not None:
+            self.no_of_freq: int = no_of_freq
+        else:
+            self.no_of_freq: int = 100 if KKT else 20
         self.RPA_rewrite: bool = RPA_rewrite
         self.KKT: bool = KKT
 
@@ -1811,8 +1825,9 @@ class BornMermin_Fortmann(FreeFreeModel):
     implementation of the local field correction, proposed by
     :cite:`Fortmann.2010`.
 
-    The number of frequencies defaults to 20. To change it, just change the
-    attribute of this model after initializing it. i.e.
+    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
+    100 otherwise. To change it, just change the attribute of this model after
+    initializing it. i.e.
 
     >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann()
     >>> state["free-free scattering"].no_of_freq = 10
@@ -1845,10 +1860,16 @@ class BornMermin_Fortmann(FreeFreeModel):
     __name__ = "BornMermin_Fortmann"
 
     def __init__(
-        self, no_of_freq: int = 20, RPA_rewrite: bool = True, KKT: bool = False
+        self,
+        no_of_freq: int | None = None,
+        RPA_rewrite: bool = True,
+        KKT: bool = False,
     ) -> None:
         super().__init__()
-        self.no_of_freq: int = no_of_freq
+        if no_of_freq is not None:
+            self.no_of_freq: int = no_of_freq
+        else:
+            self.no_of_freq: int = 100 if KKT else 20
         self.RPA_rewrite: bool = RPA_rewrite
         self.KKT: bool = KKT
 
