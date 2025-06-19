@@ -1237,6 +1237,7 @@ class RPA_DandreaFit(FreeFreeModel):
     """
 
     __name__ = "RPA_DandreaFit"
+    cite_keys = ["Dandrea.1986"]
 
     @jax.jit
     def evaluate_raw(
