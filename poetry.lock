@@ -2059,20 +2059,24 @@ name = "pybtex"
 version = "0.24.0"
 description = "A BibTeX-compatible bibliography processor in Python"
 optional = false
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*"
+python-versions = ">=3.6"
 groups = ["main", "docs"]
-files = [
-    {file = "pybtex-0.24.0-py2.py3-none-any.whl", hash = "sha256:e1e0c8c69998452fea90e9179aa2a98ab103f3eed894405b7264e517cc2fcc0f"},
-    {file = "pybtex-0.24.0.tar.gz", hash = "sha256:818eae35b61733e5c007c3fcd2cfb75ed1bc8b4173c1f70b56cc4c0802d34755"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 latexcodec = ">=1.0.4"
 PyYAML = ">=3.01"
-six = "*"
 
 [package.extras]
+doc = ["sphinx"]
 test = ["pytest"]
+
+[package.source]
+type = "git"
+url = "https://bitbucket.org/pybtex-devs/pybtex"
+reference = "HEAD"
+resolved_reference = "9b97822f5517fc7893456b9827589a003ea7076a"
 
 [[package]]
 name = "pybtex-docutils"
@@ -3231,4 +3235,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10,<3.14"
-content-hash = "5d60d14dbc85ad9527527abb7a4dcc66ea4608b2fcbbc90c1768ab5327d8f24d"
+content-hash = "ede0846b135fad3b7bf31946f4562b4622998e374d55e771c118c9fdc8c08a23"
