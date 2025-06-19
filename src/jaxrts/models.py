@@ -6,7 +6,7 @@ implemented.
 import abc
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import jax
 import jax.numpy as jnp
@@ -24,6 +24,7 @@ from . import (
     hypernetted_chain,
     ion_feature,
     ipd,
+    literature,
     plasma_physics,
     static_structure_factors,
 )
@@ -46,6 +47,10 @@ logger = logging.getLogger(__name__)
 class Model(metaclass=abc.ABCMeta):
     #: A list of keywords where this model is adequate for
     allowed_keys: list[str] = []
+    #: A list of bibtex keys
+    cite_keys: (
+        list[str] | list[tuple[str, str]] | list[tuple[list[str], str]]
+    ) = []
 
     def __init__(self):
         """ """
@@ -71,6 +76,35 @@ class Model(metaclass=abc.ABCMeta):
         Test if the model is applicable to the PlasmaState. Might raise logged
         messages and errors.
         """
+
+    def citation(self, style: Literal["plain", "bibtex"] = "plain") -> str:
+        """
+        Return bibliographic information for the Model used.
+
+        Parameters
+        ----------
+        style: "plain" or "bibtex"
+            When ``"plain"``, the literature references are formatted in a
+            human-readable format. If ``"bibtex"``, the citations are given as
+            bibtex entries, which can then be copied into a literature
+            collection.
+
+        Returns
+        -------
+        str
+            The information about the model used
+        """
+        if style == "plain":
+            citation_function = literature.get_formatted_ref_string
+        else:
+            citation_function = literature.get_bibtex_ref_string
+        citations = []
+        for entry in self.cite_keys:
+            if isinstance(entry, str):
+                citations.append(citation_function(entry))
+            else:
+                citations.append(citation_function(*entry))
+        return "\n".join(citations)
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -361,6 +395,7 @@ class ArkhipovIonFeat(IonFeatModel):
     """
 
     __name__ = "ArkhipovIonFeat"
+    cite_keys = ["Arkhipov.1998", "Arkhipov.2000"]
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if plasma_state.T_e != plasma_state.T_i:
