@@ -816,6 +816,9 @@ class DebyeHueckelPotential(HNCPotential):
 
     @jax.jit
     def long_k(self, plasma_state, k):
+        """
+        See :cite:`Chapman.2015`, (Eqn 3.58) 
+        """
 
         _k = k[jnp.newaxis, jnp.newaxis, :]
 
@@ -828,6 +831,17 @@ class DebyeHueckelPotential(HNCPotential):
         )
 
         return pref * numerator / denumerator
+
+    @jax.jit
+    def full_k(self, plasma_state, k):
+        """
+        See :cite:`Chapman.2015`, (Eqn 3.49) 
+        """
+        _k = k[jnp.newaxis, jnp.newaxis, :]
+        V_C = self.q2(plasma_state) / ureg.vacuum_permittivity / _k**2
+        return V_C / (1 + (self.kappa(plasma_state)/_k)**2)
+
+
 
 
 class KelbgPotential(HNCPotential):
