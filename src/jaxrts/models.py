@@ -1270,6 +1270,17 @@ class BornMerminFull(FreeFreeModel):
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
 
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
+
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
     Requires a 'BM V_eiS' model (defaults to
@@ -1283,6 +1294,11 @@ class BornMerminFull(FreeFreeModel):
     """
 
     __name__ = "BornMerminFull"
+
+    def __init__(self, RPA_rewrite: bool = True, KKT: bool = False) -> None:
+        super().__init__()
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1327,6 +1343,8 @@ class BornMerminFull(FreeFreeModel):
             mean_Z_free,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1374,6 +1392,8 @@ class BornMerminFull(FreeFreeModel):
                 S_ii,
                 V_eiS,
                 mean_Z_free,
+                rpa_rewrite=self.RPA_rewrite,
+                KKT=self.KKT,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
             lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1391,6 +1411,23 @@ class BornMerminFull(FreeFreeModel):
             jnpu.interp(E, interpE, interpchi),
         )
 
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.RPA_rewrite,
+            self.KKT,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.sample_points, obj.RPA_rewrite, obj.KKT = aux_data
+
+        return obj
+
 
 class BornMermin(FreeFreeModel):
     """
@@ -1401,11 +1438,23 @@ class BornMermin(FreeFreeModel):
     at the probing frequency at :py:attr:`~.no_of_freq` points and
     interpolating between them, after.
 
-    The number of frequencies defaults to 20. To change it, just change the
-    attribute of this model after initializing it. i.e.
+    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
+    100 otherwise. To change it, just change the attribute of this model after
+    initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin()
     >>> state["free-free scattering"].no_of_freq = 10
+
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -1421,9 +1470,19 @@ class BornMermin(FreeFreeModel):
 
     __name__ = "BornMermin"
 
-    def __init__(self, no_of_freq: int = 20) -> None:
+    def __init__(
+        self,
+        no_of_freq: int | None = None,
+        RPA_rewrite: bool = True,
+        KKT: bool = False,
+    ) -> None:
         super().__init__()
-        self.no_of_freq: int = no_of_freq
+        if no_of_freq is not None:
+            self.no_of_freq: int = no_of_freq
+        else:
+            self.no_of_freq: int = 100 if KKT else 20
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1469,6 +1528,8 @@ class BornMermin(FreeFreeModel):
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1518,6 +1579,8 @@ class BornMermin(FreeFreeModel):
                 V_eiS,
                 mean_Z_free,
                 self.no_of_freq,
+                rpa_rewrite=self.RPA_rewrite,
+                KKT=self.KKT,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
             lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1541,13 +1604,21 @@ class BornMermin(FreeFreeModel):
             self.model_key,
             self.sample_points,
             self.no_of_freq,
+            self.RPA_rewrite,
+            self.KKT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+        (
+            obj.model_key,
+            obj.sample_points,
+            obj.no_of_freq,
+            obj.RPA_rewrite,
+            obj.KKT,
+        ) = aux_data
 
         return obj
 
@@ -1561,11 +1632,23 @@ class BornMermin_Fit(FreeFreeModel):
     un-damped RPA, numerically. However, the damped RPA is still evaluated
     using the integral.
 
-    The number of frequencies defaults to 20. To change it, just change the
-    attribute of this model after initializing it. i.e.
+    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
+    100 otherwise. To change it, just change the attribute of this model after
+    initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit()
     >>> state["free-free scattering"].no_of_freq = 10
+
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -1581,9 +1664,19 @@ class BornMermin_Fit(FreeFreeModel):
 
     __name__ = "BornMermin_Fit"
 
-    def __init__(self, no_of_freq: int = 20) -> None:
+    def __init__(
+        self,
+        no_of_freq: int | None = None,
+        RPA_rewrite: bool = True,
+        KKT: bool = False,
+    ) -> None:
         super().__init__()
-        self.no_of_freq: int = no_of_freq
+        if no_of_freq is not None:
+            self.no_of_freq: int = no_of_freq
+        else:
+            self.no_of_freq: int = 100 if KKT else 20
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1629,6 +1722,8 @@ class BornMermin_Fit(FreeFreeModel):
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1677,6 +1772,8 @@ class BornMermin_Fit(FreeFreeModel):
                 V_eiS,
                 mean_Z_free,
                 self.no_of_freq,
+                rpa_rewrite=self.RPA_rewrite,
+                KKT=self.KKT,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
             lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1700,13 +1797,21 @@ class BornMermin_Fit(FreeFreeModel):
             self.model_key,
             self.sample_points,
             self.no_of_freq,
+            self.RPA_rewrite,
+            self.KKT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+        (
+            obj.model_key,
+            obj.sample_points,
+            obj.no_of_freq,
+            obj.RPA_rewrite,
+            obj.KKT,
+        ) = aux_data
 
         return obj
 
@@ -1720,11 +1825,23 @@ class BornMermin_Fortmann(FreeFreeModel):
     implementation of the local field correction, proposed by
     :cite:`Fortmann.2010`.
 
-    The number of frequencies defaults to 20. To change it, just change the
-    attribute of this model after initializing it. i.e.
+    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
+    100 otherwise. To change it, just change the attribute of this model after
+    initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann()
     >>> state["free-free scattering"].no_of_freq = 10
+
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -1742,9 +1859,19 @@ class BornMermin_Fortmann(FreeFreeModel):
 
     __name__ = "BornMermin_Fortmann"
 
-    def __init__(self, no_of_freq: int = 20) -> None:
+    def __init__(
+        self,
+        no_of_freq: int | None = None,
+        RPA_rewrite: bool = True,
+        KKT: bool = False,
+    ) -> None:
         super().__init__()
-        self.no_of_freq: int = no_of_freq
+        if no_of_freq is not None:
+            self.no_of_freq: int = no_of_freq
+        else:
+            self.no_of_freq: int = 100 if KKT else 20
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1790,6 +1917,8 @@ class BornMermin_Fortmann(FreeFreeModel):
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1838,6 +1967,8 @@ class BornMermin_Fortmann(FreeFreeModel):
             mean_Z_free,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         return xi
 
@@ -1847,13 +1978,21 @@ class BornMermin_Fortmann(FreeFreeModel):
             self.model_key,
             self.sample_points,
             self.no_of_freq,
+            self.RPA_rewrite,
+            self.KKT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+        (
+            obj.model_key,
+            obj.sample_points,
+            obj.no_of_freq,
+            obj.RPA_rewrite,
+            obj.KKT,
+        ) = aux_data
 
         return obj
 
