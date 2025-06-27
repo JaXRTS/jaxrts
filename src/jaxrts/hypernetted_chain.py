@@ -571,7 +571,7 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
 
 
 @jax.jit
-def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0):
+def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=[]):
     """
     Calculate the Pair distribution function in the Hypernetted Chain approach,
     as it was published by :cite:`Wunsch.2011`.
@@ -584,23 +584,25 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0):
     was introduced in the MCSS User Guide :cite:`Chapman.2016` and is
     especially relevant e.g., at low temperatures, where the HNC scheme becomes
     numerically unstable.
+
+    Additionally, the `tmult` attribute can be used to avoid unwanted behavior
+    at low temperatures. If given, a full HNC cycle is calculated for the first
+    of the temperature multipliers given, until converged. This value is then
+    taken as initial condition for the second entry and so on, until finally a
+    multiplier of `1.0` is appended, performing a last HNC cycle for the
+    desired temperature.
     """
+    iterations = 0
     delta = 1e-6
 
     dr = r[1] - r[0]
     dk = jnp.pi / (len(r) * dr)
-
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-    beta = 1 / (ureg.boltzmann_constant * Ti)
-
-    v_s = beta * V_s
-    v_l_k = beta * V_l_k
-
-    log_g_r0 = -(v_s).to(ureg.dimensionless)
-    Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
-
     d = jnp.eye(ni.shape[0]) * ni
+
+    # Append the list of temperature multipliers with the target T
+    tmult = [*tmult, 1.0]
 
     def ozr(input_vec):
         """
@@ -624,41 +626,62 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0):
         err = jnpu.sum((Ns_r - Ns_r_old) ** 2)
         return (n_iter < 2000) & jnp.all(err > delta)
 
-    def step(val):
-        log_g_r, Ns_r, _, i = val
+    # Perform the full HNC cycle for each temperature
+    for titer, mult in enumerate(tmult):
+        beta = 1 / (ureg.boltzmann_constant * Ti * mult)
 
-        h_r = jnpu.expm1(log_g_r)
+        v_s = beta * V_s
+        v_l_k = beta * V_l_k
 
-        cs_r = h_r - Ns_r
+        def step(val):
+            log_g_r, Ns_r, _, i = val
 
-        cs_k = _3Dfour(k, r, cs_r)
+            h_r = jnpu.expm1(log_g_r)
+            cs_r = h_r - Ns_r
+            cs_k = _3Dfour(k, r, cs_r)
+            c_k = cs_k - v_l_k
 
-        c_k = cs_k - v_l_k
+            # Ornstein-Zernike relation
+            h_k = jax.vmap(ozr, in_axes=2, out_axes=2)(c_k)
 
-        # Ornstein-Zernike relation
-        h_k = jax.vmap(ozr, in_axes=2, out_axes=2)(c_k)
-
-        Ns_k = h_k - cs_k
-
-        Ns_r_new_full = (
-            _3Dfour(
-                r,
-                k,
-                Ns_k,
+            Ns_k = h_k - cs_k
+            Ns_r_new_full = (
+                _3Dfour(
+                    r,
+                    k,
+                    Ns_k,
+                )
+                / (2 * jnp.pi) ** 3
             )
-            / (2 * jnp.pi) ** 3
+            Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
+            log_g_r_new = Ns_r_new - v_s
+            return log_g_r_new, Ns_r_new, Ns_r, i + 1
+
+        # Set initial conditions
+        # ----------------------
+
+        # In the first iteration, use zeros for Ns_r, and v_s for log_g_r
+        if titer == 0:
+            log_g_r0 = -(v_s).to(ureg.dimensionless)
+            Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
+            init = (log_g_r0, Ns_r0, Ns_r0 - 1, 0)
+        # Otherwise, use the result of the previous temperature
+        else:
+            # Do a few steps, to not abort, directly,
+            # because the previous cycle was converged.
+            for i in range(5):
+                log_g_r, Ns_r, Ns_r_old, _ = step(
+                    (log_g_r, Ns_r, Ns_r_old, i)  # noqa: F821
+                )
+                iterations += 1
+            init = (log_g_r, Ns_r, Ns_r_old, 0)
+
+        log_g_r, Ns_r, Ns_r_old, niter = jax.lax.while_loop(
+            condition, step, init
         )
+        iterations += niter
 
-        Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
-
-        log_g_r_new = Ns_r_new - v_s
-
-        return log_g_r_new, Ns_r_new, Ns_r, i + 1
-
-    init = (log_g_r0, Ns_r0, Ns_r0 - 1, 0)
-    log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
-
-    return jnpu.exp(log_g_r), niter
+    return jnpu.exp(log_g_r), iterations
 
 
 def geometric_mean_T(T):
