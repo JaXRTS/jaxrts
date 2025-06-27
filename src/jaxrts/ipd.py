@@ -201,7 +201,7 @@ def ipd_stewart_pyatt_full_deg(
 
 @jax.jit
 def ipd_stewart_pyatt(
-    Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity
+    Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity, Z
 ) -> Quantity:
     """
     The correction to the ionization potential in the Stewart-Pyatt model using
@@ -238,10 +238,10 @@ def ipd_stewart_pyatt(
     # This function is not well-defined for Zi==0:
     Zi = jnp.clip(Zi, 1e-6)
 
-    R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
+    R_0 = (3 / (4 * jnp.pi * ni)) ** (1 / 3)
 
     kappa_i_sq = jnpu.sum(
-        Zi**2
+        (Zi + 1)**2
         * 1
         * ureg.elementary_charge**2
         * ni
@@ -253,7 +253,7 @@ def ipd_stewart_pyatt(
         / (4 * jnp.pi * 1 * ureg.epsilon_0 * ureg.boltzmann_constant * (Te**4 + T_F**4)**(1/4))
     )
 
-    kappa = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
+    kappa = jnpu.sqrt(kappa_i_sq)
     s = 1 / (R_0 * kappa)
 
     # The ionization potential depression energy shift
@@ -261,7 +261,7 @@ def ipd_stewart_pyatt(
     ipd_shift = -(
         (
             3
-            * (Zi + 1)
+            * (Z + 1)
             * ureg.elementary_charge**2
             / (2 * 4 * jnp.pi * 1 * ureg.epsilon_0 * R_0)
         )
