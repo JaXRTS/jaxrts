@@ -201,7 +201,7 @@ def ipd_stewart_pyatt_full_deg(
 
 @jax.jit
 def ipd_stewart_pyatt(
-    Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity, Z
+    Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity, Z = None
 ) -> Quantity:
     """
     The correction to the ionization potential in the Stewart-Pyatt model using
@@ -232,6 +232,9 @@ def ipd_stewart_pyatt(
     Quantity
         The ipd shift in units of electronvolt.
     """
+
+    if Z is None:
+        Z = Zi
 
     T_F = fermi_energy(ne) / (1 * ureg.k_B)
 
