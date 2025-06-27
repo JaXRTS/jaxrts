@@ -22,7 +22,6 @@ from .plasma_physics import (
     chem_pot_sommerfeld_fermi_interpolation,
 )
 
-from jaxopt import Broyden, Bisection
 
 h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
@@ -33,7 +32,7 @@ debug_detM = False
 
 
 @jax.jit
-def bisection(func, a, b, tolerance=1e-4, max_iter=1e4, min_iter=40):
+def bisection(func, a, b, tolerance=1e-4, max_iter=1e4, min_iter=1E2):
 
     def condition(state):
         prev_x, next_x, count = state
@@ -125,7 +124,7 @@ def solve_saha(
     element_list: List[Element],
     T_e: Quantity,
     ion_number_densities: Quantity,
-    continuum_lowering: Quantity = 0 * ureg.electron_volt,
+    continuum_lowering: Quantity = 0 * ureg.electron_volt
 ) -> (Quantity, Quantity):
     """
     Solve the Saha equation for a list of elements at a given temperature.
@@ -272,7 +271,7 @@ def solve_saha(
         out = []
         pref = 1
 
-        # jax.debug.print("Before: {x}, {y}", x = Eb, y = element.ionization.energies)
+        # jax.debug.print("Before: {x}", x = jnp.sum(jnp.heaviside(Eb.m_as(ureg.electron_volt), 0)))
 
         def scan_fn(pref, inputs):
             E, g = inputs
@@ -386,9 +385,9 @@ def solve_saha(
         jax.tree_util.Partial(lambda ne: det_M(M=M, ne=ne)),
         0,
         (max_ne / ne_scale).m_as(ureg.dimensionless),
-        tolerance=1e-10,
-        max_iter=1e2,
-        min_iter=1e1,
+        tolerance=1e-16,
+        max_iter=1e4,
+        min_iter=40,
     )
 
     # sol_ne = Broyden(fun=det_M_func).run((max_ne / ne_scale).m_as(ureg.dimensionless)).params
