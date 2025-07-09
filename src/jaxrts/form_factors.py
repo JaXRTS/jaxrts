@@ -205,8 +205,11 @@ def pauling_all_ff(k: Quantity, Zeff: Quantity | jnp.ndarray) -> Quantity:
         ]
     )
 
+
 @jit
-def form_factor_lowering_10(k: Quantity, binding_E: Quantity, Z_core: Quantity) -> Quantity:
+def form_factor_lowering_10(
+    k: Quantity, binding_E: Quantity, Z_core: Quantity
+) -> Quantity:
     """
     Calculate the form factor lowering for the 1s orbital.
 
@@ -214,9 +217,10 @@ def form_factor_lowering_10(k: Quantity, binding_E: Quantity, Z_core: Quantity) 
     ==========
     k: Quantity
         The scattering vector.
-    binding_E:
+    binding_E: Quantity
         The binding energies of the two 1s electrons. Has to be an array with 2 entries.
-
+    Z_core: Quantity
+        Average number of bound electrons to the core.
     """
     n = 1
     En = 13.6
