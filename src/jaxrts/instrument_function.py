@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 @jax.jit
-def instrument_gaussian(x: jnp.ndarray | float, sigma: Quantity) -> jnp.ndarray:
+def instrument_gaussian(
+    x: jnp.ndarray | float, sigma: Quantity
+) -> jnp.ndarray:
     """
 
     Gaussian model for the instrument function.
@@ -31,11 +33,15 @@ def instrument_gaussian(x: jnp.ndarray | float, sigma: Quantity) -> jnp.ndarray:
 
     """
 
-    return (1.0 / (sigma * jnp.sqrt(2 * jnp.pi))) * jnpu.exp(-0.5 * x**2 / sigma**2)
+    return (1.0 / (sigma * jnp.sqrt(2 * jnp.pi))) * jnpu.exp(
+        -0.5 * x**2 / sigma**2
+    )
 
 
 @jax.jit
-def instrument_supergaussian(x: jnp.ndarray | float, sigma: Quantity, power: float) -> jnp.ndarray:
+def instrument_supergaussian(
+    x: jnp.ndarray | float, sigma: Quantity, power: float
+) -> jnp.ndarray:
     """
 
     Super-gaussian model for the instrument function.
@@ -51,17 +57,24 @@ def instrument_supergaussian(x: jnp.ndarray | float, sigma: Quantity, power: flo
 
     """
 
-    _x = jnp.linspace(-10 * sigma.magnitude, 10 * sigma.magnitude, 600) / sigma.magnitude
+    _x = (
+        jnp.linspace(-10 * sigma.magnitude, 10 * sigma.magnitude, 600)
+        / sigma.magnitude
+    )
     _y = jnp.exp(-((0.5 * _x**2) ** power))
 
     # Normalize the super-gaussian
     norm = jax.scipy.integrate.trapezoid(_y, _x)
 
-    return jnp.exp(-(0.5 * x**2 / sigma**2).magnitude ** power) / (norm * sigma.magnitude)
+    return jnp.exp(-(0.5 * x**2 / sigma**2).magnitude ** power) / (
+        norm * sigma.magnitude
+    )
 
 
 @jax.jit
-def instrument_lorentzian(x: jnp.ndarray | float, gamma: Quantity) -> jnp.ndarray:
+def instrument_lorentzian(
+    x: jnp.ndarray | float, gamma: Quantity
+) -> jnp.ndarray:
     """
 
     Lorentzian model for the instrument function.
@@ -97,7 +110,9 @@ def instrument_from_file(filename: Path) -> jnp.ndarray:
 
     E, ints = data[:, 0], data[:, 1]
 
-    ints /= jnp.trapezoid(y=ints, x=(E * ureg.electron_volt / ureg.hbar).m_as(1 / ureg.second))
+    ints /= jnp.trapezoid(
+        y=ints, x=(E * ureg.electron_volt / ureg.hbar).m_as(1 / ureg.second)
+    )
 
     @jax.jit
     def inst_func_fxrts(w):
@@ -112,7 +127,8 @@ def instrument_from_file(filename: Path) -> jnp.ndarray:
 def instrument_from_array(x: jnp.ndarray, ints: jnp.ndarray) -> jnp.ndarray:
     """
 
-    Set instrument function from an array input. the Intensities have to be with respect to the energy shift .
+    Set instrument function from an array input.
+    The Intensities have to be with respect to the energy shift .
 
     Parameters
     ----------
@@ -122,7 +138,9 @@ def instrument_from_array(x: jnp.ndarray, ints: jnp.ndarray) -> jnp.ndarray:
             Intensity values of Instrument function.
 
     """
-    ints /= jnp.trapezoid(y=ints, x=(x * ureg.electron_volt / ureg.hbar).m_as(1 / ureg.second))
+    ints /= jnp.trapezoid(
+        y=ints, x=(x * ureg.electron_volt / ureg.hbar).m_as(1 / ureg.second)
+    )
 
     @jax.jit
     def inst_func_fxrts(w):
