@@ -2347,31 +2347,10 @@ class FormFactorLowering(Model):
             bind_energies_ipd = jnp.where(
                 bind_energies_ipd < 0, 1e-6, bind_energies_ipd
             )
+            
+            bind_energies_ipd *= ureg.electron_volt
+            f_1s = form_factors.form_factor_lowering_10(setup.k, bind_energies_ipd, elem.Z - plasma_state.Z_free[idx])
 
-            # calculate Z_eff for the up spin electron and downspin electron
-            Z_eff = jnp.sqrt(
-                (bind_energies_ipd) * 1**2 / (jnp.array([13.6, 13.6]))
-            )
-
-            # calculate the form factors for the individual electron in the 1s orbital
-            f_1s_up = form_factors.pauling_f10(setup.k, Z_eff[0])
-            f_1s_down = (
-                form_factors.pauling_f10(setup.k, Z_eff[0])
-                if elem.Z == 1
-                else form_factors.pauling_f10(setup.k, Z_eff[1])
-            )
-            Z_k_shell = elem.Z - plasma_state.Z_free[idx]
-            x_1s_up = jnp.clip(Z_k_shell, 1e-3, 1)
-            x_1s_down = jnp.clip(Z_k_shell - 1, 0, 1)
-
-            # interpolate the formfactor values depending on the degree of k-shell ionization
-            # k_shell_number_elec = jnp.array([0, 1, 2])
-            # f_1s_interp_array = jnp.array([0, f_1s_tot / 2, f_1s_tot])
-            # f_1s = jnpu.interp(elem.Z - plasma_state.Z_free[idx], k_shell_number_elec, f_1s_interp_array)
-            f_1s = (
-                x_1s_up * f_1s_up.m_as(ureg.dimensionless)
-                + x_1s_down * f_1s_down.m_as(ureg.dimensionless)
-            ) / (x_1s_up + x_1s_down)
 
             # update the pauling f_1s result with the interpolation result
             ff = ff.at[idx, 0].set(f_1s)

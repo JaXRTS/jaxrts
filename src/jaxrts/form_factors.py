@@ -5,7 +5,7 @@ This submodule is dedicated to form factors.
 import logging
 
 import numpy as onp
-from jax import jit
+from jax import jit, debug
 from jax import numpy as jnp
 from jpu import numpy as jnpu
 
@@ -204,3 +204,36 @@ def pauling_all_ff(k: Quantity, Zeff: Quantity | jnp.ndarray) -> Quantity:
             pauling_f43(k, Zeff[9]).m_as(ureg.dimensionless),
         ]
     )
+
+@jit
+def form_factor_lowering_10(k: Quantity, binding_E: Quantity, Z_core: Quantity) -> Quantity:
+    """
+    Calculate the form factor lowering for the 1s orbital.
+
+    Parameters
+    ==========
+    k: Quantity
+        The scattering vector.
+    binding_E:
+        The binding energies of the two 1s electrons. Has to be an array with 2 entries.
+
+    """
+    n = 1
+    En = 13.6
+
+    # calculate Z_eff for the up spin electron and downspin electron
+    Z_eff = jnp.sqrt(
+        (binding_E.m_as(ureg.electron_volt)) * n**2 / (jnp.array([En, En]))
+    )
+
+    # calculate the form factors for the individual electron in the 1s orbital
+    f_1s_up = pauling_f10(k, Z_eff[0])
+    f_1s_down = pauling_f10(k, Z_eff[1])
+    x_1s_up = jnp.clip(Z_core, 1e-3, 1)
+    x_1s_down = jnp.clip(Z_core - 1, 0, 1)
+
+    f_1s = (
+        x_1s_up * f_1s_up.m_as(ureg.dimensionless)
+        + x_1s_down * f_1s_down.m_as(ureg.dimensionless)
+    ) / (x_1s_up + x_1s_down)
+    return f_1s
