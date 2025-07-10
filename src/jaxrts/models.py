@@ -2331,28 +2331,33 @@ class FormFactorLowering(Model):
         ff = form_factors.pauling_all_ff(setup.k, Zstar)
         ipd = plasma_state.evaluate(key="ipd", setup=setup)
 
+        # Loop throught the Ions of the Plasma state and calculate the corrected 1s form factor
         for elem, idx in zip(plasma_state.ions, range(len(plasma_state.ions))):
-            # flip ionization enegies, to start with the binding energie of the 1st K-shell electron
+            # flip ionization energies, to start with the binding energie of the 1st K-shell electron
             ionization_energies = elem.ionization.energies[::-1]
             bind_energies_K_shell = jnp.zeros(2)
 
-            # subtract IPD value and set all binding energies below zero to a small number
+            # Account for the Hydrogen case
             cutoff = 1 if elem.Z == 1 else 2
             ionization_energies = ionization_energies[:cutoff]
 
+            # calculate IPD corrected binding energies for the individual electrons 
             bind_energies_ipd = bind_energies_K_shell.at[:cutoff].set(
                 ionization_energies.m_as(ureg.electron_volt)
                 + ipd[idx].m_as(ureg.electron_volt)
             )
+            
+            # set all binding energies below zero to a small number
             bind_energies_ipd = jnp.where(
                 bind_energies_ipd < 0, 1e-6, bind_energies_ipd
             )
             
+            # calculate the form factor of the 1s orbital given the binding energies
             bind_energies_ipd *= ureg.electron_volt
             f_1s = form_factors.form_factor_lowering_10(setup.k, bind_energies_ipd, elem.Z - plasma_state.Z_free[idx])
 
 
-            # update the pauling f_1s result with the interpolation result
+            # update the pauling f_1s result
             ff = ff.at[idx, 0].set(f_1s)
 
         return ff
