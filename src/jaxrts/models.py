@@ -2312,7 +2312,10 @@ class FormFactorLowering(Model):
     """
     Form factor lowering model as introduced by :cite:`Doeppner.2023`.
     In high density plasma the form factor is reduced due to IPD.
-    This concept only applies for the K-shell.
+    This concept only applies for the K-shell. Here we calculate the f1s(k) 
+    form factor with the analytic Pauling formular but with an IPD corrected 
+    effective charge Z_eff. The spin up and spin down K-shell electrons
+    and their respective binding energies are taken into account for this calculation.
     """
 
     allowed_keys = ["form-factors"]
