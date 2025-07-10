@@ -90,7 +90,7 @@ def instrument_lorentzian(
     return 1.0 / (jnp.pi * gamma * (1 + (x / gamma) ** 2))
 
 
-def instrument_from_file(filename: Path) -> jnp.ndarray:
+def instrument_from_file(filename: Path) -> "Callable":
     """
     Loads instrument function data from a given file.
 
@@ -124,7 +124,7 @@ def instrument_from_file(filename: Path) -> jnp.ndarray:
     return inst_func_fxrts
 
 
-def instrument_from_array(x: jnp.ndarray, ints: jnp.ndarray) -> jnp.ndarray:
+def instrument_from_array(x: jnp.ndarray, ints: jnp.ndarray) -> "Callable":
     """
 
     Set instrument function from an array input.
