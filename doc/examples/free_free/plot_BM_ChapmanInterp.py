@@ -74,6 +74,7 @@ BM_free_free_scatter = state.evaluate("free-free scattering", setup).m_as(
 jax.block_until_ready(BM_free_free_scatter)
 print(f"Full BMA: {time.time()-t0}s")
 state["free-free scattering"] = jaxrts.models.BornMermin()
+state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
 
 
 for ls, KKT in zip(["solid", "dotted"], [False, True]):

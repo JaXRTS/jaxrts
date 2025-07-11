@@ -1475,8 +1475,9 @@ def collision_frequency_BA_Chapman_interp(
     n_e: Quantity,
     chem_pot: Quantity,
     Zf: float,
+    E_cutoff_min: Quantity,
+    E_cutoff_max: Quantity,
     no_of_points: int = 20,
-    E_cutoff: None | Quantity = None,
     KKT: bool = False,
 ):
     """
@@ -1488,16 +1489,9 @@ def collision_frequency_BA_Chapman_interp(
 
     """
 
-    E_pe = plasma_frequency(n_e) * (1 * ureg.hbar)
-
-    if E_cutoff is None:
-        E_cutoff = 1.1 * jnpu.max(E)
-
-    min_E = jnpu.min(jnpu.absolute(E))
-
     interp_E = jnpu.linspace(
-        1e-6 * E_pe if KKT else 1e-6 * E_pe + min_E,
-        E_cutoff,
+        E_cutoff_min,
+        E_cutoff_max,
         no_of_points,
     )
     interp_w = interp_E / (1 * ureg.hbar)
@@ -1605,8 +1599,9 @@ def collision_frequency_BA_Chapman_interpFit(
     V_eiS: callable,
     n_e: Quantity,
     Zf: float,
+    E_cutoff_min: Quantity,
+    E_cutoff_max: Quantity,
     no_of_points: int = 20,
-    E_cutoff: None | Quantity = None,
     KKT: bool = False,
 ):
     """
@@ -1619,16 +1614,9 @@ def collision_frequency_BA_Chapman_interpFit(
     Uses the :cite:`Dandrea.1986` interpolation for the RPA.
     """
 
-    E_pe = plasma_frequency(n_e) * (1 * ureg.hbar)
-
-    if E_cutoff is None:
-        E_cutoff = 1.1 * jnpu.max(E)
-
-    min_E = jnpu.min(jnpu.absolute(E))
-
     interp_E = jnpu.linspace(
-        1e-6 * E_pe if KKT else 1e-6 * E_pe + min_E,
-        E_cutoff,
+        E_cutoff_min,
+        E_cutoff_max,
         no_of_points,
     )
     interp_w = interp_E / (1 * ureg.hbar)
@@ -1828,6 +1816,8 @@ def dielectric_function_BMA_chapman_interpFit(
     S_ii: callable,
     V_eiS: callable,
     Zf: float,
+    E_cutoff_min: Quantity,
+    E_cutoff_max: Quantity,
     no_of_points: int = 20,
     rpa_rewrite: bool = True,
     KKT: bool = False,
@@ -1839,29 +1829,17 @@ def dielectric_function_BMA_chapman_interpFit(
     """
     w = E / (1 * ureg.hbar)
 
-    # Calculate the cut-off energy from the RPA
-
-    E_RPA = jnpu.linspace(0 * ureg.electron_volt, 10 * jnpu.max(E), 100)
-    See_RPA = S0_ee_RPA_Dandrea(jnpu.mean(k), T, n_e, E_RPA)
-
-    E_cutoff = (
-        jnpu.min(
-            jnpu.where(
-                See_RPA > jnpu.max(See_RPA * 1e-4), E_RPA, jnpu.max(E_RPA)
-            )
-        )
-        * 1.5
-    )
-    E_cutoff = jnpu.absolute(E_cutoff)
-
-    # When not using the Kramers Kronig Transform, we can get away with a
-    # shorter range, as we don't need the real part to drop off to 0.
-    if not KKT:
-        max_probed_E = jnpu.max(jnpu.absolute(E))
-        E_cutoff = jnpu.min(to_array((E_cutoff, max_probed_E)))
-
     coll_freq = collision_frequency_BA_Chapman_interpFit(
-        E, T, S_ii, V_eiS, n_e, Zf, no_of_points, E_cutoff, KKT
+        E,
+        T,
+        S_ii,
+        V_eiS,
+        n_e,
+        Zf,
+        E_cutoff_min,
+        E_cutoff_max,
+        no_of_points,
+        KKT,
     )
 
     p0 = (
@@ -1900,6 +1878,8 @@ def dielectric_function_BMA_Fortmann(
     S_ii: callable,
     V_eiS: callable,
     Zf: float,
+    E_cutoff_min: Quantity,
+    E_cutoff_max: Quantity,
     lfc: float = 0,
     no_of_points: int = 20,
     rpa_rewrite: bool = True,
@@ -1915,6 +1895,8 @@ def dielectric_function_BMA_Fortmann(
         S_ii,
         V_eiS,
         Zf,
+        E_cutoff_min,
+        E_cutoff_max,
         lfc,
         no_of_points,
         rpa_rewrite,
@@ -1933,6 +1915,8 @@ def susceptibility_BMA_Fortmann(
     S_ii: callable,
     V_eiS: callable,
     Zf: float,
+    E_cutoff_min: Quantity,
+    E_cutoff_max: Quantity,
     lfc: float = 0,
     no_of_points: int = 20,
     rpa_rewrite: bool = True,
@@ -1951,28 +1935,17 @@ def susceptibility_BMA_Fortmann(
     """
     w = E / (1 * ureg.hbar)
 
-    # Calculate the cut-off energy from the RPA
-
-    E_RPA = jnpu.linspace(0 * ureg.electron_volt, 10 * jnpu.max(E), 100)
-    See_RPA = S0_ee_RPA_Dandrea(jnpu.mean(k), T, n_e, E_RPA)
-    E_cutoff = (
-        jnpu.min(
-            jnpu.where(
-                See_RPA > jnpu.max(See_RPA * 1e-4), E_RPA, jnpu.max(E_RPA)
-            )
-        )
-        * 1.5
-    )
-    E_cutoff = jnpu.absolute(E_cutoff)
-
-    # When not using the Kramers Kronig Transform, we can get away with a
-    # shorter range, as we don't need the real part to drop off to 0.
-    if not KKT:
-        max_probed_E = jnpu.max(jnpu.absolute(E))
-        E_cutoff = jnpu.min(to_array((E_cutoff, max_probed_E)))
-
     coll_freq = collision_frequency_BA_Chapman_interpFit(
-        E, T, S_ii, V_eiS, n_e, Zf, no_of_points, E_cutoff, KKT
+        E,
+        T,
+        S_ii,
+        V_eiS,
+        n_e,
+        Zf,
+        E_cutoff_min,
+        E_cutoff_max,
+        no_of_points,
+        KKT,
     )
 
     V_ee = coulomb_potential_fourier(-1, -1, k)
@@ -2013,6 +1986,8 @@ def dielectric_function_BMA_chapman_interp(
     S_ii: callable,
     V_eiS: callable,
     Zf: float,
+    E_cutoff_min: Quantity,
+    E_cutoff_max: Quantity,
     no_of_points: int = 20,
     rpa_rewrite: bool = True,
     KKT: bool = False,
@@ -2023,27 +1998,6 @@ def dielectric_function_BMA_chapman_interp(
     """
     w = E / (1 * ureg.hbar)
 
-    # Calculate the cut-off energy from the RPA
-    E_RPA = jnpu.linspace(0 * ureg.electron_volt, 10 * jnpu.max(E), 100)
-    See_RPA = S0_ee_RPA_no_damping(
-        jnpu.mean(k), T, n_e, E_RPA, chem_pot, unsave=True
-    )
-    E_cutoff = (
-        jnpu.min(
-            jnpu.where(
-                See_RPA > jnpu.max(See_RPA * 1e-4), E_RPA, jnpu.max(E_RPA)
-            )
-        )
-        * 1.5
-    )
-    E_cutoff = jnpu.absolute(E_cutoff)
-
-    # When not using the Kramers Kronig Transform, we can get away with a
-    # shorter range, as we don't need the real part to drop off to 0.
-    if not KKT:
-        max_probed_E = jnpu.max(jnpu.absolute(E))
-        E_cutoff = jnpu.min(to_array((E_cutoff, max_probed_E)))
-
     coll_freq = collision_frequency_BA_Chapman_interp(
         E,
         T,
@@ -2052,8 +2006,9 @@ def dielectric_function_BMA_chapman_interp(
         n_e,
         chem_pot,
         Zf,
+        E_cutoff_min,
+        E_cutoff_max,
         no_of_points,
-        E_cutoff,
         KKT,
     )
 
@@ -2093,6 +2048,8 @@ def S0_ee_BMA_chapman_interp(
     V_eiS: callable,
     n_e: Quantity,
     Zf: float,
+    E_cutoff_min: Quantity,
+    E_cutoff_max: Quantity,
     E: Quantity | List,
     lfc: Quantity = 0.0,
     no_of_points: int = 20,
@@ -2103,7 +2060,19 @@ def S0_ee_BMA_chapman_interp(
     E = -E
 
     eps = dielectric_function_BMA_chapman_interp(
-        k, E, chem_pot, T, n_e, S_ii, V_eiS, Zf, no_of_points, rpa_rewrite, KKT
+        k,
+        E,
+        chem_pot,
+        T,
+        n_e,
+        S_ii,
+        V_eiS,
+        Zf,
+        E_cutoff_min,
+        E_cutoff_max,
+        no_of_points,
+        rpa_rewrite,
+        KKT,
     )
 
     xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
@@ -2122,6 +2091,8 @@ def S0_ee_BMA_chapman_interpFit(
     V_eiS: callable,
     n_e: Quantity,
     Zf: float,
+    E_cutoff_min: Quantity,
+    E_cutoff_max: Quantity,
     E: Quantity | List,
     lfc: Quantity = 0.0,
     no_of_points: int = 20,
@@ -2140,6 +2111,8 @@ def S0_ee_BMA_chapman_interpFit(
         S_ii,
         V_eiS,
         Zf,
+        E_cutoff_min,
+        E_cutoff_max,
         no_of_points,
         rpa_rewrite,
         KKT,
@@ -2161,6 +2134,8 @@ def S0_ee_BMA_Fortmann(
     V_eiS: callable,
     n_e: Quantity,
     Zf: float,
+    E_cutoff_min: Quantity,
+    E_cutoff_max: Quantity,
     E: Quantity | List,
     lfc: Quantity = 0.0,
     no_of_points: int = 20,
@@ -2179,9 +2154,39 @@ def S0_ee_BMA_Fortmann(
         S_ii,
         V_eiS,
         Zf,
+        E_cutoff_min,
+        E_cutoff_max,
         lfc,
         no_of_points,
         rpa_rewrite,
         KKT,
     )
     return S0ee_from_susceptibility_FDT(k, T, n_e, E, xi)
+
+
+def guess_E_cutoff_max(k, T, ne, E_max, KKT):
+    # Calculate the cut-off energy from the RPA
+    E_RPA = jnpu.linspace(0 * ureg.electron_volt, 10 * E_max, 500)
+    See_RPA = S0_ee_RPA_Dandrea(jnpu.mean(k), T, ne, E_RPA)
+
+    E_cutoff_max = (
+        jnpu.min(
+            jnpu.where(
+                See_RPA > jnpu.max(See_RPA * 1e-4), E_RPA, jnpu.max(E_RPA)
+            )
+        )
+        * 1.5
+    )
+    E_cutoff_max = jnpu.absolute(E_cutoff_max)
+
+    # When not using the Kramers Kronig Transform, we can get away with a
+    # shorter range, as we don't need the real part to drop off to 0.
+    if not KKT:
+        E_cutoff_max = jnpu.min(to_array((E_cutoff_max, E_max)))
+    return E_cutoff_max
+
+
+def guess_E_cutoff_min(ne, KKT):
+    E_pe = plasma_frequency(ne) * (1 * ureg.hbar)
+    E_cutoff_min = 1e-6 * E_pe if KKT else E_pe / 2
+    return E_cutoff_min
