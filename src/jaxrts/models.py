@@ -1276,7 +1276,7 @@ class BornMerminFull(FreeFreeModel):
     :cite:`Schorner.2023`.
 
     Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
-    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
     We found for edge cases to avoid numerical spikes.
@@ -1460,7 +1460,7 @@ class BornMermin(FreeFreeModel):
     :cite:`Schorner.2023`.
 
     Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
-    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
     We found for edge cases to avoid numerical spikes.
@@ -1729,7 +1729,7 @@ class BornMermin_Fit(FreeFreeModel):
     :cite:`Schorner.2023`.
 
     Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
-    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
     We found for edge cases to avoid numerical spikes.
@@ -1997,7 +1997,7 @@ class BornMermin_Fortmann(FreeFreeModel):
     :cite:`Schorner.2023`.
 
     Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
-    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
     We found for edge cases to avoid numerical spikes.

@@ -1234,7 +1234,7 @@ def S0_ee_RPA(
         The chemical potential in units of energy.
     rpa_rewrite: bool, default ``True``
         Use the rewrite of the RPA dielectric function from
-        :cite:`Chapman.2015`, rather than :cite:`Schoerner.2023`.
+        :cite:`Chapman.2015`, rather than :cite:`Schorner.2023`.
 
     Returns
     -------
