@@ -304,7 +304,7 @@ def eelfc_dornheim2021(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
         ureg.dimensionless
     )
     k_over_k_f = (k / fermi_wavenumber(n_e)).m_as(ureg.dimensionless)
-    rs = (wiegner_seitz_radius / (1 * ureg.a0)).m_as(ureg.dimensionless)
+    rs = (wiegner_seitz_radius(n_e) / (1 * ureg.a0)).m_as(ureg.dimensionless)
 
     return dornheim_G(k_over_k_f, rs, Theta)
 
