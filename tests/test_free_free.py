@@ -94,6 +94,8 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
                 V_eiS=V_eiS,
                 n_e=n_e,
                 Zf=1.0,
+                E_cutoff_min=jnpu.min(jnpu.absolute(energy_shift)),
+                E_cutoff_max=jnpu.max(jnpu.absolute(energy_shift)),
                 E=energy_shift,
                 no_of_points=20,
             )
@@ -109,8 +111,10 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
                 n_e=n_e,
                 Zf=1.0,
                 E=energy_shift,
+                E_cutoff_min=1 / 2 * jnpu.min(jnpu.absolute(energy_shift)),
+                E_cutoff_max=10 * jnpu.max(jnpu.absolute(energy_shift)),
                 no_of_points=100,
-                KKT=True
+                KKT=True,
             )
             / ureg.hbar
         ).m_as(1 / ureg.rydberg)
@@ -132,7 +136,6 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         error_Chapman_KKT = onp.abs(calc_See - calc_See_Chapman_KKT)
         assert onp.max(error_Chapman_KKT) < 0.05
         count += 1
-
 
 
 def test_glenzer2009_fig9a_reprduction() -> None:
@@ -325,6 +328,7 @@ def calculate_fwhm(data, x):
 @pytest.mark.skip(reason="Cannot Reproduce")
 def test_BornCollisionFrequency_reproduces_literature_Fortmann2010() -> None:
     import matplotlib.pyplot as plt
+
     data_dir = pathlib.Path(__file__).parent / "data/Fortmann2010/Fig1"
 
     Zf = 1.0
@@ -370,9 +374,18 @@ def test_BornCollisionFrequency_reproduces_literature_Fortmann2010() -> None:
             jnp.imag(dimless_nu),
         )
         plt.plot(E_over_Ef_imag, nu_imag)
-        plt.plot((E/E_f).m_as(ureg.dimensionless), jnp.imag(dimless_nu), color="black")
+        plt.plot(
+            (E / E_f).m_as(ureg.dimensionless),
+            jnp.imag(dimless_nu),
+            color="black",
+        )
         plt.plot(E_over_Ef_real, nu_real, ls="dashed")
-        plt.plot((E/E_f).m_as(ureg.dimensionless), jnp.real(dimless_nu), ls="dashed", color = "black")
+        plt.plot(
+            (E / E_f).m_as(ureg.dimensionless),
+            jnp.real(dimless_nu),
+            ls="dashed",
+            color="black",
+        )
         plt.xscale("log")
         plt.xlim(0.1, 100)
         plt.show()
@@ -424,6 +437,8 @@ def test_Fortmann_with_LFC_reproduces_literature() -> None:
         V_eiS,
         n_e,
         Zf,
+        jnpu.min(jnpu.absolute(E)),
+        jnpu.max(jnpu.absolute(E)),
         E[jnp.newaxis, :],
         0.0,
         no_of_points=150,
@@ -436,6 +451,8 @@ def test_Fortmann_with_LFC_reproduces_literature() -> None:
         V_eiS,
         n_e,
         Zf,
+        jnpu.min(jnpu.absolute(E)),
+        jnpu.max(jnpu.absolute(E)),
         E[jnp.newaxis, :],
         sLFC,
         no_of_points=150,
@@ -498,10 +515,29 @@ def test_Fortman_reproduces_vanilla_BMA_without_LFC():
         )
 
     classical_BMA = jaxrts.free_free.dielectric_function_BMA_chapman_interpFit(
-        k, E, mu, T, n_e, S_ii, V_eiS, Zf
+        k,
+        E,
+        mu,
+        T,
+        n_e,
+        S_ii,
+        V_eiS,
+        Zf,
+        jnpu.min(jnpu.absolute(E)),
+        jnpu.max(jnpu.absolute(E)),
     )
     fortmann_BMA = jaxrts.free_free.dielectric_function_BMA_Fortmann(
-        k, E, mu, T, n_e, S_ii, V_eiS, Zf, lfc
+        k,
+        E,
+        mu,
+        T,
+        n_e,
+        S_ii,
+        V_eiS,
+        Zf,
+        jnpu.min(jnpu.absolute(E)),
+        jnpu.max(jnpu.absolute(E)),
+        lfc,
     )
     assert jnp.isclose(jnp.real(classical_BMA), jnp.real(fortmann_BMA)).all()
     assert jnp.isclose(jnp.imag(classical_BMA), jnp.imag(fortmann_BMA)).all()
