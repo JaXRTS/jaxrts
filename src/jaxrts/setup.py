@@ -44,7 +44,7 @@ class Setup:
         #: default) to ``False`` to #: check, e.g. temperature differences when
         #: applying ITCF analysis methods.
         self.correct_k_dispersion: bool = correct_k_dispersion
-        #: Exponent of the frequency redistribiton correction in the
+        #: Exponent of the frequency redistribution correction in the
         #: differential crossection.
         #:
         #: .. math::
@@ -106,7 +106,7 @@ class Setup:
     @jax.jit
     def frequency_redistribution_correction(self) -> jnp.ndarray:
         """
-        Returns the frequency redistribition correction
+        Returns the frequency redistribution correction.
 
         .. math::
             \\left(\\frac{\\omega_\\text{out}}{\\omega_\\text{in}}\\right)^\\nu
@@ -190,7 +190,7 @@ def convolve_stucture_factor_with_instrument(
     Sfac: Quantity, setup: Setup
 ) -> Quantity:
     """
-    Colvolve a dynamic structure factor with the instrument function, given by
+    Convolve a dynamic structure factor with the instrument function, given by
     the ``setup``.
 
     .. note::
