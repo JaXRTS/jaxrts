@@ -22,6 +22,7 @@ class Setup:
         measured_energy: Quantity,
         instrument: Callable,
         correct_k_dispersion: bool = True,
+        frc_exponent: float = 0.0,
     ):
 
         #: The scattering angle of the experiment
@@ -43,6 +44,33 @@ class Setup:
         #: default) to ``False`` to #: check, e.g. temperature differences when
         #: applying ITCF analysis methods.
         self.correct_k_dispersion: bool = correct_k_dispersion
+        #: Exponent of the frequency redistribiton correction in the
+        #: differential crossection.
+        #:
+        #: .. math::
+        #: 
+        #:    \left(\frac{\omega_\text{out}}{\omega_\text{in}}\right)^\nu
+        #:    S(\omega, k)
+        #:
+        #: See :cite:`Crowley.2013`.
+        #:
+        #: Defaults to 0.
+        #: 
+        #: * If 0, the methods :py:meth:`~.PlasmaState.probe` and
+        #:   :py:meth:`~.PlasmaState.evaluate` will return dynamic structure
+        #:   factors (this is the default behavior of jaxrts).
+        #: * However, when comparing to experimental data in which the signal
+        #:   is proportional to the number of photons on the detector, the apt
+        #:   comparison is to the differential crosssection, which is
+        #:   proportional to
+        #:   :math:`\frac{\omega_\text{out}}{\omega_\text{in}} S(\omega, k)`
+        #:   i.e., :math:`\nu = 1`.
+        #: * If the detector-signal is proportional to the deposited energy
+        #:   instead (as is should be the case for CCD detectors if no further
+        #:   processing occurs), an additional scaling with energy is
+        #:   introduced and ``frc_exponent`` should be set to 2.
+        #: 
+        self.frc_exponent: float = frc_exponent
 
     @property
     def k(self) -> Quantity:
@@ -73,6 +101,30 @@ class Setup:
         else:
             k = self.k * jnpu.ones_like(self.measured_energy)
         return k
+
+    @property
+    @jax.jit
+    def frequency_redistribution_correction(self) -> jnp.ndarray:
+        """
+        Returns the frequency redistribition correction
+
+        .. math::
+            \\left(\\frac{\\omega_\\text{out}}{\\omega_\\text{in}}\\right)^\\nu
+
+        where :math:`\\nu` is :py:attr:`~.frc_exponent`.
+        Will return an array of ones if :py:attr:`~.frc_exponent` ``==0``,
+        i.e., this setup will produce dynamic structure factors.
+        Otherwise, this correction yields the correction to have outputs
+        proportional to the adequate differential cross-sections for
+        single-photon counting measurements
+        (:py:attr:`~.frc_exponent` ``==1``),
+        or measurements proportional to the energy deposited
+        (:py:attr:`~.frc_exponent` ``==2``).
+        See :cite:`Crowley.2013`, for details.
+        """
+        return (self.measured_energy / self.energy).m_as(
+            ureg.dimensionless
+        ) ** (self.frc_exponent)
 
     @jax.jit
     def dispersion_corrected_k(self, n_e: Quantity) -> Quantity:
@@ -114,6 +166,7 @@ class Setup:
             self.energy,
             self.measured_energy,
             self.instrument,
+            self.frc_exponent,
         )
         aux_data = (self.correct_k_dispersion,)  # static values
         return (children, aux_data)
@@ -126,6 +179,7 @@ class Setup:
             obj.energy,
             obj.measured_energy,
             obj.instrument,
+            obj.frc_exponent,
         ) = children
         (obj.correct_k_dispersion,) = aux_data
         return obj
@@ -201,6 +255,7 @@ def get_probe_setup(k: Quantity, setup: Setup) -> Setup:
         setup.measured_energy,
         setup.instrument,
         setup.correct_k_dispersion,
+        setup.frc_exponent,
     )
 
 
