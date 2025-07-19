@@ -372,8 +372,8 @@ class ArkhipovIonFeat(IonFeatModel):
             )
         if len(plasma_state) > 1:
             logger.critical(
-                "'ArkhipovIonFeat' is only implemented for a one-component plasma"
-            )  # noqa: E501
+                "'ArkhipovIonFeat' is only implemented for a one-component plasma"  # noqa: E501
+            )
 
     @jax.jit
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
@@ -410,8 +410,8 @@ class Gregori2003IonFeat(IonFeatModel):
             )
         if len(plasma_state) > 1:
             logger.critical(
-                "'Gregori2003IonFeat' is only implemented for a one-component plasma"
-            )  # noqa: E501
+                "'Gregori2003IonFeat' is only implemented for a one-component plasma"  # noqa: E501
+            )
 
     @jax.jit
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
@@ -460,8 +460,8 @@ class Gregori2006IonFeat(IonFeatModel):
     def check(self, plasma_state: "PlasmaState") -> None:
         if len(plasma_state) > 1:
             logger.critical(
-                "'Gregori2006IonFeat' is only implemented for a one-component plasma"
-            )  # noqa: E501
+                "'Gregori2006IonFeat' is only implemented for a one-component plasma"  # noqa: E501
+            )
 
     @jax.jit
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
@@ -589,8 +589,8 @@ class OnePotentialHNCIonFeat(IonFeatModel):
             V_s_r, V_l_k, self.r, T, n
         )
         logger.debug(
-            f"{niter} Iterations of the HNC algorithm were required to reach the solution"
-        )  # noqa: 501
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+        )
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
         S_ab_HNC = hypernetted_chain.S_ii_HNC(self.k, g, n, self.r)
@@ -777,8 +777,8 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
             V_s_r, V_l_k, self.r, T, n
         )
         logger.debug(
-            f"{niter} Iterations of the HNC algorithm were required to reach the solution"
-        )  # noqa: 501
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+        )
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
         S_ab_HNC = hypernetted_chain.S_ii_HNC(self.k, g, n, self.r)
@@ -2312,10 +2312,11 @@ class FormFactorLowering(Model):
     """
     Form factor lowering model as introduced by :cite:`Doeppner.2023`.
     In high density plasma the form factor is reduced due to IPD.
-    This concept only applies for the K-shell. Here we calculate the f1s(k) 
-    form factor with the analytic Pauling formular but with an IPD corrected 
-    effective charge Z_eff. The spin up and spin down K-shell electrons
-    and their respective binding energies are taken into account for this calculation.
+    This concept only applies for the K-shell. Here we calculate the f1s(k)
+    form factor with the analytic Pauling formular but with an IPD corrected
+    effective charge Z_eff. The spin up and spin down K-shell electrons and
+    their respective binding energies are taken into account for this
+    calculation.
     """
 
     allowed_keys = ["form-factors"]
@@ -2334,9 +2335,11 @@ class FormFactorLowering(Model):
         ff = form_factors.pauling_all_ff(setup.k, Zstar)
         ipd = plasma_state.evaluate(key="ipd", setup=setup)
 
-        # Loop throught the Ions of the Plasma state and calculate the corrected 1s form factor
+        # Loop throught the Ions of the Plasma state and calculate the
+        # corrected 1s form factor
         for elem, idx in zip(plasma_state.ions, range(len(plasma_state.ions))):
-            # flip ionization energies, to start with the binding energie of the 1st K-shell electron
+            # flip ionization energies, to start with the binding energy of the
+            # 1st K-shell electron
             ionization_energies = elem.ionization.energies[::-1]
             bind_energies_K_shell = jnp.zeros(2)
 
@@ -2344,21 +2347,24 @@ class FormFactorLowering(Model):
             cutoff = 1 if elem.Z == 1 else 2
             ionization_energies = ionization_energies[:cutoff]
 
-            # calculate IPD corrected binding energies for the individual electrons 
+            # calculate IPD corrected binding energies for the individual
+            # electrons
             bind_energies_ipd = bind_energies_K_shell.at[:cutoff].set(
                 ionization_energies.m_as(ureg.electron_volt)
                 + ipd[idx].m_as(ureg.electron_volt)
             )
-            
+
             # set all binding energies below zero to a small number
             bind_energies_ipd = jnp.where(
                 bind_energies_ipd < 0, 1e-6, bind_energies_ipd
             )
-            
-            # calculate the form factor of the 1s orbital given the binding energies
-            bind_energies_ipd *= ureg.electron_volt
-            f_1s = form_factors.form_factor_lowering_10(setup.k, bind_energies_ipd, elem.Z - plasma_state.Z_free[idx])
 
+            # calculate the form factor of the 1s orbital given the binding
+            # energies
+            bind_energies_ipd *= ureg.electron_volt
+            f_1s = form_factors.form_factor_lowering_10(
+                setup.k, bind_energies_ipd, elem.Z - plasma_state.Z_free[idx]
+            )
 
             # update the pauling f_1s result
             ff = ff.at[idx, 0].set(f_1s)
@@ -3339,8 +3345,8 @@ class AverageAtom_Sii(Model):
             V_s_r, V_l_k, self.r, T, n
         )
         logger.debug(
-            f"{niter} Iterations of the HNC algorithm were required to reach the solution"
-        )  # noqa: 501
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+        )
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
         S_ab_HNC = hypernetted_chain.S_ii_HNC(self.k, g, n, self.r)
