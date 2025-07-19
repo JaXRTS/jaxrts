@@ -84,11 +84,33 @@ sLFC = jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori_farid(
     k[:, jnp.newaxis], T, n_e
 )
 
+Emin = jnpu.min(jnpu.absolute(E))
+Emax = jnpu.max(jnpu.absolute(E))
 S_ee_noLFC = jaxrts.free_free.S0_ee_BMA_Fortmann(
-    k[:, jnp.newaxis], T, mu, S_ii, V_eiS, n_e, Zf, E[jnp.newaxis, :], 0.0
+    k[:, jnp.newaxis],
+    T,
+    mu,
+    S_ii,
+    V_eiS,
+    n_e,
+    Zf,
+    Emin,
+    Emax,
+    E[jnp.newaxis, :],
+    0.0,
 )
 S_ee_sLFC = jaxrts.free_free.S0_ee_BMA_Fortmann(
-    k[:, jnp.newaxis], T, mu, S_ii, V_eiS, n_e, Zf, E[jnp.newaxis, :], sLFC
+    k[:, jnp.newaxis],
+    T,
+    mu,
+    S_ii,
+    V_eiS,
+    n_e,
+    Zf,
+    Emin,
+    Emax,
+    E[jnp.newaxis, :],
+    sLFC,
 )
 
 plt.style.use("science")

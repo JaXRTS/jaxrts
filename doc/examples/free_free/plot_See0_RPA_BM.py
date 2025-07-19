@@ -22,6 +22,7 @@ import time
 
 import jax
 import jax.numpy as jnp
+import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
 
 import jaxrts
@@ -112,6 +113,8 @@ for T in [
             S_ii=S_ii,
             V_eiS=V_eiS,
             Zf=1.0,
+            E_cutoff_min = jnpu.min(jnpu.absolute(E)),
+            E_cutoff_max = jnpu.max(jnpu.absolute(E)),
             no_of_points=10,
         )
         / ureg.hbar

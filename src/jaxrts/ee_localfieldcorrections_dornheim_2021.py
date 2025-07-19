@@ -2691,84 +2691,83 @@ def f_extended(t, a, b, c):
 
 
 # Analytical representation of the static LFC within ESA
-# coeff are fitted coefficients, see ABCD above
-def G_analytical(k_over_k_f, rs, theta, coeff):
+def G_analytical(k_over_k_f, rs, theta):
     # Determination of first rs-parameter alpha
     # y = [x,rs,theta]
     # x = q/q_F
 
     y = jnp.array([k_over_k_f, rs, theta])
 
-    a = coeff[0]
-    b = coeff[1]
-    c = coeff[2]
+    a = ABCD[0]
+    b = ABCD[1]
+    c = ABCD[2]
     my_alpha_a = f_extended(theta, a, b, c)
 
-    a = coeff[3]
-    b = coeff[4]
-    c = coeff[5]
+    a = ABCD[3]
+    b = ABCD[4]
+    c = ABCD[5]
     my_alpha_b = f_extended(theta, a, b, c)
 
-    a = coeff[6]
-    b = coeff[7]
-    c = coeff[8]
+    a = ABCD[6]
+    b = ABCD[7]
+    c = ABCD[8]
     my_alpha_c = f_extended(theta, a, b, c)
 
     my_alpha = alpha_extended(rs, my_alpha_a, my_alpha_b, my_alpha_c)
 
     # Determination of second rs-parameter beta
 
-    a = coeff[9]
-    b = coeff[10]
-    c = coeff[11]
+    a = ABCD[9]
+    b = ABCD[10]
+    c = ABCD[11]
     my_beta_a = f_extended(theta, a, b, c)
 
-    a = coeff[12]
-    b = coeff[13]
-    c = coeff[14]
+    a = ABCD[12]
+    b = ABCD[13]
+    c = ABCD[14]
     my_beta_b = f_extended(theta, a, b, c)
 
-    a = coeff[15]
-    b = coeff[16]
-    c = coeff[17]
+    a = ABCD[15]
+    b = ABCD[16]
+    c = ABCD[17]
     my_beta_c = f_extended(theta, a, b, c)
 
     my_beta = beta_extended(rs, my_beta_a, my_beta_b, my_beta_c)
 
     # Determination of third rs-parameter gamma
 
-    a = coeff[18]
-    b = coeff[19]
-    c = coeff[20]
+    a = ABCD[18]
+    b = ABCD[19]
+    c = ABCD[20]
     my_gamma_a = f_extended(theta, a, b, c)
 
-    a = coeff[21]
-    b = coeff[22]
-    c = coeff[23]
+    a = ABCD[21]
+    b = ABCD[22]
+    c = ABCD[23]
     my_gamma_b = f_extended(theta, a, b, c)
 
-    a = coeff[24]
-    b = coeff[25]
-    c = coeff[26]
+    a = ABCD[24]
+    b = ABCD[25]
+    c = ABCD[26]
     my_gamma_c = f_extended(theta, a, b, c)
 
     my_gamma = gamma_extended(rs, my_gamma_a, my_gamma_b, my_gamma_c)
 
     # Determination of fourth rs-parameter delta
 
-    a = coeff[27]
-    b = coeff[28]
-    c = coeff[29]
+    a = ABCD[27]
+    b = ABCD[28]
+    c = ABCD[29]
     my_delta_a = f_extended(theta, a, b, c)
 
-    a = coeff[30]
-    b = coeff[31]
-    c = coeff[32]
+    a = ABCD[30]
+    b = ABCD[31]
+    c = ABCD[32]
     my_delta_b = f_extended(theta, a, b, c)
 
-    a = coeff[33]
-    b = coeff[34]
-    c = coeff[35]
+    a = ABCD[33]
+    b = ABCD[34]
+    c = ABCD[35]
     my_delta_c = f_extended(theta, a, b, c)
 
     my_delta = delta_extended(rs, my_delta_a, my_delta_b, my_delta_c)

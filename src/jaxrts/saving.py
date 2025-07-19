@@ -21,7 +21,6 @@ import jax.numpy as jnp
 import jaxrts
 import jpu.numpy as jnpu
 import numpy as onp
-from jaxlib.xla_extension import ArrayImpl
 
 from .elements import Element
 from .helpers import partialclass
@@ -114,7 +113,7 @@ class JaXRTSEncoder(json.JSONEncoder):
             }
         elif isinstance(obj, Quantity):
             return {"_type": "Quantity", "value": obj.to_tuple()}
-        elif isinstance(obj, ArrayImpl):
+        elif isinstance(obj, jax.Array):
             try:
                 return {"_type": "Array", "value": list(onp.array(obj))}
             except TypeError:

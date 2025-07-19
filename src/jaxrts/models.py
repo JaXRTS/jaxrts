@@ -1278,7 +1278,7 @@ class BornMerminFull(FreeFreeModel):
     :cite:`Schorner.2023`.
 
     Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
-    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
     We found for edge cases to avoid numerical spikes.
@@ -1447,13 +1447,22 @@ class BornMermin(FreeFreeModel):
     >>> state["free-free scattering"] = jaxrts.models.BornMermin()
     >>> state["free-free scattering"].no_of_freq = 10
 
+    The boundaries for this interpolation can be set as arguments
+    ``E_cutoff_min`` and ``E_cutoff_max``. It should be set to sane defaults
+    for most use cases; however, it is recommended to revisit this setting
+    carefully. As a minimal good practice, the defaults should be adjusted to
+    the setup used. This can be done with the
+    :py:meth:`~./set_guessed_E_cutoffs` method:
+
+    >>> state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
+
     Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
     ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
     is used, otherwise, use the formulas that are found, e.g., in
     :cite:`Schorner.2023`.
 
     Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
-    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
     We found for edge cases to avoid numerical spikes.
@@ -1477,6 +1486,8 @@ class BornMermin(FreeFreeModel):
         no_of_freq: int | None = None,
         RPA_rewrite: bool = True,
         KKT: bool = False,
+        E_cutoff_min: Quantity = -1.0 * ureg.electron_volt,
+        E_cutoff_max: Quantity = -1.0 * ureg.electron_volt,
     ) -> None:
         super().__init__()
         if no_of_freq is not None:
@@ -1485,6 +1496,48 @@ class BornMermin(FreeFreeModel):
             self.no_of_freq: int = 100 if KKT else 20
         self.RPA_rewrite: bool = RPA_rewrite
         self.KKT: bool = KKT
+        self.E_cutoff_min: Quantity = E_cutoff_min
+        self.E_cutoff_max: Quantity = E_cutoff_max
+
+    def guess_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        if setup is not None:
+            E_max = jnpu.max(
+                jnpu.absolute(setup.measured_energy - setup.energy)
+            )
+            k = setup.k
+        else:
+            lam = ureg.planck_constant * ureg.c / E_max
+            k = 4 * jnp.pi / lam
+        E_cutoff_min = free_free.guess_E_cutoff_min(plasma_state.n_e, self.KKT)
+        E_cutoff_max = free_free.guess_E_cutoff_max(
+            k, plasma_state.T_e, plasma_state.n_e, E_max, self.KKT
+        )
+        return E_cutoff_min, E_cutoff_max
+
+    def set_guessed_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(
+            plasma_state, setup, E_max
+        )
+        self.E_cutoff_min = E_cutoff_min
+        self.E_cutoff_max = E_cutoff_max
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1495,6 +1548,17 @@ class BornMermin(FreeFreeModel):
             plasma_state.update_default_model("BM S_ii", Sum_Sii())
         else:
             plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(plasma_state)
+        self.E_cutoff_min = jnpu.where(
+            self.E_cutoff_min > 0 * ureg.electron_volt,
+            self.E_cutoff_min,
+            E_cutoff_min,
+        )
+        self.E_cutoff_max = jnpu.where(
+            self.E_cutoff_max > 0 * ureg.electron_volt,
+            self.E_cutoff_max,
+            E_cutoff_max,
+        )
 
     @jax.jit
     def evaluate_raw(
@@ -1527,6 +1591,8 @@ class BornMermin(FreeFreeModel):
             V_eiS,
             plasma_state.n_e,
             mean_Z_free,
+            self.E_cutoff_min,
+            self.E_cutoff_max,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
@@ -1580,6 +1646,8 @@ class BornMermin(FreeFreeModel):
                 S_ii,
                 V_eiS,
                 mean_Z_free,
+                self.E_cutoff_min,
+                self.E_cutoff_max,
                 self.no_of_freq,
                 rpa_rewrite=self.RPA_rewrite,
                 KKT=self.KKT,
@@ -1601,7 +1669,10 @@ class BornMermin(FreeFreeModel):
         )
 
     def _tree_flatten(self):
-        children = ()
+        children = (
+            self.E_cutoff_min,
+            self.E_cutoff_max,
+        )
         aux_data = (
             self.model_key,
             self.sample_points,
@@ -1621,6 +1692,10 @@ class BornMermin(FreeFreeModel):
             obj.RPA_rewrite,
             obj.KKT,
         ) = aux_data
+        (
+            obj.E_cutoff_min,
+            obj.E_cutoff_max,
+        ) = children
 
         return obj
 
@@ -1641,13 +1716,22 @@ class BornMermin_Fit(FreeFreeModel):
     >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit()
     >>> state["free-free scattering"].no_of_freq = 10
 
+    The boundaries for this interpolation can be set as arguments
+    ``E_cutoff_min`` and ``E_cutoff_max``. It should be set to sane defaults
+    for most use cases; however, it is recommended to revisit this setting
+    carefully. As a minimal good practice, the defaults should be adjusted to
+    the setup used. This can be done with the
+    :py:meth:`~./set_guessed_E_cutoffs` method:
+
+    >>> state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
+
     Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
     ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
     is used, otherwise, use the formulas that are found, e.g., in
     :cite:`Schorner.2023`.
 
     Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
-    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
     We found for edge cases to avoid numerical spikes.
@@ -1671,6 +1755,8 @@ class BornMermin_Fit(FreeFreeModel):
         no_of_freq: int | None = None,
         RPA_rewrite: bool = True,
         KKT: bool = False,
+        E_cutoff_min: Quantity = -1.0 * ureg.electron_volt,
+        E_cutoff_max: Quantity = -1.0 * ureg.electron_volt,
     ) -> None:
         super().__init__()
         if no_of_freq is not None:
@@ -1679,6 +1765,48 @@ class BornMermin_Fit(FreeFreeModel):
             self.no_of_freq: int = 100 if KKT else 20
         self.RPA_rewrite: bool = RPA_rewrite
         self.KKT: bool = KKT
+        self.E_cutoff_min: Quantity = E_cutoff_min
+        self.E_cutoff_max: Quantity = E_cutoff_max
+
+    def guess_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        if setup is not None:
+            E_max = jnpu.max(
+                jnpu.absolute(setup.measured_energy - setup.energy)
+            )
+            k = setup.k
+        else:
+            lam = ureg.planck_constant * ureg.c / E_max
+            k = 4 * jnp.pi / lam
+        E_cutoff_min = free_free.guess_E_cutoff_min(plasma_state.n_e, self.KKT)
+        E_cutoff_max = free_free.guess_E_cutoff_max(
+            k, plasma_state.T_e, plasma_state.n_e, E_max, self.KKT
+        )
+        return E_cutoff_min, E_cutoff_max
+
+    def set_guessed_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(
+            plasma_state, setup, E_max
+        )
+        self.E_cutoff_min = E_cutoff_min
+        self.E_cutoff_max = E_cutoff_max
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1689,6 +1817,17 @@ class BornMermin_Fit(FreeFreeModel):
             plasma_state.update_default_model("BM S_ii", Sum_Sii())
         else:
             plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(plasma_state)
+        self.E_cutoff_min = jnpu.where(
+            self.E_cutoff_min > 0 * ureg.electron_volt,
+            self.E_cutoff_min,
+            E_cutoff_min,
+        )
+        self.E_cutoff_max = jnpu.where(
+            self.E_cutoff_max > 0 * ureg.electron_volt,
+            self.E_cutoff_max,
+            E_cutoff_max,
+        )
 
     @jax.jit
     def evaluate_raw(
@@ -1721,6 +1860,8 @@ class BornMermin_Fit(FreeFreeModel):
             V_eiS,
             plasma_state.n_e,
             mean_Z_free,
+            self.E_cutoff_min,
+            self.E_cutoff_max,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
@@ -1773,6 +1914,8 @@ class BornMermin_Fit(FreeFreeModel):
                 S_ii,
                 V_eiS,
                 mean_Z_free,
+                self.E_cutoff_min,
+                self.E_cutoff_max,
                 self.no_of_freq,
                 rpa_rewrite=self.RPA_rewrite,
                 KKT=self.KKT,
@@ -1794,7 +1937,10 @@ class BornMermin_Fit(FreeFreeModel):
         )
 
     def _tree_flatten(self):
-        children = ()
+        children = (
+            self.E_cutoff_min,
+            self.E_cutoff_max,
+        )
         aux_data = (
             self.model_key,
             self.sample_points,
@@ -1814,6 +1960,10 @@ class BornMermin_Fit(FreeFreeModel):
             obj.RPA_rewrite,
             obj.KKT,
         ) = aux_data
+        (
+            obj.E_cutoff_min,
+            obj.E_cutoff_max,
+        ) = children
 
         return obj
 
@@ -1834,13 +1984,22 @@ class BornMermin_Fortmann(FreeFreeModel):
     >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann()
     >>> state["free-free scattering"].no_of_freq = 10
 
+    The boundaries for this interpolation can be set as arguments
+    ``E_cutoff_min`` and ``E_cutoff_max``. It should be set to sane defaults
+    for most use cases; however, it is recommended to revisit this setting
+    carefully. As a minimal good practice, the defaults should be adjusted to
+    the setup used. This can be done with the
+    :py:meth:`~./set_guessed_E_cutoffs` method:
+
+    >>> state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
+
     Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
     ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
     is used, otherwise, use the formulas that are found, e.g., in
     :cite:`Schorner.2023`.
 
     Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
-    using :cite:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
     We found for edge cases to avoid numerical spikes.
@@ -1866,6 +2025,8 @@ class BornMermin_Fortmann(FreeFreeModel):
         no_of_freq: int | None = None,
         RPA_rewrite: bool = True,
         KKT: bool = False,
+        E_cutoff_min: Quantity = -1.0 * ureg.electron_volt,
+        E_cutoff_max: Quantity = -1.0 * ureg.electron_volt,
     ) -> None:
         super().__init__()
         if no_of_freq is not None:
@@ -1874,6 +2035,48 @@ class BornMermin_Fortmann(FreeFreeModel):
             self.no_of_freq: int = 100 if KKT else 20
         self.RPA_rewrite: bool = RPA_rewrite
         self.KKT: bool = KKT
+        self.E_cutoff_min: Quantity = E_cutoff_min
+        self.E_cutoff_max: Quantity = E_cutoff_max
+
+    def guess_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        if setup is not None:
+            E_max = jnpu.max(
+                jnpu.absolute(setup.measured_energy - setup.energy)
+            )
+            k = setup.k
+        else:
+            lam = ureg.planck_constant * ureg.c / E_max
+            k = 4 * jnp.pi / lam
+        E_cutoff_min = free_free.guess_E_cutoff_min(plasma_state.n_e, self.KKT)
+        E_cutoff_max = free_free.guess_E_cutoff_max(
+            k, plasma_state.T_e, plasma_state.n_e, E_max, self.KKT
+        )
+        return E_cutoff_min, E_cutoff_max
+
+    def set_guessed_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(
+            plasma_state, setup, E_max
+        )
+        self.E_cutoff_min = E_cutoff_min
+        self.E_cutoff_max = E_cutoff_max
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1884,6 +2087,17 @@ class BornMermin_Fortmann(FreeFreeModel):
             plasma_state.update_default_model("BM S_ii", Sum_Sii())
         else:
             plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(plasma_state)
+        self.E_cutoff_min = jnpu.where(
+            self.E_cutoff_min > 0 * ureg.electron_volt,
+            self.E_cutoff_min,
+            E_cutoff_min,
+        )
+        self.E_cutoff_max = jnpu.where(
+            self.E_cutoff_max > 0 * ureg.electron_volt,
+            self.E_cutoff_max,
+            E_cutoff_max,
+        )
 
     @jax.jit
     def evaluate_raw(
@@ -1916,6 +2130,8 @@ class BornMermin_Fortmann(FreeFreeModel):
             V_eiS,
             plasma_state.n_e,
             mean_Z_free,
+            self.E_cutoff_min,
+            self.E_cutoff_max,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
@@ -1967,6 +2183,8 @@ class BornMermin_Fortmann(FreeFreeModel):
             S_ii,
             V_eiS,
             mean_Z_free,
+            self.E_cutoff_min,
+            self.E_cutoff_max,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
             rpa_rewrite=self.RPA_rewrite,
@@ -1975,7 +2193,10 @@ class BornMermin_Fortmann(FreeFreeModel):
         return xi
 
     def _tree_flatten(self):
-        children = ()
+        children = (
+            self.E_cutoff_min,
+            self.E_cutoff_max,
+        )
         aux_data = (
             self.model_key,
             self.sample_points,
@@ -1994,7 +2215,13 @@ class BornMermin_Fortmann(FreeFreeModel):
             obj.no_of_freq,
             obj.RPA_rewrite,
             obj.KKT,
+            obj.E_cutoff_min,
+            obj.E_cutoff_max,
         ) = aux_data
+        (
+            obj.E_cutoff_min,
+            obj.E_cutoff_max,
+        ) = children
 
         return obj
 
