@@ -2235,6 +2235,11 @@ class SchumacherImpulse(ScatteringModel):
     asymmetric correction to the impulse approximation, as given in the
     aforementioned paper.
 
+    Should yield similar results as
+    :py:class:`~.SchumacherImpulseColdEdges`. However, rather than using
+    absorption edges being of the cold sample, here we use edges of
+    isolated ions in a plasma instead.
+
     Requires a 'form-factors' model (defaults to
     :py:class:`~PaulingFormFactors`).
 
@@ -2244,6 +2249,169 @@ class SchumacherImpulse(ScatteringModel):
 
     allowed_keys = ["bound-free scattering"]
     __name__ = "SchumacherImpulse"
+
+    def __init__(self, r_k: float | None = None) -> None:
+        """
+        r_k is the correction given in :cite:`Gregori.2004`. If None, or if a
+        negative value is given, we use the formula given by
+        :cite:`Gregori.2004`. Otherwise, it is just the value provided by the
+        user.
+        """
+        super().__init__()
+        #: The value for r_k (see :cite:`Gregori.2004`). A negative value means
+        #: to use the calculation given in the aforementioned paper.
+        self.r_k = r_k
+        if self.r_k is None:
+            self.r_k = -1.0
+        # This is required to catch a potential int input by a user
+        if isinstance(self.r_k, int):
+            self.r_k = float(self.r_k)
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model("ipd", Neglect())
+
+    @jax.jit
+    def evaluate_raw(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+    ) -> jnp.ndarray:
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
+        omega_0 = setup.energy / ureg.hbar
+        omega = omega_0 - setup.measured_energy / ureg.hbar
+        x = plasma_state.number_fraction
+
+        out = 0 * ureg.second
+        for idx in range(plasma_state.nions):
+            element_atomic_number = plasma_state.Z_A[idx]
+            ion_charge_state = plasma_state.Z_free[idx]
+
+            # Define a function to calculate scattering for a single integer charge state
+            def calculate_scattering_for_charge_state(charge_state):
+                E_b = (
+                    plasma_state.ions[idx].get_binding_energies(charge_state)
+                    + plasma_state.models["ipd"].evaluate(plasma_state, None)[idx]
+                )
+                E_b = jnpu.where(
+                    E_b < 0 * ureg.electron_volt, 0 * ureg.electron_volt, E_b
+                )
+
+                Z_core = element_atomic_number - charge_state
+                Zeff = (
+                    element_atomic_number
+                ) - form_factors.pauling_size_screening_constants(Z_core)
+
+                population = electron_distribution_ionized_state(Z_core)
+
+                def rk_on(r_k_val):
+                    # Gregori.2004, Eqn 20
+                    fi = plasma_state["form-factors"].evaluate(
+                        plasma_state, setup
+                    )[:, idx]
+                    new_r_k = 1 - jnp.sum(population * (fi) ** 2) / Z_core
+                    new_r_k = jax.lax.cond(Z_core == 0, lambda: 1.0, lambda: new_r_k)
+                    return new_r_k
+
+                def rk_off(r_k):
+                    """
+                    Use the rk provided by the user
+                    """
+                    return r_k
+
+                r_k = jax.lax.cond(self.r_k < 0, rk_on, rk_off, self.r_k)
+                B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
+                factor = r_k / (Z_core * B**3).m_as(ureg.dimensionless)
+                sbe = factor * bound_free.J_impulse_approx(
+                    omega, k, population, Zeff, E_b
+                )
+                val = sbe * Z_core
+                return jnpu.where(
+                    jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
+                )
+
+            # Check if the ionization state is an integer
+            is_integer = (ion_charge_state == jnp.floor(ion_charge_state))
+
+            def integer_case(charge_state):
+                return calculate_scattering_for_charge_state(charge_state)
+
+            def non_integer_case(charge_state):
+                Z_low = jnp.floor(charge_state)
+                Z_high = jnp.ceil(charge_state)
+
+                # Define the case where the higher ionization state is a bare nucleus
+                def handle_bare_nucleus_case(_):
+                    # Weight of the lower state is 100% of the remaining bound electrons
+                    weight_low = element_atomic_number - charge_state
+                    sbe_low = calculate_scattering_for_charge_state(Z_low)
+                    # Contribution is only from the weighted lower state
+                    return weight_low * sbe_low
+
+                # Define the normal case where both states have bound electrons
+                def handle_normal_case(_):
+                    weight_high = charge_state - Z_low
+                    weight_low = 1.0 - weight_high
+                    sbe_low = calculate_scattering_for_charge_state(Z_low)
+                    sbe_high = calculate_scattering_for_charge_state(Z_high)
+                    return weight_low * sbe_low + weight_high * sbe_high
+
+                # Condition to check if the higher ionization state is a bare nucleus
+                is_bare_nucleus = (Z_high >= element_atomic_number)
+
+                return jax.lax.cond(
+                    is_bare_nucleus,
+                    handle_bare_nucleus_case,
+                    handle_normal_case,
+                    None
+                )
+
+            total_sbe_for_element = jax.lax.cond(
+                is_integer,
+                integer_case,
+                non_integer_case,
+                ion_charge_state
+            )
+
+            out += total_sbe_for_element * x[idx]
+
+        return out / plasma_state.mean_Z_A
+
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.r_k,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.sample_points, obj.r_k = aux_data
+
+        return obj
+
+
+class SchumacherImpulseColdEdges(ScatteringModel):
+    """
+    Bound-free scattering based on the Schumacher Impulse Approximation
+    :cite:`Schumacher.1975`. The implementation considers the first order
+    asymmetric correction to the impulse approximation, as given in the
+    aforementioned paper.
+
+    Uses cold absorption edges, regardless of the ionization state.
+
+    Requires a 'form-factors' model (defaults to
+    :py:class:`~PaulingFormFactors`).
+
+    Requires an 'ipd' model (defaults to
+    :py:class:`~Neglect`).
+    """
+
+    allowed_keys = ["bound-free scattering"]
+    __name__ = "SchumacherImpulseColdEdges"
 
     def __init__(self, r_k: float | None = None) -> None:
         """
@@ -2282,7 +2450,7 @@ class SchumacherImpulse(ScatteringModel):
         for idx in range(plasma_state.nions):
             Z_c = plasma_state.Z_core[idx]
             E_b = (
-                plasma_state.ions[idx].binding_energies
+                plasma_state.ions[idx].cold_binding_energies
                 + plasma_state.models["ipd"].evaluate(plasma_state, None)[idx]
             )
             E_b = jnpu.where(
@@ -2339,7 +2507,6 @@ class SchumacherImpulse(ScatteringModel):
         obj.model_key, obj.sample_points, obj.r_k = aux_data
 
         return obj
-
 
 class SchumacherImpulseFitRk(ScatteringModel):
     """
@@ -3680,6 +3847,7 @@ _all_models = [
     RPA_NoDamping,
     ScatteringModel,
     SchumacherImpulse,
+    SchumacherImpulseColdEdges,
     SchumacherImpulseFitRk,
     Sum_Sii,
     StewartPyattIPD,
