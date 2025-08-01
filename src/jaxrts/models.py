@@ -2213,8 +2213,6 @@ class BornMermin_Fortmann(FreeFreeModel):
             obj.no_of_freq,
             obj.RPA_rewrite,
             obj.KKT,
-            obj.E_cutoff_min,
-            obj.E_cutoff_max,
         ) = aux_data
         (
             obj.E_cutoff_min,
