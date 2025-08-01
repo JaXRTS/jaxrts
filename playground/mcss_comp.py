@@ -135,6 +135,7 @@ def plot_mcss_comparison(mcss_file):
             jaxrts.instrument_function.instrument_gaussian,
             sigma=ureg("10eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
         ),
+        frc_exponent = 2.0,
     )
 
     state["chemical potential"] = jaxrts.models.IchimaruChemPotential()
