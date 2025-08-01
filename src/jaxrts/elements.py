@@ -10,7 +10,9 @@ from jax import numpy as jnp
 
 from .helpers import invert_dict, orbital_array, orbital_map
 from .units import Quantity, ureg
-from .absorption_edges_ionized_ions_data import ENERGY_DATA as _absorption_edges_ionized_atoms
+from .absorption_edges_ionized_ions_data import (
+    ENERGY_DATA as _absorption_edges_ionized_atoms,
+)
 
 _element_symbols = {
     1: "H",  # Hydrogen
@@ -519,24 +521,37 @@ _cold_absorption_edges = {
 }
 
 
-max_Z = max(d['Z'] for d in _absorption_edges_ionized_atoms)
-max_charge_state = max(max(ion_data['ions'].keys()) for ion_data in _absorption_edges_ionized_atoms) if _absorption_edges_ionized_atoms else 0
+max_Z = max(d["Z"] for d in _absorption_edges_ionized_atoms)
+max_charge_state = (
+    max(
+        max(ion_data["ions"].keys())
+        for ion_data in _absorption_edges_ionized_atoms
+    )
+    if _absorption_edges_ionized_atoms
+    else 0
+)
 
 
 _idx_to_orbital = invert_dict(orbital_map)
 num_orbitals = len(orbital_map)
 
 # Initialize a 3D array: Atomic number x Charge x Orbital_Idx
-_edge_position_table_ionization_states = jnp.zeros((max_Z + 1, max_charge_state + 1, num_orbitals), dtype=jnp.float32)
+_edge_position_table_ionization_states = jnp.zeros(
+    (max_Z + 1, max_charge_state + 1, num_orbitals), dtype=jnp.float32
+)
 
 # Fill the _edge_position_table_ionization_states with ionization energies
 for element_data in _absorption_edges_ionized_atoms:
-    Z = element_data['Z']
-    for charge, ion_info in element_data['ions'].items():
-        for orbital, energy in ion_info['ionization_energies_eV'].items():
+    Z = element_data["Z"]
+    for charge, ion_info in element_data["ions"].items():
+        for orbital, energy in ion_info["ionization_energies_eV"].items():
             if orbital in orbital_map:
                 orbital_idx = orbital_map[orbital]
-                _edge_position_table_ionization_states = _edge_position_table_ionization_states.at[Z, charge, orbital_idx].set(energy)
+                _edge_position_table_ionization_states = (
+                    _edge_position_table_ionization_states.at[
+                        Z, charge, orbital_idx
+                    ].set(energy)
+                )
 
 # fmt: off
 
@@ -1625,7 +1640,7 @@ class Element:
             self.symbol = _element_symbols[self.Z]
         #: The name of the element
         self.name: str = _element_names[self.Z]
-         #: The electron distribution, returned as a flat array
+        #: The electron distribution, returned as a flat array
         self.electron_distribution = electron_distribution_ionized_state(
             self.Z
         )
@@ -1647,19 +1662,29 @@ class Element:
         Eb4p = 0
         Eb4d = 0
         Eb4f = 0
-        
-        #: Returns the binding energies of the electrons in the ground state 
-        #: of the neutral atom, i.e., the binding energies of the electrons 
+
+        #: Returns the binding energies of the electrons in the ground state
+        #: of the neutral atom, i.e., the binding energies of the electrons
         #: in the neutral atom.
         self.cold_binding_energies = jnp.array(
             [Eb1s, Eb2s, Eb2p, Eb3s, Eb3p, Eb3d, Eb4s, Eb4p, Eb4d, Eb4f]
         ) * (1 * ureg.electron_volt)
 
-    def get_binding_energies(self, ion_charge: int | jnp.ndarray) -> jnp.ndarray:
-        safe_Z = jnp.clip(self.Z, 0, _edge_position_table_ionization_states.shape[0] - 1)
+    def get_binding_energies(
+        self, ion_charge: int | jnp.ndarray
+    ) -> jnp.ndarray:
+        safe_Z = jnp.clip(
+            self.Z, 0, _edge_position_table_ionization_states.shape[0] - 1
+        )
         safe_ion_charge = jnp.round(ion_charge).astype(jnp.int32)
-        safe_ion_charge = jnp.clip(safe_ion_charge, 0, _edge_position_table_ionization_states.shape[1] - 1)
-        orbital_energies = _edge_position_table_ionization_states[safe_Z, safe_ion_charge, :]
+        safe_ion_charge = jnp.clip(
+            safe_ion_charge,
+            0,
+            _edge_position_table_ionization_states.shape[1] - 1,
+        )
+        orbital_energies = _edge_position_table_ionization_states[
+            safe_Z, safe_ion_charge, :
+        ]
         return orbital_energies * (1 * ureg.electron_volt)
 
     def __eq__(self, other: Any) -> bool:

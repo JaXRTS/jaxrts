@@ -2289,7 +2289,9 @@ class SchumacherImpulse(ScatteringModel):
             def calculate_scattering_for_charge_state(charge_state):
                 E_b = (
                     plasma_state.ions[idx].get_binding_energies(charge_state)
-                    + plasma_state.models["ipd"].evaluate(plasma_state, None)[idx]
+                    + plasma_state.models["ipd"].evaluate(plasma_state, None)[
+                        idx
+                    ]
                 )
                 E_b = jnpu.where(
                     E_b < 0 * ureg.electron_volt, 0 * ureg.electron_volt, E_b
@@ -2308,7 +2310,9 @@ class SchumacherImpulse(ScatteringModel):
                         plasma_state, setup
                     )[:, idx]
                     new_r_k = 1 - jnp.sum(population * (fi) ** 2) / Z_core
-                    new_r_k = jax.lax.cond(Z_core == 0, lambda: 1.0, lambda: new_r_k)
+                    new_r_k = jax.lax.cond(
+                        Z_core == 0, lambda: 1.0, lambda: new_r_k
+                    )
                     return new_r_k
 
                 def rk_off(r_k):
@@ -2318,7 +2322,9 @@ class SchumacherImpulse(ScatteringModel):
                     return r_k
 
                 r_k = jax.lax.cond(self.r_k < 0, rk_on, rk_off, self.r_k)
-                B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
+                B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (
+                    2 * ureg.electron_mass
+                )
                 factor = r_k / (Z_core * B**3).m_as(ureg.dimensionless)
                 sbe = factor * bound_free.J_impulse_approx(
                     omega, k, population, Zeff, E_b
@@ -2329,7 +2335,7 @@ class SchumacherImpulse(ScatteringModel):
                 )
 
             # Check if the ionization state is an integer
-            is_integer = (ion_charge_state == jnp.floor(ion_charge_state))
+            is_integer = ion_charge_state == jnp.floor(ion_charge_state)
 
             def integer_case(charge_state):
                 return calculate_scattering_for_charge_state(charge_state)
@@ -2355,20 +2361,17 @@ class SchumacherImpulse(ScatteringModel):
                     return weight_low * sbe_low + weight_high * sbe_high
 
                 # Condition to check if the higher ionization state is a bare nucleus
-                is_bare_nucleus = (Z_high >= element_atomic_number)
+                is_bare_nucleus = Z_high >= element_atomic_number
 
                 return jax.lax.cond(
                     is_bare_nucleus,
                     handle_bare_nucleus_case,
                     handle_normal_case,
-                    None
+                    None,
                 )
 
             total_sbe_for_element = jax.lax.cond(
-                is_integer,
-                integer_case,
-                non_integer_case,
-                ion_charge_state
+                is_integer, integer_case, non_integer_case, ion_charge_state
             )
 
             out += total_sbe_for_element * x[idx]
@@ -2505,6 +2508,7 @@ class SchumacherImpulseColdEdges(ScatteringModel):
         obj.model_key, obj.sample_points, obj.r_k = aux_data
 
         return obj
+
 
 class SchumacherImpulseFitRk(ScatteringModel):
     """
