@@ -166,7 +166,9 @@ def plot_mcss_comparison(mcss_file):
         print(
             state["free-free scattering"].E_cutoff_max.to(ureg.electron_volt)
         )
-    state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=rk)
+    state["bound-free scattering"] = jaxrts.models.SchumacherImpulseColdEdges(
+        r_k=rk
+    )
     state["free-bound scattering"] = jaxrts.models.Neglect()
 
     print("W_R")
