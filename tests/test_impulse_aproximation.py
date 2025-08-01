@@ -33,7 +33,7 @@ def test_literature_chapman2015():
 
         S_bf_lit = S_bf_lit[sort] * 1e-2 / ureg.electron_volt
 
-        E_b = jaxrts.Element("C").binding_energies
+        E_b = jaxrts.Element("C").cold_binding_energies
 
         Zeff = 6 - jaxrts.form_factors.pauling_size_screening_constants(Z_b)
         population = jaxrts.elements.electron_distribution_ionized_state(Z_b)
@@ -70,7 +70,7 @@ def test_modified_literature_chapman2015():
 
         S_bf_lit = S_bf_lit[sort] * 1e-2 / ureg.electron_volt
 
-        E_b = jaxrts.Element("C").binding_energies
+        E_b = jaxrts.Element("C").cold_binding_energies
 
         Zeff = jaxrts.form_factors.pauling_effective_charge(6)
         Zeff = 6 - jaxrts.form_factors.pauling_size_screening_constants(Z_b)
