@@ -5,7 +5,7 @@ This submodule is dedicated to form factors.
 import logging
 
 import numpy as onp
-from jax import jit, debug
+from jax import jit
 from jax import numpy as jnp
 from jpu import numpy as jnpu
 
@@ -218,7 +218,8 @@ def form_factor_lowering_10(
     k: Quantity
         The scattering vector.
     binding_E: Quantity
-        The binding energies of the two 1s electrons. Has to be an array with 2 entries.
+        The binding energies of the two 1s electrons. Has to be an array with 2
+        entries.
     Z_core: Quantity
         Average number of bound electrons to the core.
     """
