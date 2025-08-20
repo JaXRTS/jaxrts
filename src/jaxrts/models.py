@@ -585,7 +585,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         T = plasma_state["ion-ion Potential"].T(plasma_state)
         n = plasma_state.n_i
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
-            V_s_r, V_l_k, self.r, T, n
+            V_s_r, V_l_k, self.r, T, n, self.mix
         )
         logger.debug(
             f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
@@ -773,7 +773,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         T = plasma_state["ion-ion Potential"].T(plasma_state)
         n = to_array([*plasma_state.n_i, plasma_state.n_e])
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
-            V_s_r, V_l_k, self.r, T, n
+            V_s_r, V_l_k, self.r, T, n, self.mix
         )
         logger.debug(
             f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
@@ -3622,6 +3622,7 @@ class AverageAtom_Sii(Model):
         rmin: Quantity = 0.001 * ureg.a_0,
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
+        mix: float = 0.0,
     ) -> None:
         #: The minimal radius for evaluating the potentials.
         self.r_min: Quantity = rmin
@@ -3630,6 +3631,12 @@ class AverageAtom_Sii(Model):
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
+        #: Value in [0, 1); desribes how much of the last iterations' nodal
+        #: correction term should be added to the newly obtained `N_ab`. A
+        #: value of zero corresponds to no parts of the old solution. Can be
+        #: increased when HNC becomes numerically unstable due to high coupling
+        #: strengths.
+        self.mix: float = mix
         super().__init__()
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -3672,7 +3679,7 @@ class AverageAtom_Sii(Model):
         T = aaState["ion-ion Potential"].T(aaState)
         n = aaState.n_i
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
-            V_s_r, V_l_k, self.r, T, n
+            V_s_r, V_l_k, self.r, T, n, self.mix
         )
         logger.debug(
             f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
@@ -3689,7 +3696,7 @@ class AverageAtom_Sii(Model):
 
     # The following is required to jit a Model
     def _tree_flatten(self):
-        children = (self.r_min, self.r_max)
+        children = (self.r_min, self.r_max, self.mix)
         aux_data = (
             self.model_key,
             self.pot,
@@ -3700,7 +3707,7 @@ class AverageAtom_Sii(Model):
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
         obj.model_key, obj.pot = aux_data
-        obj.r_min, obj.r_max = children
+        obj.r_min, obj.r_max, obj.mix = children
 
         return obj
 
