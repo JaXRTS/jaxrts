@@ -321,6 +321,7 @@ class IonFeatModel(Model):
             jnp.arange(plasma_state.nions),
             jnp.arange(plasma_state.nions),
         )
+
         for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
             w_R += add_wrt(a, b)
         return w_R
@@ -839,6 +840,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         # Get the formfactor from the plasma state
         fi = plasma_state["form-factors"].evaluate(plasma_state, setup)
         population = electron_distribution_ionized_state(plasma_state.Z_core)
+
         # Sum up all fi to the full f
         f = jnp.sum(fi * population, axis=0)
         # Calculate the number-fraction per element
@@ -2724,6 +2726,70 @@ class PaulingFormFactors(Model):
         return ff
 
 
+class FormFactorLowering(Model):
+    """
+    Form factor lowering model as introduced by :cite:`Doeppner.2023`.
+    In high density plasma the form factor is reduced due to IPD.
+    This concept only applies for the K-shell. Here we calculate the f1s(k)
+    form factor with the analytic Pauling formular but with an IPD corrected
+    effective charge Z_eff. The spin up and spin down K-shell electrons and
+    their respective binding energies are taken into account for this
+    calculation.
+    """
+
+    allowed_keys = ["form-factors"]
+    __name__ = "FormFactorLowering"
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        Zstar = (
+            plasma_state.Z_A
+            - form_factors.pauling_size_screening_constants(
+                plasma_state.Z_core
+            )
+        )
+        ff = form_factors.pauling_all_ff(setup.k, Zstar)
+        ipd = plasma_state.evaluate(key="ipd", setup=setup)
+
+        # Loop throught the Ions of the Plasma state and calculate the
+        # corrected 1s form factor
+        for elem, idx in zip(plasma_state.ions, range(len(plasma_state.ions))):
+            # flip ionization energies, to start with the binding energy of the
+            # 1st K-shell electron
+            ionization_energies = elem.ionization.energies[::-1]
+            bind_energies_K_shell = jnp.zeros(2)
+
+            # Account for the Hydrogen case
+            cutoff = 1 if elem.Z == 1 else 2
+            ionization_energies = ionization_energies[:cutoff]
+
+            # calculate IPD corrected binding energies for the individual
+            # electrons
+            bind_energies_ipd = bind_energies_K_shell.at[:cutoff].set(
+                ionization_energies.m_as(ureg.electron_volt)
+                + ipd[idx].m_as(ureg.electron_volt)
+            )
+
+            # set all binding energies below zero to a small number
+            bind_energies_ipd = jnp.where(
+                bind_energies_ipd < 0, 1e-6, bind_energies_ipd
+            )
+
+            # calculate the form factor of the 1s orbital given the binding
+            # energies
+            bind_energies_ipd *= ureg.electron_volt
+            f_1s = form_factors.form_factor_lowering_10(
+                setup.k, bind_energies_ipd, elem.Z - plasma_state.Z_free[idx]
+            )
+
+            # update the pauling f_1s result
+            ff = ff.at[idx, 0].set(f_1s)
+
+        return ff
+
+
 # Chemical Potential Models
 # =========================
 
@@ -3869,6 +3935,7 @@ _all_models = [
     FiniteWavelengthScreening,
     FiniteWavelength_BM_V,
     FixedSii,
+    FormFactorLowering,
     Gericke2010ScreeningLength,
     Gregori2003IonFeat,
     Gregori2004Screening,
