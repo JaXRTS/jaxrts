@@ -183,7 +183,8 @@ class ScatteringModel(Model):
                 left=0,
                 right=0,
             )
-        return convolve_stucture_factor_with_instrument(raw, setup)
+        conv = convolve_stucture_factor_with_instrument(raw, setup)
+        return conv * setup.frequency_redistribution_correction
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -332,6 +333,7 @@ class IonFeatModel(Model):
         res = w_R * setup.instrument(
             (setup.measured_energy - setup.energy) / ureg.hbar
         )
+        res *= setup.frequency_redistribution_correction
         return res / plasma_state.mean_Z_A
 
 
