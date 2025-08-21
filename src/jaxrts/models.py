@@ -546,7 +546,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
-        #: Value in [0, 1); desribes how much of the last iterations' nodal
+        #: Value in [0, 1); describes how much of the last iterations' nodal
         #: correction term should be added to the newly obtained `N_ab`. A
         #: value of zero corresponds to no parts of the old solution. Can be
         #: increased when HNC becomes numerically unstable due to high coupling
@@ -682,7 +682,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
-        #: Value in [0, 1); desribes how much of the last iterations' nodal
+        #: Value in [0, 1); describes how much of the last iterations' nodal
         #: correction term should be added to the newly obtained `N_ab`. A
         #: value of zero corresponds to no parts of the old solution. Can be
         #: increased when HNC becomes numerically unstable due to high coupling
@@ -3652,7 +3652,7 @@ class AverageAtom_Sii(Model):
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
-        #: Value in [0, 1); desribes how much of the last iterations' nodal
+        #: Value in [0, 1); describes how much of the last iterations' nodal
         #: correction term should be added to the newly obtained `N_ab`. A
         #: value of zero corresponds to no parts of the old solution. Can be
         #: increased when HNC becomes numerically unstable due to high coupling
