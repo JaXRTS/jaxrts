@@ -28,9 +28,6 @@ from jaxrts.hypernetted_chain import (
 from jaxrts.plasma_physics import (
     fermi_wavenumber,
     fermi_dirac,
-    degeneracy_param,
-    wiegner_seitz_radius,
-    fermi_energy,
     chem_pot_sommerfeld_fermi_interpolation,
 )
 from jaxrts.units import Quantity, to_array, ureg
@@ -44,10 +41,10 @@ def pauli_potential_from_classical_map_SpinAveraged(
 ):
     """
     This method utilizes the exact non-interacting solution for the pair
-    distribution function (PDF) as input (see :cite:`Bredow.2017`). The effective potential is then
-    derived iteratively to reproduce the input PDF using the HNC algorithm.
-    This approach effectively inverts the HNC framework to determine the
-    interaction potential from a known PDF.
+    distribution function (PDF) as input (see :cite:`Bredow.2017`). The
+    effective potential is then derived iteratively to reproduce the input PDF
+    using the HNC algorithm. This approach effectively inverts the HNC
+    framework to determine the interaction potential from a known PDF.
     """
 
     SMALL = 1e-14
@@ -817,7 +814,7 @@ class DebyeHueckelPotential(HNCPotential):
     @jax.jit
     def long_k(self, plasma_state, k):
         """
-        See :cite:`Chapman.2015`, (Eqn 3.58) 
+        See :cite:`Chapman.2015`, (Eqn 3.58)
         """
 
         _k = k[jnp.newaxis, jnp.newaxis, :]
@@ -835,13 +832,11 @@ class DebyeHueckelPotential(HNCPotential):
     @jax.jit
     def full_k(self, plasma_state, k):
         """
-        See :cite:`Chapman.2015`, (Eqn 3.49) 
+        See :cite:`Chapman.2015`, (Eqn 3.49)
         """
         _k = k[jnp.newaxis, jnp.newaxis, :]
         V_C = self.q2(plasma_state) / ureg.vacuum_permittivity / _k**2
-        return V_C / (1 + (self.kappa(plasma_state)/_k)**2)
-
-
+        return V_C / (1 + (self.kappa(plasma_state) / _k) ** 2)
 
 
 class KelbgPotential(HNCPotential):
@@ -1236,6 +1231,94 @@ class EmptyCorePotential(HNCPotential):
         )
 
 
+class YukawaShortRangeRepulsion(HNCPotential):
+    """
+    Yukawa Potential with a short-range repulsion as used in
+    :cite:`Fletcher.2015`.
+    """
+
+    __name__ = "YukawaShortRangeRepulsion"
+
+    def __init__(
+        self,
+        sigma: Quantity = 0.0 * ureg.angstrom,
+    ):
+        #: This gives the strength of the repulsion, and is a fitting parameter
+        self.sigma = sigma
+        super().__init__()
+
+    def kappa(self, plasma_state):
+        # This is called if kappa is defined per ion species
+        if (
+            isinstance(plasma_state.screening_length.magnitude, jnp.ndarray)
+            and len(plasma_state.screening_length.shape) == 2
+        ):
+            return 1 / plasma_state.screening_length[:, :, jnp.newaxis]
+        else:
+            return 1 / plasma_state.screening_length
+
+    @jax.jit
+    def full_r(self, plasma_state, r: Quantity) -> Quantity:
+        """
+        .. math::
+
+           q^2 / (4 jnp.pi \\varepsilon_0 * r) \\exp(-\\kappa r) +
+           \\frac{\\sigma^4}{r^4}
+
+        """
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+        return (
+            self.q2(plasma_state)
+            / (4 * jnp.pi * ureg.epsilon_0 * _r)
+            * jnpu.exp(-self.kappa(plasma_state) * r)
+        ) + 1 * ureg.k_B * self.T(plasma_state) * self.sigma**4 / _r
+
+    @jax.jit
+    def long_r(self, plasma_state, r):
+        """
+        .. math::
+
+            \\frac{q^2}{(4 \\pi \\epsilon_0 r)} \\exp(-\\kappa r)
+
+        """
+
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+
+        return (
+            self.q2(plasma_state)
+            / (4 * jnp.pi * ureg.epsilon_0 * _r)
+            * jnpu.exp(-self.kappa(plasma_state) * r)
+        )
+
+    @jax.jit
+    def short_r(self, plasma_state, r: Quantity) -> Quantity:
+        _r = r[jnp.newaxis, jnp.newaxis, :]
+        return (self.sigma**4 / _r**4) * 1 * ureg.k_B * self.T(plasma_state)
+
+    @jax.jit
+    def long_k(self, plasma_state, k):
+        _k = k[jnp.newaxis, jnp.newaxis, :]
+        V_C = self.q2(plasma_state) / ureg.vacuum_permittivity / _k**2
+        return V_C / (1 + (self.kappa(plasma_state) / _k) ** 2)
+
+    # The following is required to jit a state
+    def _tree_flatten(self):
+        children = (self._transform_r, self.sigma)
+        aux_data = {
+            "include_electrons": self.include_electrons,
+            "model_key": self.model_key,
+        }  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj._transform_r, obj.sigma = children
+        obj.model_key = aux_data["model_key"]
+        obj.include_electrons = aux_data["include_electrons"]
+        return obj
+
+
 class SoftCorePotential(HNCPotential):
     """
     This potential is very comparable to :py:class:`EmptyCorePotential`, but to
@@ -1446,25 +1529,6 @@ class PauliClassicalMap(HNCPotential):
 
         V_P_r = _3Dfour(r, k, self.full_k(plasma_state, k)) / (2 * jnp.pi) ** 3
 
-        # index1 = jnp.argmax(jnp.where(r.m_as(ureg.a0) < 0.1, jnp.arange(r.size), -1.0))
-
-        # index2 = jnp.argmax(jnp.where(r.m_as(ureg.a0) < 0.12, jnp.arange(r.size), -1.0))
-
-        # f1 = V_P_r.m_as(ureg.electron_volt).at[index1].get() * 1 * ureg.electron_volt
-        # f2 = V_P_r.m_as(ureg.electron_volt).at[index2].get() * 1 * ureg.electron_volt
-        # x1 = r.m_as(ureg.a0).at[index1].get() * (1 * ureg.a0)
-        # x2 = r.m_as(ureg.a0).at[index2].get() * (1 * ureg.a0)
-
-        # def interp_func(x):
-
-        #     a = (f2 - f1) / (x2 - x1)
-        #     c = f1 - a * x1
-
-        #     return a * x + c
-
-        # print(interp_func(r))
-        # V_P_r = jnpu.where((r.m_as(ureg.a0) < x1.m_as(ureg.a0)), interp_func(r), V_P_r)
-
         return V_P_r
 
     def _tree_flatten(self):
@@ -1611,6 +1675,7 @@ _all_hnc_potentals = [
     SpinAveragedEEExchange,
     PauliClassicalMap,
     SpinSeparatedEEExchange,
+    YukawaShortRangeRepulsion,
 ]
 
 for _pot in _all_hnc_potentals:
