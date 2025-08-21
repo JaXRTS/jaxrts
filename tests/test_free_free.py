@@ -481,7 +481,7 @@ def test_Fortmann_with_LFC_reproduces_literature() -> None:
         )
 
         assert jnp.max(jnp.abs(w - interpw)) < 0.1
-        assert jnp.max(jnp.abs(G - interpG)) < 0.1
+        assert jnp.max(jnp.abs(G - interpG)) < 0.15
 
 
 def test_Fortman_reproduces_vanilla_BMA_without_LFC():

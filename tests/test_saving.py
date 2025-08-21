@@ -1,3 +1,4 @@
+from copy import deepcopy
 import pathlib
 import hashlib
 import tempfile
@@ -18,16 +19,11 @@ def hash_file(path):
 
 
 ions = [jaxrts.Element("H"), jaxrts.Element("O")]
-number_fraction = jnp.array([2 / 3, 1 / 3])
-mass_fraction = jaxrts.helpers.mass_from_number_fraction(number_fraction, ions)
 
 test_state = jaxrts.PlasmaState(
     ions=ions,
     Z_free=jnp.array([0.9, 5.2]),
-    mass_density=mass_fraction
-    * jnp.array([1.0])
-    * ureg.gram
-    / ureg.centimeter**3,
+    mass_density=jnp.array([0.11, 0.89]) * (ureg.gram / ureg.centimeter**3),
     T_e=40 * ureg.electron_volt / ureg.k_B,
 )
 
@@ -41,7 +37,6 @@ test_state["free-bound scattering"] = jaxrts.models.Neglect()
 test_state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHueckelPotential()
 test_state["form-factors"] = jaxrts.models.PaulingFormFactors()
 test_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(mix=0.8)
-
 
 def test_dump_state():
     with tempfile.NamedTemporaryFile() as tmp:
@@ -119,15 +114,7 @@ class AlwaysPiModel(jaxrts.models.Model):
 
 
 def test_saving_and_restoring_custom_model():
-    state = jaxrts.PlasmaState(
-        ions=ions,
-        Z_free=jnp.array([0.9, 5.2]),
-        mass_density=mass_fraction
-        * jnp.array([1.0])
-        * ureg.gram
-        / ureg.centimeter**3,
-        T_e=40 * ureg.electron_volt / ureg.k_B,
-    )
+    state = deepcopy(test_state)
     state["test"] = AlwaysPiModel()
 
     with tempfile.NamedTemporaryFile() as tmp:
