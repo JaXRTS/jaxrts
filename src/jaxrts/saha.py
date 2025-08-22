@@ -5,7 +5,6 @@ linking the temperature of a plasma to it's ionization.
 """
 
 from functools import partial
-from typing import List
 
 import jax
 import jax.numpy as jnp
@@ -21,7 +20,6 @@ from .plasma_physics import (
     chem_pot_interpolationIchimaru,
     chem_pot_sommerfeld_fermi_interpolation,
 )
-
 
 h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
@@ -115,13 +113,13 @@ def saha_equation(
         2
         * (gj / gi)
         * ((2 * jnp.pi * 1 * m_e * k_B * T_e) ** 1.5 / (1 * h**3))
-        * jnpu.exp(((-energy_diff) / (1 * k_B * T_e)))
+        * jnpu.exp((-energy_diff) / (1 * k_B * T_e))
     )
 
 
 @partial(jax.jit, static_argnames=["element_list"])
 def solve_saha(
-    element_list: List[Element],
+    element_list: list[Element],
     T_e: Quantity,
     ion_number_densities: Quantity,
     continuum_lowering: Quantity = 0 * ureg.electron_volt
@@ -570,7 +568,7 @@ def solve_gen_saha(
         ).m_as(ureg.dimensionless)
 
         diag = jnp.diag((-1) * coeff)
-        dens_row = jnp.ones((element.Z + 1))
+        dens_row = jnp.ones(element.Z + 1)
 
         # Set the diagonal for the Saha-rows
         M = M.at[skip : skip + element.Z, skip : skip + element.Z].set(diag)

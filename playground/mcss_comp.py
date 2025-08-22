@@ -14,9 +14,9 @@ import sys
 
 import jax
 
-jax.config.update("jax_compilation_cache_dir", "/tmp/jax_cache")
-jax.config.update("jax_persistent_cache_min_entry_size_bytes", -1)
-jax.config.update("jax_persistent_cache_min_compile_time_secs", 0.2)
+# jax.config.update("jax_compilation_cache_dir", "/tmp/jax_cache")
+# jax.config.update("jax_persistent_cache_min_entry_size_bytes", -1)
+# jax.config.update("jax_persistent_cache_min_compile_time_secs", 0.2)
 
 import os
 import re
@@ -135,6 +135,7 @@ def plot_mcss_comparison(mcss_file):
             jaxrts.instrument_function.instrument_gaussian,
             sigma=ureg("10eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
         ),
+        frc_exponent = 2.0,
     )
 
     state["chemical potential"] = jaxrts.models.IchimaruChemPotential()
@@ -156,8 +157,19 @@ def plot_mcss_comparison(mcss_file):
     if ff.lower() == "dandrea_rpa_fit":
         state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
     elif ff.lower() == "born_mermin":
-        state["free-free scattering"] = jaxrts.models.BornMermin()
-    state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=rk)
+        state["free-free scattering"] = jaxrts.models.BornMermin(
+            no_of_freq=40, KKT=False, RPA_rewrite=True
+        )
+        state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
+        print(
+            state["free-free scattering"].E_cutoff_min.to(ureg.electron_volt)
+        )
+        print(
+            state["free-free scattering"].E_cutoff_max.to(ureg.electron_volt)
+        )
+    state["bound-free scattering"] = jaxrts.models.SchumacherImpulseColdEdges(
+        r_k=rk
+    )
     state["free-bound scattering"] = jaxrts.models.Neglect()
 
     print("W_R")
@@ -174,12 +186,13 @@ def plot_mcss_comparison(mcss_file):
 
     I = state.probe(setup)
     t0 = time.time()
-    state.probe(setup)
+    I = state.probe(setup)
+    jax.block_until_ready(I)
     print(f"One sample takes {time.time()-t0}s.")
-    norm = jnpu.max(
-        state.evaluate("free-free scattering", setup)
-        # + state.evaluate("bound-free scattering", setup)
-    )
+    ff = state.evaluate("free-free scattering", setup)
+    bf = state.evaluate("bound-free scattering", setup)
+    el = state.evaluate("ionic scattering", setup)
+    norm = jnpu.max(ff)
 
     fig, ax0 = plt.subplots()
     inset_ax = inset_axes(ax0, width="50%", height="50%", loc="upper left")
@@ -187,15 +200,13 @@ def plot_mcss_comparison(mcss_file):
     for ax in [ax0, inset_ax]:
         ax.plot(
             (setup.measured_energy).m_as(ureg.electron_volt),
-            (I / norm).m_as(ureg.dimensionless),
-            color="C0",
+            ((bf + ff + el) / norm).m_as(ureg.dimensionless),
+            color="black",
             label="JaXRTS",
         )
         ax.plot(
             (setup.measured_energy).m_as(ureg.electron_volt),
-            (state.evaluate("bound-free scattering", setup) / norm).m_as(
-                ureg.dimensionless
-            ),
+            (bf / norm).m_as(ureg.dimensionless),
             color="C0",
             ls="dashed",
             label="JaXRTS, bf",
@@ -203,9 +214,7 @@ def plot_mcss_comparison(mcss_file):
         )
         ax.plot(
             (setup.measured_energy).m_as(ureg.electron_volt),
-            (state.evaluate("free-free scattering", setup) / norm).m_as(
-                ureg.dimensionless
-            ),
+            (ff / norm).m_as(ureg.dimensionless),
             color="C0",
             ls="dotted",
             label="JaXRTS, ff",
@@ -213,13 +222,17 @@ def plot_mcss_comparison(mcss_file):
         )
         ax.plot(
             (setup.measured_energy).m_as(ureg.electron_volt),
-            (state.evaluate("ionic scattering", setup) / norm).m_as(
-                ureg.dimensionless
-            ),
+            (el / norm).m_as(ureg.dimensionless),
             color="C0",
             ls="dashdot",
             label="JaXRTS, elastic",
             alpha=0.7,
+        )
+        ax.plot(
+            (setup.measured_energy).m_as(ureg.electron_volt),
+            (I / norm).m_as(ureg.dimensionless),
+            color="C0",
+            label="JaXRTS",
         )
         MCSS_Norm = jnp.max(S_ff)
         ax.plot(
@@ -261,7 +274,9 @@ def plot_mcss_comparison(mcss_file):
     plt.close()
 
 
-for mcss_file in (file_dir / "../tests/mcss_samples").glob("mcss*.txt"):
+for mcss_file in sorted(
+    list((file_dir / "../tests/mcss_samples").glob("mcss*.txt"))
+):
     print(mcss_file)
     plot_mcss_comparison(mcss_file)
 

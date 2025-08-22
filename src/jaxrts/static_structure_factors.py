@@ -728,6 +728,9 @@ def debyeWallerFactor(
     TwoM = (
         (3 * ureg.planck_constant**2 * ureg.N_A * Q**2)
         / (atomic_mass * ureg.k_B * debye_temp)
-        * (temp / jnpu.mean(debye_temp) * phi(jnpu.mean(debye_temp) / temp) + 1 / 4)
+        * (
+            temp / jnpu.mean(debye_temp) * phi(jnpu.mean(debye_temp) / temp)
+            + 1 / 4
+        )
     )
     return jnpu.exp(-TwoM).m_as(ureg.dimensionless)

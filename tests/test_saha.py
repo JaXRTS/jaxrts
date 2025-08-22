@@ -1,10 +1,11 @@
 import pathlib
 
-from jaxrts.saha import solve_saha
-from jaxrts.units import ureg
-import jaxrts
 import jax.numpy as jnp
 import numpy as onp
+
+import jaxrts
+from jaxrts.saha import solve_saha
+from jaxrts.units import ureg
 
 
 def test_against_MALGS_calculation():
@@ -45,7 +46,7 @@ def test_against_MALGS_calculation():
     # Prepare the output dictionary
     ion_population = {element.Z: [] for element in ions}
     for element in ions:
-        for charge in onp.arange(element.Z + 1):
+        for charge in onp.arange(element.Z + 1):  # noqa: B007
             ion_population[element.Z].append([])
 
     Tes = jnp.logspace(2, 6, 150) * ureg.kelvin

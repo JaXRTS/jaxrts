@@ -14,8 +14,6 @@ import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
-from .analysis import ITCF_fsum
-
 from . import (
     bound_free,
     ee_localfieldcorrections,
@@ -29,6 +27,7 @@ from . import (
     plasma_physics,
     static_structure_factors,
 )
+from .analysis import ITCF_fsum
 from .elements import MixElement, electron_distribution_ionized_state
 from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
 from .setup import (
@@ -58,7 +57,9 @@ class Model(metaclass=abc.ABCMeta):
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray: ...
 
-    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+    def prepare(  # noqa: B027
+        self, plasma_state: "PlasmaState", key: str
+    ) -> None:
         """
         Modify the plasma_state in place.
 
@@ -67,12 +68,14 @@ class Model(metaclass=abc.ABCMeta):
         defaults if necessary.
         Please log assumptions, properly
         """
+        pass
 
-    def check(self, plasma_state: "PlasmaState") -> None:
+    def check(self, plasma_state: "PlasmaState") -> None:  # noqa: B027
         """
         Test if the model is applicable to the PlasmaState. Might raise logged
         messages and errors.
         """
+        pass
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -185,7 +188,8 @@ class ScatteringModel(Model):
                 left=0,
                 right=0,
             )
-        return convolve_stucture_factor_with_instrument(raw, setup)
+        conv = convolve_stucture_factor_with_instrument(raw, setup)
+        return conv * setup.frequency_redistribution_correction
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -333,7 +337,9 @@ class IonFeatModel(Model):
             jnp.arange(plasma_state.nions),
             jnp.arange(plasma_state.nions),
         )
-        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+        for a, b in zip(
+            ion_spec1.flatten(), ion_spec2.flatten(), strict=False
+        ):
             w_R += add_wrt(a, b)
         return w_R
 
@@ -345,6 +351,7 @@ class IonFeatModel(Model):
         res = w_R * setup.instrument(
             (setup.measured_energy - setup.energy) / ureg.hbar
         )
+        res *= setup.frequency_redistribution_correction
         return res / plasma_state.mean_Z_A
 
 
@@ -550,20 +557,32 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
         mix: float = 0.0,
+        tmult: list[float] = None,
     ) -> None:
         #: The minimal radius for evaluating the potentials.
+        if tmult is None:
+            tmult = []
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
-        #: Value in [0, 1); desribes how much of the last iterations' nodal
+        #: Value in [0, 1); describes how much of the last iterations' nodal
         #: correction term should be added to the newly obtained `N_ab`. A
         #: value of zero corresponds to no parts of the old solution. Can be
         #: increased when HNC becomes numerically unstable due to high coupling
         #: strengths.
         self.mix: float = mix
+        #: List of temperature multipliers used in auxiliary HNC calculations.
+        #: HNC can be sensitive to initial guesses, and the algorithm often
+        #: converges more reliably at higher temperatures.
+        #: The multipliers allow the calculation to be run first at scaled
+        #: (higher) temperatures, using those results as initial guesses for
+        #: subsequent runs. The final multiplier of 1.0 should be omitted.
+        #: See also
+        #: :py:func:`jaxrts.hypernetted_chain.pair_distribution_function_HNC`.
+        self.tmult: list[float] = tmult
         super().__init__()
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -598,10 +617,10 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         T = plasma_state["ion-ion Potential"].T(plasma_state)
         n = plasma_state.n_i
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
-            V_s_r, V_l_k, self.r, T, n
+            V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
         )
         logger.debug(
-            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
         )
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
@@ -615,7 +634,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
 
     # The following is required to jit a Model
     def _tree_flatten(self):
-        children = (self.r_min, self.r_max, self.mix)
+        children = (self.r_min, self.r_max, self.mix, self.tmult)
         aux_data = (
             self.model_key,
             self.pot,
@@ -626,7 +645,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
         obj.model_key, obj.pot = aux_data
-        obj.r_min, obj.r_max, obj.mix = children
+        obj.r_min, obj.r_max, obj.mix, obj.tmult = children
 
         return obj
 
@@ -676,20 +695,32 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
         mix: float = 0.0,
+        tmult: list[float] = None,
     ) -> None:
         #: The minimal radius for evaluating the potentials.
+        if tmult is None:
+            tmult = []
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
-        #: Value in [0, 1); desribes how much of the last iterations' nodal
+        #: Value in [0, 1); describes how much of the last iterations' nodal
         #: correction term should be added to the newly obtained `N_ab`. A
         #: value of zero corresponds to no parts of the old solution. Can be
         #: increased when HNC becomes numerically unstable due to high coupling
         #: strengths.
         self.mix: float = mix
+        #: List of temperature multipliers used in auxiliary HNC calculations.
+        #: HNC can be sensitive to initial guesses, and the algorithm often
+        #: converges more reliably at higher temperatures.
+        #: The multipliers allow the calculation to be run first at scaled
+        #: (higher) temperatures, using those results as initial guesses for
+        #: subsequent runs. The final multiplier of 1.0 should be omitted.
+        #: See also
+        #: :py:func:`jaxrts.hypernetted_chain.pair_distribution_function_HNC`.
+        self.tmult: list[float] = tmult
         super().__init__()
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -786,10 +817,10 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         T = plasma_state["ion-ion Potential"].T(plasma_state)
         n = to_array([*plasma_state.n_i, plasma_state.n_e])
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
-            V_s_r, V_l_k, self.r, T, n
+            V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
         )
         logger.debug(
-            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
         )
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
@@ -846,14 +877,16 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
                 * S_ab[a, b]
             ).m_as(ureg.dimensionless)
 
-        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+        for a, b in zip(
+            ion_spec1.flatten(), ion_spec2.flatten(), strict=False
+        ):
             w_R += add_wrt(a, b)
         # Scale the instrument function directly with w_R
         return w_R
 
     # The following is required to jit a Model
     def _tree_flatten(self):
-        children = (self.r_min, self.r_max, self.mix)
+        children = (self.r_min, self.r_max, self.mix, self.tmult)
         aux_data = (
             self.model_key,
             self.pot,
@@ -864,7 +897,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
         obj.model_key, obj.pot = aux_data
-        obj.r_min, obj.r_max, obj.mix = children
+        obj.r_min, obj.r_max, obj.mix, obj.tmult = children
 
         return obj
 
@@ -908,7 +941,7 @@ class PeakCollection(IonFeatModel):
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
         # Create an array with the correct dimensions
         out = 0 * self.peak_function(1 / ureg.angstrom)
-        for center, factor in zip(self.k_pos, self.intensity):
+        for center, factor in zip(self.k_pos, self.intensity, strict=False):
             out += self.peak_function(setup.k - center) * factor
         return out
 
@@ -1283,6 +1316,17 @@ class BornMerminFull(FreeFreeModel):
     Model of the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
 
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
+
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
     Requires a 'BM V_eiS' model (defaults to
@@ -1296,6 +1340,11 @@ class BornMerminFull(FreeFreeModel):
     """
 
     __name__ = "BornMerminFull"
+
+    def __init__(self, RPA_rewrite: bool = True, KKT: bool = False) -> None:
+        super().__init__()
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1340,6 +1389,8 @@ class BornMerminFull(FreeFreeModel):
             mean_Z_free,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1387,6 +1438,8 @@ class BornMerminFull(FreeFreeModel):
                 S_ii,
                 V_eiS,
                 mean_Z_free,
+                rpa_rewrite=self.RPA_rewrite,
+                KKT=self.KKT,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
             lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1404,6 +1457,23 @@ class BornMerminFull(FreeFreeModel):
             jnpu.interp(E, interpE, interpchi),
         )
 
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.RPA_rewrite,
+            self.KKT,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.sample_points, obj.RPA_rewrite, obj.KKT = aux_data
+
+        return obj
+
 
 class BornMermin(FreeFreeModel):
     """
@@ -1414,11 +1484,32 @@ class BornMermin(FreeFreeModel):
     at the probing frequency at :py:attr:`~.no_of_freq` points and
     interpolating between them, after.
 
-    The number of frequencies defaults to 20. To change it, just change the
-    attribute of this model after initializing it. i.e.
+    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
+    100 otherwise. To change it, just change the attribute of this model after
+    initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin()
     >>> state["free-free scattering"].no_of_freq = 10
+
+    The boundaries for this interpolation can be set as arguments
+    ``E_cutoff_min`` and ``E_cutoff_max``. It should be set to sane defaults
+    for most use cases; however, it is recommended to revisit this setting
+    carefully. As a minimal good practice, the defaults should be adjusted to
+    the setup used. This can be done with the
+    :py:meth:`~./set_guessed_E_cutoffs` method:
+
+    >>> state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
+
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -1434,9 +1525,63 @@ class BornMermin(FreeFreeModel):
 
     __name__ = "BornMermin"
 
-    def __init__(self, no_of_freq: int = 20) -> None:
+    def __init__(
+        self,
+        no_of_freq: int | None = None,
+        RPA_rewrite: bool = True,
+        KKT: bool = False,
+        E_cutoff_min: Quantity = -1.0 * ureg.electron_volt,
+        E_cutoff_max: Quantity = -1.0 * ureg.electron_volt,
+    ) -> None:
         super().__init__()
-        self.no_of_freq: int = no_of_freq
+        if no_of_freq is not None:
+            self.no_of_freq: int = no_of_freq
+        else:
+            self.no_of_freq: int = 100 if KKT else 20
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
+        self.E_cutoff_min: Quantity = E_cutoff_min
+        self.E_cutoff_max: Quantity = E_cutoff_max
+
+    def guess_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        if setup is not None:
+            E_max = jnpu.max(
+                jnpu.absolute(setup.measured_energy - setup.energy)
+            )
+            k = setup.k
+        else:
+            lam = ureg.planck_constant * ureg.c / E_max
+            k = 4 * jnp.pi / lam
+        E_cutoff_min = free_free.guess_E_cutoff_min(plasma_state.n_e, self.KKT)
+        E_cutoff_max = free_free.guess_E_cutoff_max(
+            k, plasma_state.T_e, plasma_state.n_e, E_max, self.KKT
+        )
+        return E_cutoff_min, E_cutoff_max
+
+    def set_guessed_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(
+            plasma_state, setup, E_max
+        )
+        self.E_cutoff_min = E_cutoff_min
+        self.E_cutoff_max = E_cutoff_max
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1447,6 +1592,17 @@ class BornMermin(FreeFreeModel):
             plasma_state.update_default_model("BM S_ii", Sum_Sii())
         else:
             plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(plasma_state)
+        self.E_cutoff_min = jnpu.where(
+            self.E_cutoff_min > 0 * ureg.electron_volt,
+            self.E_cutoff_min,
+            E_cutoff_min,
+        )
+        self.E_cutoff_max = jnpu.where(
+            self.E_cutoff_max > 0 * ureg.electron_volt,
+            self.E_cutoff_max,
+            E_cutoff_max,
+        )
 
     @jax.jit
     def evaluate_raw(
@@ -1479,9 +1635,13 @@ class BornMermin(FreeFreeModel):
             V_eiS,
             plasma_state.n_e,
             mean_Z_free,
+            self.E_cutoff_min,
+            self.E_cutoff_max,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1530,7 +1690,11 @@ class BornMermin(FreeFreeModel):
                 S_ii,
                 V_eiS,
                 mean_Z_free,
+                self.E_cutoff_min,
+                self.E_cutoff_max,
                 self.no_of_freq,
+                rpa_rewrite=self.RPA_rewrite,
+                KKT=self.KKT,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
             lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1549,18 +1713,33 @@ class BornMermin(FreeFreeModel):
         )
 
     def _tree_flatten(self):
-        children = ()
+        children = (
+            self.E_cutoff_min,
+            self.E_cutoff_max,
+        )
         aux_data = (
             self.model_key,
             self.sample_points,
             self.no_of_freq,
+            self.RPA_rewrite,
+            self.KKT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+        (
+            obj.model_key,
+            obj.sample_points,
+            obj.no_of_freq,
+            obj.RPA_rewrite,
+            obj.KKT,
+        ) = aux_data
+        (
+            obj.E_cutoff_min,
+            obj.E_cutoff_max,
+        ) = children
 
         return obj
 
@@ -1574,11 +1753,32 @@ class BornMermin_Fit(FreeFreeModel):
     un-damped RPA, numerically. However, the damped RPA is still evaluated
     using the integral.
 
-    The number of frequencies defaults to 20. To change it, just change the
-    attribute of this model after initializing it. i.e.
+    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
+    100 otherwise. To change it, just change the attribute of this model after
+    initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit()
     >>> state["free-free scattering"].no_of_freq = 10
+
+    The boundaries for this interpolation can be set as arguments
+    ``E_cutoff_min`` and ``E_cutoff_max``. It should be set to sane defaults
+    for most use cases; however, it is recommended to revisit this setting
+    carefully. As a minimal good practice, the defaults should be adjusted to
+    the setup used. This can be done with the
+    :py:meth:`~./set_guessed_E_cutoffs` method:
+
+    >>> state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
+
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -1594,9 +1794,63 @@ class BornMermin_Fit(FreeFreeModel):
 
     __name__ = "BornMermin_Fit"
 
-    def __init__(self, no_of_freq: int = 20) -> None:
+    def __init__(
+        self,
+        no_of_freq: int | None = None,
+        RPA_rewrite: bool = True,
+        KKT: bool = False,
+        E_cutoff_min: Quantity = -1.0 * ureg.electron_volt,
+        E_cutoff_max: Quantity = -1.0 * ureg.electron_volt,
+    ) -> None:
         super().__init__()
-        self.no_of_freq: int = no_of_freq
+        if no_of_freq is not None:
+            self.no_of_freq: int = no_of_freq
+        else:
+            self.no_of_freq: int = 100 if KKT else 20
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
+        self.E_cutoff_min: Quantity = E_cutoff_min
+        self.E_cutoff_max: Quantity = E_cutoff_max
+
+    def guess_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        if setup is not None:
+            E_max = jnpu.max(
+                jnpu.absolute(setup.measured_energy - setup.energy)
+            )
+            k = setup.k
+        else:
+            lam = ureg.planck_constant * ureg.c / E_max
+            k = 4 * jnp.pi / lam
+        E_cutoff_min = free_free.guess_E_cutoff_min(plasma_state.n_e, self.KKT)
+        E_cutoff_max = free_free.guess_E_cutoff_max(
+            k, plasma_state.T_e, plasma_state.n_e, E_max, self.KKT
+        )
+        return E_cutoff_min, E_cutoff_max
+
+    def set_guessed_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(
+            plasma_state, setup, E_max
+        )
+        self.E_cutoff_min = E_cutoff_min
+        self.E_cutoff_max = E_cutoff_max
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1607,6 +1861,17 @@ class BornMermin_Fit(FreeFreeModel):
             plasma_state.update_default_model("BM S_ii", Sum_Sii())
         else:
             plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(plasma_state)
+        self.E_cutoff_min = jnpu.where(
+            self.E_cutoff_min > 0 * ureg.electron_volt,
+            self.E_cutoff_min,
+            E_cutoff_min,
+        )
+        self.E_cutoff_max = jnpu.where(
+            self.E_cutoff_max > 0 * ureg.electron_volt,
+            self.E_cutoff_max,
+            E_cutoff_max,
+        )
 
     @jax.jit
     def evaluate_raw(
@@ -1639,9 +1904,13 @@ class BornMermin_Fit(FreeFreeModel):
             V_eiS,
             plasma_state.n_e,
             mean_Z_free,
+            self.E_cutoff_min,
+            self.E_cutoff_max,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1689,7 +1958,11 @@ class BornMermin_Fit(FreeFreeModel):
                 S_ii,
                 V_eiS,
                 mean_Z_free,
+                self.E_cutoff_min,
+                self.E_cutoff_max,
                 self.no_of_freq,
+                rpa_rewrite=self.RPA_rewrite,
+                KKT=self.KKT,
             )
             xi0 = noninteracting_susceptibility_from_eps_RPA(eps, k)
             lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -1708,18 +1981,33 @@ class BornMermin_Fit(FreeFreeModel):
         )
 
     def _tree_flatten(self):
-        children = ()
+        children = (
+            self.E_cutoff_min,
+            self.E_cutoff_max,
+        )
         aux_data = (
             self.model_key,
             self.sample_points,
             self.no_of_freq,
+            self.RPA_rewrite,
+            self.KKT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+        (
+            obj.model_key,
+            obj.sample_points,
+            obj.no_of_freq,
+            obj.RPA_rewrite,
+            obj.KKT,
+        ) = aux_data
+        (
+            obj.E_cutoff_min,
+            obj.E_cutoff_max,
+        ) = children
 
         return obj
 
@@ -1733,11 +2021,32 @@ class BornMermin_Fortmann(FreeFreeModel):
     implementation of the local field correction, proposed by
     :cite:`Fortmann.2010`.
 
-    The number of frequencies defaults to 20. To change it, just change the
-    attribute of this model after initializing it. i.e.
+    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
+    100 otherwise. To change it, just change the attribute of this model after
+    initializing it. i.e.
 
-    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann
+    >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann()
     >>> state["free-free scattering"].no_of_freq = 10
+
+    The boundaries for this interpolation can be set as arguments
+    ``E_cutoff_min`` and ``E_cutoff_max``. It should be set to sane defaults
+    for most use cases; however, it is recommended to revisit this setting
+    carefully. As a minimal good practice, the defaults should be adjusted to
+    the setup used. This can be done with the
+    :py:meth:`~./set_guessed_E_cutoffs` method:
+
+    >>> state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
+
+    Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
+    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
+    is used, otherwise, use the formulas that are found, e.g., in
+    :cite:`Schorner.2023`.
+
+    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
+    part of the collision frequency, rather than solving the integral for the
+    imaginary part, as well.
+    We found for edge cases to avoid numerical spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -1755,9 +2064,63 @@ class BornMermin_Fortmann(FreeFreeModel):
 
     __name__ = "BornMermin_Fortmann"
 
-    def __init__(self, no_of_freq: int = 20) -> None:
+    def __init__(
+        self,
+        no_of_freq: int | None = None,
+        RPA_rewrite: bool = True,
+        KKT: bool = False,
+        E_cutoff_min: Quantity = -1.0 * ureg.electron_volt,
+        E_cutoff_max: Quantity = -1.0 * ureg.electron_volt,
+    ) -> None:
         super().__init__()
-        self.no_of_freq: int = no_of_freq
+        if no_of_freq is not None:
+            self.no_of_freq: int = no_of_freq
+        else:
+            self.no_of_freq: int = 100 if KKT else 20
+        self.RPA_rewrite: bool = RPA_rewrite
+        self.KKT: bool = KKT
+        self.E_cutoff_min: Quantity = E_cutoff_min
+        self.E_cutoff_max: Quantity = E_cutoff_max
+
+    def guess_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        if setup is not None:
+            E_max = jnpu.max(
+                jnpu.absolute(setup.measured_energy - setup.energy)
+            )
+            k = setup.k
+        else:
+            lam = ureg.planck_constant * ureg.c / E_max
+            k = 4 * jnp.pi / lam
+        E_cutoff_min = free_free.guess_E_cutoff_min(plasma_state.n_e, self.KKT)
+        E_cutoff_max = free_free.guess_E_cutoff_max(
+            k, plasma_state.T_e, plasma_state.n_e, E_max, self.KKT
+        )
+        return E_cutoff_min, E_cutoff_max
+
+    def set_guessed_E_cutoffs(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup | None = None,
+        E_max: Quantity = 500 * ureg.electron_volt,
+    ) -> None:
+        """
+        Guess and set cutoff energies for the collision frequency
+        interpolation, based on the plasma_state and setup evaluated.
+        """
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(
+            plasma_state, setup, E_max
+        )
+        self.E_cutoff_min = E_cutoff_min
+        self.E_cutoff_max = E_cutoff_max
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1768,6 +2131,17 @@ class BornMermin_Fortmann(FreeFreeModel):
             plasma_state.update_default_model("BM S_ii", Sum_Sii())
         else:
             plasma_state.update_default_model("BM S_ii", AverageAtom_Sii())
+        E_cutoff_min, E_cutoff_max = self.guess_E_cutoffs(plasma_state)
+        self.E_cutoff_min = jnpu.where(
+            self.E_cutoff_min > 0 * ureg.electron_volt,
+            self.E_cutoff_min,
+            E_cutoff_min,
+        )
+        self.E_cutoff_max = jnpu.where(
+            self.E_cutoff_max > 0 * ureg.electron_volt,
+            self.E_cutoff_max,
+            E_cutoff_max,
+        )
 
     @jax.jit
     def evaluate_raw(
@@ -1800,9 +2174,13 @@ class BornMermin_Fortmann(FreeFreeModel):
             V_eiS,
             plasma_state.n_e,
             mean_Z_free,
+            self.E_cutoff_min,
+            self.E_cutoff_max,
             setup.measured_energy - setup.energy,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         ff = See_0 * mean_Z_free
         # Return 0 scattering if there are no free electrons
@@ -1849,24 +2227,43 @@ class BornMermin_Fortmann(FreeFreeModel):
             S_ii,
             V_eiS,
             mean_Z_free,
+            self.E_cutoff_min,
+            self.E_cutoff_max,
             plasma_state["ee-lfc"].evaluate(plasma_state, setup),
             self.no_of_freq,
+            rpa_rewrite=self.RPA_rewrite,
+            KKT=self.KKT,
         )
         return xi
 
     def _tree_flatten(self):
-        children = ()
+        children = (
+            self.E_cutoff_min,
+            self.E_cutoff_max,
+        )
         aux_data = (
             self.model_key,
             self.sample_points,
             self.no_of_freq,
+            self.RPA_rewrite,
+            self.KKT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.sample_points, obj.no_of_freq = aux_data
+        (
+            obj.model_key,
+            obj.sample_points,
+            obj.no_of_freq,
+            obj.RPA_rewrite,
+            obj.KKT,
+        ) = aux_data
+        (
+            obj.E_cutoff_min,
+            obj.E_cutoff_max,
+        ) = children
 
         return obj
 
@@ -1882,6 +2279,11 @@ class SchumacherImpulse(ScatteringModel):
     asymmetric correction to the impulse approximation, as given in the
     aforementioned paper.
 
+    Should yield similar results as
+    :py:class:`~.SchumacherImpulseColdEdges`. However, rather than using
+    absorption edges being of the cold sample, here we use edges of
+    isolated ions in a plasma instead.
+
     Requires a 'form-factors' model (defaults to
     :py:class:`~PaulingFormFactors`).
 
@@ -1891,6 +2293,173 @@ class SchumacherImpulse(ScatteringModel):
 
     allowed_keys = ["bound-free scattering"]
     __name__ = "SchumacherImpulse"
+
+    def __init__(self, r_k: float | None = None) -> None:
+        """
+        r_k is the correction given in :cite:`Gregori.2004`. If None, or if a
+        negative value is given, we use the formula given by
+        :cite:`Gregori.2004`. Otherwise, it is just the value provided by the
+        user.
+        """
+        super().__init__()
+        #: The value for r_k (see :cite:`Gregori.2004`). A negative value means
+        #: to use the calculation given in the aforementioned paper.
+        self.r_k = r_k
+        if self.r_k is None:
+            self.r_k = -1.0
+        # This is required to catch a potential int input by a user
+        if isinstance(self.r_k, int):
+            self.r_k = float(self.r_k)
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model("form-factors", PaulingFormFactors())
+        plasma_state.update_default_model("ipd", Neglect())
+
+    @jax.jit
+    def evaluate_raw(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+    ) -> jnp.ndarray:
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
+        omega_0 = setup.energy / ureg.hbar
+        omega = omega_0 - setup.measured_energy / ureg.hbar
+        x = plasma_state.number_fraction
+
+        out = 0 * ureg.second
+        for idx in range(plasma_state.nions):
+            element_atomic_number = plasma_state.Z_A[idx]
+            ion_charge_state = plasma_state.Z_free[idx]
+
+            # Define a function to calculate scattering for a single integer
+            # charge state
+            def calculate_scattering_for_charge_state(charge_state):
+                E_b = (
+                    plasma_state.ions[idx].get_binding_energies(charge_state)
+                    + plasma_state.models["ipd"].evaluate(plasma_state, None)[
+                        idx
+                    ]
+                )
+                E_b = jnpu.where(
+                    E_b < 0 * ureg.electron_volt, 0 * ureg.electron_volt, E_b
+                )
+
+                Z_core = element_atomic_number - charge_state
+                Zeff = (
+                    element_atomic_number
+                ) - form_factors.pauling_size_screening_constants(Z_core)
+
+                population = electron_distribution_ionized_state(Z_core)
+
+                def rk_on(r_k_val):
+                    # Gregori.2004, Eqn 20
+                    fi = plasma_state["form-factors"].evaluate(
+                        plasma_state, setup
+                    )[:, idx]
+                    new_r_k = 1 - jnp.sum(population * (fi) ** 2) / Z_core
+                    new_r_k = jax.lax.cond(
+                        Z_core == 0, lambda: 1.0, lambda: new_r_k
+                    )
+                    return new_r_k
+
+                def rk_off(r_k):
+                    """
+                    Use the rk provided by the user
+                    """
+                    return r_k
+
+                r_k = jax.lax.cond(self.r_k < 0, rk_on, rk_off, self.r_k)
+                B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (
+                    2 * ureg.electron_mass
+                )
+                factor = r_k / (Z_core * B**3).m_as(ureg.dimensionless)
+                sbe = factor * bound_free.J_impulse_approx(
+                    omega, k, population, Zeff, E_b
+                )
+                val = sbe * Z_core
+                return jnpu.where(
+                    jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
+                )
+
+            # Check if the ionization state is an integer
+            is_integer = ion_charge_state == jnp.floor(ion_charge_state)
+
+            def integer_case(charge_state):
+                return calculate_scattering_for_charge_state(charge_state)
+
+            def non_integer_case(charge_state):
+                Z_low = jnp.floor(charge_state)
+                Z_high = jnp.ceil(charge_state)
+
+                # Define the case where the higher ionization state is a bare nucleus
+                def handle_bare_nucleus_case(_):
+                    # Weight of the lower state is 100% of the remaining bound electrons
+                    weight_low = element_atomic_number - charge_state
+                    sbe_low = calculate_scattering_for_charge_state(Z_low)
+                    # Contribution is only from the weighted lower state
+                    return weight_low * sbe_low
+
+                # Define the normal case where both states have bound electrons
+                def handle_normal_case(_):
+                    weight_high = charge_state - Z_low
+                    weight_low = 1.0 - weight_high
+                    sbe_low = calculate_scattering_for_charge_state(Z_low)
+                    sbe_high = calculate_scattering_for_charge_state(Z_high)
+                    return weight_low * sbe_low + weight_high * sbe_high
+
+                # Condition to check if the higher ionization state is a bare nucleus
+                is_bare_nucleus = Z_high >= element_atomic_number
+
+                return jax.lax.cond(
+                    is_bare_nucleus,
+                    handle_bare_nucleus_case,
+                    handle_normal_case,
+                    None,
+                )
+
+            total_sbe_for_element = jax.lax.cond(
+                is_integer, integer_case, non_integer_case, ion_charge_state
+            )
+
+            out += total_sbe_for_element * x[idx]
+
+        return out / plasma_state.mean_Z_A
+
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (
+            self.model_key,
+            self.sample_points,
+            self.r_k,
+        )  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        obj.model_key, obj.sample_points, obj.r_k = aux_data
+
+        return obj
+
+
+class SchumacherImpulseColdEdges(ScatteringModel):
+    """
+    Bound-free scattering based on the Schumacher Impulse Approximation
+    :cite:`Schumacher.1975`. The implementation considers the first order
+    asymmetric correction to the impulse approximation, as given in the
+    aforementioned paper.
+
+    Uses cold absorption edges, regardless of the ionization state.
+
+    Requires a 'form-factors' model (defaults to
+    :py:class:`~PaulingFormFactors`).
+
+    Requires an 'ipd' model (defaults to
+    :py:class:`~Neglect`).
+    """
+
+    allowed_keys = ["bound-free scattering"]
+    __name__ = "SchumacherImpulseColdEdges"
 
     def __init__(self, r_k: float | None = None) -> None:
         """
@@ -1929,7 +2498,7 @@ class SchumacherImpulse(ScatteringModel):
         for idx in range(plasma_state.nions):
             Z_c = plasma_state.Z_core[idx]
             E_b = (
-                plasma_state.ions[idx].binding_energies
+                plasma_state.ions[idx].cold_binding_energies
                 + plasma_state.models["ipd"].evaluate(plasma_state, None)[idx]
             )
             E_b = jnpu.where(
@@ -3041,6 +3610,47 @@ class ElectronicLFCUtsumiIchimaru(Model):
         )
 
 
+class ElectronicLFCDornheimAnalyticalInterp(Model):
+    """
+    Static local field correction model by Dornheim et al
+    :cite:`Dornheim.2021`. Their model is an analytical interpolation of
+    ab-initio PIMC simulations.
+
+    See Also
+    --------
+    jaxrts.ee_localfieldcorrections.eelfc_dornheim2021
+        Function used to calculate the LFC.
+    """
+
+    allowed_keys = ["ee-lfc"]
+    __name__ = "ElectronicLFCDornheimAnalyticalInterp"
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_dornheim2021(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_dornheim2021(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
+
 class ElectronicLFCStaticInterpolation(Model):
     """
     Static local field correction model that interpolates between the
@@ -3194,7 +3804,9 @@ class Sum_Sii(Model):
             jnp.arange(plasma_state.nions),
             jnp.arange(plasma_state.nions),
         )
-        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+        for a, b in zip(
+            ion_spec1.flatten(), ion_spec2.flatten(), strict=False
+        ):
             S_ii += add_Sii(a, b)
         return S_ii
 
@@ -3214,14 +3826,33 @@ class AverageAtom_Sii(Model):
         rmin: Quantity = 0.001 * ureg.a_0,
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
+        mix: float = 0.0,
+        tmult: list[float] = None,
     ) -> None:
         #: The minimal radius for evaluating the potentials.
+        if tmult is None:
+            tmult = []
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
+        #: Value in [0, 1); describes how much of the last iterations' nodal
+        #: correction term should be added to the newly obtained `N_ab`. A
+        #: value of zero corresponds to no parts of the old solution. Can be
+        #: increased when HNC becomes numerically unstable due to high coupling
+        #: strengths.
+        self.mix: float = mix
+        #: List of temperature multipliers used in auxiliary HNC calculations.
+        #: HNC can be sensitive to initial guesses, and the algorithm often
+        #: converges more reliably at higher temperatures.
+        #: The multipliers allow the calculation to be run first at scaled
+        #: (higher) temperatures, using those results as initial guesses for
+        #: subsequent runs. The final multiplier of 1.0 should be omitted.
+        #: See also
+        #: :py:func:`jaxrts.hypernetted_chain.pair_distribution_function_HNC`.
+        self.tmult: list[float] = tmult
         super().__init__()
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -3264,10 +3895,10 @@ class AverageAtom_Sii(Model):
         T = aaState["ion-ion Potential"].T(aaState)
         n = aaState.n_i
         g, niter = hypernetted_chain.pair_distribution_function_HNC(
-            V_s_r, V_l_k, self.r, T, n
+            V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
         )
         logger.debug(
-            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
         )
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
@@ -3281,7 +3912,7 @@ class AverageAtom_Sii(Model):
 
     # The following is required to jit a Model
     def _tree_flatten(self):
-        children = (self.r_min, self.r_max)
+        children = (self.r_min, self.r_max, self.mix, self.tmult)
         aux_data = (
             self.model_key,
             self.pot,
@@ -3292,7 +3923,7 @@ class AverageAtom_Sii(Model):
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
         obj.model_key, obj.pot = aux_data
-        obj.r_min, obj.r_max = children
+        obj.r_min, obj.r_max, obj.mix, obj.tmult = children
 
         return obj
 
@@ -3415,6 +4046,7 @@ _all_models = [
     DetailedBalance,
     EckerKroellIPD,
     ElectronicLFCConstant,
+    ElectronicLFCDornheimAnalyticalInterp,
     ElectronicLFCGeldartVosko,
     ElectronicLFCStaticInterpolation,
     ElectronicLFCUtsumiIchimaru,
@@ -3440,6 +4072,7 @@ _all_models = [
     RPA_NoDamping,
     ScatteringModel,
     SchumacherImpulse,
+    SchumacherImpulseColdEdges,
     SchumacherImpulseFitRk,
     Sum_Sii,
     StewartPyattIPD,

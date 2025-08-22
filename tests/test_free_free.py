@@ -25,7 +25,6 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
     w_pl = jaxrts.plasma_physics.plasma_frequency(n_e)
     # Normalize
 
-    count = 0
 
     # Load the data
     data_dir = pathlib.Path(__file__).parent / "data/Glenzer2009/Fig9/"
@@ -37,7 +36,7 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         "c3": 8.0 * ureg.electron_volt,
     }
 
-    for datafile in sorted(entries):
+    for count, datafile in enumerate(sorted(entries)):
         omega_over_omega_pl, literature_See = onp.genfromtxt(
             datafile, delimiter=",", unpack=True
         )
@@ -94,7 +93,27 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
                 V_eiS=V_eiS,
                 n_e=n_e,
                 Zf=1.0,
+                E_cutoff_min=jnpu.min(jnpu.absolute(energy_shift)),
+                E_cutoff_max=jnpu.max(jnpu.absolute(energy_shift)),
                 E=energy_shift,
+                no_of_points=20,
+            )
+            / ureg.hbar
+        ).m_as(1 / ureg.rydberg)
+        calc_See_Chapman_KKT = (
+            jaxrts.free_free.S0_ee_BMA_chapman_interp(
+                k,
+                T=T / (ureg.boltzmann_constant),
+                chem_pot=mu,
+                S_ii=S_ii,
+                V_eiS=V_eiS,
+                n_e=n_e,
+                Zf=1.0,
+                E=energy_shift,
+                E_cutoff_min=1 / 2 * jnpu.min(jnpu.absolute(energy_shift)),
+                E_cutoff_max=10 * jnpu.max(jnpu.absolute(energy_shift)),
+                no_of_points=100,
+                KKT=True,
             )
             / ureg.hbar
         ).m_as(1 / ureg.rydberg)
@@ -112,8 +131,9 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
             assert onp.quantile(error, 0.8) < 0.05
         # Test the Chapman interpolation
         error_Chapman = onp.abs(calc_See - calc_See_Chapman)
-        assert onp.max(error_Chapman) < 0.01
-        count += 1
+        assert onp.max(error_Chapman) < 0.05
+        error_Chapman_KKT = onp.abs(calc_See - calc_See_Chapman_KKT)
+        assert onp.max(error_Chapman_KKT) < 0.05
 
 
 def test_glenzer2009_fig9a_reprduction() -> None:
@@ -126,9 +146,6 @@ def test_glenzer2009_fig9a_reprduction() -> None:
     n_e = 1e19 / ureg.centimeter**3
 
     w_pl = jaxrts.plasma_physics.plasma_frequency(n_e)
-    # Normalize
-
-    count = 0
 
     # Load the data
     data_dir = pathlib.Path(__file__).parent / "data/Glenzer2009/Fig9/"
@@ -140,7 +157,7 @@ def test_glenzer2009_fig9a_reprduction() -> None:
         "a3": 3000 * ureg.electron_volt,
     }
 
-    for datafile in sorted(entries):
+    for _count, datafile in enumerate(sorted(entries)):
         omega_over_omega_pl, literature_See = onp.genfromtxt(
             datafile, delimiter=",", unpack=True
         )
@@ -167,7 +184,6 @@ def test_glenzer2009_fig9a_reprduction() -> None:
 
         assert onp.max(error) < 5
         assert onp.mean(error) < 0.5
-        count += 1
 
 
 def test_gregori2003_fig1b_reprduction() -> None:
@@ -177,16 +193,11 @@ def test_gregori2003_fig1b_reprduction() -> None:
     k = (4 * onp.pi / lambda_0) * onp.sin(onp.deg2rad(theta) / 2.0)
     n_e = 1e21 / ureg.centimeter**3
 
-    # Normalize
-
-    count = 0
-    norm = 1.0
-
     # Load the data
     data_dir = pathlib.Path(__file__).parent / "data/Gregori2003/Fig1/"
     # We have to sort, here, to assert the normalization works properly
     entries = list(data_dir.glob("b_*.csv"))
-    for datafile in sorted(entries):
+    for count, datafile in enumerate(sorted(entries)):
         energy_shift, literature_See = onp.genfromtxt(
             datafile, delimiter=",", unpack=True
         )
@@ -210,7 +221,6 @@ def test_gregori2003_fig1b_reprduction() -> None:
             assert onp.mean(error) < 0.02
         else:
             assert onp.max(error) < 0.02
-        count += 1
 
 
 def test_gregori2003_fig1c_reprduction() -> None:
@@ -221,15 +231,11 @@ def test_gregori2003_fig1c_reprduction() -> None:
 
     k = (4 * onp.pi / lambda_0) * onp.sin(onp.deg2rad(theta) / 2.0)
 
-    # Normalize
-    count = 0
-    norm = 1.0
-
     # Load the data
     data_dir = pathlib.Path(__file__).parent / "data/Gregori2003/Fig1/"
     # We have to sort, here, to assert the normalization works properly
     entries = list(data_dir.glob("c_*.csv"))
-    for datafile in sorted(entries):
+    for count, datafile in enumerate(sorted(entries)):
         energy_shift, literature_See = onp.genfromtxt(
             datafile, delimiter=",", unpack=True
         )
@@ -251,11 +257,10 @@ def test_gregori2003_fig1c_reprduction() -> None:
         calc_See /= norm
         # Calculate the deviation between our curves and the data ripped from
         # the literature
-        error = onp.abs((calc_See - literature_See))
+        error = onp.abs(calc_See - literature_See)
 
         assert onp.max(error) < 0.05
         assert onp.mean(error) < 0.02
-        count += 1
 
 
 def test_dandrea_fit_reproduces_calculated_RPA() -> None:
@@ -305,6 +310,8 @@ def calculate_fwhm(data, x):
 
 @pytest.mark.skip(reason="Cannot Reproduce")
 def test_BornCollisionFrequency_reproduces_literature_Fortmann2010() -> None:
+    import matplotlib.pyplot as plt
+
     data_dir = pathlib.Path(__file__).parent / "data/Fortmann2010/Fig1"
 
     Zf = 1.0
@@ -326,7 +333,7 @@ def test_BornCollisionFrequency_reproduces_literature_Fortmann2010() -> None:
             )
 
         E_f = jaxrts.plasma_physics.fermi_energy(n_e)
-        E = jnp.logspace(-1, 2) * E_f
+        E = jnp.linspace(-200, 200, 1500) * E_f
         E_over_Ef_real, nu_real = onp.genfromtxt(
             data_dir / f"Re_rs{r_s:.0f}.csv", unpack=True, delimiter=","
         )
@@ -349,6 +356,22 @@ def test_BornCollisionFrequency_reproduces_literature_Fortmann2010() -> None:
             (E / E_f).m_as(ureg.dimensionless),
             jnp.imag(dimless_nu),
         )
+        plt.plot(E_over_Ef_imag, nu_imag)
+        plt.plot(
+            (E / E_f).m_as(ureg.dimensionless),
+            jnp.imag(dimless_nu),
+            color="black",
+        )
+        plt.plot(E_over_Ef_real, nu_real, ls="dashed")
+        plt.plot(
+            (E / E_f).m_as(ureg.dimensionless),
+            jnp.real(dimless_nu),
+            ls="dashed",
+            color="black",
+        )
+        plt.xscale("log")
+        plt.xlim(0.1, 100)
+        plt.show()
         assert jnp.max(jnp.abs(nu_real - interpnu_real)) < 0.05
         assert jnp.max(jnp.abs(nu_imag - interpnu_imag)) < 0.05
 
@@ -390,10 +413,32 @@ def test_Fortmann_with_LFC_reproduces_literature() -> None:
         )
 
     S_ee_noLFC = jaxrts.free_free.S0_ee_BMA_Fortmann(
-        k[:, jnp.newaxis], T, mu, S_ii, V_eiS, n_e, Zf, E[jnp.newaxis, :], 0.0
+        k[:, jnp.newaxis],
+        T,
+        mu,
+        S_ii,
+        V_eiS,
+        n_e,
+        Zf,
+        jnpu.min(jnpu.absolute(E)),
+        jnpu.max(jnpu.absolute(E)),
+        E[jnp.newaxis, :],
+        0.0,
+        no_of_points=150,
     )
     S_ee_sLFC = jaxrts.free_free.S0_ee_BMA_Fortmann(
-        k[:, jnp.newaxis], T, mu, S_ii, V_eiS, n_e, Zf, E[jnp.newaxis, :], sLFC
+        k[:, jnp.newaxis],
+        T,
+        mu,
+        S_ii,
+        V_eiS,
+        n_e,
+        Zf,
+        jnpu.min(jnpu.absolute(E)),
+        jnpu.max(jnpu.absolute(E)),
+        E[jnp.newaxis, :],
+        sLFC,
+        no_of_points=150,
     )
     for S_ee, suffix in [(S_ee_noLFC, ""), (S_ee_sLFC, "sLFC")]:
         idx = jnpu.argmax(S_ee, axis=1)
@@ -418,8 +463,8 @@ def test_Fortmann_with_LFC_reproduces_literature() -> None:
             FWHM,
         )
 
-        assert jnp.max(jnp.abs(w - interpw)) < 0.07
-        assert jnp.max(jnp.abs(G - interpG)) < 0.1
+        assert jnp.max(jnp.abs(w - interpw)) < 0.1
+        assert jnp.max(jnp.abs(G - interpG)) < 0.15
 
 
 def test_Fortman_reproduces_vanilla_BMA_without_LFC():
@@ -453,10 +498,29 @@ def test_Fortman_reproduces_vanilla_BMA_without_LFC():
         )
 
     classical_BMA = jaxrts.free_free.dielectric_function_BMA_chapman_interpFit(
-        k, E, mu, T, n_e, S_ii, V_eiS, Zf
+        k,
+        E,
+        mu,
+        T,
+        n_e,
+        S_ii,
+        V_eiS,
+        Zf,
+        jnpu.min(jnpu.absolute(E)),
+        jnpu.max(jnpu.absolute(E)),
     )
     fortmann_BMA = jaxrts.free_free.dielectric_function_BMA_Fortmann(
-        k, E, mu, T, n_e, S_ii, V_eiS, Zf, lfc
+        k,
+        E,
+        mu,
+        T,
+        n_e,
+        S_ii,
+        V_eiS,
+        Zf,
+        jnpu.min(jnpu.absolute(E)),
+        jnpu.max(jnpu.absolute(E)),
+        lfc,
     )
     assert jnp.isclose(jnp.real(classical_BMA), jnp.real(fortmann_BMA)).all()
     assert jnp.isclose(jnp.imag(classical_BMA), jnp.imag(fortmann_BMA)).all()

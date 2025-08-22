@@ -21,8 +21,7 @@ import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
 
 import jaxrts
-from jaxrts import hnc_potentials
-from jaxrts import ureg
+from jaxrts import hnc_potentials, ureg
 
 plt.style.use("science")
 

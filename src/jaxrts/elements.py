@@ -8,7 +8,10 @@ import jax
 import jpu.numpy as jnpu
 from jax import numpy as jnp
 
-from .helpers import invert_dict, orbital_array
+from .absorption_edges_ionized_ions_data import (
+    ENERGY_DATA as _absorption_edges_ionized_atoms,
+)
+from .helpers import invert_dict, orbital_array, orbital_map
 from .units import Quantity, ureg
 
 _element_symbols = {
@@ -379,7 +382,7 @@ _ionic_radii = {
 }
 
 # This data is taken from hephaestus https://bruceravel.github.io/demeter/
-_absorption_edges = {
+_cold_absorption_edges = {
     1: [13.6, 0, 0, 0, 0, 0, 0, 0, 0],
     2: [24.6, 0, 0, 0, 0, 0, 0, 0, 0],
     3: [54.8, 5.3, 0, 0, 0, 0, 0, 0, 0],
@@ -516,6 +519,39 @@ _absorption_edges = {
         0,
     ],
 }
+
+
+max_Z = max(d["Z"] for d in _absorption_edges_ionized_atoms)
+max_charge_state = (
+    max(
+        max(ion_data["ions"].keys())
+        for ion_data in _absorption_edges_ionized_atoms
+    )
+    if _absorption_edges_ionized_atoms
+    else 0
+)
+
+
+_idx_to_orbital = invert_dict(orbital_map)
+num_orbitals = len(orbital_map)
+
+# Initialize a 3D array: Atomic number x Charge x Orbital_Idx
+_edge_position_table_ionization_states = jnp.zeros(
+    (max_Z + 1, max_charge_state + 1, num_orbitals), dtype=jnp.float32
+)
+
+# Fill the _edge_position_table_ionization_states with ionization energies
+for element_data in _absorption_edges_ionized_atoms:
+    Z = element_data["Z"]
+    for charge, ion_info in element_data["ions"].items():
+        for orbital, energy in ion_info["ionization_energies_eV"].items():
+            if orbital in orbital_map:
+                orbital_idx = orbital_map[orbital]
+                _edge_position_table_ionization_states = (
+                    _edge_position_table_ionization_states.at[
+                        Z, charge, orbital_idx
+                    ].set(energy)
+                )
 
 # fmt: off
 
@@ -1550,7 +1586,7 @@ def electron_distribution_ionized_state(Z_core: float) -> jnp.ndarray:
     jnp.ndarray
         An array of populations.
     """
-    S1s = jnpu.interp(Z_core, jnp.array([1, 2]), jnp.array([1, 2]))
+    S1s = jnpu.interp(Z_core, jnp.array([0, 2]), jnp.array([0, 2]))
     S2s = jnpu.interp(Z_core, jnp.array([2, 4]), jnp.array([0, 2]))
     S2p = jnpu.interp(Z_core, jnp.array([4, 10]), jnp.array([0, 6]))
     S3s = jnpu.interp(Z_core, jnp.array([10, 12]), jnp.array([0, 2]))
@@ -1597,25 +1633,25 @@ class Element:
         if isinstance(identifier, str):
             #: The atomic number of the element
             self.Z = invert_dict(_element_symbols)[identifier]
-            #: The abbreviated symbol no the element
+            #: The abbreviated symbol of the element
             self.symbol = identifier
         else:
             self.Z = int(identifier)
             self.symbol = _element_symbols[self.Z]
-
         #: The name of the element
         self.name: str = _element_names[self.Z]
         #: The electron distribution, returned as a flat array
         self.electron_distribution = electron_distribution_ionized_state(
             self.Z
         )
-
         #: The atomic mass of this element
         self.atomic_mass: Quantity = _element_masses[self.Z] * (
             1 * ureg.atomic_mass_constant
         )
+        self.atomic_radius_calc = _atomic_radii_calc[self.Z] * ureg.picometer
+        self.ionization = Ionization(self.Z)
 
-        Eb = _absorption_edges[self.Z]
+        Eb = _cold_absorption_edges[self.Z]
         Eb1s = Eb[0]
         Eb2s = Eb[1]
         Eb2p = 1 / 2 * (Eb[2] + Eb[3])
@@ -1627,28 +1663,37 @@ class Element:
         Eb4d = 0
         Eb4f = 0
 
-        self.binding_energies = jnp.array(
+        #: Returns the binding energies of the electrons in the ground state
+        #: of the neutral atom, i.e., the binding energies of the electrons
+        #: in the neutral atom.
+        self.cold_binding_energies = jnp.array(
             [Eb1s, Eb2s, Eb2p, Eb3s, Eb3p, Eb3d, Eb4s, Eb4p, Eb4d, Eb4f]
         ) * (1 * ureg.electron_volt)
 
-        self.atomic_radius_calc = _atomic_radii_calc[self.Z] * ureg.picometer
-        self.ionization = Ionization(self.Z)
+    def get_binding_energies(
+        self, ion_charge: int | jnp.ndarray
+    ) -> jnp.ndarray:
+        safe_Z = jnp.clip(
+            self.Z, 0, _edge_position_table_ionization_states.shape[0] - 1
+        )
+        safe_ion_charge = jnp.round(ion_charge).astype(jnp.int32)
+        safe_ion_charge = jnp.clip(
+            safe_ion_charge,
+            0,
+            _edge_position_table_ionization_states.shape[1] - 1,
+        )
+        orbital_energies = _edge_position_table_ionization_states[
+            safe_Z, safe_ion_charge, :
+        ]
+        return orbital_energies * (1 * ureg.electron_volt)
 
     def __eq__(self, other: Any) -> bool:
-        """
-        If this function returns ``True``, the two instances self and other are
-        considered identical.
-        """
         if not isinstance(other, Element):
-            # don't attempt to compare against unrelated types
             raise NotImplementedError(
-                "Cannot compare {} to an object of type {}".format(
-                    type(self), type(other)
-                )
+                f"Cannot compare {type(self)} to an object of type {type(other)}"
             )
         if isinstance(other, MixElement):
             return False
-
         return self.Z == other.Z
 
     def __repr__(self) -> str:

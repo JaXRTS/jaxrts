@@ -10,11 +10,13 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 from quadax import quadts as quad
 
+from .ee_localfieldcorrections_dornheim_2021 import G_analytical as dornheim_G
 from .plasma_physics import (
     coupling_param,
     fermi_energy,
     fermi_wavenumber,
     interparticle_spacing,
+    wiegner_seitz_radius,
 )
 from .units import Quantity, ureg
 
@@ -289,6 +291,22 @@ def eelfc_interpolationgregori_farid(
     return (
         eelfc_farid(k, T_e, n_e) + Theta * eelfc_geldartvosko(k, T_e, n_e)
     ) / (1 + Theta)
+
+
+@jax.jit
+def eelfc_dornheim2021(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
+    """
+    Use the analytical interpolation of the ab initio LFC from
+    :cite:`Dornheim.2021`
+    """
+
+    Theta = (T_e / (fermi_energy(n_e) / (1 * ureg.boltzmann_constant))).m_as(
+        ureg.dimensionless
+    )
+    k_over_k_f = (k / fermi_wavenumber(n_e)).m_as(ureg.dimensionless)
+    rs = (wiegner_seitz_radius(n_e) / (1 * ureg.a0)).m_as(ureg.dimensionless)
+
+    return dornheim_G(k_over_k_f, rs, Theta)
 
 
 # Dynamic local-field corrections

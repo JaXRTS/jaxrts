@@ -1,10 +1,9 @@
 import pathlib
 
+import jpu.numpy as jnpu
 import numpy as onp
 import pytest
-import jax
 from jax import numpy as jnp
-import jpu.numpy as jnpu
 
 import jaxrts
 
@@ -25,7 +24,7 @@ def test_arkhipov_static_structure_factors_literature():
     a = r_s * ureg.a_0
     n_e = 3 / (4 * jnp.pi * a**3)
 
-    for fig, gam in zip([3, 4], [0.1, 1]):
+    for fig, gam in zip([3, 4], [0.1, 1], strict=False):
         data_dir = (
             pathlib.Path(__file__).parent / f"data/Arkhipov1998/Fig{fig}/"
         )

@@ -11,16 +11,16 @@ def main():
 
     fig, ax = plt.subplots(ncols=2, nrows=2, sharex=True, squeeze=True)
 
-    axis_count = 0
-
     axis = ax.flatten()
 
-    for T in [
-        20 * ureg.electron_volt / ureg.boltzmann_constant,
-        10 * ureg.electron_volt / ureg.boltzmann_constant,
-        4 * ureg.electron_volt / ureg.boltzmann_constant,
-        1 * ureg.electron_volt / ureg.boltzmann_constant,
-    ]:
+    for axis_count, T in enumerate(
+        [
+            20 * ureg.electron_volt / ureg.boltzmann_constant,
+            10 * ureg.electron_volt / ureg.boltzmann_constant,
+            4 * ureg.electron_volt / ureg.boltzmann_constant,
+            1 * ureg.electron_volt / ureg.boltzmann_constant,
+        ]
+    ):
         Z = 2
 
         n_i = (1.5e23 / ureg.cc).to(1 / ureg.angstrom**3)
@@ -73,7 +73,7 @@ def main():
             + str(T.magnitude)
             + " eV\n"
             + r"$\Gamma_{\text{ii}} = $"
-            + "{:.1f}".format(Gamma.m_as(ureg.dimensionless)[0, 0]),
+            + f"{Gamma.m_as(ureg.dimensionless)[0, 0]:.1f}",
             (0.4, 1.2),
         )
 
@@ -86,7 +86,6 @@ def main():
             axis[axis_count].set_xlabel("k [d$_i^{-1}$]")
         if axis_count in [0, 2]:
             axis[axis_count].set_ylabel(r"S$_{ii}$(k)")
-        axis_count += 1
     plt.show()
 
     # assert jnp.max(jnp.abs(f_ft_analytical - f_fft)) < 1e-8
