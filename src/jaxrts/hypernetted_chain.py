@@ -365,7 +365,8 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
     V_s, V_l_k, r, T_ab, n, m, mix=0.0
 ):
     """
-    See :cite:`Shaffer.2017`, solved Eqns. 7. This reference fixes some typos in the seminal work of :cite:`Seuferling.1989`.
+    See :cite:`Shaffer.2017`, solved Eqns. 7. This reference fixes some typos
+    in the seminal work of :cite:`Seuferling.1989`.
     """
     delta = 1e-6
 
@@ -571,7 +572,7 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
 
 
 @jax.jit
-def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=[]):
+def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=None):
     """
     Calculate the Pair distribution function in the Hypernetted Chain approach,
     as it was published by :cite:`Wunsch.2011`.
@@ -592,6 +593,8 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=[]):
     multiplier of `1.0` is appended, performing a last HNC cycle for the
     desired temperature.
     """
+    if tmult is None:
+        tmult = []
     iterations = 0
     delta = 1e-6
 

@@ -5,7 +5,6 @@ import numpy as np
 from jax import numpy as jnp
 
 import jaxrts
-
 from jaxrts.ipd import (
     ipd_debye_hueckel,
     ipd_stewart_pyatt,
@@ -57,8 +56,8 @@ def test_ipd_zeng2022():
     # these.
     assert jnpu.nanmax(jnp.absolute((ipdDH - ipdDH_calc) / ipdDH)[10:]) < 0.08
     assert jnpu.nanmax(jnp.absolute((ipdSP - ipdSP_calc) / ipdSP)[10:]) < 0.02
-    assert jnpu.max(jnp.absolute((ipdDH - ipdDH_calc))[:10]) < 10  # eV
-    assert jnpu.max(jnp.absolute((ipdSP - ipdSP_calc))[:10]) < 4  # eV
+    assert jnpu.max(jnp.absolute(ipdDH - ipdDH_calc)[:10]) < 10  # eV
+    assert jnpu.max(jnp.absolute(ipdSP - ipdSP_calc)[:10]) < 4  # eV
 
 
 def test_ipd_valid_for_Z_f_equals_0():

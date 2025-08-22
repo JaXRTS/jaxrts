@@ -13,7 +13,7 @@ def generate_available_model_overview_page():
             if "__class__" in dir(obj_name):
                 attributes = getattr(module, obj_name)
                 if "allowed_keys" in dir(attributes):
-                    keys = getattr(attributes, "allowed_keys")
+                    keys = attributes.allowed_keys
                     if (
                         ("Model" not in obj_name)
                         & ("model" not in obj_name)
@@ -40,7 +40,7 @@ def generate_available_model_overview_page():
 
         """
         )
-        f.write(", ".join([f"``{key}``" for key in all_models.keys()]))
+        f.write(", ".join([f"``{key}``" for key in all_models]))
         f.write(
             r"""
 
@@ -60,13 +60,13 @@ def generate_available_model_overview_page():
                 pathlib.Path(__file__).parent / f"available_models/{key}"
             )
             if notefile.exists():
-                with open(notefile, "r") as nf:
+                with open(notefile) as nf:
                     lines = nf.readlines()
                 f.write("\n")
                 f.writelines(lines)
                 f.write("\n")
 
-            f.write(f".. autosummary::\n")
+            f.write(".. autosummary::\n")
             f.write("    :toctree: _autosummary\n")
             f.write("    :recursive:\n\n")
             for model in model_list:

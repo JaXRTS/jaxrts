@@ -8,11 +8,11 @@ import jax
 import jpu.numpy as jnpu
 from jax import numpy as jnp
 
-from .helpers import invert_dict, orbital_array, orbital_map
-from .units import Quantity, ureg
 from .absorption_edges_ionized_ions_data import (
     ENERGY_DATA as _absorption_edges_ionized_atoms,
 )
+from .helpers import invert_dict, orbital_array, orbital_map
+from .units import Quantity, ureg
 
 _element_symbols = {
     1: "H",  # Hydrogen
@@ -1690,9 +1690,7 @@ class Element:
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Element):
             raise NotImplementedError(
-                "Cannot compare {} to an object of type {}".format(
-                    type(self), type(other)
-                )
+                f"Cannot compare {type(self)} to an object of type {type(other)}"
             )
         if isinstance(other, MixElement):
             return False

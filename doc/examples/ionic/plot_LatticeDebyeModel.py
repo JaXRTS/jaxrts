@@ -20,9 +20,8 @@ steps.
 from pathlib import Path
 
 import jax.numpy as jnp
-import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
-import scienceplots
+import matplotlib.pyplot as plt
 import numpy as onp
 
 import jaxrts

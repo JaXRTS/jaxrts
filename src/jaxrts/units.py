@@ -25,7 +25,7 @@ def to_array(obj) -> jnp.ndarray:
             unit = obj.units
             return jnp.array(obj.m_as(unit)) * unit
     # Try to unpack a list or tuple, here
-    elif isinstance(obj, list) or isinstance(obj, tuple):
+    elif isinstance(obj, list | tuple):
         try:
             unit = obj[0].units
             array = jnp.array([o.m_as(unit) for o in obj]) * unit

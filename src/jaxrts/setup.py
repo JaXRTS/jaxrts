@@ -3,7 +3,7 @@ This submodule is dedicated to handling the setup configuration for the
 calculation of the synthetic spectra.
 """
 
-from typing import Callable
+from collections.abc import Callable
 
 import jax
 import jax.numpy as jnp
@@ -48,14 +48,14 @@ class Setup:
         #: differential crossection.
         #:
         #: .. math::
-        #: 
+        #:
         #:    \left(\frac{\omega_\text{out}}{\omega_\text{in}}\right)^\nu
         #:    S(\omega, k)
         #:
         #: See :cite:`Crowley.2013`.
         #:
         #: Defaults to 0.
-        #: 
+        #:
         #: * If 0, the methods :py:meth:`~.PlasmaState.probe` and
         #:   :py:meth:`~.PlasmaState.evaluate` will return dynamic structure
         #:   factors (this is the default behavior of jaxrts).
@@ -69,7 +69,7 @@ class Setup:
         #:   instead (as is should be the case for CCD detectors if no further
         #:   processing occurs), an additional scaling with energy is
         #:   introduced and ``frc_exponent`` should be set to 2.
-        #: 
+        #:
         self.frc_exponent: float = frc_exponent
 
     @property

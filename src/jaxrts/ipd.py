@@ -372,13 +372,10 @@ def ipd_pauli_blocking(
                 / (
                     jnpu.exp(
                         (
-                            (
-                                (1 * ureg.hbar * p) ** 2
-                                / (2 * ureg.electron_mass)
-                                - chem_pot
-                            )
-                            / (1 * ureg.boltzmann_constant * Te)
+                            (1 * ureg.hbar * p) ** 2 / (2 * ureg.electron_mass)
+                            - chem_pot
                         )
+                        / (1 * ureg.boltzmann_constant * Te)
                     )
                     + 1
                 )

@@ -10,9 +10,8 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 
 import jaxrts
-from jaxrts import hnc_potentials
+from jaxrts import hnc_potentials, ureg
 from jaxrts import hypernetted_chain as hnc
-from jaxrts import ureg
 
 plt.style.use("science")
 

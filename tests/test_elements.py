@@ -1,5 +1,5 @@
-import numpy as onp
 import jpu.numpy as jnpu
+import numpy as onp
 
 from jaxrts import elements, ureg
 
@@ -9,7 +9,7 @@ def test_element_creatation() -> None:
 
 
 def test_electron_distribution() -> None:
-    for Z in elements._element_names.keys():
+    for Z in elements._element_names:
         electron_occupation = elements.electron_distribution(Z)
         # Check that the number of electrons is correct
         assert onp.sum(electron_occupation) == Z

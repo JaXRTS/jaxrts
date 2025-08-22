@@ -1,8 +1,8 @@
 from pathlib import Path
 
-import pytest
 import jpu.numpy as jnpu
 import numpy as onp
+import pytest
 from jax import numpy as jnp
 
 import jaxrts
@@ -73,7 +73,7 @@ def test_hydrogen_pair_distribution_function_literature_values_wuensch():
         T_e=10 * ureg.electron_volt / ureg.k_B,
     )
 
-    for Gamma, pot in zip([1, 10, 30, 100], [13, 13, 15, 16]):
+    for Gamma, pot in zip([1, 10, 30, 100], [13, 13, 15, 16], strict=False):
         r = jnpu.linspace(0.0001 * ureg.angstrom, 100 * ureg.a0, 2**pot)
 
         dr = r[1] - r[0]
@@ -226,7 +226,9 @@ def test_multicomponent_wunsch2011_literature():
     current_folder = Path(__file__).parent
 
     for idx, gtype in zip(
-        [jnp.s_[0, 0, :], jnp.s_[1, 0, :], jnp.s_[1, 1, :]], ["HH", "CH", "CC"]
+        [jnp.s_[0, 0, :], jnp.s_[1, 0, :], jnp.s_[1, 1, :]],
+        ["HH", "CH", "CC"],
+        strict=False,
     ):
         xlit, glit = onp.genfromtxt(
             current_folder / f"data/Wunsch2011/Fig4.12/g_{gtype}.csv",
