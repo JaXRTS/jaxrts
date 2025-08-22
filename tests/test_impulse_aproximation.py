@@ -44,7 +44,7 @@ def test_literature_chapman2015():
 
         assert (
             jnpu.quantile(
-                jnpu.absolute((S_bf_lit - S_bf)) / jnpu.max(S_bf), 0.90
+                jnpu.absolute(S_bf_lit - S_bf) / jnpu.max(S_bf), 0.90
             ).to(ureg.dimensionless)
             < 0.1
         )
@@ -88,7 +88,7 @@ def test_modified_literature_chapman2015():
 
         assert (
             jnpu.quantile(
-                jnpu.absolute((S_bf_lit - S_bf)) / jnpu.max(S_bf), 0.90
+                jnpu.absolute(S_bf_lit - S_bf) / jnpu.max(S_bf), 0.90
             ).to(ureg.dimensionless)
             < 0.04
         )

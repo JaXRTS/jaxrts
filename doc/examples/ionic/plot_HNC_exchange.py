@@ -11,11 +11,11 @@ objects can be added.
 """
 
 import jax.numpy as jnp
-import jaxrts
 import jpu.numpy as jnpu
-
 import matplotlib.pyplot as plt
 import scienceplots  # noqa: F401
+
+import jaxrts
 
 plt.style.use("science")
 

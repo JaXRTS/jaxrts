@@ -2,8 +2,6 @@
 This submodule contains basic formulas used in plasma physics.
 """
 
-from typing import List
-
 import jax
 from jax import numpy as jnp
 from jpu import numpy as jnpu
@@ -180,8 +178,9 @@ def wiegner_seitz_radius(n_e: Quantity) -> Quantity:
 
 
 def chem_pot_sommerfeld_fermi_interpolation(T: Quantity, n_e: Quantity):
-    """Interpolation function for the chemical potential of a non-interacting (ideal) fermi gas
-    given in the paper of :cite:`Cowan.2019`.
+    """
+    Interpolation function for the chemical potential of a non-interacting
+    (ideal) fermi gas given in the paper of :cite:`Cowan.2019`.
     """
 
     E_F = fermi_energy(n_e)
@@ -240,7 +239,7 @@ def chem_pot_interpolationIchimaru(T: Quantity, n_e: Quantity) -> Quantity:
 
 @jax.jit
 def Debye_Hueckel_screening_length(
-    n: Quantity | List, T: Quantity, Z: float | List | jnp.ndarray = 1.0
+    n: Quantity | list, T: Quantity, Z: float | list | jnp.ndarray = 1.0
 ) -> Quantity:
     """
     Calculate the Debye-Hückel screening length. Use the general formula using

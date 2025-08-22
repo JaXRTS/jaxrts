@@ -18,17 +18,14 @@ from jax import numpy as jnp
 
 from jaxrts.hypernetted_chain import (
     _3Dfour,
-    _3Dfour_ogata,
     fourier_transform_sine,
-    fourier_transform_ogata,
     hnc_interp,
     mass_weighted_T,
-    geometric_mean_T,
 )
 from jaxrts.plasma_physics import (
-    fermi_wavenumber,
-    fermi_dirac,
     chem_pot_sommerfeld_fermi_interpolation,
+    fermi_dirac,
+    fermi_wavenumber,
 )
 from jaxrts.units import Quantity, to_array, ureg
 
@@ -304,14 +301,15 @@ class HNCPotential(metaclass=abc.ABCMeta):
             "off", "SpinAveraged", "SpinSeparated"
         ] = include_electrons
 
-    def check(self, plasma_state) -> None:
+    def check(self, plasma_state) -> None:  # noqa: B027
         """
         Test if the HNCPotential is applicable to the PlasmaState. Might raise
         logged messages and errors. Is automatically called after
         :py:meth:`~.__init__`.
         """
+        pass
 
-    def prepare(self, plasma_state, key: str) -> None:
+    def prepare(self, plasma_state, key: str) -> None:  # noqa: B027
         pass
 
     @abc.abstractmethod
@@ -511,7 +509,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
         return PotentialSum(list_of_potentials)
 
     def __mul__(self, other) -> "ScaledPotential":
-        if not isinstance(other, (float, int)):
+        if not isinstance(other, float | int):
             raise NotImplementedError(
                 "You can only add scale an HNCPotentials with a float."
                 + f"Other is type {type(other)}."
@@ -709,7 +707,7 @@ class ScaledPotential(HNCPotential):
         return self.potential.short_k(plasma_state, k) * self.factor
 
     def __mul__(self, other) -> "ScaledPotential":
-        if not isinstance(other, (float, int)):
+        if not isinstance(other, float | int):
             raise NotImplementedError(
                 "You can only add scale an HNCPotentials with a float. "
                 + f"Other is type {type(other)}."
@@ -781,7 +779,7 @@ class DebyeHueckelPotential(HNCPotential):
     def check(self, plasma_state) -> None:
         if not hasattr(plasma_state, "screening_length"):
             logger.error(
-                f"The PlasmaState {plasma_state} has no attribute 'screening_length, which is required for DebyeHueckelPotential."  # noqa: 501
+                f"The PlasmaState {plasma_state} has no attribute 'screening_length, which is required for DebyeHueckelPotential."  # noqa: E501
             )
 
     def kappa(self, plasma_state):
@@ -1611,17 +1609,14 @@ class SpinAveragedEEExchange(HNCPotential):
             (ureg.k_B * self.T(plasma_state))
             * jnp.log(2)
             * jnpu.exp(
-                (
-                    -1
-                    / (jnp.pi * jnp.log(2))
-                    * (
-                        (
-                            _r
-                            / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))
-                        ).m_as(ureg.dimensionless)
-                    )
-                    ** 2
+                -1
+                / (jnp.pi * jnp.log(2))
+                * (
+                    (
+                        _r / (self.lambda_ab(plasma_state) / jnp.sqrt(jnp.pi))
+                    ).m_as(ureg.dimensionless)
                 )
+                ** 2
             )
             * jnp.eye(plasma_state.nions + 1)[:, :, jnp.newaxis]
         )

@@ -18,7 +18,7 @@ dependencies = [
   "jpu (>=0.0.5)",
   "dill (>=0.4.0,<0.5.0)",
 ]
-requires-python = "^3.10,<3.14"
+requires-python = ">=3.10,<3.14"
 
 [tool.poetry]
 packages = [{ include = "jaxrts", from = "src" }]
@@ -64,4 +64,28 @@ pattern = '(?P<base>\d+\.\d+\.\d+)'
 [tool.poetry-dynamic-versioning.substitution]
 folders = [
   { path = "src/jaxrts" }
+]
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+ignore = [
+  # Ambiguous variable names; for quantum numbers, this is annoying
+  "E741",
+  # Function uses loop variable; often, we have to define functions within
+  # loops for jax; this is reducing the required arguments passed to the
+  # function. Omit with care.
+  "B023"
 ]

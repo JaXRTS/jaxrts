@@ -10,11 +10,11 @@ interaction.
 """
 
 import jax.numpy as jnp
-import jaxrts
 import jpu.numpy as jnpu
-
 import matplotlib.pyplot as plt
 import scienceplots  # noqa: F401
+
+import jaxrts
 
 plt.style.use("science")
 
@@ -184,7 +184,7 @@ for ElectronIonPotential, ElectronElectronPotential, mix in [
         axis.legend()
 
     fig.suptitle(
-        f"e-i Potential: {ElectronIonPotential.__name__}, e-e Potential: {ElectronElectronPotential.__name__}"  # noqa: 501f
+        f"e-i Potential: {ElectronIonPotential.__name__}, e-e Potential: {ElectronElectronPotential.__name__}"  # noqa: E501
     )
 
 plt.tight_layout()

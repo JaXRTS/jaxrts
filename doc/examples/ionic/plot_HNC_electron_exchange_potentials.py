@@ -3,12 +3,10 @@ Comparison of classical map to derived analytical formulas
 ==========================================================
 """
 
-import jaxrts
-import jax
 import jax.numpy as jnp
-
-
 import matplotlib.pyplot as plt
+
+import jaxrts
 
 ureg = jaxrts.ureg
 

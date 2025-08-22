@@ -184,7 +184,7 @@ def pauling_atomic_ff(
         factor.
     """
     # Find the correct _fxx function and execute it
-    form_factor = globals()["pauling_f{:1d}{:1d}".format(n, l)](k, Zeff)
+    form_factor = globals()[f"pauling_f{n:1d}{l:1d}"](k, Zeff)
     return form_factor
 
 

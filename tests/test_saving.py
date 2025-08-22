@@ -1,12 +1,13 @@
-from copy import deepcopy
-import pathlib
 import hashlib
+import pathlib
 import tempfile
+from copy import deepcopy
 
 import jax
+import jax.numpy as jnp
+
 import jaxrts
 import jaxrts.saving as saving
-import jax.numpy as jnp
 
 ureg = jaxrts.ureg
 save_dir = pathlib.Path(__file__).parent / "saves/"
@@ -38,6 +39,7 @@ test_state["ion-ion Potential"] = jaxrts.hnc_potentials.DebyeHueckelPotential()
 test_state["form-factors"] = jaxrts.models.PaulingFormFactors()
 test_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(mix=0.8)
 
+
 def test_dump_state():
     with tempfile.NamedTemporaryFile() as tmp:
         # with open(save_dir / "state.json", "w") as f:
@@ -51,13 +53,13 @@ def test_dump_state():
 
 
 def test_load_state():
-    with open(save_dir / "state.json", "r") as f:
+    with open(save_dir / "state.json") as f:
         loaded_state = saving.load(f, ureg)
     assert loaded_state == test_state
 
 
 def test_load_model():
-    with open(save_dir / "model.json", "r") as f:
+    with open(save_dir / "model.json") as f:
         loaded_model = saving.load(f, ureg)
     assert isinstance(
         loaded_model, jaxrts.models.ArbitraryDegeneracyScreeningLength
@@ -65,7 +67,7 @@ def test_load_model():
 
 
 def test_load_hnc_potential():
-    with open(save_dir / "hnc_pot.json", "r") as f:
+    with open(save_dir / "hnc_pot.json") as f:
         loaded_hnc_pot = saving.load(f, ureg)
     assert loaded_hnc_pot.model_key == ""
     assert len(loaded_hnc_pot._transform_r) == 200
@@ -85,7 +87,7 @@ def test_save_and_load_setup():
     with tempfile.NamedTemporaryFile() as tmp:
         with open(tmp.name, "w") as f:
             saving.dump(test_setup, f)
-        with open(tmp.name, "r") as f:
+        with open(tmp.name) as f:
             loaded_setup = saving.load(f, jaxrts.ureg)
     assert (
         jnp.abs(loaded_setup.instrument(ureg("5/s")).m_as(ureg.second) - 0.2)
@@ -100,7 +102,7 @@ def test_function_saving_and_loading():
     with tempfile.NamedTemporaryFile() as tmp:
         with open(tmp.name, "w") as f:
             saving.dump(test_function, f)
-        with open(tmp.name, "r") as f:
+        with open(tmp.name) as f:
             loaded_function = saving.load(f, jaxrts.ureg)
     assert test_function(3, 5) == loaded_function(3, 5)
 
@@ -120,7 +122,7 @@ def test_saving_and_restoring_custom_model():
     with tempfile.NamedTemporaryFile() as tmp:
         with open(tmp.name, "w") as f:
             saving.dump(state, f)
-        with open(tmp.name, "r") as f:
+        with open(tmp.name) as f:
             loaded_state = saving.load(
                 f,
                 jaxrts.ureg,

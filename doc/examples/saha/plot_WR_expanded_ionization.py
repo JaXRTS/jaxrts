@@ -14,7 +14,6 @@ from functools import partial
 
 import jax
 import matplotlib.pyplot as plt
-import scienceplots
 from jax import numpy as jnp
 
 import jaxrts

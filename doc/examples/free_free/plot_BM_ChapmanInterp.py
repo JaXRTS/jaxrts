@@ -77,7 +77,7 @@ state["free-free scattering"] = jaxrts.models.BornMermin()
 state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
 
 
-for ls, KKT in zip(["solid", "dotted"], [False, True]):
+for ls, KKT in zip(["solid", "dotted"], [False, True], strict=False):
     for i, no_of_freq in enumerate([2, 4, 20, 100]):
         state["free-free scattering"].no_of_freq = no_of_freq
         state["free-free scattering"].KKT = KKT

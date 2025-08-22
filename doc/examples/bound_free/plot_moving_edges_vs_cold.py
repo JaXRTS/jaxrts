@@ -8,15 +8,14 @@ https://github.com/flexible-atomic-code/fac and compares them to a bound-free
 model using only the cold edges.
 """
 
-import matplotlib.pyplot as plt
 from functools import partial
-import jax
-from jax import numpy as jnp
-import time
-import jaxrts
-import os
 
+import jax
 import matplotlib as mpl
+import matplotlib.pyplot as plt
+from jax import numpy as jnp
+
+import jaxrts
 
 # ----------- Global settings ------------
 mpl.rcParams.update(

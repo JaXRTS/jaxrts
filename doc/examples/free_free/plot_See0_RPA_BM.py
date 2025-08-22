@@ -41,13 +41,14 @@ k = (4 * jnp.pi / lambda_0) * jnp.sin(jnp.deg2rad(theta) / 2.0)
 w_pl = jaxrts.plasma_physics.plasma_frequency(n_e)
 omega = jnp.linspace(-6, 6, 100) * w_pl
 E = omega * ureg.hbar
-count = 0
 
-for T in [
-    0.5 * ureg.electron_volts,
-    2.0 * ureg.electron_volts,
-    8.0 * ureg.electron_volts,
-]:
+for count, T in enumerate(
+    [
+        0.5 * ureg.electron_volts,
+        2.0 * ureg.electron_volts,
+        8.0 * ureg.electron_volts,
+    ]
+):
     mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(
         T / (1 * ureg.boltzmann_constant), n_e
     )
@@ -113,8 +114,8 @@ for T in [
             S_ii=S_ii,
             V_eiS=V_eiS,
             Zf=1.0,
-            E_cutoff_min = jnpu.min(jnpu.absolute(E)),
-            E_cutoff_max = jnpu.max(jnpu.absolute(E)),
+            E_cutoff_min=jnpu.min(jnpu.absolute(E)),
+            E_cutoff_max=jnpu.max(jnpu.absolute(E)),
             no_of_points=10,
         )
         / ureg.hbar
@@ -180,7 +181,6 @@ for T in [
         linestyle="dotted",
         color="black",
     )
-    count += 1
 
 
 plt.xlabel(r"$\omega/\omega_{pl}$")

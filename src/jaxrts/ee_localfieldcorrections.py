@@ -10,6 +10,7 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 from quadax import quadts as quad
 
+from .ee_localfieldcorrections_dornheim_2021 import G_analytical as dornheim_G
 from .plasma_physics import (
     coupling_param,
     fermi_energy,
@@ -18,7 +19,6 @@ from .plasma_physics import (
     wiegner_seitz_radius,
 )
 from .units import Quantity, ureg
-from .ee_localfieldcorrections_dornheim_2021 import G_analytical as dornheim_G
 
 logger = logging.getLogger(__name__)
 

@@ -6,6 +6,7 @@ This example calculates a synthetic spectrum of a CHO plasma.
 """
 
 from functools import partial
+
 import matplotlib.pyplot as plt
 from jax import numpy as jnp
 
@@ -13,7 +14,7 @@ import jaxrts
 
 ureg = jaxrts.ureg
 
-#plt.style.use("science")
+# plt.style.use("science")
 
 ions = [jaxrts.Element("C"), jaxrts.Element("H"), jaxrts.Element("O")]
 rho = ureg("3g/cc")

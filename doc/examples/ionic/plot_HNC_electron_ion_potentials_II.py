@@ -61,7 +61,7 @@ for idx, pot in enumerate([empty_core, soft_core2, soft_core6, coulomb]):
         label=names[idx],
     )
 
-for ls, r_cut in zip(["solid", "dashed", "dotted"], [0.5, 1, 2]):
+for ls, r_cut in zip(["solid", "dashed", "dotted"], [0.5, 1, 2], strict=False):
     state.ion_core_radius = jnp.array([r_cut]) * ureg.angstrom
     q = -jaxrts.ion_feature.free_electron_susceptilibily_RPA(
         k, 1 / state.screening_length

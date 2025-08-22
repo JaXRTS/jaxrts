@@ -25,7 +25,6 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
     w_pl = jaxrts.plasma_physics.plasma_frequency(n_e)
     # Normalize
 
-    count = 0
 
     # Load the data
     data_dir = pathlib.Path(__file__).parent / "data/Glenzer2009/Fig9/"
@@ -37,7 +36,7 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         "c3": 8.0 * ureg.electron_volt,
     }
 
-    for datafile in sorted(entries):
+    for count, datafile in enumerate(sorted(entries)):
         omega_over_omega_pl, literature_See = onp.genfromtxt(
             datafile, delimiter=",", unpack=True
         )
@@ -135,7 +134,6 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         assert onp.max(error_Chapman) < 0.05
         error_Chapman_KKT = onp.abs(calc_See - calc_See_Chapman_KKT)
         assert onp.max(error_Chapman_KKT) < 0.05
-        count += 1
 
 
 def test_glenzer2009_fig9a_reprduction() -> None:
@@ -148,9 +146,6 @@ def test_glenzer2009_fig9a_reprduction() -> None:
     n_e = 1e19 / ureg.centimeter**3
 
     w_pl = jaxrts.plasma_physics.plasma_frequency(n_e)
-    # Normalize
-
-    count = 0
 
     # Load the data
     data_dir = pathlib.Path(__file__).parent / "data/Glenzer2009/Fig9/"
@@ -162,7 +157,7 @@ def test_glenzer2009_fig9a_reprduction() -> None:
         "a3": 3000 * ureg.electron_volt,
     }
 
-    for datafile in sorted(entries):
+    for _count, datafile in enumerate(sorted(entries)):
         omega_over_omega_pl, literature_See = onp.genfromtxt(
             datafile, delimiter=",", unpack=True
         )
@@ -189,7 +184,6 @@ def test_glenzer2009_fig9a_reprduction() -> None:
 
         assert onp.max(error) < 5
         assert onp.mean(error) < 0.5
-        count += 1
 
 
 def test_gregori2003_fig1b_reprduction() -> None:
@@ -199,16 +193,11 @@ def test_gregori2003_fig1b_reprduction() -> None:
     k = (4 * onp.pi / lambda_0) * onp.sin(onp.deg2rad(theta) / 2.0)
     n_e = 1e21 / ureg.centimeter**3
 
-    # Normalize
-
-    count = 0
-    norm = 1.0
-
     # Load the data
     data_dir = pathlib.Path(__file__).parent / "data/Gregori2003/Fig1/"
     # We have to sort, here, to assert the normalization works properly
     entries = list(data_dir.glob("b_*.csv"))
-    for datafile in sorted(entries):
+    for count, datafile in enumerate(sorted(entries)):
         energy_shift, literature_See = onp.genfromtxt(
             datafile, delimiter=",", unpack=True
         )
@@ -232,7 +221,6 @@ def test_gregori2003_fig1b_reprduction() -> None:
             assert onp.mean(error) < 0.02
         else:
             assert onp.max(error) < 0.02
-        count += 1
 
 
 def test_gregori2003_fig1c_reprduction() -> None:
@@ -243,15 +231,11 @@ def test_gregori2003_fig1c_reprduction() -> None:
 
     k = (4 * onp.pi / lambda_0) * onp.sin(onp.deg2rad(theta) / 2.0)
 
-    # Normalize
-    count = 0
-    norm = 1.0
-
     # Load the data
     data_dir = pathlib.Path(__file__).parent / "data/Gregori2003/Fig1/"
     # We have to sort, here, to assert the normalization works properly
     entries = list(data_dir.glob("c_*.csv"))
-    for datafile in sorted(entries):
+    for count, datafile in enumerate(sorted(entries)):
         energy_shift, literature_See = onp.genfromtxt(
             datafile, delimiter=",", unpack=True
         )
@@ -273,11 +257,10 @@ def test_gregori2003_fig1c_reprduction() -> None:
         calc_See /= norm
         # Calculate the deviation between our curves and the data ripped from
         # the literature
-        error = onp.abs((calc_See - literature_See))
+        error = onp.abs(calc_See - literature_See)
 
         assert onp.max(error) < 0.05
         assert onp.mean(error) < 0.02
-        count += 1
 
 
 def test_dandrea_fit_reproduces_calculated_RPA() -> None:

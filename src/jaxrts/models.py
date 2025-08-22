@@ -12,8 +12,6 @@ import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
-from .analysis import ITCF_fsum
-
 from . import (
     bound_free,
     ee_localfieldcorrections,
@@ -27,6 +25,7 @@ from . import (
     plasma_physics,
     static_structure_factors,
 )
+from .analysis import ITCF_fsum
 from .elements import MixElement, electron_distribution_ionized_state
 from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
 from .setup import (
@@ -56,7 +55,9 @@ class Model(metaclass=abc.ABCMeta):
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray: ...
 
-    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+    def prepare(  # noqa: B027
+        self, plasma_state: "PlasmaState", key: str
+    ) -> None:
         """
         Modify the plasma_state in place.
 
@@ -65,12 +66,14 @@ class Model(metaclass=abc.ABCMeta):
         defaults if necessary.
         Please log assumptions, properly
         """
+        pass
 
-    def check(self, plasma_state: "PlasmaState") -> None:
+    def check(self, plasma_state: "PlasmaState") -> None:  # noqa: B027
         """
         Test if the model is applicable to the PlasmaState. Might raise logged
         messages and errors.
         """
+        pass
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -321,7 +324,9 @@ class IonFeatModel(Model):
             jnp.arange(plasma_state.nions),
             jnp.arange(plasma_state.nions),
         )
-        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+        for a, b in zip(
+            ion_spec1.flatten(), ion_spec2.flatten(), strict=False
+        ):
             w_R += add_wrt(a, b)
         return w_R
 
@@ -539,9 +544,11 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
         mix: float = 0.0,
-        tmult: list[float] = [],
+        tmult: list[float] = None,
     ) -> None:
         #: The minimal radius for evaluating the potentials.
+        if tmult is None:
+            tmult = []
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
@@ -600,7 +607,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
             V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
         )
         logger.debug(
-            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
         )
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
@@ -675,9 +682,11 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
         mix: float = 0.0,
-        tmult: list[float] = [],
+        tmult: list[float] = None,
     ) -> None:
         #: The minimal radius for evaluating the potentials.
+        if tmult is None:
+            tmult = []
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
@@ -798,7 +807,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
             V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
         )
         logger.debug(
-            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
         )
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
@@ -855,7 +864,9 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
                 * S_ab[a, b]
             ).m_as(ureg.dimensionless)
 
-        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+        for a, b in zip(
+            ion_spec1.flatten(), ion_spec2.flatten(), strict=False
+        ):
             w_R += add_wrt(a, b)
         # Scale the instrument function directly with w_R
         return w_R
@@ -917,7 +928,7 @@ class PeakCollection(IonFeatModel):
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
         # Create an array with the correct dimensions
         out = 0 * self.peak_function(1 / ureg.angstrom)
-        for center, factor in zip(self.k_pos, self.intensity):
+        for center, factor in zip(self.k_pos, self.intensity, strict=False):
             out += self.peak_function(setup.k - center) * factor
         return out
 
@@ -2307,7 +2318,8 @@ class SchumacherImpulse(ScatteringModel):
             element_atomic_number = plasma_state.Z_A[idx]
             ion_charge_state = plasma_state.Z_free[idx]
 
-            # Define a function to calculate scattering for a single integer charge state
+            # Define a function to calculate scattering for a single integer
+            # charge state
             def calculate_scattering_for_charge_state(charge_state):
                 E_b = (
                     plasma_state.ions[idx].get_binding_energies(charge_state)
@@ -3624,7 +3636,9 @@ class Sum_Sii(Model):
             jnp.arange(plasma_state.nions),
             jnp.arange(plasma_state.nions),
         )
-        for a, b in zip(ion_spec1.flatten(), ion_spec2.flatten()):
+        for a, b in zip(
+            ion_spec1.flatten(), ion_spec2.flatten(), strict=False
+        ):
             S_ii += add_Sii(a, b)
         return S_ii
 
@@ -3645,9 +3659,11 @@ class AverageAtom_Sii(Model):
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
         mix: float = 0.0,
-        tmult: list[float] = [],
+        tmult: list[float] = None,
     ) -> None:
         #: The minimal radius for evaluating the potentials.
+        if tmult is None:
+            tmult = []
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
@@ -3714,7 +3730,7 @@ class AverageAtom_Sii(Model):
             V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
         )
         logger.debug(
-            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: 501
+            f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
         )
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
