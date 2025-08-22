@@ -1,5 +1,6 @@
 import logging
 from abc import ABCMeta
+from copy import deepcopy
 
 import jax
 import jpu.numpy as jnpu
@@ -99,14 +100,14 @@ class PlasmaState:
             doub_Z - jnp.floor(doub_Z),
         )
         doub_rho = jnpu.repeat(self.mass_density, 2)
-
-        return PlasmaState(
-            doub_ion_list,
-            Z_free=new_Z,
-            mass_density=xi * doub_rho,
-            T_e=self.T_e,
-            T_i=doub_Ti,
-        )
+        state = deepcopy(self)
+        state.ions = doub_ion_list
+        state.Z_free = new_Z
+        state.mass_density = xi * doub_rho
+        state.T_i = doub_Ti
+        # for key, model in state.models.items():
+        #    model.prepare(state, key)
+        return state
 
     def update_default_model(
         self, model_name: str, model_class: ABCMeta
