@@ -4,6 +4,7 @@ functions.
 """
 
 import logging
+from collections.abc import Callable
 from pathlib import Path
 
 import jax
@@ -11,7 +12,7 @@ import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
 
-from .units import Quantity
+from .units import Quantity, ureg
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ def instrument_lorentzian(
     return 1.0 / (jnp.pi * gamma * (1 + (x / gamma) ** 2))
 
 
-def instrument_from_file(filename: Path) -> jnp.ndarray:
+def instrument_from_file(filename: Path) -> Callable[[Quantity], Quantity]:
     """
     Loads instrument function data from a given file.
 
@@ -106,8 +107,20 @@ def instrument_from_file(filename: Path) -> jnp.ndarray:
             The intensities of the instrument function
     """
 
-    data = onp.genfromtxt(filename, delimiter=",", skiprows=0)
+    data = onp.genfromtxt(filename, delimiter=",", skip_header=0)
 
     E, ints = data[:, 0], data[:, 1]
 
-    return jnp.array([E, ints])
+    ints /= jnp.trapezoid(
+        y=ints, x=(E * ureg.electron_volt / ureg.hbar).m_as(1 / ureg.second)
+    )
+
+    @jax.jit
+    def inst_func_fxrts(w):
+        _E = w * ureg.hbar
+        Emag = _E.to(ureg.electron_volt).magnitude
+        ints_func = jnp.interp(Emag, E, ints, left=0, right=0)
+        return ints_func * ureg.second
+
+    return jax.tree_util.Partial(inst_func_fxrts)
+
