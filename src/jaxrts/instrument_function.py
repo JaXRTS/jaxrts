@@ -11,7 +11,7 @@ import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
 
-from .units import Quantity, ureg
+from .units import Quantity
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ def instrument_lorentzian(
     return 1.0 / (jnp.pi * gamma * (1 + (x / gamma) ** 2))
 
 
-def instrument_from_file(filename: Path) -> "Callable":
+def instrument_from_file(filename: Path) -> jnp.ndarray:
     """
     Loads instrument function data from a given file.
 
@@ -106,47 +106,8 @@ def instrument_from_file(filename: Path) -> "Callable":
             The intensities of the instrument function
     """
 
-    data = onp.genfromtxt(filename, delimiter=",", skip_header=0)
+    data = onp.genfromtxt(filename, delimiter=",", skiprows=0)
 
     E, ints = data[:, 0], data[:, 1]
 
-    ints /= jnp.trapezoid(
-        y=ints, x=(E * ureg.electron_volt / ureg.hbar).m_as(1 / ureg.second)
-    )
-
-    @jax.jit
-    def inst_func_fxrts(w):
-        _E = w * ureg.hbar
-        Emag = _E.to(ureg.electron_volt).magnitude
-        ints_func = jnp.interp(Emag, E, ints, left=0, right=0)
-        return ints_func * ureg.second
-
-    return inst_func_fxrts
-
-
-def instrument_from_array(x: jnp.ndarray, ints: jnp.ndarray) -> "Callable":
-    """
-
-    Set instrument function from an array input.
-    The Intensities have to be with respect to the energy shift .
-
-    Parameters
-    ----------
-    x :     jnp.ndarray | float
-            The energy shift.
-    ints:   jnp.ndarray | float
-            Intensity values of Instrument function.
-
-    """
-    ints /= jnp.trapezoid(
-        y=ints, x=(x * ureg.electron_volt / ureg.hbar).m_as(1 / ureg.second)
-    )
-
-    @jax.jit
-    def inst_func_fxrts(w):
-        _E = w * ureg.hbar
-        Emag = _E.to(ureg.electron_volt).magnitude
-        ints_func = jnp.interp(Emag, x, ints, left=0, right=0)
-        return ints_func * ureg.second
-
-    return inst_func_fxrts
+    return jnp.array([E, ints])
