@@ -1,4 +1,5 @@
 from jax import numpy as jnp
+import jpu.numpy as jnpu
 
 import jaxrts
 
@@ -45,3 +46,35 @@ def test_peak_position_stability_with_convolution() -> None:
             ),
         )
         assert assert_peak_position_stability(test_setup)
+
+
+def test_instrumentfunction_from_array() -> None:
+    def psf(x):
+        return jaxrts.instrument_function.instrument_gaussian(
+            x, ureg("1eV") / ureg.hbar
+        )
+
+    # w has to be quite large, because we normalize the instrument function
+    # automatically.
+    E = jnp.linspace(-10, 10, 400) * ureg.electron_volt
+    w = E / ureg.hbar
+
+    # Have intensities that are not normed
+    intensities = psf(w) * 42
+
+    # with units on intensities
+    array_psf_1 = jaxrts.instrument_function.instrument_from_array(
+        w, intensities
+    )
+    # without units on intensities
+    array_psf_2 = jaxrts.instrument_function.instrument_from_array(
+        w, intensities.m_as(ureg.picosecond)
+    )
+    # define the PSF over the energy and not frequencies
+    array_psf_3 = jaxrts.instrument_function.instrument_from_array(
+        E, intensities
+    )
+
+    assert jnp.all(jnpu.isclose(psf(w), array_psf_1(w)))
+    assert jnp.all(jnpu.isclose(psf(w), array_psf_2(w)))
+    assert jnp.all(jnpu.isclose(psf(w), array_psf_3(w)))

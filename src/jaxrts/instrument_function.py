@@ -124,3 +124,38 @@ def instrument_from_file(filename: Path) -> Callable[[Quantity], Quantity]:
 
     return jax.tree_util.Partial(inst_func_fxrts)
 
+
+def instrument_from_array(
+    x: Quantity, ints: jnp.ndarray | Quantity
+) -> Callable[[Quantity], Quantity]:
+    """
+    Set instrument function from an array input.
+    The intensities have to have the same length as the energy shift.
+
+    Parameters
+    ----------
+    x :     Quantity
+            :math:`\\omega` or energy shift. Should be given in units of 1/time
+            or in energy units.
+    ints:   jnp.ndarray | float | Quantity
+            Intensity values of Instrument function.
+    """
+    # Handle units
+
+    # if x is given in energy units, convert to 1/time
+    if x.check("[energy]"):
+        x = x / (1 * ureg.hbar)
+    w = x.m_as(ureg.electron_volt / ureg.hbar)
+    if isinstance(ints, Quantity):
+        ints = ints.to_base_units().magnitude
+
+    # Assert normalization
+    ints /= jnp.trapezoid(y=ints, x=w)
+
+    @jax.jit
+    def inst_func_fxrts(_w):
+        w_mag = _w.m_as(ureg.electron_volt / ureg.hbar)
+        ints_func = jnp.interp(w_mag, w, ints, left=0, right=0)
+        return ints_func * (1 * ureg.hbar / ureg.electron_volt)
+
+    return jax.tree_util.Partial(inst_func_fxrts)
