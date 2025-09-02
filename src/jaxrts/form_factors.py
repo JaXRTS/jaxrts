@@ -208,10 +208,8 @@ def pauling_all_ff(k: Quantity, Zeff: Quantity | jnp.ndarray) -> Quantity:
 
 
 @partial(jit, static_argnames=["Z_squared_correction"])
-def form_factor_lowering_10(
-    k: Quantity,
+def form_factor_lowering_Zeff_10(
     binding_E: Quantity,
-    Z_core: float,
     Z_A: float,
     Z_squared_correction: bool,
 ) -> jnp.ndarray:
@@ -240,14 +238,10 @@ def form_factor_lowering_10(
 
 
     Parameters
-    ==========
-    k: Quantity
-        The scattering vector.
+    ----------
     binding_E: Quantity
         The binding energies of the two 1s electrons. Has to be an array with 2
         entries. Note that this potentially has to be reduced by the IPD.
-    Z_core: float
-        Average number of bound electrons to the core.
     Z_A: float
         Atomic number of the element, i.e., number of protons in the core.
     Z_squared_correction: bool
@@ -264,6 +258,40 @@ def form_factor_lowering_10(
 
     # calculate Z_eff for H and He like species
     Z_eff = jnp.sqrt((binding_E.m_as(ureg.electron_volt)) * n**2 / (En))
+    return Z_eff
+
+
+@partial(jit, static_argnames=["Z_squared_correction"])
+def form_factor_lowering_10(
+    k: Quantity,
+    binding_E: Quantity,
+    Z_core: float,
+    Z_A: float,
+    Z_squared_correction: bool,
+) -> jnp.ndarray:
+    """
+    Calculate the form factor lowering for the 1s orbital. See
+    :cite:`Doppner.2023`. Calculates the effective charge from the binding
+    energies (incl. IPD) from :py:func:`~form_factor_lowering_Zeff_10`. Then,
+    insert this effective charge in the function from :cite:`Pauling.1932`,
+    :py:func:`pauling_f10`.
+
+    Parameters
+    ----------
+    k: Quantity
+        The scattering vector.
+    binding_E: Quantity
+        The binding energies of the two 1s electrons. Has to be an array with 2
+        entries. Note that this potentially has to be reduced by the IPD.
+    Z_core: float
+        Average number of bound electrons to the core.
+    Z_A: float
+        Atomic number of the element, i.e., number of protons in the core.
+    Z_squared_correction: bool
+        If ``True``, the quadratic correction term discussed above is added to
+        better match the zero IPD limit.
+    """
+    Z_eff = form_factor_lowering_Zeff_10(binding_E, Z_A, Z_squared_correction)
 
     # calculate the form factors for H and He like ions
     # Note: when there are two electrons, they cannot be distinguished.
