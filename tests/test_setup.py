@@ -44,7 +44,4 @@ def test_peak_position_stability_with_convolution() -> None:
                 x, ureg("1eV") / ureg.hbar
             ),
         )
-        print(assert_peak_position_stability(test_setup))
-
-
-test_peak_position_stability_with_convolution()
+        assert assert_peak_position_stability(test_setup)
