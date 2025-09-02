@@ -88,7 +88,7 @@ def instrument_supergaussian(
 
     return jnp.exp(
         -(0.5 * x**2 / sigma**2).m_as(ureg.dimensionless) ** power
-    ) / (norm * sigma.magnitude)
+    ) / (norm * sigma)
 
 
 @jax.jit
