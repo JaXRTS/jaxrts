@@ -1,9 +1,14 @@
-from jax import numpy as jnp
+from pathlib import Path
+
 import jpu.numpy as jnpu
+import pytest
+from jax import numpy as jnp
+from pint.errors import DimensionalityError
 
 import jaxrts
 
 ureg = jaxrts.ureg
+cwd = Path(__file__).parent
 
 
 def assert_peak_position_stability(setup) -> None:
@@ -78,3 +83,28 @@ def test_instrumentfunction_from_array() -> None:
     assert jnp.all(jnpu.isclose(psf(w), array_psf_1(w)))
     assert jnp.all(jnpu.isclose(psf(w), array_psf_2(w)))
     assert jnp.all(jnpu.isclose(psf(w), array_psf_3(w)))
+
+
+def test_instrumentfunction_from_file() -> None:
+    def psf(x):
+        return jaxrts.instrument_function.instrument_gaussian(
+            x, ureg("2eV/hbar")
+        )
+
+    w = jnp.linspace(-30, 30, 300) * ureg.electron_volt / ureg.hbar
+    file_psf_E = jaxrts.instrument_function.instrument_from_file(
+        cwd / "saves/gaussian_over_E.csv"
+    )
+    file_psf_w = jaxrts.instrument_function.instrument_from_file(
+        cwd / "saves/gaussian_over_w.csv", 1 / ureg.second
+    )
+
+    assert jnp.all(jnpu.isclose(psf(w), file_psf_E(w)))
+    assert jnp.all(jnpu.isclose(psf(w), file_psf_w(w)))
+
+
+def test_instrumentfunction_from_file_raises_error_on_wrong_unit() -> None:
+    with pytest.raises(DimensionalityError):
+        jaxrts.instrument_function.instrument_from_file(
+            cwd / "saves/gaussian_over_w.csv", ureg.meter
+        )

@@ -12,7 +12,7 @@ import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
 
-from .units import Quantity, ureg
+from .units import Quantity, Unit, ureg
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,9 @@ def instrument_lorentzian(x: Quantity, gamma: Quantity) -> Quantity:
     return 1.0 / (jnp.pi * gamma * (1 + (x / gamma) ** 2))
 
 
-def instrument_from_file(filename: Path) -> Callable[[Quantity], Quantity]:
+def instrument_from_file(
+    filename: Path, xunit: Unit = ureg.electron_volt
+) -> Callable[[Quantity], Quantity]:
     """
     Loads instrument function data from a given file.
 
@@ -125,8 +127,10 @@ def instrument_from_file(filename: Path) -> Callable[[Quantity], Quantity]:
     ----------
     filename: Path
         The path to the file which should be loaded. We assume a
-        comma-separated list of energy in the first, and intensity in the
-        second column.
+        comma-separated list of energy or frequency shifts in the first, and
+        intensity in the second column.
+    xunit: Unit, default ``ureg.electron_volt``
+        The unit of the x-axis. We allow for energy and frequency units.
 
     Returns
     -------
@@ -138,18 +142,20 @@ def instrument_from_file(filename: Path) -> Callable[[Quantity], Quantity]:
 
     data = onp.genfromtxt(filename, delimiter=",", skip_header=0)
 
-    E, ints = data[:, 0], data[:, 1]
+    x, ints = data[:, 0], data[:, 1]
+    x *= xunit
 
-    ints /= jnp.trapezoid(
-        y=ints, x=(E * ureg.electron_volt / ureg.hbar).m_as(1 / ureg.second)
-    )
+    if x.check("[energy]"):
+        x = x / (1 * ureg.hbar)
 
-    @jax.jit
-    def inst_func_fxrts(w):
-        _E = w * ureg.hbar
-        Emag = _E.to(ureg.electron_volt).magnitude
-        ints_func = jnp.interp(Emag, E, ints, left=0, right=0)
-        return ints_func * ureg.second
+    w = x.m_as(ureg.electron_volt / ureg.hbar)
+
+    ints /= jnp.trapezoid(y=ints, x=w)
+
+    def inst_func_fxrts(_w):
+        w_mag = _w.m_as(ureg.electron_volt / ureg.hbar)
+        ints_func = jnp.interp(w_mag, w, ints, left=0, right=0)
+        return ints_func * (1 * ureg.hbar / ureg.electron_volt)
 
     return jax.tree_util.Partial(inst_func_fxrts)
 
