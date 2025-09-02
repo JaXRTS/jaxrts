@@ -18,20 +18,26 @@ logger = logging.getLogger(__name__)
 
 
 @jax.jit
-def instrument_gaussian(
-    x: jnp.ndarray | float, sigma: Quantity
-) -> jnp.ndarray:
+def instrument_gaussian(x: Quantity, sigma: Quantity) -> Quantity:
     """
-
     Gaussian model for the instrument function.
+
+    .. math::
+
+       \\frac{1}{\\sigma \\sqrt{2\\pi}}
+       \\exp\\left(-\\frac{x^2}{{2\\sigma}^2}\\right)
 
     Parameters
     ----------
-    x :     jnp.ndarray | float
-            The energy shift.
-    sigma:  Quantity
-            The standard deviation of the gaussian.
+    x: Quantity
+        The energy shift.
+    sigma: Quantity
+        The standard deviation of the gaussian.
 
+    Return
+    ------
+    Quantity
+        The Gaussian function, evaluated at positions x. Normed to 1.
     """
 
     return (1.0 / (sigma * jnp.sqrt(2 * jnp.pi))) * jnpu.exp(
@@ -41,21 +47,34 @@ def instrument_gaussian(
 
 @jax.jit
 def instrument_supergaussian(
-    x: jnp.ndarray | float, sigma: Quantity, power: float
-) -> jnp.ndarray:
+    x: Quantity, sigma: Quantity, power: float
+) -> Quantity:
     """
 
     Super-gaussian model for the instrument function.
 
+
+    .. math::
+
+       \\exp\\left(-\\left(\\frac{x^2}{2\\sigma^2}\\right)^p\\right)
+
+    .. note::
+
+       The function is normalized by numerical integration
+
     Parameters
     ----------
-    x :     jnp.ndarray | float
-            The energy shift.
+    x: Quantity
+        The energy shift.
     sigma:  Quantity
-            The standard deviation of the gaussian.
+        The standard deviation of the gaussian.
     power:  float
-            The power of the super-gaussian.
+        The power of the super-gaussian.
 
+    Return
+    ------
+    Quantity
+        The super-Gaussian function, evaluated at positions x. Normed to 1.
     """
 
     _x = (
@@ -67,26 +86,33 @@ def instrument_supergaussian(
     # Normalize the super-gaussian
     norm = jax.scipy.integrate.trapezoid(_y, _x)
 
-    return jnp.exp(-(0.5 * x**2 / sigma**2).magnitude ** power) / (
-        norm * sigma.magnitude
-    )
+    return jnp.exp(
+        -(0.5 * x**2 / sigma**2).m_as(ureg.dimensionless) ** power
+    ) / (norm * sigma.magnitude)
 
 
 @jax.jit
-def instrument_lorentzian(
-    x: jnp.ndarray | float, gamma: Quantity
-) -> jnp.ndarray:
+def instrument_lorentzian(x: Quantity, gamma: Quantity) -> Quantity:
     """
-
     Lorentzian model for the instrument function.
+
+    .. math::
+
+       \\frac{1}{\\pi}
+       \\frac{1}{\\gamma \\left(1+\\left(\\frac{x}{\\gamma}\\right)^2\\right)}
+
 
     Parameters
     ----------
-    x :     jnp.ndarray | float
-            The energy shift.
-    gamma:  Quantity
-            The scale parameter of the lorentzian.
+    x: Quantity
+        The frequency shift.
+    gamma: Quantity
+        The scale parameter of the lorentzian.
 
+    Return
+    ------
+    Quantity
+        The Lorentzian function, evaluated at positions x. Normed to 1.
     """
     return 1.0 / (jnp.pi * gamma * (1 + (x / gamma) ** 2))
 
@@ -97,14 +123,17 @@ def instrument_from_file(filename: Path) -> Callable[[Quantity], Quantity]:
 
     Parameters
     ----------
-    filename:   Path
-                The filename.
+    filename: Path
+        The path to the file which should be loaded. We assume a
+        comma-separated list of energy in the first, and intensity in the
+        second column.
+
     Returns
     -------
-    E:      jnp.ndarray
-            The energy shifts.
-    ints:   jnp.ndarray
-            The intensities of the instrument function
+    Callable
+        The instrument function, which takes one singular argument (the
+        frequency shift), and returns the weight of this shift. The function is
+        normalized to one.
     """
 
     data = onp.genfromtxt(filename, delimiter=",", skip_header=0)
@@ -134,11 +163,18 @@ def instrument_from_array(
 
     Parameters
     ----------
-    x :     Quantity
-            :math:`\\omega` or energy shift. Should be given in units of 1/time
-            or in energy units.
-    ints:   jnp.ndarray | float | Quantity
-            Intensity values of Instrument function.
+    x: Quantity
+        :math:`\\omega` or energy shift. Should be given in units of 1/time or
+        in energy units.
+    ints: jnp.ndarray | float | Quantity
+        Intensity values of Instrument function.
+
+    Returns
+    -------
+    Callable
+        The instrument function, which takes one singular argument (the
+        frequency shift), and returns the weight of this shift. The function is
+        normalized to one.
     """
     # Handle units
 
