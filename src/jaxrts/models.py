@@ -2544,10 +2544,32 @@ class FormFactorLowering(Model):
     effective charge Z_eff. The spin up and spin down K-shell electrons and
     their respective binding energies are taken into account for this
     calculation.
+
+    .. note::
+
+       For compatibility, we include form-factors for higher orbitals
+       calculated using
+       :py:func:`jaxrts.form_factors.pauling_all_ff`, as they are suggested by
+       :cite:`Pauling.1932`. However, this model is only applicable when the
+       only electrons in the K-shell are remaining.
+
+    See Also
+    --------
+    jaxrts.form_factors.form_factor_lowering_10
+        Function calculating the lowered form factors for the 1s orbital.
     """
 
     allowed_keys = ["form-factors"]
     __name__ = "FormFactorLowering"
+
+    def __init__(self, Z_squared_correction: bool = True):
+        # Without IPD, the results of this form-factors model should be
+        # identical to :py:class:`~.PaulingFormFactors`. However, we noted
+        # small discrepancy, increasing with the nuclear charge of the plasma.
+        # When ``True``, this will be corrected for by a fitted function,
+        # quadratic in the atomic number.
+        self.Z_squared_correction = Z_squared_correction
+        super().__init__()
 
     @jax.jit
     def evaluate(
@@ -2562,8 +2584,8 @@ class FormFactorLowering(Model):
         ff = form_factors.pauling_all_ff(setup.k, Zstar)
         ipd = plasma_state.evaluate(key="ipd", setup=setup)
 
-        # Loop throught the Ions of the Plasma state and calculate the
-        # corrected 1s form factor
+        # Loop through the Ions of the Plasma state and calculate the corrected
+        # 1s form factor
         for elem, idx in zip(plasma_state.ions, range(len(plasma_state.ions))):
             # flip ionization energies, to start with the binding energy of the
             # 1st K-shell electron
@@ -2590,13 +2612,28 @@ class FormFactorLowering(Model):
             # energies
             bind_energies_ipd *= ureg.electron_volt
             f_1s = form_factors.form_factor_lowering_10(
-                setup.k, bind_energies_ipd, elem.Z - plasma_state.Z_free[idx]
+                setup.k,
+                bind_energies_ipd,
+                elem.Z - plasma_state.Z_free[idx],
+                elem.Z,
+                self.Z_squared_correction,
             )
 
-            # update the pauling f_1s result
+            # update the Pauling f_1s result
             ff = ff.at[idx, 0].set(f_1s)
 
         return ff
+
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (self.model_key, self.Z_squared_correction)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key, obj.Z_squared_correction) = aux_data
+        return obj
 
 
 # Chemical Potential Models
