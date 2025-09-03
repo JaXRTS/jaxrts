@@ -11,7 +11,6 @@ light differences between Hydrogen- and Helium-like ions. For a fractional
 charge, we interpolate linearly between these two states.
 """
 import jax.numpy as jnp
-
 import matplotlib.pyplot as plt
 import scienceplots  # noqa:F401
 

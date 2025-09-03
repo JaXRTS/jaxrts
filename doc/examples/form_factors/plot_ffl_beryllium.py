@@ -5,7 +5,6 @@ Plot form factor lowering effect for Beryllium
 """
 
 import jax.numpy as jnp
-
 import matplotlib.pyplot as plt
 import scienceplots  # noqa:F401
 

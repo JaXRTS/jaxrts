@@ -12,7 +12,6 @@ effective change, this value is plotted.
 
 import jax.numpy as jnp
 import jpu.numpy as jnpu
-
 import matplotlib.pyplot as plt
 import scienceplots  # noqa:F401
 

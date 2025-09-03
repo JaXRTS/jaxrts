@@ -2,8 +2,8 @@
 This submodule is dedicated to form factors.
 """
 
-from functools import partial
 import logging
+from functools import partial
 
 import numpy as onp
 from jax import jit
@@ -155,7 +155,7 @@ def pauling_f40(k: Quantity, Zeff: Quantity | float) -> Quantity:
 
 
 def pauling_atomic_ff(
-    n: int, l: int, k: Quantity, Zeff: Quantity | float  # noqa: 741
+    n: int, l: int, k: Quantity, Zeff: Quantity | float  # noqa: E741
 ) -> Quantity:
     """
     Atomic formfactor of a hydrogen-like atom taken from :cite:`Pauling.1932`.

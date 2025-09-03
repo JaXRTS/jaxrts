@@ -108,7 +108,7 @@ def test_0_idp_ffl_approaches_pauling():
     """
     k = jnp.linspace(0, 170, 400) / (1 * ureg.angstrom)
     for Z_A in [4, 25]:
-        for idx, Z_C in enumerate([0.5, 1.0, 1.5, 2.0, 2.5]):
+        for Z_C in [0.5, 1.0, 1.5, 2.0, 2.5]:
             Zeff_pauling = (
                 Z_A
                 - jaxrts.form_factors.pauling_size_screening_constants(Z_C)[0]

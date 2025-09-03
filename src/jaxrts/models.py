@@ -2773,11 +2773,8 @@ class FormFactorLowering(Model):
         self.Z_squared_correction = Z_squared_correction
         super().__init__()
 
-
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
-        plasma_state.update_default_model(
-            "ipd", StewartPyattIPD()
-        )
+        plasma_state.update_default_model("ipd", StewartPyattIPD())
 
     @jax.jit
     def evaluate(
@@ -2794,7 +2791,9 @@ class FormFactorLowering(Model):
 
         # Loop through the Ions of the Plasma state and calculate the corrected
         # 1s form factor
-        for elem, idx in zip(plasma_state.ions, range(len(plasma_state.ions))):
+        for elem, idx in zip(
+            plasma_state.ions, range(len(plasma_state.ions)), strict=False
+        ):
             # flip ionization energies, to start with the binding energy of the
             # 1st K-shell electron
             ionization_energies = elem.ionization.energies[::-1]
