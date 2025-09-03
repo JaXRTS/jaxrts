@@ -268,7 +268,7 @@ def form_factor_lowering_10(
     Z_core: float,
     Z_A: float,
     Z_squared_correction: bool,
-) -> jnp.ndarray:
+) -> Quantity:
     """
     Calculate the form factor lowering for the 1s orbital. See
     :cite:`Doppner.2023`. Calculates the effective charge from the binding
@@ -303,4 +303,4 @@ def form_factor_lowering_10(
     x_1s_H_like = 1 - x_1s_He_like
 
     f_1s = (x_1s_H_like * f_1s_H_like) + (x_1s_He_like * f_1s_He_like)
-    return f_1s.m_as(ureg.dimensionless)
+    return f_1s.to(ureg.dimensionless)
