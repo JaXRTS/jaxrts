@@ -20,6 +20,7 @@ mult_comp_test_state = jaxrts.PlasmaState(
     T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
 )
 
+
 def plasmaStateEquality(state):
     # Test comparison with some random type
     assert state != 6

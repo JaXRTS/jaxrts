@@ -1,16 +1,16 @@
 import logging
 from abc import ABCMeta
-from typing import List
+from copy import deepcopy
 
 import jax
 import jpu.numpy as jnpu
 import numpy as np
 from jax import numpy as jnp
 
-from .plasma_physics import wiegner_seitz_radius, fermi_energy
 from .elements import Element
 from .helpers import JittableDict
 from .models import DebyeHueckelScreeningLength, ElectronicLFCConstant
+from .plasma_physics import fermi_energy, wiegner_seitz_radius
 from .setup import Setup
 from .units import Quantity, to_array, ureg
 
@@ -21,11 +21,11 @@ class PlasmaState:
 
     def __init__(
         self,
-        ions: List[Element],
-        Z_free: List | Quantity,
-        mass_density: List | Quantity,
+        ions: list[Element],
+        Z_free: list | Quantity,
+        mass_density: list | Quantity,
         T_e: Quantity,
-        T_i: List | Quantity | None = None,
+        T_i: list | Quantity | None = None,
     ):
 
         assert (len(ions) == len(Z_free)) and (
@@ -43,9 +43,11 @@ class PlasmaState:
 
         self.mass_density = to_array(mass_density)
 
-        if isinstance(T_e, list):
-            self.T_e = T_e[0]
-        elif isinstance(T_e.magnitude, jnp.ndarray) and len(T_e.shape) == 1:
+        if (
+            isinstance(T_e, list)
+            or isinstance(T_e.magnitude, jnp.ndarray)
+            and len(T_e.shape) == 1
+        ):
             self.T_e = T_e[0]
         else:
             self.T_e = T_e
@@ -98,14 +100,14 @@ class PlasmaState:
             doub_Z - jnp.floor(doub_Z),
         )
         doub_rho = jnpu.repeat(self.mass_density, 2)
-
-        return PlasmaState(
-            doub_ion_list,
-            Z_free=new_Z,
-            mass_density=xi * doub_rho,
-            T_e=self.T_e,
-            T_i=doub_Ti,
-        )
+        state = deepcopy(self)
+        state.ions = doub_ion_list
+        state.Z_free = new_Z
+        state.mass_density = xi * doub_rho
+        state.T_i = doub_Ti
+        # for key, model in state.models.items():
+        #    model.prepare(state, key)
+        return state
 
     def update_default_model(
         self, model_name: str, model_class: ABCMeta
@@ -142,7 +144,7 @@ class PlasmaState:
         --------
         >> s.update_default_model("form-factors", PaulingFormFactors)
         """
-        if model_name not in self.models.keys():
+        if model_name not in self.models:
             logger.warning(
                 f"Setting default '{model_name}' model to '{model_class.__name__}'."  # noqa: E501
                 + " You can suppress this warning by setting the model manually."  # noqa: E501
@@ -194,7 +196,8 @@ class PlasmaState:
     @property
     def Teff_e(self):
         """
-        Return the effective electron temperature. Quantum temperature as used by :cite:`Gregori.2003`.
+        Return the effective electron temperature. Quantum temperature as used
+        by :cite:`Gregori.2003`.
         """
         rs = wiegner_seitz_radius(self.n_e) / ureg.a_0
         # This is another definition of Tq, not from Gregori et al.
@@ -270,7 +273,7 @@ class PlasmaState:
         x = self.n_i / jnpu.sum(self.n_i)
         return x.m_as(ureg.dimensionless)
 
-    def db_wavelength(self, kind: List | str):
+    def db_wavelength(self, kind: list | str):
 
         wavelengths = []
 
@@ -387,7 +390,7 @@ class PlasmaState:
             other_c, other_s, other_i, other_m = other._eq_characteristic()
 
             # Test the children. If any is not equal, return false
-            for s, o in zip(self_c, other_c):
+            for s, o in zip(self_c, other_c, strict=False):
                 eq = jnpu.equal(s, o)
                 if not isinstance(eq, bool):
                     eq = eq.all()

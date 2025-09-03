@@ -2,6 +2,7 @@ from collections import defaultdict
 
 import jaxrts
 
+
 def get_all_models():
     """
     Get a list of all models defined within jaxrts
@@ -13,7 +14,7 @@ def get_all_models():
             if "__class__" in dir(obj_name):
                 attributes = getattr(module, obj_name)
                 if "allowed_keys" in dir(attributes):
-                    keys = getattr(attributes, "allowed_keys")
+                    keys = attributes.allowed_keys
                     if (
                         ("Model" not in obj_name)
                         & ("model" not in obj_name)

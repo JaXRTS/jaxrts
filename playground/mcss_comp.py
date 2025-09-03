@@ -135,6 +135,7 @@ def plot_mcss_comparison(mcss_file):
             jaxrts.instrument_function.instrument_gaussian,
             sigma=ureg("10eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
         ),
+        frc_exponent = 2.0,
     )
 
     state["chemical potential"] = jaxrts.models.IchimaruChemPotential()
@@ -166,7 +167,9 @@ def plot_mcss_comparison(mcss_file):
         print(
             state["free-free scattering"].E_cutoff_max.to(ureg.electron_volt)
         )
-    state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=rk)
+    state["bound-free scattering"] = jaxrts.models.SchumacherImpulseColdEdges(
+        r_k=rk
+    )
     state["free-bound scattering"] = jaxrts.models.Neglect()
 
     print("W_R")

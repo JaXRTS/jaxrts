@@ -5,7 +5,6 @@ structure.
 
 import logging
 from functools import partial
-from typing import List
 
 import jax
 from jax import jit
@@ -26,7 +25,7 @@ from .plasma_physics import (
     plasma_frequency,
     wiegner_seitz_radius,
 )
-from .units import Quantity, ureg, to_array
+from .units import Quantity, to_array, ureg
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +35,7 @@ jax.config.update("jax_enable_x64", True)
 
 @jit
 def _KKT_single_point(Edash, E_vals, I_vals, eps):
-    integrand = I_vals / ((E_vals - Edash))
+    integrand = I_vals / (E_vals - Edash)
     mask_low = E_vals < (Edash - eps)
     mask_high = E_vals > (Edash + eps)
     part1 = jnp.trapezoid(jnp.where(mask_low, integrand, 0.0), E_vals)
@@ -111,7 +110,7 @@ def _W_salpeter(x: jnp.ndarray | float) -> jnp.ndarray:
 
 @jit
 def dielectric_function_salpeter(
-    k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | List
+    k: Quantity, T_e: Quantity, n_e: Quantity, E: Quantity | list
 ) -> jnp.ndarray:
     """
     Implementation of the quantum corrected Salpeter approximation of the
@@ -171,8 +170,8 @@ def S0ee_from_dielectric_func_FDT(
     k: Quantity,
     T_e: Quantity,
     n_e: Quantity,
-    E: Quantity | List,
-    dielectric_function: Quantity | List,
+    E: Quantity | list,
+    dielectric_function: Quantity | list,
 ) -> Quantity:
     """
     Links the dielectric function to S0_ee via the fluctuation dissipation
@@ -217,7 +216,7 @@ def S0ee_from_dielectric_func_FDT(
             ((1 * ureg.vacuum_permittivity) * k**2)
             / (jnp.pi * (1 * ureg.elementary_charge) ** 2 * n_e)
         )
-        * jnp.imag((1 / dielectric_function))
+        * jnp.imag(1 / dielectric_function)
     ).to_base_units()
 
     return res
@@ -228,8 +227,8 @@ def S0ee_from_susceptibility_FDT(
     k: Quantity,
     T_e: Quantity,
     n_e: Quantity,
-    E: Quantity | List,
-    susceptibility: Quantity | List,
+    E: Quantity | list,
+    susceptibility: Quantity | list,
 ) -> Quantity:
     """
     Links the dielectric function to S0_ee via the fluctuation dissipation
@@ -281,7 +280,7 @@ def S0_ee_Salpeter(
     k: Quantity,
     T_e: Quantity,
     n_e: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     lfc: Quantity = 0.0,
 ) -> jnp.ndarray:
     """
@@ -1165,7 +1164,7 @@ def S0_ee_RPA_no_damping(
     k: Quantity,
     T_e: Quantity,
     n_e: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     chem_pot: Quantity,
     lfc: Quantity = 0.0,
     unsave: bool = False,
@@ -1208,7 +1207,7 @@ def S0_ee_RPA(
     k: Quantity,
     T_e: Quantity,
     n_e: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     chem_pot: Quantity,
     lfc: Quantity = 0.0,
     rpa_rewrite: bool = True,
@@ -1710,7 +1709,7 @@ def collision_frequency_BA_Chapman_interpFit(
 @partial(jit, static_argnames=("rpa_rewrite", "KKT"))
 def dielectric_function_BMA_full(
     k: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     chem_pot: Quantity,
     T: Quantity,
     n_e: Quantity,
@@ -1752,7 +1751,7 @@ def dielectric_function_BMA_full(
 
     numerator = (1 + 1j * coll_freq / w) * (eps - 1)
 
-    denumerator = 1 + 1j * (coll_freq / w) * ((eps - 1)) / (
+    denumerator = 1 + 1j * (coll_freq / w) * (eps - 1) / (
         dielectric_function_RPA_no_damping(
             k, 0 * ureg.electron_volt, chem_pot, T, unsave=True
         )
@@ -1767,7 +1766,7 @@ def S0_ee_RPA_Dandrea(
     k: Quantity,
     T: Quantity,
     n_e: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     lfc: Quantity = 0.0,
 ) -> jnp.ndarray:
 
@@ -1788,7 +1787,7 @@ def S0_ee_BMA(
     V_eiS: callable,
     n_e: Quantity,
     Zf: float,
-    E: Quantity | List,
+    E: Quantity | list,
     lfc: Quantity = 0.0,
     rpa_rewrite: bool = True,
     KKT: bool = False,
@@ -1809,7 +1808,7 @@ def S0_ee_BMA(
 @partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def dielectric_function_BMA_chapman_interpFit(
     k: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     chem_pot: Quantity,
     T: Quantity,
     n_e: Quantity,
@@ -1871,7 +1870,7 @@ def dielectric_function_BMA_chapman_interpFit(
 @partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def dielectric_function_BMA_Fortmann(
     k: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     chem_pot: Quantity,
     T: Quantity,
     n_e: Quantity,
@@ -1908,7 +1907,7 @@ def dielectric_function_BMA_Fortmann(
 @partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def susceptibility_BMA_Fortmann(
     k: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     chem_pot: Quantity,
     T: Quantity,
     n_e: Quantity,
@@ -1979,7 +1978,7 @@ def susceptibility_BMA_Fortmann(
 @partial(jit, static_argnames=("no_of_points", "rpa_rewrite", "KKT"))
 def dielectric_function_BMA_chapman_interp(
     k: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     chem_pot: Quantity,
     T: Quantity,
     n_e: Quantity,
@@ -2050,7 +2049,7 @@ def S0_ee_BMA_chapman_interp(
     Zf: float,
     E_cutoff_min: Quantity,
     E_cutoff_max: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     lfc: Quantity = 0.0,
     no_of_points: int = 20,
     rpa_rewrite: bool = True,
@@ -2093,7 +2092,7 @@ def S0_ee_BMA_chapman_interpFit(
     Zf: float,
     E_cutoff_min: Quantity,
     E_cutoff_max: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     lfc: Quantity = 0.0,
     no_of_points: int = 20,
     rpa_rewrite: bool = True,
@@ -2136,7 +2135,7 @@ def S0_ee_BMA_Fortmann(
     Zf: float,
     E_cutoff_min: Quantity,
     E_cutoff_max: Quantity,
-    E: Quantity | List,
+    E: Quantity | list,
     lfc: Quantity = 0.0,
     no_of_points: int = 20,
     rpa_rewrite: bool = True,

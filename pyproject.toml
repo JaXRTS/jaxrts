@@ -1,6 +1,7 @@
 [project]
 name = "jaxrts"
-version = "0.2.0"
+dynamic = [ "version" ]
+
 description = ""
 authors = [
   { name = "J. Lütgert", email = "julian.luetgert@uni-rostock.de" },
@@ -17,7 +18,14 @@ dependencies = [
   "jpu (>=0.0.5)",
   "dill (>=0.4.0,<0.5.0)",
 ]
-requires-python = "^3.10,<3.14"
+requires-python = ">=3.10,<3.14"
+
+[tool.poetry]
+packages = [{ include = "jaxrts", from = "src" }]
+version = "0.0.0"  # base version
+
+[tool.poetry.requires-plugins]
+poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.1"
@@ -41,13 +49,43 @@ optional = true
 flax = "^0.10.4"
 orbax = "^0.1.9"
 
-[tool.poetry]
-packages = [{ include = "jaxrts", from = "src" }]
-
 [build-system]
-requires = ["poetry-core>=2.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.black]
 line-length = 79
 target-version = ['py312']
+
+[tool.poetry-dynamic-versioning]
+enable = true
+pattern = '(?P<base>\d+\.\d+\.\d+)'
+
+[tool.poetry-dynamic-versioning.substitution]
+folders = [
+  { path = "src/jaxrts" }
+]
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+ignore = [
+  # Ambiguous variable names; for quantum numbers, this is annoying
+  "E741",
+  # Function uses loop variable; often, we have to define functions within
+  # loops for jax; this is reducing the required arguments passed to the
+  # function. Omit with care.
+  "B023"
+]

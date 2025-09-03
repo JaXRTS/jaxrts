@@ -10,11 +10,9 @@ from the Laplace transform of the structure, as proposed by
 from functools import partial
 
 import jax
+import matplotlib.pyplot as plt
 from jax import numpy as jnp
 from jpu import numpy as jnpu
-
-import matplotlib.pyplot as plt
-import scienceplots  # noqa: F501
 
 import jaxrts
 

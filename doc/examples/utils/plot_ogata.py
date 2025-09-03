@@ -3,8 +3,8 @@ Ogata Fourier transform
 =======================
 """
 
-from functools import partial
 import time
+from functools import partial
 
 import hankel
 import jax
@@ -130,7 +130,7 @@ k = np.logspace(-3, 1, 50)
 f_fft_analy = jnp.sqrt(2 / jnp.pi) * (1 / k**2) / (k**2 + 1) * k**2
 
 
-for i in range(10):
+for _i in range(10):
     t0 = time.time()
 
     f_fft = jax.vmap(

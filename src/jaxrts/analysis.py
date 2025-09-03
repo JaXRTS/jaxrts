@@ -8,9 +8,9 @@ import jax
 from jax import numpy as jnp
 from jpu import numpy as jnpu
 
-from .setup import Setup
-from .units import ureg, Quantity
 from .helpers import secant_extrema_finding
+from .setup import Setup
+from .units import Quantity, ureg
 
 
 @jax.jit

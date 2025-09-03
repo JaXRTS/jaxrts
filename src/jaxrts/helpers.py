@@ -3,12 +3,11 @@ Miscellaneous helper functions.
 """
 
 import logging
-from functools import wraps, partialmethod
+from functools import partialmethod, wraps
 from time import time
 
 import jax
 from jax import numpy as jnp
-from jax.scipy.optimize import minimize
 
 from .units import Quantity, ureg
 
@@ -170,7 +169,7 @@ class JittableDict(dict):
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = JittableDict.__new__(cls)
-        for key, val in zip(aux_data, children):
+        for key, val in zip(aux_data, children, strict=False):
             obj[key] = val
         return obj
 

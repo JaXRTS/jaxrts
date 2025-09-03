@@ -3,11 +3,9 @@ These tests investigate that certain properties of a generated spectrum hold
 true.
 """
 
-import pytest
-
 from functools import partial
 
-import jax
+import pytest
 from jax import numpy as jnp
 from jpu import numpy as jnpu
 
