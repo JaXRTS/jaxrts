@@ -16,7 +16,7 @@ ureg = jaxrts.ureg
 plt.style.use("science")
 
 Z_A = 4
-Z_C = 3.5
+Z_C = 0.5
 
 k = jnp.linspace(0, 17, 100) / (1 * ureg.angstrom)
 
