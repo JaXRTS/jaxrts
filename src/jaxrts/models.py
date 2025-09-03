@@ -2773,6 +2773,12 @@ class FormFactorLowering(Model):
         self.Z_squared_correction = Z_squared_correction
         super().__init__()
 
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        plasma_state.update_default_model(
+            "ipd", StewartPyattIPD()
+        )
+
     @jax.jit
     def evaluate(
         self, plasma_state: "PlasmaState", setup: Setup
@@ -2819,7 +2825,7 @@ class FormFactorLowering(Model):
                 elem.Z - plasma_state.Z_free[idx],
                 elem.Z,
                 self.Z_squared_correction,
-            )
+            ).m_as(ureg.dimensionless)
 
             # update the Pauling f_1s result
             ff = ff.at[idx, 0].set(f_1s)
