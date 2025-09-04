@@ -3,6 +3,7 @@ This submodule is dedicated to form factors.
 """
 
 import logging
+from functools import partial
 
 import numpy as onp
 from jax import jit
@@ -154,7 +155,7 @@ def pauling_f40(k: Quantity, Zeff: Quantity | float) -> Quantity:
 
 
 def pauling_atomic_ff(
-    n: int, l: int, k: Quantity, Zeff: Quantity | float  # noqa: 741
+    n: int, l: int, k: Quantity, Zeff: Quantity | float  # noqa: E741
 ) -> Quantity:
     """
     Atomic formfactor of a hydrogen-like atom taken from :cite:`Pauling.1932`.
@@ -204,3 +205,102 @@ def pauling_all_ff(k: Quantity, Zeff: Quantity | jnp.ndarray) -> Quantity:
             pauling_f43(k, Zeff[9]).m_as(ureg.dimensionless),
         ]
     )
+
+
+@partial(jit, static_argnames=["Z_squared_correction"])
+def form_factor_lowering_Zeff_10(
+    binding_E: Quantity,
+    Z_A: float,
+    Z_squared_correction: bool,
+) -> jnp.ndarray:
+    """
+    Calculate the form factor lowering for the 1s orbital. See
+    :cite:`Doppner.2023`.
+
+    For hydrogen-like ions, the binding energy has to be compared to 13.6eV.
+    He-like ions use a corrected ground-state value, instead, to account for
+    screening. This has to be chosen to reproduce the known form factors
+    :py:func:`~.pauling_f10` in the case of no IPD, and scales with `1/Z_A`
+
+    .. math::
+
+        E_n^\\text{H-like} = 13.6 \\text{eV}
+        E_n^\\text{He-like} = (13.6 - 12.13/Z_A)\\text{eV}
+
+    We noted that with growing Z, the simple functions above start to deviate
+    from the values given by :cite:`Pauling.1932`.
+
+    We fitted an additional correction term:
+
+    .. math::
+
+        \\Delta E_n = 1.77 \\times 10^{-4} \\text{eV} \\cdot Z_A^2
+
+
+    Parameters
+    ----------
+    binding_E: Quantity
+        The binding energies of the two 1s electrons. Has to be an array with 2
+        entries. Note that this potentially has to be reduced by the IPD.
+    Z_A: float
+        Atomic number of the element, i.e., number of protons in the core.
+    Z_squared_correction: bool
+        If ``True``, the quadratic correction term discussed above is added to
+        better match the zero IPD limit.
+    """
+    n = 1
+    En_H = 13.605693122994
+    En_He = En_H - 12.1318355 / Z_A
+
+    En = jnp.array([En_H, En_He])
+    if Z_squared_correction:
+        En += 1.7728e-04 * Z_A**2
+
+    # calculate Z_eff for H and He like species
+    Z_eff = jnp.sqrt((binding_E.m_as(ureg.electron_volt)) * n**2 / (En))
+    return Z_eff
+
+
+@partial(jit, static_argnames=["Z_squared_correction"])
+def form_factor_lowering_10(
+    k: Quantity,
+    binding_E: Quantity,
+    Z_core: float,
+    Z_A: float,
+    Z_squared_correction: bool,
+) -> Quantity:
+    """
+    Calculate the form factor lowering for the 1s orbital. See
+    :cite:`Doppner.2023`. Calculates the effective charge from the binding
+    energies (incl. IPD) from :py:func:`~form_factor_lowering_Zeff_10`. Then,
+    insert this effective charge in the function from :cite:`Pauling.1932`,
+    :py:func:`pauling_f10`.
+
+    Parameters
+    ----------
+    k: Quantity
+        The scattering vector.
+    binding_E: Quantity
+        The binding energies of the two 1s electrons. Has to be an array with 2
+        entries. Note that this potentially has to be reduced by the IPD.
+    Z_core: float
+        Average number of bound electrons to the core.
+    Z_A: float
+        Atomic number of the element, i.e., number of protons in the core.
+    Z_squared_correction: bool
+        If ``True``, the quadratic correction term discussed above is added to
+        better match the zero IPD limit.
+    """
+    Z_eff = form_factor_lowering_Zeff_10(binding_E, Z_A, Z_squared_correction)
+
+    # calculate the form factors for H and He like ions
+    # Note: when there are two electrons, they cannot be distinguished.
+    # In case of Z_core being fractional, though, we need to average ions with
+    # H and He-like structure, with the correct ratio.
+    f_1s_H_like = pauling_f10(k, Z_eff[0])
+    f_1s_He_like = pauling_f10(k, Z_eff[1])
+    x_1s_He_like = jnp.clip(Z_core - 1, 0, 1)
+    x_1s_H_like = 1 - x_1s_He_like
+
+    f_1s = (x_1s_H_like * f_1s_H_like) + (x_1s_He_like * f_1s_He_like)
+    return f_1s.to(ureg.dimensionless)
