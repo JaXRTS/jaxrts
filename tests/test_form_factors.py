@@ -1,3 +1,4 @@
+import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
 
@@ -49,3 +50,78 @@ def test_tabulated_scattering_factors():
             axis=0,
         )
         assert (onp.max(onp.abs(literature_F - F) / F)) < 0.03
+
+
+def test_effective_charge_ffl_approaches_pauling_0_ipd():
+    """
+    Test that the effective charge (and with it the form factors) in the form
+    factor lowering formalism approach the values of Pauling for 0 IPD.
+    """
+    Z_A = jnp.arange(2, 36)
+
+    Zeff_pauling_H_like = Z_A
+    Zeff_pauling_He_like = (
+        Z_A - jaxrts.form_factors.pauling_size_screening_constants(Z_A)[0]
+    )
+
+    Zeff_ffl_H_like = []
+    Zeff_ffl_He_like = []
+
+    Zeff_ffl_H_like_corr = []
+    Zeff_ffl_He_like_corr = []
+    for Zs in Z_A:
+        binding_E = jnpu.sort(jaxrts.Element(Zs).ionization.energies)[-2:][
+            ::-1
+        ]
+        H_like, He_like = jaxrts.form_factors.form_factor_lowering_Zeff_10(
+            binding_E, Zs, Z_squared_correction=False
+        )
+        Zeff_ffl_H_like.append(H_like)
+        Zeff_ffl_He_like.append(He_like)
+
+        H_like, He_like = jaxrts.form_factors.form_factor_lowering_Zeff_10(
+            binding_E, Zs, Z_squared_correction=True
+        )
+        Zeff_ffl_H_like_corr.append(H_like)
+        Zeff_ffl_He_like_corr.append(He_like)
+
+    Zeff_ffl_H_like = jnp.array(Zeff_ffl_H_like)
+    Zeff_ffl_He_like = jnp.array(Zeff_ffl_He_like)
+
+    Zeff_ffl_H_like_corr = jnp.array(Zeff_ffl_H_like_corr)
+    Zeff_ffl_He_like_corr = jnp.array(Zeff_ffl_He_like_corr)
+
+    assert jnp.all(jnp.abs(Zeff_ffl_H_like - Zeff_pauling_H_like)[:15] < 0.05)
+    assert jnp.all(jnp.abs(Zeff_ffl_H_like_corr - Zeff_pauling_H_like) < 0.03)
+
+    assert jnp.all(
+        jnp.abs(Zeff_ffl_He_like - Zeff_pauling_He_like)[:15] < 0.05
+    )
+    assert jnp.all(
+        jnp.abs(Zeff_ffl_He_like_corr - Zeff_pauling_He_like) < 0.03
+    )
+
+
+def test_0_idp_ffl_approaches_pauling():
+    """
+    Compare the 1s form factors of ffl and pauling for z IPD.
+    """
+    k = jnp.linspace(0, 170, 400) / (1 * ureg.angstrom)
+    for Z_A in [4, 25]:
+        for Z_C in [0.5, 1.0, 1.5, 2.0, 2.5]:
+            Zeff_pauling = (
+                Z_A
+                - jaxrts.form_factors.pauling_size_screening_constants(Z_C)[0]
+            )
+            f_pauling = jaxrts.form_factors.pauling_f10(k, Zeff_pauling)
+
+            binding_E = jaxrts.Element(Z_A).ionization.energies[::-1][:2]
+            f_ffl = jaxrts.form_factors.form_factor_lowering_10(
+                k, binding_E, Z_C, Z_A, Z_squared_correction=True
+            )
+            assert (
+                jnpu.max(jnpu.absolute(f_ffl - f_pauling)).m_as(
+                    ureg.dimensionless
+                )
+                < 0.001
+            )
