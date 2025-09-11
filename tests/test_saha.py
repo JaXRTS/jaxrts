@@ -51,7 +51,7 @@ def test_against_MALGS_calculation():
 
     Tes = jnp.logspace(2, 6, 150) * ureg.kelvin
     for Te in Tes:
-        sol, _ = solve_saha(
+        sol, _, _ = solve_saha(
             tuple(plasma_state.ions),
             Te,
             (plasma_state.mass_density / plasma_state.atomic_masses),

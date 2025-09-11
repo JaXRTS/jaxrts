@@ -30,7 +30,7 @@ debug_detM = False
 
 
 @jax.jit
-def bisection(func, a, b, tolerance=1e-4, max_iter=1e4, min_iter=1E2):
+def bisection(func, a, b, tolerance=1e-4, max_iter=1e4, min_iter=1e2):
 
     def condition(state):
         prev_x, next_x, count = state
@@ -122,7 +122,7 @@ def solve_saha(
     element_list: list[Element],
     T_e: Quantity,
     ion_number_densities: Quantity,
-    continuum_lowering: Quantity = 0 * ureg.electron_volt
+    continuum_lowering: Quantity | None = None,
 ) -> (Quantity, Quantity):
     """
     Solve the Saha equation for a list of elements at a given temperature.
@@ -198,7 +198,11 @@ def solve_saha(
          degrees.
     """
 
-    Z = [elem.Z for elem in element_list]
+    Z = [ion.Z for ion in element_list]
+    if continuum_lowering is None:
+        continuum_lowering = [
+            jnp.zeros(ion.Z) * ureg.electron_volt for ion in element_list
+        ]
 
     # Set up the empty matrix
     M = jnp.zeros(
@@ -219,24 +223,28 @@ def solve_saha(
     # temperature to avoid numerical instabilities
     # jax.debug.print("{x}",x = max_ne.m_as(1 / ureg.m**3) // 1)
 
-    # Calculate how many states have a energy below 0, as it can happen due to ipd.abs
+    # Calculate how many states have a energy below 0, as it can happen due to
+    # ipd.abs
 
     Ebs = []
-    for ion_dens, element, ipd in zip(
-        ion_number_densities, element_list, continuum_lowering
-    ):
+    for element, ipd in zip(element_list, continuum_lowering, strict=True):
 
         stat_weight = element.ionization.statistical_weights
 
         Ebs.append(
-            (element.ionization.energies + ipd).m_as(ureg.electron_volt)
+            (jnpu.sort(element.ionization.energies) + ipd).m_as(ureg.electron_volt)
         )
-    
 
-    ratio = jnp.sum(jnp.heaviside(jnp.array(Ebs), 0) / len(Ebs))
+    all_binding_energies = jnp.concatenate(Ebs)
+    ratio = jnp.sum(
+        jnp.heaviside(all_binding_energies, 0) / len(all_binding_energies)
+    )
 
     _ne_range = jnp.array(
-        [max_ne.m_as(1 / ureg.m**3) * ratio + 1, max_ne.m_as(1 / ureg.m**3)]
+        [
+            max_ne.m_as(1 / ureg.m**3) * (1 - ratio) + 1,
+            max_ne.m_as(1 / ureg.m**3),
+        ]
     )
     ne_scale = jnp.interp(
         (T_e * k_B).m_as(ureg.electron_volt),
@@ -258,16 +266,11 @@ def solve_saha(
     # number density (the Saha part does contain n_e, but implicitly).
     # Note: The matrix is transposed, here. It will be transposed when n_e is
     # inserted.
-    for ion_dens, element, ipd in zip(
-        ion_number_densities, element_list, continuum_lowering
+    for ion_dens, element, Eb in zip(
+        ion_number_densities, element_list, Ebs, strict=True
     ):
 
         stat_weight = element.ionization.statistical_weights
-
-        Eb = element.ionization.energies + ipd
-
-        out = []
-        pref = 1
 
         # jax.debug.print("Before: {x}", x = jnp.sum(jnp.heaviside(Eb.m_as(ureg.electron_volt), 0)))
 
@@ -281,7 +284,7 @@ def solve_saha(
         final_pref, out_values = jax.lax.scan(
             scan_fn,
             initial_pref,
-            (jnp.array([*Eb.m_as(ureg.electron_volt), 1.0]), stat_weight),
+            (jnp.array([*Eb, 1.0]), stat_weight),
         )
 
         stat_weight = out_values
@@ -298,13 +301,13 @@ def solve_saha(
                 stat_weight[:-1],
                 stat_weight[1:],
                 T_e,
-                Eb,
+                Eb * ureg.electron_volt,
             )
             / ne_scale
         ).m_as(ureg.dimensionless)
 
         diag = jnp.diag(
-            jnp.where(Eb.m_as(ureg.electron_volt) > 0, (-1) * coeff, 1)
+            jnp.where(Eb > 0, (-1) * coeff, 1)
         )
         dens_row = jnp.ones((element.Z + 1))
 
@@ -335,7 +338,7 @@ def solve_saha(
         ne_line = jnp.ones(len(element_list) + int(onp.sum(Z))) * ne
 
         skip = -1
-        for element, Eb in zip(element_list, Ebs):
+        for element, Eb in zip(element_list, Ebs, strict=True):
 
             # jax.debug.print("{x}", x = jnp.heaviside(Eb, 0))
 
@@ -366,21 +369,22 @@ def solve_saha(
         * 1e16
     )
 
-    if debug_detM:
-        ne_plot = onp.linspace(0, 1, 100)
-        ax.hlines(0.0, ne_plot[0], ne_plot[-1], color="black", ls="dashed")
-        ax.plot(ne_plot, [det_M_func(ne) for ne in ne_plot])
-        ax.vlines(sol_ne, 0, 0.0001, color="black", ls="dashed")
-        plt.show(block=False)
-        plt.pause(2.0)
-        jax.debug.print("sol_ne: {x}, {y}", x=sol_ne, y=ne_scale)
+    # if debug_detM:
+    #     ne_plot = onp.linspace(0, 1, 100)
+    #     ax.hlines(0.0, ne_plot[0], ne_plot[-1], color="black", ls="dashed")
+    #     ax.plot(ne_plot, [det_M_func(ne) for ne in ne_plot])
+    #     ax.vlines(sol_ne, 0, 0.0001, color="black", ls="dashed")
+    #     plt.show(block=False)
+    #     plt.pause(2.0)
+    #     jax.debug.print("sol_ne: {x}, {y}", x=sol_ne, y=ne_scale)
 
     # ax.set_yscale("log")
 
     # Find n_e by finding the root where the determinant of M is 0
     # Use the bisection method, boundaries are fixed by max_ne and 0.
     sol_ne, iterations = bisection(
-        jax.tree_util.Partial(lambda ne: det_M(M=M, ne=ne)),
+        # jax.tree_util.Partial(lambda ne: det_M(M=M, ne=ne)),
+        jax.tree_util.Partial(det_M_func),
         0,
         (max_ne / ne_scale).m_as(ureg.dimensionless),
         tolerance=1e-16,
@@ -408,20 +412,35 @@ def solve_saha(
     # Rescale the dimensionless number densities so that units are
     # 1/[length]**3.
     res = jnpu.multiply(ionised_number_densities, ne_scale)
-
     # jax.debug.print("{x}", x = ionised_number_densities)
-    Z_mean = to_array(
-        (sol_ne * ne_scale) / jnpu.sum(ion_number_densities)
-    ).m_as(ureg.dimensionless)
+
+    skip = 0
+    Z_mean = []
+    for element in element_list:
+        Z_mean.append(
+            jnpu.sum(
+                res[skip : skip + element.Z + 1]
+                * jnp.arange(element.Z + 1)
+                / jnpu.sum(res[skip : skip + element.Z + 1])
+            )
+        )
+        skip += element.Z + 1
+    # Z_mean = to_array(
+    #     (sol_ne * ne_scale) / jnpu.sum(ion_number_densities)
+    # ).m_as(ureg.dimensionless)
     # print(len(res))
     # print(jnp.abs(jnpu.sum((jnp.arange(len(res)) * res) / jnpu.sum(res)).m_as(ureg.dimensionless) - Z_mean) < 1E-3)
 
-    return to_array(res), Z_mean
+    return (
+        to_array(res),
+        sol_ne * ne_scale,
+        to_array(Z_mean).m_as(ureg.dimensionless),
+    )
 
 
 @partial(jax.jit, static_argnames=["element_list"])
 def solve_gen_saha(
-    element_list: List[Element],
+    element_list: list[Element],
     T_e: Quantity,
     n_e: Quantity,
     ion_number_densities: Quantity,
@@ -551,7 +570,7 @@ def solve_gen_saha(
     ):
 
         stat_weight = element.ionization.statistical_weights
-        Eb = jnpu.sort(element.ionization.energies + ipd)
+        Eb = jnpu.sort(element.ionization.energies) + ipd
 
         # Don't allow negative binding energies.
         # Eb = jnpu.where(Eb < 0, 0, Eb)
@@ -655,7 +674,7 @@ def calculate_charge_state_distribution(plasma_state):
 
     cl = plasma_state["ipd"].all_element_states(plasma_state)
 
-    sol, Z_mean = solve_saha(
+    sol, ne, Z_mean = solve_saha(
         tuple(plasma_state.ions),
         plasma_state.T_e,
         # plasma_state.n_e,
@@ -666,7 +685,7 @@ def calculate_charge_state_distribution(plasma_state):
     return (sol / jnpu.sum(sol)).m_as(ureg.dimensionless)
 
 
-def calculate_mean_free_charge_saha(plasma_state):
+def calculate_mean_free_charge_saha(plasma_state, ipd: bool = False):
     """
     Calculates the mean charge of each ion in a plasma using the Saha-Boltzmann
     equation.
@@ -692,9 +711,14 @@ def calculate_mean_free_charge_saha(plasma_state):
     """
 
     plasma_state.Z_free = jnp.array([1.0])
-    cl = plasma_state["ipd"].all_element_states(plasma_state)
+    if ipd:
+        cl = plasma_state["ipd"].all_element_states(plasma_state)
+    else:
+        cl = [
+            jnp.zeros(ion.Z) * ureg.electron_volt for ion in plasma_state.ions
+        ]
 
-    charge_distribution, Z_mean = solve_saha(
+    charge_distribution, ne, Z_mean = solve_saha(
         tuple(plasma_state.ions),
         plasma_state.T_e,
         # plasma_state.n_e,
