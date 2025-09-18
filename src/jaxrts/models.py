@@ -3110,7 +3110,7 @@ class StewartPyattIPD(Model):
                     [
                         ipd.ipd_stewart_pyatt(
                             Z + 1,
-                            (Z + 1) * plasma_state.n_i[idx],
+                            plasma_state.n_e,
                             plasma_state.n_i[idx],
                             plasma_state.T_e,
                             plasma_state.T_i[idx],
