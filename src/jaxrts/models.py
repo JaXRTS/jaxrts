@@ -3109,12 +3109,12 @@ class StewartPyattIPD(Model):
                 jnp.array(
                     [
                         ipd.ipd_stewart_pyatt(
-                            plasma_state.Z_free[idx],
-                            plasma_state.n_e,
+                            Z+1,
+                            (Z+1) * plasma_state.n_i[idx],
                             plasma_state.n_i[idx],
                             plasma_state.T_e,
                             plasma_state.T_i[idx],
-                            Z,
+                            Z+1,
                         ).m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
@@ -3156,8 +3156,8 @@ class StewartPyattFullDegIPD(Model):
                 jnp.array(
                     [
                         ipd.ipd_stewart_pyatt_full_deg(
-                            Z,
-                            plasma_state.n_i[idx] * (Z + 1e-6),
+                            Z+1,
+                            plasma_state.n_i[idx] * (Z + 1),
                             plasma_state.n_i[idx],
                             plasma_state.T_e,
                             plasma_state.T_i[idx],
@@ -3281,6 +3281,30 @@ class PauliBlockingIPD(Model):
             plasma_state.T_e,
             plasma_state.T_i,
         )
+
+    @jax.jit
+    def all_element_states(
+        self, plasma_state: "PlasmaState"
+    ) -> list[jnp.ndarray]:
+        out = []
+        for idx, element in enumerate(plasma_state.ions):
+            out.append(
+                jnp.array(
+                    [
+                        ipd.ipd_pauli_blocking(
+                            plasma_state.Z_free[idx],
+                            plasma_state.n_e,
+                            plasma_state.n_i[idx],
+                            plasma_state.T_e,
+                            plasma_state.T_i,
+                        ).m_as(ureg.electron_volt)
+                        for Z in jnp.arange(element.Z)
+                    ]
+                )
+                * ureg.electron_volt
+            )
+        return out
+
 
 
 # Screening Length Models

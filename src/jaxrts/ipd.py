@@ -165,12 +165,12 @@ def ipd_stewart_pyatt_full_deg(
     """
 
     # This function is not well-defined for Zi==0:
-    Zi = jnp.clip(Zi, 1e-6)
+    # Zi = jnp.clip(Zi, 1e-6)
 
-    R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
+    R_0 = (3 * (Zi) / (4 * jnp.pi * ne)) ** (1 / 3)
 
     kappa_i_sq = jnpu.sum(
-        Zi**2
+        (Zi)**2
         * 1
         * ureg.elementary_charge**2
         * ni
@@ -190,7 +190,7 @@ def ipd_stewart_pyatt_full_deg(
     ipd_shift = -(
         (
             3
-            * (Zi + 1)
+            * (Zi)
             * ureg.elementary_charge**2
             / (2 * 4 * jnp.pi * 1 * ureg.epsilon_0 * R_0)
         )
@@ -233,15 +233,13 @@ def ipd_stewart_pyatt(
         The ipd shift in units of electronvolt.
     """
 
-    T_F = fermi_energy(ne) / (1 * ureg.k_B)
-
     # This function is not well-defined for Zi==0:
     Zi = jnp.clip(Zi, 1e-6)
 
     R_0 = (3 / (4 * jnp.pi * ni)) ** (1 / 3)
 
     kappa_i_sq = jnpu.sum(
-        (Zi + 1)**2
+        (Zi)**2
         * 1
         * ureg.elementary_charge**2
         * ni
@@ -250,7 +248,7 @@ def ipd_stewart_pyatt(
     kappa_e_sq = (
         ne
         * ureg.elementary_charge**2
-        / (4 * jnp.pi * 1 * ureg.epsilon_0 * ureg.boltzmann_constant * (Te**4 + T_F**4)**(1/4))
+        / (4 * jnp.pi * 1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
     )
 
     kappa = jnpu.sqrt(kappa_i_sq)
@@ -261,7 +259,7 @@ def ipd_stewart_pyatt(
     ipd_shift = -(
         (
             3
-            * (Z + 1)
+            * (Z)
             * ureg.elementary_charge**2
             / (2 * 4 * jnp.pi * 1 * ureg.epsilon_0 * R_0)
         )
