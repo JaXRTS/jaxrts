@@ -41,6 +41,8 @@ class PlasmaState:
         # Define charge configuration
         self.Z_free = to_array(Z_free)
 
+        self.pop = None
+
         self.mass_density = to_array(mass_density)
 
         if (
@@ -161,6 +163,10 @@ class PlasmaState:
     @property
     def nions(self) -> int:
         return len(self.ions)
+
+    @property
+    def population(self) -> jnp.ndarray:
+        return self.pop
 
     @property
     def mean_Z_A(self) -> float:
@@ -335,6 +341,7 @@ class PlasmaState:
     # Set labels for a save state that is better readable by humans
     _children_labels = (
         "Z_free",
+        "pop",
         "mass_density",
         "T_e",
         "T_i",
@@ -347,6 +354,7 @@ class PlasmaState:
     def _tree_flatten(self):
         children = (
             self.Z_free,
+            self.pop,
             self.mass_density,
             self.T_e,
             self.T_i,
@@ -362,6 +370,7 @@ class PlasmaState:
         (obj.ions,) = aux_data
         (
             obj.Z_free,
+            obj.pop,
             obj.mass_density,
             obj.T_e,
             obj.T_i,

@@ -747,7 +747,7 @@ def calculate_charge_state_distribution(plasma_state):
     return (sol / jnpu.sum(sol)).m_as(ureg.dimensionless)
 
 
-def calculate_mean_free_charge_saha(plasma_state, ipd: bool = False, degenerate = False):
+def calculate_mean_free_charge_saha(plasma_state, ipd: bool = False, degenerate : bool = False):
     """
     Calculates the mean charge of each ion in a plasma using the Saha-Boltzmann
     equation.
@@ -773,6 +773,7 @@ def calculate_mean_free_charge_saha(plasma_state, ipd: bool = False, degenerate 
     """
 
     plasma_state.Z_free = jnp.array([1.0])
+
     if ipd:
         cl = plasma_state["ipd"].all_element_states(plasma_state)
     else:
@@ -798,8 +799,5 @@ def calculate_mean_free_charge_saha(plasma_state, ipd: bool = False, degenerate 
             continuum_lowering=cl,
         )
             plasma_state.Z_free = jnp.array([Z_mean])
-            # print(Z_mean)
-        # print(plasma_state.n_e)
-    
 
-    return Z_mean
+    return charge_distribution / jnpu.sum(charge_distribution), Z_mean

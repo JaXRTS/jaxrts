@@ -3114,7 +3114,7 @@ class StewartPyattIPD(Model):
                             plasma_state.n_i[idx],
                             plasma_state.T_e,
                             plasma_state.T_i[idx],
-                            Z+1,
+                            (jnp.arange(element.Z+1), plasma_state.population) if plasma_state.population is not None else None,
                         ).m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
