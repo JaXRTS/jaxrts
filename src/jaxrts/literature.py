@@ -48,7 +48,7 @@ def get_formatted_ref_string(
         ]
     except KeyError as e:
         key = e.args[0]
-        raise KeyError (
+        raise KeyError(
             f"Could not find biblography entry {key} in {literature_file}"
         ) from e
     if comment is not None:
@@ -68,19 +68,17 @@ def get_bibtex_ref_string(
         bibkeys = [bibkeys]
 
     try:
-        out_list = [
-            pybtex.database.parse_file(literature_file)
-            .entries[key]
-            .to_string("bibtex")
-            for key in bibkeys
-        ]
+        out_list = []
+        for key in bibkeys:
+            entry = pybtex.database.parse_file(literature_file).entries[key]
+            if comment is not None:
+                entry.fields.update(dict(note=comment))
+            out_list.append(entry.to_string("bibtex"))
     except KeyError as e:
         key = e.args[0]
         raise KeyError(
             f"Could not find biblography entry {key} in {literature_file}"
         ) from e
-    if comment is not None:
-        out_list = [comment, *out_list]
     # Filter out all empty strings:
     out_list = [string for string in out_list if string.strip() != ""]
     return "\n".join(out_list)

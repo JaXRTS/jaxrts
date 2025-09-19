@@ -101,13 +101,22 @@ class PlasmaState:
         """
         out_strings = []
         for key, model in self.models.items():
-            model_str = model.citation(style)
-            if model_str.strip() != "":
-                out_strings.append("")  # Will be a newline
-                out_strings.append(key)
-                out_strings.append(model_str)
-        if len(out_strings) > 0:
-            out_strings = out_strings[1:]
+            # Force a human-readable format.
+            if style == "plain":
+                model_str = model.citation(style)
+                if model_str.strip() != "":
+                    out_strings.append("")  # Will be a newline
+                    out_strings.append(key)
+                    out_strings.append(model_str)
+            # Squish the citation key in the `note` key of the bibtex entry.
+            elif style == "bibtex":
+                model_str = model.citation(style, key)
+                if model_str.strip() != "":
+                    out_strings.append(model_str)
+        # Remove the leading empty line for plain style
+        if style == "plain":
+            if len(out_strings) > 0:
+                out_strings = out_strings[1:]
         return "\n".join(out_strings)
 
     def expand_integer_ionization_states(self) -> "PlasmaState":

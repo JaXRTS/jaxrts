@@ -46,7 +46,10 @@ logger = logging.getLogger(__name__)
 class Model(metaclass=abc.ABCMeta):
     #: A list of keywords where this model is adequate for
     allowed_keys: list[str] = []
-    #: A list of bibtex keys
+    #: A list of bibtex keys. Can be in the format ``[key1, key2]``, for
+    #: general keys, ``[(key1, comment1), (key2, comment2)]``, if comments are
+    #: desired, of ``[([key1, key2], comment1), (key3, comment2)]`` if the
+    #: comment should apply to multiple keys.
     cite_keys: (
         list[str] | list[tuple[str, str]] | list[tuple[list[str], str]]
     ) = []
@@ -80,7 +83,11 @@ class Model(metaclass=abc.ABCMeta):
         """
         pass
 
-    def citation(self, style: Literal["plain", "bibtex"] = "plain") -> str:
+    def citation(
+        self,
+        style: Literal["plain", "bibtex"] = "plain",
+        comment: str | None = None,
+    ) -> str:
         """
         Return bibliographic information for the Model used.
 
@@ -104,9 +111,12 @@ class Model(metaclass=abc.ABCMeta):
         citations = []
         for entry in self.cite_keys:
             if isinstance(entry, str):
-                citations.append(citation_function(entry))
+                citations.append(citation_function(entry, comment))
             else:
-                citations.append(citation_function(*entry))
+                key, key_comment = entry
+                if comment is not None:
+                    key_comment = comment + ". " + key_comment
+                citations.append(citation_function(key, key_comment))
         return "\n".join(citations)
 
     # The following is required to jit a Model
@@ -441,6 +451,7 @@ class Gregori2003IonFeat(IonFeatModel):
     """
 
     __name__ = "Gregori2003IonFeat"
+    cite_keys = ["Gregori.2003"]
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if plasma_state.T_e != plasma_state.T_i:
@@ -493,6 +504,7 @@ class Gregori2006IonFeat(IonFeatModel):
     """
 
     __name__ = "Gregori2006IonFeat"
+    cite_keys = ["Gregori.2006"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         super().prepare(plasma_state, key)
@@ -572,6 +584,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
     """
 
     __name__ = "OnePotentialHNCIonFeat"
+    cite_keys = [("Wunsch.2011", "Implementation of the HNC scheme based on")]
 
     def __init__(
         self,
