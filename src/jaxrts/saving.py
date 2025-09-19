@@ -18,10 +18,10 @@ import json
 import dill as pickle
 import jax
 import jax.numpy as jnp
-import jaxrts
 import jpu.numpy as jnpu
 import numpy as onp
-from jaxlib.xla_extension import ArrayImpl
+
+import jaxrts
 
 from .elements import Element
 from .helpers import partialclass
@@ -35,9 +35,12 @@ from .units import Quantity
 def _flatten_obj(obj):
     children, aux = obj._tree_flatten()
     if hasattr(obj, "_children_labels"):
-        children = {l: c for (l, c) in zip(obj._children_labels, children)}
+        children = {
+            l: c
+            for (l, c) in zip(obj._children_labels, children, strict=False)
+        }
     if hasattr(obj, "_aux_labels"):
-        aux = {l: a for (l, a) in zip(obj._aux_labels, aux)}
+        aux = {l: a for (l, a) in zip(obj._aux_labels, aux, strict=False)}
     return (children, aux)
 
 
@@ -114,7 +117,7 @@ class JaXRTSEncoder(json.JSONEncoder):
             }
         elif isinstance(obj, Quantity):
             return {"_type": "Quantity", "value": obj.to_tuple()}
-        elif isinstance(obj, ArrayImpl):
+        elif isinstance(obj, jax.Array):
             try:
                 return {"_type": "Array", "value": list(onp.array(obj))}
             except TypeError:
@@ -124,9 +127,7 @@ class JaXRTSEncoder(json.JSONEncoder):
                 "_type": "ndArray",
                 "value": list(obj),
             }
-        elif isinstance(obj, onp.int32):
-            return int(obj)
-        elif isinstance(obj, onp.int64):
+        elif isinstance(obj, onp.int32 | onp.int64):
             return int(obj)
         elif isinstance(obj, jax.tree_util.Partial):
             return {
@@ -144,12 +145,14 @@ class JaXRTSDecoder(json.JSONDecoder):
        To restore them, you have to provide these in `additional_mappings`:
     """
 
-    def __init__(self, ureg, additional_mappings={}, *args, **kwargs):
+    def __init__(self, ureg, additional_mappings=None, *args, **kwargs):
         """ """
+        if additional_mappings is None:
+            additional_mappings = {}
         self.ureg = ureg
         self.additional_mappings = additional_mappings
         json.JSONDecoder.__init__(
-            self, object_hook=self.object_hook, *args, **kwargs
+            self, *args, object_hook=self.object_hook, **kwargs
         )
 
     @property
@@ -264,7 +267,7 @@ def dumps(obj, *args, **kwargs) -> str:
     return json.dumps(obj, *args, **kwargs)
 
 
-def load(fp, unit_reg, additional_mappings={}, *args, **kwargs):
+def load(fp, unit_reg, additional_mappings=None, *args, **kwargs):
     """
     Load an object from file. Uses :py:func:`json.load` under to hood, and
     forwards args and kwargs to this function.
@@ -287,7 +290,7 @@ def load(fp, unit_reg, additional_mappings={}, *args, **kwargs):
     --------
     >>> with open("state.json", "w") as f:
     >>>     state = load(f, unit_reg = jaxrts.ureg)
-    
+
     Custom models have to be passed to :py:func:`~load` as shown bellow.
 
     >>> class AlwaysPiModel(jaxrts.models.Model):
@@ -303,6 +306,8 @@ def load(fp, unit_reg, additional_mappings={}, *args, **kwargs):
     >>>     )
 
     """
+    if additional_mappings is None:
+        additional_mappings = {}
     dec = partialclass(
         JaXRTSDecoder, ureg=unit_reg, additional_mappings=additional_mappings
     )

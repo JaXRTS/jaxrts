@@ -25,14 +25,13 @@ E = jnp.linspace(-100, 100, 500) * ureg.electron_volts
 
 k = (4 * jnp.pi / lambda_0) * jnp.sin(jnp.deg2rad(theta) / 2.0)
 
-count = 0
-norm = 1.0
-
-for T in [
-    0.8 * ureg.electron_volts,
-    3.0 * ureg.electron_volts,
-    13.0 * ureg.electron_volts,
-]:
+for count, T in enumerate(
+    [
+        0.8 * ureg.electron_volts,
+        3.0 * ureg.electron_volts,
+        13.0 * ureg.electron_volts,
+    ]
+):
     mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(
         T / (1 * ureg.boltzmann_constant), n_e
     )
@@ -54,7 +53,6 @@ for T in [
         label="T = " + str(T.m_as(ureg.electron_volt)) + " eV",
         color=f"C{count}",
     )
-    count += 1
 
 plt.xlabel(r"$\omega$ [eV]")
 plt.ylabel(r"$S^0_{\text{ee}}$ [arb. units]")

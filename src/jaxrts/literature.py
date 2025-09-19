@@ -2,12 +2,11 @@
 Submodule handeling the citation of references
 """
 
-from typing import Iterable
+from collections.abc import Iterable
+from pathlib import Path
 
 import pybtex
 import pybtex.database
-from pathlib import Path
-
 from pybtex.style.labels import BaseLabelStyle
 
 

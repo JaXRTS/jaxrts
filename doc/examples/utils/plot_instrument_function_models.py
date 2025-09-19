@@ -1,6 +1,10 @@
 """
 All available instrument function models.
 =========================================
+
+To include an instrument function in a :py:class:`jaxrts.Setup`, we require it
+to be Callable that takes only one argument, the shift in frequency space. The
+function has to be normalized to unify from -infinity to +infinity.
 """
 
 import jax.numpy as jnp
@@ -15,26 +19,32 @@ plt.style.use("science")
 
 fig, ax = plt.subplots(figsize=(7, 4))
 
-x = jnp.linspace(-100, 100, 500) * ureg.electron_volts
+E = jnp.linspace(-100, 100, 500) * ureg.electron_volts
+w = E / ureg.hbar
+
+
+width = 20 * ureg.electron_volt / ureg.hbar
 
 plt.plot(
-    x,
-    ifs.instrument_gaussian(x, 20 * ureg.electron_volts),
-    label=r"Gaussian Model",
+    E.m_as(ureg.electron_volt),
+    ifs.instrument_gaussian(w, width).m_as(ureg.hbar / ureg.electron_volt),
+    label="Gaussian Model",
 )
 plt.plot(
-    x,
-    ifs.instrument_supergaussian(x, 20 * ureg.electron_volts, 2),
-    label=r"Super-Gaussian Model (p=1)",
+    E.m_as(ureg.electron_volt),
+    ifs.instrument_supergaussian(w, width, 2).m_as(
+        ureg.hbar / ureg.electron_volt
+    ),
+    label="Super-Gaussian Model (p=2)",
 )
 plt.plot(
-    x,
-    ifs.instrument_lorentzian(x, 20 * ureg.electron_volts),
-    label=r"Lorentzian Model",
+    E.m_as(ureg.electron_volt),
+    ifs.instrument_lorentzian(w, width).m_as(ureg.hbar / ureg.electron_volt),
+    label="Lorentzian Model",
 )
 
 plt.xlabel("E [eV]")
-plt.ylabel("Intensity [arb. units]")
+plt.ylabel("Intensity [hbar / eV]")
 
 plt.legend(loc="upper left")
 plt.tight_layout()

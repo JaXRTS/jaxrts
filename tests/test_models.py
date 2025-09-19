@@ -1,5 +1,7 @@
 import copy
+import itertools
 import logging
+
 import pytest
 from jax import numpy as jnp
 
@@ -152,8 +154,10 @@ def test_all_models_can_be_evaluated_one_component():
                 )
                 out = one_comp_test_state.evaluate(key, test_setup)
                 assert out is not None
-            except Exception:
-                raise AssertionError(f"Error evaluating {model} as {key}.")
+            except Exception as exc:
+                raise AssertionError(
+                    f"Error evaluating {model} as {key}."
+                ) from exc
 
 
 def test_all_models_can_be_evaluated_two_component():
@@ -177,5 +181,30 @@ def test_all_models_can_be_evaluated_two_component():
                 )
                 out = two_comp_test_state.evaluate(key, test_setup)
                 assert out is not None
-            except Exception:
-                raise AssertionError(f"Error evaluating {model} as {key}.")
+            except Exception as exc:
+                raise AssertionError(
+                    f"Error evaluating {model} as {key}."
+                ) from exc
+
+
+def test_BM_Models_can_be_evaluated_with_extraArguments():
+    """
+    Test the additional flags for BornMermin type models, RPA_rewrite and KKT.
+    """
+    key = "free-free scattering"
+    model = jaxrts.models.BornMermin
+    for args in itertools.product([True, False], [True, False]):
+        try:
+            one_comp_test_state = jaxrts.PlasmaState(
+                ions=[jaxrts.Element("C")],
+                Z_free=jnp.array([2]),
+                mass_density=jnp.array([3.5]) * ureg.gram / ureg.centimeter**3,
+                T_e=jnp.array([80]) * ureg.electron_volt / ureg.k_B,
+            )
+            one_comp_test_state[key] = model(KKT=args[0], RPA_rewrite=args[1])
+            out = one_comp_test_state.evaluate(key, test_setup)
+            assert out is not None
+        except Exception as exc:
+            raise AssertionError(
+                f"Error evaluating {model} with KKT={args[0]}, RPA_rewrite={args[1]}."  # noqa:E501
+            ) from exc

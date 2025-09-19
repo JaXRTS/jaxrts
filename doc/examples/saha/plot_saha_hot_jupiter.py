@@ -8,12 +8,13 @@ plot generated with M. Schöttler's MALGS programm -- which is discussed, e.g.
 in :cite:`Kumar.2021`.
 """
 
-from jaxrts.saha import solve_saha
-from jaxrts.units import ureg
-import jaxrts
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
+
+import jaxrts
+from jaxrts.saha import solve_saha
+from jaxrts.units import ureg
 
 if __name__ == "__main__":
     number_fraction = jnp.array(
@@ -50,7 +51,7 @@ if __name__ == "__main__":
     ion_population = {element.Z: [] for element in ions}
     ion_population["n_free"] = []
     for element in ions:
-        for charge in np.arange(element.Z + 1):
+        for charge in np.arange(element.Z + 1):  # noqa: B007
             ion_population[element.Z].append([])
 
     Tes = jnp.logspace(2, 6, 250) * ureg.kelvin

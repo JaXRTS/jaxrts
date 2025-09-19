@@ -5,14 +5,13 @@ Currently the free-bound contribution is calculated using the bound-free
 contribution and assuming the principle of detailed balance.
 """
 
-from typing import Callable
+from collections.abc import Callable
 
 import jax
 from jpu import numpy as jnpu
 
-
 from .setup import Setup, plasma_frequency
-from .units import ureg, Quantity
+from .units import Quantity, ureg
 
 
 class FreeBoundFlippedSetup(Setup):

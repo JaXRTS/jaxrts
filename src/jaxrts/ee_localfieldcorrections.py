@@ -10,6 +10,7 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 from quadax import quadts as quad
 
+from .ee_localfieldcorrections_dornheim_2021 import G_analytical as dornheim_G
 from .plasma_physics import (
     coupling_param,
     fermi_energy,
@@ -18,7 +19,6 @@ from .plasma_physics import (
     wiegner_seitz_radius,
 )
 from .units import Quantity, ureg
-from .ee_localfieldcorrections_dornheim_2021 import G_analytical as dornheim_G
 
 logger = logging.getLogger(__name__)
 
@@ -304,7 +304,7 @@ def eelfc_dornheim2021(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
         ureg.dimensionless
     )
     k_over_k_f = (k / fermi_wavenumber(n_e)).m_as(ureg.dimensionless)
-    rs = (wiegner_seitz_radius / (1 * ureg.a0)).m_as(ureg.dimensionless)
+    rs = (wiegner_seitz_radius(n_e) / (1 * ureg.a0)).m_as(ureg.dimensionless)
 
     return dornheim_G(k_over_k_f, rs, Theta)
 

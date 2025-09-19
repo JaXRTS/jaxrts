@@ -437,9 +437,9 @@ def bm_bound_wavefunction(
         scattering which reduces the contribution [James.1962]).
     """
     # Find the correct _Jxx_BM function and execute it
-    Jxx0 = globals()["_J{:1d}{:1d}_BM".format(n, l)](omega, k, Zeff)
+    Jxx0 = globals()[f"_J{n:1d}{l:1d}_BM"](omega, k, Zeff)
     if HR_Correction:
-        Jxx1 = globals()["_J{:1d}{:1d}_HR".format(n, l)](omega, k, Zeff)
+        Jxx1 = globals()[f"_J{n:1d}{l:1d}_HR"](omega, k, Zeff)
         return Jxx0 + Jxx1
     return Jxx0
 

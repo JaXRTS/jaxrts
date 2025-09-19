@@ -7,6 +7,11 @@ time by evaluating the Structure factor not on all frequencies, but only on a
 given number of points, and interpolates after. This example is investigating
 the required number of points for the interpolation.
 
+We also compare the number of points required when solving the integral for the
+imaginary part of the collision frequency, or connecting it via a Kramers
+Kronig relation (``KKT = True``). We observe that the number of grid-points has
+to be higher for comparable quality of the result, when using ``KKT``.
+
 .. note::
 
     The time printed in this script is the time after the first compilation
@@ -66,30 +71,37 @@ t0 = time.time()
 BM_free_free_scatter = state.evaluate("free-free scattering", setup).m_as(
     ureg.second
 )
+jax.block_until_ready(BM_free_free_scatter)
 print(f"Full BMA: {time.time()-t0}s")
 state["free-free scattering"] = jaxrts.models.BornMermin()
+state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
 
-for no_of_freq in [2, 4, 20, 100]:
-    state["free-free scattering"].no_of_freq = no_of_freq
-    state.evaluate("free-free scattering", setup).m_as(ureg.second)
-    t0 = time.time()
-    free_free_scatter = state.evaluate("free-free scattering", setup).m_as(
-        ureg.second
-    )
-    print(
-        f"{no_of_freq} interp points: {time.time()-t0}s      ",
-        "Mean deviation from full RPA: ",
-        jnp.mean(free_free_scatter - BM_free_free_scatter),
-        "Max deviation from full RPA: ",
-        jnp.max(free_free_scatter - BM_free_free_scatter),
-    )
-    plt.plot(
-        setup.measured_energy.m_as(ureg.electron_volt),
-        free_free_scatter,
-        label=f"{no_of_freq} interpolation points",
-        linestyle="solid",
-        alpha=0.8,
-    )
+
+for ls, KKT in zip(["solid", "dotted"], [False, True], strict=False):
+    for i, no_of_freq in enumerate([2, 4, 20, 100]):
+        state["free-free scattering"].no_of_freq = no_of_freq
+        state["free-free scattering"].KKT = KKT
+        state.evaluate("free-free scattering", setup).m_as(ureg.second)
+        t0 = time.time()
+        free_free_scatter = state.evaluate("free-free scattering", setup).m_as(
+            ureg.second
+        )
+        jax.block_until_ready(free_free_scatter)
+        print(
+            f"{no_of_freq} interp points: {time.time()-t0}s      ",
+            "Mean deviation from full RPA: ",
+            jnp.mean(free_free_scatter - BM_free_free_scatter),
+            "Max deviation from full RPA: ",
+            jnp.max(free_free_scatter - BM_free_free_scatter),
+        )
+        plt.plot(
+            setup.measured_energy.m_as(ureg.electron_volt),
+            free_free_scatter,
+            label=f"{no_of_freq} interpolation points",
+            linestyle=ls,
+            color=f"C{i}",
+            alpha=0.8,
+        )
 
 plt.plot(
     setup.measured_energy.m_as(ureg.electron_volt),
@@ -104,6 +116,7 @@ t0 = time.time()
 free_free_scatter = state.evaluate("free-free scattering", setup).m_as(
     ureg.second
 )
+jax.block_until_ready(free_free_scatter)
 print(f"RPA: {time.time()-t0}s")
 plt.plot(
     setup.measured_energy.m_as(ureg.electron_volt),

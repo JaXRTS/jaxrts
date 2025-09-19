@@ -1,4 +1,6 @@
-__version__ = "0.2.0"
+# These version placeholders will be replaced by poetry-dynamic-versioning
+__version__ = "0.0.0"
+__version_tuple__ = (0, 0, 0)
 
 from . import (
     analysis,

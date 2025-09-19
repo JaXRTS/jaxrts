@@ -52,7 +52,7 @@ for r_s in [1.0, 2.0, 5.0]:
         )
 
     E_f = jaxrts.plasma_physics.fermi_energy(n_e)
-    E = jnp.logspace(-1, 2) * E_f
+    E = jnp.linspace(-200, 200, 2000) * E_f
     nu = jaxrts.free_free.collision_frequency_BA_fullFit(
         E, T, S_ii, V_eiS, n_e, Zf
     )
@@ -81,7 +81,7 @@ for r_s in [1.0, 2.0, 5.0]:
     )
     ax[0].plot(
         0.1,
-        0.11623
+        0.11523
         * r_s**2
         * (jnp.log(1 + 6.02921 / r_s) - 1 / (1 + r_s / 6.02921)),
         marker="x",

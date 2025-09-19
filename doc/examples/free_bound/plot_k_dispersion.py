@@ -15,11 +15,11 @@ has to be evaluated at the :math:`k` values which corresponds to the
 blue-shifted energies.
 """
 
-from jpu import numpy as jnpu
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
 import scienceplots  # noqa: F401
+from jpu import numpy as jnpu
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
 
 import jaxrts
 

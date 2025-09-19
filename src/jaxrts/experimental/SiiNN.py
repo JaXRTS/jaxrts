@@ -1,5 +1,5 @@
 """
-Interpolate the Static structure factors by a neural network. In this file, we 
+Interpolate the Static structure factors by a neural network. In this file, we
 define the NN layout, and also create a :py:class:`jaxrts.Model` which allows
 for easily using a trained NN with jaxrts.
 
@@ -11,13 +11,13 @@ slight additions to save properties of the net architecture.
 
 import json
 
-from flax import nnx
-import jaxrts
 import jax
 import jax.numpy as jnp
 import jpu.numpy as jnpu
 import orbax.checkpoint as ocp
-import numpy as onp
+from flax import nnx
+
+import jaxrts
 
 ureg = jaxrts.ureg
 
