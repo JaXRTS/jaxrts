@@ -18,7 +18,7 @@ class _NoLabelStyle(BaseLabelStyle):
     """
 
     def format_labels(self, sorted_entries):
-        for number, entry in enumerate(sorted_entries):
+        for _number, _entry in enumerate(sorted_entries):
             yield ""
 
 
@@ -48,9 +48,9 @@ def get_formatted_ref_string(
         ]
     except KeyError as e:
         key = e.args[0]
-        raise KeyError(
+        raise KeyError (
             f"Could not find biblography entry {key} in {literature_file}"
-        )
+        ) from e
     if comment is not None:
         out_list = [comment, *out_list]
     # Filter out all empty strings:
@@ -78,7 +78,7 @@ def get_bibtex_ref_string(
         key = e.args[0]
         raise KeyError(
             f"Could not find biblography entry {key} in {literature_file}"
-        )
+        ) from e
     if comment is not None:
         out_list = [comment, *out_list]
     # Filter out all empty strings:

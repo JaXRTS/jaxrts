@@ -1,7 +1,7 @@
+import jax.numpy as jnp
 import pytest
 
 import jaxrts
-import jax.numpy as jnp
 
 ureg = jaxrts.ureg
 
