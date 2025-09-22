@@ -2436,7 +2436,10 @@ class SchumacherImpulse(ScatteringModel):
     def cite_keys(self) -> list[tuple[str | list[str], str]]:
         out = [
             "Schmacher.1975",
-            ("Bloch.1975", "Corrects for main quantum number 1 and 2."),
+            (
+                "Holm.1989",
+                "Corrects contribution for n equals 1 and 2.",
+            ),
             ("Gu.2008", "Edge positions."),
         ]
         if self.r_k < 0:
@@ -2615,7 +2618,10 @@ class SchumacherImpulseColdEdges(ScatteringModel):
     def cite_keys(self) -> list[tuple[str | list[str], str]]:
         out = [
             "Schmacher.1975",
-            ("Bloch.1975", "Corrects for main quantum number 1 and 2."),
+            (
+                "Holm.1989",
+                "Corrects contribution for n equals 1 and 2.",
+            ),
         ]
         if self.r_k < 0:
             out.append(("Gregori.2004", "Scaling factor r_k."))
@@ -2721,7 +2727,10 @@ class SchumacherImpulseFitRk(ScatteringModel):
     __name__ = "SchumacherImpulseFitRk"
     cite_keys = [
         "Schmacher.1975",
-        ("Bloch.1975", "Corrects for main quantum number 1 and 2."),
+        (
+            "Holm.1989",
+            "Corrects contribution for n equals 1 and 2.",
+        ),
         ("Gu.2008", "Edge positions."),
         ("Dornheim.2024", "Intensitiy normalization due to f-sum rule"),
     ]
