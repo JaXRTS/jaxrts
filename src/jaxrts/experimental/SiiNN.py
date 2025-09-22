@@ -94,8 +94,8 @@ sharding = jax.sharding.NamedSharding(
 
 
 def set_sharding(x: jax.ShapeDtypeStruct) -> jax.ShapeDtypeStruct:
-    x.sharding = sharding
-    return x
+    y = x.update(sharding=sharding)
+    return y
 
 
 class NNSiiModel(jaxrts.models.IonFeatModel):
