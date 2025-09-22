@@ -16,6 +16,7 @@ import jax.interpreters
 import jpu.numpy as jnpu
 from jax import numpy as jnp
 
+from jaxrts import literature
 from jaxrts.hypernetted_chain import (
     _3Dfour,
     fourier_transform_sine,
@@ -276,11 +277,21 @@ class HNCPotential(metaclass=abc.ABCMeta):
     the first two dimensions get one or two additional entries, respectively.
     """
 
+    #: A list of keys where this Potential is adequate for. Valid keys are
+    #: "ion-ion Potential", "electron-ion Potential", and
+    #: "electron-electron Potential".
     allowed_keys = [
         "ion-ion Potential",
         "electron-ion Potential",
         "electron-electron Potential",
     ]
+    #: A list of bibtex keys. Can be in the format ``[key1, key2]``, for
+    #: general keys, ``[(key1, comment1), (key2, comment2)]``, if comments are
+    #: desired, of ``[([key1, key2], comment1), (key3, comment2)]`` if the
+    #: comment should apply to multiple keys.
+    cite_keys: (
+        list[str] | list[tuple[str, str]] | list[tuple[list[str], str]]
+    ) = []
 
     def __init__(
         self,
@@ -300,6 +311,44 @@ class HNCPotential(metaclass=abc.ABCMeta):
         self.include_electrons: Literal[
             "off", "SpinAveraged", "SpinSeparated"
         ] = include_electrons
+
+    def citation(
+        self,
+        style: Literal["plain", "bibtex"] = "plain",
+        comment: str | None = None,
+    ) -> str:
+        """
+        Return bibliographic information for the Model used.
+
+        Parameters
+        ----------
+        style: "plain" or "bibtex"
+            When ``"plain"``, the literature references are formatted in a
+            human-readable format. If ``"bibtex"``, the citations are given as
+            bibtex entries, which can then be copied into a literature
+            collection.
+        comment: str or None, default None
+            (Additional) comment to give to the citation entry.
+
+        Returns
+        -------
+        str
+            The information about the model used
+        """
+        if style == "plain":
+            citation_function = literature.get_formatted_ref_string
+        else:
+            citation_function = literature.get_bibtex_ref_string
+        citations = []
+        for entry in self.cite_keys:
+            if isinstance(entry, str):
+                citations.append(citation_function(entry, comment))
+            else:
+                key, key_comment = entry
+                if comment is not None:
+                    key_comment = comment + ". " + key_comment
+                citations.append(citation_function(key, key_comment))
+        return "\n".join(citations)
 
     def check(self, plasma_state) -> None:  # noqa: B027
         """

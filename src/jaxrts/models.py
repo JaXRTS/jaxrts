@@ -98,6 +98,8 @@ class Model(metaclass=abc.ABCMeta):
             human-readable format. If ``"bibtex"``, the citations are given as
             bibtex entries, which can then be copied into a literature
             collection.
+        comment: str or None, default None
+            (Additional) comment to give to the citation entry.
 
         Returns
         -------
