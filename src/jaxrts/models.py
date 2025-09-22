@@ -586,7 +586,9 @@ class OnePotentialHNCIonFeat(IonFeatModel):
     """
 
     __name__ = "OnePotentialHNCIonFeat"
-    cite_keys = [("Wunsch.2011", "Implementation of the HNC scheme based on")]
+    cite_keys = [
+        ("Wunsch.2011", "Basis for the implementation of the HNC scheme.")
+    ]
 
     def __init__(
         self,
@@ -725,6 +727,13 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
     """
 
     __name__ = "ThreePotentialHNC"
+    cite_keys = [
+        (
+            "Schwarz.2007",
+            "Description of two-comenponent, two-temperature HNC",
+        ),
+        ("Wunsch.2011", "Basis for the implementation of the HNC scheme."),
+    ]
 
     def __init__(
         self,
@@ -1033,6 +1042,10 @@ class DebyeWallerSolid(IonFeatModel):
     """
 
     __name__ = "DebyeWallerSolid"
+    cite_keys = [
+        ("Gregori.2006", "Formulation of the Model."),
+        ("Murphy.2008", "Definition of the Debye Waller Factor."),
+    ]
 
     def __init__(
         self,
@@ -1142,6 +1155,10 @@ class QCSalpeterApproximation(FreeFreeModel):
     """
 
     __name__ = "QCSalpeterApproximation"
+    cite_keys = [
+        ("Salpeter.1960", "Basal model."),
+        ("Gregori.2003", "Quantum correction to the original model."),
+    ]
 
     @jax.jit
     def evaluate_raw(
@@ -1380,6 +1397,21 @@ class BornMerminFull(FreeFreeModel):
 
     __name__ = "BornMerminFull"
 
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            ("Mermin.1970", "Mermin Approximation."),
+            (
+                ["Schorner.2023", "Reinholz.2000"],
+                "Electron-ion collision frequency.",
+            ),
+        ]
+        if self.RPA_rewrite:
+            out.append(("Chapman.2015", "RPA integral."))
+        else:
+            out.append(("Schorner.2023", "RPA integral."))
+        return out
+
     def __init__(self, RPA_rewrite: bool = True, KKT: bool = False) -> None:
         super().__init__()
         self.RPA_rewrite: bool = RPA_rewrite
@@ -1581,6 +1613,22 @@ class BornMermin(FreeFreeModel):
         self.KKT: bool = KKT
         self.E_cutoff_min: Quantity = E_cutoff_min
         self.E_cutoff_max: Quantity = E_cutoff_max
+
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            ("Mermin.1970", "Mermin Approximation."),
+            (
+                ["Schorner.2023", "Reinholz.2000"],
+                "Electron-ion collision frequency.",
+            ),
+            ("Chapman.2016", "Interpolation over few collision frequencies."),
+        ]
+        if self.RPA_rewrite:
+            out.append(("Chapman.2015", "RPA integral."))
+        else:
+            out.append(("Schorner.2023", "RPA integral."))
+        return out
 
     def guess_E_cutoffs(
         self,
@@ -1850,6 +1898,23 @@ class BornMermin_Fit(FreeFreeModel):
         self.KKT: bool = KKT
         self.E_cutoff_min: Quantity = E_cutoff_min
         self.E_cutoff_max: Quantity = E_cutoff_max
+
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            ("Mermin.1970", "Mermin Approximation."),
+            (
+                ["Schorner.2023", "Reinholz.2000"],
+                "Electron-ion collision frequency.",
+            ),
+            ("Chapman.2016", "Interpolation over few collision frequencies."),
+            ("Dandrea.1986", "Analytical Fit for RPA"),
+        ]
+        if self.RPA_rewrite:
+            out.append(("Chapman.2015", "RPA integral."))
+        else:
+            out.append(("Schorner.2023", "RPA integral."))
+        return out
 
     def guess_E_cutoffs(
         self,
@@ -2121,6 +2186,23 @@ class BornMermin_Fortmann(FreeFreeModel):
         self.E_cutoff_min: Quantity = E_cutoff_min
         self.E_cutoff_max: Quantity = E_cutoff_max
 
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            ("Mermin.1970", "Mermin Approximation."),
+            (
+                ["Schorner.2023", "Reinholz.2000"],
+                "Electron-ion collision frequency.",
+            ),
+            ("Fortmann.2010", "LFC in Born-Mernin Formalism."),
+            ("Dandrea.1986", "Analytical Fit for RPA"),
+        ]
+        if self.RPA_rewrite:
+            out.append(("Chapman.2015", "RPA integral."))
+        else:
+            out.append(("Schorner.2023", "RPA integral."))
+        return out
+
     def guess_E_cutoffs(
         self,
         plasma_state: "PlasmaState",
@@ -2350,6 +2432,17 @@ class SchumacherImpulse(ScatteringModel):
         if isinstance(self.r_k, int):
             self.r_k = float(self.r_k)
 
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            "Schmacher.1975",
+            ("Bloch.1975", "Corrects for main quantum number 1 and 2."),
+            ("Gu.2008", "Edge positions."),
+        ]
+        if self.r_k < 0:
+            out.append(("Gregori.2004", "Scaling factor r_k."))
+        return out
+
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
@@ -2518,6 +2611,16 @@ class SchumacherImpulseColdEdges(ScatteringModel):
         if isinstance(self.r_k, int):
             self.r_k = float(self.r_k)
 
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            "Schmacher.1975",
+            ("Bloch.1975", "Corrects for main quantum number 1 and 2."),
+        ]
+        if self.r_k < 0:
+            out.append(("Gregori.2004", "Scaling factor r_k."))
+        return out
+
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
@@ -2616,6 +2719,12 @@ class SchumacherImpulseFitRk(ScatteringModel):
 
     allowed_keys = ["bound-free scattering"]
     __name__ = "SchumacherImpulseFitRk"
+    cite_keys = [
+        "Schmacher.1975",
+        ("Bloch.1975", "Corrects for main quantum number 1 and 2."),
+        ("Gu.2008", "Edge positions."),
+        ("Dornheim.2024", "Intensitiy normalization due to f-sum rule"),
+    ]
 
     def __init__(self) -> None:
         super().__init__()
@@ -2735,6 +2844,7 @@ class DetailedBalance(ScatteringModel):
 
     __name__ = "DetailedBalance"
     allowed_keys = ["free-bound scattering"]
+    cite_keys = ["Bohme.2023"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -2771,6 +2881,7 @@ class PaulingFormFactors(Model):
 
     allowed_keys = ["form-factors"]
     __name__ = "PaulingFormFactors"
+    cite_keys = ["Pauling.1932"]
 
     @jax.jit
     def evaluate(
@@ -2814,6 +2925,7 @@ class FormFactorLowering(Model):
 
     allowed_keys = ["form-factors"]
     __name__ = "FormFactorLowering"
+    cite_keys = ["Dopppner.2023"]
 
     def __init__(self, Z_squared_correction: bool = True):
         # Without IPD, the results of this form-factors model should be
@@ -2907,6 +3019,7 @@ class IchimaruChemPotential(Model):
 
     __name__ = "IchimaruChemPotential"
     allowed_keys = ["chemical potential"]
+    cite_keys = ["Ichimaru.2018"]
 
     @jax.jit
     def evaluate(
@@ -3000,6 +3113,7 @@ class BohmStaver(Model):
 
     allowed_keys = ["Debye temperature"]
     __name__ = "BohmStaver"
+    cite_keys = ["Gregori.2006"]
 
     @jax.jit
     def evaluate(
@@ -3207,6 +3321,7 @@ class Gericke2010ScreeningLength(Model):
 
     allowed_keys = ["screening length"]
     __name__ = "Gericke2010ScreeningLength"
+    cite_keys = ["Gericke.2010"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3231,6 +3346,7 @@ class ArbitraryDegeneracyScreeningLength(Model):
 
     allowed_keys = ["screening length"]
     __name__ = "ArbitraryDegeneracyScreeningLength"
+    cite_keys = ["Baggott.2017"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3307,6 +3423,7 @@ class LinearResponseScreeningGericke2010(Model):
 
     allowed_keys = ["screening"]
     __name__ = "LinearResponseScreeningGericke2010"
+    cite_keys = ["Gericke.2010", "Wunsch.2011"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -3358,6 +3475,7 @@ class FiniteWavelengthScreening(Model):
 
     allowed_keys = ["screening"]
     __name__ = "FiniteWavelengthScreening"
+    cite_keys = ["Chapman.2015b"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -3402,6 +3520,7 @@ class DebyeHueckelScreening(Model):
 
     allowed_keys = ["screening"]
     __name__ = "DebyeHueckelScreening"
+    cite_keys = ["Chapman.2015b"]
 
     @jax.jit
     def evaluate(
@@ -3446,6 +3565,7 @@ class LinearResponseScreening(Model):
 
     allowed_keys = ["screening"]
     __name__ = "LinearResponseScreening"
+    cite_keys = ["Gericke.2010", "Wunsch.2011"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -3492,6 +3612,7 @@ class Gregori2004Screening(Model):
 
     allowed_keys = ["screening"]
     __name__ = "Gregori2004Screening"
+    cite_keys = ["Gregori.2004"]
 
     @jax.jit
     def evaluate(
@@ -3533,6 +3654,7 @@ class ElectronicLFCGeldartVosko(Model):
 
     allowed_keys = ["ee-lfc"]
     __name__ = "GeldartVosko Static LFC"
+    cite_keys = ["Geldart.1966"]
 
     @jax.jit
     def evaluate(
@@ -3573,6 +3695,7 @@ class ElectronicLFCUtsumiIchimaru(Model):
 
     allowed_keys = ["ee-lfc"]
     __name__ = "UtsumiIchimaru Static LFC"
+    cite_keys = ["UtsumiIchimaru.1982"]
 
     @jax.jit
     def evaluate(
@@ -3614,6 +3737,7 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
 
     allowed_keys = ["ee-lfc"]
     __name__ = "ElectronicLFCDornheimAnalyticalInterp"
+    cite_keys = ["Dornheim.2021"]
 
     @jax.jit
     def evaluate(
@@ -3655,6 +3779,10 @@ class ElectronicLFCStaticInterpolation(Model):
 
     allowed_keys = ["ee-lfc"]
     __name__ = "Static Interpolation"
+    cite_keys = [
+        ("Fortmann.2010", "Interpolation."),
+        (["Farid.1993", "Geldart.1966"], "Limits."),
+    ]
 
     @jax.jit
     def evaluate(
@@ -3810,6 +3938,9 @@ class AverageAtom_Sii(Model):
 
     allowed_keys = ["BM S_ii"]
     __name__ = "AverageAtom_Sii"
+    cite_keys = [
+        ("Wunsch.2011", "Basis for the implementation of the HNC scheme.")
+    ]
 
     def __init__(
         self,
