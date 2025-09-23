@@ -29,7 +29,7 @@ def get_formatted_ref_string(
     bibkeys: str | Iterable[str], comment: str | None = None
 ) -> str:
     """
-    Return biblography entries as a human readable string.
+    Return bibliography entries as a human readable string.
     """
     if isinstance(bibkeys, str):
         bibkeys = [bibkeys]
@@ -49,7 +49,7 @@ def get_formatted_ref_string(
     except KeyError as e:
         key = e.args[0]
         raise KeyError(
-            f"Could not find biblography entry {key} in {literature_file}"
+            f"Could not find bibliography entry {key} in {literature_file}"
         ) from e
     if comment is not None:
         out_list = [comment, *out_list]
@@ -58,11 +58,26 @@ def get_formatted_ref_string(
     return "\n".join(out_list)
 
 
+def get_cite_ref_string(
+    bibkeys: str | Iterable[str], comment: str | None = None
+) -> str:
+    """
+    Return bibliography as a list of latex `\\cite{...}` entries.
+    """
+    if isinstance(bibkeys, str):
+        bibkeys = [bibkeys]
+
+    out = "\\cite{" + ",".join(bibkeys) + "}"
+    if comment is not None:
+        out = f"{comment}~{out}"
+    return out
+
+
 def get_bibtex_ref_string(
     bibkeys: str | Iterable[str], comment: str | None = None
 ) -> str:
     """
-    Return biblography entries as a bibtex style string.
+    Return bibliography entries as a bibtex style string.
     """
     if isinstance(bibkeys, str):
         bibkeys = [bibkeys]

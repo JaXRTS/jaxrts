@@ -314,7 +314,7 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
     def citation(
         self,
-        style: Literal["plain", "bibtex"] = "plain",
+        style: Literal["plain", "bibtex", "cite"] = "plain",
         comment: str | None = None,
     ) -> str:
         """
@@ -322,11 +322,12 @@ class HNCPotential(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        style: "plain" or "bibtex"
+        style: "plain", "cite", or "bibtex"
             When ``"plain"``, the literature references are formatted in a
             human-readable format. If ``"bibtex"``, the citations are given as
             bibtex entries, which can then be copied into a literature
-            collection.
+            collection. If ``"cite"``, the citation keys are not evaluated, but
+            just retuned, wrapped in a tex ``\\cite{...}`` command.
         comment: str or None, default None
             (Additional) comment to give to the citation entry.
 
@@ -337,6 +338,8 @@ class HNCPotential(metaclass=abc.ABCMeta):
         """
         if style == "plain":
             citation_function = literature.get_formatted_ref_string
+        elif style == "cite":
+            citation_function = literature.get_cite_ref_string
         else:
             citation_function = literature.get_bibtex_ref_string
         citations = []

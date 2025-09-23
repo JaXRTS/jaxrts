@@ -80,18 +80,21 @@ class PlasmaState:
         model.model_key = key
         self.models[key] = model
 
-    def citation(self, style: Literal["plain", "bibtex"] = "plain") -> str:
+    def citation(
+        self, style: Literal["plain", "cite", "bibtex"] = "plain"
+    ) -> str:
         """
         Return bibliographic information for all the
         :py:class`jaxrts.models.Model` attached to this PlasmaState.
 
         Parameters
         ----------
-        style: "plain" or "bibtex"
+        style: "plain", "cite", or "bibtex"
             When ``"plain"``, the literature references are formatted in a
             human-readable format. If ``"bibtex"``, the citations are given as
             bibtex entries, which can then be copied into a literature
-            collection.
+            collection. If ``"cite"``, the citation keys are not evaluated, but
+            just retuned, wrapped in a tex ``\\cite{...}`` command.
 
         Returns
         -------
@@ -102,7 +105,7 @@ class PlasmaState:
         out_strings = []
         for key, model in self.models.items():
             # Force a human-readable format.
-            if style == "plain":
+            if style in ["plain", "cite"]:
                 model_str = model.citation(style)
                 if model_str.strip() != "":
                     out_strings.append("")  # Will be a newline
@@ -114,9 +117,8 @@ class PlasmaState:
                 if model_str.strip() != "":
                     out_strings.append(model_str)
         # Remove the leading empty line for plain style
-        if style == "plain":
-            if len(out_strings) > 0:
-                out_strings = out_strings[1:]
+        if style in ["plain", "cite"] and len(out_strings) > 0:
+            out_strings = out_strings[1:]
         return "\n".join(out_strings)
 
     def expand_integer_ionization_states(self) -> "PlasmaState":
