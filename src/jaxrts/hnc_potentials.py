@@ -902,6 +902,11 @@ class KelbgPotential(HNCPotential):
     """
 
     __name__ = "KelbgPotential"
+    cite_keys = [
+        "Kelbg.1963",
+        "Wunsch.2011",
+        ("Schwarz.2007", "Definition of lambda_ab"),
+    ]
 
     @jax.jit
     def full_r(self, plasma_state, r: Quantity) -> Quantity:
@@ -1075,6 +1080,11 @@ class KlimontovichKraeftPotential(HNCPotential):
         "electron-ion Potential",
     ]
     __name__ = "KlimontovichKraeftPotential"
+    cite_keys = [
+        "Klimontovich.1974",
+        "Wunsch.2011",
+        "Schwarz.2007",
+    ]
 
     @jax.jit
     def full_r(self, plasma_state, r):
@@ -1123,6 +1133,11 @@ class DeutschPotential(HNCPotential):
     """
 
     __name__ = "DeutschPotential"
+    cite_keys = [
+        "Kelbg.1963",
+        "Wunsch.2011",
+        ("Schwarz.2007", "Definition of lambda_ab"),
+    ]
 
     @jax.jit
     def full_r(self, plasma_state, r):
@@ -1223,6 +1238,7 @@ class EmptyCorePotential(HNCPotential):
         "electron-ion Potential",
     ]
     __name__ = "EmptyCorePotential"
+    cite_keys = ["Gericke.2010"]
 
     def __init__(
         self,
@@ -1288,6 +1304,7 @@ class YukawaShortRangeRepulsion(HNCPotential):
     """
 
     __name__ = "YukawaShortRangeRepulsion"
+    cite_keys = ["Wunsch.2009", "Fletcher.2015"]
 
     def __init__(
         self,
@@ -1392,6 +1409,7 @@ class SoftCorePotential(HNCPotential):
         "electron-ion Potential",
     ]
     __name__ = "SoftCorePotential"
+    cite_keys = ["Gericke.2010"]
 
     def __init__(
         self,
@@ -1500,6 +1518,7 @@ class SoftCorePotential(HNCPotential):
 class PauliClassicalMap(HNCPotential):
 
     __name__ = "PauliClassicalMap"
+    cite_keys = ["Bredow.2015", "DharmaWardana.2000", "DharmaWardana.2012"]
 
     def __init__(self):
         """
@@ -1611,6 +1630,7 @@ class SpinSeparatedEEExchange(HNCPotential):
     """
 
     __name__ = "SpinSeparatedEEExchange"
+    cite_keys = ["Wunsch.2008", "Huang.1987", "Deutsch.1982"]
 
     def __init__(
         self,
@@ -1652,6 +1672,7 @@ class SpinAveragedEEExchange(HNCPotential):
     """
 
     __name__ = "SpinAveragedEEExchange"
+    cite_keys = ["Wunsch.2008"]
 
     @jax.jit
     def full_r(self, plasma_state, r):
