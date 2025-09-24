@@ -2438,7 +2438,7 @@ class SchumacherImpulse(ScatteringModel):
     @property
     def cite_keys(self) -> list[tuple[str | list[str], str]]:
         out = [
-            "Schmacher.1975",
+            "Schumacher.1975",
             (
                 "Holm.1989",
                 "Corrects contribution for n equals 1 and 2.",
@@ -2620,7 +2620,7 @@ class SchumacherImpulseColdEdges(ScatteringModel):
     @property
     def cite_keys(self) -> list[tuple[str | list[str], str]]:
         out = [
-            "Schmacher.1975",
+            "Schumacher.1975",
             (
                 "Holm.1989",
                 "Corrects contribution for n equals 1 and 2.",
@@ -2729,7 +2729,7 @@ class SchumacherImpulseFitRk(ScatteringModel):
     allowed_keys = ["bound-free scattering"]
     __name__ = "SchumacherImpulseFitRk"
     cite_keys = [
-        "Schmacher.1975",
+        "Schumacher.1975",
         (
             "Holm.1989",
             "Corrects contribution for n equals 1 and 2.",
@@ -2937,7 +2937,7 @@ class FormFactorLowering(Model):
 
     allowed_keys = ["form-factors"]
     __name__ = "FormFactorLowering"
-    cite_keys = ["Dopppner.2023"]
+    cite_keys = ["Doppner.2023"]
 
     def __init__(self, Z_squared_correction: bool = True):
         # Without IPD, the results of this form-factors model should be
