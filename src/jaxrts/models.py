@@ -710,7 +710,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
     Requires 3 Potentials:
 
         - an 'ion-ion Potential' The black entries in the picture below
-          (defaults to :py:class:`~DebyeHueckelPotential`).
+          (defaults to :py:class:`~CoulombPotential`).
         - an 'electron-ion Potential' The orange entries in the picture below
           (defaults to :py:class:`~KlimontovichKraeftPotential`).
         - an 'electron-electron Potential' The red entries in the picutre below
@@ -777,7 +777,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         # screening model
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model(
-            "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
+            "ion-ion Potential", hnc_potentials.CoulombPotential()
         )
         plasma_state.update_default_model(
             "electron-ion Potential",
