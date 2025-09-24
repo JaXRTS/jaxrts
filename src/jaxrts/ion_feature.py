@@ -191,6 +191,7 @@ def q_DebyeHueckelChapman2015(
 def free_electron_susceptilibily_RPA(
     k: Quantity,
     kappa: Quantity,
+    lfc: float = 0,
 ):
     """
     Return the free electron susceptilibily given by :cite:`Gericke.2010` eqn 4
@@ -209,6 +210,8 @@ def free_electron_susceptilibily_RPA(
         energies of the incident photons (unit: 1 / [length]).
     kappa : Quantity
         Inverse screening length.
+    lfc: float
+        The local field correction.
 
     Returns
     -------
@@ -216,5 +219,6 @@ def free_electron_susceptilibily_RPA(
         The free electron susceptilibily.
     """
     xi0 = kappa**2 * ureg.epsilon_0 / ((1 * ureg.elementary_charge) ** 2)
-    varepsilon = (k**2 + kappa**2) / (k**2)
+    V_ee = -1 * coulomb_potential_fourier(-1, -1, k)
+    varepsilon = 1 - V_ee * (1 - lfc) * xi0
     return xi0 / varepsilon

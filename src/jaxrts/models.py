@@ -3457,7 +3457,8 @@ class LinearResponseScreeningGericke2010(Model):
 
         # Use the Debye screening length for the screening cloud.
         kappa = 1 / plasma_state.screening_length
-        xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa)
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa, lfc)
         Vei = plasma_state["electron-ion Potential"].full_k(
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
