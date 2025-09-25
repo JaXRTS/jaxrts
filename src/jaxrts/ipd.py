@@ -139,67 +139,6 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
 
 
 @jax.jit
-def ipd_stewart_pyatt_full_deg(
-    Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity
-) -> Quantity:
-    """
-    See :cite:`Roepke.2019`. Using the full inverse screening length
-
-    Parameters
-    ----------
-    Z_i
-        The (mean) charge state of the ions.
-    n_e
-        Electron density. Units of 1/[length]**3.
-    n_i
-        Ion density. Units of 1/[length]**3.
-    T_e
-        The electron temperature.
-    T_i
-        The ion temperature.
-
-    Returns
-    -------
-    Quantity
-        The ipd shift in units of electronvolt.
-    """
-
-    # This function is not well-defined for Zi==0:
-    # Zi = jnp.clip(Zi, 1e-6)
-
-    R_0 = (3 * (Zi) / (4 * jnp.pi * ne)) ** (1 / 3)
-
-    kappa_i_sq = jnpu.sum(
-        (Zi) ** 2
-        * 1
-        * ureg.elementary_charge**2
-        * ni
-        / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti)
-    )
-    # We have to fix the dimension. This cannot be an array. Take the only
-    # (i.e., the first), element
-    kappa_e_sq = (inverse_screening_length_e(ne, Te) ** 2).to(
-        1 / ureg.angstrom**2
-    )[0]
-
-    kappa = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
-    s = 1 / (R_0 * kappa)
-
-    # The ionization potential depression energy shift
-
-    ipd_shift = -(
-        (
-            3
-            * (Zi)
-            * ureg.elementary_charge**2
-            / (2 * 4 * jnp.pi * 1 * ureg.epsilon_0 * R_0)
-        )
-        * ((1 + s**3) ** (2 / 3) - s**2)
-    )
-    return ipd_shift.to(ureg.electron_volt)
-
-
-@jax.jit
 def ipd_stewart_pyatt(
     Zi: float,
     ne: Quantity,
@@ -237,8 +176,6 @@ def ipd_stewart_pyatt(
     Quantity
         The ipd shift in units of electronvolt.
     """
-    # This function is not well-defined for Zi==0:
-    # Zi = jnp.clip(Zi, 1e-6)
 
     if Z_and_pop is None:
         Zp = Zi
@@ -261,33 +198,6 @@ def ipd_stewart_pyatt(
     Lambda_i = (3 * Gamma_i) ** (3/2)
 
     ipd_shift = -(1 * ureg.boltzmann_constant * Ti) / (2 * (Zp)) * ((1 + Lambda_i)**(2/3) - 1)
-
-    # The ionization potential depression energy shift
-    # kappa = jnpu.sqrt(kappa_i_sq)
-   
-    # s = 1 / (R_i * kappa)
-    # kappa_i_sq = jnpu.sum(
-    #     (Zi) ** 2
-    #     * 1
-    #     * ureg.elementary_charge**2
-    #     * ni
-    #     / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti)
-    # )
-    # kappa_e_sq = (
-    #     ne
-    #     * ureg.elementary_charge**2
-    #     / (4 * jnp.pi * 1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
-    # )
-
-    # ipd_shift = -(
-    #     (
-    #         3
-    #         * (Zi)
-    #         * ureg.elementary_charge**2
-    #         / (2 * 4 * jnp.pi * 1 * ureg.epsilon_0 * R_i)
-    #     )
-    #     * ((1 + s**3) ** (2 / 3) - s**2)
-    # )
 
     return ipd_shift.to(ureg.electron_volt)
 

@@ -3380,7 +3380,6 @@ class ArbitraryDegeneracyScreeningLength(Model):
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
         inverse_lam = ipd.inverse_screening_length_e(
-            (1 * ureg.elementary_charge),
             plasma_state.n_e,
             plasma_state.T_e,
         )

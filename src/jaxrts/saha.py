@@ -68,15 +68,17 @@ def gen_saha_equation(
     chem_pot = chem_pot_sommerfeld_fermi_interpolation(T_e, n_e).to(
         ureg.electron_volt
     )
+
     return (
         (gj / gi)
         * n_e
-        * jnpu.exp(((-energy_diff - chem_pot) / (1 * k_B * T_e)))
+        * (jnpu.exp(((-energy_diff) / (1 * k_B * T_e))))
+        * jnpu.exp(-chem_pot / (1 * k_B * T_e))
     )
 
 
 @jax.jit
-def saha_equation(
+def saha_equation( 
     gi: float, gj: float, T_e: Quantity, energy_diff: Quantity
 ) -> Quantity:
     """
@@ -113,7 +115,7 @@ def saha_equation(
         2
         * (gj / gi)
         * ((2 * jnp.pi * 1 * m_e * k_B * T_e) ** 1.5 / (1 * h**3))
-        * jnpu.exp((-energy_diff) / (1 * k_B * T_e))
+        * (jnpu.exp((-energy_diff) / (1 * k_B * T_e)))
     )
 
 
@@ -232,8 +234,12 @@ def solve_saha(
         stat_weight = element.ionization.statistical_weights
 
         Ebs.append(
-            (jnpu.sort(element.ionization.energies) + ipd).m_as(ureg.electron_volt)
+            (jnpu.sort(element.ionization.energies) + ipd).m_as(
+                ureg.electron_volt
+            )
         )
+
+    # Ebs = jnp.where(jnp.array(Ebs)<0, 0.0, jnp.array(Ebs))
 
     all_binding_energies = jnp.concatenate(Ebs)
     ratio = jnp.sum(
@@ -306,9 +312,7 @@ def solve_saha(
             / ne_scale
         ).m_as(ureg.dimensionless)
 
-        diag = jnp.diag(
-            jnp.where(Eb > 0, (-1) * coeff, 1)
-        )
+        diag = jnp.diag(jnp.where(Eb > 0, (-1) * coeff, 1))
         dens_row = jnp.ones((element.Z + 1))
 
         # Set the diagonal for the Saha-rows
@@ -548,7 +552,9 @@ def solve_gen_saha(
         stat_weight = element.ionization.statistical_weights
 
         Ebs.append(
-            (jnpu.sort(element.ionization.energies) + ipd).m_as(ureg.electron_volt)
+            (jnpu.sort(element.ionization.energies) + ipd).m_as(
+                ureg.electron_volt
+            )
         )
 
     all_binding_energies = jnp.concatenate(Ebs)
@@ -623,9 +629,7 @@ def solve_gen_saha(
             / ne_scale
         ).m_as(ureg.dimensionless)
 
-        diag = jnp.diag(
-            jnp.where(Eb > 0, (-1) * coeff, 1)
-        )
+        diag = jnp.diag(jnp.where(Eb > 0, (-1) * coeff, 1))
         dens_row = jnp.ones((element.Z + 1))
 
         # Set the diagonal for the Saha-rows
@@ -728,7 +732,6 @@ def solve_gen_saha(
 
     return (
         to_array(res),
-        sol_ne * ne_scale,
         to_array(Z_mean).m_as(ureg.dimensionless),
     )
 
@@ -747,7 +750,9 @@ def calculate_charge_state_distribution(plasma_state):
     return (sol / jnpu.sum(sol)).m_as(ureg.dimensionless)
 
 
-def calculate_mean_free_charge_saha(plasma_state, ipd: bool = False, degenerate : bool = False, population = None):
+def calculate_mean_free_charge_saha(
+    plasma_state, ipd: bool = False, degenerate: bool = False, population=None
+):
     """
     Calculates the mean charge of each ion in a plasma using the Saha-Boltzmann
     equation.
@@ -783,21 +788,67 @@ def calculate_mean_free_charge_saha(plasma_state, ipd: bool = False, degenerate 
 
     if not degenerate:
         charge_distribution, ne, Z_mean = solve_saha(
-        tuple(plasma_state.ions),
-        plasma_state.T_e,
-        (plasma_state.mass_density / plasma_state.atomic_masses),
-        continuum_lowering=cl,
-    )
-    else:
-
-        for k in range(10):
-            charge_distribution, ne, Z_mean = solve_gen_saha(
             tuple(plasma_state.ions),
             plasma_state.T_e,
-            plasma_state.n_e,
             (plasma_state.mass_density / plasma_state.atomic_masses),
             continuum_lowering=cl,
         )
-            plasma_state.Z_free = jnp.array([Z_mean])
+        plasma_state.Z_free = jnp.array(Z_mean)
+
+    else:
+
+        charge_distribution, ne, Z_mean = solve_saha(
+            tuple(plasma_state.ions),
+            plasma_state.T_e,
+            (plasma_state.mass_density / plasma_state.atomic_masses),
+        )
+
+        tol = 1e-8
+        max_iters = 80
+
+        carry0 = (
+            0,
+            charge_distribution,
+            jnp.array(Z_mean),
+            plasma_state,
+            False,
+        )
+
+        def cond_fun(carry):
+            i, prev_csd, prev_Z, pstate, done = carry
+            return jnp.logical_and(~done, i < max_iters)
+
+        def body_fun(carry):
+            i, prev_csd, prev_Z, plasma_state, done = carry
+
+            if ipd:
+                cl = plasma_state["ipd"].all_element_states(
+                    plasma_state, population
+                )
+            else:
+                cl = [
+                    jnp.zeros(ion.Z) * ureg.electron_volt
+                    for ion in plasma_state.ions
+                ]
+
+            charge_distribution, Z_mean = solve_gen_saha(
+                tuple(plasma_state.ions),
+                plasma_state.T_e,
+                plasma_state.n_e,
+                (plasma_state.mass_density / plasma_state.atomic_masses),
+                continuum_lowering=cl,
+            )
+
+            plasma_state.Z_free = jnp.array(Z_mean)
+
+            new_Z = jnp.array(Z_mean)
+            diff = jnp.linalg.norm(new_Z - prev_Z)
+            new_done = diff <= tol
+
+            return (i + 1, charge_distribution, new_Z, plasma_state, new_done)
+
+        final_i, charge_distribution, Z_mean, final_state, final_done = (
+            jax.lax.while_loop(cond_fun, body_fun, carry0)
+        )
 
     return charge_distribution / jnpu.sum(charge_distribution), Z_mean
