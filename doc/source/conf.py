@@ -5,6 +5,8 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import jaxrts
+import pathlib
 
 project = "jaxrts"
 copyright = "2024, J. Lütgert and S. Schumacher"
@@ -70,7 +72,7 @@ sphinx_gallery_conf = {
 }
 
 # bibtex
-bibtex_bibfiles = ["literature.bib"]
+bibtex_bibfiles = [str(pathlib.Path(jaxrts.__file__).parent / "literature.bib")]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

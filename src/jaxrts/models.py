@@ -6,7 +6,7 @@ implemented.
 import abc
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import jax
 import jax.numpy as jnp
@@ -22,6 +22,7 @@ from . import (
     hypernetted_chain,
     ion_feature,
     ipd,
+    literature,
     plasma_physics,
     static_structure_factors,
 )
@@ -45,6 +46,13 @@ logger = logging.getLogger(__name__)
 class Model(metaclass=abc.ABCMeta):
     #: A list of keywords where this model is adequate for
     allowed_keys: list[str] = []
+    #: A list of bibtex keys. Can be in the format ``[key1, key2]``, for
+    #: general keys, ``[(key1, comment1), (key2, comment2)]``, if comments are
+    #: desired, of ``[([key1, key2], comment1), (key3, comment2)]`` if the
+    #: comment should apply to multiple keys.
+    cite_keys: (
+        list[str] | list[tuple[str, str]] | list[tuple[list[str], str]]
+    ) = []
 
     def __init__(self):
         """ """
@@ -74,6 +82,47 @@ class Model(metaclass=abc.ABCMeta):
         messages and errors.
         """
         pass
+
+    def citation(
+        self,
+        style: Literal["plain", "bibtex", "cite"] = "plain",
+        comment: str | None = None,
+    ) -> str:
+        """
+        Return bibliographic information for the Model used.
+
+        Parameters
+        ----------
+        style: "plain", "cite", or "bibtex"
+            When ``"plain"``, the literature references are formatted in a
+            human-readable format. If ``"bibtex"``, the citations are given as
+            bibtex entries, which can then be copied into a literature
+            collection. If ``"cite"``, the citation keys are not evaluated, but
+            just retuned, wrapped in a tex ``\\cite{...}`` command.
+        comment: str or None, default None
+            (Additional) comment to give to the citation entry.
+
+        Returns
+        -------
+        str
+            The information about the model used
+        """
+        if style == "plain":
+            citation_function = literature.get_formatted_ref_string
+        elif style == "cite":
+            citation_function = literature.get_cite_ref_string
+        else:
+            citation_function = literature.get_bibtex_ref_string
+        citations = []
+        for entry in self.cite_keys:
+            if isinstance(entry, str):
+                citations.append(citation_function(entry, comment))
+            else:
+                key, key_comment = entry
+                if comment is not None:
+                    key_comment = comment + ". " + key_comment
+                citations.append(citation_function(key, key_comment))
+        return "\n".join(citations)
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -368,6 +417,7 @@ class ArkhipovIonFeat(IonFeatModel):
     """
 
     __name__ = "ArkhipovIonFeat"
+    cite_keys = ["Arkhipov.1998", "Arkhipov.2000"]
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if plasma_state.T_e != plasma_state.T_i:
@@ -406,6 +456,7 @@ class Gregori2003IonFeat(IonFeatModel):
     """
 
     __name__ = "Gregori2003IonFeat"
+    cite_keys = ["Gregori.2003"]
 
     def check(self, plasma_state: "PlasmaState") -> None:
         if plasma_state.T_e != plasma_state.T_i:
@@ -458,6 +509,7 @@ class Gregori2006IonFeat(IonFeatModel):
     """
 
     __name__ = "Gregori2006IonFeat"
+    cite_keys = ["Gregori.2006"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         super().prepare(plasma_state, key)
@@ -537,6 +589,9 @@ class OnePotentialHNCIonFeat(IonFeatModel):
     """
 
     __name__ = "OnePotentialHNCIonFeat"
+    cite_keys = [
+        ("Wunsch.2011", "Basis for the implementation of the HNC scheme.")
+    ]
 
     def __init__(
         self,
@@ -675,6 +730,13 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
     """
 
     __name__ = "ThreePotentialHNC"
+    cite_keys = [
+        (
+            "Schwarz.2007",
+            "Description of two-comenponent, two-temperature HNC",
+        ),
+        ("Wunsch.2011", "Basis for the implementation of the HNC scheme."),
+    ]
 
     def __init__(
         self,
@@ -983,6 +1045,10 @@ class DebyeWallerSolid(IonFeatModel):
     """
 
     __name__ = "DebyeWallerSolid"
+    cite_keys = [
+        ("Gregori.2006", "Formulation of the Model."),
+        ("Murphy.2008", "Definition of the Debye Waller Factor."),
+    ]
 
     def __init__(
         self,
@@ -1092,6 +1158,10 @@ class QCSalpeterApproximation(FreeFreeModel):
     """
 
     __name__ = "QCSalpeterApproximation"
+    cite_keys = [
+        ("Salpeter.1960", "Basal model."),
+        ("Gregori.2003", "Quantum correction to the original model."),
+    ]
 
     @jax.jit
     def evaluate_raw(
@@ -1236,6 +1306,7 @@ class RPA_DandreaFit(FreeFreeModel):
     """
 
     __name__ = "RPA_DandreaFit"
+    cite_keys = ["Dandrea.1986"]
 
     @jax.jit
     def evaluate_raw(
@@ -1328,6 +1399,21 @@ class BornMerminFull(FreeFreeModel):
     """
 
     __name__ = "BornMerminFull"
+
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            ("Mermin.1970", "Mermin Approximation."),
+            (
+                ["Schorner.2023", "Reinholz.2000"],
+                "Electron-ion collision frequency.",
+            ),
+        ]
+        if self.RPA_rewrite:
+            out.append(("Chapman.2015", "RPA integral."))
+        else:
+            out.append(("Schorner.2023", "RPA integral."))
+        return out
 
     def __init__(self, RPA_rewrite: bool = True, KKT: bool = False) -> None:
         super().__init__()
@@ -1530,6 +1616,22 @@ class BornMermin(FreeFreeModel):
         self.KKT: bool = KKT
         self.E_cutoff_min: Quantity = E_cutoff_min
         self.E_cutoff_max: Quantity = E_cutoff_max
+
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            ("Mermin.1970", "Mermin Approximation."),
+            (
+                ["Schorner.2023", "Reinholz.2000"],
+                "Electron-ion collision frequency.",
+            ),
+            ("Chapman.2016", "Interpolation over few collision frequencies."),
+        ]
+        if self.RPA_rewrite:
+            out.append(("Chapman.2015", "RPA integral."))
+        else:
+            out.append(("Schorner.2023", "RPA integral."))
+        return out
 
     def guess_E_cutoffs(
         self,
@@ -1799,6 +1901,23 @@ class BornMermin_Fit(FreeFreeModel):
         self.KKT: bool = KKT
         self.E_cutoff_min: Quantity = E_cutoff_min
         self.E_cutoff_max: Quantity = E_cutoff_max
+
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            ("Mermin.1970", "Mermin Approximation."),
+            (
+                ["Schorner.2023", "Reinholz.2000"],
+                "Electron-ion collision frequency.",
+            ),
+            ("Chapman.2016", "Interpolation over few collision frequencies."),
+            ("Dandrea.1986", "Analytical Fit for RPA"),
+        ]
+        if self.RPA_rewrite:
+            out.append(("Chapman.2015", "RPA integral."))
+        else:
+            out.append(("Schorner.2023", "RPA integral."))
+        return out
 
     def guess_E_cutoffs(
         self,
@@ -2070,6 +2189,23 @@ class BornMermin_Fortmann(FreeFreeModel):
         self.E_cutoff_min: Quantity = E_cutoff_min
         self.E_cutoff_max: Quantity = E_cutoff_max
 
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            ("Mermin.1970", "Mermin Approximation."),
+            (
+                ["Schorner.2023", "Reinholz.2000"],
+                "Electron-ion collision frequency.",
+            ),
+            ("Fortmann.2010", "LFC in Born-Mernin Formalism."),
+            ("Dandrea.1986", "Analytical Fit for RPA"),
+        ]
+        if self.RPA_rewrite:
+            out.append(("Chapman.2015", "RPA integral."))
+        else:
+            out.append(("Schorner.2023", "RPA integral."))
+        return out
+
     def guess_E_cutoffs(
         self,
         plasma_state: "PlasmaState",
@@ -2299,6 +2435,20 @@ class SchumacherImpulse(ScatteringModel):
         if isinstance(self.r_k, int):
             self.r_k = float(self.r_k)
 
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            "Schumacher.1975",
+            (
+                "Holm.1989",
+                "Corrects contribution for n equals 1 and 2.",
+            ),
+            ("Gu.2008", "Edge positions."),
+        ]
+        if self.r_k < 0:
+            out.append(("Gregori.2004", "Scaling factor r_k."))
+        return out
+
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
@@ -2467,6 +2617,19 @@ class SchumacherImpulseColdEdges(ScatteringModel):
         if isinstance(self.r_k, int):
             self.r_k = float(self.r_k)
 
+    @property
+    def cite_keys(self) -> list[tuple[str | list[str], str]]:
+        out = [
+            "Schumacher.1975",
+            (
+                "Holm.1989",
+                "Corrects contribution for n equals 1 and 2.",
+            ),
+        ]
+        if self.r_k < 0:
+            out.append(("Gregori.2004", "Scaling factor r_k."))
+        return out
+
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
@@ -2565,6 +2728,15 @@ class SchumacherImpulseFitRk(ScatteringModel):
 
     allowed_keys = ["bound-free scattering"]
     __name__ = "SchumacherImpulseFitRk"
+    cite_keys = [
+        "Schumacher.1975",
+        (
+            "Holm.1989",
+            "Corrects contribution for n equals 1 and 2.",
+        ),
+        ("Gu.2008", "Edge positions."),
+        ("Dornheim.2024", "Intensitiy normalization due to f-sum rule"),
+    ]
 
     def __init__(self) -> None:
         super().__init__()
@@ -2684,6 +2856,7 @@ class DetailedBalance(ScatteringModel):
 
     __name__ = "DetailedBalance"
     allowed_keys = ["free-bound scattering"]
+    cite_keys = ["Bohme.2023"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -2720,6 +2893,7 @@ class PaulingFormFactors(Model):
 
     allowed_keys = ["form-factors"]
     __name__ = "PaulingFormFactors"
+    cite_keys = ["Pauling.1932"]
 
     @jax.jit
     def evaluate(
@@ -2763,6 +2937,7 @@ class FormFactorLowering(Model):
 
     allowed_keys = ["form-factors"]
     __name__ = "FormFactorLowering"
+    cite_keys = ["Doppner.2023"]
 
     def __init__(self, Z_squared_correction: bool = True):
         # Without IPD, the results of this form-factors model should be
@@ -2856,6 +3031,7 @@ class IchimaruChemPotential(Model):
 
     __name__ = "IchimaruChemPotential"
     allowed_keys = ["chemical potential"]
+    cite_keys = ["Ichimaru.2018"]
 
     @jax.jit
     def evaluate(
@@ -2949,6 +3125,7 @@ class BohmStaver(Model):
 
     allowed_keys = ["Debye temperature"]
     __name__ = "BohmStaver"
+    cite_keys = ["Gregori.2006"]
 
     @jax.jit
     def evaluate(
@@ -3156,6 +3333,7 @@ class Gericke2010ScreeningLength(Model):
 
     allowed_keys = ["screening length"]
     __name__ = "Gericke2010ScreeningLength"
+    cite_keys = ["Gericke.2010"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3180,6 +3358,7 @@ class ArbitraryDegeneracyScreeningLength(Model):
 
     allowed_keys = ["screening length"]
     __name__ = "ArbitraryDegeneracyScreeningLength"
+    cite_keys = ["Baggott.2017"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3256,6 +3435,7 @@ class LinearResponseScreeningGericke2010(Model):
 
     allowed_keys = ["screening"]
     __name__ = "LinearResponseScreeningGericke2010"
+    cite_keys = ["Gericke.2010", "Wunsch.2011"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -3307,6 +3487,7 @@ class FiniteWavelengthScreening(Model):
 
     allowed_keys = ["screening"]
     __name__ = "FiniteWavelengthScreening"
+    cite_keys = ["Chapman.2015b"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -3351,6 +3532,7 @@ class DebyeHueckelScreening(Model):
 
     allowed_keys = ["screening"]
     __name__ = "DebyeHueckelScreening"
+    cite_keys = ["Chapman.2015b"]
 
     @jax.jit
     def evaluate(
@@ -3395,6 +3577,7 @@ class LinearResponseScreening(Model):
 
     allowed_keys = ["screening"]
     __name__ = "LinearResponseScreening"
+    cite_keys = ["Gericke.2010", "Wunsch.2011"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -3441,6 +3624,7 @@ class Gregori2004Screening(Model):
 
     allowed_keys = ["screening"]
     __name__ = "Gregori2004Screening"
+    cite_keys = ["Gregori.2004"]
 
     @jax.jit
     def evaluate(
@@ -3482,6 +3666,7 @@ class ElectronicLFCGeldartVosko(Model):
 
     allowed_keys = ["ee-lfc"]
     __name__ = "GeldartVosko Static LFC"
+    cite_keys = ["Geldart.1966"]
 
     @jax.jit
     def evaluate(
@@ -3522,6 +3707,7 @@ class ElectronicLFCUtsumiIchimaru(Model):
 
     allowed_keys = ["ee-lfc"]
     __name__ = "UtsumiIchimaru Static LFC"
+    cite_keys = ["UtsumiIchimaru.1982"]
 
     @jax.jit
     def evaluate(
@@ -3563,6 +3749,7 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
 
     allowed_keys = ["ee-lfc"]
     __name__ = "ElectronicLFCDornheimAnalyticalInterp"
+    cite_keys = ["Dornheim.2021"]
 
     @jax.jit
     def evaluate(
@@ -3604,6 +3791,10 @@ class ElectronicLFCStaticInterpolation(Model):
 
     allowed_keys = ["ee-lfc"]
     __name__ = "Static Interpolation"
+    cite_keys = [
+        ("Fortmann.2010", "Interpolation."),
+        (["Farid.1993", "Geldart.1966"], "Limits."),
+    ]
 
     @jax.jit
     def evaluate(
@@ -3759,6 +3950,9 @@ class AverageAtom_Sii(Model):
 
     allowed_keys = ["BM S_ii"]
     __name__ = "AverageAtom_Sii"
+    cite_keys = [
+        ("Wunsch.2011", "Basis for the implementation of the HNC scheme.")
+    ]
 
     def __init__(
         self,
