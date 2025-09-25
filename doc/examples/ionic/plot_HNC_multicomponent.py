@@ -34,8 +34,8 @@ state = jaxrts.PlasmaState(
     T_e=2e4 * ureg.kelvin,
 )
 
-pot = 15
-r = jnpu.linspace(0.0001 * ureg.angstrom, 1000 * ureg.a0, 2**pot)
+pot = 12
+r = jnpu.linspace(0.0001 * ureg.angstrom, 200 * ureg.a0, 2**pot)
 
 # We add densities, here. Maybe this is wrong.
 d = jnpu.cbrt(

@@ -3163,7 +3163,7 @@ class BohmStaver(Model):
 
 class ConstantIPD(Model):
     """
-    A model that returns constant value for the IPD.
+    A model that returns a constant value for the IPD, set by the user.
     """
 
     allowed_keys = ["ipd"]
@@ -3196,9 +3196,10 @@ class ConstantIPD(Model):
 
 class DebyeHueckelIPD(Model):
     """
-    Debye Hückel IPD Model
-
-    See Also
+    Debye-Hückel IPD Model :cite:`Debye.1923`.
+    The Debye-Hückel Model is applicable for low-density and high-temperature
+    plasmas, determined by charge screening effects as described in the
+    Debye-Hückel theory.
     --------
     jaxrts.ipd.ipd_debye_hueckel
         Function used to calculate the IPD
@@ -3206,6 +3207,7 @@ class DebyeHueckelIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "DebyeHueckel"
+    cite_keys = ["Debye.1923", "Crowley.2014"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3220,9 +3222,11 @@ class DebyeHueckelIPD(Model):
 
 class StewartPyattIPD(Model):
     """
-    Stewart Pyatt IPD Model.
+    Stewart Pyatt IPD Model :cite:`Stewart.1966`.
+    The Stewart–Pyatt (SP) model interpolates between the
+    Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972` 
+    at (low T, high rho) and (high T, low rho), respectively.
 
-    See Also
     --------
     jaxrts.ipd.ipd_stewart_pyatt
         Function used to calculate the IPD
@@ -3230,6 +3234,7 @@ class StewartPyattIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "StewartPyatt"
+    cite_keys = ["Stewart.1966", "Crowley.2014"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3244,9 +3249,15 @@ class StewartPyattIPD(Model):
 
 class IonSphereIPD(Model):
     """
-    Ion Sphere IPD Model.
+    Ion Sphere IPD Model :cite:`Rozsnyai.1972`.
+    
+    The Ion Sphere Model (IS) is especially applicable plasmas with strong ion
+    coupling, and thus in particular for high density, low temperature plasmas.
+    The relevant length scale that determines the ionization potential is the
+    ion sphere radius R_0, determined by the condition that a sphere of radius
+    R_0 contains the same charge as given by the mean ionization and the
+    electron number density.
 
-    See Also
     --------
     jaxrts.ipd.ipd_ion_sphere
         Function used to calculate the IPD
@@ -3254,6 +3265,7 @@ class IonSphereIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "IonSphere"
+    cite_keys = ["Rozsnyai.1972", "Crowley.2014"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3264,9 +3276,12 @@ class IonSphereIPD(Model):
 
 class EckerKroellIPD(Model):
     """
-    Ecker Kröll IPD Model.
+    Ecker-Kröll IPD Model:cite:`EckerKroell.1963`.
 
-    See Also
+    Opposite to the Stewart-Pyatt:cite:`Stewart.1966` Model the Ecker-Kröll Model assumes that the relevant length scale for determining the IPD
+    in high-density plasmas is not R_0 (the ion sphere radius) but rather the average distance between all free particles r^3_EK = 3/4\pi(n_e + n_i),
+    where n_e and n_i are the ion and electron number density.
+    The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt Model for highly ionized plasmas. 
     --------
     jaxrts.ipd.ipd_ecker_kroell
         Function used to calculate the IPD
@@ -3274,6 +3289,7 @@ class EckerKroellIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "EckerKroell"
+    cite_keys = ["EckerKroell.1963", "Crowley.2014"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3288,9 +3304,14 @@ class EckerKroellIPD(Model):
 
 class PauliBlockingIPD(Model):
     """
-    Pauli Blocking IPD Model.
+    Pauli Blocking IPD Model :cite:`Ropke.2019`.
 
-    See Also
+    In dense plasma the bound state energies get modified due to the Pauli
+    exclusion principle, thereby lowering the ionization potential from below.
+    Additionally, the Pauli Blocking IPD Model should be supplemented by a
+    model that lowers the continuum and hence the ionization potential from
+    above.
+
     --------
     jaxrts.ipd.ipd_pauli_blocking
         Function used to calculate the IPD
@@ -3298,6 +3319,7 @@ class PauliBlockingIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "PauliBlocking"
+    cite_keys = ["Ropke.2019"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3316,8 +3338,8 @@ class PauliBlockingIPD(Model):
 
 class DebyeHueckelScreeningLength(Model):
     """
-    The Debye Hückel screening length of the electrons. Use the electron
-    temperature for the known formula with `Z=1`.
+    This is standard Debye Hückel screening length. See also
+    :cite:`Gericke.2010`.
 
     See also
     --------
@@ -3327,6 +3349,7 @@ class DebyeHueckelScreeningLength(Model):
 
     allowed_keys = ["screening length"]
     __name__ = "DebyeHueckelScreeningLength"
+    cite_keys = ["Debye.1923"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3368,7 +3391,7 @@ class ArbitraryDegeneracyScreeningLength(Model):
     """
     A screening length valid for arbitrary degeneracy.
 
-    See Also
+    See Also :cite:`Ropke.2019`.
     --------
     ipd.inverse_screening_length_e
         The function used to calculate the inverse of the screening length
