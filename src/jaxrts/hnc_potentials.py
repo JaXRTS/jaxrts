@@ -16,6 +16,7 @@ import jax.interpreters
 import jpu.numpy as jnpu
 from jax import numpy as jnp
 
+from jaxrts import literature
 from jaxrts.hypernetted_chain import (
     _3Dfour,
     fourier_transform_sine,
@@ -276,11 +277,21 @@ class HNCPotential(metaclass=abc.ABCMeta):
     the first two dimensions get one or two additional entries, respectively.
     """
 
+    #: A list of keys where this Potential is adequate for. Valid keys are
+    #: "ion-ion Potential", "electron-ion Potential", and
+    #: "electron-electron Potential".
     allowed_keys = [
         "ion-ion Potential",
         "electron-ion Potential",
         "electron-electron Potential",
     ]
+    #: A list of bibtex keys. Can be in the format ``[key1, key2]``, for
+    #: general keys, ``[(key1, comment1), (key2, comment2)]``, if comments are
+    #: desired, of ``[([key1, key2], comment1), (key3, comment2)]`` if the
+    #: comment should apply to multiple keys.
+    cite_keys: (
+        list[str] | list[tuple[str, str]] | list[tuple[list[str], str]]
+    ) = []
 
     def __init__(
         self,
@@ -300,6 +311,47 @@ class HNCPotential(metaclass=abc.ABCMeta):
         self.include_electrons: Literal[
             "off", "SpinAveraged", "SpinSeparated"
         ] = include_electrons
+
+    def citation(
+        self,
+        style: Literal["plain", "bibtex", "cite"] = "plain",
+        comment: str | None = None,
+    ) -> str:
+        """
+        Return bibliographic information for the Model used.
+
+        Parameters
+        ----------
+        style: "plain", "cite", or "bibtex"
+            When ``"plain"``, the literature references are formatted in a
+            human-readable format. If ``"bibtex"``, the citations are given as
+            bibtex entries, which can then be copied into a literature
+            collection. If ``"cite"``, the citation keys are not evaluated, but
+            just retuned, wrapped in a tex ``\\cite{...}`` command.
+        comment: str or None, default None
+            (Additional) comment to give to the citation entry.
+
+        Returns
+        -------
+        str
+            The information about the model used
+        """
+        if style == "plain":
+            citation_function = literature.get_formatted_ref_string
+        elif style == "cite":
+            citation_function = literature.get_cite_ref_string
+        else:
+            citation_function = literature.get_bibtex_ref_string
+        citations = []
+        for entry in self.cite_keys:
+            if isinstance(entry, str):
+                citations.append(citation_function(entry, comment))
+            else:
+                key, key_comment = entry
+                if comment is not None:
+                    key_comment = comment + ". " + key_comment
+                citations.append(citation_function(key, key_comment))
+        return "\n".join(citations)
 
     def check(self, plasma_state) -> None:  # noqa: B027
         """
@@ -850,6 +902,11 @@ class KelbgPotential(HNCPotential):
     """
 
     __name__ = "KelbgPotential"
+    cite_keys = [
+        "Kelbg.1963",
+        "Wunsch.2011",
+        ("Schwarz.2007", "Definition of lambda_ab"),
+    ]
 
     @jax.jit
     def full_r(self, plasma_state, r: Quantity) -> Quantity:
@@ -1023,6 +1080,11 @@ class KlimontovichKraeftPotential(HNCPotential):
         "electron-ion Potential",
     ]
     __name__ = "KlimontovichKraeftPotential"
+    cite_keys = [
+        "Klimontovich.1974",
+        "Wunsch.2011",
+        "Schwarz.2007",
+    ]
 
     @jax.jit
     def full_r(self, plasma_state, r):
@@ -1071,6 +1133,11 @@ class DeutschPotential(HNCPotential):
     """
 
     __name__ = "DeutschPotential"
+    cite_keys = [
+        "Kelbg.1963",
+        "Wunsch.2011",
+        ("Schwarz.2007", "Definition of lambda_ab"),
+    ]
 
     @jax.jit
     def full_r(self, plasma_state, r):
@@ -1171,6 +1238,7 @@ class EmptyCorePotential(HNCPotential):
         "electron-ion Potential",
     ]
     __name__ = "EmptyCorePotential"
+    cite_keys = ["Gericke.2010"]
 
     def __init__(
         self,
@@ -1236,6 +1304,7 @@ class YukawaShortRangeRepulsion(HNCPotential):
     """
 
     __name__ = "YukawaShortRangeRepulsion"
+    cite_keys = ["Wunsch.2009", "Fletcher.2015"]
 
     def __init__(
         self,
@@ -1340,6 +1409,7 @@ class SoftCorePotential(HNCPotential):
         "electron-ion Potential",
     ]
     __name__ = "SoftCorePotential"
+    cite_keys = ["Gericke.2010"]
 
     def __init__(
         self,
@@ -1448,6 +1518,7 @@ class SoftCorePotential(HNCPotential):
 class PauliClassicalMap(HNCPotential):
 
     __name__ = "PauliClassicalMap"
+    cite_keys = ["Bredow.2015", "DharmaWardana.2000", "DharmaWardana.2012"]
 
     def __init__(self):
         """
@@ -1559,6 +1630,7 @@ class SpinSeparatedEEExchange(HNCPotential):
     """
 
     __name__ = "SpinSeparatedEEExchange"
+    cite_keys = ["Wunsch.2008", "Huang.1987", "Deutsch.1982"]
 
     def __init__(
         self,
@@ -1600,6 +1672,7 @@ class SpinAveragedEEExchange(HNCPotential):
     """
 
     __name__ = "SpinAveragedEEExchange"
+    cite_keys = ["Wunsch.2008"]
 
     @jax.jit
     def full_r(self, plasma_state, r):
