@@ -3174,31 +3174,6 @@ class StewartPyattFullDegIPD(Model):
             )
         return out
 
-
-class MoreIPD(Model):
-    """
-    More IPD Model.
-
-    See Also
-    --------
-    jaxrts.ipd.ipd_more
-        Function used to calculate the IPD
-    """
-
-    allowed_keys = ["ipd"]
-    __name__ = "More"
-
-    @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
-        return ipd.ipd_more(
-            plasma_state.Z_free,
-            plasma_state.n_e,
-            plasma_state.n_i,
-            plasma_state.T_e,
-            plasma_state.T_i,
-        )
-
-
 class IonSphereIPD(Model):
     """
     Ion Sphere IPD Model.
@@ -4212,7 +4187,6 @@ _all_models = [
     Sum_Sii,
     StewartPyattIPD,
     StewartPyattFullDegIPD,
-    MoreIPD,
     ThreePotentialHNCIonFeat,
 ]
 

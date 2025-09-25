@@ -13,9 +13,9 @@ from jaxrts.ipd import (
     ipd_stewart_pyatt,
 )
 
-# from jaxrts.helpers import get_all_models
+from .helpers import get_all_models
 
-# all_ipd_models = get_all_models()["ipd"]
+all_ipd_models = get_all_models()["ipd"]
 
 ureg = jaxrts.ureg
 
