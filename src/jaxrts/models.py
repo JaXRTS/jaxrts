@@ -3026,7 +3026,10 @@ class IchimaruChemPotential(Model):
     """
     A fitting formula for the chemical potential of a plasma between the
     classical and the quantum regime, given by :cite:`Gregori.2003`.
-    Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
+
+    See Also
+    --------
+    Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolationIchimaru`.
     """
 
     __name__ = "IchimaruChemPotential"
@@ -3041,6 +3044,28 @@ class IchimaruChemPotential(Model):
             plasma_state.T_e, plasma_state.n_e
         )
 
+class SommerfeldChemPotential(Model):
+
+    """
+    Interpolation function for the chemical potential of a non-interacting
+    (ideal) fermi gas given in the paper of :cite:`Cowan.2019`.
+
+    See Also
+    --------
+    Uses :py:func:`jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation`.
+    """
+
+    __name__ = "SommerfeldChemPotential"
+    allowed_keys = ["chemical potential"]
+    cite_keys = ["Cowan.2019"]
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        return plasma_physics.chem_pot_sommerfeld_fermi_interpolation(
+            plasma_state.T_e, plasma_state.n_e
+        )
 
 class ConstantChemPotential(Model):
     """
