@@ -826,7 +826,15 @@ class CoulombPotential(HNCPotential):
 
 
 class DebyeHueckelPotential(HNCPotential):
+
+    """
+    The Debye-Hückel Screening Potential as defined e.g. in :cite:`Wunsch.2008`.
+    
+    """
+
     __name__ = "DebyeHueckelPotential"
+
+    cite_keys = ["Wunsch.2008"]
 
     def check(self, plasma_state) -> None:
         if not hasattr(plasma_state, "screening_length"):
@@ -892,7 +900,7 @@ class DebyeHueckelPotential(HNCPotential):
 class KelbgPotential(HNCPotential):
     """
     See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Kelbg.1963`, and
-    :cite:`Schwarz.2007`, Eqn 14. We use the definition of lambda_ab from
+    :cite:`Schwarz.2007`, Eqn 14. We use the definition of :math:`\\lambda_{ab}` from
     :cite:`Schwarz.2007`.
 
     .. note::
@@ -1065,7 +1073,7 @@ class KelbgPotential(HNCPotential):
 
 class KlimontovichKraeftPotential(HNCPotential):
     """
-    See ::cite:`Schwarz.2007` Eqn 15 and cite:`Wunsch.2011` Eqn. 4.43.
+    See :cite:`Schwarz.2007` Eqn (15) and :cite:`Wunsch.2011` Eqn. (4.43).
 
     .. note::
 
@@ -1218,11 +1226,11 @@ class DeutschPotential(HNCPotential):
 class EmptyCorePotential(HNCPotential):
     """
     The Empty core potential, which is essentially a
-    :py:class:`~.CoulombPotential` for all radii bitter than `r_cut`.
-    For all radii smaller than `r_cut` (this is the short-range part of the
+    :py:class:`~.CoulombPotential` for all radii bitter than :math:`r_\\text{cut}`.
+    For all radii smaller than :math:`r_\\text{cut}` (this is the short-range part of the
     potential, for now), the potential is forced to zero.
 
-    We define `r_cut` in the :py:class:`jaxrts.PlasmaState`.
+    We define :math:`r_\\text{cut}` in the :py:class:`jaxrts.PlasmaState`.
 
     .. warning::
 
@@ -1304,7 +1312,7 @@ class YukawaShortRangeRepulsion(HNCPotential):
     """
 
     __name__ = "YukawaShortRangeRepulsion"
-    cite_keys = ["Wunsch.2009", "Fletcher.2015"]
+    cite_keys = ["Wunsch.2008", "Fletcher.2015"]
 
     def __init__(
         self,
@@ -1517,7 +1525,14 @@ class SoftCorePotential(HNCPotential):
 
 class PauliClassicalMap(HNCPotential):
 
+    """
+    Calculates the Pauli potential from the exact non-interacting UEG pair distribution function 
+    by inverting the Hyper-Netted-Chain calculations:cite:`DharmaWardana.2012`.
+
+    """
+
     __name__ = "PauliClassicalMap"
+
     cite_keys = ["Bredow.2015", "DharmaWardana.2000", "DharmaWardana.2012"]
 
     def __init__(self):
@@ -1620,7 +1635,7 @@ class PauliClassicalMap(HNCPotential):
 class SpinSeparatedEEExchange(HNCPotential):
     """
     See :cite:`Wunsch.2008`, Eqn (17), Citing :cite:`Huang.1987`. Eqn. (9.57),
-    however, there is a factor of 2 * sqrt(pi) difference in the definition of
+    however, there is a factor of :math:`\\sqrt{\\pi}` difference in the definition of
     lambda. (one is from :cite:`Deutsch.1982` presenting a reduced quantity
     :math:`\\lambda_{ee}`, and then them having another factor of
     :math:`\\sqrt{2}` in the mass term. We here present the corrected version

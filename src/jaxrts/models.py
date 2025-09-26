@@ -3203,7 +3203,7 @@ class DebyeHueckelIPD(Model):
 
 class StewartPyattIPD(Model):
     """
-    Stewart Pyatt IPD Model:cite:`Stewart.1966`.
+    Stewarts Pyatt IPD Model:cite:`Stewart.1966`.
     The Stewart–Pyatt (SP) model interpolates between the Debye–Hückel:cite:`Debye.1923` and Ion-Sphere model:cite:`Rozsnyai.1972` 
     at low/high and high/low densities, respectively.
 
@@ -3232,8 +3232,8 @@ class IonSphereIPD(Model):
     Ion Sphere IPD Model:cite:`Rozsnyai.1972`.
 
     
-    The Ion Sphere Model (IS) is especially applicable plasmas with strong ion coupling, and thus in particular for high density, low temperature plasmas.
-    The relevant length scale that determines the ionization potential is the ion sphere radius R_0, determined by the condition that a sphere of radius R_0 contains the same 
+    The Ion Sphere Model (IS) is especially applicable for plasmas with strong ion coupling, and thus in particular for high density, low temperature plasmas.
+    The relevant length scale that determines the ionization potential is the ion sphere radius :math:`R_0`, determined by the condition that a sphere of radius :math:`R_0` contains the same 
     charge as given by the mean ionization and the electron number density.
 
     --------
@@ -3257,8 +3257,8 @@ class EckerKroellIPD(Model):
     Ecker-Kröll IPD Model:cite:`EckerKroell.1963`.
 
     Opposite to the Stewart-Pyatt:cite:`Stewart.1966` Model the Ecker-Kröll Model assumes that the relevant length scale for determining the IPD
-    in high-density plasmas is not R_0 (the ion sphere radius) but rather the average distance between all free particles r^3_EK = 3/4\pi(n_e + n_i),
-    where n_e and n_i are the ion and electron number density.
+    in high-density plasmas is not :math:`R_0` (the ion sphere radius) but rather the average distance between all free particles :math:`r^3_\\text{EK} = 3/4\\pi(n_e + n_i)`,
+    where :math:`n_e` and :math:`n_i` are the ion and electron number density.
     The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt Model for highly ionized plasmas. 
     --------
     jaxrts.ipd.ipd_ecker_kroell
@@ -3316,7 +3316,7 @@ class DebyeHueckelScreeningLength(Model):
     """
     This is standard Debye Hückel screening length. See also :cite:`Gericke.2010`.
 
-    See also
+    See Also
     --------
     jaxrts.plasma_physics.Debye_Hueckel_screening_length
         The function used to calculate the screening length
@@ -3336,7 +3336,7 @@ class Gericke2010ScreeningLength(Model):
     """
     Return the Debye-Hückel Debye screening length. Uses a 4th-power
     interpolation between electron and fermi temperature, as proposed by
-    :cite:`Gericke.2010`
+    :cite:`Gericke.2010`.
 
     See Also
     --------
@@ -3494,7 +3494,7 @@ class FiniteWavelengthScreening(Model):
     Should be identical to :py:class:`~.LinearResponseScreening`, if the
     free-free model is a RPA model.
 
-    See also
+    See Also
     --------
     jaxrts.ion_feature.q_FiniteWLChapman2015
         The function used to calculate ``q``.
@@ -3539,6 +3539,7 @@ class DebyeHueckelScreening(Model):
     """
     Debye Hueckel screening as presented by :cite:`Chapman.2015b`.
 
+    See Also
     --------
     jaxrts.ion_feature.q_DebyeHueckelChapman2015
         The function used to calculate ``q``.
@@ -3912,8 +3913,7 @@ def averagePlasmaState(state: "PlasmaState") -> "PlasmaState":
 
 class Sum_Sii(Model):
     """
-    This model sums up all S_ab from the HNC and multiplies it with ``sqrt(x_a
-    * x_b)``. While it is obviously ok for a single-species plasma, multiple
+    This model sums up all :math:`S_{ab}` from the HNC and multiplies it with :math:`\\sqrt{x_{a}\\cdot x_{b}}`. While it is obviously appropriate for a single-species plasma, multiple
     species might not be treated correctly.
     """
 
@@ -4151,6 +4151,7 @@ class FiniteWavelength_BM_V(BM_V_eiSModel):
 
     allowed_keys = ["BM V_eiS"]
     __name__ = "FiniteWavelength_BM_V"
+    cite_keys = ["Dandrea.1986"]
 
     @jax.jit
     def V(
