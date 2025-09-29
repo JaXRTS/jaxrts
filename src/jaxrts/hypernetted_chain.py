@@ -641,33 +641,24 @@ def pair_distribution_function_SVT_HNC(
         b = ar[jnp.newaxis, :, jnp.newaxis]   # shape (1,M,1)
         s = ar[jnp.newaxis, jnp.newaxis, :]   # shape (1,1,M)
 
+        # broadcast to full (M,M,M) so every (a,b,s) is explicit
         a3 = jnp.broadcast_to(a, (M, M, M))
         b3 = jnp.broadcast_to(b, (M, M, M))
         s3 = jnp.broadcast_to(s, (M, M, M))
 
-        # Row index p = idx(a,b) and column indices q1 = idx(s,b), q2 = idx(a,s)
-        p_idx  = (a3 * M + b3).reshape(-1).astype(jnp.int32)   # shape (M^3,)
-        q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)   # shape (M^3,)
-        q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)   # shape (M^3,)
+        # flattened row & column indices in the big matrix A
+        p_idx  = (a3 * M + b3).reshape(-1).astype(jnp.int32)   # (M^3,)
+        q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)   # idx(s,b)
+        q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)   # idx(a,s)
 
-        # Values to subtract: -alpha[a,b,s] * C[a,s] and -beta[a,b,s] * C[s,b]
-        vals1 = -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)   # shape (M^3,)
-        vals2 = -(coeff_2 * c_k[s3, b3]).reshape(-1).m_as(ureg.dimensionless)   # shape (M^3,)
+        # values to scatter: -alpha[a,b,s] * C[a,s]  and  -beta[a,b,s] * C[s,b]
+        vals1 = -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)
+        vals2 = -(coeff_2  * c_k[s3, b3]).reshape(-1).m_as(ureg.dimensionless)
 
-        # Build A: identity for the two delta-part
+        # Build A = I + scattered contributions
         A = jnp.eye(M**2, dtype=c_k.dtype)
-
-
-        for a in range(M):
-            for b in range(M):
-                p = idx(a, b)
-                for s in range(M):
-                    val1 = -coeff_1[a, b, s] * c_k[a, s]
-                    A = A.at[p, idx(s, b)].add(val1.m_as(ureg.dimensionless))
-                # - sum_s beta_{a b s} H_{a s} c_{s b}
-                for s in range(M):
-                    val2 = -coeff_2[a, b, s] * c_k[s, b]
-                    A = A.at[p, idx(a, s)].add(val2.m_as(ureg.dimensionless))
+        A = A.at[p_idx, q1_idx].add(vals1)
+        A = A.at[p_idx, q2_idx].add(vals2)
 
         # RHS is vec(C) with mapping p = a*M + b matching reshape order
         rhs = c_k.reshape(-1)
