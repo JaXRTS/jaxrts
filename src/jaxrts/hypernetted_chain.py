@@ -2,6 +2,7 @@
 This submodule is dedicated to the using the hypernetted chain approach
 to calculate static structure factors.
 """
+from typing import Tuple
 
 from functools import partial
 
@@ -10,7 +11,7 @@ import jax.interpreters
 import jpu.numpy as jnpu
 from jax import numpy as jnp
 
-from jaxrts.units import Quantity, ureg
+from jaxrts.units import Quantity, ureg, to_array
 
 
 # Helper functions.
@@ -569,6 +570,168 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
     log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
 
     return jnpu.exp(log_g_r), niter
+
+
+@jax.jit
+def pair_distribution_function_SVT_HNC(
+    V_s, V_l_k, r, T_ab, n, m, mix=0.0
+):
+    """
+    See :cite:`Shaffer.2017`, solved Eqns. 7. This reference fixes some typos
+    in the seminal work of :cite:`Seuferling.1989`.
+    """
+    delta = 1e-6
+
+    dr = r[1] - r[0]
+    dk = jnp.pi / (len(r) * dr)
+
+    k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+
+    beta = 1 / (ureg.boltzmann_constant * T_ab)
+
+    m_ab =  jnpu.outer(m, m) / (m[:, jnp.newaxis] + m[jnp.newaxis, :])  # m_a * m_b / (m_a + m_b)
+    
+    v_s = beta * V_s
+    v_l_k = beta * V_l_k
+
+    log_g_r0 = -(v_s).to(ureg.dimensionless)
+    Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
+
+    @jax.jit
+    def build_coeffs(n: jnp.ndarray, T: jnp.ndarray, m: jnp.ndarray, mab: jnp.ndarray) -> Tuple[jnp.ndarray, jnp.ndarray]:
+        """
+        n: (M,), T: (M,M) pairwise array, m: (M,)
+        Returns coeff1, coeff2 with shape (M, M, M) and axes (a,b,s)
+        coeff1[a,b,s] = n[s] * (mab[a,b] * T[a,s]) / (m[a] * T[a,b])
+        coeff2[a,b,s] = n[s] * (mab[a,b] * T[s,b]) / (m[b] * T[a,b])
+        """
+    
+        # extend the axis that is not given
+        _T = T[:, :, 0]
+        Tab = _T[:, :, jnp.newaxis]
+        Tas = _T[:, jnp.newaxis, :]
+        Tbs = _T[jnp.newaxis, :, :]
+
+        mab = mab[:, :, jnp.newaxis]
+
+
+        numer1 = mab * Tas
+        denom1 = (m[:, jnp.newaxis, jnp.newaxis] * Tab)
+        coeff1 = n[jnp.newaxis, jnp.newaxis, :] * (numer1 / denom1)
+
+        numer2 = mab * Tbs
+        denom2 = (m[jnp.newaxis, :, jnp.newaxis] * Tab)
+        coeff2 = n[jnp.newaxis, jnp.newaxis, :] * (numer2 / denom2)
+
+        return coeff1, coeff2
+
+    coeff_1, coeff_2 = build_coeffs(n, T_ab, m, m_ab)
+
+    def svt_ozr_ei(c_k):
+        """
+        The modified Ornstein-Zernicke Relation
+        """
+
+        M = c_k.shape[0]
+        def idx(a, b): return a * M + b
+        ar = jnp.arange(M)
+
+        # index grids
+        a = ar[:, jnp.newaxis, jnp.newaxis]   # shape (M,1,1)
+        b = ar[jnp.newaxis, :, jnp.newaxis]   # shape (1,M,1)
+        s = ar[jnp.newaxis, jnp.newaxis, :]   # shape (1,1,M)
+
+        a3 = jnp.broadcast_to(a, (M, M, M))
+        b3 = jnp.broadcast_to(b, (M, M, M))
+        s3 = jnp.broadcast_to(s, (M, M, M))
+
+        # Row index p = idx(a,b) and column indices q1 = idx(s,b), q2 = idx(a,s)
+        p_idx  = (a3 * M + b3).reshape(-1).astype(jnp.int32)   # shape (M^3,)
+        q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)   # shape (M^3,)
+        q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)   # shape (M^3,)
+
+        # Values to subtract: -alpha[a,b,s] * C[a,s] and -beta[a,b,s] * C[s,b]
+        vals1 = -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)   # shape (M^3,)
+        vals2 = -(coeff_2 * c_k[s3, b3]).reshape(-1).m_as(ureg.dimensionless)   # shape (M^3,)
+
+        # Build A: identity for the two delta-part
+        A = jnp.eye(M**2, dtype=c_k.dtype)
+
+
+        for a in range(M):
+            for b in range(M):
+                p = idx(a, b)
+                for s in range(M):
+                    val1 = -coeff_1[a, b, s] * c_k[a, s]
+                    A = A.at[p, idx(s, b)].add(val1.m_as(ureg.dimensionless))
+                # - sum_s beta_{a b s} H_{a s} c_{s b}
+                for s in range(M):
+                    val2 = -coeff_2[a, b, s] * c_k[s, b]
+                    A = A.at[p, idx(a, s)].add(val2.m_as(ureg.dimensionless))
+
+        # RHS is vec(C) with mapping p = a*M + b matching reshape order
+        rhs = c_k.reshape(-1)
+
+        # Solve: use pinv to be robust to singular matrices
+        H_flat = jnpu.matmul(jnp.linalg.inv(A), rhs)
+
+        return H_flat.reshape((M, M))
+
+    def condition(val):
+        """
+        If this is False, the loop will stop. Abort if too many steps were
+        reached, or if convergence was reached.
+        """
+        _, Ns_r, Ns_r_old, n_iter = val
+        err = jnpu.sum((Ns_r - Ns_r_old) ** 2)
+        return (n_iter < 2000) & jnp.all(err > delta)
+
+    def step(val):
+        log_g_r, Ns_r, _, i = val
+
+        h_r = jnpu.expm1(log_g_r)
+
+        cs_r = h_r - Ns_r
+
+        cs_k = _3Dfour(k, r, cs_r)
+
+        c_k = cs_k - v_l_k
+
+        # Ornstein-Zernike relation
+        h_k = jax.vmap(svt_ozr_ei, in_axes=2, out_axes=2)(c_k)
+
+        Ns_k = h_k - cs_k
+
+        Ns_r_new_full = (
+            _3Dfour(
+                r,
+                k,
+                Ns_k,
+            )
+            / (2 * jnp.pi) ** 3
+        )
+
+        Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
+
+        log_g_r_new = Ns_r_new - v_s
+
+        return (
+            log_g_r_new.m_as(ureg.dimensionless),
+            Ns_r_new.m_as(ureg.dimensionless),
+            Ns_r,
+            i + 1,
+        )
+
+    init = (
+        log_g_r0.m_as(ureg.dimensionless),
+        Ns_r0.m_as(ureg.dimensionless),
+        Ns_r0.m_as(ureg.dimensionless) - 1,
+        0,
+    )
+    log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
+
+    return jnpu.exp(log_g_r) * ureg.dimensionless, niter
+
 
 
 @jax.jit
