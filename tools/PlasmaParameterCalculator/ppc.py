@@ -26,6 +26,7 @@ ELEMENTS = {
     for k in range(1, 37)
 }
 
+import tkinter.font as tkfont
 
 def compute_plasma_parameters(rho, element_symbol, T_e, Z_avg):
     if element_symbol not in ELEMENTS:
@@ -147,20 +148,22 @@ class PlasmaGUI:
         ttk.Label(
             right_frame, text="Results:", font=("Segoe UI", 11, "bold")
         ).pack(anchor=tk.NW)
-        self.output_label = tk.Label(
+        self.output_label = tk.Text(
             right_frame,
-            text="",
-            justify=tk.LEFT,
-            anchor="nw",
-            bg="#dddddd",
-            fg="black",
-            font=("Courier New", 10),
+            wrap="word",  # wrap text nicely
+            bg="#dddddd",  # same background
+            fg="black",  # same text color
+            font=("Courier New", 10),  # same font
             bd=2,
             relief=tk.SUNKEN,
+            height=5,  # adjust height if needed
         )
         self.output_label.pack(
             fill=tk.BOTH, expand=True, padx=(0, 10), pady=(6, 10)
         )
+
+        # Make it behave like a label (no editing, just selection)
+        self.output_label.config(state="disabled")
 
     def on_calculate(self):
         try:
@@ -179,6 +182,7 @@ class PlasmaGUI:
             messagebox.showerror("Error", str(e))
 
     def display_results(self, r, element, T_e, Z):
+
         lines = []
         lines.append(
             f"Element: {element}    T = {T_e:.3g} eV    Z_free = {Z:.3g}"
@@ -240,12 +244,12 @@ class PlasmaGUI:
         )
         lines.append("")
         lines.append(
-            f"Fermi energy E_F (electrons) = {r['E_Fe']:.3eP}".replace(
+            f"Fermi energy E_F (electrons) = {r['E_Fe']:.3fP}".replace(
                 "electron_volt", "eV"
             )
         )
         lines.append(
-            f"Fermi energy E_F (ions) = {r['E_Fi']:.3eP}".replace(
+            f"Fermi energy E_F (ions) = {r['E_Fi']:.3fP}".replace(
                 "electron_volt", "eV"
             )
         )
@@ -288,21 +292,36 @@ class PlasmaGUI:
         degen_i = determine_level(1 / r["Theta_i"])
         degen_e = determine_level(1 / r["Theta_e"])
 
-        lines.append(
-            f">>> Ions are {coupling_i} coupled and {degen_i} degenerate."
-        )
-        lines.append(
-            f">>> Electron are {coupling_e} coupled and {degen_i} degenerate."
-        )
 
-        self.output_label.config(text="\n".join(lines))
+        bold_font = tkfont.Font(self.output_label, self.output_label.cget("font"))
+        bold_font.configure(weight="bold")
+        self.output_label.tag_configure("bold", font=bold_font)
+
+        self.output_label.config(state="normal")
+
+        for line in lines[:]:
+            self.output_label.insert("end", line + "\n")
+
+        self.output_label.insert("end", ">>> Ions are ")
+        self.output_label.insert("end", coupling_i, "bold")
+        self.output_label.insert("end", " coupled and ")
+        self.output_label.insert("end", degen_i, "bold")
+        self.output_label.insert("end", " degenerate.\n")
+
+        self.output_label.insert("end", ">>> Electrons are ")
+        self.output_label.insert("end", coupling_e, "bold")
+        self.output_label.insert("end", " coupled and ")
+        self.output_label.insert("end", degen_e, "bold")
+        self.output_label.insert("end", " degenerate.\n")
+
+        self.output_label.config(state="disabled")
 
 
 if __name__ == "__main__":
     root = tk.Tk()
 
     style = ttk.Style()
-    style.theme_use("default")  # try "default", "clam", "alt", "classic"
+    style.theme_use("default")  # "default", "clam", "alt", "classic"
 
     app = PlasmaGUI(root)
     root.mainloop()
