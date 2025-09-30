@@ -3278,10 +3278,15 @@ class EckerKroellIPD(Model):
     """
     Ecker-Kröll IPD Model:cite:`EckerKroell.1963`.
 
-    Opposite to the Stewart-Pyatt:cite:`Stewart.1966` Model the Ecker-Kröll Model assumes that the relevant length scale for determining the IPD
-    in high-density plasmas is not R_0 (the ion sphere radius) but rather the average distance between all free particles r^3_EK = 3/4\pi(n_e + n_i),
+    Opposite to the Stewart-Pyatt:cite:`Stewart.1966` Model the Ecker-Kröll
+    Model assumes that the relevant length scale for determining the IPD in
+    high-density plasmas is not R_0 (the ion sphere radius) but rather the
+    average distance between all free particles r^3_EK = 3/4\\pi(n_e + n_i),
     where n_e and n_i are the ion and electron number density.
-    The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt Model for highly ionized plasmas. 
+    The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt
+    Model for highly ionized plasmas. 
+
+    See also
     --------
     jaxrts.ipd.ipd_ecker_kroell
         Function used to calculate the IPD
