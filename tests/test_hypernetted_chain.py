@@ -372,11 +372,6 @@ def test_svt_hnc_classical_hnc_consistency():
     dk = jnp.pi / (len(r) * dr)
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-    # Compute average distance for normalization
-    d = jnpu.cbrt(
-        3 / (4 * jnp.pi * (state.n_i[:, jnp.newaxis] + state.n_i[jnp.newaxis, :]))
-    )
-
     Potential = jaxrts.hnc_potentials.DebyeHueckelPotential()
     V_s = Potential.short_r(state, r)
     V_l_k = Potential.long_k(state, k)
@@ -389,7 +384,7 @@ def test_svt_hnc_classical_hnc_consistency():
 
     # Run standard HNC (expects Ti as (M,) vector)
     g_hnc, _ = hnc.pair_distribution_function_HNC(
-        V_s, V_l_k, r, state.T_i, state.n_i
+        V_s, V_l_k, r, T_ab, state.n_i
     )
 
     # Run SVT-HNC (expects T_ab as (M,M) matrix and mass m)
@@ -398,5 +393,5 @@ def test_svt_hnc_classical_hnc_consistency():
     )
 
     # Consistency check: g_hnc ≈ g_svt when T_ab is uniform
-    max_diff = jnpu.max(jnpu.abs(g_hnc - g_svt)).m_as(ureg.dimensionless)
+    max_diff = jnpu.max(jnpu.absolute(g_hnc - g_svt)).m_as(ureg.dimensionless)
     assert max_diff < 1e-3, f"SVT-HNC and HNC differ by {max_diff} in equal-T limit"

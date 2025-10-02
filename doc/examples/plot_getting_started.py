@@ -25,7 +25,7 @@ state = jaxrts.PlasmaState(
     ions=[jaxrts.Element("Be")],  # Specify the elements as a list
     Z_free=jnp.array([2]),  # This is the ionization per species
     mass_density=jnp.array([1]) * ureg.gram / ureg.centimeter**3,
-    T_e=2 * ureg.electron_volt / ureg.k_B,  # T_e is the electron temperature.
+    T_e=5 * ureg.electron_volt / ureg.k_B,  # T_e is the electron temperature.
     # If no T_i (ion temperature) is given, we assume equilibrium of ion and
     # electron temperatures
 )
@@ -59,7 +59,7 @@ setup = jaxrts.Setup(
 # by adding keys to the plasma state.
 
 
-state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
+state["ionic scattering"] = jaxrts.models.ThreePotentialHNCIonFeat(SVT=True, mix=0.5)
 state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
 state["bound-free scattering"] = jaxrts.models.SchumacherImpulse()
 state["free-bound scattering"] = jaxrts.models.DetailedBalance()

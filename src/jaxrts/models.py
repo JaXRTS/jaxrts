@@ -665,7 +665,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         if self.SVT:
             masses = to_array([ion.atomic_mass for ion in plasma_state.ions])
             g, niter = hypernetted_chain.pair_distribution_function_SVT_HNC(
-                V_s_r, V_l_k, self.r, T, n, masses, self.mix,
+                V_s_r, V_l_k, self.r, T, n, masses, self.mix, self.tmult
             )
         else:
             g, niter = hypernetted_chain.pair_distribution_function_HNC(
@@ -881,9 +881,14 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         T = plasma_state["ion-ion Potential"].T(plasma_state)
         n = to_array([*plasma_state.n_i, plasma_state.n_e])
         if self.SVT:
-            masses = to_array([*[ion.atomic_mass for ion in plasma_state.ions], 1 * ureg.electron_mass])
+            masses = to_array(
+                [
+                    *[ion.atomic_mass for ion in plasma_state.ions],
+                    1 * ureg.electron_mass,
+                ]
+            )
             g, niter = hypernetted_chain.pair_distribution_function_SVT_HNC(
-                V_s_r, V_l_k, self.r, T, n, masses, self.mix,
+                V_s_r, V_l_k, self.r, T, n, masses, self.mix, self.tmult
             )
         else:
             g, niter = hypernetted_chain.pair_distribution_function_HNC(

@@ -2,7 +2,6 @@
 This submodule is dedicated to the using the hypernetted chain approach
 to calculate static structure factors.
 """
-from typing import Tuple
 
 from functools import partial
 
@@ -11,7 +10,7 @@ import jax.interpreters
 import jpu.numpy as jnpu
 from jax import numpy as jnp
 
-from jaxrts.units import Quantity, ureg, to_array
+from jaxrts.units import Quantity, ureg
 
 
 # Helper functions.
@@ -592,17 +591,21 @@ def pair_distribution_function_SVT_HNC(
 
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-    m_ab =  jnpu.outer(m, m) / (m[:, jnp.newaxis] + m[jnp.newaxis, :])  # m_a * m_b / (m_a + m_b)
+    m_ab = jnpu.outer(m, m) / (
+        m[:, jnp.newaxis] + m[jnp.newaxis, :]
+    )  # m_a * m_b / (m_a + m_b)
 
     @jax.jit
-    def build_coeffs(n: jnp.ndarray, T: jnp.ndarray, m: jnp.ndarray, mab: jnp.ndarray) -> Tuple[jnp.ndarray, jnp.ndarray]:
+    def build_coeffs(
+        n: jnp.ndarray, T: jnp.ndarray, m: jnp.ndarray, mab: jnp.ndarray
+    ) -> tuple[jnp.ndarray, jnp.ndarray]:
         """
         n: (M,), T: (M,M) pairwise array, m: (M,)
         Returns coeff1, coeff2 with shape (M, M, M) and axes (a,b,s)
         coeff1[a,b,s] = n[s] * (mab[a,b] * T[a,s]) / (m[a] * T[a,b])
         coeff2[a,b,s] = n[s] * (mab[a,b] * T[s,b]) / (m[b] * T[a,b])
         """
-    
+
         # extend the axis that is not given
         _T = T[:, :, 0]
         Tab = _T[:, :, jnp.newaxis]
@@ -611,17 +614,16 @@ def pair_distribution_function_SVT_HNC(
 
         mab = mab[:, :, jnp.newaxis]
 
-
         numer1 = mab * Tas
-        denom1 = (m[:, jnp.newaxis, jnp.newaxis] * Tab)
+        denom1 = m[:, jnp.newaxis, jnp.newaxis] * Tab
         coeff1 = n[jnp.newaxis, jnp.newaxis, :] * (numer1 / denom1)
 
         numer2 = mab * Tbs
-        denom2 = (m[jnp.newaxis, :, jnp.newaxis] * Tab)
+        denom2 = m[jnp.newaxis, :, jnp.newaxis] * Tab
         coeff2 = n[jnp.newaxis, jnp.newaxis, :] * (numer2 / denom2)
 
         return coeff1, coeff2
-    
+
     for titer, mult in enumerate(tmult):
 
         beta = 1 / (ureg.boltzmann_constant * mult * T_ab)
@@ -632,7 +634,6 @@ def pair_distribution_function_SVT_HNC(
         log_g_r0 = -(v_s).to(ureg.dimensionless)
         Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
 
-
         coeff_1, coeff_2 = build_coeffs(n, mult * T_ab, m, m_ab)
 
         def svt_ozr_ei(c_k):
@@ -641,13 +642,13 @@ def pair_distribution_function_SVT_HNC(
             """
 
             M = c_k.shape[0]
-            #def idx(a, b): return a * M + b
+            # def idx(a, b): return a * M + b
             ar = jnp.arange(M)
 
             # index grids
-            a = ar[:, jnp.newaxis, jnp.newaxis]   # shape (M,1,1)
-            b = ar[jnp.newaxis, :, jnp.newaxis]   # shape (1,M,1)
-            s = ar[jnp.newaxis, jnp.newaxis, :]   # shape (1,1,M)
+            a = ar[:, jnp.newaxis, jnp.newaxis]  # shape (M,1,1)
+            b = ar[jnp.newaxis, :, jnp.newaxis]  # shape (1,M,1)
+            s = ar[jnp.newaxis, jnp.newaxis, :]  # shape (1,1,M)
 
             # broadcast to full (M,M,M) so every (a,b,s) is explicit
             a3 = jnp.broadcast_to(a, (M, M, M))
@@ -655,13 +656,17 @@ def pair_distribution_function_SVT_HNC(
             s3 = jnp.broadcast_to(s, (M, M, M))
 
             # flattened row & column indices in the big matrix A
-            p_idx  = (a3 * M + b3).reshape(-1).astype(jnp.int32)   # (M^3,)
-            q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)   # idx(s,b)
-            q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)   # idx(a,s)
+            p_idx = (a3 * M + b3).reshape(-1).astype(jnp.int32)  # (M^3,)
+            q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)  # idx(s,b)
+            q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)  # idx(a,s)
 
             # values to scatter: -alpha[a,b,s] * C[a,s]  and  -beta[a,b,s] * C[s,b]
-            vals1 = -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)
-            vals2 = -(coeff_2  * c_k[s3, b3]).reshape(-1).m_as(ureg.dimensionless)
+            vals1 = (
+                -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)
+            )
+            vals2 = (
+                -(coeff_2 * c_k[s3, b3]).reshape(-1).m_as(ureg.dimensionless)
+            )
 
             # Build A = I + scattered contributions
             A = jnp.eye(M**2, dtype=c_k.dtype)
@@ -712,7 +717,7 @@ def pair_distribution_function_SVT_HNC(
 
             Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
 
-            #log_g_r_new = jnp.where(jnp.abs((Ns_r_new - v_s).m_as(ureg.dimensionless))>100, 0, (Ns_r_new - v_s).m_as(ureg.dimensionless))* ureg.dimensionless
+            # Maybe do some clipping here to avoid numerical issues?
             log_g_r_new = Ns_r_new - v_s
             return (
                 log_g_r_new,
@@ -735,14 +740,13 @@ def pair_distribution_function_SVT_HNC(
                 )
                 iterations += 1
             init = (log_g_r, Ns_r, Ns_r_old, 0)
-        
+
         log_g_r, Ns_r, Ns_r_old, niter = jax.lax.while_loop(
             condition, step, init
         )
         iterations += niter
 
     return jnpu.exp(log_g_r), niter
-
 
 
 @jax.jit

@@ -7,23 +7,27 @@ for non-equilibrium case. For the equilibrium case, the M-SVT method gives ident
 results as the Fig. 4.12 from :cite:`Wunsch.2011`. For the non-equilibrium case, 
 the M-SVT result is slight different from cite:`Bredow.2013`.
 """
+
 from pathlib import Path
-import jax
+
 import jax.numpy as jnp
 import jpu.numpy as jnpu
-import numpy as onp
-from jaxrts import hypernetted_chain as hnc
-#import scienceplots  # noqa: F401
+
+# import scienceplots  # noqa: F401
 import matplotlib.pyplot as plt
-import jaxrts   
-#plt.style.use("science")
+import numpy as onp
+
+import jaxrts
+from jaxrts import hypernetted_chain as hnc
+
+# plt.style.use("science")
 ureg = jaxrts.ureg
 
 # ======================================================================
 #                        reproduce wunsch 2011
 # =====================================================================
 
-#fig, ax = plt.subplots(1, 2, figsize=(8, 4))
+# fig, ax = plt.subplots(1, 2, figsize=(8, 4))
 
 # Set up the ionization, density and temperature for individual ion
 # species.
@@ -36,7 +40,7 @@ state = jaxrts.PlasmaState(
         2.5e23 / ureg.centimeter**3 * jaxrts.Element("C").atomic_mass,
     ],
     T_e=2e4 * ureg.kelvin,
-    T_i=jnp.array([2e4, 2e4]) * ureg.kelvin
+    T_i=jnp.array([2e4, 2e4]) * ureg.kelvin,
 )
 
 pot = 12
@@ -63,7 +67,12 @@ V_s = Potential.short_r(state, r)
 V_l_k = Potential.long_k(state, k)
 
 g, niter = hnc.pair_distribution_function_SVT_HNC(
-    V_s, V_l_k, r, Potential.T(state), state.n_i, jaxrts.units.to_array([ion.atomic_mass for ion in state.ions])
+    V_s,
+    V_l_k,
+    r,
+    Potential.T(state),
+    state.n_i,
+    jaxrts.units.to_array([ion.atomic_mass for ion in state.ions]),
 )
 S_ii = hnc.S_ii_HNC(k, g, state.n_i, r)
 fig, ax = plt.subplots(2, 1)
@@ -154,15 +163,15 @@ fig.suptitle("MSVT reproduce wunsch.2011 (Fig. 4.12)")
 plt.tight_layout()
 plt.show()
 
-#=====================================================================
+# =====================================================================
 #              reproduce bredow2013hypernetted (Fig. 4b)
-#=====================================================================
+# =====================================================================
 state = jaxrts.PlasmaState(
     ions=[jaxrts.Element("H")],
     Z_free=[1],
     mass_density=[1e23 * ureg.proton_mass / (1 * ureg.centimeter**3)],
-    T_e=13.6*1.16e4 * ureg.kelvin,
-    T_i=[2.72*1.16e4] * ureg.kelvin
+    T_e=13.6 * 1.16e4 * ureg.kelvin,
+    T_i=[2.72 * 1.16e4] * ureg.kelvin,
 )
 
 pot = 12
@@ -189,7 +198,6 @@ for ElectronIonPotential, ElectronElectronPotential, mix, tmult in [
         0.8,
         [1.5],
     ],
-
 ]:
     fig, ax = plt.subplots(2, 2, sharex="col", figsize=(6, 8))
 
@@ -256,25 +264,34 @@ for ElectronIonPotential, ElectronElectronPotential, mix, tmult in [
     V_l_k *= unit
     n = jaxrts.units.to_array([*state.n_i, state.n_e])
 
-    masses = jaxrts.units.to_array([*[ion.atomic_mass for ion in state.ions], 1 * ureg.electron_mass])
+    masses = jaxrts.units.to_array(
+        [*[ion.atomic_mass for ion in state.ions], 1 * ureg.electron_mass]
+    )
     g, niter = jaxrts.hypernetted_chain.pair_distribution_function_SVT_HNC(
-        V_s, V_l_k, r, IonIonPotential.T(state), n, masses, mix=mix, tmult = tmult
+        V_s,
+        V_l_k,
+        r,
+        IonIonPotential.T(state),
+        n,
+        masses,
+        mix=mix,
+        tmult=tmult,
     )
     S_ii = jaxrts.hypernetted_chain.S_ii_HNC(k, g, n, r)
 
     # The Fist value should not be trusted
     ax[1, 1].plot(
-        (k[1:]).m_as(1/ureg.a0),
+        (k[1:]).m_as(1 / ureg.a0),
         S_ii[0, 0, 1:].m_as(ureg.dimensionless),
         label="$S_{ii}$",
     )
     ax[1, 1].plot(
-        (k[1:]).m_as(1/ureg.a0),
+        (k[1:]).m_as(1 / ureg.a0),
         S_ii[1, 0, 1:].m_as(ureg.dimensionless),
         label="$S_{ei}$",
     )
     ax[1, 1].plot(
-        (k[1:]).m_as(1/ureg.a0),
+        (k[1:]).m_as(1 / ureg.a0),
         S_ii[1, 1, 1:].m_as(ureg.dimensionless),
         label="$S_{ee}$",
     )
@@ -316,45 +333,43 @@ plt.tight_layout()
 plt.show()
 
 
-data_ee = onp.genfromtxt('../../../tests/data/bredow2013/right-ee.csv', delimiter=',', skip_header=1)
-data_ei = onp.genfromtxt('../../../tests/data/bredow2013/right-ei.csv', delimiter=',', skip_header=1)
-data_ii = onp.genfromtxt('../../../tests/data/bredow2013/right-ii.csv', delimiter=',', skip_header=1)
+data_ee = onp.genfromtxt(
+    "../../../tests/data/bredow2013/right-ee.csv", delimiter=","
+)
+data_ei = onp.genfromtxt(
+    "../../../tests/data/bredow2013/right-ei.csv", delimiter=","
+)
+data_ii = onp.genfromtxt(
+    "../../../tests/data/bredow2013/right-ii.csv", delimiter=","
+)
 plt.figure()
 plt.plot(
-        (k[1:]).m_as(1/ureg.a0),
-        S_ii[0, 0, 1:].m_as(ureg.dimensionless),
-        label="$S_{ii}$"
-    )
+    (k[1:]).m_as(1 / ureg.a0),
+    S_ii[0, 0, 1:].m_as(ureg.dimensionless),
+    label="$S_{ii}$",
+)
+plt.plot(data_ii[:, 0], data_ii[:, 1], color="gray", ls="dashed")
 plt.plot(
-        data_ii[:,0],
-        data_ii[:,1],
-        color='gray',ls='dashed'
-    )
+    (k[1:]).m_as(1 / ureg.a0),
+    S_ii[1, 0, 1:].m_as(ureg.dimensionless),
+    label="$S_{ei}$",
+)
+plt.plot(data_ei[:, 0], data_ei[:, 1], color="gray", ls="dashed")
 plt.plot(
-        (k[1:]).m_as(1/ureg.a0),
-        S_ii[1, 0, 1:].m_as(ureg.dimensionless),
-        label="$S_{ei}$",
-    )
+    (k[1:]).m_as(1 / ureg.a0),
+    S_ii[1, 1, 1:].m_as(ureg.dimensionless),
+    label="$S_{ee}$",
+)
 plt.plot(
-        data_ei[:,0],
-        data_ei[:,1],
-        color='gray',ls="dashed"
-    )
-plt.plot(
-        (k[1:]).m_as(1/ureg.a0),
-        S_ii[1, 1, 1:].m_as(ureg.dimensionless),
-        label="$S_{ee}$",
-    )
-plt.plot(
-        data_ee[:,0],
-        data_ee[:,1],
-        label="Bredow et al (2013).",
-        color='gray',ls="dashed"
-    )
+    data_ee[:, 0],
+    data_ee[:, 1],
+    label="Bredow et al (2013).",
+    color="gray",
+    ls="dashed",
+)
 plt.xlabel("$k$ [1/a$_i$]")
 plt.xlim(0, 2.5)
 plt.ylabel("$S(k)$")
 plt.legend()
 plt.title("MSVT reproduce Bredow et al. 2013 (Fig. 4b)")
 plt.show()
-
