@@ -1,11 +1,9 @@
 SVT–OZ and notation
 ===================
 
-Consider :math:`M` species with number densities :math:`\{n_a\}`, masses
+Consider :math:`M` species (electron included, namely: M-1 ions plus electron) with number densities :math:`\{n_a\}`, masses
 :math:`\{m_a\}`, and temperatures :math:`\{T_a\}` (:math:`a=1,\dots,M`).
-In :math:`k`-space, the SVT–OZ relation :raw-latex:`\cite{Shaffer2017}`
-is
-
+In :math:`k`-space, the multi-component SVT–OZ relation can be obtained by extending the work of :cite:`Shaffer.2017` through summation over all species, yielding
 .. math::
 
    \hat h_{ab}
@@ -122,7 +120,7 @@ Collecting like terms yields the :math:`4\times4` linear system
    -\alpha_{211}\hat{c}_{21} & 0 & 1 - \alpha_{212}\hat{c}_{22} - \beta_{211}\hat{c}_{11} & -\beta_{212}\hat{c}_{21} \\
    0 & -\alpha_{221}\hat{c}_{21} & -\beta_{221}\hat{c}_{12} & 1 - (\alpha_{222} + \beta_{222})\hat{c}_{22}
    \end{pmatrix}
-   }_{\displaystyle \bm A}
+   }_{\displaystyle A}
    \;
    \underbrace{
    \begin{pmatrix}

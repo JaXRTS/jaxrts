@@ -343,3 +343,60 @@ def test_HNC_Potential_algebra():
         )
         <= 1e-10
     ).all()
+
+def test_svt_hnc_classical_hnc_consistency():
+    """
+    Test the SVT-HNC implementation against the standard HNC in the equal-temperature
+    """
+    # Set up plasma state with equal ion temperatures (so SVT should reduce to HNC)
+    state = jaxrts.PlasmaState(
+        ions=[jaxrts.Element("H"), jaxrts.Element("C")],
+        Z_free=[1, 4],
+        mass_density=[
+            2.5e23 / ureg.centimeter**3 * jaxrts.Element("H").atomic_mass,
+            2.5e23 / ureg.centimeter**3 * jaxrts.Element("C").atomic_mass,
+        ],
+        T_e=2e4 * ureg.kelvin,
+        T_i=jnp.array([2e4, 2e4]) * ureg.kelvin,
+    )
+
+    # Set screening length as in the example
+    state["screening length"] = jaxrts.models.ConstantScreeningLength(
+        2 / 3 * ureg.a_0
+    )
+
+    pot = 12
+    r = jnpu.linspace(0.0001 * ureg.angstrom, 200 * ureg.a0, 2**pot)
+
+    dr = r[1] - r[0]
+    dk = jnp.pi / (len(r) * dr)
+    k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
+
+    # Compute average distance for normalization
+    d = jnpu.cbrt(
+        3 / (4 * jnp.pi * (state.n_i[:, jnp.newaxis] + state.n_i[jnp.newaxis, :]))
+    )
+
+    Potential = jaxrts.hnc_potentials.DebyeHueckelPotential()
+    V_s = Potential.short_r(state, r)
+    V_l_k = Potential.long_k(state, k)
+
+    # Get temperature matrix from potential (should be (2,2) with all entries = 2e4 K)
+    T_ab = Potential.T(state)  # Shape (M, M)
+
+    # Mass array for SVT
+    m = jaxrts.units.to_array([ion.atomic_mass for ion in state.ions])
+
+    # Run standard HNC (expects Ti as (M,) vector)
+    g_hnc, _ = hnc.pair_distribution_function_HNC(
+        V_s, V_l_k, r, state.T_i, state.n_i
+    )
+
+    # Run SVT-HNC (expects T_ab as (M,M) matrix and mass m)
+    g_svt, _ = hnc.pair_distribution_function_SVT_HNC(
+        V_s, V_l_k, r, T_ab, state.n_i, m
+    )
+
+    # Consistency check: g_hnc ≈ g_svt when T_ab is uniform
+    max_diff = jnpu.max(jnpu.abs(g_hnc - g_svt)).m_as(ureg.dimensionless)
+    assert max_diff < 1e-3, f"SVT-HNC and HNC differ by {max_diff} in equal-T limit"
