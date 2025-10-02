@@ -574,12 +574,17 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
 
 @jax.jit
 def pair_distribution_function_SVT_HNC(
-    V_s, V_l_k, r, T_ab, n, m, mix=0.0
+    V_s, V_l_k, r, T_ab, n, m, mix=0.0, tmult=None
 ):
     """
-    See :cite:`Shaffer.2017`, solved Eqns. 7. This reference fixes some typos
-    in the seminal work of :cite:`Seuferling.1989`.
+    Multi-component, multi-temperature version of the SVT-OZ-HNC, by extending the
+    sum to all species in Eq. 7 in :cite:`Shaffer.2017`.
     """
+    if tmult is None:
+        tmult = []
+    iterations = 0
+    tmult = [*tmult, 1.0]
+
     delta = 1e-6
 
     dr = r[1] - r[0]
@@ -587,15 +592,7 @@ def pair_distribution_function_SVT_HNC(
 
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-    beta = 1 / (ureg.boltzmann_constant * T_ab)
-
     m_ab =  jnpu.outer(m, m) / (m[:, jnp.newaxis] + m[jnp.newaxis, :])  # m_a * m_b / (m_a + m_b)
-    
-    v_s = beta * V_s
-    v_l_k = beta * V_l_k
-
-    log_g_r0 = -(v_s).to(ureg.dimensionless)
-    Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
 
     @jax.jit
     def build_coeffs(n: jnp.ndarray, T: jnp.ndarray, m: jnp.ndarray, mab: jnp.ndarray) -> Tuple[jnp.ndarray, jnp.ndarray]:
@@ -624,104 +621,127 @@ def pair_distribution_function_SVT_HNC(
         coeff2 = n[jnp.newaxis, jnp.newaxis, :] * (numer2 / denom2)
 
         return coeff1, coeff2
+    
+    for titer, mult in enumerate(tmult):
 
-    coeff_1, coeff_2 = build_coeffs(n, T_ab, m, m_ab)
+        beta = 1 / (ureg.boltzmann_constant * mult * T_ab)
 
-    def svt_ozr_ei(c_k):
-        """
-        The modified Ornstein-Zernicke Relation
-        """
+        v_s = beta * V_s
+        v_l_k = beta * V_l_k
 
-        M = c_k.shape[0]
-        def idx(a, b): return a * M + b
-        ar = jnp.arange(M)
+        log_g_r0 = -(v_s).to(ureg.dimensionless)
+        Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
 
-        # index grids
-        a = ar[:, jnp.newaxis, jnp.newaxis]   # shape (M,1,1)
-        b = ar[jnp.newaxis, :, jnp.newaxis]   # shape (1,M,1)
-        s = ar[jnp.newaxis, jnp.newaxis, :]   # shape (1,1,M)
 
-        # broadcast to full (M,M,M) so every (a,b,s) is explicit
-        a3 = jnp.broadcast_to(a, (M, M, M))
-        b3 = jnp.broadcast_to(b, (M, M, M))
-        s3 = jnp.broadcast_to(s, (M, M, M))
+        coeff_1, coeff_2 = build_coeffs(n, mult * T_ab, m, m_ab)
 
-        # flattened row & column indices in the big matrix A
-        p_idx  = (a3 * M + b3).reshape(-1).astype(jnp.int32)   # (M^3,)
-        q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)   # idx(s,b)
-        q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)   # idx(a,s)
+        def svt_ozr_ei(c_k):
+            """
+            The modified Ornstein-Zernicke Relation
+            """
 
-        # values to scatter: -alpha[a,b,s] * C[a,s]  and  -beta[a,b,s] * C[s,b]
-        vals1 = -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)
-        vals2 = -(coeff_2  * c_k[s3, b3]).reshape(-1).m_as(ureg.dimensionless)
+            M = c_k.shape[0]
+            #def idx(a, b): return a * M + b
+            ar = jnp.arange(M)
 
-        # Build A = I + scattered contributions
-        A = jnp.eye(M**2, dtype=c_k.dtype)
-        A = A.at[p_idx, q1_idx].add(vals1)
-        A = A.at[p_idx, q2_idx].add(vals2)
+            # index grids
+            a = ar[:, jnp.newaxis, jnp.newaxis]   # shape (M,1,1)
+            b = ar[jnp.newaxis, :, jnp.newaxis]   # shape (1,M,1)
+            s = ar[jnp.newaxis, jnp.newaxis, :]   # shape (1,1,M)
 
-        # RHS is vec(C) with mapping p = a*M + b matching reshape order
-        rhs = c_k.reshape(-1)
+            # broadcast to full (M,M,M) so every (a,b,s) is explicit
+            a3 = jnp.broadcast_to(a, (M, M, M))
+            b3 = jnp.broadcast_to(b, (M, M, M))
+            s3 = jnp.broadcast_to(s, (M, M, M))
 
-        # Solve: use pinv to be robust to singular matrices
-        H_flat = jnpu.matmul(jnp.linalg.inv(A), rhs)
+            # flattened row & column indices in the big matrix A
+            p_idx  = (a3 * M + b3).reshape(-1).astype(jnp.int32)   # (M^3,)
+            q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)   # idx(s,b)
+            q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)   # idx(a,s)
 
-        return H_flat.reshape((M, M))
+            # values to scatter: -alpha[a,b,s] * C[a,s]  and  -beta[a,b,s] * C[s,b]
+            vals1 = -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)
+            vals2 = -(coeff_2  * c_k[s3, b3]).reshape(-1).m_as(ureg.dimensionless)
 
-    def condition(val):
-        """
-        If this is False, the loop will stop. Abort if too many steps were
-        reached, or if convergence was reached.
-        """
-        _, Ns_r, Ns_r_old, n_iter = val
-        err = jnpu.sum((Ns_r - Ns_r_old) ** 2)
-        return (n_iter < 2000) & jnp.all(err > delta)
+            # Build A = I + scattered contributions
+            A = jnp.eye(M**2, dtype=c_k.dtype)
+            A = A.at[p_idx, q1_idx].add(vals1)
+            A = A.at[p_idx, q2_idx].add(vals2)
 
-    def step(val):
-        log_g_r, Ns_r, _, i = val
+            # RHS is vec(C) with mapping p = a*M + b matching reshape order
+            rhs = c_k.reshape(-1)
 
-        h_r = jnpu.expm1(log_g_r)
+            # Solve: use pinv to be robust to singular matrices
+            H_flat = jnpu.matmul(jnp.linalg.inv(A), rhs)
 
-        cs_r = h_r - Ns_r
+            return H_flat.reshape((M, M))
 
-        cs_k = _3Dfour(k, r, cs_r)
+        def condition(val):
+            """
+            If this is False, the loop will stop. Abort if too many steps were
+            reached, or if convergence was reached.
+            """
+            _, Ns_r, Ns_r_old, n_iter = val
+            err = jnpu.sum((Ns_r - Ns_r_old) ** 2)
+            return (n_iter < 2000) & jnp.all(err > delta)
 
-        c_k = cs_k - v_l_k
+        def step(val):
+            log_g_r, Ns_r, _, i = val
 
-        # Ornstein-Zernike relation
-        h_k = jax.vmap(svt_ozr_ei, in_axes=2, out_axes=2)(c_k)
+            h_r = jnpu.expm1(log_g_r)
 
-        Ns_k = h_k - cs_k
+            cs_r = h_r - Ns_r
 
-        Ns_r_new_full = (
-            _3Dfour(
-                r,
-                k,
-                Ns_k,
+            cs_k = _3Dfour(k, r, cs_r)
+
+            c_k = cs_k - v_l_k
+
+            # Ornstein-Zernike relation
+            h_k = jax.vmap(svt_ozr_ei, in_axes=2, out_axes=2)(c_k)
+
+            Ns_k = h_k - cs_k
+
+            Ns_r_new_full = (
+                _3Dfour(
+                    r,
+                    k,
+                    Ns_k,
+                )
+                / (2 * jnp.pi) ** 3
             )
-            / (2 * jnp.pi) ** 3
+
+            Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
+
+            #log_g_r_new = jnp.where(jnp.abs((Ns_r_new - v_s).m_as(ureg.dimensionless))>100, 0, (Ns_r_new - v_s).m_as(ureg.dimensionless))* ureg.dimensionless
+            log_g_r_new = Ns_r_new - v_s
+            return (
+                log_g_r_new,
+                Ns_r_new,
+                Ns_r,
+                i + 1,
+            )
+
+        if titer == 0:
+            log_g_r0 = -(v_s).to(ureg.dimensionless)
+            Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
+            init = (log_g_r0, Ns_r0, Ns_r0 - 1, 0)
+        # Otherwise, use the result of the previous temperature
+        else:
+            # Do a few steps, to not abort, directly,
+            # because the previous cycle was converged.
+            for i in range(5):
+                log_g_r, Ns_r, Ns_r_old, _ = step(
+                    (log_g_r, Ns_r, Ns_r_old, i)  # noqa: F821
+                )
+                iterations += 1
+            init = (log_g_r, Ns_r, Ns_r_old, 0)
+        
+        log_g_r, Ns_r, Ns_r_old, niter = jax.lax.while_loop(
+            condition, step, init
         )
+        iterations += niter
 
-        Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
-
-        log_g_r_new = Ns_r_new - v_s
-
-        return (
-            log_g_r_new.m_as(ureg.dimensionless),
-            Ns_r_new.m_as(ureg.dimensionless),
-            Ns_r,
-            i + 1,
-        )
-
-    init = (
-        log_g_r0.m_as(ureg.dimensionless),
-        Ns_r0.m_as(ureg.dimensionless),
-        Ns_r0.m_as(ureg.dimensionless) - 1,
-        0,
-    )
-    log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
-
-    return jnpu.exp(log_g_r) * ureg.dimensionless, niter
+    return jnpu.exp(log_g_r), niter
 
 
 
