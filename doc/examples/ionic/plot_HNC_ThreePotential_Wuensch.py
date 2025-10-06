@@ -16,19 +16,18 @@ import scienceplots  # noqa: F401
 
 import jaxrts
 
-# plt.style.use("science")
+plt.style.use("science")
 
 ureg = jaxrts.ureg
 
 state = jaxrts.PlasmaState(
     ions=[jaxrts.Element("H")],
     Z_free=[1],
-    mass_density=[120] / (1 * ureg.centimeter**3) * ureg.gram,
-    T_e=100 * 1.16e4 * ureg.kelvin,
-    T_i=[100 * 1.16e4] * ureg.kelvin,
+    mass_density=[1e22] / (1 * ureg.centimeter**3) * ureg.proton_mass,
+    T_e=4.5e4 * ureg.kelvin,
 )
 
-pot = 18
+pot = 16
 r = jnpu.linspace(1e-1 * ureg.a0, 5e3 * ureg.a0, 2**pot)
 
 d = jnpu.cbrt(
@@ -53,12 +52,12 @@ for ElectronIonPotential, ElectronElectronPotential, mix in [
         0.8,
     ],
     [
-        jaxrts.hnc_potentials.CoulombPotential(),
+        jaxrts.hnc_potentials.KelbgPotential(),
         jaxrts.hnc_potentials.KelbgPotential(),
         0.95,
     ],
     [
-        jaxrts.hnc_potentials.CoulombPotential(),
+        jaxrts.hnc_potentials.KlimontovichKraeftPotential(),
         jaxrts.hnc_potentials.DeutschPotential(),
         0.8,
     ],
@@ -133,11 +132,8 @@ for ElectronIonPotential, ElectronElectronPotential, mix in [
 
     n = jaxrts.units.to_array([*state.n_i, state.n_e])
 
-    masses = jaxrts.units.to_array(
-        [*[ion.atomic_mass for ion in state.ions], 1 * ureg.electron_mass]
-    )
-    g, niter = jaxrts.hypernetted_chain.pair_distribution_function_SVT_HNC(
-        V_s, V_l_k, r, IonIonPotential.T(state), n, masses, mix=mix
+    g, niter = jaxrts.hypernetted_chain.pair_distribution_function_HNC(
+        V_s, V_l_k, r, IonIonPotential.T(state), n, mix=mix
     )
     S_ii = jaxrts.hypernetted_chain.S_ii_HNC(k, g, n, r)
 

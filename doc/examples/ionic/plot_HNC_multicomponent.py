@@ -17,7 +17,7 @@ import jaxrts
 from jaxrts import hypernetted_chain as hnc
 from jaxrts import ureg
 
-# plt.style.use("science")
+plt.style.use("science")
 
 fig, ax = plt.subplots(1, 2, figsize=(8, 4))
 
@@ -32,12 +32,10 @@ state = jaxrts.PlasmaState(
         2.5e23 / ureg.centimeter**3 * jaxrts.Element("C").atomic_mass,
     ],
     T_e=2e4 * ureg.kelvin,
-    T_i=jnp.array([2e4, 2e4]) * ureg.kelvin,
-    # T_i=jnp.array([1e4, 2e4]) * ureg.kelvin
 )
 
 pot = 15
-r = jnpu.linspace(0.01 * ureg.angstrom, 200 * ureg.a0, 2**pot)
+r = jnpu.linspace(0.0001 * ureg.angstrom, 1000 * ureg.a0, 2**pot)
 
 # We add densities, here. Maybe this is wrong.
 d = jnpu.cbrt(
@@ -58,15 +56,9 @@ Potential = jaxrts.hnc_potentials.DebyeHueckelPotential()
 
 V_s = Potential.short_r(state, r)
 V_l_k = Potential.long_k(state, k)
-# print([ion.atomic_mass for ion in state.ions])
 
-g, niter = hnc.pair_distribution_function_SVT_HNC(
-    V_s,
-    V_l_k,
-    r,
-    Potential.T(state),
-    state.n_i,
-    jaxrts.units.to_array([ion.atomic_mass for ion in state.ions]),
+g, niter = hnc.pair_distribution_function_HNC(
+    V_s, V_l_k, r, Potential.T(state), state.n_i
 )
 S_ii = hnc.S_ii_HNC(k, g, state.n_i, r)
 
