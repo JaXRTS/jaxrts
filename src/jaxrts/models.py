@@ -3078,7 +3078,8 @@ class IchimaruChemPotential(Model):
 
     See Also
     --------
-    Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolationIchimaru`.
+    jaxrts.plasma_physics.chem_pot_interpolationIchimaru
+        Function used for calculating the chemical potential
     """
 
     __name__ = "IchimaruChemPotential"
@@ -3101,7 +3102,8 @@ class SommerfeldChemPotential(Model):
 
     See Also
     --------
-    Uses :py:func:`jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation`.
+    jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation
+        Function used for calculating the chemical potential
     """
 
     __name__ = "SommerfeldChemPotential"
@@ -3430,8 +3432,8 @@ class DebyeHueckelScreeningLength(Model):
 
 class Gericke2010ScreeningLength(Model):
     """
-    Return the Debye-Hückel Debye screening length. Uses a 4th-power
-    interpolation between electron and fermi temperature, as proposed by
+    Return the Debye-Hückel screening length. Uses a 4th-power interpolation
+    between electron and fermi temperature, as proposed by
     :cite:`Gericke.2010`.
 
     See Also
@@ -3674,7 +3676,7 @@ class FiniteWavelengthScreening(Model):
 
 class DebyeHueckelScreening(Model):
     """
-    Debye Hueckel screening as presented by :cite:`Chapman.2015b`.
+    Debye Hückel screening as presented by :cite:`Chapman.2015b`.
 
     .. math::
 
@@ -4069,8 +4071,9 @@ def averagePlasmaState(state: "PlasmaState") -> "PlasmaState":
 
 class Sum_Sii(Model):
     """
-    This model sums up all :math:`S_{ab}` from the HNC and multiplies it with :math:`\\sqrt{x_{a}\\cdot x_{b}}`. While it is obviously appropriate for a single-species plasma, multiple
-    species might not be treated correctly.
+    This model sums up all :math:`S_{ab}` from the HNC and multiplies it with
+    :math:`\\sqrt{x_{a}\\cdot x_{b}}`. While it is obviously appropriate for a
+    single-species plasma, multiple species might not be treated correctly.
     """
 
     allowed_keys = ["BM S_ii"]

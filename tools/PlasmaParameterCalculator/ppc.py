@@ -1,14 +1,14 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
 import math
-import jaxrts
-
-ureg = jaxrts.ureg
-import jpu
+import tkinter as tk
+import tkinter.font as tkfont
+from tkinter import messagebox, ttk
 
 import numpy as np
 
+import jaxrts
 import jaxrts.plasma_physics as pp
+
+ureg = jaxrts.ureg
 
 eps0 = 1 * ureg.epsilon_0
 e_charge = 1 * ureg.elementary_charge
@@ -29,7 +29,7 @@ ELEMENTS = {
 ELEMENTS["HT"] = 2.5 * ureg.u
 ELEMENTS_Z["HT"] = 1
 
-import tkinter.font as tkfont
+
 
 def compute_plasma_parameters(rho, element_symbol, T_e, Z_avg):
     if element_symbol not in ELEMENTS:
@@ -57,15 +57,33 @@ def compute_plasma_parameters(rho, element_symbol, T_e, Z_avg):
     E_Fe = pp.fermi_energy(n_e)
     E_Fi = pp.fermi_energy(n_i)
 
-    kTeff_e = 1 * ureg.boltzmann_constant * ((E_Fe / ureg.boltzmann_constant)**4 + (kT / ureg.boltzmann_constant)**4)**(1/4)
-    kTeff_i = 1 * ureg.boltzmann_constant * ((E_Fi / ureg.boltzmann_constant)**4 + (kT / ureg.boltzmann_constant)**4)**(1/4)
+    kTeff_e = (
+        1
+        * ureg.boltzmann_constant
+        * (
+            (E_Fe / ureg.boltzmann_constant) ** 4
+            + (kT / ureg.boltzmann_constant) ** 4
+        )
+        ** (1 / 4)
+    )
+    kTeff_i = (
+        1
+        * ureg.boltzmann_constant
+        * (
+            (E_Fi / ureg.boltzmann_constant) ** 4
+            + (kT / ureg.boltzmann_constant) ** 4
+        )
+        ** (1 / 4)
+    )
 
     Gamma_ee = (e_charge**2) / (4 * math.pi * eps0 * a_ws_e * kT)
     Gamma_ii = ((Z_avg * e_charge) ** 2) / (4 * math.pi * eps0 * a_ws_i * kT)
     Gamma_ei = (Z_avg * e_charge**2) / (4 * math.pi * eps0 * a_ws_i * kT)
 
     Gamma_ee_eff = (e_charge**2) / (4 * math.pi * eps0 * a_ws_e * kTeff_e)
-    Gamma_ii_eff = ((Z_avg * e_charge) ** 2) / (4 * math.pi * eps0 * a_ws_i * kTeff_i)
+    Gamma_ii_eff = ((Z_avg * e_charge) ** 2) / (
+        4 * math.pi * eps0 * a_ws_i * kTeff_i
+    )
 
     Theta_e = kT / E_Fe
     Theta_i = kT / E_Fi
@@ -85,8 +103,8 @@ def compute_plasma_parameters(rho, element_symbol, T_e, Z_avg):
         "Gamma_ee": Gamma_ee.to(ureg.dimensionless),
         "Gamma_ii": Gamma_ii.to(ureg.dimensionless),
         "Gamma_ei": Gamma_ei.to(ureg.dimensionless),
-        "Gamma_ee_eff" : Gamma_ee_eff.to(ureg.dimensionless),
-        "Gamma_ii_eff" : Gamma_ii_eff.to(ureg.dimensionless),
+        "Gamma_ee_eff": Gamma_ee_eff.to(ureg.dimensionless),
+        "Gamma_ii_eff": Gamma_ii_eff.to(ureg.dimensionless),
         "E_Fe": E_Fe.to("eV"),
         "E_Fi": E_Fi.to("eV"),
         "Theta_e": Theta_e.to(ureg.dimensionless),
@@ -194,10 +212,10 @@ class PlasmaGUI:
 
     def display_results(self, r, element, T_e, Z):
 
-        self.output_label.config(state="normal")   # enable editing
-        self.output_label.delete("1.0", "end")     # clear all text
+        self.output_label.config(state="normal")  # enable editing
+        self.output_label.delete("1.0", "end")  # clear all text
         self.output_label.insert("1.0", "")  # insert new text if provided
-        self.output_label.config(state="disabled") # disable editing
+        self.output_label.config(state="disabled")  # disable editing
 
         lines = []
         lines.append(
@@ -308,8 +326,9 @@ class PlasmaGUI:
         degen_i = determine_level(1 / r["Theta_i"])
         degen_e = determine_level(1 / r["Theta_e"])
 
-
-        bold_font = tkfont.Font(self.output_label, self.output_label.cget("font"))
+        bold_font = tkfont.Font(
+            self.output_label, self.output_label.cget("font")
+        )
         bold_font.configure(weight="bold")
         self.output_label.tag_configure("bold", font=bold_font)
 

@@ -1312,7 +1312,7 @@ class YukawaShortRangeRepulsion(HNCPotential):
     """
 
     __name__ = "YukawaShortRangeRepulsion"
-    cite_keys = ["Wunsch.2008", "Fletcher.2015"]
+    cite_keys = ["Wunsch.2009", "Fletcher.2015"]
 
     def __init__(
         self,
