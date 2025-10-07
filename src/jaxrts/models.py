@@ -3093,8 +3093,8 @@ class IchimaruChemPotential(Model):
             plasma_state.T_e, plasma_state.n_e
         )
 
-class SommerfeldChemPotential(Model):
 
+class SommerfeldChemPotential(Model):
     """
     Interpolation function for the chemical potential of a non-interacting
     (ideal) fermi gas given in the paper of :cite:`Cowan.2019`.
@@ -3116,7 +3116,9 @@ class SommerfeldChemPotential(Model):
             plasma_state.T_e, plasma_state.n_e
         )
 
+
 class ConstantChemPotential(Model):
+
     """
     A model that returns a constant chemical potential, specified by a user.
     """
@@ -3256,7 +3258,7 @@ class DebyeHueckelIPD(Model):
     The Debye-Hückel Model is applicable for low-density and high-temperature
     plasmas, determined by charge screening effects as described in the
     Debye-Hückel theory.
-    
+
     See Also
     --------
     jaxrts.ipd.ipd_debye_hueckel
@@ -3310,11 +3312,12 @@ class IonSphereIPD(Model):
     """
     Ion Sphere IPD Model :cite:`Rozsnyai.1972`.
 
-    The Ion Sphere Model (IS) is especially applicable for plasmas with strong ion
-    coupling, and thus in particular for high density, low temperature plasmas.
-    The relevant length scale that determines the ionization potential is the
-    ion sphere radius :math:`R_0`, determined by the condition that a sphere of radius
-    :math:`R_0` contains the same charge as given by the mean ionization and the
+    The Ion Sphere Model (IS) is especially applicable for plasmas
+    with strong ion coupling, and thus in particular for high density,
+    low temperature plasmas. The relevant length scale that determines
+    the ionization potential is the ion sphere radius :math:`R_0`,
+    determined by the condition that a sphere of radius :math:`R_0`
+    contains the same charge as given by the mean ionization and the
     electron number density.
 
     See Also
@@ -3340,8 +3343,9 @@ class EckerKroellIPD(Model):
 
     Opposite to the Stewart-Pyatt:cite:`Stewart.1966` Model the Ecker-Kröll
     Model assumes that the relevant length scale for determining the IPD in
-    high-density plasmas is not :math:`R_0` (the ion sphere radius) but rather the
-    average distance between all free particles :math:`r^3_\\text{EK} = 3/4\\\pi(n_e + n_i)`,
+    high-density plasmas is not :math:`R_0` (the ion sphere radius) but rather
+    the average distance between all free particles
+    :math:`r^3_\\text{EK} = 3/4\\pi(n_e + n_i)`,
     where :math:`n_e` and :math:`n_i` are the ion and electron number density.
     The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt
     Model for highly ionized plasmas.

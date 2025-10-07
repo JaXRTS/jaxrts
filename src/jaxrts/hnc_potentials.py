@@ -826,10 +826,9 @@ class CoulombPotential(HNCPotential):
 
 
 class DebyeHueckelPotential(HNCPotential):
-
     """
-    The Debye-Hückel Screening Potential as defined e.g. in :cite:`Wunsch.2008`.
-    
+    The Debye-Hückel Screening Potential as defined e.g. in
+    :cite:`Wunsch.2008`.
     """
 
     __name__ = "DebyeHueckelPotential"
@@ -900,8 +899,8 @@ class DebyeHueckelPotential(HNCPotential):
 class KelbgPotential(HNCPotential):
     """
     See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Kelbg.1963`, and
-    :cite:`Schwarz.2007`, Eqn 14. We use the definition of :math:`\\lambda_{ab}` from
-    :cite:`Schwarz.2007`.
+    :cite:`Schwarz.2007`, Eqn 14. We use the definition of
+    :math:`\\lambda_{ab}` from :cite:`Schwarz.2007`.
 
     .. note::
 
@@ -1226,8 +1225,9 @@ class DeutschPotential(HNCPotential):
 class EmptyCorePotential(HNCPotential):
     """
     The Empty core potential, which is essentially a
-    :py:class:`~.CoulombPotential` for all radii bitter than :math:`r_\\text{cut}`.
-    For all radii smaller than :math:`r_\\text{cut}` (this is the short-range part of the
+    :py:class:`~.CoulombPotential` for all radii bitter
+    than :math:`r_\\text{cut}`. For all radii smaller
+    than :math:`r_\\text{cut}`(this is the short-range part of the
     potential, for now), the potential is forced to zero.
 
     We define :math:`r_\\text{cut}` in the :py:class:`jaxrts.PlasmaState`.
@@ -1524,10 +1524,10 @@ class SoftCorePotential(HNCPotential):
 
 
 class PauliClassicalMap(HNCPotential):
-
     """
-    Calculates the Pauli potential from the exact non-interacting UEG pair distribution function 
-    by inverting the Hyper-Netted-Chain calculations:cite:`DharmaWardana.2012`.
+    Calculates the Pauli potential from the exact non-interacting
+    UEG pair distribution function by inverting the
+    Hyper-Netted-Chain calculations:cite:`DharmaWardana.2012`.
 
     """
 
@@ -1635,12 +1635,13 @@ class PauliClassicalMap(HNCPotential):
 class SpinSeparatedEEExchange(HNCPotential):
     """
     See :cite:`Wunsch.2008`, Eqn (17), Citing :cite:`Huang.1987`. Eqn. (9.57),
-    however, there is a factor of :math:`\\sqrt{\\pi}` difference in the definition of
-    lambda. (one is from :cite:`Deutsch.1982` presenting a reduced quantity
-    :math:`\\lambda_{ee}`, and then them having another factor of
-    :math:`\\sqrt{2}` in the mass term. We here present the corrected version
-    of the equation, which reproduces Figure 6. in :cite:`Wunsch.2008` and
-    results in a higher repusion than the :py:class:`~.SpinAveragedEEExchange`,
+    however, there is a factor of :math:`\\sqrt{\\pi}` difference in the
+    definition of lambda. (one is from :cite:`Deutsch.1982` presenting a
+    reduced quantity :math:`\\lambda_{ee}`, and then them having another
+    factor of :math:`\\sqrt{2}` in the mass term. We here present the
+    corrected version of the equation, which reproduces
+    Figure 6. in :cite:`Wunsch.2008` and results in a higher repulsion
+    than the :py:class:`~.SpinAveragedEEExchange`,
     which should be expected.
     """
 
