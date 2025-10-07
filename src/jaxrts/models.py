@@ -458,7 +458,7 @@ class Gregori2003IonFeat(IonFeatModel):
     :cite:`Gregori.2003`.
 
     This model is identical to :py:class:`~ArkhipovIonFeat` but uses an
-    effective temperature ~:py:func:`jaxtrs.static_structure_factors.T_cf_Greg`
+    effective temperature ~:py:func:`jaxrts.static_structure_factors.T_cf_Greg`
     rather than the electron Temperature throughout the calculation.
     """
 
@@ -507,7 +507,7 @@ class Gregori2006IonFeat(IonFeatModel):
        :cite:`Gregori.2006` uses effective temperatures for the ion and
        electron temperatures to obtain sane limits to :math:`T\\rightarrow 0`.
        This is done by calling
-       :py:func:`jaxtrs.static_structure_factors.T_cf_Greg` for the electron
+       :py:func:`jaxrts.static_structure_factors.T_cf_Greg` for the electron
        temperature and :py:func:`jaxrts.static_structure_factors.T_i_eff_Greg`,
        for the ionic temperatures. The latter requires a 'Debye temperature'
        model.
@@ -1191,7 +1191,7 @@ class QCSalpeterApproximation(FreeFreeModel):
 
     See Also
     --------
-    jaxtrs.free_free.S0_ee_Salpeter(
+    jaxrts.free_free.S0_ee_Salpeter(
         Function used to calculate the dynamic free electron-electron structure
         factor.
     """
@@ -1265,7 +1265,7 @@ class RPA_NoDamping(FreeFreeModel):
 
     See Also
     --------
-    jaxtrs.free_free.S0_ee_RPA_no_damping
+    jaxrts.free_free.S0_ee_RPA_no_damping
         Function used to calculate the dynamic free-free electron structure
         factor.
     """
@@ -1340,7 +1340,7 @@ class RPA_DandreaFit(FreeFreeModel):
 
     See Also
     --------
-    jaxtrs.free_free.
+    jaxrts.free_free.
         Function used to calculate the dynamic free-free electron structure
         factor.
     """
@@ -2783,7 +2783,7 @@ class SchumacherImpulseFitRk(ScatteringModel):
             "Corrects contribution for n equals 1 and 2.",
         ),
         ("Gu.2008", "Edge positions."),
-        ("Dornheim.2024", "Intensitiy normalization due to f-sum rule"),
+        ("Dornheim.2024", "Intensity normalization due to f-sum rule"),
     ]
 
     def __init__(self) -> None:
@@ -3075,7 +3075,11 @@ class IchimaruChemPotential(Model):
     """
     A fitting formula for the chemical potential of a plasma between the
     classical and the quantum regime, given by :cite:`Gregori.2003`.
-    Uses :py:func:`jaxrts.plasma_physics.chem_pot_interpolation`.
+
+    See Also
+    --------
+    jaxrts.plasma_physics.chem_pot_interpolationIchimaru
+        Function used for calculating the chemical potential
     """
 
     __name__ = "IchimaruChemPotential"
@@ -3091,7 +3095,32 @@ class IchimaruChemPotential(Model):
         )
 
 
+class SommerfeldChemPotential(Model):
+    """
+    Interpolation function for the chemical potential of a non-interacting
+    (ideal) fermi gas given in the paper of :cite:`Cowan.2019`.
+
+    See Also
+    --------
+    jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation
+        Function used for calculating the chemical potential
+    """
+
+    __name__ = "SommerfeldChemPotential"
+    allowed_keys = ["chemical potential"]
+    cite_keys = ["Cowan.2019"]
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        return plasma_physics.chem_pot_sommerfeld_fermi_interpolation(
+            plasma_state.T_e, plasma_state.n_e
+        )
+
+
 class ConstantChemPotential(Model):
+
     """
     A model that returns a constant chemical potential, specified by a user.
     """
@@ -3231,6 +3260,8 @@ class DebyeHueckelIPD(Model):
     The Debye-Hückel Model is applicable for low-density and high-temperature
     plasmas, determined by charge screening effects as described in the
     Debye-Hückel theory.
+
+    See Also
     --------
     jaxrts.ipd.ipd_debye_hueckel
         Function used to calculate the IPD
@@ -3258,6 +3289,7 @@ class StewartPyattIPD(Model):
     Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972`
     at (low T, high rho) and (high T, low rho), respectively.
 
+    See Also
     --------
     jaxrts.ipd.ipd_stewart_pyatt
         Function used to calculate the IPD
@@ -3282,13 +3314,15 @@ class IonSphereIPD(Model):
     """
     Ion Sphere IPD Model :cite:`Rozsnyai.1972`.
 
-    The Ion Sphere Model (IS) is especially applicable plasmas with strong ion
-    coupling, and thus in particular for high density, low temperature plasmas.
-    The relevant length scale that determines the ionization potential is the
-    ion sphere radius R_0, determined by the condition that a sphere of radius
-    R_0 contains the same charge as given by the mean ionization and the
+    The Ion Sphere Model (IS) is especially applicable for plasmas
+    with strong ion coupling, and thus in particular for high density,
+    low temperature plasmas. The relevant length scale that determines
+    the ionization potential is the ion sphere radius :math:`R_0`,
+    determined by the condition that a sphere of radius :math:`R_0`
+    contains the same charge as given by the mean ionization and the
     electron number density.
 
+    See Also
     --------
     jaxrts.ipd.ipd_ion_sphere
         Function used to calculate the IPD
@@ -3311,13 +3345,14 @@ class EckerKroellIPD(Model):
 
     Opposite to the Stewart-Pyatt:cite:`Stewart.1966` Model the Ecker-Kröll
     Model assumes that the relevant length scale for determining the IPD in
-    high-density plasmas is not R_0 (the ion sphere radius) but rather the
-    average distance between all free particles r^3_EK = 3/4\\pi(n_e + n_i),
-    where n_e and n_i are the ion and electron number density.
+    high-density plasmas is not :math:`R_0` (the ion sphere radius) but rather
+    the average distance between all free particles
+    :math:`r^3_\\text{EK} = 3/4\\pi(n_e + n_i)`,
+    where :math:`n_e` and :math:`n_i` are the ion and electron number density.
     The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt
     Model for highly ionized plasmas.
 
-    See also
+    See Also
     --------
     jaxrts.ipd.ipd_ecker_kroell
         Function used to calculate the IPD
@@ -3348,6 +3383,7 @@ class PauliBlockingIPD(Model):
     model that lowers the continuum and hence the ionization potential from
     above.
 
+    See Also
     --------
     jaxrts.ipd.ipd_pauli_blocking
         Function used to calculate the IPD
@@ -3377,7 +3413,7 @@ class DebyeHueckelScreeningLength(Model):
     This is standard Debye Hückel screening length. See also
     :cite:`Gericke.2010`.
 
-    See also
+    See Also
     --------
     jaxrts.plasma_physics.Debye_Hueckel_screening_length
         The function used to calculate the screening length
@@ -3396,9 +3432,9 @@ class DebyeHueckelScreeningLength(Model):
 
 class Gericke2010ScreeningLength(Model):
     """
-    Return the Debye-Hückel screening length. Uses a 4th-power
-    interpolation between electron and Fermi temperature, as proposed by
-    :cite:`Gericke.2010`
+    Return the Debye-Hückel screening length. Uses a 4th-power interpolation
+    between electron and fermi temperature, as proposed by
+    :cite:`Gericke.2010`.
 
     See Also
     --------
@@ -3425,9 +3461,9 @@ class Gericke2010ScreeningLength(Model):
 
 class ArbitraryDegeneracyScreeningLength(Model):
     """
-    A screening length valid for arbitrary degeneracy.
+    A screening length valid for arbitrary degeneracy :cite:`Baggott.2017`.
 
-    See Also :cite:`Ropke.2019`.
+    See Also
     --------
     ipd.inverse_screening_length_e
         The function used to calculate the inverse of the screening length
@@ -3524,7 +3560,7 @@ class LinearResponseScreeningGericke2010(Model):
 
     See Also
     --------
-    jaxtrs.ion_feature.free_electron_susceptilibily_RPA
+    jaxrts.ion_feature.free_electron_susceptilibily_RPA
         Function used to calculate :math:`\\xi{ee}^\\text{RPA}`
     """
 
@@ -3590,7 +3626,14 @@ class FiniteWavelengthScreening(Model):
        Model.
 
 
-    See also
+    .. note::
+
+       Due to the above definition, the 'screening length' ``Model`` of the
+       plasma state is of no relevance for the evaluation of this Screening
+       Model.
+
+
+    See Also
     --------
     jaxrts.ion_feature.q_FiniteWLChapman2015
         The function used to calculate ``q``.
@@ -3633,11 +3676,11 @@ class FiniteWavelengthScreening(Model):
 
 class DebyeHueckelScreening(Model):
     """
-    Debye Hueckel screening as presented by :cite:`Chapman.2015b`.
+    Debye Hückel screening as presented by :cite:`Chapman.2015b`.
 
     .. math::
 
-       q^\\text{DH} = Z_f \\frac{\\kappa_e^*2}{\\kappa_e^2 + k^2}
+       q^\\text{DH} = Z_f \\frac{\\kappa_e^2}{\\kappa_e^2 + k^2}
 
 
     Where :math:`\\kappa_e` is given by the 'screening length' model.
@@ -3650,7 +3693,7 @@ class DebyeHueckelScreening(Model):
        potential being a Coulomb potential
 
 
-    See also
+    See Also
     --------
     jaxrts.ion_feature.q_DebyeHueckelChapman2015
         The function used to calculate ``q``.
@@ -4028,9 +4071,9 @@ def averagePlasmaState(state: "PlasmaState") -> "PlasmaState":
 
 class Sum_Sii(Model):
     """
-    This model sums up all S_ab from the HNC and multiplies it with ``sqrt(x_a
-    * x_b)``. While it is obviously ok for a single-species plasma, multiple
-    species might not be treated correctly.
+    This model sums up all :math:`S_{ab}` from the HNC and multiplies it with
+    :math:`\\sqrt{x_{a}\\cdot x_{b}}`. While it is obviously appropriate for a
+    single-species plasma, multiple species might not be treated correctly.
     """
 
     allowed_keys = ["BM S_ii"]
@@ -4268,6 +4311,7 @@ class FiniteWavelength_BM_V(BM_V_eiSModel):
 
     allowed_keys = ["BM V_eiS"]
     __name__ = "FiniteWavelength_BM_V"
+    cite_keys = ["Dandrea.1986"]
 
     @jax.jit
     def V(
@@ -4341,6 +4385,7 @@ _all_models = [
     SchumacherImpulseFitRk,
     Sum_Sii,
     StewartPyattIPD,
+    SommerfeldChemPotential,
     ThreePotentialHNCIonFeat,
 ]
 

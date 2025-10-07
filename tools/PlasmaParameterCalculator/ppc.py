@@ -1,0 +1,362 @@
+import math
+import tkinter as tk
+import tkinter.font as tkfont
+from tkinter import messagebox, ttk
+
+import numpy as np
+
+import jaxrts
+import jaxrts.plasma_physics as pp
+
+ureg = jaxrts.ureg
+
+eps0 = 1 * ureg.epsilon_0
+e_charge = 1 * ureg.elementary_charge
+k_B = 1 * ureg.boltzmann_constant
+m_e = 1 * ureg.electron_mass
+h = 1 * ureg.planck_constant
+m_u = 1 * ureg.u
+
+ELEMENTS_Z = {jaxrts.elements._element_symbols[k]: k for k in range(1, 37)}
+
+ELEMENTS = {
+    jaxrts.elements._element_symbols[k]: jaxrts.elements._element_masses[k]
+    * 1
+    * ureg.u
+    for k in range(1, 37)
+}
+
+ELEMENTS["HT"] = 2.5 * ureg.u
+ELEMENTS_Z["HT"] = 1
+
+
+
+def compute_plasma_parameters(rho, element_symbol, T_e, Z_avg):
+    if element_symbol not in ELEMENTS:
+        raise ValueError("Unknown-Element.")
+    if rho <= 0 or T_e <= 0 or Z_avg <= 0:
+        raise ValueError("All entries must be > 0.")
+    if Z_avg > ELEMENTS_Z[element_symbol]:
+        raise ValueError("Ionization greater than ion charge!")
+
+    mass_ion = ELEMENTS[element_symbol]
+
+    kT = 1 * ureg.boltzmann_constant * T_e
+
+    n_i = (rho / mass_ion).to("1/cm^3")
+    n_e = (Z_avg * n_i).to("1/cm^3")
+
+    lambda_D = pp.Debye_Hueckel_screening_length(n_e, T_e, Z_avg)
+
+    N_D = (4 / 3) * math.pi * n_e * lambda_D**3
+
+    a_ws_e = (3 / (4 * math.pi * n_e)) ** (1 / 3)
+    a_ws_i = (3 / (4 * math.pi * (n_e / Z_avg))) ** (1 / 3)
+    r_dB_e = pp.therm_de_broglie_wl(T_e)
+
+    E_Fe = pp.fermi_energy(n_e)
+    E_Fi = pp.fermi_energy(n_i)
+
+    kTeff_e = (
+        1
+        * ureg.boltzmann_constant
+        * (
+            (E_Fe / ureg.boltzmann_constant) ** 4
+            + (kT / ureg.boltzmann_constant) ** 4
+        )
+        ** (1 / 4)
+    )
+    kTeff_i = (
+        1
+        * ureg.boltzmann_constant
+        * (
+            (E_Fi / ureg.boltzmann_constant) ** 4
+            + (kT / ureg.boltzmann_constant) ** 4
+        )
+        ** (1 / 4)
+    )
+
+    Gamma_ee = (e_charge**2) / (4 * math.pi * eps0 * a_ws_e * kT)
+    Gamma_ii = ((Z_avg * e_charge) ** 2) / (4 * math.pi * eps0 * a_ws_i * kT)
+    Gamma_ei = (Z_avg * e_charge**2) / (4 * math.pi * eps0 * a_ws_i * kT)
+
+    Gamma_ee_eff = (e_charge**2) / (4 * math.pi * eps0 * a_ws_e * kTeff_e)
+    Gamma_ii_eff = ((Z_avg * e_charge) ** 2) / (
+        4 * math.pi * eps0 * a_ws_i * kTeff_i
+    )
+
+    Theta_e = kT / E_Fe
+    Theta_i = kT / E_Fi
+
+    omega_pe = pp.plasma_frequency(n_e)
+    f_pe = omega_pe / (2 * math.pi)
+
+    return {
+        "rho": rho,
+        "n_i": n_i,
+        "n_e": n_e,
+        "lambda_D": lambda_D.to("nm"),
+        "N_D": N_D.to(ureg.dimensionless),
+        "a_ws_e": a_ws_e.to("nm"),
+        "a_ws_i": a_ws_i.to("nm"),
+        "r_dB_e": r_dB_e.to("nm"),
+        "Gamma_ee": Gamma_ee.to(ureg.dimensionless),
+        "Gamma_ii": Gamma_ii.to(ureg.dimensionless),
+        "Gamma_ei": Gamma_ei.to(ureg.dimensionless),
+        "Gamma_ee_eff": Gamma_ee_eff.to(ureg.dimensionless),
+        "Gamma_ii_eff": Gamma_ii_eff.to(ureg.dimensionless),
+        "E_Fe": E_Fe.to("eV"),
+        "E_Fi": E_Fi.to("eV"),
+        "Theta_e": Theta_e.to(ureg.dimensionless),
+        "Theta_i": Theta_i.to(ureg.dimensionless),
+        "omega_pe": omega_pe.to("rad/s"),
+        "f_pe": f_pe.to("Hz"),
+    }
+
+
+class PlasmaGUI:
+    def __init__(self, root):
+        self.root = root
+        root.title("Plasma Parameters Calculator")
+        root.geometry("1000x500")
+        root.resizable(False, False)
+
+        left_frame = ttk.Frame(root, padding=(10, 10))
+        left_frame.pack(side=tk.LEFT, fill=tk.Y)
+        right_frame = ttk.Frame(root, padding=(10, 10))
+        right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+        ttk.Label(
+            left_frame,
+            text="Plasma conditions:",
+            font=("Segoe UI", 11, "bold"),
+        ).grid(row=0, column=0, columnspan=2, pady=(0, 8))
+
+        row = 1
+        ttk.Label(left_frame, text="Mass density ρ [g/cm³]").grid(
+            row=row, column=0, sticky=tk.W, pady=4
+        )
+        self.rho_entry = ttk.Entry(left_frame, width=20)
+        self.rho_entry.grid(row=row, column=1, pady=4)
+        self.rho_entry.insert(0, "1.0")
+
+        row += 1
+        ttk.Label(left_frame, text="Element").grid(
+            row=row, column=0, sticky=tk.W, pady=4
+        )
+        self.element_combo = ttk.Combobox(
+            left_frame,
+            values=list(ELEMENTS.keys()),
+            width=17,
+            state="readonly",
+        )
+        self.element_combo.grid(row=row, column=1, pady=4)
+        self.element_combo.set("HT")
+
+        row += 1
+        ttk.Label(left_frame, text="Temperature T [eV]").grid(
+            row=row, column=0, sticky=tk.W, pady=4
+        )
+        self.T_entry = ttk.Entry(left_frame, width=20)
+        self.T_entry.grid(row=row, column=1, pady=4)
+        self.T_entry.insert(0, "10")
+
+        row += 1
+        ttk.Label(left_frame, text="Ionization Z").grid(
+            row=row, column=0, sticky=tk.W, pady=4
+        )
+        self.Z_entry = ttk.Entry(left_frame, width=20)
+        self.Z_entry.grid(row=row, column=1, pady=4)
+        self.Z_entry.insert(0, "1")
+
+        row += 1
+        ttk.Button(
+            left_frame, text="Calculate", command=self.on_calculate
+        ).grid(row=row, column=0, columnspan=2, pady=(12, 0), ipadx=10)
+
+        ttk.Label(
+            right_frame, text="Results:", font=("Segoe UI", 11, "bold")
+        ).pack(anchor=tk.NW)
+        self.output_label = tk.Text(
+            right_frame,
+            wrap="word",  # wrap text nicely
+            bg="#dddddd",  # same background
+            fg="black",  # same text color
+            font=("Courier New", 10),  # same font
+            bd=2,
+            relief=tk.SUNKEN,
+            height=5,  # adjust height if needed
+        )
+        self.output_label.pack(
+            fill=tk.BOTH, expand=True, padx=(0, 10), pady=(6, 10)
+        )
+
+        # Make it behave like a label (no editing, just selection)
+        self.output_label.config(state="disabled")
+
+    def on_calculate(self):
+        try:
+            rho = float(self.rho_entry.get())
+            element = self.element_combo.get()
+            T_e = float(self.T_entry.get())
+            Z = float(self.Z_entry.get())
+            results = compute_plasma_parameters(
+                rho * 1 * ureg.gram / ureg.cc,
+                element,
+                T_e * ureg.electron_volt / ureg.boltzmann_constant,
+                Z,
+            )
+            self.display_results(results, element, T_e, Z)
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def display_results(self, r, element, T_e, Z):
+
+        self.output_label.config(state="normal")  # enable editing
+        self.output_label.delete("1.0", "end")  # clear all text
+        self.output_label.insert("1.0", "")  # insert new text if provided
+        self.output_label.config(state="disabled")  # disable editing
+
+        lines = []
+        lines.append(
+            f"Element: {element}    T = {T_e:.3g} eV    Z_free = {Z:.3g}"
+        )
+        lines.append(
+            f"Mass density ρ = {r['rho']:.3gP}".replace(
+                "gram/cubic_centimeter", "g/cm³"
+            )
+        )
+        lines.append("-" * 60)
+        lines.append(
+            f"Ion number density n_i = {r['n_i']:.3eP}".replace(
+                "1/centimeter", "1/cm"
+            )
+        )
+        lines.append(
+            f"Electron number density n_e = {r['n_e']:.3eP}".replace(
+                "1/centimeter", "1/cm"
+            )
+        )
+        lines.append("")
+        lines.append(f"Debye length λ_D = {r['lambda_D']:.3eP}")
+        lines.append(
+            f"Particles in a Debye sphere N_D = {r['N_D']:.3eP} (≈ {np.round(r['N_D'])})".replace(
+                "dimensionless", ""
+            )
+        )
+        lines.append("")
+        lines.append(
+            f"Wigner-Seitz radius (electrons) a_ws_e = {r['a_ws_e']:.3eP}".replace(
+                "nanometer", "nm"
+            )
+        )
+        lines.append(
+            f"Wigner-Seitz radius (ions) a_ws_i = {r['a_ws_i']:.3eP}".replace(
+                "nanometer", "nm"
+            )
+        )
+        lines.append(
+            f"Thermal de Broglie wavelength (e) r_dB = {r['r_dB_e']:.3eP}".replace(
+                "nanometer", "nm"
+            )
+        )
+        lines.append("")
+        lines.append(
+            f"electron-electron coupling parameter Γ_ee = {r['Gamma_ee']:.3eP} (deg: {r['Gamma_ee_eff']:.3eP})".replace(
+                "dimensionless", ""
+            )
+        )
+        lines.append(
+            f"ion-ion coupling parameter Γ_ii = {r['Gamma_ii']:.3eP} (deg: {r['Gamma_ii_eff']:.3eP})".replace(
+                "dimensionless", ""
+            )
+        )
+        lines.append(
+            f"electron-ion coupling parameter Γ_ei = {r['Gamma_ei']:.3eP}".replace(
+                "dimensionless", ""
+            )
+        )
+        lines.append("")
+        lines.append(
+            f"Fermi energy E_F (electrons) = {r['E_Fe']:.3fP}".replace(
+                "electron_volt", "eV"
+            )
+        )
+        lines.append(
+            f"Fermi energy E_F (ions) = {r['E_Fi']:.3fP}".replace(
+                "electron_volt", "eV"
+            )
+        )
+        lines.append(
+            f"Degeneracy parameter Θ (electrons) = {r['Theta_e']:.3fP}".replace(
+                "dimensionless", ""
+            )
+        )
+        lines.append(
+            f"Degeneracy parameter Θ (ions) = {r['Theta_i']:.3fP}".replace(
+                "dimensionless", ""
+            )
+        )
+        lines.append("")
+        lines.append(
+            f"Plasma frequency ω_pe = {r['omega_pe']:.3eP}".replace(
+                "radian/second", "rad/s"
+            )
+        )
+        lines.append(
+            f"Plasma frequency f_pe = {r['f_pe']:.3eP}".replace("hertz", "Hz")
+        )
+        lines.append("-" * 60)
+
+        def determine_level(x):
+
+            upper = 1.5
+            lower = 0.5
+
+            if x > upper:
+                return "strongly"
+            if lower <= x <= upper:
+                return "moderately"
+            if x < lower:
+                return "weakly"
+
+        level = {1: "weakly", 2: "moderately", 3: "strongly"}
+        coupling_i = determine_level(r["Gamma_ii_eff"])
+        coupling_e = determine_level(r["Gamma_ee_eff"])
+        degen_i = determine_level(1 / r["Theta_i"])
+        degen_e = determine_level(1 / r["Theta_e"])
+
+        bold_font = tkfont.Font(
+            self.output_label, self.output_label.cget("font")
+        )
+        bold_font.configure(weight="bold")
+        self.output_label.tag_configure("bold", font=bold_font)
+
+        self.output_label.config(state="normal")
+
+        for line in lines[:]:
+            self.output_label.insert("end", line + "\n")
+
+        self.output_label.insert("end", ">>> Ions are ")
+        self.output_label.insert("end", coupling_i, "bold")
+        self.output_label.insert("end", " coupled and ")
+        self.output_label.insert("end", degen_i, "bold")
+        self.output_label.insert("end", " degenerate.\n")
+
+        self.output_label.insert("end", ">>> Electrons are ")
+        self.output_label.insert("end", coupling_e, "bold")
+        self.output_label.insert("end", " coupled and ")
+        self.output_label.insert("end", degen_e, "bold")
+        self.output_label.insert("end", " degenerate.\n")
+
+        self.output_label.config(state="disabled")
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+
+    style = ttk.Style()
+    style.theme_use("default")  # "default", "clam", "alt", "classic"
+
+    app = PlasmaGUI(root)
+    root.mainloop()
