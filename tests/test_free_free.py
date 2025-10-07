@@ -25,7 +25,6 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
     w_pl = jaxrts.plasma_physics.plasma_frequency(n_e)
     # Normalize
 
-
     # Load the data
     data_dir = pathlib.Path(__file__).parent / "data/Glenzer2009/Fig9/"
     # We have to sort, here, to assert the normalization works properly
@@ -121,8 +120,8 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         # the literature
         error = onp.abs(calc_See - literature_See)
 
-        # The low-temperature curve has some notable difference in the height of
-        # the peak. However, we accept it here, for now.
+        # The low-temperature curve has some notable difference in the height
+        # of the peak. However, we accept it here, for now.
         if count == 0:
             assert onp.max(error) < 0.35
             assert onp.quantile(error, 0.8) < 0.1

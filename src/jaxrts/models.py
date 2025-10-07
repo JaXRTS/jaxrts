@@ -5,6 +5,7 @@ implemented.
 
 import abc
 import logging
+from collections.abc import Callable
 from copy import deepcopy
 from typing import TYPE_CHECKING, Literal
 
@@ -155,22 +156,24 @@ class ScatteringModel(Model):
     to (mainly elastic) scattering models.
     These models have a pre-defined :py:meth:`~.evaluate` method, which is
     performing a convolution with the instrument function, and now requires a
-    user to define :py:meth:`.evaluate_raw` which is giving the scattered
-    energy **without the instrument function**.
+    user to define :py:meth:`.evaluate_raw` which is returning the dynamic
+    structure factor **without the instrument function or any frequency
+    redistribution correction**.
 
     .. note::
 
        As these extra functionalities are only relevant when re-sampling and
        convolution with an instrument function is reasonable, the
-       :py:class:`~.Model` s used to describe ionic scattering are currently
-       not instances of :py:class:`~.ScatteringModel` as the convolution with a
+       :py:class:`~.Model` s used to describe ionic scattering are not
+       instances of :py:class:`~.ScatteringModel` as the convolution with a
        delta function would just result in numerical issues.
+       For ionic scattering, use :py:class:`~IonFeatModel`, instead.
 
-    It furthermore allows a user to set the :py:attr:`~.sample_points`
-    attribute, which is initialized as ``None``.
-    If set, the model is evaluated only on `sample_points` points, rather than
-    all :math:`k` that are probed and is then evaluated. Afterwards, the result
-    is extrapolated to match the :py:class:`~.setup.Setup`'s :math:`k`.
+    A `ScatteringModel` allows users to set the :py:attr:`~.sample_points`
+    attribute, which defaults to ``None``.
+    If set, the model is evaluated only on `sample_points`, equidistant points,
+    rather than at all :math:`k` that are probed. Afterwards, the result is
+    interpolated to match the :py:class:`~.setup.Setup`'s :math:`k`.
     """
 
     def __init__(self, sample_points: int | None = None) -> None:
@@ -268,8 +271,10 @@ scattering_models = [
 
 class Neglect(Model):
     """
-    A model that returns an empty with zeros in (units of seconds) for every
-    energy probed.
+    Universal model to neglect a contribution and set it to zero.
+    For elastic and inelastic energies, return an empty array of zeros in
+    (units of seconds) for every energy probed.
+    If used for the ``IPD`` key, return 0eV, i.e., no IPD.
     """
 
     allowed_keys = [*scattering_models, "ipd"]
@@ -307,10 +312,12 @@ class Neglect(Model):
 # -----------
 class IonFeatModel(Model):
     """
-    These set of models describe the scattering by electrons tightly bound to
-    the ions, causing quasi-elastic scattering. `IonFeatModels` have to define
-    a method :py:meth:`~.S_ii` which returns the static ion-ion structure
-    factor.
+    Abstract class of `Model`s, describing the scattering by electrons tightly
+    bound to the ions, causing quasi-elastic scattering. An `IonFeatModel` has
+    to define a method :py:meth:`~.S_ii` which returns the static ion-ion
+    structure factor. This quantity is used to calculate the
+    :py:meth:`~.Rayleigh_weight` by combining ``form-factors`` and
+    ``screening`` models of the :py:class:`~.PlasmaState`.
     """
 
     #: A list of keywords where this model is adequate for
@@ -334,8 +341,8 @@ class IonFeatModel(Model):
         setup: Setup,
     ) -> jnp.ndarray:
         """
-        This is the result from Wünsch, to calculate the Rayleigh weight for
-        multiple species.
+        This is the result from Wünsch :cite:`Wunsch.2011`, to calculate the
+        Rayleigh weight for a plasma from multiple species.
 
         .. math::
 
@@ -463,7 +470,7 @@ class Gregori2003IonFeat(IonFeatModel):
     Model for the ion feature of the scattering, presented in
     :cite:`Gregori.2003`.
 
-    This model is identical to :py:class:`~ArkhipovIonFeat`, but uses an
+    This model is identical to :py:class:`~ArkhipovIonFeat` but uses an
     effective temperature ~:py:func:`jaxtrs.static_structure_factors.T_cf_Greg`
     rather than the electron Temperature throughout the calculation.
     """
@@ -505,7 +512,7 @@ class Gregori2006IonFeat(IonFeatModel):
     Model for the ion feature of the scattering, presented in
     :cite:`Gregori.2006`.
 
-    This model extends :py:class:`~ArkhipovIonFeat`, to allow for different
+    This model extends :py:class:`~ArkhipovIonFeat` to allow for different
     ion-and electron temperatures.
 
     .. note::
@@ -556,7 +563,9 @@ class Gregori2006IonFeat(IonFeatModel):
 
 class FixedSii(IonFeatModel):
     """
-    Model for the ion feature with a fixed value for :math:`S_{ii}`.
+    Model for the ion feature with a fixed value for :math:`S_{ii}`. Note that
+    the `Sii` has to be returned as a :math:`(n\\times n)` array, where n is
+    the number of component of the plasma.
     """
 
     __name__ = "FixedSii"
@@ -586,17 +595,19 @@ class FixedSii(IonFeatModel):
 
 class OnePotentialHNCIonFeat(IonFeatModel):
     """
-    Model for the ion feature using a calculating all :math:`S_{ab}` in the
-    Hypernetted Chain approximation.
+    Calculates :math:`S_{ab}` in the Hypernetted Chain approximation.
 
     In contrast to :py:class:`~.ThreePotentialHNCIonFeat`, this models
-    calculates only the ion-ion Structure factors, and is neglecting the
-    electron-contibutions. Hence, screening is not included, automatically, but
-    has to be provided as an additional `screening`.
+    calculates only the ion-ion structure factors, and is neglecting the
+    electron-contributions. Hence, screening is not included, automatically,
+    but has to be provided as an additional `screening`. For reasonable
+    results, the 'ion-ion Potential' should account for the fact that the
+    electrons are not included in the HNC scheme. See, e.g.,
+    :cite:`Wunsch.2008`.
 
 
-    Requires an 'ion-ion' (defaults to :py:class:`~DebyeHueckelPotential`) and
-    a `screening` model (default:
+    Requires an 'ion-ion Potential' (defaults to
+    :py:class:`~DebyeHueckelPotential`) and a `screening` model (default:
     :py::class:`~.LinearResponseScreeningGericke2010`. Further requires a
     'form-factors' model (defaults to :py:class:`~PaulingFormFactors`).
     """
@@ -611,6 +622,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         rmin: Quantity = 0.001 * ureg.a_0,
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
+        SVT: bool = False,
         mix: float = 0.0,
         tmult: list[float] = None,
     ) -> None:
@@ -620,6 +632,9 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
+        #: if ``True`` use the SVT formulation to extend the HNC scheme to
+        #: different temperatures between the components.
+        self.SVT: bool = SVT
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
@@ -671,9 +686,15 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         # ----------------------------------
         T = plasma_state["ion-ion Potential"].T(plasma_state)
         n = plasma_state.n_i
-        g, niter = hypernetted_chain.pair_distribution_function_HNC(
-            V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
-        )
+        if self.SVT:
+            masses = to_array([ion.atomic_mass for ion in plasma_state.ions])
+            g, niter = hypernetted_chain.pair_distribution_function_SVT_HNC(
+                V_s_r, V_l_k, self.r, T, n, masses, self.mix, self.tmult
+            )
+        else:
+            g, niter = hypernetted_chain.pair_distribution_function_HNC(
+                V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
+            )
         logger.debug(
             f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
         )
@@ -693,13 +714,14 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         aux_data = (
             self.model_key,
             self.pot,
+            self.SVT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.pot = aux_data
+        obj.model_key, obj.pot, obj.SVT = aux_data
         obj.r_min, obj.r_max, obj.mix, obj.tmult = children
 
         return obj
@@ -707,26 +729,27 @@ class OnePotentialHNCIonFeat(IonFeatModel):
 
 class ThreePotentialHNCIonFeat(IonFeatModel):
     """
-    Model for the ion feature using a calculating all :math:`S_{ab}` in the
-    Hypernetted Chain approximation. This is achieved by treating the electrons
-    as an additional ion species, that is amended to the list of ions. See,
-    e.g. :cite:`Schwarz.2007`.
+    Calculates :math:`S_{ab}` including electron-ion and electron-electron
+    static structure factors using the Hypernetted Chain approximation. This is
+    achieved by treating the electrons as an additional ion species, that is
+    amended to the list of ions. See, e.g. :cite:`Schwarz.2007`.
 
     .. note::
 
-        Compared to :py:class:`HNCIonFeat`, the internal Variables, `V_s` and
-        `V_l` are now :math:`(n+1 \\times n+1 \\times m)` matrices, where
-        :math:`n` is the number of ion species and :math:`m = 2^\\text{pot}`
-        which pot being :py:attr:`~.pot`, the exponent for the number of
-        scattering vectors to be evaluated in the HNC approach.
+        Compared to :py:class:`OnePotentialHNCIonFeat`, the internal Variables,
+        `V_s` and `V_l` are now :math:`(n+1 \\times n+1 \\times m)` matrices,
+        where :math:`n` is the number of ion species and :math:`m =
+        2^\\text{pot}`. :py:attr:`~.pot` is an attribute defining the number of
+        grid-points evaluated in the HNC approach, which heavily relies on
+        Fourier transforms).
 
     Requires 3 Potentials:
 
         - an 'ion-ion Potential' The black entries in the picture below
-          (defaults to :py:class:`~DebyeHueckelPotential`).
+          (defaults to :py:class:`~CoulombPotential`).
         - an 'electron-ion Potential' The orange entries in the picture below
           (defaults to :py:class:`~KlimontovichKraeftPotential`).
-        - an 'electron-electron Potential' The red entries in the picutre below
+        - an 'electron-electron Potential' The red entries in the picture below
           (defaults to :py:class:`~KelbgPotental`).
 
     .. image:: ../images/ThreePotentialHNC.svg
@@ -737,8 +760,8 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
 
     jaxrts.ion_feature.q_Glenzer2009
         Calculation of the screening, when both S_ei and S_ii are known. As
-        this should be accurate, we don't require a 'screening' model with this
-        'ionic scttering' model.
+        we directly calculate all static structure factors, we don't require a
+        'screening' model with this 'ionic scattering' model.
 
     """
 
@@ -756,6 +779,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         rmin: Quantity = 0.001 * ureg.a_0,
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
+        SVT: bool = False,
         mix: float = 0.0,
         tmult: list[float] = None,
     ) -> None:
@@ -774,6 +798,9 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         #: increased when HNC becomes numerically unstable due to high coupling
         #: strengths.
         self.mix: float = mix
+        #: if ``True`` use the SVT formulation to extend the HNC scheme to
+        #: different temperatures between the components.
+        self.SVT: bool = SVT
         #: List of temperature multipliers used in auxiliary HNC calculations.
         #: HNC can be sensitive to initial guesses, and the algorithm often
         #: converges more reliably at higher temperatures.
@@ -790,7 +817,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         # screening model
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model(
-            "ion-ion Potential", hnc_potentials.DebyeHueckelPotential()
+            "ion-ion Potential", hnc_potentials.CoulombPotential()
         )
         plasma_state.update_default_model(
             "electron-ion Potential",
@@ -878,9 +905,20 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         # ----------------------------------
         T = plasma_state["ion-ion Potential"].T(plasma_state)
         n = to_array([*plasma_state.n_i, plasma_state.n_e])
-        g, niter = hypernetted_chain.pair_distribution_function_HNC(
-            V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
-        )
+        if self.SVT:
+            masses = to_array(
+                [
+                    *[ion.atomic_mass for ion in plasma_state.ions],
+                    1 * ureg.electron_mass,
+                ]
+            )
+            g, niter = hypernetted_chain.pair_distribution_function_SVT_HNC(
+                V_s_r, V_l_k, self.r, T, n, masses, self.mix, self.tmult
+            )
+        else:
+            g, niter = hypernetted_chain.pair_distribution_function_HNC(
+                V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
+            )
         logger.debug(
             f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
         )
@@ -953,13 +991,14 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         aux_data = (
             self.model_key,
             self.pot,
+            self.SVT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.pot = aux_data
+        obj.model_key, obj.pot, obj.SVT = aux_data
         obj.r_min, obj.r_max, obj.mix, obj.tmult = children
 
         return obj
@@ -967,9 +1006,9 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
 
 class PeakCollection(IonFeatModel):
     """
-    A model for approximating :py:meth:`~.PeakCollection.S_ii` as a sum of
-    peaks. Can be used to model, e.g., ideal powder diffraction, where elastic
-    signal would only be expected at certain values of :math:`k`.
+    A model for approximating :math:`S_{ii}` as a sum of peaks. Can be used to
+    model, e.g., ideal powder diffraction, where elastic signal would only be
+    expected at certain values of :math:`k`.
     """
 
     __name__ = "PeakCollection"
@@ -978,7 +1017,7 @@ class PeakCollection(IonFeatModel):
         self,
         k_pos: Quantity,
         intensity: jnp.ndarray,
-        peak_function: callable,
+        peak_function: Callable[[Quantity], jnp.ndarray],
     ):
         """
         Parameters
@@ -987,13 +1026,14 @@ class PeakCollection(IonFeatModel):
             The position of the peaks in :math:`k` space.
         intensity: jnp.ndarray
             The intensity of the peaks. Should have the same length as `k_pos`.
-        peak_function: callable
-            The shape of each peak. This function is expected to be normed over
-            the integral over all :math:`k`, should be centered around 0, and
-            expects to require exactly 1 argument, the position in k space.
-            The `peak_function` should return a shape that is compatible with
-            :py:attr:jaxrts.PlasmaState.nions`. I.e., the output should be a
-            `(nxn)` matrix where `n` is the number of ion species considered.
+        peak_function : Callable[[Quantity], jnp.ndarray]
+            A function defining the shape of a peak. The function must:
+
+            - Be normalized such that its integral over all :math:`k` equals 1.
+            - Be centered at zero in :math:`k`-space.
+            - Accept exactly one argument: a position in :math:`k`-space.
+            - Return an array with shape `(n, n)`, where `n` is the number of
+              ion species (:py:attr:`jaxrts.PlasmaState.nions`).
         """
         self.k_pos = to_array(k_pos)
         self.intensity = to_array(intensity)
@@ -1027,10 +1067,10 @@ class DebyeWallerSolid(IonFeatModel):
     """
     This model approximates the static structure factor (SSF) of a solid at
     finite temperature as suggested by :cite:`Gregori.2006`. It assumes the SSF
-    to consist of a crystall peak feature :math:`b(k)`, which are damped by the
-    debye Waller factor :math:`2W`, and an increasing, diffuse scattering part,
-    which is decribed py the static structure factor :math:`S_\\text{plasma}`
-    of the plasma (or liquid)-seeming contributions.
+    to consist of a crystal peak feature :math:`b(k)`, damped by the Debye
+    Waller factor :math:`2W`, and an increasing, diffuse scattering part, which
+    is described by the static structure factor :math:`S_\\text{plasma}` of the
+    plasma (or liquid) contributions.
 
     .. math::
 
@@ -1039,9 +1079,8 @@ class DebyeWallerSolid(IonFeatModel):
 
     .. note::
 
-       For the temperatures this model might be used,
-       :math:`S_\\text{plasma}(k) = 1` has been used in the literature, before
-       to extract Debye temperatures from DFT-MD Simulations. See
+       Inverting this model and using :math:`S_\\text{plasma}(k) = 1` has
+       allowed to extract Debye temperatures from DFT-MD simulations
        :cite:`Schuster.2020`.
 
     This function uses the :py:class:`jaxrts.plasmastate.PlasmaState` ``'Debye
@@ -1053,8 +1092,8 @@ class DebyeWallerSolid(IonFeatModel):
     --------
     jaxrts.static_structure_factors.debyeWallerFactor
        Function used to calculate the Debye Waller Factor. Note that the
-       implementation used based on :cite:`Murphy.2008` does differ from the
-       formula in :cite:`Gregori.2006`.
+       implementation used in jaxrts is based on :cite:`Murphy.2008` and
+       differs from the formula in :cite:`Gregori.2006`.
     """
 
     __name__ = "DebyeWallerSolid"
@@ -1129,7 +1168,7 @@ class FreeFreeModel(ScatteringModel):
     """
     A class of models suitable for ``'free-free scattering'``. These models
     have to define a :py:meth:`~.susceptibility` method, which can be used by a
-    ``'screening'`` model, later.
+    ``'screening'`` Model, later.
     """
 
     #: A list of keywords where this model is adequate for
@@ -1153,15 +1192,15 @@ class QCSalpeterApproximation(FreeFreeModel):
     the results by Salpeter (:cite:`Salpeter.1960`), increasing the range of
     applicability.
 
-    However, this model might be rather considered to be educational, as it is
-    only valid for small(er) densities and probing energies. Instead, one might
-    use :py:class:~RPA_NoDamping`, which should give more accurate results
-    (according to, e.g., "cite:`Gregori.2003`) at a comparable computation
-    time.
+    However, this model should mainly be rather considered to be educational,
+    as it is only valid for small(er) densities and probing energies. Instead,
+    for most practical use-cases one might use :py:class:~RPA_DandreaFit` which
+    should give more accurate results (according to, e.g.,
+    "cite:`Gregori.2003`) at a comparable computation time.
 
     This model does not provide a straight-forward approach to include local
-    field corrections. We have included it, for now, by assuming the behavior
-    would be the same as it is for the RPA.
+    field corrections. We have included it, by assuming the behavior would be
+    the same as it is for the RPA.
 
     See Also
     --------
@@ -1228,10 +1267,11 @@ class QCSalpeterApproximation(FreeFreeModel):
 class RPA_NoDamping(FreeFreeModel):
     """
     Model for elastic free-free scattering based on the Random Phase
-    Approximation
+    Approximation.
 
-    Calculates the dielectic function in RPA and obtain a Structure factor via
-    the fluctuation dissipation theorem. Based on lecture notes from M. Bonitz.
+    Calculates the dielectric function in RPA and obtain a Structure factor via
+    the fluctuation dissipation theorem. Implementation is based on lecture
+    notes from M. Bonitz.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~IchimaruChemPotential`).
@@ -1385,19 +1425,20 @@ class RPA_DandreaFit(FreeFreeModel):
 
 class BornMerminFull(FreeFreeModel):
     """
-    Model of the free-free scattering, based on the Born Mermin Approximation
+    Model for the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
 
     Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
-    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
-    is used, otherwise, use the formulas that are found, e.g., in
-    :cite:`Schorner.2023`.
+    ``True``, we solve the RPA integral as formulated by :cite:`Chapman.2015`
+    Otherwise, use the formulas that are found, e.g., in :cite:`Schorner.2023`.
+    The former implementation yields more stable results, most of the time.
 
-    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    The model has the optional attribute ``KKT``, defaulting to ``False``,
     using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
-    We found for edge cases to avoid numerical spikes.
+    We found for edge cases this behavior was beneficial to avoid numerical
+    spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -1564,12 +1605,12 @@ class BornMerminFull(FreeFreeModel):
 
 class BornMermin(FreeFreeModel):
     """
-    Model of the free-free scattering, based on the Born Mermin Approximation
+    Model for the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
     Uses the Chapman interpolation which allows for a faster computation of the
-    free-free scattering compared to :py:class:`~.BornMerminFull`, by sampleing
-    at the probing frequency at :py:attr:`~.no_of_freq` points and
-    interpolating between them, after.
+    free-free scattering compared to :py:class:`~.BornMerminFull`, by sampling
+    the probing frequency at :py:attr:`~.no_of_freq` points and interpolating
+    between them, after.
 
     The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
     100 otherwise. To change it, just change the attribute of this model after
@@ -1578,8 +1619,8 @@ class BornMermin(FreeFreeModel):
     >>> state["free-free scattering"] = jaxrts.models.BornMermin()
     >>> state["free-free scattering"].no_of_freq = 10
 
-    The boundaries for this interpolation can be set as arguments
-    ``E_cutoff_min`` and ``E_cutoff_max``. It should be set to sane defaults
+    The boundaries for this interpolation can be given as arguments
+    ``E_cutoff_min`` and ``E_cutoff_max``. They should be set to sane defaults
     for most use cases; however, it is recommended to revisit this setting
     carefully. As a minimal good practice, the defaults should be adjusted to
     the setup used. This can be done with the
@@ -1588,15 +1629,16 @@ class BornMermin(FreeFreeModel):
     >>> state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
 
     Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
-    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
-    is used, otherwise, use the formulas that are found, e.g., in
-    :cite:`Schorner.2023`.
+    ``True``, we solve the RPA integral as formulated by :cite:`Chapman.2015`
+    Otherwise, use the formulas that are found, e.g., in :cite:`Schorner.2023`.
+    The former implementation yields more stable results, most of the time.
 
-    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    The model has the optional attribute ``KKT``, defaulting to ``False``,
     using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
-    We found for edge cases to avoid numerical spikes.
+    We found for edge cases this behavior was beneficial to avoid numerical
+    spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -1849,22 +1891,22 @@ class BornMermin(FreeFreeModel):
 
 class BornMermin_Fit(FreeFreeModel):
     """
-    Model of the free-free scattering, based on the Born Mermin Approximation
+    Model for the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
     Identical to :py:class:`~.BornMermin`, but uses the Dandrea
     fit (:cite:`Dandrea.1986`), rather than numerically calculating the
-    un-damped RPA, numerically. However, the damped RPA is still evaluated
-    using the integral.
+    un-damped RPA. However, the damped RPA is still evaluated using the
+    adequate integral.
 
-    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
-    100 otherwise. To change it, just change the attribute of this model after
-    initializing it. i.e.
+    The number of frequencies for the Chapman interpolation defaults to 20 if
+    ``KKT`` is ``False``, and to 100 otherwise. To change it, just change the
+    attribute of this model after initializing it. i.e.
 
     >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fit()
     >>> state["free-free scattering"].no_of_freq = 10
 
-    The boundaries for this interpolation can be set as arguments
-    ``E_cutoff_min`` and ``E_cutoff_max``. It should be set to sane defaults
+    The boundaries for the interpolation can be given as arguments
+    ``E_cutoff_min`` and ``E_cutoff_max``. They should be set to sane defaults
     for most use cases; however, it is recommended to revisit this setting
     carefully. As a minimal good practice, the defaults should be adjusted to
     the setup used. This can be done with the
@@ -1873,15 +1915,16 @@ class BornMermin_Fit(FreeFreeModel):
     >>> state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
 
     Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
-    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
-    is used, otherwise, use the formulas that are found, e.g., in
-    :cite:`Schorner.2023`.
+    ``True``, we solve the RPA integral as formulated by :cite:`Chapman.2015`
+    Otherwise, use the formulas that are found, e.g., in :cite:`Schorner.2023`.
+    The former implementation yields more stable results, most of the time.
 
-    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    The model has the optional attribute ``KKT``, defaulting to ``False``,
     using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
-    We found for edge cases to avoid numerical spikes.
+    We found for edge cases this behavior was beneficial to avoid numerical
+    spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -2134,22 +2177,22 @@ class BornMermin_Fit(FreeFreeModel):
 
 class BornMermin_Fortmann(FreeFreeModel):
     """
-    Model of the free-free scattering, based on the Born Mermin Approximation
+    Model for the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
-    Uses the same collision frequency as :py:class:`~.BornMermin_Fit`
-    (including the :cite:`Dandrea.1986` fit), but uses a rigorous
+    Uses the same assumptions as :py:class:`~.BornMermin_Fit` (including the
+    :cite:`Dandrea.1986` fit for the un-damped RPA), but uses a rigorous
     implementation of the local field correction, proposed by
     :cite:`Fortmann.2010`.
 
-    The number of frequencies defaults to 20 if ``KKT`` is ``False``, and to
-    100 otherwise. To change it, just change the attribute of this model after
-    initializing it. i.e.
+    The number of frequencies for the Champan interpolation defaults to 20 if
+    ``KKT`` is ``False``, and to 100 otherwise. To change it, just change the
+    attribute of this model after initializing it. i.e.
 
     >>> state["free-free scattering"] = jaxrts.models.BornMermin_Fortmann()
     >>> state["free-free scattering"].no_of_freq = 10
 
-    The boundaries for this interpolation can be set as arguments
-    ``E_cutoff_min`` and ``E_cutoff_max``. It should be set to sane defaults
+    The boundaries for the interpolation can be given as arguments
+    ``E_cutoff_min`` and ``E_cutoff_max``. They should be set to sane defaults
     for most use cases; however, it is recommended to revisit this setting
     carefully. As a minimal good practice, the defaults should be adjusted to
     the setup used. This can be done with the
@@ -2158,15 +2201,16 @@ class BornMermin_Fortmann(FreeFreeModel):
     >>> state["free-free scattering"].set_guessed_E_cutoffs(state, setup)
 
     Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
-    ``True``, the integral RPA integral as formulated by :cite:`Chapman.2015`
-    is used, otherwise, use the formulas that are found, e.g., in
-    :cite:`Schorner.2023`.
+    ``True``, we solve the RPA integral as formulated by :cite:`Chapman.2015`
+    Otherwise, use the formulas that are found, e.g., in :cite:`Schorner.2023`.
+    The former implementation yields more stable results, most of the time.
 
-    Furtemore, it has the optional attribute ``KKT``, defaulting to ``False``,
+    The model has the optional attribute ``KKT``, defaulting to ``False``,
     using :py:func:`jaxrts.free_free.KramersKronigTransform`, for the imaginary
     part of the collision frequency, rather than solving the integral for the
     imaginary part, as well.
-    We found for edge cases to avoid numerical spikes.
+    We found for edge cases this behavior was beneficial to avoid numerical
+    spikes.
 
     Requires a 'chemical potential' model (defaults to
     :py:class:`~.IchimaruChemPotential`).
@@ -2418,8 +2462,8 @@ class SchumacherImpulse(ScatteringModel):
 
     Should yield similar results as
     :py:class:`~.SchumacherImpulseColdEdges`. However, rather than using
-    absorption edges being of the cold sample, here we use edges of
-    isolated ions in a plasma instead.
+    absorption edges beof the cold sample, here we use edges of isolated ions
+    in a plasma instead.
 
     Requires a 'form-factors' model (defaults to
     :py:class:`~PaulingFormFactors`).
@@ -2433,7 +2477,7 @@ class SchumacherImpulse(ScatteringModel):
 
     def __init__(self, r_k: float | None = None) -> None:
         """
-        r_k is the correction given in :cite:`Gregori.2004`. If None, or if a
+        r_k is the correction given in :cite:`Gregori.2004`. If `None`, or if a
         negative value is given, we use the formula given by
         :cite:`Gregori.2004`. Otherwise, it is just the value provided by the
         user.
@@ -2542,9 +2586,11 @@ class SchumacherImpulse(ScatteringModel):
                 Z_low = jnp.floor(charge_state)
                 Z_high = jnp.ceil(charge_state)
 
-                # Define the case where the higher ionization state is a bare nucleus
+                # Define the case where the higher ionization state is a bare
+                # nucleus
                 def handle_bare_nucleus_case(_):
-                    # Weight of the lower state is 100% of the remaining bound electrons
+                    # Weight of the lower state is 100% of the remaining bound
+                    # electrons
                     weight_low = element_atomic_number - charge_state
                     sbe_low = calculate_scattering_for_charge_state(Z_low)
                     # Contribution is only from the weighted lower state
@@ -2558,7 +2604,8 @@ class SchumacherImpulse(ScatteringModel):
                     sbe_high = calculate_scattering_for_charge_state(Z_high)
                     return weight_low * sbe_low + weight_high * sbe_high
 
-                # Condition to check if the higher ionization state is a bare nucleus
+                # Condition to check if the higher ionization state is a bare
+                # nucleus
                 is_bare_nucleus = Z_high >= element_atomic_number
 
                 return jax.lax.cond(
@@ -2726,7 +2773,8 @@ class SchumacherImpulseFitRk(ScatteringModel):
     Bound-free scattering based on the Schumacher Impulse Approximation
     :cite:`Schumacher.1975`. The implementation considers the first order
     asymmetric correction to the impulse approximation, as given in the
-    aforementioned paper. The r_k factor is fitted to fulfill the f-sum rule.
+    aforementioned paper. The r_k factor is set so that the full spectrum
+    fulfills the f-sum rule (See :cite:`Dornheim.2024`).
     Note, that this implementation is still experimental.
 
     Requires a 'form-factors' model (defaults to
@@ -2856,9 +2904,9 @@ class DetailedBalance(ScatteringModel):
 
     .. note::
 
-       This model requires to have an `evaluate_raw` method for the bound-free
-       model, which should return the bound-free scattering intensity **not
-       convolved** with an instrument function.
+       This model requires the ound-free model to have an `evaluate_raw`, which
+       should return the bound-free scattering intensity **not convolved** with
+       an instrument function. (See :py:class:`~.ScatteringModel`).
 
     .. note::
 
@@ -2926,13 +2974,14 @@ class PaulingFormFactors(Model):
 
 class FormFactorLowering(Model):
     """
-    Form factor lowering model as introduced by :cite:`Doeppner.2023`.
-    In high density plasma the form factor is reduced due to IPD.
-    This concept only applies for the K-shell. Here we calculate the f1s(k)
-    form factor with the analytic Pauling formular but with an IPD corrected
-    effective charge Z_eff. The spin up and spin down K-shell electrons and
-    their respective binding energies are taken into account for this
-    calculation.
+    Form factor lowering model as introduced by :cite:`Doppner.2023`.
+    In a high density plasma the form factor is reduced due to ionization
+    potential depression. This concept only applies to very high densities,
+    when only K-shell electrons should remain. Here we calculate the
+    :math:`f_{1s}(k)` form factor with the analytic Pauling formula but with an
+    IPD corrected effective charge `Z_eff`. The spin up and spin down K-shell
+    electrons and their respective binding energies are taken into account for
+    this calculation.
 
     .. note::
 
@@ -3057,7 +3106,7 @@ class IchimaruChemPotential(Model):
 
 class ConstantChemPotential(Model):
     """
-    A model that returns an a constant for each energy probed.
+    A model that returns a constant chemical potential, specified by a user.
     """
 
     allowed_keys = ["chemical potential"]
@@ -3158,7 +3207,7 @@ class BohmStaver(Model):
 
 class ConstantIPD(Model):
     """
-    A model that returns constant value for the IPD.
+    A model that returns a constant value for the IPD, set by the user.
     """
 
     allowed_keys = ["ipd"]
@@ -3208,9 +3257,10 @@ class ConstantIPD(Model):
 
 class DebyeHueckelIPD(Model):
     """
-    Debye Hückel IPD Model
-
-    See Also
+    Debye-Hückel IPD Model :cite:`Debye.1923`.
+    The Debye-Hückel Model is applicable for low-density and high-temperature
+    plasmas, determined by charge screening effects as described in the
+    Debye-Hückel theory.
     --------
     jaxrts.ipd.ipd_debye_hueckel
         Function used to calculate the IPD
@@ -3218,6 +3268,7 @@ class DebyeHueckelIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "DebyeHueckel"
+    cite_keys = ["Debye.1923", "Crowley.2014"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3255,9 +3306,11 @@ class DebyeHueckelIPD(Model):
 
 class StewartPyattIPD(Model):
     """
-    Stewart Pyatt IPD Model.
+    Stewart Pyatt IPD Model :cite:`Stewart.1966`.
+    The Stewart–Pyatt (SP) model interpolates between the
+    Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972`
+    at (low T, high rho) and (high T, low rho), respectively.
 
-    See Also
     --------
     jaxrts.ipd.ipd_stewart_pyatt
         Function used to calculate the IPD
@@ -3265,6 +3318,7 @@ class StewartPyattIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "StewartPyatt"
+    cite_keys = ["Stewart.1966", "Crowley.2014"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3353,9 +3407,15 @@ class StewartPyattFullDegIPD(Model):
 
 class IonSphereIPD(Model):
     """
-    Ion Sphere IPD Model.
+    Ion Sphere IPD Model :cite:`Rozsnyai.1972`.
 
-    See Also
+    The Ion Sphere Model (IS) is especially applicable plasmas with strong ion
+    coupling, and thus in particular for high density, low temperature plasmas.
+    The relevant length scale that determines the ionization potential is the
+    ion sphere radius R_0, determined by the condition that a sphere of radius
+    R_0 contains the same charge as given by the mean ionization and the
+    electron number density.
+
     --------
     jaxrts.ipd.ipd_ion_sphere
         Function used to calculate the IPD
@@ -3363,6 +3423,7 @@ class IonSphereIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "IonSphere"
+    cite_keys = ["Rozsnyai.1972", "Crowley.2014"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3394,9 +3455,17 @@ class IonSphereIPD(Model):
 
 class EckerKroellIPD(Model):
     """
-    Ecker Kröll IPD Model.
+    Ecker-Kröll IPD Model:cite:`EckerKroell.1963`.
 
-    See Also
+    Opposite to the Stewart-Pyatt:cite:`Stewart.1966` Model the Ecker-Kröll
+    Model assumes that the relevant length scale for determining the IPD in
+    high-density plasmas is not R_0 (the ion sphere radius) but rather the
+    average distance between all free particles r^3_EK = 3/4\\pi(n_e + n_i),
+    where n_e and n_i are the ion and electron number density.
+    The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt
+    Model for highly ionized plasmas.
+
+    See also
     --------
     jaxrts.ipd.ipd_ecker_kroell
         Function used to calculate the IPD
@@ -3404,6 +3473,7 @@ class EckerKroellIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "EckerKroell"
+    cite_keys = ["EckerKroell.1963", "Crowley.2014"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3418,9 +3488,14 @@ class EckerKroellIPD(Model):
 
 class PauliBlockingIPD(Model):
     """
-    Pauli Blocking IPD Model.
+    Pauli Blocking IPD Model :cite:`Ropke.2019`.
 
-    See Also
+    In dense plasma the bound state energies get modified due to the Pauli
+    exclusion principle, thereby lowering the ionization potential from below.
+    Additionally, the Pauli Blocking IPD Model should be supplemented by a
+    model that lowers the continuum and hence the ionization potential from
+    above.
+
     --------
     jaxrts.ipd.ipd_pauli_blocking
         Function used to calculate the IPD
@@ -3428,6 +3503,7 @@ class PauliBlockingIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "PauliBlocking"
+    cite_keys = ["Ropke.2019"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3469,8 +3545,8 @@ class PauliBlockingIPD(Model):
 
 class DebyeHueckelScreeningLength(Model):
     """
-    This is just the normal Debye Hückel screening length. Use the electron
-    temperature for the known formula
+    This is standard Debye Hückel screening length. See also
+    :cite:`Gericke.2010`.
 
     See also
     --------
@@ -3480,6 +3556,7 @@ class DebyeHueckelScreeningLength(Model):
 
     allowed_keys = ["screening length"]
     __name__ = "DebyeHueckelScreeningLength"
+    cite_keys = ["Debye.1923"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3490,8 +3567,8 @@ class DebyeHueckelScreeningLength(Model):
 
 class Gericke2010ScreeningLength(Model):
     """
-    Return the Debye-Hückel Debye screening length. Uses a 4th-power
-    interpolation between electron and fermi temperature, as proposed by
+    Return the Debye-Hückel screening length. Uses a 4th-power
+    interpolation between electron and Fermi temperature, as proposed by
     :cite:`Gericke.2010`
 
     See Also
@@ -3521,7 +3598,7 @@ class ArbitraryDegeneracyScreeningLength(Model):
     """
     A screening length valid for arbitrary degeneracy.
 
-    See Also
+    See Also :cite:`Ropke.2019`.
     --------
     ipd.inverse_screening_length_e
         The function used to calculate the inverse of the screening length
@@ -3579,28 +3656,46 @@ class ConstantScreeningLength(Model):
 # ================
 #
 # These models should return a `q`, the screening by free electrons which is
-# relevant when calculating the Raighley weight.
+# relevant when calculating the Rayleigh weight.
 
 
 class LinearResponseScreeningGericke2010(Model):
     """
     The screening density :math:`q` is calculated using a result from linear
-    response, by
+    response:
 
     .. math::
 
-       q(k) = \\xi_{ee}^{RPA} V_{ei}(k)
+       q(k) = \\chi_{ee}^\\text{DH} V_{ei}(k)
 
 
-    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
+    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3). The
+    susceptibility is calculated using the Debye Hückel dielectric function,
+    accessing the 'screening length' model of the plasma state.
+
+    .. math::
+
+       \\chi_ee^\\text{DH} = \\chi^0_{ee} / (1 - V_{ee}(1-LFC)\\chi^0_{ee})
+       \\chi^0_{ee} = \\frac{\\kappa_e \\varepsilon_0}{e^2}
+
+    :math:`kappa_e` is the screening length, LFC the local field correction
+    used, and V_{ee} the Coulomb potential.
 
     Requires an 'electron-ion' potential. (defaults to
     :py:class:`~KlimontovichKraeftPotential`).
 
+
+    .. note::
+
+       This model should reduce to the :py:class:`~.DebyeHueckelScreening`,
+       model if the local field correction is 0, and the electron-ion is a
+       Coulomb potential.
+
+
     See Also
     --------
-    jaxtrs.ion_feature.free_electron_susceptilibily
-        Function used to calculate :math:`\\xi{ee}`
+    jaxtrs.ion_feature.free_electron_susceptilibily_RPA
+        Function used to calculate :math:`\\xi{ee}^\\text{RPA}`
     """
 
     allowed_keys = ["screening"]
@@ -3627,7 +3722,8 @@ class LinearResponseScreeningGericke2010(Model):
 
         # Use the Debye screening length for the screening cloud.
         kappa = 1 / plasma_state.screening_length
-        xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa)
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        xi = ion_feature.free_electron_susceptilibily_RPA(setup.k, kappa, lfc)
         Vei = plasma_state["electron-ion Potential"].full_k(
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )
@@ -3644,10 +3740,25 @@ class LinearResponseScreeningGericke2010(Model):
 
 class FiniteWavelengthScreening(Model):
     """
-    Finite wavelenth screening as presented by :cite:`Chapman.2015b`.
+    Finite wavelength screening as presented by :cite:`Chapman.2015b`, using a
+    using a result from linear to calculate the screening density :math:`q`:
+
+    .. math::
+
+       q(k) = \\chi_{ee}^\\text{RPA} V_{ei}(k)
+
+
+    The RPA is calculated using the fit formula from :cite:`Dandrea.1986`.
 
     Should be identical to :py:class:`~.LinearResponseScreening`, if the
     free-free model is a RPA model.
+
+    .. note::
+
+       Due to the above definition, the 'screening length' ``Model`` of the
+       plasma state is of no relevance for the evaluation of this Screening
+       Model.
+
 
     See also
     --------
@@ -3657,7 +3768,7 @@ class FiniteWavelengthScreening(Model):
 
     allowed_keys = ["screening"]
     __name__ = "FiniteWavelengthScreening"
-    cite_keys = ["Chapman.2015b"]
+    cite_keys = ["Chapman.2015b", ("Dandrea.1986", "Analytical Fit for RPA")]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -3694,6 +3805,21 @@ class DebyeHueckelScreening(Model):
     """
     Debye Hueckel screening as presented by :cite:`Chapman.2015b`.
 
+    .. math::
+
+       q^\\text{DH} = Z_f \\frac{\\kappa_e^*2}{\\kappa_e^2 + k^2}
+
+
+    Where :math:`\\kappa_e` is given by the 'screening length' model.
+
+    .. note::
+
+       This model should give the same results as
+       :py:class:`~.LinearResponseScreeningGericke2010`, if the latter is
+       evaluated with a local field correction of 0, and the electron-ion
+       potential being a Coulomb potential
+
+
     See also
     --------
     jaxrts.ion_feature.q_DebyeHueckelChapman2015
@@ -3728,21 +3854,21 @@ class DebyeHueckelScreening(Model):
 class LinearResponseScreening(Model):
     """
     The screening density :math:`q` is calculated using a result from linear
-    response, by
+    response:
 
     .. math::
 
-       q(k) = \\xi_{ee} V_{ei}(k)
+       q(k) = \\chi_{ee} V_{ei}(k)
 
 
     See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
 
-    Requires an 'electron-ion' potential. (defaults to
-    :py:class:`~KlimontovichKraeftPotential`).
-
     Uses the :py:meth:`~.FreeFreeModel.susceptibility` method of the chosen
     Free Free model. If not free-free model is specified, set the default to
     :py:class:`~.RPA_DandreaFit`.
+
+    Requires an 'electron-ion' potential. (defaults to
+    :py:class:`~KlimontovichKraeftPotential`).
     """
 
     allowed_keys = ["screening"]
@@ -3784,7 +3910,11 @@ class LinearResponseScreening(Model):
 class Gregori2004Screening(Model):
     """
     Calculating the screening from free electrons according to
-    :cite:`Gregori.2004`.
+    :cite:`Gregori.2004`. This implementation of the screening relies on
+    calculating static sturcture factors for the ion-electron system by the
+    work of Arkhipov (:cite:`Arkhipov.1998` and :cite:`Arkhipov.2000`) -- with
+    the limits in applicablity for a dense plasma, as, among others, work by
+    :cite:`Schwarz.2007` shows.
 
     See Also
     --------
@@ -3907,7 +4037,7 @@ class ElectronicLFCUtsumiIchimaru(Model):
 
 class ElectronicLFCDornheimAnalyticalInterp(Model):
     """
-    Static local field correction model by Dornheim et al
+    Static local field correction model by Dornheim et al.
     :cite:`Dornheim.2021`. Their model is an analytical interpolation of
     ab-initio PIMC simulations.
 
@@ -4290,7 +4420,8 @@ class DebyeHueckel_BM_V(BM_V_eiSModel):
 class FiniteWavelength_BM_V(BM_V_eiSModel):
     """
     Uses finite wavelength screening to screen the bare Coulomb potential,
-    i.e., :math:`V_{s} = \\frac{V_\\mathrm{Coulomb}}{\\vareps_{RPA}(k, E=0)}`
+    i.e.,
+    :math:`V_{s}=\\frac{V_\\mathrm{Coulomb}}{\\varepsilon_\\text{RPA}(k, E=0)}`
 
     We use the pure RPA result to calculate the dielectric function, and use
     the :cite:`Dandrea.1986` fitting formula.
