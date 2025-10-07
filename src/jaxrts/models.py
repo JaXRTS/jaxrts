@@ -608,6 +608,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         rmin: Quantity = 0.001 * ureg.a_0,
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
+        SVT: bool = False,
         mix: float = 0.0,
         tmult: list[float] = None,
     ) -> None:
@@ -617,6 +618,9 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         self.r_min: Quantity = rmin
         #: The maximal radius for evaluating the potentials.
         self.r_max: Quantity = rmax
+        #: if ``True`` use the SVT formulation to extend the HNC scheme to
+        #: different temperatures between the components.
+        self.SVT: bool = SVT
         #: The exponent (``2 ** pot``), setting the number of points in ``r``
         #: or ``k`` to evaluate.
         self.pot: int = pot
@@ -668,9 +672,15 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         # ----------------------------------
         T = plasma_state["ion-ion Potential"].T(plasma_state)
         n = plasma_state.n_i
-        g, niter = hypernetted_chain.pair_distribution_function_HNC(
-            V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
-        )
+        if self.SVT:
+            masses = to_array([ion.atomic_mass for ion in plasma_state.ions])
+            g, niter = hypernetted_chain.pair_distribution_function_SVT_HNC(
+                V_s_r, V_l_k, self.r, T, n, masses, self.mix, self.tmult
+            )
+        else:
+            g, niter = hypernetted_chain.pair_distribution_function_HNC(
+                V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
+            )
         logger.debug(
             f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
         )
@@ -690,13 +700,14 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         aux_data = (
             self.model_key,
             self.pot,
+            self.SVT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.pot = aux_data
+        obj.model_key, obj.pot, obj.SVT = aux_data
         obj.r_min, obj.r_max, obj.mix, obj.tmult = children
 
         return obj
@@ -754,6 +765,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         rmin: Quantity = 0.001 * ureg.a_0,
         rmax: Quantity = 100 * ureg.a_0,
         pot: int = 14,
+        SVT: bool = False,
         mix: float = 0.0,
         tmult: list[float] = None,
     ) -> None:
@@ -772,6 +784,9 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         #: increased when HNC becomes numerically unstable due to high coupling
         #: strengths.
         self.mix: float = mix
+        #: if ``True`` use the SVT formulation to extend the HNC scheme to
+        #: different temperatures between the components.
+        self.SVT: bool = SVT
         #: List of temperature multipliers used in auxiliary HNC calculations.
         #: HNC can be sensitive to initial guesses, and the algorithm often
         #: converges more reliably at higher temperatures.
@@ -876,9 +891,20 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         # ----------------------------------
         T = plasma_state["ion-ion Potential"].T(plasma_state)
         n = to_array([*plasma_state.n_i, plasma_state.n_e])
-        g, niter = hypernetted_chain.pair_distribution_function_HNC(
-            V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
-        )
+        if self.SVT:
+            masses = to_array(
+                [
+                    *[ion.atomic_mass for ion in plasma_state.ions],
+                    1 * ureg.electron_mass,
+                ]
+            )
+            g, niter = hypernetted_chain.pair_distribution_function_SVT_HNC(
+                V_s_r, V_l_k, self.r, T, n, masses, self.mix, self.tmult
+            )
+        else:
+            g, niter = hypernetted_chain.pair_distribution_function_HNC(
+                V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
+            )
         logger.debug(
             f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
         )
@@ -951,13 +977,14 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         aux_data = (
             self.model_key,
             self.pot,
+            self.SVT,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.pot = aux_data
+        obj.model_key, obj.pot, obj.SVT = aux_data
         obj.r_min, obj.r_max, obj.mix, obj.tmult = children
 
         return obj

@@ -359,15 +359,19 @@ _3Dfour_ogata = jax.vmap(
 
 _3Dfour = _3Dfour_sine
 
-
 @jax.jit
-def pair_distribution_function_two_component_SVT_HNC_ei(
-    V_s, V_l_k, r, T_ab, n, m, mix=0.0
+def pair_distribution_function_SVT_HNC(
+    V_s, V_l_k, r, T_ab, n, m, mix=0.0, tmult=None
 ):
     """
-    See :cite:`Shaffer.2017`, solved Eqns. 7. This reference fixes some typos
-    in the seminal work of :cite:`Seuferling.1989`.
+    Multi-component, multi-temperature version of the SVT-OZ-HNC, by extending the
+    sum to all species in Eq. 7 in :cite:`Shaffer.2017`.
     """
+    if tmult is None:
+        tmult = []
+    iterations = 0
+    tmult = [*tmult, 1.0]
+
     delta = 1e-6
 
     dr = r[1] - r[0]
@@ -375,198 +379,157 @@ def pair_distribution_function_two_component_SVT_HNC_ei(
 
     k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
-    beta = 1 / (ureg.boltzmann_constant * T_ab)
+    m_ab = jnpu.outer(m, m) / (
+        m[:, jnp.newaxis] + m[jnp.newaxis, :]
+    )  # m_a * m_b / (m_a + m_b)
 
-    v_s = beta * V_s
-    v_l_k = beta * V_l_k
-
-    log_g_r0 = -(v_s).to(ureg.dimensionless)
-    Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
-
-    def svt_ozr_ei(c_k):
+    @jax.jit
+    def build_coeffs(
+        n: jnp.ndarray, T: jnp.ndarray, m: jnp.ndarray, mab: jnp.ndarray
+    ) -> tuple[jnp.ndarray, jnp.ndarray]:
         """
-        The modified Ornstein-Zernicke Relation
+        n: (M,), T: (M,M) pairwise array, m: (M,)
+        Returns coeff1, coeff2 with shape (M, M, M) and axes (a,b,s)
+        coeff1[a,b,s] = n[s] * (mab[a,b] * T[a,s]) / (m[a] * T[a,b])
+        coeff2[a,b,s] = n[s] * (mab[a,b] * T[s,b]) / (m[b] * T[a,b])
         """
 
-        cee = c_k[1, 1]
-        cei = c_k[1, 0]
-        cii = c_k[0, 0]
+        # extend the axis that is not given
+        _T = T[:, :, 0]
+        Tab = _T[:, :, jnp.newaxis]
+        Tas = _T[:, jnp.newaxis, :]
+        Tbs = _T[jnp.newaxis, :, :]
 
-        beta_e = beta[1, 1, 0]
-        beta_i = beta[0, 0, 0]
-        beta_ei = beta[1, 0, 0]
+        mab = mab[:, :, jnp.newaxis]
 
-        ni = n[0]
-        ne = n[1]
+        numer1 = mab * Tas
+        denom1 = m[:, jnp.newaxis, jnp.newaxis] * Tab
+        coeff1 = n[jnp.newaxis, jnp.newaxis, :] * (numer1 / denom1)
 
-        me = m[1]
-        mi = m[0]
+        numer2 = mab * Tbs
+        denom2 = m[jnp.newaxis, :, jnp.newaxis] * Tab
+        coeff2 = n[jnp.newaxis, jnp.newaxis, :] * (numer2 / denom2)
 
-        hei = (
-            beta_ei
-            * (
-                beta_e * beta_i * cei * me
-                + beta_e * beta_i * cei * mi
-                - beta_e * beta_i * cee * cei * mi * ne
-                - beta_e * beta_i * cei * cii * me * ni
+        return coeff1, coeff2
+
+    for titer, mult in enumerate(tmult):
+
+        beta = 1 / (ureg.boltzmann_constant * mult * T_ab)
+
+        v_s = beta * V_s
+        v_l_k = beta * V_l_k
+
+        log_g_r0 = -(v_s).to(ureg.dimensionless)
+        Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
+
+        coeff_1, coeff_2 = build_coeffs(n, mult * T_ab, m, m_ab)
+
+        def svt_ozr_ei(c_k):
+            """
+            The modified Ornstein-Zernicke Relation
+            """
+
+            M = c_k.shape[0]
+            ar = jnp.arange(M)
+
+            # index grids
+            a = ar[:, jnp.newaxis, jnp.newaxis]  # shape (M,1,1)
+            b = ar[jnp.newaxis, :, jnp.newaxis]  # shape (1,M,1)
+            s = ar[jnp.newaxis, jnp.newaxis, :]  # shape (1,1,M)
+
+            # broadcast to full (M,M,M) so every (a,b,s) is explicit
+            a3 = jnp.broadcast_to(a, (M, M, M))
+            b3 = jnp.broadcast_to(b, (M, M, M))
+            s3 = jnp.broadcast_to(s, (M, M, M))
+
+            # flattened row & column indices in the big matrix A
+            p_idx = (a3 * M + b3).reshape(-1).astype(jnp.int32)  # (M^3,)
+            q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)  # idx(s,b)
+            q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)  # idx(a,s)
+
+            # values to scatter: -alpha[a,b,s] * C[a,s]  and  -beta[a,b,s] * C[s,b]
+            vals1 = (
+                -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)
             )
-        ) / (
-            beta_e * beta_i * beta_ei * me
-            + beta_e * beta_i * beta_ei * mi
-            + beta_i * beta_ei**2 * cee**2 * mi * ne**2
-            + beta_e * beta_ei**2 * cii**2 * me * ni**2
-            - beta_i * beta_ei**2 * cee * mi * ne
-            - beta_e * beta_ei**2 * cii * me * ni
-            - beta_e**2 * beta_i * cei**2 * me * ne * ni
-            - beta_e * beta_i**2 * cei**2 * mi * ne * ni
-            - beta_e * beta_i * beta_ei * cee * me * ne
-            - beta_e * beta_i * beta_ei * cee * mi * ne
-            - beta_e * beta_i * beta_ei * cii * me * ni
-            - beta_e * beta_i * beta_ei * cii * mi * ni
-            + beta_e * beta_i**2 * cee * cei**2 * mi * ne**2 * ni
-            - beta_e * beta_ei**2 * cee * cii**2 * me * ne * ni**2
-            + beta_e**2 * beta_i * cei**2 * cii * me * ne * ni**2
-            - beta_i * beta_ei**2 * cee**2 * cii * mi * ne**2 * ni
-            + beta_e * beta_ei**2 * cee * cii * me * ne * ni
-            + beta_i * beta_ei**2 * cee * cii * mi * ne * ni
-            + beta_e * beta_i * beta_ei * cee * cii * me * ne * ni
-            + beta_e * beta_i * beta_ei * cee * cii * mi * ne * ni
-        )
-
-        hee = -(
-            beta_i * beta_ei**2 * cee**2 * mi * ne
-            - beta_e**2 * beta_i * cei**2 * me * ni
-            - beta_e**2 * beta_i * cei**2 * mi * ni
-            - beta_e * beta_i * beta_ei * cee * me
-            - beta_e * beta_i * beta_ei * cee * mi
-            + beta_e * beta_ei**2 * cee * cii * me * ni
-            - beta_e * beta_ei**2 * cee * cii**2 * me * ni**2
-            + beta_e**2 * beta_i * cei**2 * cii * me * ni**2
-            + beta_e * beta_i * beta_ei * cee * cii * me * ni
-            + beta_e * beta_i * beta_ei * cee * cii * mi * ni
-            + beta_e * beta_i**2 * cee * cei**2 * mi * ne * ni
-            - beta_i * beta_ei**2 * cee**2 * cii * mi * ne * ni
-        ) / (
-            beta_e * beta_i * beta_ei * me
-            + beta_e * beta_i * beta_ei * mi
-            + beta_i * beta_ei**2 * cee**2 * mi * ne**2
-            + beta_e * beta_ei**2 * cii**2 * me * ni**2
-            - beta_i * beta_ei**2 * cee * mi * ne
-            - beta_e * beta_ei**2 * cii * me * ni
-            - beta_e**2 * beta_i * cei**2 * me * ne * ni
-            - beta_e * beta_i**2 * cei**2 * mi * ne * ni
-            - beta_e * beta_i * beta_ei * cee * me * ne
-            - beta_e * beta_i * beta_ei * cee * mi * ne
-            - beta_e * beta_i * beta_ei * cii * me * ni
-            - beta_e * beta_i * beta_ei * cii * mi * ni
-            + beta_e * beta_i**2 * cee * cei**2 * mi * ne**2 * ni
-            - beta_e * beta_ei**2 * cee * cii**2 * me * ne * ni**2
-            + beta_e**2 * beta_i * cei**2 * cii * me * ne * ni**2
-            - beta_i * beta_ei**2 * cee**2 * cii * mi * ne**2 * ni
-            + beta_e * beta_ei**2 * cee * cii * me * ne * ni
-            + beta_i * beta_ei**2 * cee * cii * mi * ne * ni
-            + beta_e * beta_i * beta_ei * cee * cii * me * ne * ni
-            + beta_e * beta_i * beta_ei * cee * cii * mi * ne * ni
-        )
-
-        hii = (
-            beta_e * beta_i**2 * cei**2 * me * ne
-            + beta_e * beta_i**2 * cei**2 * mi * ne
-            - beta_e * beta_ei**2 * cii**2 * me * ni
-            + beta_e * beta_i * beta_ei * cii * me
-            + beta_e * beta_i * beta_ei * cii * mi
-            - beta_i * beta_ei**2 * cee * cii * mi * ne
-            - beta_e * beta_i**2 * cee * cei**2 * mi * ne**2
-            + beta_i * beta_ei**2 * cee**2 * cii * mi * ne**2
-            - beta_e * beta_i * beta_ei * cee * cii * me * ne
-            - beta_e * beta_i * beta_ei * cee * cii * mi * ne
-            + beta_e * beta_ei**2 * cee * cii**2 * me * ne * ni
-            - beta_e**2 * beta_i * cei**2 * cii * me * ne * ni
-        ) / (
-            beta_e * beta_i * beta_ei * me
-            + beta_e * beta_i * beta_ei * mi
-            + beta_i * beta_ei**2 * cee**2 * mi * ne**2
-            + beta_e * beta_ei**2 * cii**2 * me * ni**2
-            - beta_i * beta_ei**2 * cee * mi * ne
-            - beta_e * beta_ei**2 * cii * me * ni
-            - beta_e**2 * beta_i * cei**2 * me * ne * ni
-            - beta_e * beta_i**2 * cei**2 * mi * ne * ni
-            - beta_e * beta_i * beta_ei * cee * me * ne
-            - beta_e * beta_i * beta_ei * cee * mi * ne
-            - beta_e * beta_i * beta_ei * cii * me * ni
-            - beta_e * beta_i * beta_ei * cii * mi * ni
-            + beta_e * beta_i**2 * cee * cei**2 * mi * ne**2 * ni
-            - beta_e * beta_ei**2 * cee * cii**2 * me * ne * ni**2
-            + beta_e**2 * beta_i * cei**2 * cii * me * ne * ni**2
-            - beta_i * beta_ei**2 * cee**2 * cii * mi * ne**2 * ni
-            + beta_e * beta_ei**2 * cee * cii * me * ne * ni
-            + beta_i * beta_ei**2 * cee * cii * mi * ne * ni
-            + beta_e * beta_i * beta_ei * cee * cii * me * ne * ni
-            + beta_e * beta_i * beta_ei * cee * cii * mi * ne * ni
-        )
-
-        return (
-            jnp.array(
-                [
-                    [hii.m_as(ureg.angstrom**3), hei.m_as(ureg.angstrom**3)],
-                    [hei.m_as(ureg.angstrom**3), hee.m_as(ureg.angstrom**3)],
-                ]
+            vals2 = (
+                -(coeff_2 * c_k[s3, b3]).reshape(-1).m_as(ureg.dimensionless)
             )
-            * ureg.angstrom**3
-        )
 
-    def condition(val):
-        """
-        If this is False, the loop will stop. Abort if too many steps were
-        reached, or if convergence was reached.
-        """
-        _, Ns_r, Ns_r_old, n_iter = val
-        err = jnpu.sum((Ns_r - Ns_r_old) ** 2)
-        return (n_iter < 2000) & jnp.all(err > delta)
+            # Build A = I + scattered contributions
+            A = jnp.eye(M**2, dtype=c_k.dtype)
+            A = A.at[p_idx, q1_idx].add(vals1)
+            A = A.at[p_idx, q2_idx].add(vals2)
 
-    def step(val):
-        log_g_r, Ns_r, _, i = val
+            # RHS is vec(C) with mapping p = a*M + b matching reshape order
+            rhs = c_k.reshape(-1)
+            H_flat = jnpu.matmul(jnp.linalg.inv(A), rhs)
 
-        h_r = jnpu.expm1(log_g_r)
+            return H_flat.reshape((M, M))
 
-        cs_r = h_r - Ns_r
+        def condition(val):
+            """
+            If this is False, the loop will stop. Abort if too many steps were
+            reached, or if convergence was reached.
+            """
+            _, Ns_r, Ns_r_old, n_iter = val
+            err = jnpu.sum((Ns_r - Ns_r_old) ** 2)
+            return (n_iter < 2000) & jnp.all(err > delta)
 
-        cs_k = _3Dfour(k, r, cs_r)
+        def step(val):
+            log_g_r, Ns_r, _, i = val
 
-        c_k = cs_k - v_l_k
+            h_r = jnpu.expm1(log_g_r)
 
-        # Ornstein-Zernike relation
-        h_k = jax.vmap(svt_ozr_ei, in_axes=2, out_axes=2)(c_k)
+            cs_r = h_r - Ns_r
 
-        Ns_k = h_k - cs_k
+            cs_k = _3Dfour(k, r, cs_r)
 
-        Ns_r_new_full = (
-            _3Dfour(
-                r,
-                k,
-                Ns_k,
+            c_k = cs_k - v_l_k
+
+            # Ornstein-Zernike relation
+            h_k = jax.vmap(svt_ozr_ei, in_axes=2, out_axes=2)(c_k)
+
+            Ns_k = h_k - cs_k
+
+            Ns_r_new_full = (
+                _3Dfour(
+                    r,
+                    k,
+                    Ns_k,
+                )
+                / (2 * jnp.pi) ** 3
             )
-            / (2 * jnp.pi) ** 3
+
+            Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
+
+            # Maybe do some clipping here to avoid numerical issues?
+            log_g_r_new = Ns_r_new - v_s
+            return (
+                log_g_r_new,
+                Ns_r_new,
+                Ns_r,
+                i + 1,
+            )
+
+        if titer == 0:
+            log_g_r0 = -(v_s).to(ureg.dimensionless)
+            Ns_r0 = jnp.zeros_like(log_g_r0) * ureg.dimensionless
+            init = (log_g_r0, Ns_r0, Ns_r0 - 1, 0)
+        # Otherwise, use the result of the previous temperature
+        else:
+            # Do a few steps, to not abort, directly,
+            # because the previous cycle was converged.
+            for i in range(5):
+                log_g_r, Ns_r, Ns_r_old, _ = step(
+                    (log_g_r, Ns_r, Ns_r_old, i)  # noqa: F821
+                )
+                iterations += 1
+            init = (log_g_r, Ns_r, Ns_r_old, 0)
+
+        log_g_r, Ns_r, Ns_r_old, niter = jax.lax.while_loop(
+            condition, step, init
         )
-
-        Ns_r_new = (1 - mix) * Ns_r_new_full + mix * Ns_r
-
-        log_g_r_new = Ns_r_new - v_s
-
-        return (
-            log_g_r_new.m_as(ureg.dimensionless),
-            Ns_r_new.m_as(ureg.dimensionless),
-            Ns_r,
-            i + 1,
-        )
-
-    init = (
-        log_g_r0.m_as(ureg.dimensionless),
-        Ns_r0.m_as(ureg.dimensionless),
-        Ns_r0.m_as(ureg.dimensionless) - 1,
-        0,
-    )
-    log_g_r, _, _, niter = jax.lax.while_loop(condition, step, init)
+        iterations += niter
 
     return jnpu.exp(log_g_r), niter
 
