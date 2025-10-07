@@ -26,6 +26,9 @@ ELEMENTS = {
     for k in range(1, 37)
 }
 
+ELEMENTS["HT"] = 2.5 * ureg.u
+ELEMENTS_Z["HT"] = 1
+
 import tkinter.font as tkfont
 
 def compute_plasma_parameters(rho, element_symbol, T_e, Z_avg):
@@ -51,12 +54,18 @@ def compute_plasma_parameters(rho, element_symbol, T_e, Z_avg):
     a_ws_i = (3 / (4 * math.pi * (n_e / Z_avg))) ** (1 / 3)
     r_dB_e = pp.therm_de_broglie_wl(T_e)
 
+    E_Fe = pp.fermi_energy(n_e)
+    E_Fi = pp.fermi_energy(n_i)
+
+    kTeff_e = 1 * ureg.boltzmann_constant * ((E_Fe / ureg.boltzmann_constant)**4 + (kT / ureg.boltzmann_constant)**4)**(1/4)
+    kTeff_i = 1 * ureg.boltzmann_constant * ((E_Fi / ureg.boltzmann_constant)**4 + (kT / ureg.boltzmann_constant)**4)**(1/4)
+
     Gamma_ee = (e_charge**2) / (4 * math.pi * eps0 * a_ws_e * kT)
     Gamma_ii = ((Z_avg * e_charge) ** 2) / (4 * math.pi * eps0 * a_ws_i * kT)
     Gamma_ei = (Z_avg * e_charge**2) / (4 * math.pi * eps0 * a_ws_i * kT)
 
-    E_Fe = pp.fermi_energy(n_e)
-    E_Fi = pp.fermi_energy(n_i)
+    Gamma_ee_eff = (e_charge**2) / (4 * math.pi * eps0 * a_ws_e * kTeff_e)
+    Gamma_ii_eff = ((Z_avg * e_charge) ** 2) / (4 * math.pi * eps0 * a_ws_i * kTeff_i)
 
     Theta_e = kT / E_Fe
     Theta_i = kT / E_Fi
@@ -76,6 +85,8 @@ def compute_plasma_parameters(rho, element_symbol, T_e, Z_avg):
         "Gamma_ee": Gamma_ee.to(ureg.dimensionless),
         "Gamma_ii": Gamma_ii.to(ureg.dimensionless),
         "Gamma_ei": Gamma_ei.to(ureg.dimensionless),
+        "Gamma_ee_eff" : Gamma_ee_eff.to(ureg.dimensionless),
+        "Gamma_ii_eff" : Gamma_ii_eff.to(ureg.dimensionless),
         "E_Fe": E_Fe.to("eV"),
         "E_Fi": E_Fi.to("eV"),
         "Theta_e": Theta_e.to(ureg.dimensionless),
@@ -89,7 +100,7 @@ class PlasmaGUI:
     def __init__(self, root):
         self.root = root
         root.title("Plasma Parameters Calculator")
-        root.geometry("900x500")
+        root.geometry("1000x500")
         root.resizable(False, False)
 
         left_frame = ttk.Frame(root, padding=(10, 10))
@@ -122,7 +133,7 @@ class PlasmaGUI:
             state="readonly",
         )
         self.element_combo.grid(row=row, column=1, pady=4)
-        self.element_combo.set("H")
+        self.element_combo.set("HT")
 
         row += 1
         ttk.Label(left_frame, text="Temperature T [eV]").grid(
@@ -183,6 +194,11 @@ class PlasmaGUI:
 
     def display_results(self, r, element, T_e, Z):
 
+        self.output_label.config(state="normal")   # enable editing
+        self.output_label.delete("1.0", "end")     # clear all text
+        self.output_label.insert("1.0", "")  # insert new text if provided
+        self.output_label.config(state="disabled") # disable editing
+
         lines = []
         lines.append(
             f"Element: {element}    T = {T_e:.3g} eV    Z_free = {Z:.3g}"
@@ -228,12 +244,12 @@ class PlasmaGUI:
         )
         lines.append("")
         lines.append(
-            f"electron-electron coupling parameter Γ_ee = {r['Gamma_ee']:.3eP}".replace(
+            f"electron-electron coupling parameter Γ_ee = {r['Gamma_ee']:.3eP} (deg: {r['Gamma_ee_eff']:.3eP})".replace(
                 "dimensionless", ""
             )
         )
         lines.append(
-            f"ion-ion coupling parameter Γ_ii = {r['Gamma_ii']:.3eP}".replace(
+            f"ion-ion coupling parameter Γ_ii = {r['Gamma_ii']:.3eP} (deg: {r['Gamma_ii_eff']:.3eP})".replace(
                 "dimensionless", ""
             )
         )
@@ -254,7 +270,7 @@ class PlasmaGUI:
             )
         )
         lines.append(
-            f"Degeneracy parameter Θ (electrons)= {r['Theta_e']:.3fP}".replace(
+            f"Degeneracy parameter Θ (electrons) = {r['Theta_e']:.3fP}".replace(
                 "dimensionless", ""
             )
         )
@@ -287,8 +303,8 @@ class PlasmaGUI:
                 return "weakly"
 
         level = {1: "weakly", 2: "moderately", 3: "strongly"}
-        coupling_i = determine_level(r["Gamma_ii"])
-        coupling_e = determine_level(r["Gamma_ee"])
+        coupling_i = determine_level(r["Gamma_ii_eff"])
+        coupling_e = determine_level(r["Gamma_ee_eff"])
         degen_i = determine_level(1 / r["Theta_i"])
         degen_e = determine_level(1 / r["Theta_e"])
 
