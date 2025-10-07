@@ -1,10 +1,17 @@
 SVT–OZ and notation
 ===================
-We derive the linear-algebra form of the SVT--OZ relation :cite:`Shaffer.2017` for a general :math:`M`-component, :math:`M`-temperature plasma. First, we use the explicit :math:`M=2` case as a warm-up, then we extend this to the full formula for the :math:`M^2 \times M^2` matrix entries.
 
-Consider :math:`M` species (note that with electrons included in the calculation, this means: M-1 ions plus electron) with number densities :math:`\{n_a\}`, masses
-:math:`\{m_a\}`, and temperatures :math:`\{T_a\}` (:math:`a=1,\dots,M`).
-In :math:`k`-space, the multi-component SVT–OZ relation can be obtained by extending the work of :cite:`Shaffer.2017` through summation over all species, yielding
+We derive the linear-algebra form of the SVT--OZ relation :cite:`Shaffer.2017`
+for a general :math:`M`-component, :math:`M`-temperature plasma. First, we use
+the explicit :math:`M=2` case as a warm-up, then we extend this to the full
+formula for the :math:`M^2 \times M^2` matrix entries.
+
+Consider :math:`M` species (note that with electrons included in the
+calculation, this means: M-1 ions plus electron) with number densities
+:math:`\{n_a\}`, masses :math:`\{m_a\}`, and temperatures :math:`\{T_a\}`
+(:math:`a=1,\dots,M`). In :math:`k`-space, the multi-component SVT–OZ relation
+can be obtained by extending the work of :cite:`Shaffer.2017` through summation
+over all species, yielding
 
 .. math::
 
@@ -38,12 +45,12 @@ For brevity define
 Moving all terms to the left, except :math:`\hat c_{ab}`.
 
 .. math::
+   :label: svt-oz-LHS
 
    \hat h_{ab}
    -\sum_{s=1}^M \alpha_{abs}\,\hat c_{as}\,\hat h_{sb}
    -\sum_{s=1}^M \beta_{abs}\,\hat h_{as}\,\hat c_{sb}
    =\hat c_{ab}.
-   \label{eq:svt-oz-LHS}
 
 In real space we use the HNC closure with the *cross* temperature
 :math:`T_{ab}`,
@@ -79,35 +86,35 @@ For :math:`M{=}2`, the four unknowns are
    \mathrm{vec}(\hat C)=
    \begin{bmatrix}\hat c_{11}&\hat c_{12}&\hat c_{21}&\hat c_{22}\end{bmatrix}^{\!\top}.
 
-Writing :eq:`eq:svt-oz-LHS` for
+Writing :eq:`svt-oz-LHS` for
 :math:`(a,b)=(1,1),(1,2),(2,1),(2,2)` gives
 
 .. math::
 
    \begin{aligned}
-   \hat{h}_{11} - 
-   \alpha_{111}\, \hat{c}_{11}\, \hat{h}_{11}  - 
-   \alpha_{112}\, \hat{c}_{12}\, \hat{h}_{21} - 
-   \beta_{111}\, \hat{h}_{11}\, \hat{c}_{11} - 
-   \beta_{112}\, \hat{h}_{12}\, \hat{c}_{21} &= 
+   \hat{h}_{11} -
+   \alpha_{111}\, \hat{c}_{11}\, \hat{h}_{11}  -
+   \alpha_{112}\, \hat{c}_{12}\, \hat{h}_{21} -
+   \beta_{111}\, \hat{h}_{11}\, \hat{c}_{11} -
+   \beta_{112}\, \hat{h}_{12}\, \hat{c}_{21} &=
    \hat{c}_{11},\\
-   \hat{h}_{12} - 
-   \alpha_{121}\, \hat{c}_{11}\, \hat{h}_{12}  - 
-   \alpha_{122}\, \hat{c}_{12}\, \hat{h}_{22} - 
-   \beta_{121}\, \hat{h}_{11}\, \hat{c}_{12} - 
-   \beta_{122}\, \hat{h}_{12}\, \hat{c}_{22} &= 
+   \hat{h}_{12} -
+   \alpha_{121}\, \hat{c}_{11}\, \hat{h}_{12}  -
+   \alpha_{122}\, \hat{c}_{12}\, \hat{h}_{22} -
+   \beta_{121}\, \hat{h}_{11}\, \hat{c}_{12} -
+   \beta_{122}\, \hat{h}_{12}\, \hat{c}_{22} &=
    \hat{c}_{12},\\
-   \hat{h}_{21} - 
-   \alpha_{211}\, \hat{c}_{21}\, \hat{h}_{11}  - 
-   \alpha_{212}\, \hat{c}_{22}\, \hat{h}_{21} - 
-   \beta_{211}\, \hat{h}_{21}\, \hat{c}_{11} - 
-   \beta_{212}\, \hat{h}_{22}\, \hat{c}_{21} &= 
+   \hat{h}_{21} -
+   \alpha_{211}\, \hat{c}_{21}\, \hat{h}_{11}  -
+   \alpha_{212}\, \hat{c}_{22}\, \hat{h}_{21} -
+   \beta_{211}\, \hat{h}_{21}\, \hat{c}_{11} -
+   \beta_{212}\, \hat{h}_{22}\, \hat{c}_{21} &=
    \hat{c}_{21},\\
-   \hat{h}_{22} - 
-   \alpha_{221}\, \hat{c}_{21}\, \hat{h}_{12}  - 
-   \alpha_{222}\, \hat{c}_{22}\, \hat{h}_{22} - 
-   \beta_{221}\, \hat{h}_{21}\, \hat{c}_{12} - 
-   \beta_{222}\, \hat{h}_{22}\, \hat{c}_{22} &= 
+   \hat{h}_{22} -
+   \alpha_{221}\, \hat{c}_{21}\, \hat{h}_{12}  -
+   \alpha_{222}\, \hat{c}_{22}\, \hat{h}_{22} -
+   \beta_{221}\, \hat{h}_{21}\, \hat{c}_{12} -
+   \beta_{222}\, \hat{h}_{22}\, \hat{c}_{22} &=
    \hat{c}_{22}.
    \end{aligned}
 

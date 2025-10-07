@@ -1,11 +1,13 @@
 """
 HNC-SVT: multi-component, multi-temperature (M-SVT)
-# ======================================================================
-This example tests M-SVT model and reproduces Fig. 4.12 from :cite:`Wunsch.2011`.
+===================================================
 
-For equilibrium case, the M-SVT method gives identical results as the Fig. 4.12 
-from :cite:`Wunsch.2011`. And the results are also consistent with the results from
-plot_HNC_multicomponent.py.
+This example tests M-SVT model and reproduces Fig. 4.12 from
+:cite:`Wunsch.2011`.
+
+For equilibrium case, the M-SVT method gives identical results as the Fig. 4.12
+from :cite:`Wunsch.2011`. And the results are also consistent with the results
+from plot_HNC_multicomponent.py.
 
 For non-equilibrium case, the M-SVT result is slightly different from
 :cite:`Bredow.2013`.
@@ -29,8 +31,6 @@ ureg = jaxrts.ureg
 # ======================================================================
 #                   reproduce wunsch 2011 (Fig. 4.12)
 # =====================================================================
-
-# fig, ax = plt.subplots(1, 2, figsize=(8, 4))
 
 # Set up the ionization, density and temperature for individual ion
 # species.
@@ -246,18 +246,16 @@ g, niter = jaxrts.hypernetted_chain.pair_distribution_function_SVT_HNC(
     tmult=tmult,
 )
 S_ii = jaxrts.hypernetted_chain.S_ii_HNC(k, g, n, r)
-index_map = {
-    "ii": (0, 0),
-    "ei": (1, 0),
-    "ee": (1, 1)
-}
+index_map = {"ii": (0, 0), "ei": (1, 0), "ee": (1, 1)}
 x_calculated = (k[1:]).m_as(1 / ureg.a0)
 
 plt.figure(figsize=(6, 4))
 for gtype, indices in index_map.items():
-    file_path = current_folder / f"../../../tests/data/bredow2013/right-{gtype}.csv"
+    file_path = (
+        current_folder / f"../../../tests/data/bredow2013/right-{gtype}.csv"
+    )
     data_lit = onp.genfromtxt(file_path, delimiter=",")
-    
+
     i, j = indices
     y_calculated = S_ii[i, j, 1:].m_as(ureg.dimensionless)
     plt.plot(x_calculated, y_calculated, label=f"$S_{{{gtype}}}$")
@@ -271,15 +269,24 @@ info_text = (
     r"$n_{e} = n_{H^+}= 10^{23}\,cc$"
 )
 
-bbox_props = dict(boxstyle="round,pad=0.4", lw=0.5, fc='none', ec='none', alpha=1)
-plt.gca().text(0.97, 0.75, info_text, transform=plt.gca().transAxes,
-               fontsize=10, verticalalignment='top', horizontalalignment='right',
-               bbox=bbox_props)
+bbox_props = dict(
+    boxstyle="round,pad=0.4", lw=0.5, fc="none", ec="none", alpha=1
+)
+plt.gca().text(
+    0.97,
+    0.75,
+    info_text,
+    transform=plt.gca().transAxes,
+    fontsize=10,
+    verticalalignment="top",
+    horizontalalignment="right",
+    bbox=bbox_props,
+)
 
 plt.xlabel("$k$ [1/a$_i$]")
 plt.xlim(0, 2.5)
 plt.ylabel("$S(k)$")
-plt.legend(bbox_to_anchor=(1.01, 0.5), loc='upper right', frameon=False)
+plt.legend(bbox_to_anchor=(1.01, 0.5), loc="upper right", frameon=False)
 plt.title("MSVT reproduce Bredow et al. 2013 (Fig. 4b)")
 plt.tight_layout()
 plt.show()
