@@ -458,7 +458,7 @@ class Gregori2003IonFeat(IonFeatModel):
     :cite:`Gregori.2003`.
 
     This model is identical to :py:class:`~ArkhipovIonFeat` but uses an
-    effective temperature ~:py:func:`jaxtrs.static_structure_factors.T_cf_Greg`
+    effective temperature ~:py:func:`jaxrts.static_structure_factors.T_cf_Greg`
     rather than the electron Temperature throughout the calculation.
     """
 
@@ -507,7 +507,7 @@ class Gregori2006IonFeat(IonFeatModel):
        :cite:`Gregori.2006` uses effective temperatures for the ion and
        electron temperatures to obtain sane limits to :math:`T\\rightarrow 0`.
        This is done by calling
-       :py:func:`jaxtrs.static_structure_factors.T_cf_Greg` for the electron
+       :py:func:`jaxrts.static_structure_factors.T_cf_Greg` for the electron
        temperature and :py:func:`jaxrts.static_structure_factors.T_i_eff_Greg`,
        for the ionic temperatures. The latter requires a 'Debye temperature'
        model.
@@ -1191,7 +1191,7 @@ class QCSalpeterApproximation(FreeFreeModel):
 
     See Also
     --------
-    jaxtrs.free_free.S0_ee_Salpeter(
+    jaxrts.free_free.S0_ee_Salpeter(
         Function used to calculate the dynamic free electron-electron structure
         factor.
     """
@@ -1265,7 +1265,7 @@ class RPA_NoDamping(FreeFreeModel):
 
     See Also
     --------
-    jaxtrs.free_free.S0_ee_RPA_no_damping
+    jaxrts.free_free.S0_ee_RPA_no_damping
         Function used to calculate the dynamic free-free electron structure
         factor.
     """
@@ -1340,7 +1340,7 @@ class RPA_DandreaFit(FreeFreeModel):
 
     See Also
     --------
-    jaxtrs.free_free.
+    jaxrts.free_free.
         Function used to calculate the dynamic free-free electron structure
         factor.
     """
@@ -3461,7 +3461,7 @@ class Gericke2010ScreeningLength(Model):
 
 class ArbitraryDegeneracyScreeningLength(Model):
     """
-    A screening length valid for arbitrary degeneracy :cite:`Baggot.2017`.
+    A screening length valid for arbitrary degeneracy :cite:`Baggott.2017`.
 
     See Also
     --------
@@ -3560,7 +3560,7 @@ class LinearResponseScreeningGericke2010(Model):
 
     See Also
     --------
-    jaxtrs.ion_feature.free_electron_susceptilibily_RPA
+    jaxrts.ion_feature.free_electron_susceptilibily_RPA
         Function used to calculate :math:`\\xi{ee}^\\text{RPA}`
     """
 
