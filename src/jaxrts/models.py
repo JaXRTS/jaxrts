@@ -4250,6 +4250,7 @@ _all_models = [
     SchumacherImpulseFitRk,
     Sum_Sii,
     StewartPyattIPD,
+    SommerfeldChemPotential,
     ThreePotentialHNCIonFeat,
 ]
 
