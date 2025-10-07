@@ -260,8 +260,8 @@ def eelfc_interpolationgregori2007(
 ) -> Quantity:
     """
     Interpolation function between the UtsumiIchimaru result (high-degeneracy)
-    for the local field correction and the GeldartVosko result (low-degeneracy).
-    :cite:`Fortmann.2010`
+    for the local field correction and the GeldartVosko result
+    (low-degeneracy). :cite:`Fortmann.2010`
     """
 
     Theta = (T_e / (fermi_energy(n_e) / (1 * ureg.boltzmann_constant))).m_as(
@@ -280,8 +280,8 @@ def eelfc_interpolationgregori_farid(
 ) -> Quantity:
     """
     Interpolation function between the Farid result (high-degeneracy)
-    for the local field correction and the GeldartVosko result (low-degeneracy).
-    :cite:`Fortmann.2010`
+    for the local field correction and the GeldartVosko result
+    (low-degeneracy). :cite:`Fortmann.2010`
     """
 
     Theta = (T_e / (fermi_energy(n_e) / (1 * ureg.boltzmann_constant))).m_as(
