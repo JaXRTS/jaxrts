@@ -394,4 +394,4 @@ def test_svt_hnc_classical_hnc_consistency():
 
     # Consistency check: g_hnc ≈ g_svt when T_ab is uniform
     max_diff = jnpu.max(jnpu.absolute(g_hnc - g_svt)).m_as(ureg.dimensionless)
-    assert max_diff < 1e-3, f"SVT-HNC and HNC differ by {max_diff} in equal-T limit"
+    assert max_diff < 1e-6, f"SVT-HNC and HNC differ by {max_diff} in equal-T limit"

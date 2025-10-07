@@ -1,11 +1,14 @@
 """
 HNC-SVT: multi-component, multi-temperature (M-SVT)
-==================================================
-This example tests M-SVT model and reproduces Fig. 4.12 from :cite:`Wunsch.2011` 
-for $T_e = T_i$, and reproduces Fig. 4 (b) from :cite:`Bredow.2013` 
-for non-equilibrium case. For the equilibrium case, the M-SVT method gives identical
-results as the Fig. 4.12 from :cite:`Wunsch.2011`. For the non-equilibrium case, 
-the M-SVT result is slight different from cite:`Bredow.2013`.
+# ======================================================================
+This example tests M-SVT model and reproduces Fig. 4.12 from :cite:`Wunsch.2011`.
+
+For equilibrium case, the M-SVT method gives identical results as the Fig. 4.12 
+from :cite:`Wunsch.2011`. And the results are also consistent with the results from
+plot_HNC_multicomponent.py.
+
+For non-equilibrium case, the M-SVT result is slightly different from
+:cite:`Bredow.2013`.
 """
 
 from pathlib import Path
@@ -24,7 +27,7 @@ from jaxrts import hypernetted_chain as hnc
 ureg = jaxrts.ureg
 
 # ======================================================================
-#                        reproduce wunsch 2011
+#                   reproduce wunsch 2011 (Fig. 4.12)
 # =====================================================================
 
 # fig, ax = plt.subplots(1, 2, figsize=(8, 4))
@@ -75,7 +78,7 @@ g, niter = hnc.pair_distribution_function_SVT_HNC(
     jaxrts.units.to_array([ion.atomic_mass for ion in state.ions]),
 )
 S_ii = hnc.S_ii_HNC(k, g, state.n_i, r)
-fig, ax = plt.subplots(2, 1)
+fig, ax = plt.subplots(1, 2, figsize=(8, 4))
 ax[0].plot(
     (r / d[0, 0]).m_as(ureg.dimensionless),
     g[0, 0, :].m_as(ureg.dimensionless),
@@ -191,185 +194,92 @@ dk = jnp.pi / (len(r) * dr)
 k = jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
 
-for ElectronIonPotential, ElectronElectronPotential, mix, tmult in [
-    [
-        jaxrts.hnc_potentials.DeutschPotential(),
-        jaxrts.hnc_potentials.DeutschPotential(),
-        0.8,
-        [1.5],
-    ],
+ElectronIonPotential = jaxrts.hnc_potentials.DeutschPotential()
+ElectronElectronPotential = jaxrts.hnc_potentials.DeutschPotential()
+mix = 0.8
+tmult = [1.5]
+
+IonIonPotential = jaxrts.hnc_potentials.DeutschPotential()
+CoulombPotential = jaxrts.hnc_potentials.CoulombPotential()
+
+for Potential in [
+    IonIonPotential,
+    ElectronIonPotential,
+    ElectronElectronPotential,
+    CoulombPotential,
 ]:
-    fig, ax = plt.subplots(2, 2, sharex="col", figsize=(6, 8))
+    Potential.include_electrons = "SpinAveraged"
 
-    IonIonPotential = jaxrts.hnc_potentials.DeutschPotential()
-    CoulombPotential = jaxrts.hnc_potentials.CoulombPotential()
+unit = ureg.electron_volt
+V_s = IonIonPotential.full_r(state, r).m_as(unit)
 
-    for Potential in [
-        IonIonPotential,
-        ElectronIonPotential,
-        ElectronElectronPotential,
-        CoulombPotential,
-    ]:
-        Potential.include_electrons = "SpinAveraged"
-
-    unit = ureg.electron_volt
-    V_s = IonIonPotential.full_r(state, r).m_as(unit)
-
-    V_s = V_s.at[-1, :, :].set(
-        ElectronIonPotential.full_r(state, r)[-1, :, :].m_as(unit)
-    )
-    V_s = V_s.at[:, -1, :].set(
-        ElectronIonPotential.full_r(state, r)[:, -1, :].m_as(unit)
-    )
-    V_s = V_s.at[-1, -1, :].set(
-        ElectronElectronPotential.full_r(state, r)[-1, -1, :].m_as(unit)
-    )
-    V_s *= unit
-    V_s -= CoulombPotential.long_r(state, r)
-
-    ax[0, 0].plot(
-        (r / d[0, 0]).m_as(ureg.dimensionless),
-        V_s[0, 0, :].m_as(unit),
-        label="$V_{ii}$",
-    )
-    ax[0, 0].plot(
-        (r / d[1, 0]).m_as(ureg.dimensionless),
-        V_s[1, 0, :].m_as(unit),
-        label="$V_{ei}$",
-    )
-    ax[0, 0].plot(
-        (r / d[1, 1]).m_as(ureg.dimensionless),
-        V_s[1, 1, :].m_as(unit),
-        label="$V_{ee}$",
-    )
-
-    unit = ureg.electron_volt * ureg.angstrom**3
-    V_l_k = CoulombPotential.long_k(state, k).m_as(unit)
-
-    ax[0, 1].plot(
-        (k * d[0, 0]).m_as(ureg.dimensionless),
-        V_l_k[0, 0, :],
-        label="$V_{ii}$",
-    )
-    ax[0, 1].plot(
-        (k * d[1, 0]).m_as(ureg.dimensionless),
-        V_l_k[1, 0, :],
-        label="$V_{ei}$",
-    )
-    ax[0, 1].plot(
-        (k * d[1, 1]).m_as(ureg.dimensionless),
-        V_l_k[1, 1, :],
-        label="$V_{ee}$",
-    )
-    V_l_k *= unit
-    n = jaxrts.units.to_array([*state.n_i, state.n_e])
-
-    masses = jaxrts.units.to_array(
-        [*[ion.atomic_mass for ion in state.ions], 1 * ureg.electron_mass]
-    )
-    g, niter = jaxrts.hypernetted_chain.pair_distribution_function_SVT_HNC(
-        V_s,
-        V_l_k,
-        r,
-        IonIonPotential.T(state),
-        n,
-        masses,
-        mix=mix,
-        tmult=tmult,
-    )
-    S_ii = jaxrts.hypernetted_chain.S_ii_HNC(k, g, n, r)
-
-    # The Fist value should not be trusted
-    ax[1, 1].plot(
-        (k[1:]).m_as(1 / ureg.a0),
-        S_ii[0, 0, 1:].m_as(ureg.dimensionless),
-        label="$S_{ii}$",
-    )
-    ax[1, 1].plot(
-        (k[1:]).m_as(1 / ureg.a0),
-        S_ii[1, 0, 1:].m_as(ureg.dimensionless),
-        label="$S_{ei}$",
-    )
-    ax[1, 1].plot(
-        (k[1:]).m_as(1 / ureg.a0),
-        S_ii[1, 1, 1:].m_as(ureg.dimensionless),
-        label="$S_{ee}$",
-    )
-    ax[1, 0].plot(
-        (r / d[0, 0]).m_as(ureg.dimensionless),
-        g[0, 0, :].m_as(ureg.dimensionless),
-        label="$g_{ii}$",
-    )
-    ax[1, 0].plot(
-        (r / d[1, 0]).m_as(ureg.dimensionless),
-        g[1, 0, :].m_as(ureg.dimensionless),
-        label="$g_{ei}$",
-    )
-    ax[1, 0].plot(
-        (r / d[1, 1]).m_as(ureg.dimensionless),
-        g[1, 1, :].m_as(ureg.dimensionless),
-        label="$g_{ee}$",
-    )
-
-    ax[1, 0].set_xlim(0, 3)
-    ax[1, 1].set_xlim(0, 13)
-
-    ax[1, 1].set_xlabel("$k$ [1/a$_i$]")
-    ax[1, 0].set_xlabel("$r$ [a$_i$]")
-
-    ax[0, 0].set_title("Short-ranged Potential")
-    ax[0, 1].set_xlabel("long-ranged Potential (FT)")
-    ax[1, 0].set_xlabel("Pair distribution function")
-    ax[1, 1].set_xlabel("Static structure factor")
-
-    for axis in ax.flatten():
-        axis.legend()
-
-    fig.suptitle(
-        f"e-i Potential: {ElectronIonPotential.__name__}, e-e Potential: {ElectronElectronPotential.__name__}"  # noqa: E501
-    )
-
-plt.tight_layout()
-plt.show()
-
-
-data_ee = onp.genfromtxt(
-    "../../../tests/data/bredow2013/right-ee.csv", delimiter=","
+V_s = V_s.at[-1, :, :].set(
+    ElectronIonPotential.full_r(state, r)[-1, :, :].m_as(unit)
 )
-data_ei = onp.genfromtxt(
-    "../../../tests/data/bredow2013/right-ei.csv", delimiter=","
+V_s = V_s.at[:, -1, :].set(
+    ElectronIonPotential.full_r(state, r)[:, -1, :].m_as(unit)
 )
-data_ii = onp.genfromtxt(
-    "../../../tests/data/bredow2013/right-ii.csv", delimiter=","
+V_s = V_s.at[-1, -1, :].set(
+    ElectronElectronPotential.full_r(state, r)[-1, -1, :].m_as(unit)
 )
-plt.figure()
-plt.plot(
-    (k[1:]).m_as(1 / ureg.a0),
-    S_ii[0, 0, 1:].m_as(ureg.dimensionless),
-    label="$S_{ii}$",
+V_s *= unit
+V_s -= CoulombPotential.long_r(state, r)
+
+
+unit = ureg.electron_volt * ureg.angstrom**3
+V_l_k = CoulombPotential.long_k(state, k).m_as(unit)
+
+V_l_k *= unit
+n = jaxrts.units.to_array([*state.n_i, state.n_e])
+
+masses = jaxrts.units.to_array(
+    [*[ion.atomic_mass for ion in state.ions], 1 * ureg.electron_mass]
 )
-plt.plot(data_ii[:, 0], data_ii[:, 1], color="gray", ls="dashed")
-plt.plot(
-    (k[1:]).m_as(1 / ureg.a0),
-    S_ii[1, 0, 1:].m_as(ureg.dimensionless),
-    label="$S_{ei}$",
+g, niter = jaxrts.hypernetted_chain.pair_distribution_function_SVT_HNC(
+    V_s,
+    V_l_k,
+    r,
+    IonIonPotential.T(state),
+    n,
+    masses,
+    mix=mix,
+    tmult=tmult,
 )
-plt.plot(data_ei[:, 0], data_ei[:, 1], color="gray", ls="dashed")
-plt.plot(
-    (k[1:]).m_as(1 / ureg.a0),
-    S_ii[1, 1, 1:].m_as(ureg.dimensionless),
-    label="$S_{ee}$",
+S_ii = jaxrts.hypernetted_chain.S_ii_HNC(k, g, n, r)
+index_map = {
+    "ii": (0, 0),
+    "ei": (1, 0),
+    "ee": (1, 1)
+}
+x_calculated = (k[1:]).m_as(1 / ureg.a0)
+
+plt.figure(figsize=(6, 4))
+for gtype, indices in index_map.items():
+    file_path = current_folder / f"../../../tests/data/bredow2013/right-{gtype}.csv"
+    data_lit = onp.genfromtxt(file_path, delimiter=",")
+    
+    i, j = indices
+    y_calculated = S_ii[i, j, 1:].m_as(ureg.dimensionless)
+    plt.plot(x_calculated, y_calculated, label=f"$S_{{{gtype}}}$")
+    plt.plot(data_lit[:, 0], data_lit[:, 1], color="gray", ls="dashed")
+
+plt.plot([], [], label="literature", color="gray", ls="dashed")
+
+info_text = (
+    r"$T_e = 13.6\,$eV" + "\n"
+    r"$T_i = 2.72\,$eV" + "\n"
+    r"$n_{e} = n_{H^+}= 10^{23}\,cc$"
 )
-plt.plot(
-    data_ee[:, 0],
-    data_ee[:, 1],
-    label="Bredow et al (2013).",
-    color="gray",
-    ls="dashed",
-)
+
+bbox_props = dict(boxstyle="round,pad=0.4", lw=0.5, fc='none', ec='none', alpha=1)
+plt.gca().text(0.97, 0.75, info_text, transform=plt.gca().transAxes,
+               fontsize=10, verticalalignment='top', horizontalalignment='right',
+               bbox=bbox_props)
+
 plt.xlabel("$k$ [1/a$_i$]")
 plt.xlim(0, 2.5)
 plt.ylabel("$S(k)$")
-plt.legend()
+plt.legend(bbox_to_anchor=(1.01, 0.5), loc='upper right', frameon=False)
 plt.title("MSVT reproduce Bredow et al. 2013 (Fig. 4b)")
+plt.tight_layout()
 plt.show()

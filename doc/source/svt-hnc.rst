@@ -1,9 +1,11 @@
 SVT–OZ and notation
 ===================
+We derive the linear-algebra form of the SVT--OZ relation :cite:`Shaffer.2017` for a general :math:`M`-component, :math:`M`-temperature plasma. First, we use the explicit :math:`M=2` case as a warm-up, then we extend this to the full formula for the :math:`M^2 \times M^2` matrix entries.
 
-Consider :math:`M` species (electron included, namely: M-1 ions plus electron) with number densities :math:`\{n_a\}`, masses
+Consider :math:`M` species (note that with electrons included in the calculation, this means: M-1 ions plus electron) with number densities :math:`\{n_a\}`, masses
 :math:`\{m_a\}`, and temperatures :math:`\{T_a\}` (:math:`a=1,\dots,M`).
 In :math:`k`-space, the multi-component SVT–OZ relation can be obtained by extending the work of :cite:`Shaffer.2017` through summation over all species, yielding
+
 .. math::
 
    \hat h_{ab}
@@ -77,7 +79,7 @@ For :math:`M{=}2`, the four unknowns are
    \mathrm{vec}(\hat C)=
    \begin{bmatrix}\hat c_{11}&\hat c_{12}&\hat c_{21}&\hat c_{22}\end{bmatrix}^{\!\top}.
 
-Writing `[eq:svt-oz-LHS] <#eq:svt-oz-LHS>`__ for
+Writing :eq:`eq:svt-oz-LHS` for
 :math:`(a,b)=(1,1),(1,2),(2,1),(2,2)` gives
 
 .. math::
@@ -141,16 +143,14 @@ Collecting like terms yields the :math:`4\times4` linear system
    }_{\displaystyle \mathrm{vec}(\hat C)}.
    \label{eq:M2-matrix}
 
-This explicit :math:`M{=}2` pattern shows that each row couples only to
-one column-block :math:`\{\hat h_{sb}\}_s` and one row-block
-:math:`\{\hat h_{as}\}_s`.
+Now we just need to solve this linear equation to get :math:`h_{ab}`
 
 From the :math:`M{=}2` pattern to the general :math:`M`: a selector-:math:`\delta` derivation
 ---------------------------------------------------------------------------------------------
 
 We now derive the general matrix entries :math:`A[p,q]`
 
-Flattening.
+Flattening
 ^^^^^^^^^^^
 
 Fix a wave number :math:`k` and vectorize by lexicographic order. Using
@@ -162,7 +162,7 @@ Fix a wave number :math:`k` and vectorize by lexicographic order. Using
    q=\mathrm{idx}(u,v)=(u-1)M+(v-1).
    \label{eq:idx}
 
-Turn the single :math:`s`-sum into a matrix–vector product.
+Turn the single :math:`s`-sum into a matrix–vector product
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For a fixed row :math:`(a,b)` (i.e. fixed :math:`p`), rewrite each term
