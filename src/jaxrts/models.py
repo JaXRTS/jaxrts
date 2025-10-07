@@ -5,8 +5,9 @@ implemented.
 
 import abc
 import logging
+from collections.abc import Callable
 from copy import deepcopy
-from typing import TYPE_CHECKING, Literal, Callable
+from typing import TYPE_CHECKING, Literal
 
 import jax
 import jax.numpy as jnp
@@ -2572,9 +2573,11 @@ class SchumacherImpulse(ScatteringModel):
                 Z_low = jnp.floor(charge_state)
                 Z_high = jnp.ceil(charge_state)
 
-                # Define the case where the higher ionization state is a bare nucleus
+                # Define the case where the higher ionization state is a bare
+                # nucleus
                 def handle_bare_nucleus_case(_):
-                    # Weight of the lower state is 100% of the remaining bound electrons
+                    # Weight of the lower state is 100% of the remaining bound
+                    # electrons
                     weight_low = element_atomic_number - charge_state
                     sbe_low = calculate_scattering_for_charge_state(Z_low)
                     # Contribution is only from the weighted lower state
@@ -2588,7 +2591,8 @@ class SchumacherImpulse(ScatteringModel):
                     sbe_high = calculate_scattering_for_charge_state(Z_high)
                     return weight_low * sbe_low + weight_high * sbe_high
 
-                # Condition to check if the higher ionization state is a bare nucleus
+                # Condition to check if the higher ionization state is a bare
+                # nucleus
                 is_bare_nucleus = Z_high >= element_atomic_number
 
                 return jax.lax.cond(
@@ -3251,7 +3255,7 @@ class StewartPyattIPD(Model):
     """
     Stewart Pyatt IPD Model :cite:`Stewart.1966`.
     The Stewart–Pyatt (SP) model interpolates between the
-    Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972` 
+    Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972`
     at (low T, high rho) and (high T, low rho), respectively.
 
     --------
@@ -3277,7 +3281,7 @@ class StewartPyattIPD(Model):
 class IonSphereIPD(Model):
     """
     Ion Sphere IPD Model :cite:`Rozsnyai.1972`.
-    
+
     The Ion Sphere Model (IS) is especially applicable plasmas with strong ion
     coupling, and thus in particular for high density, low temperature plasmas.
     The relevant length scale that determines the ionization potential is the
@@ -3311,7 +3315,7 @@ class EckerKroellIPD(Model):
     average distance between all free particles r^3_EK = 3/4\\pi(n_e + n_i),
     where n_e and n_i are the ion and electron number density.
     The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt
-    Model for highly ionized plasmas. 
+    Model for highly ionized plasmas.
 
     See also
     --------

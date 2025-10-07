@@ -1690,7 +1690,7 @@ class Element:
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Element):
             raise NotImplementedError(
-                f"Cannot compare {type(self)} to an object of type {type(other)}"
+                f"Cannot compare {type(self)} to an object of type {type(other)}"  # noqa: E501
             )
         if isinstance(other, MixElement):
             return False

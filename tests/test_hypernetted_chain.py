@@ -344,11 +344,14 @@ def test_HNC_Potential_algebra():
         <= 1e-10
     ).all()
 
+
 def test_svt_hnc_classical_hnc_consistency():
     """
-    Test the SVT-HNC implementation against the standard HNC in the equal-temperature
+    Test the SVT-HNC implementation against the standard HNC in the
+    equal-temperature
     """
-    # Set up plasma state with equal ion temperatures (so SVT should reduce to HNC)
+    # Set up plasma state with equal ion temperatures (so SVT should reduce to
+    # HNC)
     state = jaxrts.PlasmaState(
         ions=[jaxrts.Element("H"), jaxrts.Element("C")],
         Z_free=[1, 4],
@@ -376,7 +379,8 @@ def test_svt_hnc_classical_hnc_consistency():
     V_s = Potential.short_r(state, r)
     V_l_k = Potential.long_k(state, k)
 
-    # Get temperature matrix from potential (should be (2,2) with all entries = 2e4 K)
+    # Get temperature matrix from potential (should be (2,2) with all entries =
+    # 2e4 K)
     T_ab = Potential.T(state)  # Shape (M, M)
 
     # Mass array for SVT
@@ -394,4 +398,6 @@ def test_svt_hnc_classical_hnc_consistency():
 
     # Consistency check: g_hnc ≈ g_svt when T_ab is uniform
     max_diff = jnpu.max(jnpu.absolute(g_hnc - g_svt)).m_as(ureg.dimensionless)
-    assert max_diff < 1e-6, f"SVT-HNC and HNC differ by {max_diff} in equal-T limit"
+    assert (
+        max_diff < 1e-6
+    ), f"SVT-HNC and HNC differ by {max_diff} in equal-T limit"

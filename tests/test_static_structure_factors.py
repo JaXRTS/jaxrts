@@ -1,10 +1,9 @@
-from copy import deepcopy
 import pathlib
 
+import jax
 import jpu.numpy as jnpu
 import numpy as onp
 import pytest
-import jax
 from jax import numpy as jnp
 
 import jaxrts

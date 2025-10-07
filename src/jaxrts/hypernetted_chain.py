@@ -359,13 +359,14 @@ _3Dfour_ogata = jax.vmap(
 
 _3Dfour = _3Dfour_sine
 
+
 @jax.jit
 def pair_distribution_function_SVT_HNC(
     V_s, V_l_k, r, T_ab, n, m, mix=0.0, tmult=None
 ):
     """
-    Multi-component, multi-temperature version of the SVT-OZ-HNC, by extending the
-    sum to all species in Eq. 7 in :cite:`Shaffer.2017`.
+    Multi-component, multi-temperature version of the SVT-OZ-HNC, by extending
+    the sum to all species in Eq. 7 in :cite:`Shaffer.2017`.
     """
     if tmult is None:
         tmult = []
@@ -447,7 +448,8 @@ def pair_distribution_function_SVT_HNC(
             q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)  # idx(s,b)
             q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)  # idx(a,s)
 
-            # values to scatter: -alpha[a,b,s] * C[a,s]  and  -beta[a,b,s] * C[s,b]
+            # values to scatter:
+            # -alpha[a,b,s] * C[a,s] and -beta[a,b,s] * C[s,b]
             vals1 = (
                 -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)
             )
