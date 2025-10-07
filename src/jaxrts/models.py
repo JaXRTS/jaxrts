@@ -3223,16 +3223,10 @@ class ConstantIPD(Model):
 
 class DebyeHueckelIPD(Model):
     """
-<<<<<<< HEAD
-    Debye-Hückel IPD Model:cite:`Debye.1923`.
-    The Debye-Hückel Model is applicable for low-density and high-temperature plasmas, determined by charge screening effects as 
-    described in the Debye-Hückel theory.
-=======
     Debye-Hückel IPD Model :cite:`Debye.1923`.
     The Debye-Hückel Model is applicable for low-density and high-temperature
     plasmas, determined by charge screening effects as described in the
     Debye-Hückel theory.
->>>>>>> 6b8f278bc761517ff738a313687ba262f889ccf2
     --------
     jaxrts.ipd.ipd_debye_hueckel
         Function used to calculate the IPD
@@ -3240,11 +3234,7 @@ class DebyeHueckelIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "DebyeHueckel"
-<<<<<<< HEAD
-    cite_keys = ["Debye.1923","Crowley.2014"]
-=======
     cite_keys = ["Debye.1923", "Crowley.2014"]
->>>>>>> 6b8f278bc761517ff738a313687ba262f889ccf2
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3259,16 +3249,10 @@ class DebyeHueckelIPD(Model):
 
 class StewartPyattIPD(Model):
     """
-<<<<<<< HEAD
-    Stewart Pyatt IPD Model:cite:`Stewart.1966`.
-    The Stewart–Pyatt (SP) model interpolates between the Debye–Hückel:cite:`Debye.1923` and Ion-Sphere model:cite:`Rozsnyai.1972` 
-    at low/high and high/low densities, respectively.
-=======
     Stewart Pyatt IPD Model :cite:`Stewart.1966`.
     The Stewart–Pyatt (SP) model interpolates between the
     Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972` 
     at (low T, high rho) and (high T, low rho), respectively.
->>>>>>> 6b8f278bc761517ff738a313687ba262f889ccf2
 
     --------
     jaxrts.ipd.ipd_stewart_pyatt
@@ -3292,14 +3276,6 @@ class StewartPyattIPD(Model):
 
 class IonSphereIPD(Model):
     """
-<<<<<<< HEAD
-    Ion Sphere IPD Model:cite:`Rozsnyai.1972`.
-
-    
-    The Ion Sphere Model (IS) is especially applicable plasmas with strong ion coupling, and thus in particular for high density, low temperature plasmas.
-    The relevant length scale that determines the ionization potential is the ion sphere radius R_0, determined by the condition that a sphere of radius R_0 contains the same 
-    charge as given by the mean ionization and the electron number density.
-=======
     Ion Sphere IPD Model :cite:`Rozsnyai.1972`.
     
     The Ion Sphere Model (IS) is especially applicable plasmas with strong ion
@@ -3308,7 +3284,6 @@ class IonSphereIPD(Model):
     ion sphere radius R_0, determined by the condition that a sphere of radius
     R_0 contains the same charge as given by the mean ionization and the
     electron number density.
->>>>>>> 6b8f278bc761517ff738a313687ba262f889ccf2
 
     --------
     jaxrts.ipd.ipd_ion_sphere
@@ -3330,12 +3305,6 @@ class EckerKroellIPD(Model):
     """
     Ecker-Kröll IPD Model:cite:`EckerKroell.1963`.
 
-<<<<<<< HEAD
-    Opposite to the Stewart-Pyatt:cite:`Stewart.1966` Model the Ecker-Kröll Model assumes that the relevant length scale for determining the IPD
-    in high-density plasmas is not R_0 (the ion sphere radius) but rather the average distance between all free particles r^3_EK = 3/4\pi(n_e + n_i),
-    where n_e and n_i are the ion and electron number density.
-    The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt Model for highly ionized plasmas. 
-=======
     Opposite to the Stewart-Pyatt:cite:`Stewart.1966` Model the Ecker-Kröll
     Model assumes that the relevant length scale for determining the IPD in
     high-density plasmas is not R_0 (the ion sphere radius) but rather the
@@ -3345,7 +3314,6 @@ class EckerKroellIPD(Model):
     Model for highly ionized plasmas. 
 
     See also
->>>>>>> 6b8f278bc761517ff738a313687ba262f889ccf2
     --------
     jaxrts.ipd.ipd_ecker_kroell
         Function used to calculate the IPD
@@ -3368,13 +3336,6 @@ class EckerKroellIPD(Model):
 
 class PauliBlockingIPD(Model):
     """
-<<<<<<< HEAD
-    Pauli Blocking IPD Model:cite:`Ropke.2019`.
-
-    In dense plasma the bound state energies get modified due to the Pauli exclusion principle, thereby
-    lowering the ionization potential from below. Additionally, the Pauli Blocking IPD Model should be supplemented 
-    by a model that lowers the continuum and hence the ionization potential from above.
-=======
     Pauli Blocking IPD Model :cite:`Ropke.2019`.
 
     In dense plasma the bound state energies get modified due to the Pauli
@@ -3382,7 +3343,6 @@ class PauliBlockingIPD(Model):
     Additionally, the Pauli Blocking IPD Model should be supplemented by a
     model that lowers the continuum and hence the ionization potential from
     above.
->>>>>>> 6b8f278bc761517ff738a313687ba262f889ccf2
 
     --------
     jaxrts.ipd.ipd_pauli_blocking
@@ -3410,12 +3370,8 @@ class PauliBlockingIPD(Model):
 
 class DebyeHueckelScreeningLength(Model):
     """
-<<<<<<< HEAD
-    This is standard Debye Hückel screening length. See also :cite:`Gericke.2010`.
-=======
     This is standard Debye Hückel screening length. See also
     :cite:`Gericke.2010`.
->>>>>>> 6b8f278bc761517ff738a313687ba262f889ccf2
 
     See also
     --------
@@ -3675,8 +3631,6 @@ class DebyeHueckelScreening(Model):
     """
     Debye Hueckel screening as presented by :cite:`Chapman.2015b`.
 
-<<<<<<< HEAD
-=======
     .. math::
 
        q^\\text{DH} = Z_f \\frac{\\kappa_e^*2}{\\kappa_e^2 + k^2}
@@ -3693,7 +3647,6 @@ class DebyeHueckelScreening(Model):
 
 
     See also
->>>>>>> 6b8f278bc761517ff738a313687ba262f889ccf2
     --------
     jaxrts.ion_feature.q_DebyeHueckelChapman2015
         The function used to calculate ``q``.
