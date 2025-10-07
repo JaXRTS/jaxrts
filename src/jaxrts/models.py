@@ -2783,7 +2783,7 @@ class SchumacherImpulseFitRk(ScatteringModel):
             "Corrects contribution for n equals 1 and 2.",
         ),
         ("Gu.2008", "Edge positions."),
-        ("Dornheim.2024", "Intensitiy normalization due to f-sum rule"),
+        ("Dornheim.2024", "Intensity normalization due to f-sum rule"),
     ]
 
     def __init__(self) -> None:
