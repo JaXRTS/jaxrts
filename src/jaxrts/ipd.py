@@ -19,6 +19,7 @@ from .units import Quantity, ureg
 from .plasma_physics import fermi_energy
 from .plasma_physics import (
     chem_pot_interpolationIchimaru as chem_pot_interpolation,
+    Debye_Hueckel_screening_length
 )
 
 logger = logging.getLogger(__name__)
@@ -140,7 +141,7 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     return ipd_shift.to(ureg.electron_volt)
 
 
-@partial(jax.jit, static_argnames = ["crowley_correction"])
+@partial(jax.jit, static_argnames=["crowley_correction"])
 def ipd_stewart_pyatt(
     Zi: float,
     ne: Quantity,
@@ -208,6 +209,87 @@ def ipd_stewart_pyatt(
     ipd_shift = (
         -(1 * ureg.boltzmann_constant * Ti)
         / (2 * (Zp + cc))
+        * ((1 + Lambda_i) ** (2 / 3) - 1)
+    )
+
+    return ipd_shift.to(ureg.electron_volt)
+
+
+@jax.jit
+def ipd_stewart_pyatt_preston(
+    Zi: float,
+    ne: Quantity,
+    ni: Quantity,
+    Te: Quantity,
+    Ti: Quantity,
+    ion_population=None,
+) -> Quantity:
+    """
+    The correction to the ionization potential in the Stewart-Pyatt model using
+    the small bound state approximation. This model is founded on the
+    Thomas-Fermi Model for the electrons and extends it to include ions in the
+    vicinity of a given nucleus. Taken from :cite:`Ropke.2019` Eq. (2).
+
+    .. note::
+
+       The Stewart-Pyatt value is always below both the Debye and ion sphere
+       results.
+
+    Parameters
+    ----------
+    Z_i
+        The (mean) charge state of the ions.
+    n_e
+        Electron density. Units of 1/[length]**3.
+    n_i
+        Ion density. Units of 1/[length]**3.
+    T_e
+        The electron temperature.
+    T_i
+        The ion temperature.
+    ion_population
+        The ion population fractions.
+    crowley_correction
+        If set to True, shift Zp by 1 in the ipd shift formula.
+
+    Returns
+    -------
+    Quantity
+        The ipd shift in units of electronvolt.
+    """
+
+    if ion_population is None:
+        Zp = Zi
+        Zbar = Zi
+    else:
+        Z = jnp.arange(len(ion_population))
+        Zbar = jnpu.mean(Z * ion_population)
+        Zp = jnpu.mean(Z**2 * ion_population) / Zbar
+
+    R_i = (3 / (4 * jnp.pi * ni)) ** (1 / 3)
+
+    num = ureg.epsilon_0 * ureg.k_B * Ti
+    denom = (ni+ne) * (Zi * ureg.elementary_charge) ** 2
+    lambda_D = jnpu.sqrt(num / denom)
+
+    Lambda_i = (
+        3
+        * (Zp + 1)
+        * Zi
+        * ureg.elementary_charge**2
+        / (
+            4
+            * ureg.epsilon_0
+            * jnp.pi
+            * lambda_D
+            * ureg.boltzmann_constant
+            * Ti
+        )
+    )
+
+    ipd_shift = (
+        -(1 * ureg.boltzmann_constant * Ti)
+        / (2 * (Zp + 1))
         * ((1 + Lambda_i) ** (2 / 3) - 1)
     )
 

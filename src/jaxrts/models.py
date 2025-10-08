@@ -3404,23 +3404,26 @@ class StewartPyattIPD(Model):
             )
         return out
 
-
-class StewartPyattFullDegIPD(Model):
+class StewartPyattPrestonIPD(Model):
     """
-    Stewart Pyatt IPD Model.
+    Stewart Pyatt IPD Model :cite:`Stewart.1966`.
+    The Stewart–Pyatt (SP) model interpolates between the
+    Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972`
+    at (low temperature, high density) and (high temperature, low density), respectively.
 
     See Also
     --------
-    jaxrts.ipd.ipd_stewart_pyatt_full_deg
+    jaxrts.ipd.ipd_stewart_pyatt
         Function used to calculate the IPD
     """
 
     allowed_keys = ["ipd"]
-    __name__ = "StewartPyattFullDeg"
+    __name__ = "StewartPyatt"
+    cite_keys = ["Stewart.1966", "Crowley.2014"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
-        return ipd.ipd_stewart_pyatt_full_deg(
+        return ipd.ipd_stewart_pyatt_preston(
             plasma_state.Z_free,
             plasma_state.n_e,
             plasma_state.n_i,
@@ -3430,19 +3433,20 @@ class StewartPyattFullDegIPD(Model):
 
     @jax.jit
     def all_element_states(
-        self, plasma_state: "PlasmaState"
+        self, plasma_state: "PlasmaState", ion_population=None
     ) -> list[jnp.ndarray]:
         out = []
         for idx, element in enumerate(plasma_state.ions):
             out.append(
                 jnp.array(
                     [
-                        ipd.ipd_stewart_pyatt_full_deg(
+                        ipd.ipd_stewart_pyatt_preston(
                             Z + 1,
-                            plasma_state.n_i[idx] * (Z + 1),
+                            plasma_state.n_e,
                             plasma_state.n_i[idx],
                             plasma_state.T_e,
                             plasma_state.T_i[idx],
+                            ion_population = ion_population,
                         ).m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
@@ -3450,7 +3454,6 @@ class StewartPyattFullDegIPD(Model):
                 * ureg.electron_volt
             )
         return out
-
 
 class IonSphereIPD(Model):
     """
@@ -4570,6 +4573,7 @@ _all_models = [
     SchumacherImpulseFitRk,
     Sum_Sii,
     StewartPyattIPD,
+    StewartPyattPrestonIPD,
     SommerfeldChemPotential,
     ThreePotentialHNCIonFeat,
 ]
