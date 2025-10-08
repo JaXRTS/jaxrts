@@ -3351,7 +3351,7 @@ class StewartPyattIPD(Model):
     __name__ = "StewartPyatt"
     cite_keys = ["Stewart.1966", "Crowley.2014"]
 
-    def __init__(self, crowley_correction : bool = False):
+    def __init__(self, crowley_correction: bool = False):
         self.crowley_correction = crowley_correction
         super().__init__()
 
@@ -3363,7 +3363,7 @@ class StewartPyattIPD(Model):
             plasma_state.n_i,
             plasma_state.T_e,
             plasma_state.T_i,
-            crowley_correction = self.crowley_correction,
+            crowley_correction=self.crowley_correction,
         )
 
     # The following is required to jit a Model
@@ -3376,7 +3376,7 @@ class StewartPyattIPD(Model):
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
         (obj.model_key, obj.crowley_correction) = aux_data
-    
+
         return obj
 
     @jax.jit
@@ -3394,8 +3394,8 @@ class StewartPyattIPD(Model):
                             plasma_state.n_i[idx],
                             plasma_state.T_e,
                             plasma_state.T_i[idx],
-                            ion_population = ion_population,
-                            crowley_correction = self.crowley_correction,
+                            ion_population=ion_population,
+                            crowley_correction=self.crowley_correction,
                         ).m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
@@ -3403,6 +3403,7 @@ class StewartPyattIPD(Model):
                 * ureg.electron_volt
             )
         return out
+
 
 class StewartPyattPrestonIPD(Model):
     """
@@ -3446,7 +3447,7 @@ class StewartPyattPrestonIPD(Model):
                             plasma_state.n_i[idx],
                             plasma_state.T_e,
                             plasma_state.T_i[idx],
-                            ion_population = ion_population,
+                            ion_population=ion_population,
                         ).m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
@@ -3454,6 +3455,59 @@ class StewartPyattPrestonIPD(Model):
                 * ureg.electron_volt
             )
         return out
+
+
+class StewartPyattArbDegIPD(Model):
+    """
+    Stewart Pyatt IPD Model :cite:`Stewart.1966`.
+    The Stewart–Pyatt (SP) model interpolates between the
+    Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972`
+    at (low temperature, high density) and (high temperature, low density), respectively.
+
+    See Also
+    --------
+    jaxrts.ipd.ipd_stewart_pyatt
+        Function used to calculate the IPD
+    """
+
+    allowed_keys = ["ipd"]
+    __name__ = "StewartPyatt"
+    cite_keys = ["Stewart.1966", "Crowley.2014"]
+
+    @jax.jit
+    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
+        return ipd.ipd_stewart_pyatt_arb_deg(
+            plasma_state.Z_free,
+            plasma_state.n_e,
+            plasma_state.n_i,
+            plasma_state.T_e,
+            plasma_state.T_i,
+        )
+
+    @jax.jit
+    def all_element_states(
+        self, plasma_state: "PlasmaState", ion_population=None
+    ) -> list[jnp.ndarray]:
+        out = []
+        for idx, element in enumerate(plasma_state.ions):
+            out.append(
+                jnp.array(
+                    [
+                        ipd.ipd_stewart_pyatt_arb_deg(
+                            Z + 1,
+                            plasma_state.n_e,
+                            plasma_state.n_i[idx],
+                            plasma_state.T_e,
+                            plasma_state.T_i[idx],
+                            ion_population=ion_population,
+                        ).m_as(ureg.electron_volt)
+                        for Z in jnp.arange(element.Z)
+                    ]
+                )
+                * ureg.electron_volt
+            )
+        return out
+
 
 class IonSphereIPD(Model):
     """
@@ -3485,7 +3539,9 @@ class IonSphereIPD(Model):
 
     @jax.jit
     def all_element_states(
-        self, plasma_state: "PlasmaState"
+        self,
+        plasma_state: "PlasmaState",
+        ion_population=None,
     ) -> list[jnp.ndarray]:
         out = []
         for idx, element in enumerate(plasma_state.ions):
@@ -3493,9 +3549,10 @@ class IonSphereIPD(Model):
                 jnp.array(
                     [
                         ipd.ipd_ion_sphere(
-                            plasma_state.Z_free[idx],
+                            Z + 1,
                             plasma_state.n_e,
                             plasma_state.n_i[idx],
+                            ion_population=ion_population,
                         ).m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
@@ -4572,6 +4629,7 @@ _all_models = [
     SchumacherImpulseColdEdges,
     SchumacherImpulseFitRk,
     Sum_Sii,
+    StewartPyattArbDegIPD,
     StewartPyattIPD,
     StewartPyattPrestonIPD,
     SommerfeldChemPotential,

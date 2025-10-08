@@ -19,10 +19,21 @@ from .units import Quantity, ureg
 from .plasma_physics import fermi_energy
 from .plasma_physics import (
     chem_pot_interpolationIchimaru as chem_pot_interpolation,
-    Debye_Hueckel_screening_length
+    Debye_Hueckel_screening_length,
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _surrounding_plasma(Zi, ion_population):
+    if ion_population is None:
+        Zp = Zi
+        Zbar = Zi
+    else:
+        Z = jnp.arange(len(ion_population))
+        Zbar = jnpu.mean(Z * ion_population)
+        Zp = jnpu.mean(Z**2 * ion_population) / Zbar
+    return Zbar, Zp
 
 
 @jax.jit
@@ -83,26 +94,26 @@ def ipd_debye_hueckel(
     Quantity
         The ipd shift in units of electronvolt.
     """
+    Zbar = ne / jnpu.sum(ni)
 
-    kappa_class = jnpu.sqrt(
-        (
-            1
-            * ureg.elementary_charge**2
-            / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
-        )
-        * (jnpu.sum(Zi**2 * ni) + ne)
+    kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te)
+    kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
+        1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
     )
+    kappa = jnpu.sqrt(kappa_i_sq + kappa_e**2)
 
     # The ionization potential depression energy shift
-    ipd_shift = kappa_class * (
-        -(Zi + 1) * ureg.elementary_charge**2 / (4 * jnp.pi * ureg.epsilon_0)
+    ipd_shift = kappa * (
+        -(Zi) * ureg.elementary_charge**2 / (4 * jnp.pi * ureg.epsilon_0)
     )
 
     return ipd_shift.to(ureg.electron_volt)
 
 
 @jax.jit
-def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
+def ipd_ion_sphere(
+    Zi: Quantity, ne: Quantity, ni: Quantity, ion_population=None
+) -> Quantity:
     """
     The correction to the ionization potential for the m-th ionization stage in
     the ion-sphere model. The ion-sphere model considers the ions to be
@@ -124,19 +135,78 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     """
     # This function is not well-defined for Zi==0:
     Zi = jnp.clip(Zi, 1e-6)
+    Zbar = ne / jnpu.sum(ni)
 
     # The ion-sphere radius, determined by the ion density n_i such that the
     # average distance to the nearest neighbor ion is
     # approximately 2 R_0.
-    R_0 = (3 * Zi / (4 * jnp.pi * ne)) ** (1 / 3)
+    R_0 = (3 * Zbar / (4 * jnp.pi * ne)) ** (1 / 3)
 
-    ipd_shift = (
-        -3
-        * (Zi + 1)
-        * 1
-        * ureg.elementary_charge**2
-        / (R_0 * 8 * jnp.pi * 1 * ureg.epsilon_0)
+    ipd_shift = -(3 * Zi * 1 * ureg.elementary_charge**2) / (
+        R_0 * 8 * jnp.pi * 1 * ureg.epsilon_0
     )
+
+    return ipd_shift.to(ureg.electron_volt)
+
+
+@jax.jit
+def ipd_stewart_pyatt_arb_deg(
+    Zi: float,
+    ne: Quantity,
+    ni: Quantity,
+    Te: Quantity,
+    Ti: Quantity,
+    ion_population=None,
+) -> Quantity:
+    """
+    The correction to the ionization potential in the Stewart-Pyatt model using
+    the small bound state approximation. This model is founded on the
+    Thomas-Fermi Model for the electrons and extends it to include ions in the
+    vicinity of a given nucleus. Taken from :cite:`Ropke.2019` Eq. (2).
+
+    .. note::
+
+       The Stewart-Pyatt value is always below both the Debye and ion sphere
+       results.
+
+    Parameters
+    ----------
+    Z_i
+        The (mean) charge state of the ions.
+    n_e
+        Electron density. Units of 1/[length]**3.
+    n_i
+        Ion density. Units of 1/[length]**3.
+    T_e
+        The electron temperature.
+    T_i
+        The ion temperature.
+    ion_population
+        The ion population fractions.
+
+    Returns
+    -------
+    Quantity
+        The ipd shift in units of electronvolt.
+    """
+    Zbar = ne / jnpu.sum(ni)
+
+    kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te)
+    kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
+        1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
+    )
+    kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e**2)
+
+    R_0 = (3 / (4 * jnp.pi * jnpu.sum(ni))) ** (1 / 3)
+
+
+    s = 1 / kappa_D / R_0
+
+    ipd_shift = jnpu.sum((
+        -(3 * Zi * ureg.elementary_charge**2)
+        / (8 * jnp.pi * ureg.epsilon_0 * R_0)
+        * ((1 + s**3) ** (2 / 3) - s**2)
+    ))
 
     return ipd_shift.to(ureg.electron_volt)
 
@@ -185,14 +255,7 @@ def ipd_stewart_pyatt(
         The ipd shift in units of electronvolt.
     """
     cc = 0 if crowley_correction else 1
-
-    if ion_population is None:
-        Zp = Zi
-        Zbar = Zi
-    else:
-        Z = jnp.arange(len(ion_population))
-        Zbar = jnpu.mean(Z * ion_population)
-        Zp = jnpu.mean(Z**2 * ion_population) / Zbar
+    Zbar, Zp = _surrounding_plasma(Zi, ion_population)
 
     R_i = (3 / (4 * jnp.pi * ni)) ** (1 / 3)
 
@@ -249,8 +312,6 @@ def ipd_stewart_pyatt_preston(
         The ion temperature.
     ion_population
         The ion population fractions.
-    crowley_correction
-        If set to True, shift Zp by 1 in the ipd shift formula.
 
     Returns
     -------
@@ -258,19 +319,12 @@ def ipd_stewart_pyatt_preston(
         The ipd shift in units of electronvolt.
     """
 
-    if ion_population is None:
-        Zp = Zi
-        Zbar = Zi
-    else:
-        Z = jnp.arange(len(ion_population))
-        Zbar = jnpu.mean(Z * ion_population)
-        Zp = jnpu.mean(Z**2 * ion_population) / Zbar
-
-    R_i = (3 / (4 * jnp.pi * ni)) ** (1 / 3)
+    Zbar, Zp = _surrounding_plasma(Zi, ion_population)
 
     num = ureg.epsilon_0 * ureg.k_B * Ti
-    denom = (ni+ne) * (Zi * ureg.elementary_charge) ** 2
+    denom = (ni + ne) * (ureg.elementary_charge) ** 2
     lambda_D = jnpu.sqrt(num / denom)
+    # lambda_D /= jnpu.sqrt(Zbar * (1 + Zp))
 
     Lambda_i = (
         3
@@ -298,7 +352,12 @@ def ipd_stewart_pyatt_preston(
 
 @jax.jit
 def ipd_ecker_kroell(
-    Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity
+    Zi: float,
+    ne: Quantity,
+    ni: Quantity,
+    Te: Quantity,
+    Ti: Quantity,
+    Z_max: Quantity,
 ) -> Quantity:
     """
     The correction to the ionization potential for the m-th ionization stage in
@@ -325,6 +384,7 @@ def ipd_ecker_kroell(
         The ipd shift in units of electronvolt.
 
     """
+    Zbar = n_e / jnpu.sum(n_i)
 
     lambda_Di = jnpu.sqrt(
         ureg.epsilon_0
@@ -338,13 +398,10 @@ def ipd_ecker_kroell(
     # The critical density in the model of Ecker-Kroell
 
     n_c = (3 / (4 * jnp.pi)) * (
-        4
-        * jnp.pi
-        * 1
-        * ureg.epsilon_0
+        (4 * jnp.pi * 1 * ureg.epsilon_0)
         * ureg.boltzmann_constant
         * Te
-        / ureg.elementary_charge**2
+        / (Z_max**2 * ureg.elementary_charge**2)
     ) ** 3
 
     # The constant in Ecker-Kroells model, which is determined from the
