@@ -12,6 +12,8 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 from quadax import quadts as quad
 
+from functools import partial
+
 from .math import fermi_neg12_rational_approximation_antia
 from .units import Quantity, ureg
 from .plasma_physics import fermi_energy
@@ -138,14 +140,15 @@ def ipd_ion_sphere(Zi: Quantity, ne: Quantity, ni: Quantity) -> Quantity:
     return ipd_shift.to(ureg.electron_volt)
 
 
-@jax.jit
+@partial(jax.jit, static_argnames = ["crowley_correction"])
 def ipd_stewart_pyatt(
     Zi: float,
     ne: Quantity,
     ni: Quantity,
     Te: Quantity,
     Ti: Quantity,
-    Z_and_pop=None,
+    ion_population=None,
+    crowley_correction=False,
 ) -> Quantity:
     """
     The correction to the ionization potential in the Stewart-Pyatt model using
@@ -170,34 +173,43 @@ def ipd_stewart_pyatt(
         The electron temperature.
     T_i
         The ion temperature.
+    ion_population
+        The ion population fractions.
+    crowley_correction
+        If set to True, shift Zp by 1 in the ipd shift formula.
 
     Returns
     -------
     Quantity
         The ipd shift in units of electronvolt.
     """
+    cc = 0 if crowley_correction else 1
 
-    if Z_and_pop is None:
+    if ion_population is None:
         Zp = Zi
         Zbar = Zi
     else:
-        Z, pop = Z_and_pop
-        Zbar = jnpu.mean(Z * pop)
-        Zp = jnpu.mean((Z * pop) ** 2) / Zbar
+        Z = jnp.arange(len(ion_population))
+        Zbar = jnpu.mean(Z * ion_population)
+        Zp = jnpu.mean(Z**2 * ion_population) / Zbar
 
     R_i = (3 / (4 * jnp.pi * ni)) ** (1 / 3)
 
     Gamma_i = (
         Zi
-        * Zp
+        * (Zp + cc)
         * 1
         * ureg.elementary_charge**2
         / (4 * jnp.pi * ureg.epsilon_0 * R_i * ureg.boltzmann_constant * Ti)
     ).m_as(ureg.dimensionless)
 
-    Lambda_i = (3 * Gamma_i) ** (3/2)
+    Lambda_i = (3 * Gamma_i) ** (3 / 2)
 
-    ipd_shift = -(1 * ureg.boltzmann_constant * Ti) / (2 * (Zp)) * ((1 + Lambda_i)**(2/3) - 1)
+    ipd_shift = (
+        -(1 * ureg.boltzmann_constant * Ti)
+        / (2 * (Zp + cc))
+        * ((1 + Lambda_i) ** (2 / 3) - 1)
+    )
 
     return ipd_shift.to(ureg.electron_volt)
 
