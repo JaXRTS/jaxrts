@@ -96,7 +96,7 @@ def ipd_debye_hueckel(
     """
     Zbar = ne / jnpu.sum(ni)
 
-    kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te)
+    kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te))
     kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
         1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
     )
@@ -191,7 +191,7 @@ def ipd_stewart_pyatt_arb_deg(
     """
     Zbar = ne / jnpu.sum(ni)
 
-    kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te)
+    kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te))
     kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
         1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
     )
