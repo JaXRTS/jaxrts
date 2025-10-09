@@ -25,10 +25,6 @@ h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
 m_e = 1 * ureg.electron_mass
 
-# fig, ax = plt.subplots()
-debug_detM = False
-
-
 @jax.jit
 def bisection(func, a, b, tolerance=1e-4, max_iter=1e4, min_iter=1e2):
 
@@ -218,16 +214,6 @@ def solve_saha(
     # for maximal full electron number density
     max_ne = jnpu.sum(jnp.array(Z) * ion_number_densities)
 
-    # ne_scale = max_ne
-    # ne_scale = 1e0 / (1 * ureg.cm**3)
-
-    # Interpolate between a small ne and the maximal ne, depending on the
-    # temperature to avoid numerical instabilities
-    # jax.debug.print("{x}",x = max_ne.m_as(1 / ureg.m**3) // 1)
-
-    # Calculate how many states have a energy below 0, as it can happen due to
-    # ipd.abs
-
     Ebs = []
     for element, ipd in zip(element_list, continuum_lowering, strict=True):
 
@@ -238,8 +224,6 @@ def solve_saha(
                 ureg.electron_volt
             )
         )
-
-    # Ebs = jnp.where(jnp.array(Ebs)<0, 0.0, jnp.array(Ebs))
 
     all_binding_energies = jnp.concatenate(Ebs)
     ratio = jnp.sum(
@@ -260,9 +244,6 @@ def solve_saha(
         right=_ne_range[-1],
     ) * (1 / ureg.m**3)
 
-    # jax.debug.print("{x}", x= max_ne)
-    # ne_scale = max_ne
-
     # Offset (each element will have a block of size Z+1) This value specifies
     # the block.
     skip = 0
@@ -278,8 +259,6 @@ def solve_saha(
 
         stat_weight = element.ionization.statistical_weights
 
-        # jax.debug.print("Before: {x}", x = jnp.sum(jnp.heaviside(Eb.m_as(ureg.electron_volt), 0)))
-
         def scan_fn(pref, inputs):
             E, g = inputs
             output = jnp.where(E > 0, pref * g, 1.0)
@@ -292,15 +271,6 @@ def solve_saha(
             initial_pref,
             (jnp.array([*Eb, 1.0]), stat_weight),
         )
-
-        # stat_weight = out_values
-
-        # jax.debug.print("After: {x}", x = stat_weight)
-
-        # jax.debug.print("{x}, {z}", x=element.ionization.energies + ipd, z = continuum_lowering)
-
-        # Eb = jnpu.where(Eb < 0, 0, Eb)
-        # jax.debug.print("{x}{y}", x =stat_weight[:-1], y = stat_weight[1:])
 
         coeff = (
             saha_equation(
@@ -344,8 +314,6 @@ def solve_saha(
         skip = -1
         for element, Eb in zip(element_list, Ebs, strict=True):
 
-            # jax.debug.print("{x}", x = jnp.heaviside(Eb, 0))
-
             # Not the full off-diagonal equals n_e: The density rows don't
             # contain it!
             ne_line = ne_line.at[skip + 1 : skip + element.Z + 1].multiply(
@@ -362,7 +330,6 @@ def solve_saha(
 
     def det_M(M, ne):
         res = jnp.linalg.det(insert_ne(M, ne))
-        # jax.debug.print("{x}", x=res)
         return res
 
     det_M_func = (
@@ -373,21 +340,9 @@ def solve_saha(
         * 1e16
     )
 
-    # if debug_detM:
-    #     ne_plot = onp.linspace(0, 1, 100)
-    #     ax.hlines(0.0, ne_plot[0], ne_plot[-1], color="black", ls="dashed")
-    #     ax.plot(ne_plot, [det_M_func(ne) for ne in ne_plot])
-    #     ax.vlines(sol_ne, 0, 0.0001, color="black", ls="dashed")
-    #     plt.show(block=False)
-    #     plt.pause(2.0)
-    #     jax.debug.print("sol_ne: {x}, {y}", x=sol_ne, y=ne_scale)
-
-    # ax.set_yscale("log")
-
     # Find n_e by finding the root where the determinant of M is 0
     # Use the bisection method, boundaries are fixed by max_ne and 0.
     sol_ne, iterations = bisection(
-        # jax.tree_util.Partial(lambda ne: det_M(M=M, ne=ne)),
         jax.tree_util.Partial(det_M_func),
         0,
         (max_ne / ne_scale).m_as(ureg.dimensionless),
@@ -396,14 +351,9 @@ def solve_saha(
         min_iter=40,
     )
 
-    # sol_ne = Broyden(fun=det_M_func).run((max_ne / ne_scale).m_as(ureg.dimensionless)).params
-    # sol_ne = Bisection(optimality_fun = det_M_func, lower = 1E-7, upper = (max_ne / ne_scale).m_as(ureg.dimensionless)).run().params
-
     # Create the matrix that describes the linear system of equations we solve.
     # Insert n_e.
     concrete_M = insert_ne(M, sol_ne)
-
-    # jax.debug.print("{x}", x = concrete_M)
 
     # Strip the last row and column. Use the latter as inhomogeneity.
     M1 = concrete_M[:-1, :-1]
@@ -416,7 +366,6 @@ def solve_saha(
     # Rescale the dimensionless number densities so that units are
     # 1/[length]**3.
     res = jnpu.multiply(ionised_number_densities, ne_scale)
-    # jax.debug.print("{x}", x = ionised_number_densities)
 
     skip = 0
     Z_mean = []
@@ -429,11 +378,6 @@ def solve_saha(
             )
         )
         skip += element.Z + 1
-    # Z_mean = to_array(
-    #     (sol_ne * ne_scale) / jnpu.sum(ion_number_densities)
-    # ).m_as(ureg.dimensionless)
-    # print(len(res))
-    # print(jnp.abs(jnpu.sum((jnp.arange(len(res)) * res) / jnpu.sum(res)).m_as(ureg.dimensionless) - Z_mean) < 1E-3)
 
     return (
         to_array(res),
@@ -541,8 +485,6 @@ def solve_gen_saha(
     # Maximal electron number density per element, if fully ionized -> Sum up
     # for maximal full electron number density
     max_ne = jnpu.sum(jnp.array(Z) * ion_number_densities)
-    # ne_scale = max_ne
-    # ne_scale = 1e0 / (1 * ureg.m**3)
 
     # Interpolate between a small ne and the maximal ne, depending on the
     # temperature to avoid numerical instabilities
@@ -576,9 +518,6 @@ def solve_gen_saha(
         right=_ne_range[-1],
     ) * (1 / ureg.m**3)
 
-    # jax.debug.print("{x}", x= max_ne)
-    # ne_scale = max_ne
-
     # Offset (each element will have a block of size Z+1) This value specifies
     # the block.
     skip = 0
@@ -608,15 +547,6 @@ def solve_gen_saha(
             initial_pref,
             (jnp.array([*Eb, 1.0]), stat_weight),
         )
-
-        # stat_weight = out_values
-
-        # jax.debug.print("After: {x}", x = stat_weight)
-
-        # jax.debug.print("{x}, {z}", x=element.ionization.energies + ipd, z = continuum_lowering)
-
-        # Eb = jnpu.where(Eb < 0, 0, Eb)
-        # jax.debug.print("{x}{y}", x =stat_weight[:-1], y = stat_weight[1:])
 
         coeff = (
             gen_saha_equation(
@@ -709,8 +639,6 @@ def solve_gen_saha(
     # Get the solution of the set of linear equations of the form
     # (nIon0_0+,nIon0_1+, ..., nIon1_0+,nIon1_1+, ...)
 
-    # jax.debug.print("{x}", x=M1)
-
     ionised_number_densities = jnp.linalg.solve(M1, M2)
 
     # Rescale the dimensionless number densities so that units are
@@ -736,7 +664,22 @@ def solve_gen_saha(
     )
 
 
-def calculate_charge_state_distribution(plasma_state):
+def calculate_charge_state_distribution(plasma_state, ipd : bool = False):
+
+    """
+    Calculates the charge state distribution in fractions using the Saha-Boltzmann equation assuming
+    thermal equilibrium.
+
+    Parameters
+    ----------
+    plasma_state : PlasmaState
+        The plasma state object.
+
+    Returns
+    -------
+    jnp.ndarray
+    The charge state distribution in fractions.
+    """
 
     cl = plasma_state["ipd"].all_element_states(plasma_state)
 
@@ -765,9 +708,14 @@ def calculate_mean_free_charge_saha(
         If true, the ipd correction of the plasma state is used to reduce the
         continuum. Note: the IPD can very much depend on the ionization state.
         this could result in some circular dependency.
+    ion_population: bool
+        The ion population calculated in a previous step or assumed,
+        to calculate plasma specific charges.
 
     Returns
     -------
+    jnp.ndarray
+        The charge state distribution in fractions.
     jnp.ndarray
         An array containing the mean charge of each ion in the plasma.
 

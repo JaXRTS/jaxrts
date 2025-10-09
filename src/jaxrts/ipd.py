@@ -289,7 +289,7 @@ def ipd_stewart_pyatt_preston(
     Lambda = (
         3
         * (Zp + cc)
-        * Zi
+        * (Zi+1)
         * ureg.elementary_charge**2
         / (
             4
