@@ -64,7 +64,12 @@ def inverse_screening_length_e(ne: Quantity, Te: Quantity):
 
 @partial(jax.jit, static_argnames=["arb_deg"])
 def ipd_debye_hueckel(
-    Zi: float, ne: Quantity, ni: Quantity, Te: Quantity, Ti: Quantity, arb_deg:bool = False
+    Zi: float,
+    ne: Quantity,
+    ni: Quantity,
+    Te: Quantity,
+    Ti: Quantity,
+    arb_deg: bool = False,
 ) -> Quantity:
     """
     The correction to the ionization potential for the m-th ionization stage in
@@ -94,14 +99,14 @@ def ipd_debye_hueckel(
     Quantity
         The ipd shift in units of electronvolt.
     """
-    Zbar = n_e / n_i
+    Zbar = ne / ni
 
     kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
         1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
     )
     if arb_deg:
         kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te))
-        kappa = jnpu.sqrt(kappa_i_sq + kappa_e**2)
+        kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e**2)
     else:
         kappa_e_sq = jnpu.sum(ureg.elementary_charge**2 * ne) / (
             1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te
@@ -109,8 +114,8 @@ def ipd_debye_hueckel(
         kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
 
     # The ionization potential depression energy shift
-    ipd_shift = kappa * (
-        -(Zi  + 1) * ureg.elementary_charge**2 / (4 * jnp.pi * ureg.epsilon_0)
+    ipd_shift = kappa_D * (
+        -(Zi + 1) * ureg.elementary_charge**2 / (4 * jnp.pi * ureg.epsilon_0)
     )
 
     return ipd_shift.to(ureg.electron_volt)
@@ -141,7 +146,7 @@ def ipd_ion_sphere(
     """
     # This function is not well-defined for Zi==0:
     Zi = jnp.clip(Zi, 1e-6)
-    Zbar = n_e / n_i
+    Zbar = ne / ni
 
     # The ion-sphere radius, determined by the ion density n_i such that the
     # average distance to the nearest neighbor ion is
@@ -162,7 +167,7 @@ def ipd_stewart_pyatt(
     ni: Quantity,
     Te: Quantity,
     Ti: Quantity,
-    arb_deg: bool = False
+    arb_deg: bool = False,
 ) -> Quantity:
     """
     The correction to the ionization potential in the Stewart-Pyatt model using
@@ -202,7 +207,7 @@ def ipd_stewart_pyatt(
     )
     if arb_deg:
         kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te))
-        kappa = jnpu.sqrt(kappa_i_sq + kappa_e**2)
+        kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e**2)
     else:
         kappa_e_sq = jnpu.sum(ureg.elementary_charge**2 * ne) / (
             1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te
@@ -210,7 +215,6 @@ def ipd_stewart_pyatt(
         kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
 
     R_0 = (3 / (4 * jnp.pi * jnpu.sum(ni))) ** (1 / 3)
-
 
     s = 1 / kappa_D / R_0
 
@@ -223,7 +227,7 @@ def ipd_stewart_pyatt(
     return ipd_shift.to(ureg.electron_volt)
 
 
-@partial(jax.jit, static_argnames=["crowley_correction"])
+@partial(jax.jit, static_argnames=["arb_deg", "crowley_correction"])
 def ipd_stewart_pyatt_preston(
     Zi: float,
     ne: Quantity,
@@ -231,7 +235,8 @@ def ipd_stewart_pyatt_preston(
     Te: Quantity,
     Ti: Quantity,
     ion_population=None,
-    crowley_correction: bool = False
+    arb_deg: bool = False,
+    crowley_correction: bool = False,
 ) -> Quantity:
     """
     The correction to the ionization potential in the Stewart-Pyatt model using
@@ -268,10 +273,18 @@ def ipd_stewart_pyatt_preston(
     Zbar, Zp = _surrounding_plasma(Zi, ion_population)
     cc = 0 if crowley_correction else 1
 
-    num = ureg.epsilon_0 * ureg.k_B * Ti
-    denom = (ni + ne) * (ureg.elementary_charge) ** 2
-    lambda_D = jnpu.sqrt(num / denom)
-    # lambda_D /= jnpu.sqrt(Zbar * (1 + Zp))
+    kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
+        1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
+    )
+    if arb_deg:
+        kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te))
+        kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e**2)
+    else:
+        kappa_e_sq = jnpu.sum(ureg.elementary_charge**2 * ne) / (
+            1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te
+        )
+        kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
+    lambda_D = 1 / kappa_D
 
     Lambda = (
         3
@@ -297,7 +310,7 @@ def ipd_stewart_pyatt_preston(
     return ipd_shift.to(ureg.electron_volt)
 
 
-@jax.jit
+@partial(jax.jit, static_argnames=["arb_deg"])
 def ipd_ecker_kroell(
     Zi: float,
     ne: Quantity,
@@ -305,6 +318,8 @@ def ipd_ecker_kroell(
     Te: Quantity,
     Ti: Quantity,
     Z_max: Quantity,
+    arb_deg: bool = False,
+    C: Quantity | None = None,
 ) -> Quantity:
     """
     The correction to the ionization potential for the m-th ionization stage in
@@ -331,14 +346,20 @@ def ipd_ecker_kroell(
         The ipd shift in units of electronvolt.
 
     """
-    Zbar = n_e / n_i
+    Zbar = ne / ni
 
-    lambda_Di = jnpu.sqrt(
-        ureg.epsilon_0
-        * ureg.boltzmann_constant
-        * Ti
-        / (ne * ureg.elementary_charge**2)
+    kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
+        1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
     )
+    if arb_deg:
+        kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te))
+        kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e**2)
+    else:
+        kappa_e_sq = jnpu.sum(ureg.elementary_charge**2 * ne) / (
+            1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te
+        )
+        kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
+    lambda_D = 1 / kappa_D
 
     R_0 = (3 / (4 * jnp.pi * ni)) ** (1 / 3)
 
@@ -354,17 +375,20 @@ def ipd_ecker_kroell(
     # The constant in Ecker-Kroells model, which is determined from the
     # continuity of the potential across the critical density.
 
-    C = (
-        2.2
-        * jnpu.sqrt(
-            ureg.elementary_charge**2
-            / (ureg.boltzmann_constant * Te)
-            / (4 * jnp.pi * ureg.epsilon_0)
-        )
-        * n_c ** (1 / 6)
-    ).m_as(ureg.dimensionless)
+    if C is None:
+        C = (
+            2.2
+            * jnpu.sqrt(
+                ureg.elementary_charge**2
+                / (ureg.boltzmann_constant * Te)
+                / (4 * jnp.pi * ureg.epsilon_0)
+            )
+            * n_c ** (1 / 6)
+        ).m_as(ureg.dimensionless)
 
-    ipd_c1 = -1 * ureg.elementary_charge**2 / (ureg.epsilon_0 * lambda_Di) * (Zi + 1)
+    ipd_c1 = (
+        -1 * ureg.elementary_charge**2 / (ureg.epsilon_0 * lambda_D) * (Zi + 1)
+    )
     ipd_c2 = -C * ureg.elementary_charge**2 / (ureg.epsilon_0 * R_0) * (Zi + 1)
 
     # The ionization potential depression energy shift

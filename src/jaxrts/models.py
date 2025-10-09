@@ -300,7 +300,7 @@ class Neglect(Model):
         self, plasma_state: "PlasmaState"
     ) -> list[jnp.ndarray]:
         out = []
-        for idx, element in enumerate(plasma_state.ions):
+        for _, element in enumerate(plasma_state.ions):
             out.append(
                 jnp.array([0 for Z in jnp.arange(element.Z)])
                 * ureg.electron_volt
@@ -3270,7 +3270,7 @@ class ConstantIPD(Model):
         self, plasma_state: "PlasmaState"
     ) -> list[jnp.ndarray]:
         out = []
-        for idx, element in enumerate(plasma_state.ions):
+        for _, element in enumerate(plasma_state.ions):
             out.append(
                 jnp.array(
                     [
@@ -3356,7 +3356,8 @@ class StewartPyattPrestonIPD(Model):
     Stewart Pyatt IPD Model :cite:`Stewart.1966`.
     The Stewart–Pyatt (SP) model interpolates between the
     Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972`
-    at (low temperature, high density) and (high temperature, low density), respectively.
+    at (low temperature, high density) and (high temperature, low density),
+    respectively.
 
     See Also
     --------
@@ -3368,8 +3369,11 @@ class StewartPyattPrestonIPD(Model):
     __name__ = "StewartPyatt"
     cite_keys = ["Stewart.1966", "Crowley.2014"]
 
-    def __init__(self, crowley_correction: bool = False):
+    def __init__(
+        self, arb_deg: bool = False, crowley_correction: bool = False
+    ):
         self.crowley_correction = crowley_correction
+        self.arb_deg = arb_deg
         super().__init__()
 
     @jax.jit
@@ -3380,19 +3384,20 @@ class StewartPyattPrestonIPD(Model):
             plasma_state.n_i,
             plasma_state.T_e,
             plasma_state.T_i,
+            arb_deg=self.arb_deg,
             crowley_correction=self.crowley_correction,
         )
 
     # The following is required to jit a Model
     def _tree_flatten(self):
         children = ()
-        aux_data = (self.model_key, self.crowley_correction)  # static values
+        aux_data = (self.model_key, self.arb_deg, self.crowley_correction)
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        (obj.model_key, obj.crowley_correction) = aux_data
+        (obj.model_key, obj.arb_deg, obj.crowley_correction) = aux_data
 
         return obj
 
@@ -3412,6 +3417,7 @@ class StewartPyattPrestonIPD(Model):
                             plasma_state.T_e,
                             plasma_state.T_i[idx],
                             ion_population=ion_population,
+                            arb_deg=self.arb_deg,
                             crowley_correction=self.crowley_correction,
                         ).m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
@@ -3427,7 +3433,8 @@ class StewartPyattIPD(Model):
     Stewart Pyatt IPD Model :cite:`Stewart.1966`.
     The Stewart–Pyatt (SP) model interpolates between the
     Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972`
-    at (low temperature, high density) and (high temperature, low density), respectively.
+    at (low temperature, high density) and (high temperature, low density),
+    respectively.
 
     See Also
     --------
@@ -3566,6 +3573,10 @@ class EckerKroellIPD(Model):
     __name__ = "EckerKroell"
     cite_keys = ["EckerKroell.1963", "Crowley.2014"]
 
+    def __init__(self, arb_deg: bool = False):
+        self.arb_deg = arb_deg
+        super().__init__()
+
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
         return ipd.ipd_ecker_kroell(
@@ -3574,7 +3585,19 @@ class EckerKroellIPD(Model):
             plasma_state.n_i,
             plasma_state.T_e,
             plasma_state.T_i,
+            arb_deg=self.arb_deg,
         )
+
+    def _tree_flatten(self):
+        children = ()
+        aux_data = (self.model_key, self.arb_deg)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key, obj.arb_deg) = aux_data
+        return obj
 
 
 class PauliBlockingIPD(Model):
