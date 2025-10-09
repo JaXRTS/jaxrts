@@ -25,17 +25,6 @@ from .plasma_physics import (
 logger = logging.getLogger(__name__)
 
 
-def _surrounding_plasma(Zi, ion_population):
-    if ion_population is None:
-        Zp = Zi
-        Zbar = Zi
-    else:
-        Z = jnp.arange(len(ion_population))
-        Zbar = jnpu.mean(Z * ion_population)
-        Zp = jnpu.mean(Z**2 * ion_population) / Zbar
-    return Zbar, Zp
-
-
 @jax.jit
 def inverse_screening_length_e(ne: Quantity, Te: Quantity):
     """ """
@@ -83,20 +72,25 @@ def ipd_debye_hueckel(
 
     Parameters
     ----------
-    Z_i
-        The (mean) charge state of the ions.
-    n_e
+    Zi
+        The charge state of the atom (note that this is the state before the
+        ionization).
+    ne
         Electron density. Units of 1/[length]**3.
-    n_i
+    ni
         Ion density. Units of 1/[length]**3.
-    T_e
+    Te
         The electron temperature.
-    T_i
+    Ti
         The ion temperature.
+    arb_deg: bool, default false
+        If ``True`` the Debye screening length is evaluated using
+        :py:func:`inverse_screening_length_e`, which includes solving the Fermi
+        integral, rather than the classical value.
 
     Returns
     -------
-    Quantity
+    Quantity.
         The ipd shift in units of electronvolt.
     """
     Zbar = ne / ni
@@ -123,7 +117,7 @@ def ipd_debye_hueckel(
 
 @jax.jit
 def ipd_ion_sphere(
-    Zi: Quantity, ne: Quantity, ni: Quantity, ion_population=None
+    Zi: Quantity, ne: Quantity, ni: Quantity
 ) -> Quantity:
     """
     The correction to the ionization potential for the m-th ionization stage in
@@ -132,11 +126,12 @@ def ipd_ion_sphere(
 
     Parameters
     ----------
-    Z_i
-        The (mean) charge state of the ions.
-    n_e
+    Zi
+        The charge state of the atom (note that this is the state before the
+        ionization)
+    ne
         Electron density. Units of 1/[length]**3.
-    n_i
+    ni
         Ion density. Units of 1/[length]**3.
 
     Returns
@@ -144,8 +139,6 @@ def ipd_ion_sphere(
     Quantity
         The ipd shift in units of electronvolt.
     """
-    # This function is not well-defined for Zi==0:
-    Zi = jnp.clip(Zi, 1e-6)
     Zbar = ne / ni
 
     # The ion-sphere radius, determined by the ion density n_i such that the
@@ -153,7 +146,7 @@ def ipd_ion_sphere(
     # approximately 2 R_0.
     R_0 = (3 * Zbar / (4 * jnp.pi * ne)) ** (1 / 3)
 
-    ipd_shift = -(3 * Zi * 1 * ureg.elementary_charge**2) / (
+    ipd_shift = -(3 * (Zi + 1) * 1 * ureg.elementary_charge**2) / (
         R_0 * 8 * jnp.pi * 1 * ureg.epsilon_0
     )
 
@@ -182,18 +175,21 @@ def ipd_stewart_pyatt(
 
     Parameters
     ----------
-    Z_i
-        The (mean) charge state of the ions.
-    n_e
+    Zi
+        The charge state of the atom (note that this is the state before the
+        ionization).
+    ne
         Electron density. Units of 1/[length]**3.
-    n_i
+    ni
         Ion density. Units of 1/[length]**3.
-    T_e
+    Te
         The electron temperature.
-    T_i
+    Ti
         The ion temperature.
-    ion_population
-        The ion population fractions.
+    arb_deg: bool, default false
+        If ``True`` the Debye screening length is evaluated using
+        :py:func:`inverse_screening_length_e`, which includes solving the Fermi
+        integral, rather than the classical value.
 
     Returns
     -------
@@ -239,30 +235,44 @@ def ipd_stewart_pyatt_preston(
     crowley_correction: bool = False,
 ) -> Quantity:
     """
-    The correction to the ionization potential in the Stewart-Pyatt model using
-    the small bound state approximation. This model is founded on the
-    Thomas-Fermi Model for the electrons and extends it to include ions in the
-    vicinity of a given nucleus. Taken from :cite:`Ropke.2019` Eq. (2).
+    The Stewart Pyatt IPD, as presented by :cite:`Preston.2013`, which closely
+    resembles the seminal work of :cite:`Stewart.1966`.
 
-    .. note::
+    The IPD is dependent on the quantity
+    :math:`z^* = \\frac{\\langle z^2 \\rangle}{\\langle z\\rangle}` which is
+    only calculated if an ``ion_population`` argument is given. Otherwise, we
+    assume this value was the average ionization state, which is, however, not
+    accurate.
 
-       The Stewart-Pyatt value is always below both the Debye and ion sphere
-       results.
+    The connection between this formulation and the implementation in
+    :py:func:`~.ipd_stewart_pyatt` can be found in Appendix A of
+    :cite:`Pain.2022`.
+
+    :cite:`Crowley.2014` pointed out a correction to the formula used by
+    Stewart and Pyatt. This can be handled by setting the
+    ``crowley_correction`` flag to true
 
     Parameters
     ----------
-    Z_i
-        The (mean) charge state of the ions.
-    n_e
+    Zi
+        The charge state of the atom (note that this is the state before the
+        ionization).
+    ne
         Electron density. Units of 1/[length]**3.
-    n_i
+    ni
         Ion density. Units of 1/[length]**3.
-    T_e
+    Te
         The electron temperature.
-    T_i
+    Ti
         The ion temperature.
     ion_population
         The ion population fractions.
+    arb_deg: bool, default false
+        If ``True`` the Debye screening length is evaluated using
+        :py:func:`inverse_screening_length_e`, which includes solving the Fermi
+        integral, rather than the classical value.
+    crowley_correction: bool, default False
+        If ``True`` apply the correction presented by :cite:`Crowley.2014`.
 
     Returns
     -------
@@ -270,7 +280,14 @@ def ipd_stewart_pyatt_preston(
         The ipd shift in units of electronvolt.
     """
 
-    Zbar, Zp = _surrounding_plasma(Zi, ion_population)
+    if ion_population is None:
+        Zp = ne / jnpu.sum(ni)
+        Zbar = ne / ni
+    else:
+        Z = jnp.arange(len(ion_population))
+        Zbar = jnpu.mean(Z * ion_population)
+        Zp = jnpu.mean(Z**2 * ion_population) / Zbar
+
     cc = 0 if crowley_correction else 1
 
     kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
@@ -289,7 +306,7 @@ def ipd_stewart_pyatt_preston(
     Lambda = (
         3
         * (Zp + cc)
-        * (Zi+1)
+        * (Zi + 1)
         * ureg.elementary_charge**2
         / (
             4
@@ -319,26 +336,38 @@ def ipd_ecker_kroell(
     Ti: Quantity,
     Z_max: Quantity,
     arb_deg: bool = False,
-    C: Quantity | None = None,
+    C: float | None = None,
 ) -> Quantity:
     """
-    The correction to the ionization potential for the m-th ionization stage in
-    the Ecker-Kroell model.
-    This model is similar to the model of Stewart-Pyatt and divided the radial
-    dimension into three regions. For details see :cite:`EckerKroell.1963`.
+    The ionization potential for an atom with charge Zi in the Ecker-Kroell
+    model.
+    Defines a critical density under which the IPD is idetical to
+    :py:func:`~.ipd_debye_hueckel`. Above that value, the IPD is given by a
+    Ecker Kröll length. If no value ``C`` is given, the latter value is scaled
+    to have a continous IPD. Some studies (e.g. :cite:`Preston.2014` use a
+    modified Ecker Kröll model, where a specific value of ``C`` (often 1) is
+    set instead. For details see :cite:`EckerKroell.1963`.
 
     Parameters
     ----------
-    Z_i
-        The (mean) charge state of the ions.
-    n_e
+    Zi
+        The charge state of the atom (note that this is the state before the
+        ionization)
+    ne
         Electron density. Units of 1/[length]**3.
-    n_i
+    ni
         Ion density. Units of 1/[length]**3.
-    T_e
+    Te
         The electron temperature.
-    T_i
+    Ti
         The ion temperature.
+    arb_deg: bool, default false
+        If ``True`` the Debye screening length is evaluated using
+        :py:func:`inverse_screening_length_e`, which includes solving the Fermi
+        integral, rather than the classical value.
+    C: float or None, default None
+        Multiplicative factor for the high-density part of the EK model. If set
+        to None, the factor is chosen to achieve a continuous IPD.
 
     Returns
     -------
@@ -407,15 +436,16 @@ def ipd_pauli_blocking(
 
     Parameters
     ----------
-    Z_i
-        The (mean) charge state of the ions.
-    n_e
+    Zi
+        The charge state of the atom (note that this is the state before the
+        ionization)
+    ne
         Electron density. Units of 1/[length]**3.
-    n_i
+    ni
         Ion density. Units of 1/[length]**3.
-    T_e
+    Te
         The electron temperature.
-    T_i
+    Ti
         The ion temperature.
 
     Returns
