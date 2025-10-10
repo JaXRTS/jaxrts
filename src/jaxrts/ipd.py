@@ -27,7 +27,9 @@ logger = logging.getLogger(__name__)
 
 @jax.jit
 def inverse_screening_length_e(ne: Quantity, Te: Quantity):
-    """ """
+    """
+    See :cite:`Röpke.2019`.
+    """
 
     chem_pot = chem_pot_interpolation(Te, ne)
     beta = 1 / (1 * ureg.boltzmann_constant * Te)
@@ -58,6 +60,7 @@ def ipd_debye_hueckel(
     ni: Quantity,
     Te: Quantity,
     Ti: Quantity,
+    Zbar: float | None = None,
     arb_deg: bool = False,
 ) -> Quantity:
     """
@@ -93,7 +96,8 @@ def ipd_debye_hueckel(
     Quantity.
         The ipd shift in units of electronvolt.
     """
-    Zbar = ne / ni
+    if Zbar is None:
+        Zbar = Zi
 
     kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
         1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
@@ -117,7 +121,7 @@ def ipd_debye_hueckel(
 
 @jax.jit
 def ipd_ion_sphere(
-    Zi: Quantity, ne: Quantity, ni: Quantity
+    Zi: Quantity, ne: Quantity, ni: Quantity, Zbar: float | None = None
 ) -> Quantity:
     """
     The correction to the ionization potential for the m-th ionization stage in
@@ -133,13 +137,17 @@ def ipd_ion_sphere(
         Electron density. Units of 1/[length]**3.
     ni
         Ion density. Units of 1/[length]**3.
+    Zbar: float, optional
+        The average ionization of the plasma. If not given, Zi is assumed to be
+        the average ionization of the plasma.
 
     Returns
     -------
     Quantity
         The ipd shift in units of electronvolt.
     """
-    Zbar = ne / ni
+    if Zbar is None:
+        Zbar = Zi
 
     # The ion-sphere radius, determined by the ion density n_i such that the
     # average distance to the nearest neighbor ion is
@@ -160,6 +168,7 @@ def ipd_stewart_pyatt(
     ni: Quantity,
     Te: Quantity,
     Ti: Quantity,
+    Zbar: float | None = None,
     arb_deg: bool = False,
 ) -> Quantity:
     """
@@ -186,6 +195,9 @@ def ipd_stewart_pyatt(
         The electron temperature.
     Ti
         The ion temperature.
+    Zbar: float, optional
+        The average ionization of the plasma. If not given, Zi is assumed to be
+        the average ionization of the plasma.
     arb_deg: bool, default false
         If ``True`` the Debye screening length is evaluated using
         :py:func:`inverse_screening_length_e`, which includes solving the Fermi
@@ -196,7 +208,8 @@ def ipd_stewart_pyatt(
     Quantity
         The ipd shift in units of electronvolt.
     """
-    Zbar = ne / ni
+    if Zbar is None:
+        Zbar = Zi
 
     kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
         1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
@@ -335,6 +348,7 @@ def ipd_ecker_kroell(
     Te: Quantity,
     Ti: Quantity,
     Z_max: Quantity,
+    Zbar: float | None = None,
     arb_deg: bool = False,
     C: float | None = None,
 ) -> Quantity:
@@ -361,6 +375,9 @@ def ipd_ecker_kroell(
         The electron temperature.
     Ti
         The ion temperature.
+    Zbar: float, optional
+        The average ionization of the plasma. If not given, Zi is assumed to be
+        the average ionization of the plasma.
     arb_deg: bool, default false
         If ``True`` the Debye screening length is evaluated using
         :py:func:`inverse_screening_length_e`, which includes solving the Fermi
@@ -375,25 +392,9 @@ def ipd_ecker_kroell(
         The ipd shift in units of electronvolt.
 
     """
-    Zbar = ne / ni
-
-    kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
-        1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
-    )
-    if arb_deg:
-        kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te))
-        kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e**2)
-    else:
-        kappa_e_sq = jnpu.sum(ureg.elementary_charge**2 * ne) / (
-            1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te
-        )
-        kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
-    lambda_D = 1 / kappa_D
-
-    R_0 = (3 / (4 * jnp.pi * ni)) ** (1 / 3)
-
+    if Zbar is None:
+        Zbar = Zi
     # The critical density in the model of Ecker-Kroell
-
     n_c = (3 / (4 * jnp.pi)) * (
         (4 * jnp.pi * 1 * ureg.epsilon_0)
         * ureg.boltzmann_constant
@@ -404,24 +405,77 @@ def ipd_ecker_kroell(
     # The constant in Ecker-Kroells model, which is determined from the
     # continuity of the potential across the critical density.
 
+    # Calculating lambda_D at the critical density if arb_deg is given requires
+    # to split n_c = n_i + n_e, to that the electronic part can be treated
+    # individually.
+
+    ne_crit = n_c / (ne + jnpu.sum(ni)) * ne
+    ni_crit = n_c[:, None] / (ne + jnpu.sum(ni)) * ni[None, :]
+
+    kappa_i_sq = jnpu.sum(
+        Zbar**2
+        * ureg.elementary_charge**2
+        * ni
+        / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti)
+    )
+    kappa_i_sq_crit = jnpu.sum(
+        Zbar[None, :] ** 2
+        * ureg.elementary_charge**2
+        * ni_crit
+        / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti),
+        axis=1,
+    )
+
+    if arb_deg:
+        kappa_e = jnpu.sum(inverse_screening_length_e(ne, Te))
+        kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e**2)
+
+        kappa_e_crit = inverse_screening_length_e(ne_crit, Te)
+        kappa_D_crit = jnpu.sqrt(kappa_i_sq_crit + kappa_e_crit**2)
+    else:
+        kappa_e_sq = jnpu.sum(ureg.elementary_charge**2 * ne) / (
+            1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te
+        )
+        kappa_D = jnpu.sqrt(kappa_i_sq + kappa_e_sq)
+        kappa_e_sq_crit = (
+            ureg.elementary_charge**2
+            * ne_crit
+            / (1 * ureg.epsilon_0 * ureg.boltzmann_constant * Te)
+        )
+        kappa_D_crit = jnpu.sqrt(kappa_i_sq_crit + kappa_e_sq_crit)
+    lambda_D = 1 / kappa_D
+
+    # For the definitions, see e.g., :cite:`Preston.2013`.
+    R_EK = (3 / (4 * jnp.pi * (ne + ni))) ** (1 / 3)
+    R_EK_crit = (3 / (4 * jnp.pi * n_c)) ** (1 / 3)
+
     if C is None:
-        C = (
-            2.2
-            * jnpu.sqrt(
-                ureg.elementary_charge**2
-                / (ureg.boltzmann_constant * Te)
-                / (4 * jnp.pi * ureg.epsilon_0)
-            )
-            * n_c ** (1 / 6)
-        ).m_as(ureg.dimensionless)
+        C = (kappa_D_crit * R_EK_crit).m_as(ureg.dimensionless)
 
     ipd_c1 = (
-        -1 * ureg.elementary_charge**2 / (ureg.epsilon_0 * lambda_D) * (Zi + 1)
+        -1
+        * ureg.elementary_charge**2
+        / (4 * jnp.pi * ureg.epsilon_0 * lambda_D)
+        * (Zi + 1)
     )
-    ipd_c2 = -C * ureg.elementary_charge**2 / (ureg.epsilon_0 * R_0) * (Zi + 1)
+    ipd_c2 = (
+        -C
+        * ureg.elementary_charge**2
+        / (4 * jnp.pi * ureg.epsilon_0 * R_EK)
+        * (Zi + 1)
+    )
 
     # The ionization potential depression energy shift
-    ipd_shift = jnpu.where(ni <= n_c, ipd_c1, ipd_c2)
+    # jax.debug.print(
+    #     "{x},{y}|{a},{b}|{c},{d}",
+    #     x=(ni + ne).to_base_units(),
+    #     y=n_c.to_base_units(),
+    #     a=lambda_D.to_base_units(),
+    #     b=(1 / kappa_D_crit).to_base_units(),
+    #     c=R_EK.to_base_units(),
+    #     d=R_EK_crit.to_base_units(),
+    # )
+    ipd_shift = jnpu.where((ni + ne) <= n_c, ipd_c1, ipd_c2)
 
     return ipd_shift.to(ureg.electron_volt)
 

@@ -3290,6 +3290,9 @@ class DebyeHueckelIPD(Model):
     plasmas, determined by charge screening effects as described in the
     Debye-Hückel theory.
 
+    Allows for the ``arb_deg`` flag, which solves Fermi integrals to obtain the
+    Debye screening length, rather than using the classical formula.
+
     See Also
     --------
     jaxrts.ipd.ipd_debye_hueckel
@@ -3312,6 +3315,7 @@ class DebyeHueckelIPD(Model):
             plasma_state.n_i,
             plasma_state.T_e,
             plasma_state.T_i,
+            Zbar=plasma_state.Z_free,
             arb_deg=self.arb_deg,
         )
 
@@ -3327,11 +3331,12 @@ class DebyeHueckelIPD(Model):
                         ipd.ipd_debye_hueckel(
                             Z,
                             plasma_state.n_e,
-                            plasma_state.n_i[idx],
+                            plasma_state.n_i,
                             plasma_state.T_e,
-                            plasma_state.T_i[idx],
+                            plasma_state.T_i,
+                            Zbar=plasma_state.Z_free,
                             arb_deg=self.arb_deg,
-                        ).m_as(ureg.electron_volt)
+                        )[idx].m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
                 )
@@ -3359,15 +3364,27 @@ class StewartPyattPrestonIPD(Model):
     at (low temperature, high density) and (high temperature, low density),
     respectively.
 
+    Uses the formulation that can be found in :cite:`Preston.2013`, which is
+    close to the original work of :cite:`Stewart.1966`, but is formulated in a
+    way that requires knowledge over the distribution of all plasma states. See
+    Appendix A of :cite:`Pain.2022` for how to obtain the Model implemented in
+    :py:class:~.StewartPyattIPD` from this Model.
+
+    Allows for the ``arb_deg`` flag, which solves Fermi integrals to obtain the
+    Debye screening length, rather than using the classical formula.
+
+    A correction presented in :cite:`Crowley.2014` can be switched on with the
+    ``crowley_correction`` flag.
+
     See Also
     --------
-    jaxrts.ipd.ipd_stewart_pyatt
+    jaxrts.ipd.ipd_stewart_pyatt_preston
         Function used to calculate the IPD
     """
 
     allowed_keys = ["ipd"]
     __name__ = "StewartPyatt"
-    cite_keys = ["Stewart.1966", "Crowley.2014"]
+    cite_keys = ["Stewart.1966", "Preston.2013", "Crowley.2014"]
 
     def __init__(
         self, arb_deg: bool = False, crowley_correction: bool = False
@@ -3413,13 +3430,13 @@ class StewartPyattPrestonIPD(Model):
                         ipd.ipd_stewart_pyatt_preston(
                             Z,
                             plasma_state.n_e,
-                            plasma_state.n_i[idx],
+                            plasma_state.n_i,
                             plasma_state.T_e,
-                            plasma_state.T_i[idx],
+                            plasma_state.T_i,
                             ion_population=ion_population,
                             arb_deg=self.arb_deg,
                             crowley_correction=self.crowley_correction,
-                        ).m_as(ureg.electron_volt)
+                        )[idx].m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
                 )
@@ -3435,6 +3452,9 @@ class StewartPyattIPD(Model):
     Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972`
     at (low temperature, high density) and (high temperature, low density),
     respectively.
+
+    Allows for the ``arb_deg`` flag, which solves Fermi integrals to obtain the
+    Debye screening length, rather than using the classical formula.
 
     See Also
     --------
@@ -3458,6 +3478,7 @@ class StewartPyattIPD(Model):
             plasma_state.n_i,
             plasma_state.T_e,
             plasma_state.T_i,
+            Zbar=plasma_state.Z_free,
             arb_deg=self.arb_deg,
         )
 
@@ -3473,11 +3494,12 @@ class StewartPyattIPD(Model):
                         ipd.ipd_stewart_pyatt(
                             Z,
                             plasma_state.n_e,
-                            plasma_state.n_i[idx],
+                            plasma_state.n_i,
                             plasma_state.T_e,
-                            plasma_state.T_i[idx],
+                            plasma_state.T_i,
+                            Zbar=plasma_state.Z_free,
                             arb_deg=self.arb_deg,
-                        ).m_as(ureg.electron_volt)
+                        )[idx].m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
                 )
@@ -3522,7 +3544,10 @@ class IonSphereIPD(Model):
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
         return ipd.ipd_ion_sphere(
-            plasma_state.Z_free, plasma_state.n_e, plasma_state.n_i
+            plasma_state.Z_free,
+            plasma_state.n_e,
+            plasma_state.n_i,
+            Zbar=plasma_state.Z_free,
         )
 
     @jax.jit
@@ -3539,9 +3564,9 @@ class IonSphereIPD(Model):
                         ipd.ipd_ion_sphere(
                             Z,
                             plasma_state.n_e,
-                            plasma_state.n_i[idx],
-                            ion_population=ion_population,
-                        ).m_as(ureg.electron_volt)
+                            plasma_state.n_i,
+                            Zbar=plasma_state.Z_free,
+                        )[idx].m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
                 )
@@ -3563,6 +3588,9 @@ class EckerKroellIPD(Model):
     The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt
     Model for highly ionized plasmas.
 
+    Allows for the ``arb_deg`` flag, which solves Fermi integrals to obtain the
+    Debye screening length, rather than using the classical formula.
+
     See Also
     --------
     jaxrts.ipd.ipd_ecker_kroell
@@ -3571,25 +3599,60 @@ class EckerKroellIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "EckerKroell"
-    cite_keys = ["EckerKroell.1963", "Crowley.2014"]
+    cite_keys = ["EckerKroell.1963", "Crowley.2014", "Preston.2013"]
 
-    def __init__(self, arb_deg: bool = False):
+    def __init__(self, C: float | None = None, arb_deg: bool = False):
         self.arb_deg = arb_deg
+        self.C = C
         super().__init__()
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
+        # Model requires Zmax as an input.
+        Zmax = jnp.array([ion.Z for ion in plasma_state.ions])
         return ipd.ipd_ecker_kroell(
             plasma_state.Z_free,
             plasma_state.n_e,
             plasma_state.n_i,
             plasma_state.T_e,
             plasma_state.T_i,
+            Zmax,
+            Zbar=plasma_state.Z_free,
             arb_deg=self.arb_deg,
+            C=self.C,
         )
 
+    @jax.jit
+    def all_element_states(
+        self,
+        plasma_state: "PlasmaState",
+        ion_population=None,
+    ) -> list[jnp.ndarray]:
+        out = []
+        for idx, element in enumerate(plasma_state.ions):
+            out.append(
+                jnp.array(
+                    [
+                        ipd.ipd_ecker_kroell(
+                            Z,
+                            plasma_state.n_e,
+                            plasma_state.n_i,
+                            plasma_state.T_e,
+                            plasma_state.T_i,
+                            element.Z,
+                            Zbar=plasma_state.Z_free,
+                            arb_deg=self.arb_deg,
+                            C=self.C,
+                        )[idx].m_as(ureg.electron_volt)
+                        for Z in jnp.arange(element.Z)
+                    ]
+                )
+                * ureg.electron_volt
+            )
+        return out
+
     def _tree_flatten(self):
-        children = ()
+        children = (self.C,)
         aux_data = (self.model_key, self.arb_deg)  # static values
         return (children, aux_data)
 
@@ -3597,6 +3660,7 @@ class EckerKroellIPD(Model):
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
         (obj.model_key, obj.arb_deg) = aux_data
+        (obj.C,) = children
         return obj
 
 
@@ -3721,7 +3785,7 @@ class ArbitraryDegeneracyScreeningLength(Model):
 
     allowed_keys = ["screening length"]
     __name__ = "ArbitraryDegeneracyScreeningLength"
-    cite_keys = ["Baggott.2017"]
+    cite_keys = ["Röpke.2019", "Baggott.2017"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
