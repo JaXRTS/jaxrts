@@ -297,7 +297,7 @@ class Neglect(Model):
             return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
 
     def all_element_states(
-        self, plasma_state: "PlasmaState"
+        self, plasma_state: "PlasmaState", ion_population = None
     ) -> list[jnp.ndarray]:
         out = []
         for _, element in enumerate(plasma_state.ions):
@@ -3267,7 +3267,7 @@ class ConstantIPD(Model):
 
     @jax.jit
     def all_element_states(
-        self, plasma_state: "PlasmaState"
+        self, plasma_state: "PlasmaState", ion_population = None
     ) -> list[jnp.ndarray]:
         out = []
         for _, element in enumerate(plasma_state.ions):
@@ -3321,7 +3321,7 @@ class DebyeHueckelIPD(Model):
 
     @jax.jit
     def all_element_states(
-        self, plasma_state: "PlasmaState"
+        self, plasma_state: "PlasmaState", ion_population = None
     ) -> list[jnp.ndarray]:
         out = []
         for idx, element in enumerate(plasma_state.ions):
@@ -3696,7 +3696,7 @@ class PauliBlockingIPD(Model):
 
     @jax.jit
     def all_element_states(
-        self, plasma_state: "PlasmaState"
+        self, plasma_state: "PlasmaState", ion_population = None
     ) -> list[jnp.ndarray]:
         out = []
         for idx, element in enumerate(plasma_state.ions):
