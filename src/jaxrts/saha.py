@@ -259,18 +259,18 @@ def solve_saha(
 
         stat_weight = element.ionization.statistical_weights
 
-        def scan_fn(pref, inputs):
-            E, g = inputs
-            output = jnp.where(E > 0, pref * g, 1.0)
-            new_pref = jnp.where(E > 0, 1.0, pref * g)
-            return new_pref, output
+        # def scan_fn(pref, inputs):
+        #     E, g = inputs
+        #     output = jnp.where(E > 0, pref * g, 1.0)
+        #     new_pref = jnp.where(E > 0, 1.0, pref * g)
+        #     return new_pref, output
 
-        initial_pref = 1.0
-        final_pref, out_values = jax.lax.scan(
-            scan_fn,
-            initial_pref,
-            (jnp.array([*Eb, 1.0]), stat_weight),
-        )
+        # initial_pref = 1.0
+        # final_pref, out_values = jax.lax.scan(
+        #     scan_fn,
+        #     initial_pref,
+        #     (jnp.array([*Eb, 1.0]), stat_weight),
+        # )
 
         coeff = (
             saha_equation(
@@ -332,13 +332,7 @@ def solve_saha(
         res = jnp.linalg.det(insert_ne(M, ne))
         return res
 
-    det_M_func = (
-        lambda ne: det_M(M=M, ne=ne)
-        / (ne + 1) ** (M.shape[0] + 1)
-        * T_e.m_as(ureg.electron_volt / ureg.boltzmann_constant)
-        ** (-M.shape[0])
-        * 1e16
-    )
+    det_M_func = lambda ne: det_M(M=M, ne=ne)
 
     # Find n_e by finding the root where the determinant of M is 0
     # Use the bisection method, boundaries are fixed by max_ne and 0.
@@ -346,7 +340,7 @@ def solve_saha(
         jax.tree_util.Partial(det_M_func),
         0,
         (max_ne / ne_scale).m_as(ureg.dimensionless),
-        tolerance=1e-16,
+        tolerance=1e-3,
         max_iter=1e4,
         min_iter=40,
     )
@@ -609,13 +603,7 @@ def solve_gen_saha(
         # Find n_e by finding the root where the determinant of M is 0
         # Use the bisection method, boundaries are fixed by max_ne and 0.
 
-    det_M_func = (
-        lambda ne: det_M(M=M, ne=ne)
-        / (ne + 1) ** (M.shape[0] + 1)
-        * T_e.m_as(ureg.electron_volt / ureg.boltzmann_constant)
-        ** (-M.shape[0])
-        * 1e16
-    )
+    det_M_func = lambda ne: det_M(M=M, ne=ne)
 
     sol_ne, iterations = bisection(
         jax.tree_util.Partial(det_M_func),
@@ -667,8 +655,8 @@ def solve_gen_saha(
 def calculate_charge_state_distribution(plasma_state, ipd : bool = False):
 
     """
-    Calculates the charge state distribution in fractions using the Saha-Boltzmann equation assuming
-    thermal equilibrium.
+    Calculates the charge state distribution in fractions using the
+    Saha-Boltzmann equation assuming thermal equilibrium.
 
     Parameters
     ----------
