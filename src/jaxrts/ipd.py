@@ -146,8 +146,8 @@ def ipd_ion_sphere(
     Quantity
         The ipd shift in units of electronvolt.
     """
-    if Zbar is None:
-        Zbar = Zi
+    Zi = jnp.clip(Zi, 1e-6)
+    Zbar = Zi if Zbar is None else jnp.clip(Zbar, 1e-6)
 
     # The ion-sphere radius, determined by the ion density n_i such that the
     # average distance to the nearest neighbor ion is
@@ -206,8 +206,8 @@ def ipd_stewart_pyatt(
     Quantity
         The ipd shift in units of electronvolt.
     """
-    if Zbar is None:
-        Zbar = Zi
+    Zi = jnp.clip(Zi, 1e-6)
+    Zbar = Zi if Zbar is None else jnp.clip(Zbar, 1e-6)
 
     kappa_i_sq = jnpu.sum(Zbar**2 * ureg.elementary_charge**2 * ni) / (
         1 * ureg.epsilon_0 * ureg.boltzmann_constant * Ti
@@ -265,7 +265,7 @@ def ipd_stewart_pyatt_preston(
 
     Parameters
     ----------
-    Zi
+    Z
         The charge state of the atom (note that this is the state before the
         ionization).
     ne
