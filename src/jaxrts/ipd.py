@@ -172,10 +172,8 @@ def ipd_stewart_pyatt(
     arb_deg: bool = False,
 ) -> Quantity:
     """
-    The correction to the ionization potential in the Stewart-Pyatt model using
-    the small bound state approximation. This model is founded on the
-    Thomas-Fermi Model for the electrons and extends it to include ions in the
-    vicinity of a given nucleus. Taken from :cite:`Ropke.2019` Eq. (2).
+    Stewart-Pyatt IPD model, using the formulation which can be found, e.g., in
+    :cite:`Calisti.2015` or :cite:`Röpke.2019`.
 
     .. note::
 

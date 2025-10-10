@@ -3464,7 +3464,7 @@ class StewartPyattIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "StewartPyatt"
-    cite_keys = ["Stewart.1966", "Crowley.2014"]
+    cite_keys = ["Stewart.1966", "Röpke.2019", "Calisti.2015"]
 
     def __init__(self, arb_deg: bool = False):
         self.arb_deg = arb_deg
