@@ -9,8 +9,6 @@ from collections.abc import Callable
 from copy import deepcopy
 from typing import TYPE_CHECKING, Literal
 
-from functools import partial
-
 import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
@@ -297,7 +295,7 @@ class Neglect(Model):
             return jnp.zeros_like(setup.measured_energy) * (1 * ureg.second)
 
     def all_element_states(
-        self, plasma_state: "PlasmaState", ion_population = None
+        self, plasma_state: "PlasmaState", ion_population=None
     ) -> list[jnp.ndarray]:
         out = []
         for _, element in enumerate(plasma_state.ions):
@@ -3267,7 +3265,7 @@ class ConstantIPD(Model):
 
     @jax.jit
     def all_element_states(
-        self, plasma_state: "PlasmaState", ion_population = None
+        self, plasma_state: "PlasmaState", ion_population=None
     ) -> list[jnp.ndarray]:
         out = []
         for _, element in enumerate(plasma_state.ions):
@@ -3321,7 +3319,7 @@ class DebyeHueckelIPD(Model):
 
     @jax.jit
     def all_element_states(
-        self, plasma_state: "PlasmaState", ion_population = None
+        self, plasma_state: "PlasmaState", ion_population=None
     ) -> list[jnp.ndarray]:
         out = []
         for idx, element in enumerate(plasma_state.ions):
@@ -3531,6 +3529,13 @@ class IonSphereIPD(Model):
     contains the same charge as given by the mean ionization and the
     electron number density.
 
+
+    When initializing the model, an optional scaling factor C can be set. The
+    default value is 3/2, which is consistent with the limit of
+    :py:class:`~.StewartPyattIPD` and :cite:`Crowley.2014`. Another typical
+    value would be 9/5, introduced by :cite:`Zimmerman.1980`. See also
+    :cite:`Lin.2017` and :cite:`Ciricosta.2012`.
+
     See Also
     --------
     jaxrts.ipd.ipd_ion_sphere
@@ -3539,7 +3544,12 @@ class IonSphereIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "IonSphere"
-    cite_keys = ["Rozsnyai.1972", "Crowley.2014"]
+    cite_keys = ["Rozsnyai.1972", "Zimmermann.1980", "Crowley.2014"]
+
+    def __init__(self, C: float | None = None, arb_deg: bool = False):
+        self.arb_deg = arb_deg
+        self.C = C
+        super().__init__()
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3547,6 +3557,7 @@ class IonSphereIPD(Model):
             plasma_state.Z_free,
             plasma_state.n_e,
             plasma_state.n_i,
+            C=self.C,
             Zbar=plasma_state.Z_free,
         )
 
@@ -3565,6 +3576,7 @@ class IonSphereIPD(Model):
                             Z,
                             plasma_state.n_e,
                             plasma_state.n_i,
+                            C=self.C,
                             Zbar=plasma_state.Z_free,
                         )[idx].m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
@@ -3573,6 +3585,18 @@ class IonSphereIPD(Model):
                 * ureg.electron_volt
             )
         return out
+
+    def _tree_flatten(self):
+        children = (self.C,)
+        aux_data = self.model_key  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key) = aux_data
+        (obj.C,) = children
+        return obj
 
 
 class EckerKroellIPD(Model):
@@ -3586,7 +3610,13 @@ class EckerKroellIPD(Model):
     :math:`r^3_\\text{EK} = 3/4\\pi(n_e + n_i)`,
     where :math:`n_e` and :math:`n_i` are the ion and electron number density.
     The Ecker-Kröll Model predicts a far higher IPD than the Stewart-Pyatt
-    Model for highly ionized plasmas.
+    For details see :cite:`EckerKroell.1963`.
+
+    Can be initialized with an optional value ``C``. If no value ``C`` is
+    given the IPD above the critical density is scaled to have a continuous
+    IPD. Some studies (e.g. :cite:Ciricosta.2012` and :cite:`Preston.2013` use
+    a modified Ecker Kröll model, where a specific value of ``C`` (often 1) is
+    set instead.
 
     Allows for the ``arb_deg`` flag, which solves Fermi integrals to obtain the
     Debye screening length, rather than using the classical formula.
@@ -3599,7 +3629,12 @@ class EckerKroellIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "EckerKroell"
-    cite_keys = ["EckerKroell.1963", "Crowley.2014", "Preston.2013"]
+    cite_keys = [
+        "EckerKroell.1963",
+        "Crowley.2014",
+        "Ciricosta.2012",
+        "Preston.2013",
+    ]
 
     def __init__(self, C: float | None = None, arb_deg: bool = False):
         self.arb_deg = arb_deg
@@ -3696,7 +3731,7 @@ class PauliBlockingIPD(Model):
 
     @jax.jit
     def all_element_states(
-        self, plasma_state: "PlasmaState", ion_population = None
+        self, plasma_state: "PlasmaState", ion_population=None
     ) -> list[jnp.ndarray]:
         out = []
         for idx, element in enumerate(plasma_state.ions):

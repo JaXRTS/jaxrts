@@ -9,17 +9,13 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 import jpu.numpy as jnpu
-
-import matplotlib.pyplot as plt
-
 import numpy as onp
 
 from .elements import Element
-from .units import Quantity, ureg, to_array
 from .plasma_physics import (
-    chem_pot_interpolationIchimaru,
     chem_pot_sommerfeld_fermi_interpolation,
 )
+from .units import Quantity, to_array, ureg
 
 h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
@@ -68,7 +64,7 @@ def gen_saha_equation(
     return (
         (gj / gi)
         * n_e
-        * (jnpu.exp(((-energy_diff) / (1 * k_B * T_e))))
+        * (jnpu.exp((-energy_diff) / (1 * k_B * T_e)))
         * jnpu.exp(-chem_pot / (1 * k_B * T_e))
     )
 
@@ -283,7 +279,7 @@ def solve_saha(
         ).m_as(ureg.dimensionless)
 
         diag = jnp.diag(jnp.where(Eb > 0, (-1) * coeff, 1))
-        dens_row = jnp.ones((element.Z + 1))
+        dens_row = jnp.ones(element.Z + 1)
 
         # Set the diagonal for the Saha-rows
         M = M.at[skip : skip + element.Z, skip : skip + element.Z].set(diag)
@@ -332,7 +328,8 @@ def solve_saha(
         res = jnp.linalg.det(insert_ne(M, ne))
         return res
 
-    det_M_func = lambda ne: det_M(M=M, ne=ne)
+    def det_M_func(ne):
+        return det_M(M=M, ne=ne)
 
     # Find n_e by finding the root where the determinant of M is 0
     # Use the bisection method, boundaries are fixed by max_ne and 0.
@@ -527,8 +524,6 @@ def solve_gen_saha(
 
         stat_weight = element.ionization.statistical_weights
 
-        # jax.debug.print("Before: {x}", x = jnp.sum(jnp.heaviside(Eb.m_as(ureg.electron_volt), 0)))
-
         def scan_fn(pref, inputs):
             E, g = inputs
             output = jnp.where(E > 0, pref * g, 1.0)
@@ -554,7 +549,7 @@ def solve_gen_saha(
         ).m_as(ureg.dimensionless)
 
         diag = jnp.diag(jnp.where(Eb > 0, (-1) * coeff, 1))
-        dens_row = jnp.ones((element.Z + 1))
+        dens_row = jnp.ones(element.Z + 1)
 
         # Set the diagonal for the Saha-rows
         M = M.at[skip : skip + element.Z, skip : skip + element.Z].set(diag)
@@ -603,7 +598,8 @@ def solve_gen_saha(
         # Find n_e by finding the root where the determinant of M is 0
         # Use the bisection method, boundaries are fixed by max_ne and 0.
 
-    det_M_func = lambda ne: det_M(M=M, ne=ne)
+    def det_M_func(ne):
+        return det_M(M=M, ne=ne)
 
     sol_ne, iterations = bisection(
         jax.tree_util.Partial(det_M_func),

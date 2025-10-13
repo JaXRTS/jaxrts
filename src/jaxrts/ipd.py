@@ -6,21 +6,21 @@ States in Dense Plasma Environments' by Rory A. Baggott. :cite:`Baggott.2017`
 """
 
 import logging
+from functools import partial
 
 import jax
 from jax import numpy as jnp
 from jpu import numpy as jnpu
 from quadax import quadts as quad
 
-from functools import partial
-
 from .math import fermi_neg12_rational_approximation_antia
-from .units import Quantity, ureg
-from .plasma_physics import fermi_energy
 from .plasma_physics import (
     chem_pot_interpolationIchimaru as chem_pot_interpolation,
-    Debye_Hueckel_screening_length,
 )
+from .plasma_physics import (
+    fermi_energy,
+)
+from .units import Quantity, ureg
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +121,11 @@ def ipd_debye_hueckel(
 
 @jax.jit
 def ipd_ion_sphere(
-    Zi: Quantity, ne: Quantity, ni: Quantity, Zbar: float | None = None
+    Zi: Quantity,
+    ne: Quantity,
+    ni: Quantity,
+    C: float | None = None,
+    Zbar: float | None = None,
 ) -> Quantity:
     """
     The correction to the ionization potential for the m-th ionization stage in
@@ -137,6 +141,12 @@ def ipd_ion_sphere(
         Electron density. Units of 1/[length]**3.
     ni
         Ion density. Units of 1/[length]**3.
+    C: float, optional
+        A linear scaling factor of it ion Sphere IPD. The default value is 3/2,
+        which is consistent with the limit of :py:func:`~.ipd_stewart_pyatt`
+        and :cite:`Crowley.2014`. Another typical value would be 9/5,
+        introduced by :cite:`Zimmerman.1980`. See also :cite:`Lin.2017` and
+        :cite:`Ciricosta.2012`.
     Zbar: float, optional
         The average ionization of the plasma. If not given, Zi is assumed to be
         the average ionization of the plasma.
@@ -154,8 +164,11 @@ def ipd_ion_sphere(
     # approximately 2 R_0.
     R_0 = (3 * Zbar / (4 * jnp.pi * ne)) ** (1 / 3)
 
-    ipd_shift = -(3 * (Zi + 1) * 1 * ureg.elementary_charge**2) / (
-        R_0 * 8 * jnp.pi * 1 * ureg.epsilon_0
+    if C is None:
+        C = 3 / 2
+
+    ipd_shift = -(C * (Zi + 1) * 1 * ureg.elementary_charge**2) / (
+        R_0 * 4 * jnp.pi * 1 * ureg.epsilon_0
     )
 
     return ipd_shift.to(ureg.electron_volt)
@@ -353,10 +366,10 @@ def ipd_ecker_kroell(
     """
     The ionization potential for an atom with charge Zi in the Ecker-Kroell
     model.
-    Defines a critical density under which the IPD is idetical to
+    Defines a critical density under which the IPD is identical to
     :py:func:`~.ipd_debye_hueckel`. Above that value, the IPD is given by a
     Ecker Kröll length. If no value ``C`` is given, the latter value is scaled
-    to have a continous IPD. Some studies (e.g. :cite:`Preston.2014` use a
+    to have a continuous IPD. Some studies (e.g. :cite:`Preston.2014` use a
     modified Ecker Kröll model, where a specific value of ``C`` (often 1) is
     set instead. For details see :cite:`EckerKroell.1963`.
 
@@ -373,6 +386,8 @@ def ipd_ecker_kroell(
         The electron temperature.
     Ti
         The ion temperature.
+    Z_max: Quantity
+        Array of maximal charges of the ions. Must be of the same shape as ni.
     Zbar: float, optional
         The average ionization of the plasma. If not given, Zi is assumed to be
         the average ionization of the plasma.
