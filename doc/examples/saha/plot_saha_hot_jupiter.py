@@ -57,7 +57,7 @@ if __name__ == "__main__":
     Tes = jnp.logspace(2, 6, 250) * ureg.kelvin
     for Te in Tes:
         ion_population["n_free"].append(jnp.array([0.0]))
-        sol, ne = solve_saha(
+        sol, ne, _ = solve_saha(
             tuple(plasma_state.ions),
             Te,
             (plasma_state.mass_density / plasma_state.atomic_masses),
