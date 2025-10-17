@@ -28,6 +28,36 @@ logger = logging.getLogger(__name__)
 @jax.jit
 def inverse_screening_length_e(ne: Quantity, Te: Quantity):
     """
+    Inverse screening length for arbitrary degeneracy as needed for WDM
+    applications. (Taken from :cite:`Baggott.2017`)
+    """
+    q = -1 * ureg.elementary_charge
+
+    chem_pot = chem_pot_interpolation(Te, ne)
+    beta = 1 / (1 * ureg.boltzmann_constant * Te)
+
+    fermi_integral_neg1_2 = fermi_neg12_rational_approximation_antia(
+        (chem_pot * beta).m_as(ureg.dimensionless)
+    )
+
+    therm_wv = jnpu.sqrt(
+        (2 * jnp.pi * 1 * ureg.hbar**2)
+        / ((1 * ureg.electron_mass) * 1 * ureg.boltzmann_constant * Te)
+    )
+
+    k_sq = (
+        (q**2)
+        / (ureg.epsilon_0 * ureg.boltzmann_constant * Te)
+        * (2.0 / therm_wv**3)
+        * fermi_integral_neg1_2
+    )
+
+    return jnpu.sqrt(k_sq).to(1 / ureg.angstrom)
+
+
+@jax.jit
+def inverse_screening_length_e_roepke(ne: Quantity, Te: Quantity):
+    """
     See :cite:`Röpke.2019`.
     """
 
