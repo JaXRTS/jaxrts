@@ -470,7 +470,7 @@ class Gregori2003IonFeat(IonFeatModel):
 
     This model is identical to :py:class:`~ArkhipovIonFeat` but uses an
     effective temperature ~:py:func:`jaxrts.static_structure_factors.T_cf_Greg`
-    rather than the electron Temperature throughout the calculation.
+    rather than the electron temperature throughout the calculation.
     """
 
     __name__ = "Gregori2003IonFeat"
@@ -563,7 +563,7 @@ class FixedSii(IonFeatModel):
     """
     Model for the ion feature with a fixed value for :math:`S_{ii}`. Note that
     the `Sii` has to be returned as a :math:`(n\\times n)` array, where n is
-    the number of component of the plasma.
+    the number of components of the plasma.
     """
 
     __name__ = "FixedSii"
@@ -1004,9 +1004,9 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
 
 class PeakCollection(IonFeatModel):
     """
-    A model for approximating :math:`S_{ii}` as a sum of peaks. Can be used to
-    model, e.g., ideal powder diffraction, where elastic signal would only be
-    expected at certain values of :math:`k`.
+    A model for approximating :math:`S_\\text{ii}` as a sum of peaks. Can be
+    used to model, e.g., ideal powder diffraction, where elastic signal would
+    only be expected at certain values of :math:`k`.
     """
 
     __name__ = "PeakCollection"
@@ -1265,7 +1265,7 @@ class QCSalpeterApproximation(FreeFreeModel):
 class RPA_NoDamping(FreeFreeModel):
     """
     Model for elastic free-free scattering based on the Random Phase
-    Approximation.
+    Approximation. Solves the RPA integrals numerically.
 
     Calculates the dielectric function in RPA and obtain a Structure factor via
     the fluctuation dissipation theorem. Implementation is based on lecture
@@ -1425,6 +1425,8 @@ class BornMerminFull(FreeFreeModel):
     """
     Model for the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
+    Does not use the interpolation of the collision frequencies, and rather
+    calculates them for every energy transfer measured.
 
     Has the optional argument ``RPA_rewrite``, which defaults to ``True``. If
     ``True``, we solve the RPA integral as formulated by :cite:`Chapman.2015`
@@ -3109,7 +3111,7 @@ class IchimaruChemPotential(Model):
 class SommerfeldChemPotential(Model):
     """
     Interpolation function for the chemical potential of a non-interacting
-    (ideal) fermi gas given in the paper of :cite:`Cowan.2019`.
+    (ideal) fermi gas given in the paper of Cowan :cite:`Cowan.2019`.
 
     See Also
     --------
@@ -3357,7 +3359,7 @@ class DebyeHueckelIPD(Model):
 class StewartPyattPrestonIPD(Model):
     """
     Stewart Pyatt IPD Model :cite:`Stewart.1966`.
-    The Stewart–Pyatt (SP) model interpolates between the
+    The Stewart–Pyatt model interpolates between the
     Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972`
     at (low temperature, high density) and (high temperature, low density),
     respectively.
@@ -3446,9 +3448,9 @@ class StewartPyattPrestonIPD(Model):
 class StewartPyattIPD(Model):
     """
     Stewart Pyatt IPD Model :cite:`Stewart.1966`.
-    The Stewart–Pyatt (SP) model interpolates between the
-    Debye–Hückel :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972`
-    at (low temperature, high density) and (high temperature, low density),
+    The Stewart–Pyatt model interpolates between the Debye–Hückel
+    :cite:`Debye.1923` and Ion-Sphere model :cite:`Rozsnyai.1972` at (low
+    temperature, high density) and (high temperature, low density),
     respectively.
 
     Allows for the ``arb_deg`` flag, which solves Fermi integrals to obtain the
@@ -3462,7 +3464,7 @@ class StewartPyattIPD(Model):
 
     allowed_keys = ["ipd"]
     __name__ = "StewartPyatt"
-    cite_keys = ["Stewart.1966", "Röpke.2019", "Calisti.2015"]
+    cite_keys = ["Stewart.1966", "Ropke.2019", "Calisti.2015"]
 
     def __init__(self, arb_deg: bool = False):
         self.arb_deg = arb_deg
@@ -3521,13 +3523,12 @@ class IonSphereIPD(Model):
     """
     Ion Sphere IPD Model :cite:`Rozsnyai.1972`.
 
-    The Ion Sphere Model (IS) is especially applicable for plasmas
-    with strong ion coupling, and thus in particular for high density,
-    low temperature plasmas. The relevant length scale that determines
-    the ionization potential is the ion sphere radius :math:`R_0`,
-    determined by the condition that a sphere of radius :math:`R_0`
-    contains the same charge as given by the mean ionization and the
-    electron number density.
+    The Ion Sphere Model is especially applicable for plasmas with strong ion
+    coupling, and thus in particular for high density, low temperature plasmas.
+    The relevant length scale that determines the ionization potential is the
+    ion sphere radius :math:`R_0`, determined by the condition that a sphere of
+    radius :math:`R_0` contains the same charge as given by the mean ionization
+    and the electron number density.
 
 
     When initializing the model, an optional scaling factor C can be set. The
@@ -3603,8 +3604,8 @@ class EckerKroellIPD(Model):
     """
     Ecker-Kröll IPD Model:cite:`EckerKroell.1963`.
 
-    Opposite to the Stewart-Pyatt:cite:`Stewart.1966` Model the Ecker-Kröll
-    Model assumes that the relevant length scale for determining the IPD in
+    In contrast to the Stewart-Pyatt:cite:`Stewart.1966` model the Ecker-Kröll
+    model assumes that the relevant length scale for determining the IPD in
     high-density plasmas is not :math:`R_0` (the ion sphere radius) but rather
     the average distance between all free particles
     :math:`r^3_\\text{EK} = 3/4\\pi(n_e + n_i)`,
@@ -3759,8 +3760,7 @@ class PauliBlockingIPD(Model):
 
 class DebyeHueckelScreeningLength(Model):
     """
-    This is standard Debye Hückel screening length. See also
-    :cite:`Gericke.2010`.
+    The standard Debye Hückel screening length.
 
     See Also
     --------
@@ -3770,7 +3770,7 @@ class DebyeHueckelScreeningLength(Model):
 
     allowed_keys = ["screening length"]
     __name__ = "DebyeHueckelScreeningLength"
-    cite_keys = ["Debye.1923"]
+    cite_keys = ["Debye.1923", "Gericke.2010"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -3781,7 +3781,7 @@ class DebyeHueckelScreeningLength(Model):
 
 class Gericke2010ScreeningLength(Model):
     """
-    Return the Debye-Hückel screening length. Uses a 4th-power interpolation
+    The Debye-Hückel screening length. Uses a 4th-power interpolation
     between electron and fermi temperature, as proposed by
     :cite:`Gericke.2010`.
 
@@ -3908,9 +3908,9 @@ class LinearResponseScreeningGericke2010(Model):
        q(k) = \\chi_{ee}^\\text{DH} V_{ei}(k)
 
 
-    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3). The
-    susceptibility is calculated using the Debye Hückel dielectric function,
-    accessing the 'screening length' model of the plasma state.
+    See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
+    The susceptibility is calculated using the Debye Hückel dielectric
+    function, accessing the 'screening length' model of the plasma state.
 
     .. math::
 
@@ -4110,7 +4110,7 @@ class LinearResponseScreening(Model):
     See :cite:`Wunsch.2011`, Eqn(5.22) and :cite:`Gericke.2010` Eqn(3).
 
     Uses the :py:meth:`~.FreeFreeModel.susceptibility` method of the chosen
-    Free Free model. If not free-free model is specified, set the default to
+    free free model. If not free-free model is specified, set the default to
     :py:class:`~.RPA_DandreaFit`.
 
     Requires an 'electron-ion' potential. (defaults to
@@ -4327,7 +4327,7 @@ class ElectronicLFCStaticInterpolation(Model):
     """
     Static local field correction model that interpolates between the
     high-degeneracy result by Farid :cite:`Farid.1993` and the Geldart result
-    :cite:`Geldart.1966`. See, e.g. :cite:`Fortmann.2010`.
+    :cite:`Geldart.1966`. See, e.g., :cite:`Fortmann.2010`.
 
     See Also
     --------
@@ -4670,7 +4670,7 @@ class FiniteWavelength_BM_V(BM_V_eiSModel):
     :math:`V_{s}=\\frac{V_\\mathrm{Coulomb}}{\\varepsilon_\\text{RPA}(k, E=0)}`
 
     We use the pure RPA result to calculate the dielectric function, and use
-    the :cite:`Dandrea.1986` fitting formula.
+    the Dandrea itting formula :cite:`Dandrea.1986`.
 
     See Also
     --------
