@@ -38,7 +38,7 @@ state = jaxrts.PlasmaState(
 
 
 state["ionic scattering"] = jaxrts.models.Gregori2003IonFeat()
-state["free-free scattering"] = jaxrts.models.RPA_NoDamping()
+state["free-free scattering"] = jaxrts.models.RPA()
 state["bound-free scattering"] = jaxrts.models.SchumacherImpulse()
 state["free-bound scattering"] = jaxrts.models.DetailedBalance()
 

@@ -52,7 +52,7 @@ test_state["screening length"] = (
     jaxrts.models.ArbitraryDegeneracyScreeningLength()
 )
 test_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
-test_state["free-free scattering"] = jaxrts.models.RPA_NoDamping()
+test_state["free-free scattering"] = jaxrts.models.RPA()
 test_state["bound-free scattering"] = jaxrts.models.SchumacherImpulse(r_k=1)
 test_state["free-bound scattering"] = jaxrts.models.DetailedBalance()
 

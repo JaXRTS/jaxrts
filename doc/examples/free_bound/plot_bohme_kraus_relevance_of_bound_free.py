@@ -26,7 +26,7 @@ from jaxrts.models import (
     ConstantIPD,
     DetailedBalance,
     OnePotentialHNCIonFeat,
-    RPA_NoDamping,
+    RPA,
     SchumacherImpulse,
 )
 
@@ -74,7 +74,7 @@ state["electron-ion Potential"] = CoulombPotential()
 state["screening length"] = ArbitraryDegeneracyScreeningLength()
 state["ionic scattering"] = OnePotentialHNCIonFeat()
 state["ipd"] = ConstantIPD(jnp.array([-24]) * ureg.electron_volt)
-state["free-free scattering"] = RPA_NoDamping()
+state["free-free scattering"] = RPA()
 state["bound-free scattering"] = SchumacherImpulse(r_k=1)
 state["free-bound scattering"] = DetailedBalance()
 

@@ -59,7 +59,7 @@ state = jaxrts.PlasmaState(
     jnp.array([2]) * ureg.electron_volt / ureg.k_B,
 )
 
-state["free-free scattering"] = jaxrts.models.BornMerminFull()
+state["free-free scattering"] = jaxrts.models.BornMermin_Full()
 # This is required for the S_ii in the collision frequency
 state["ionic scattering"] = jaxrts.models.ArkhipovIonFeat()
 
@@ -110,7 +110,7 @@ plt.plot(
     color="black",
 )
 
-state["free-free scattering"] = jaxrts.models.RPA_NoDamping()
+state["free-free scattering"] = jaxrts.models.RPA()
 state.evaluate("free-free scattering", setup).m_as(ureg.second)
 t0 = time.time()
 free_free_scatter = state.evaluate("free-free scattering", setup).m_as(

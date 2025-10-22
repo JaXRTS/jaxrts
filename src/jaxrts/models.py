@@ -1262,7 +1262,7 @@ class QCSalpeterApproximation(FreeFreeModel):
         return xi
 
 
-class RPA_NoDamping(FreeFreeModel):
+class RPA(FreeFreeModel):
     """
     Model for elastic free-free scattering based on the Random Phase
     Approximation. Solves the RPA integrals numerically.
@@ -1281,7 +1281,7 @@ class RPA_NoDamping(FreeFreeModel):
         factor.
     """
 
-    __name__ = "RPA_NoDamping"
+    __name__ = "RPA"
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
@@ -1421,7 +1421,7 @@ class RPA_DandreaFit(FreeFreeModel):
         return xi
 
 
-class BornMerminFull(FreeFreeModel):
+class BornMermin_Full(FreeFreeModel):
     """
     Model for the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
@@ -1452,7 +1452,7 @@ class BornMerminFull(FreeFreeModel):
         Function used to calculate the dynamic structure factor
     """
 
-    __name__ = "BornMerminFull"
+    __name__ = "BornMermin_Full"
 
     @property
     def cite_keys(self) -> list[tuple[str | list[str], str]]:
@@ -1608,7 +1608,7 @@ class BornMermin(FreeFreeModel):
     Model for the free-free scattering, based on the Born Mermin Approximation
     (:cite:`Mermin.1970`).
     Uses the Chapman interpolation which allows for a faster computation of the
-    free-free scattering compared to :py:class:`~.BornMerminFull`, by sampling
+    free-free scattering compared to :py:class:`~.BornMermin_Full`, by sampling
     the probing frequency at :py:attr:`~.no_of_freq` points and interpolating
     between them, after.
 
@@ -4687,7 +4687,7 @@ _all_models = [
     AverageAtom_Sii,
     BohmStaver,
     BornMermin,
-    BornMerminFull,
+    BornMermin_Full,
     BornMermin_Fit,
     BornMermin_Fortmann,
     ConstantChemPotential,
@@ -4726,7 +4726,7 @@ _all_models = [
     PeakCollection,
     QCSalpeterApproximation,
     RPA_DandreaFit,
-    RPA_NoDamping,
+    RPA,
     ScatteringModel,
     SchumacherImpulse,
     SchumacherImpulseColdEdges,
