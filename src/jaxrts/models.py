@@ -3820,32 +3820,7 @@ class ArbitraryDegeneracyScreeningLength(Model):
 
     allowed_keys = ["screening length"]
     __name__ = "ArbitraryDegeneracyScreeningLength"
-    cite_keys = ["Baggott.2017"]
-
-    @jax.jit
-    def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
-        inverse_lam = ipd.inverse_screening_length_e(
-            plasma_state.n_e,
-            plasma_state.T_e,
-        )
-        # inverse_lam will always have exactly one entry. But since we just
-        # want the number and not an array, we take the first element.
-        return (1 / inverse_lam[0]).to(ureg.angstrom)
-
-
-class RoepkeScreeningLength(Model):
-    """
-    A screening length valid for arbitrary degeneracy :cite:`Roepke.2019`.
-
-    See Also
-    --------
-    ipd.inverse_screening_length_e
-        The function used to calculate the inverse of the screening length
-    """
-
-    allowed_keys = ["screening length"]
-    __name__ = "ArbitraryDegeneracyScreeningLength"
-    cite_keys = ["Roepke.2019"]
+    cite_keys = ["Baggott.2017", "Ropke.2019"]
 
     @jax.jit
     def evaluate(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
@@ -4752,7 +4727,6 @@ _all_models = [
     QCSalpeterApproximation,
     RPA_DandreaFit,
     RPA_NoDamping,
-    RoepkeScreeningLength,
     ScatteringModel,
     SchumacherImpulse,
     SchumacherImpulseColdEdges,
