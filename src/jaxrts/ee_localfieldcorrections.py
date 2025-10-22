@@ -97,7 +97,9 @@ def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
 
     g_bin_0 = (
         prefactor
-        * quad(integrand, [0, jnp.inf], epsabs=1e-16, epsrel=1e-16)[0]
+        * quad(integrand, jnp.array([0, jnp.inf]), epsabs=1e-16, epsrel=1e-16)[
+            0
+        ]
     )
 
     gT_ee_0 = g_bin_0 * jnpu.exp(H_0)

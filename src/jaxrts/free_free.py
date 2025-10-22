@@ -91,7 +91,7 @@ def _W_salpeter(x: jnp.ndarray | float) -> jnp.ndarray:
     def integ(xi):
         integral, errl = quadgk(
             integrand,
-            [0, xi.m_as(ureg.dimensionless)],
+            jnp.array([0, xi.m_as(ureg.dimensionless)]),
             epsabs=1e-20,
             epsrel=1e-20,
         )
@@ -466,7 +466,7 @@ def _imag_diel_func_RPA(
 
     integral, errl = quadgk(
         integrand,
-        [0, jnp.inf],
+        jnp.array([0, jnp.inf]),
         epsabs=1e-20,
         epsrel=1e-20,
         max_ninter=150,
@@ -540,13 +540,13 @@ def _real_diel_func_RPA_rewrite(
 
     integral1, errl = quadgk(
         integrand,
-        [0, 1.0],
+        jnp.array([0, 1.0]),
         epsabs=1e-15,
         epsrel=1e-15,
     )
     integral2, errl = quadgk(
         integrand,
-        [1.0, jnp.inf],
+        jnp.array([1.0, jnp.inf]),
         epsabs=1e-15,
         epsrel=1e-15,
     )
@@ -619,13 +619,13 @@ def _imag_diel_func_RPA_rewrite(
 
     integral1, errl = quadgk(
         integrand,
-        [0.0, 1.0],
+        jnp.array([0.0, 1.0]),
         epsabs=1e-15,
         epsrel=1e-15,
     )
     integral2, errl = quadgk(
         integrand,
-        [1.0, jnp.inf],
+        jnp.array([1.0, jnp.inf]),
         epsabs=1e-15,
         epsrel=1e-15,
     )
@@ -702,7 +702,7 @@ def _real_diel_func_RPA(
 
     integral, errl = quadgk(
         integrand,
-        [0, jnp.inf],
+        jnp.array([0, jnp.inf]),
         epsabs=1e-20,
         epsrel=1e-20,
         max_ninter=150,
@@ -786,14 +786,14 @@ def _real_diel_func_RPA_no_damping(
 
         integral1, errl = quadgk(
             integrand,
-            [0, 1],
+            jnp.array([0, 1]),
             epsabs=1e-20,
             epsrel=1e-20,
             max_ninter=150,
         )
         integral2, errl = quadgk(
             integrand,
-            [1, jnp.inf],
+            jnp.array([1, jnp.inf]),
             epsabs=1e-20,
             epsrel=1e-20,
         )
@@ -824,7 +824,7 @@ def _real_diel_func_RPA_no_damping(
 
         integral, errl = quadgk(
             integrand,
-            [0, jnp.inf],
+            jnp.array([0, jnp.inf]),
             epsabs=1e-20,
             epsrel=1e-20,
             max_ninter=150,
@@ -1273,7 +1273,7 @@ def inverse_screening_length_exact(T: Quantity, chem_pot: Quantity):
         return res.m_as(ureg.electron_volt ** (-1 / 2))
 
     integral_debye, errl_debye = quadgk(
-        integrand_debye, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20
+        integrand_debye, jnp.array([0, jnp.inf]), epsabs=1e-20, epsrel=1e-20
     )
     integral_debye *= (1 * ureg.electron_volt) ** (1 / 2)
 
@@ -1343,7 +1343,7 @@ def collision_frequency_BA_full(
         )
 
     integral, errl = quadgk(
-        integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
+        integrand, jnp.array([0, jnp.inf]), epsabs=1e-10, epsrel=1e-10
     )
     integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
     integral *= prefactor
@@ -1395,7 +1395,7 @@ def collision_frequency_BA_0K(
         )
 
     integral, errl = quadgk(
-        integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
+        integrand, jnp.array([0, jnp.inf]), epsabs=1e-10, epsrel=1e-10
     )
     integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
     integral *= prefactor
@@ -1451,7 +1451,7 @@ def collision_frequency_BA_fullFit(
         )
 
     integral, errl = quadgk(
-        integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
+        integrand, jnp.array([0, jnp.inf]), epsabs=1e-10, epsrel=1e-10
     )
     integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
     integral *= prefactor
@@ -1531,7 +1531,7 @@ def collision_frequency_BA_Chapman_interp(
         )
 
     integral, errl = quadgk(
-        integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
+        integrand, jnp.array([0, jnp.inf]), epsabs=1e-10, epsrel=1e-10
     )
 
     integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3
@@ -1646,7 +1646,7 @@ def collision_frequency_BA_Chapman_interpFit(
         )
 
     integral, errl = quadgk(
-        integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10
+        integrand, jnp.array([0, jnp.inf]), epsabs=1e-10, epsrel=1e-10
     )
 
     integral *= 1 * ureg.kilogram**2 * ureg.angstrom**3 / ureg.second**3

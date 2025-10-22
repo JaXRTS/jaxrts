@@ -18,7 +18,9 @@ def fermi_integral(x, n):
     def integrand(t):
         return jnp.power(t, n) / (jnp.exp(t - x[:, jnp.newaxis]) + 1)
 
-    result, _ = quadgk(integrand, [0, jnp.inf], epsabs=1e-10, epsrel=1e-10)
+    result, _ = quadgk(
+        integrand, jnp.array([0, jnp.inf]), epsabs=1e-10, epsrel=1e-10
+    )
 
     return result / norm
 

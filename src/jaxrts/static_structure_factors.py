@@ -567,7 +567,9 @@ def g_ee_ABD(
         fac = jnpu.sin(k * r[:, jnp.newaxis]) * k
         return (Phi_ee_k * fac).m_as(ureg.joule * ureg.angstrom**2)
 
-    integ, err = quad(to_integrate, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20)
+    integ, err = quad(
+        to_integrate, jnp.array([0, jnp.inf]), epsabs=1e-20, epsrel=1e-20
+    )
 
     integ *= 1 * ureg.joule * ureg.angstrom
     integ /= (2 * jnp.pi) ** 3
@@ -628,7 +630,9 @@ def g_ii_ABD(
         fac = jnpu.sin(k * r[:, jnp.newaxis]) * k
         return (Phi_ii_k * fac).m_as(ureg.joule * ureg.angstrom**2)
 
-    integ, err = quad(to_integrate, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20)
+    integ, err = quad(
+        to_integrate, jnp.array([0, jnp.inf]), epsabs=1e-20, epsrel=1e-20
+    )
 
     integ *= 1 * ureg.joule * ureg.angstrom
     integ /= (2 * jnp.pi) ** 3
@@ -690,7 +694,9 @@ def g_ei_ABD(
         fac = jnpu.sin(k * r[:, jnp.newaxis]) * k
         return (Phi_ei_k * fac).m_as(ureg.joule * ureg.angstrom**2)
 
-    integ, err = quad(to_integrate, [0, jnp.inf], epsabs=1e-20, epsrel=1e-20)
+    integ, err = quad(
+        to_integrate, jnp.array([0, jnp.inf]), epsabs=1e-20, epsrel=1e-20
+    )
 
     integ *= 1 * ureg.joule * ureg.angstrom
     integ /= (2 * jnp.pi) ** 3

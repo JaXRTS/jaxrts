@@ -17,9 +17,6 @@ from .math import fermi_neg12_rational_approximation_antia
 from .plasma_physics import (
     chem_pot_interpolationIchimaru as chem_pot_interpolation,
 )
-from .plasma_physics import (
-    fermi_energy,
-)
 from .units import Quantity, ureg
 
 logger = logging.getLogger(__name__)
@@ -560,7 +557,9 @@ def ipd_pauli_blocking(
 
         return res.m_as(1 / ureg.angstrom**2)
 
-    integral, errl = quad(integrand, [0, jnp.inf], epsabs=1e-15, epsrel=1e-15)
+    integral, errl = quad(
+        integrand, jnp.array([0, jnp.inf]), epsabs=1e-15, epsrel=1e-15
+    )
     integral /= 1 * ureg.angstrom**3
     # The ionization potential depression energy shift
     ipd_shift = -(
