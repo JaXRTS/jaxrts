@@ -11,7 +11,7 @@ import jaxrts
 ureg = jaxrts.ureg
 
 
-def test_BM_glenzer2009_fig9b_reprduction() -> None:
+def test_BM_glenzer2009_fig9b_reproduction() -> None:
     # This should be the same data as gregori.2003, fig 1b. But the data
     # presented in 2009 does provide reasonable units.
     # This is in to test the Borm Mermin approximation, only.
@@ -135,7 +135,7 @@ def test_BM_glenzer2009_fig9b_reprduction() -> None:
         assert onp.max(error_Chapman_KKT) < 0.05
 
 
-def test_glenzer2009_fig9a_reprduction() -> None:
+def test_glenzer2009_fig9a_reproduction() -> None:
     # This should be the same data as gregori.2003, fig 1a. But the data
     # presented in 2009 does provide reasonable units.
     # Set the scattering parameters
@@ -185,7 +185,7 @@ def test_glenzer2009_fig9a_reprduction() -> None:
         assert onp.mean(error) < 0.5
 
 
-def test_gregori2003_fig1b_reprduction() -> None:
+def test_gregori2003_fig1b_reproduction() -> None:
     # Set the scattering parameters
     lambda_0 = 4.13 * ureg.nanometer
     theta = 160
@@ -222,7 +222,7 @@ def test_gregori2003_fig1b_reprduction() -> None:
             assert onp.max(error) < 0.02
 
 
-def test_gregori2003_fig1c_reprduction() -> None:
+def test_gregori2003_fig1c_reproduction() -> None:
     # Set the scattering parameters
     lambda_0 = 0.26 * ureg.nanometer
     theta = 60
