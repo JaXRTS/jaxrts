@@ -1,7 +1,8 @@
 """
-This module allows for saving and loading :py:class:`jaxrts.models.Model` and
-:py:class:`jaxrts.plasmastate.PlasmaState` and others. Furthermore, this allows
-for serializing quantities, which was an issue when pickeling a PlasmaState.
+This module allows for saving and loading :py:class:`jaxrts.models.Model`,
+:py:class:`jaxrts.plasmastate.PlasmaState` and other objects introduced in
+jaxrts. Furthermore, this allows for serializing quantities from :py:mod:`jpu`,
+which was an issue when pickeling a PlasmaState.
 
 .. warning ::
 
@@ -142,11 +143,29 @@ class JaXRTSDecoder(json.JSONDecoder):
     .. warning ::
 
        In the current implementation, you cannot easily restore custom models.
-       To restore them, you have to provide these in `additional_mappings`:
+       To restore them, you have to provide these in `additional_mappings`
     """
 
-    def __init__(self, ureg, additional_mappings=None, *args, **kwargs):
-        """ """
+    def __init__(
+        self,
+        ureg,
+        additional_mappings: dict[str, Model | HNCPotential] | None = None,
+        *args,
+        **kwargs,
+    ):
+        """
+        Initialize the JSON decoder.
+
+        Paramters
+        ---------
+        ureg
+            The UnitRegistry that is used for decoding. Has to the same
+            instance which was used when setting up the objects that should be
+            decoded.
+        additional_mappings: dict[str: Model | HNCPotential], optional
+            Dict containing mappings so that custom models can be decoded, too.
+            See the test in tests/test_saving.py to see this in practice.
+        """
         if additional_mappings is None:
             additional_mappings = {}
         self.ureg = ureg
