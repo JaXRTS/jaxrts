@@ -38,14 +38,12 @@ ureg = jaxrts.units.ureg
 plt.style.use("science")
 
 # Create a sharding for the probing energies
-sharding = jax.sharding.PositionalSharding(jax.devices())
 measured_energy = jnp.linspace(295, 305, 300) * ureg.electron_volt
-input_energy = jax.device_put(measured_energy, sharding)
 
 setup = jaxrts.setup.Setup(
     ureg("60°"),
     energy=ureg("300eV"),
-    measured_energy=input_energy,
+    measured_energy=measured_energy,
     instrument=partial(
         jaxrts.instrument_function.instrument_gaussian,
         sigma=(0.01 * ureg.electron_volt) / ureg.hbar,

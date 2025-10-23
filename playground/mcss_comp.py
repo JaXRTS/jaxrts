@@ -117,18 +117,15 @@ def plot_mcss_comparison(mcss_file):
     if jnp.any(state.Z_free - jnp.floor(state.Z_free) != 0):
         state = state.expand_integer_ionization_states()
 
-    sharding = jax.sharding.PositionalSharding(jax.devices())
     energy = (
         ureg(f"{central_energy} eV")
         - jnp.linspace(jnp.max(E), jnp.min(E), 2046) * ureg.electron_volt
     )
-    sharded_energy = jax.device_put(energy, sharding)
-    # sharded_energy = energy
 
     setup = jaxrts.setup.Setup(
         ureg(f"{theta}°"),
         ureg(f"{central_energy} eV"),
-        sharded_energy,
+        energy,
         # ureg(f"{central_energy} eV")
         # + jnp.linspace(-700, 200, 2000) * ureg.electron_volt,
         partial(
