@@ -25,12 +25,6 @@ def fermi_integral(x, n):
     return result / norm
 
 
-def numerical_inverse_fermi_integral(x, n):
-    """
-    WIP
-    """
-
-
 @jax.jit
 def _R1_mk(a, b, x):
 
@@ -417,7 +411,7 @@ def fermi_52_rational_approximation_antia(x):
 @jax.jit
 def inverse_fermi_12_rational_approximation_antia(x):
     """
-    Calculates F_{1/2} using a rational function approximation as described in
+    Calculates the inverse of F_{1/2} using a rational function approximation as described in
     :cite:`Antia.1993`.
     """
 
@@ -433,14 +427,6 @@ def inverse_fermi_12_rational_approximation_antia(x):
             1.000000000000,
         ]
     )
-
-    # a_2 = jnp.array([4.4593646E+01,
-    #             1.1288764E+01,
-    #             1.0000000E+00])
-
-    # b_2 = jnp.array([3.9519346E+01,
-    #                 -5.7517464E+00,
-    #                 2.6594291E-01])
 
     b = jnp.array(
         [
@@ -466,11 +452,5 @@ def inverse_fermi_12_rational_approximation_antia(x):
     c = jnp.array([3.4873722e01, -2.6922515e01, 1.0000000e00])
 
     d = jnp.array([2.6612832e01, -2.0452930e01, 1.1808945e01])
-    # d = jnp.array([-9.745794806288E-3,
-    #                 5.485432756838E-2,
-    #                 -3.299466243260E-1,
-    #                 4.077841975923E-1,
-    #                 -1.145531476975E0,
-    #                 -6.067091689181E-2])
 
     return _X_n(x, a, b, c, d, 0.5)

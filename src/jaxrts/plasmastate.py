@@ -11,7 +11,12 @@ from jax import numpy as jnp
 from .elements import Element
 from .helpers import JittableDict
 from .models import DebyeHueckelScreeningLength, ElectronicLFCConstant
-from .plasma_physics import fermi_energy, wiegner_seitz_radius
+from .plasma_physics import (
+    fermi_energy,
+    wiegner_seitz_radius,
+    degeneracy_param,
+    fermi_temperature,
+)
 from .setup import Setup
 from .units import Quantity, to_array, ureg
 
@@ -147,8 +152,7 @@ class PlasmaState:
         state.Z_free = new_Z
         state.mass_density = xi * doub_rho
         state.T_i = doub_Ti
-        # for key, model in state.models.items():
-        #    model.prepare(state, key)
+
         return state
 
     def update_default_model(
@@ -258,6 +262,15 @@ class PlasmaState:
         return jnpu.sqrt(Tq**2 + self.T_e**2)
 
     @property
+    def T_F(self):
+        """
+        Return the fermi temperature of the free electron system, determined 
+        by the electron density.
+        """
+
+        return fermi_temperature(self.n_e)
+
+    @property
     def ee_coupling(self):
         d = (3 / (4 * np.pi * self.n_e)) ** (1.0 / 3.0)
 
@@ -274,8 +287,12 @@ class PlasmaState:
         ).to_base_units()
 
     @property
-    def ii_coupling(self):
-        pass
+    def degeneracy_param(self):
+        """
+        Return the degree of degeneracy of the electrons.
+        """
+
+        return degeneracy_param(self.n_e, self.T_e)
 
     def _lookup_ion_core_radius(self):
         ioc = [e.atomic_radius_calc for e in self.ions]
