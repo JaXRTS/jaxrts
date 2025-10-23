@@ -150,7 +150,7 @@ def ipd_ion_sphere(
         A linear scaling factor of it ion Sphere IPD. The default value is 3/2,
         which is consistent with the limit of :py:func:`~.ipd_stewart_pyatt`
         and :cite:`Crowley.2014`. Another typical value would be 9/5,
-        introduced by :cite:`Zimmerman.1980`. See also :cite:`Lin.2017` and
+        introduced by :cite:`Zimmermann.1980`. See also :cite:`Lin.2017` and
         :cite:`Ciricosta.2012`.
     Zbar: float, optional
         The average ionization of the plasma. If not given, Zi is assumed to be
@@ -374,7 +374,7 @@ def ipd_ecker_kroell(
     Defines a critical density under which the IPD is identical to
     :py:func:`~.ipd_debye_hueckel`. Above that value, the IPD is given by a
     Ecker Kröll length. If no value ``C`` is given, the latter value is scaled
-    to have a continuous IPD. Some studies (e.g. :cite:`Preston.2014` use a
+    to have a continuous IPD. Some studies (e.g. :cite:`Preston.2013` use a
     modified Ecker Kröll model, where a specific value of ``C`` (often 1) is
     set instead. For details see :cite:`EckerKroell.1963`.
 
