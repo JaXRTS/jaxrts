@@ -3530,7 +3530,7 @@ class IonSphereIPD(Model):
     When initializing the model, an optional scaling factor C can be set. The
     default value is 3/2, which is consistent with the limit of
     :py:class:`~.StewartPyattIPD` and :cite:`Crowley.2014`. Another typical
-    value would be 9/5, introduced by :cite:`Zimmerman.1980`. See also
+    value would be 9/5, introduced by :cite:`Zimmermann.1980`. See also
     :cite:`Lin.2017` and :cite:`Ciricosta.2012`.
 
     See Also
