@@ -1,5 +1,7 @@
 """
-Static structure factors.
+Module handeling the calculation of static structure factors. Note that this
+file does not include the implementation of the hypernetted chain scheme, which
+can be found in :py:mod:`jaxrts.hypernetted_chain`.
 """
 
 import logging
@@ -25,7 +27,7 @@ def T_cf_Greg(T_e: Quantity, n_e: Quantity) -> Quantity:
     The effective temperature to be inserted in the approach by Arkhipov and
     Davletov, see :cite:`Arkhipov.1998` according to :cite:`Gregori.2003`.
     """
-    # The fermi temperature
+    # The Fermi temperature
     T_f = fermi_energy(n_e) / ureg.k_B
     dimless_rs = wiegner_seitz_radius(n_e) / ureg.a_0
     T_q = T_f / (1.3251 - 0.1779 * jnpu.sqrt(dimless_rs))
@@ -87,8 +89,16 @@ def _lambda_AD(T: Quantity, m1: Quantity, m2: Quantity) -> Quantity:
     :cite:`Gregori.2003` states this as the thermal de Broglie Wavelength, but
     this is not reproducing the known formula for ``m1 == m2``.
     However, both :cite:`Arkhipov.1998` and :cite:`Gregori` use this notation.
+
+    Parameters
+    ----------
+    T: Quantity
+        Temperature
+    m1: Quantity
+        Mass of the first object particle of the pair.
+    m2: Quantity
+        Mass of the second object particle of the pair.
     """
-    # The 1 * m1 is required so allow this function to handle Units, too.
     mu = (m1 * m2) / (m1 + m2)
     denumerator = 2 * jnp.pi * mu * ureg.k_B * T
 
@@ -153,7 +163,7 @@ def _Delta_AD(
             - 1 / (1 + k**2 * lamei**2) ** 2
         )
         + A * k**2 * k_De**2
-        # The original paper :cite:`Arkhipov.1998` differs in the subsequent
+        # The original paper :cite:`Arkhipov.1998` differs in the following
         # line. This has been rectified by the authors their paper from 2000.
         * (k**2 + k_Di**2 / (1 + k**2 * lamii**2))
         * jnpu.exp(-(k**2) / (4 * b))
@@ -183,8 +193,8 @@ def _T_rs_Greg2006(
     Returns
     -------
     Quantity
-        The effective temperature. If both temperatures are identical, than the
-        result is this temperature.
+        The effective (mix) temperature. If both temperatures are identical,
+        than the result is this temperature.
     """
     return (m_s * T_r + m_r * T_s) / (m_r + m_s)
 
@@ -399,7 +409,7 @@ def S_ii_AD(
     Returns
     -------
     Quantity
-        See, the static electron electron structure factor
+        Sii, the static ion ion structure factor.
     """
     n_i = n_e / Z_f
     Phi_ii = _Phi_ii_AD(k, T_e, T_i, n_e, m_i, Z_f)
@@ -448,7 +458,7 @@ def S_ei_AD(
     Returns
     -------
     Quantity
-        See, the static electron electron structure factor
+        Sei, the static electron ion structure factor.
     """
     T_ei = _T_rs_Greg2006(T_e, T_i, 1 * ureg.electron_mass, m_i)
     n_i = n_e / Z_f
@@ -502,7 +512,7 @@ def S_ee_AD(
     Returns
     -------
     Quantity
-        See, the static electron electron structure factor
+        See, the static electron electron structure factor.
     """
     Phi_ee = _Phi_ee_AD(k, T_e, T_i, n_e, m_i, Z_f)
     S_ee_AD = (1 - n_e / (ureg.k_B * T_e) * Phi_ee).to_base_units()
@@ -531,7 +541,7 @@ def g_ee_ABD(
 
     The method is using the Random Phase Approximation, treating the problem
     semi-classically and uses a pseudopotential between charged particles to
-    account for quantum diffraction effects and symmetry
+    account for quantum diffraction effects and symmetry.
 
     While the seminal papers treated the electron- and ion temperature to be
     equal, we follow the work of :cite:`Gregori.2006` to allow for different
@@ -557,8 +567,7 @@ def g_ee_ABD(
     Returns
     -------
     Quantity
-        The radial electron-electron distribution function in the pair
-        correlation approximation.
+        The radial electron-electron distribution function.
     """
 
     def to_integrate(k):
@@ -594,12 +603,12 @@ def g_ii_ABD(
 
     The method is using the Random Phase Approximation, treating the problem
     semi-classically and uses a pseudopotential between charged particles to
-    account for quantum diffraction effects and symmetry
+    account for quantum diffraction effects and symmetry.
 
     While the seminal papers treated the electron- and ion temperature to be
     equal, we follow the work of :cite:`Gregori.2006` to allow for different
     temperatures of the two components. The results of :cite:`Arkhipov.1998`
-    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``
+    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``.
 
     Parameters
     ----------
@@ -611,17 +620,16 @@ def g_ii_ABD(
     T_i: Quantity
         The ion temperature in Kelvin.
     n_e: Quantity
-        The electron density in 1/[volume]
+        The electron density in 1/[volume].
     m_i: Quantity
-        The mass of the ion
+        The mass of the ion.
     Z_f: float
         Number of free electrons per ion.
 
     Returns
     -------
     Quantity
-        The radial ion-ion distribution function in the pair correlation
-        approximation.
+        The radial ion-ion distribution function.
     """
 
     def to_integrate(k):
@@ -674,7 +682,7 @@ def g_ei_ABD(
     T_i: Quantity
         The ion temperature in Kelvin.
     n_e: Quantity
-        The electron density in 1/[volume]
+        The electron density in 1/[volume].
     m_i: Quantity
         The mass of the ion
     Z_f: float
@@ -683,8 +691,7 @@ def g_ei_ABD(
     Returns
     -------
     Quantity
-        The radial electron-ion distribution function in the pair correlation
-        approximation.
+        The radial electron-ion distribution function.
     """
     T_ei = _T_rs_Greg2006(T_e, T_i, 1 * ureg.electron_mass, m_i)
 
@@ -712,6 +719,22 @@ def debyeWallerFactor(
     """
     Reduction of an XRD peak due to an increase in temperature (without taking
     to account possible phase transitions), according to :cite:`Murphy.2008`.
+
+    Parameters
+    ----------
+    k: Quantity
+        The scattering vector.
+    atomic_mass: Quantity
+        Mass of an ion.
+    debye_temp: Quantity
+        The material-specific Debye Temperature.
+    temp: Quantity
+        The temperature of the lattice.
+
+    Returns
+    -------
+    Quantity
+        The Debye-Waller factor :math:`\\exp(-2M)`.
     """
 
     Q = k / (2 * jnp.pi)
@@ -730,7 +753,7 @@ def debyeWallerFactor(
             )[0]
         )
 
-    # Eqn (5):
+    # Eqn (5) of :cite:`Murphy.2008`:
     TwoM = (
         (3 * ureg.planck_constant**2 * ureg.N_A * Q**2)
         / (atomic_mass * ureg.k_B * debye_temp)
