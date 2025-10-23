@@ -205,8 +205,6 @@ def realfft(y, isign=1):
         wr = wtemp * wpr - wi * wpi + wr
         wi = wi * wpr + wtemp * wpi + wi
 
-    # exit()
-
     if isign == 1:
 
         h1r = y[0]
@@ -239,9 +237,7 @@ def sinft(y):
     efficiently compute the Fourier transform of a three-dimensional
     function with rotational symmetry.
     """
-    # In the original version, we modified y in place. This can be ok, but do
-    # we want it, here?
-    # y = y.copy()
+
     n = len(y)
 
     halfn = n >> 1

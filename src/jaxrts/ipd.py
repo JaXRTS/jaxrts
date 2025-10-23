@@ -23,10 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 @jax.jit
-def inverse_screening_length_e(ne: Quantity, Te: Quantity):
+def inverse_screening_length_e(ne: Quantity, Te: Quantity) -> Quantity:
     """
-    Inverse screening length for arbitrary degeneracy as needed for WDM
-    applications. (Taken from :cite:`Baggott.2017`)
+    Inverse screening length for arbitrary degeneracy for the electron
+    as needed for WDM applications. (Taken from :cite:`Baggott.2017`)
 
     .. note::
 
@@ -191,7 +191,7 @@ def ipd_stewart_pyatt(
 ) -> Quantity:
     """
     Stewart-Pyatt IPD model, using the formulation which can be found, e.g., in
-    :cite:`Calisti.2015` or :cite:`Röpke.2019`.
+    :cite:`Calisti.2015` or :cite:`Ropke.2019`.
 
     .. note::
 
@@ -420,9 +420,6 @@ def ipd_ecker_kroell(
         / (Z_max**2 * ureg.elementary_charge**2)
     ) ** 3
 
-    # The constant in Ecker-Kroells model, which is determined from the
-    # continuity of the potential across the critical density.
-
     # Calculating lambda_D at the critical density if arb_deg is given requires
     # to split n_c = n_i + n_e, to that the electronic part can be treated
     # individually.
@@ -484,15 +481,6 @@ def ipd_ecker_kroell(
     )
 
     # The ionization potential depression energy shift
-    # jax.debug.print(
-    #     "{x},{y}|{a},{b}|{c},{d}",
-    #     x=(ni + ne).to_base_units(),
-    #     y=n_c.to_base_units(),
-    #     a=lambda_D.to_base_units(),
-    #     b=(1 / kappa_D_crit).to_base_units(),
-    #     c=R_EK.to_base_units(),
-    #     d=R_EK_crit.to_base_units(),
-    # )
     ipd_shift = jnpu.where((ni + ne) <= n_c, ipd_c1, ipd_c2)
 
     return ipd_shift.to(ureg.electron_volt)

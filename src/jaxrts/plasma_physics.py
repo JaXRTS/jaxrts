@@ -37,7 +37,8 @@ def plasma_frequency(electron_density: Quantity) -> Quantity:
     ).to(ureg.Hz)
 
 
-def thomson_momentum_transfer(energy: Quantity, angle: Quantity):
+def thomson_momentum_transfer(energy: Quantity, angle: Quantity
+) -> Quantity:
     """
     Momentum transfer :math:`k = \\mid\\vec{k}\\mid`, assuming that the
     absolute value of the momentum for incoming and scattered light is only
@@ -128,7 +129,7 @@ def fermi_wavenumber(n_e: Quantity) -> Quantity:
 def fermi_energy(n_e: Quantity) -> Quantity:
     """
     Calculate the Fermi energy of an ideal fermi gas from a given electron
-    densiy.
+    density.
 
     .. math::
 
@@ -148,6 +149,26 @@ def fermi_energy(n_e: Quantity) -> Quantity:
     k_fsquared = (3 * jnp.pi**2 * n_e) ** (2 / 3)
     E_F = factor1 * k_fsquared
     return E_F.to(ureg.electron_volt)
+
+
+@jax.jit
+def fermi_temperature(n_e: Quantity) -> Quantity:
+    """
+    Calculates the Fermi temperature of an ideal fermi gas from a given
+    electron density.
+
+    Parameters
+    ----------
+    n_e : Quantity
+        Electron density. Units of 1/[length]**3.
+
+    Returns
+    -------
+    T_F : Quantity
+        Fermi temperaure
+    """
+
+    return fermi_energy(n_e) / (1 * ureg.k_B)
 
 
 def wiegner_seitz_radius(n_e: Quantity) -> Quantity:

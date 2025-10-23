@@ -761,7 +761,7 @@ class ScaledPotential(HNCPotential):
     def __mul__(self, other) -> "ScaledPotential":
         if not isinstance(other, float | int):
             raise NotImplementedError(
-                "You can only add scale an HNCPotentials with a float. "
+                "You can only scale an HNCPotentials with a float. "
                 + f"Other is type {type(other)}."
             )
         return ScaledPotential(self.potential, factor=other * self.factor)
@@ -1081,7 +1081,7 @@ class KlimontovichKraeftPotential(HNCPotential):
         This potential is only defined for electron-ion interactions. However,
         for the output to have the same shape as other potentials, we calculate
         it for all inputs. The most sensible treatment is to only use the
-        off-diagonal entries for the `ei` Potential.
+        off-diagonal entries for the `ei` potential.
 
     """
 
@@ -1237,7 +1237,7 @@ class EmptyCorePotential(HNCPotential):
     .. warning::
 
        This potential is only defined for the electron-ion interaction. Hence,
-       it will always and automatically set ~:py:meth:`include_electrons` to
+       it will always and automatically set ~:py:math:`include_electrons` to
        ``"SpinAveraged"``. For the rest, we return a Coulomb-potential -- but
        this is really just to be compatible with the other potentials defined
        here.

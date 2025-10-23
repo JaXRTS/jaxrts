@@ -253,10 +253,6 @@ class ScatteringModel(Model):
         obj.model_key, obj.sample_points = aux_data
         return obj
 
-
-# HERE LIST OF MODELS
-# ===================
-
 # Scattering
 # ==========
 scattering_models = [
