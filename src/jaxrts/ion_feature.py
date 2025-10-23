@@ -192,7 +192,7 @@ def free_electron_susceptilibily_RPA(
     k: Quantity,
     kappa: Quantity,
     lfc: float = 0,
-):
+) -> Quantity:
     """
     Return the free electron susceptilibily given by :cite:`Gericke.2010` eqn 4
 

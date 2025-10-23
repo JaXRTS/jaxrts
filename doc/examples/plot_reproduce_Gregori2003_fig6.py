@@ -21,7 +21,7 @@ import jaxrts
 from jaxrts.models import (
     Gregori2003IonFeat,
     Neglect,
-    RPA_NoDamping,
+    RPA,
     SchumacherImpulse,
 )
 
@@ -62,7 +62,7 @@ setup = jaxrts.setup.Setup(
 )
 
 state["ionic scattering"] = Gregori2003IonFeat()
-state["free-free scattering"] = RPA_NoDamping()
+state["free-free scattering"] = RPA()
 state["bound-free scattering"] = SchumacherImpulse()
 state["free-bound scattering"] = Neglect()
 

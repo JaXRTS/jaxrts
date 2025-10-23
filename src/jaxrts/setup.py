@@ -45,7 +45,7 @@ class Setup:
         #: applying ITCF analysis methods.
         self.correct_k_dispersion: bool = correct_k_dispersion
         #: Exponent of the frequency redistribution correction in the
-        #: differential crossection.
+        #: differential cross-section.
         #:
         #: .. math::
         #:
@@ -61,7 +61,7 @@ class Setup:
         #:   factors (this is the default behavior of jaxrts).
         #: * However, when comparing to experimental data in which the signal
         #:   is proportional to the number of photons on the detector, the apt
-        #:   comparison is to the differential crosssection, which is
+        #:   comparison is to the differential cross-section, which is
         #:   proportional to
         #:   :math:`\frac{\omega_\text{out}}{\omega_\text{in}} S(\omega, k)`
         #:   i.e., :math:`\nu = 1`.
@@ -242,6 +242,19 @@ def get_probe_setup(k: Quantity, setup: Setup) -> Setup:
     This helper function can be useful when evaluating e.g., `S_ii` Models at a
     different `k` than realized in an experiment, as it is required, e.g., for
     the Born collision frequency.
+
+    Parameters
+    ----------
+    k: Quantity
+        The target value of k, the new Setup class should probe.
+    setup: Setup
+        The original setup, from which the new setup should the derived from
+
+    Returns
+    -------
+    Setup
+        A new :py:class:`jaxrts.Setup` that now probes at the specified
+        :math:`k`.
     """
     E = (
         (1 * ureg.hbar)

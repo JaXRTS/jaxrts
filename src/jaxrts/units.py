@@ -1,6 +1,6 @@
 """
 This submodule defines the unit registry for calculations involving
-dimensionful quantities.
+quantities, consisting of a magtitude and a unit.
 """
 
 import jax.numpy as jnp
@@ -16,8 +16,9 @@ def to_array(obj) -> jnp.ndarray:
     array cannot easily be created from a list of Quantities. Rather, one has
     to strip every entry of it's unit and multiply it, after.
     """
-    # This will happen if obj was a Quantity, already: If if is also a jnp
-    # array, return it, elsewise make a jnp array from the object
+    # This will happen if obj was a Quantity, already: If is has more entries,
+    # i.e., it's shape is the shape of an array, return it, else wise make a
+    # jnp array from the object.
     if jpu.core.is_quantity(obj):
         if isinstance(obj.magnitude, jnp.ndarray):
             return obj

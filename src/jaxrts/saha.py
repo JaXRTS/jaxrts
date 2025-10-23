@@ -21,8 +21,40 @@ h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
 m_e = 1 * ureg.electron_mass
 
+
 @jax.jit
-def bisection(func, a, b, tolerance=1e-4, max_iter=1e4, min_iter=1e2):
+def bisection(
+    func, a, b, tolerance=1e-4, max_iter: int = 1e4, min_iter: int = 1e2
+):
+    """
+    Find the root of a function ``func`` between the points ``a`` and ``b`` by
+    bisection.
+
+    This is a simple implementation, without any checks guaranteeing that the
+    root is found.
+
+    Parameters
+    ----------
+    func
+        The function of which a root should be found.
+    a
+        Lower end of the interval within which the root should be searched.
+    b
+        Upper limit of the interval within which the root should be searched.
+    tolerance
+        Tolerance that sets the condition to stop the iterative search. Applies
+        to both the absolute value of the function, and the absolute distance
+        between two consecutive candidates.
+    max_iter : int
+        Maximal number of steps before the loop aborts.
+    min_iter : int
+        Minimal number of steps the algorithm has to run before a value is
+        returned.
+
+    Returns
+    -------
+    One of the function ``func``.
+    """
 
     def condition(state):
         prev_x, next_x, count = state
@@ -56,6 +88,43 @@ def gen_saha_equation(
     n_e: Quantity,
     energy_diff: Quantity,
 ) -> Quantity:
+    """
+    Generic Saha equation, using
+    :py:func:`jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation`
+    calculate the chemical potential which is plugged into the equation
+
+    Returns the value n_j / n_i * n_e
+
+    .. math::
+
+       \\frac{n_{i+1}n_e}{n_i} = 2\\frac{g_j}{g_i}
+       \\exp\\left({\\frac{-\\Delta E - \\mu}{k_B T_e}}\\right)
+
+    .. note::
+
+       Since the free electron number :math:`n_e` is an input to this function,
+       solving the gen_saha_equation has to be done iteratively, until the
+       result is self-consistent.
+
+    Parameters
+    ----------
+    gi: float
+        The statistical weight of the lower-energy state.
+    gj: float
+        The statistical weight of the upper-energy state, often g_{i+1}.
+    T_e: Quantity
+        The electron temperature.
+    n_e: Quantity
+        The free electron density.
+    energy_diff
+        The difference in energy levels.
+
+    Returns
+    -------
+    n_j / n_i * n_e : Quantity
+        The ratio of the population of the two states, multiplied with the
+        free-electron density.
+    """
 
     chem_pot = chem_pot_sommerfeld_fermi_interpolation(T_e, n_e).to(
         ureg.electron_volt
@@ -70,7 +139,7 @@ def gen_saha_equation(
 
 
 @jax.jit
-def saha_equation( 
+def saha_equation(
     gi: float, gj: float, T_e: Quantity, energy_diff: Quantity
 ) -> Quantity:
     """
@@ -302,7 +371,7 @@ def solve_saha(
 
     def insert_ne(M, ne):
         """
-        Add n_e to the off-diagonal end the last entry (last row and column.
+        Add n_e to the off-diagonal end the last entry (last row and column).
         """
 
         ne_line = jnp.ones(len(element_list) + int(onp.sum(Z))) * ne
@@ -648,8 +717,7 @@ def solve_gen_saha(
     )
 
 
-def calculate_charge_state_distribution(plasma_state, ipd : bool = False):
-
+def calculate_charge_state_distribution(plasma_state, ipd: bool = False):
     """
     Calculates the charge state distribution in fractions using the
     Saha-Boltzmann equation assuming thermal equilibrium.
@@ -678,7 +746,10 @@ def calculate_charge_state_distribution(plasma_state, ipd : bool = False):
 
 
 def calculate_mean_free_charge_saha(
-    plasma_state, ipd: bool = False, degenerate: bool = False, ion_population=None
+    plasma_state,
+    ipd: bool = False,
+    degenerate: bool = False,
+    ion_population=None,
 ):
     """
     Calculates the mean charge of each ion in a plasma using the Saha-Boltzmann
@@ -712,7 +783,9 @@ def calculate_mean_free_charge_saha(
     plasma_state.Z_free = jnp.array([1.0])
 
     if ipd:
-        cl = plasma_state["ipd"].all_element_states(plasma_state, ion_population)
+        cl = plasma_state["ipd"].all_element_states(
+            plasma_state, ion_population
+        )
     else:
         cl = [
             jnp.zeros(ion.Z) * ureg.electron_volt for ion in plasma_state.ions

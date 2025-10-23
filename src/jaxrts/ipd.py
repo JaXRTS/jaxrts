@@ -17,19 +17,22 @@ from .math import fermi_neg12_rational_approximation_antia
 from .plasma_physics import (
     chem_pot_interpolationIchimaru as chem_pot_interpolation,
 )
-from .plasma_physics import (
-    fermi_energy,
-)
 from .units import Quantity, ureg
 
 logger = logging.getLogger(__name__)
 
 
 @jax.jit
-def inverse_screening_length_e(ne: Quantity, Te: Quantity):
+def inverse_screening_length_e(ne: Quantity, Te: Quantity) -> Quantity:
     """
-    Inverse screening length for arbitrary degeneracy as needed for WDM
-    applications. (Taken from :cite:`Baggott.2017`)
+    Inverse screening length for arbitrary degeneracy for the electron
+    as needed for WDM applications. (Taken from :cite:`Baggott.2017`)
+
+    .. note::
+
+       This result reproduces eqn. 19 in :cite:`Ropke.2019`, up to a factor of
+       :math:`4 \\pi`.
+
     """
     q = -1 * ureg.elementary_charge
 
@@ -50,34 +53,6 @@ def inverse_screening_length_e(ne: Quantity, Te: Quantity):
         / (ureg.epsilon_0 * ureg.boltzmann_constant * Te)
         * (2.0 / therm_wv**3)
         * fermi_integral_neg1_2
-    )
-
-    return jnpu.sqrt(k_sq).to(1 / ureg.angstrom)
-
-
-@jax.jit
-def inverse_screening_length_e_roepke(ne: Quantity, Te: Quantity):
-    """
-    See :cite:`Röpke.2019`.
-    """
-
-    chem_pot = chem_pot_interpolation(Te, ne)
-    beta = 1 / (1 * ureg.boltzmann_constant * Te)
-
-    fermi_integral_neg1_2 = fermi_neg12_rational_approximation_antia(
-        (chem_pot * beta).m_as(ureg.dimensionless)
-    )
-
-    E_F = fermi_energy(ne)
-
-    k_sq = (
-        12
-        * jnp.pi ** (5 / 2)
-        * (1 * ureg.elementary_charge**2 / (4 * jnp.pi * ureg.epsilon_0))
-        * ne
-        * beta
-        * fermi_integral_neg1_2
-        / (beta * E_F) ** (3 / 2)
     )
 
     return jnpu.sqrt(k_sq).to(1 / ureg.angstrom)
@@ -175,7 +150,7 @@ def ipd_ion_sphere(
         A linear scaling factor of it ion Sphere IPD. The default value is 3/2,
         which is consistent with the limit of :py:func:`~.ipd_stewart_pyatt`
         and :cite:`Crowley.2014`. Another typical value would be 9/5,
-        introduced by :cite:`Zimmerman.1980`. See also :cite:`Lin.2017` and
+        introduced by :cite:`Zimmermann.1980`. See also :cite:`Lin.2017` and
         :cite:`Ciricosta.2012`.
     Zbar: float, optional
         The average ionization of the plasma. If not given, Zi is assumed to be
@@ -216,7 +191,7 @@ def ipd_stewart_pyatt(
 ) -> Quantity:
     """
     Stewart-Pyatt IPD model, using the formulation which can be found, e.g., in
-    :cite:`Calisti.2015` or :cite:`Röpke.2019`.
+    :cite:`Calisti.2015` or :cite:`Ropke.2019`.
 
     .. note::
 
@@ -399,7 +374,7 @@ def ipd_ecker_kroell(
     Defines a critical density under which the IPD is identical to
     :py:func:`~.ipd_debye_hueckel`. Above that value, the IPD is given by a
     Ecker Kröll length. If no value ``C`` is given, the latter value is scaled
-    to have a continuous IPD. Some studies (e.g. :cite:`Preston.2014` use a
+    to have a continuous IPD. Some studies (e.g. :cite:`Preston.2013` use a
     modified Ecker Kröll model, where a specific value of ``C`` (often 1) is
     set instead. For details see :cite:`EckerKroell.1963`.
 
@@ -444,9 +419,6 @@ def ipd_ecker_kroell(
         * Te
         / (Z_max**2 * ureg.elementary_charge**2)
     ) ** 3
-
-    # The constant in Ecker-Kroells model, which is determined from the
-    # continuity of the potential across the critical density.
 
     # Calculating lambda_D at the critical density if arb_deg is given requires
     # to split n_c = n_i + n_e, to that the electronic part can be treated
@@ -509,15 +481,6 @@ def ipd_ecker_kroell(
     )
 
     # The ionization potential depression energy shift
-    # jax.debug.print(
-    #     "{x},{y}|{a},{b}|{c},{d}",
-    #     x=(ni + ne).to_base_units(),
-    #     y=n_c.to_base_units(),
-    #     a=lambda_D.to_base_units(),
-    #     b=(1 / kappa_D_crit).to_base_units(),
-    #     c=R_EK.to_base_units(),
-    #     d=R_EK_crit.to_base_units(),
-    # )
     ipd_shift = jnpu.where((ni + ne) <= n_c, ipd_c1, ipd_c2)
 
     return ipd_shift.to(ureg.electron_volt)
@@ -582,7 +545,9 @@ def ipd_pauli_blocking(
 
         return res.m_as(1 / ureg.angstrom**2)
 
-    integral, errl = quad(integrand, [0, jnp.inf], epsabs=1e-15, epsrel=1e-15)
+    integral, errl = quad(
+        integrand, jnp.array([0, jnp.inf]), epsabs=1e-15, epsrel=1e-15
+    )
     integral /= 1 * ureg.angstrom**3
     # The ionization potential depression energy shift
     ipd_shift = -(

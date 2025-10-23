@@ -268,7 +268,7 @@ def construct_q_matrix(q: jnp.ndarray) -> jnp.ndarray:
 
 class HNCPotential(metaclass=abc.ABCMeta):
     """
-    Potentials, intended to be used in the HNC scheme. Per default, the results
+    Potentials, intended to be used in the HNC scheme. By default, the results
     of methods evaluating this Potential (in k or r space), return a
     :math:`(n\\times n\\times m)` matrix, where ``n`` is the number of ion
     species and ``m`` is the number of r or k points.
@@ -706,7 +706,7 @@ class PotentialSum(HNCPotential):
 
 class ScaledPotential(HNCPotential):
     """
-    A :py:class:`HNCPotential`, scaled with a factor
+    A :py:class:`HNCPotential`, scaled with a constant factor.
     """
 
     __name__ = "ScaledPotential"
@@ -761,7 +761,7 @@ class ScaledPotential(HNCPotential):
     def __mul__(self, other) -> "ScaledPotential":
         if not isinstance(other, float | int):
             raise NotImplementedError(
-                "You can only add scale an HNCPotentials with a float. "
+                "You can only scale an HNCPotentials with a float. "
                 + f"Other is type {type(other)}."
             )
         return ScaledPotential(self.potential, factor=other * self.factor)
@@ -827,7 +827,7 @@ class CoulombPotential(HNCPotential):
 
 class DebyeHueckelPotential(HNCPotential):
     """
-    The Debye-Hückel Screening Potential as defined e.g. in
+    The Debye-Hückel screening potential as defined, e.g., in
     :cite:`Wunsch.2008`.
     """
 
@@ -898,6 +898,7 @@ class DebyeHueckelPotential(HNCPotential):
 
 class KelbgPotential(HNCPotential):
     """
+    Quantum diffraction potential suggested by Kelbg.
     See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Kelbg.1963`, and
     :cite:`Schwarz.2007`, Eqn 14. We use the definition of
     :math:`\\lambda_{ab}` from :cite:`Schwarz.2007`.
@@ -1072,6 +1073,7 @@ class KelbgPotential(HNCPotential):
 
 class KlimontovichKraeftPotential(HNCPotential):
     """
+    Quantum diffraction potential suggested by Klimontovich and Kraeft.
     See :cite:`Schwarz.2007` Eqn (15) and :cite:`Wunsch.2011` Eqn. (4.43).
 
     .. note::
@@ -1079,7 +1081,7 @@ class KlimontovichKraeftPotential(HNCPotential):
         This potential is only defined for electron-ion interactions. However,
         for the output to have the same shape as other potentials, we calculate
         it for all inputs. The most sensible treatment is to only use the
-        off-diagonal entries for the `ei` Potential.
+        off-diagonal entries for the `ei` potential.
 
     """
 
@@ -1129,7 +1131,8 @@ class KlimontovichKraeftPotential(HNCPotential):
 
 class DeutschPotential(HNCPotential):
     """
-    See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Deutsch.1977`.
+    Quantum diffraction potential suggested by C. Deutsch. See
+    :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Deutsch.1977`.
 
     .. math::
 
@@ -1225,17 +1228,16 @@ class DeutschPotential(HNCPotential):
 class EmptyCorePotential(HNCPotential):
     """
     The Empty core potential, which is essentially a
-    :py:class:`~.CoulombPotential` for all radii bitter
+    :py:class:`~.CoulombPotential` for all radii bigger
     than :math:`r_\\text{cut}`. For all radii smaller
-    than :math:`r_\\text{cut}`(this is the short-range part of the
-    potential, for now), the potential is forced to zero.
+    than :math:`r_\\text{cut}`, the potential is forced to zero.
 
     We define :math:`r_\\text{cut}` in the :py:class:`jaxrts.PlasmaState`.
 
     .. warning::
 
        This potential is only defined for the electron-ion interaction. Hence,
-       it will always and automatically set ~:py:meth:`include_electrons` to
+       it will always and automatically set ~:py:math:`include_electrons` to
        ``"SpinAveraged"``. For the rest, we return a Coulomb-potential -- but
        this is really just to be compatible with the other potentials defined
        here.
@@ -1396,10 +1398,9 @@ class YukawaShortRangeRepulsion(HNCPotential):
 
 class SoftCorePotential(HNCPotential):
     """
-    This potential is very comparable to :py:class:`EmptyCorePotential`, but to
-    circumvent the hard cutoff, we rather introduce a soft cutoff, exponential
-    cutoff. It's strength is given by the attribute :py:attr:`~.beta`.
-    See :cite:`Gericke.2010`.
+    Comparable to :py:class:`EmptyCorePotential`, but to circumvent the hard
+    cutoff, rather introduce a soft, exponential cutoff. It's strength is given
+    by the attribute :py:attr:`~.beta`. See :cite:`Gericke.2010`.
 
     We define `r_cut` in the :py:class:`jaxrts.PlasmaState`.
 

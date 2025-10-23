@@ -38,14 +38,12 @@ ureg = jaxrts.units.ureg
 plt.style.use("science")
 
 # Create a sharding for the probing energies
-sharding = jax.sharding.PositionalSharding(jax.devices())
 measured_energy = jnp.linspace(295, 305, 300) * ureg.electron_volt
-input_energy = jax.device_put(measured_energy, sharding)
 
 setup = jaxrts.setup.Setup(
     ureg("60°"),
     energy=ureg("300eV"),
-    measured_energy=input_energy,
+    measured_energy=measured_energy,
     instrument=partial(
         jaxrts.instrument_function.instrument_gaussian,
         sigma=(0.01 * ureg.electron_volt) / ureg.hbar,
@@ -59,7 +57,7 @@ state = jaxrts.PlasmaState(
     jnp.array([2]) * ureg.electron_volt / ureg.k_B,
 )
 
-state["free-free scattering"] = jaxrts.models.BornMerminFull()
+state["free-free scattering"] = jaxrts.models.BornMermin_Full()
 # This is required for the S_ii in the collision frequency
 state["ionic scattering"] = jaxrts.models.ArkhipovIonFeat()
 
@@ -110,7 +108,7 @@ plt.plot(
     color="black",
 )
 
-state["free-free scattering"] = jaxrts.models.RPA_NoDamping()
+state["free-free scattering"] = jaxrts.models.RPA()
 state.evaluate("free-free scattering", setup).m_as(ureg.second)
 t0 = time.time()
 free_free_scatter = state.evaluate("free-free scattering", setup).m_as(

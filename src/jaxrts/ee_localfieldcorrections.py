@@ -97,7 +97,9 @@ def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
 
     g_bin_0 = (
         prefactor
-        * quad(integrand, [0, jnp.inf], epsabs=1e-16, epsrel=1e-16)[0]
+        * quad(integrand, jnp.array([0, jnp.inf]), epsabs=1e-16, epsrel=1e-16)[
+            0
+        ]
     )
 
     gT_ee_0 = g_bin_0 * jnpu.exp(H_0)
@@ -307,52 +309,3 @@ def eelfc_dornheim2021(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     rs = (wiegner_seitz_radius(n_e) / (1 * ureg.a0)).m_as(ureg.dimensionless)
 
     return dornheim_G(k_over_k_f, rs, Theta)
-
-
-# Dynamic local-field corrections
-# ===============================================
-#
-
-
-@jax.jit
-def eelfc_dynamic_dabrowski1986(
-    real_part_g_ee_static_limit: float,
-    real_part_g_ee_short_wl_limit: float,
-    E: Quantity,
-    k: Quantity,
-    T_e: Quantity,
-    n_e: Quantity,
-):
-    """
-    Interpolation scheme for the dynamics LFC incorporating sum rules as
-    described by `Dabrowski.1986`.
-    """
-    omega = E / (1 * ureg.hbar)
-    alpha = (4 / (9 * jnp.pi)) ** (1 / 3)
-    rs = interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)
-    C = 23 / (60 * alpha * rs)
-
-    # D = jax.scipy.special.gamma(3 / 4) / (
-    #     jnp.sqrt(jnp.pi) * jax.scipy.special.gamma(5 / 4)
-    # )
-    D = 0.763
-
-    # Calculation of the imaginary part of the dynamic LFC
-    a_k = (
-        C
-        * k**2
-        * (
-            (real_part_g_ee_static_limit - real_part_g_ee_short_wl_limit)
-            / (C * D * k**2)
-        )
-        ** (5 / 3)
-    )
-    b_k = (
-        (real_part_g_ee_static_limit - real_part_g_ee_short_wl_limit)
-        / (C * D * k**2)
-    ) ** (4 / 3)
-    (a_k * omega) / (1 + b_k * omega**2) ** (5 / 4)
-
-    # Calculation of the real part of the dynamic LFC
-
-    # WIP

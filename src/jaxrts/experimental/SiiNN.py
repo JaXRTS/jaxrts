@@ -6,7 +6,7 @@ for easily using a trained NN with jaxrts.
 Models have to be trained, for each sample type, separately. Tools for doing so
 are provided in the `tools/SiiInterpolation/` directory of the jaxrts
 repository. The trained network is saved as an :py:mod:`orbax` checkpoint (with
-slight additions to save properties of the net architecture.
+slight additions to save properties of the net architecture).
 """
 
 import json
@@ -29,7 +29,8 @@ class NNModel(nnx.Module):
             self.linears.append(nnx.Linear(dhid[i], dhid[i + 1], rngs=rngs))
         self.linears.append(nnx.Linear(dhid[-1], dout, rngs=rngs))
 
-        # These are the norming values for the input layer of the model.
+        # These are the values with which we norm the quantities for the input
+        # layer of the model.
         # We store them here to be able to obtain physical quantities from
         # scaled ones. For starters, set all values to unity. When the training
         # data is defined, replace these values.
@@ -64,21 +65,21 @@ class NNModel(nnx.Module):
     @property
     def din(self):
         """
-        Number of input nodes
+        Shape of the input layer.
         """
         return self.linears[0].in_features
 
     @property
     def dhid(self):
         """
-        Size of the hidden nodes
+        Shape of the hidden layers.
         """
         return [layer.in_features for layer in self.linears[1:]]
 
     @property
     def dout(self):
         """
-        Size of the hidden nodes
+        Shape of the output layer.
         """
         return self.linears[-1].out_features
 
