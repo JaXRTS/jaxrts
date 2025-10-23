@@ -12,10 +12,10 @@ from .elements import Element
 from .helpers import JittableDict
 from .models import DebyeHueckelScreeningLength, ElectronicLFCConstant
 from .plasma_physics import (
-    fermi_energy,
-    wiegner_seitz_radius,
     degeneracy_param,
+    fermi_energy,
     fermi_temperature,
+    wiegner_seitz_radius,
 )
 from .setup import Setup
 from .units import Quantity, to_array, ureg

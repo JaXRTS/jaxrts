@@ -411,8 +411,8 @@ def fermi_52_rational_approximation_antia(x):
 @jax.jit
 def inverse_fermi_12_rational_approximation_antia(x):
     """
-    Calculates the inverse of F_{1/2} using a rational function approximation as described in
-    :cite:`Antia.1993`.
+    Calculates the inverse of F_{1/2} using a rational function approximation
+    as described in :cite:`Antia.1993`.
     """
 
     # Set parameters of the approximating functions (see Antia 1993 eq. (6))
