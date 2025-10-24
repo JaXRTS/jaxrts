@@ -253,6 +253,7 @@ class ScatteringModel(Model):
         obj.model_key, obj.sample_points = aux_data
         return obj
 
+
 # Scattering
 # ==========
 scattering_models = [
@@ -4289,9 +4290,10 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
         **kwargs,
     ) -> jnp.ndarray:
         k = setup.dispersion_corrected_k(plasma_state.n_e)
-        return ee_localfieldcorrections.eelfc_dornheim2021(
-            k, plasma_state.T_e, plasma_state.n_e
-        )
+        return jax.vmap(
+            ee_localfieldcorrections.eelfc_dornheim2021,
+            in_axes=(0, None, None),
+        )(k, plasma_state.T_e, plasma_state.n_e)
 
 
 class ElectronicLFCStaticInterpolation(Model):
