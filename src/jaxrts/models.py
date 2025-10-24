@@ -1261,7 +1261,7 @@ class QCSalpeterApproximation(FreeFreeModel):
 
 class RPA(FreeFreeModel):
     """
-    Model for elastic free-free scattering based on the Random Phase
+    Model for free-free scattering based on the Random Phase
     Approximation. Solves the RPA integrals numerically.
 
     Calculates the dielectric function in RPA and obtain a Structure factor via
@@ -1340,7 +1340,7 @@ class RPA(FreeFreeModel):
 
 class RPA_DandreaFit(FreeFreeModel):
     """
-    Model for elastic free-free scattering based fitting to the Random Phase
+    Model for free-free scattering based fitting to the Random Phase
     Approximation, as presented by :cite:`Dandrea.1986`.
 
     Requires a 'chemical potential' model (defaults to
