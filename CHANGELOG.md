@@ -1,6 +1,5 @@
 # Changelog
 
-# Changelog
 ## [0.4.1] - 2025-10-24
 
 ### Bug Fixes
