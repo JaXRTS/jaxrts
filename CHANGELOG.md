@@ -1,4 +1,14 @@
 # Changelog
+
+# Changelog
+## [0.4.1] - 2025-10-24
+
+### Bug Fixes
+
+- ElectronicLFCDornheimAnalyticalInterp not evaluating at full k ([42a6e59](42a6e59a0953729a949b39e24af5b093a832907f))
+
+**Full Changelog**: https://github.com/jaxrts/jaxrts/compare/0.4.0...0.4.1
+
 ## [0.4.0] - 2025-10-23
 
 ### Breaking
