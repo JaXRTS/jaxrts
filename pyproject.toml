@@ -21,6 +21,24 @@ dependencies = [
 ]
 requires-python = ">=3.11,<3.15"
 
+[project.optional-dependencies]
+docs = [
+    "sphinx (>= 7.4.7)",
+    "sphinx-rtd-theme (>=2.0.0)",
+    "sphinx-gallery (>=0.15.0)",
+    "sphinx-toolbox (>=3.10.0)",
+    "sphinxcontrib-bibtex (>=2.6.5)",
+    "scienceplots (>=2.1.1)",
+    "hankel (>=1.2.2)",
+]
+NN = [
+    "flax (>=0.10.4)",
+    "orbax (>=0.1.9)",
+]
+gui = [
+    "PyQt5"
+]
+
 [tool.poetry]
 packages = [{ include = "jaxrts", from = "src" }]
 version = "0.0.0"
@@ -33,22 +51,6 @@ flake8 = "^7.3.0"
 black = "^24.10.0"
 ipython = "^8.37.0"
 pytest = "^8.4.2"
-
-[tool.poetry.group.docs.dependencies]
-sphinx = "^7.4.7"
-sphinx-rtd-theme = "^2.0.0"
-sphinx-gallery = "^0.15.0"
-sphinx-toolbox = "^3.10.0"
-sphinxcontrib-bibtex = "^2.6.5"
-scienceplots = "^2.1.1"
-hankel = "^1.2.2"
-
-[tool.poetry.group.NN]
-optional = true
-
-[tool.poetry.group.NN.dependencies]
-flax = "^0.10.4"
-orbax = "^0.1.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
