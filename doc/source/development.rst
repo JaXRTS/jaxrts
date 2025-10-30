@@ -26,6 +26,11 @@ However, you can completely ignore poetry, if you need to. In that case, it
 is recommended to install the package in edit mode ( ``pip install -e .`` ), in
 a virtual environment.
 
+To install optional dependencies, use the ``--extras`` flat.
+I.e., use ``poetry install --extras=NN`` for installing the ``NN``
+dependencies.
+
+
 Building a new release version
 ------------------------------
 

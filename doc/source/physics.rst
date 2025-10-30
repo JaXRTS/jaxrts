@@ -2,7 +2,7 @@ Physics
 =======
 
 XRTS is describing the scattering of an X-ray photon on electrons. In the WDM
-community, term summarizes Raman, Rayleigh and Thomson scattering processes
+community, the term summarizes Raman, Rayleigh and Thomson scattering processes
 :cite:`Glenzer.2009`. 
 
 In a typical setup, a light-source provides photons carying momentum
@@ -14,8 +14,8 @@ energy :math:`\hbar\omega_s`, and momentum :math:`\hbar\vec{k}_s`. The
 transferred quantities shall be denoted with :math:`\vec{k}` (the **scattering vector**) and
 :math:`\omega` (**photon frequency shift**).
 
-Since the plasma is isotropic, we simplify that only the magnitude of the scattering vector :math:`\vec{k}` was relevant. 
-This can be expressed as
+Since the plasma is isotropic, we simplify that only the absolute value of the scattering vector :math:`\vec{k}` has to be considered. 
+This quantity can be expressed as
 
 .. math::
 
@@ -56,7 +56,7 @@ an experiment via:
 
 Here, :math:`R` is the combined source instrument function
 (:py:attr:`jaxrts.setup.Setup.instrument`), :math:`\circledast` is the
-convolution, and the exponent :math:`\mu` accounts for the frequency
+convolution, and the exponent :math:`\nu` accounts for the frequency
 redistrubution correction (:py:attr:`jaxrts.setup.Setup.frc_exponent`, see
 :cite:`Crowley.2013`.
 

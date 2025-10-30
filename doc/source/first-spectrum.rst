@@ -9,17 +9,16 @@ documentation, under :doc:`gen_examples/plot_getting_started`.
 
 jaxrts provides three main types:
 
-* :py:class:`jaxrts.PlasmaState` contains information about the plasma. It
+* :py:class:`jaxrts.plasmastate.PlasmaState` contains information about the plasma. It
   defines, e.g., the constituents of the plasma (in form of
-  :py:class:`jaxrts.Element`s), electron- and ion temperature, density, and
+  :py:class:`jaxrts.elements.Element` s), electron- and ion temperature, density, and
   ionization.
-* :py:class:`jaxrts.Setup`, on the other hand, defines the geometry of the
+* :py:class:`jaxrts.setup.Setup`, on the other hand, defines the geometry of the
   experiment, like probing energy, scattering angle, and source-instrument
   function.
-* :py:class:`jaxrts.models.Model` contain approximations for a given plasma
-  state. A model should at least contain a
-  :py:meth:`jaxrts.models.Model.evaluate`, which takes a ``PlasmaState`` and a
-  ``Setup`` as argument, and computes the relevant quantities.
+* :py:class:`jaxrts.models.Model` contain approximations for a given aspect of the plasma.
+  A model should at least contain a :py:meth:`jaxrts.models.Model.evaluate`,
+  which takes a ``PlasmaState`` and a ``Setup`` as argument, and computes the relevant quantities.
 
 First, import the relevant packages:
 
@@ -40,7 +39,7 @@ time compilation.
 For most cases, you can just use it as a drop-in replacement without any
 errors. However, some problems might arise, especially when changing individual
 entries of an array in-place. We highly recommend reading the `documentation of
-jax on protential pitfalls
+jax on potential pitfalls
 <https://docs.jax.dev/en/latest/notebooks/Common_Gotchas_in_JAX.html>`_.
 
 Secondly, we utilize units, throughout. This is achieved with the ``ureg``
@@ -48,8 +47,8 @@ instance; its application should be clear after reading this example.
 We rely on `jpu <https://github.com/dfm/jpu>`_, a port of `pint
 <https://pint.readthedocs.io>`_ to the jax ecosystem.
 
-With this out of the way, we lets the define a two-times ionized Beryllium
-plasma at :math:`\rho=1\text{g/cc}`, an electron temperature :math:`k_BT_e =
+With this out of the way, we lets the define a two-times ionized beryllium
+plasma at :math:`\rho=1\text{g/cc}` and an electron temperature :math:`k_BT_e =
 1\text{eV}`.
 
 If no ion temperature is given explicitly, we assume equilibrium of ion and
@@ -64,8 +63,8 @@ electron temperatures as a default.
         T_e=2 * ureg.electron_volt / ureg.k_B,  # T_e is the electron temperature.
     )
 
-Now, we also have to define a :py:class:`jaxrts.Setup`. :py:mod:`jpu` and also
-allows to convert string to quantities with units, as you can see below.
+Now, we also have to define a :py:class:`jaxrts.setup.Setup`. :py:mod:`jpu`
+also allows to convert string to quantities with units, as you can see below.
 
 .. code:: python
 
@@ -82,11 +81,11 @@ allows to convert string to quantities with units, as you can see below.
 
 
 To attach a :py:class:`jaxrts.models.Model` instance to the
-:py:class:`jaxrts.PlasmaState`, just assign the instance to the appropriate
-key. The four keys you see below are mandatory to be set. However, depending on
-the models implemented, you might want have to specify different additional
-models, e.g., ``ipd``. See :doc:`models` for a comprehensive list of models
-available in jaxrts.
+:py:class:`jaxrts.plasmastate.PlasmaState`, just assign the instance to the
+appropriate key. The four keys you see below are mandatory to be set. However,
+depending on the models implemented, you might have to specify different
+additional models, e.g., ``ipd``. See :doc:`models` for a comprehensive list of
+models available in jaxrts.
 
 .. code:: python
 
@@ -95,8 +94,8 @@ available in jaxrts.
     state["bound-free scattering"] = jaxrts.models.SchumacherImpulse()
     state["free-bound scattering"] = jaxrts.models.DetailedBalance()
 
-Finally, we call :py:meth:`jaxrts.PlasmaState.probe`, to evaluate the
-scattering on the defined plasma state with the geometry defined.
+Finally, we call :py:meth:`jaxrts.plasmastate.PlasmaState.probe`, to evaluate
+the scattering on the plasma state with the geometry defined.
 
 .. code:: python
 
@@ -118,11 +117,8 @@ Above code produces the following plot:
 .. image:: gen_examples/images/sphx_glr_plot_getting_started_001.svg
    :width: 600
 
-Since we did not set :py:attr:`jaxrts.Setup.frc_exponent`, above, it defaults
-to zero, i.e., the output of jaxrts is proportional to the dynamic structure
-factor, convolved with the source instrument function.
-Since we did not set :py:attr:`jaxrts.Setup.frc_exponent`, above, it defaults
+Since we did not set :py:attr:`jaxrts.setup.Setup.frc_exponent`, above, it defaults
 to zero, i.e., the output of jaxrts is proportional to the dynamic structure
 factor, convolved with the source instrument function. See
 :doc:`gen_examples/setup/plot_frequency_redistibution_correction` for an
-example showing the effect of this correction.
+example showing the effect of this correction, if it was used.

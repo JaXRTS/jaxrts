@@ -2,8 +2,8 @@ Usage
 =====
 
 In this section we (very briefly) introduce XRTS and the key concepts of
-jaxrts. We provide a guide on how to setup a first simulation. This can be the
-starting point for your only compulations, as models can be easily swapped and
+jaxrts. We provide a guide on how to set up a first simulation. This can be the
+starting point for your only computations, as models can be easily swapped and
 :py:class:`jaxrts.plasmastate.PlasmaState` and :py:class:`jaxrts.setup.Setup`
 objects extended and modified.
 

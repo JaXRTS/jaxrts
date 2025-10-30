@@ -6,24 +6,25 @@ A Python package for X-ray Thomson scattering, using jax.
 .. image:: images/jaxrts_logo.svg
    :width: 600
 
-X-ray Thomson scattering (XRTS) is a diagnostics widely used in the warm dense
+X-ray Thomson scattering (XRTS) is a diagnostic widely used in the warm dense
 matter and dense plasma community.
 The theory of XRTS has been discussed in many publications, e.g.
 :cite:`Glenzer.2009, Gregori.2003, Gregori.2004, Wunsch.2011, Chapman.2015`,
 
 Since the method of XRTS embarked, many models have been formulated to
-calculate spectra. This code aims on collecting several of these efforts and
-thereby assist experiment analysis and planning with easy forward calculations.
-Splitting the full signal in different contributions, according to the Chihara
+calculate spectra. This code collects several of these efforts and
+thereby assists experiment analysis and planning with easy forward
+calculations.
+By splitting the full signal in different contributions according to the Chihara
 decomposition :cite:`Chihara.2000, Gregori.2003`, we allow users to combine
-different implemented models, applicable to different plasma conditions and
-involving varying computational cost and find a description according to their
+the implemented models, applicable to different plasma conditions and
+involving varying computational cost to find a description according to their
 needs.
 
 This documentation aims on providing an overview about the capabilities of
 jaxrts, and should help you taking your first steps. A discussion focussing on
 more details about the physics implemented is currently in the works.
-A detailed description of jaxrts module is available under
+A detailed description of the ``jaxrts`` module is available under
 :doc:`module_overview`. If you prefer to learn by examples, we kindly refer you
 to the :doc:`example gallery<gen_examples/index>`.
 
@@ -52,7 +53,7 @@ of contributors to the software.
 
 .. note::
 
-   Currently, the code is only tested linux operating systems. While the
+   Currently, the code is only tested on linux operating systems. While the
    project itself should run on other platforms, too, we do not actively test
    jaxrts against them. Please also note that currently, GPU acceleration is
    only available on linux,

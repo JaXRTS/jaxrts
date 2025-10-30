@@ -5,7 +5,7 @@ The calculation of the ion-ion static structure using hypernetted chain (HNC)
 calculations can provide good agreement with more costly techniques if adequate
 potentials are chosen :cite:`Fletcher.2015,Wunsch.2009`.
 
-If allows for obtaining pair distribution functions :math:`g_{ab} = 1 + h_{ab}`
+It allows for obtaining pair distribution functions :math:`g_{ab} = 1 + h_{ab}`
 by iteratively solving the Ornstein Zernike equation of a classical liquid,
 splitting it into a direct correlation function :math:`c_{\text{ab}}` and an
 indirect term.
@@ -33,7 +33,7 @@ Structure factors can the be calculated via
    - 1\right].
 
 Our implementation is based on the work of Kathrin Wünsch :cite:`Wunsch.2011`.
-See especially the flowchart in Figure 4.1, therein, and also
+See especially the flowchart in Figure 4.1 therein, and also
 :cite:`Schumacher.2025` and :cite:`Shaffer.2017`.
 
 Within the HNC modules, all quantities have three axis with :math:`(n\times n
