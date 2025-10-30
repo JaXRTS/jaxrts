@@ -72,6 +72,17 @@ class Setup:
         #:
         self.frc_exponent: float = frc_exponent
 
+    def __repr__(self) -> str:
+        E = f"{self.energy.m_as(ureg.electron_volt):.1f}"
+        k = f"{self.k.m_as(1/ureg.angstrom):.3f}"
+        theta = f"{self.scattering_angle.m_as(ureg.degree):1f}"
+        out = f"Setup probing with {E} eV at {theta} deg (k = {k}/angstrom)."
+        if self.frc_exponent > 0:
+            out = out + f" frc_exponent = {self.frc_exponent}."
+        if not self.correct_k_dispersion:
+            out = out + " Dispersion correction is turned off."
+        return out
+
     @property
     def k(self) -> Quantity:
         """
