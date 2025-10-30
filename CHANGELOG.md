@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.5.0] - 2025-10-30
+
+### Features
+
+- Logo (#49)([6f3ec17](6f3ec17c9b819e07900a6da3c3a57d155abe6918))
+- `print` options for PlasmaStates, Models, ect. (#47)([5412c929](5412c9295b89b748fc23fa944e663e6a42fa27b1))
+
+### Bug Fixes
+
+- Logo: Convert text to path (#50)([f19ce5b](f19ce5b6d3251555bee5182fe05e8e10f18f0fef))
+
+### Documentation
+
+- Improve sphinx documentation([9fd3cbb](9fd3cbbd3ae18ee09f358608b95a36c970c0ba7f))
+
+### Testing
+
+- Avoid opening tempfiles several times to have working test on Windows([382a8f8](382a8f8ffe9df92144c9a06494845593a77f4812))
+
+### Miscellaneous Tasks
+
+- Move from poetry optional dependencies to `[project.optional-dependencies]`([da7959f](da7959f5a06a249cb6e5d098e23e2813c323e716))
+
+
+**Full Changelog**: https://github.com/jaxrts/jaxrts/compare/0.4.1...0.5.0
+
+
 ## [0.4.1] - 2025-10-24
 
 ### Bug Fixes
