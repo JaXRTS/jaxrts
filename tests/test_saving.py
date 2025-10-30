@@ -1,5 +1,5 @@
-import hashlib
 import pathlib
+import os
 import tempfile
 from copy import deepcopy
 
@@ -11,13 +11,6 @@ import jaxrts.saving as saving
 
 ureg = jaxrts.ureg
 save_dir = pathlib.Path(__file__).parent / "saves/"
-
-
-def hash_file(path):
-    with open(path, "rb") as f:
-        sha256sum_hash = hashlib.sha256(f.read()).hexdigest()
-    return sha256sum_hash
-
 
 ions = [jaxrts.Element("H"), jaxrts.Element("O")]
 
@@ -41,15 +34,19 @@ test_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(mix=0.8)
 
 
 def test_dump_state():
-    with tempfile.NamedTemporaryFile() as tmp:
-        # with open(save_dir / "state.json", "w") as f:
-        with open(tmp.name, "w") as f:
-            saving.dump(test_state, f, indent=2)
+    fd, tmp = tempfile.mkstemp()
+    # with open(save_dir / "state.json", "w") as f:
+    with open(tmp, "w") as f:
+        saving.dump(test_state, f, indent=2)
 
-        hash_temp_file = hash_file(tmp.name)
-    hash_stored_file = hash_file(save_dir / "state.json")
+    with open(tmp) as f:
+        lines_created = f.readlines()
+    with open(save_dir / "state.json") as f:
+        lines_saved = f.readlines()
 
-    assert hash_temp_file == hash_stored_file
+    os.close(fd)
+    os.remove(tmp)
+    assert lines_created == lines_saved
 
 
 def test_load_state():
@@ -84,11 +81,13 @@ def test_save_and_load_setup():
         jnp.linspace(4000, 5000) * ureg.electron_volt,
         lambda x: 1 / x,
     )
-    with tempfile.NamedTemporaryFile() as tmp:
-        with open(tmp.name, "w") as f:
-            saving.dump(test_setup, f)
-        with open(tmp.name) as f:
-            loaded_setup = saving.load(f, jaxrts.ureg)
+    fd, tmp = tempfile.mkstemp()
+    with open(tmp, "w") as f:
+        saving.dump(test_setup, f)
+    with open(tmp) as f:
+        loaded_setup = saving.load(f, jaxrts.ureg)
+    os.close(fd)
+    os.remove(tmp)
     assert (
         jnp.abs(loaded_setup.instrument(ureg("5/s")).m_as(ureg.second) - 0.2)
         < 1e-6
@@ -99,11 +98,13 @@ def test_function_saving_and_loading():
     test_function = jax.tree_util.Partial(
         jaxrts.instrument_function.instrument_gaussian
     )
-    with tempfile.NamedTemporaryFile() as tmp:
-        with open(tmp.name, "w") as f:
-            saving.dump(test_function, f)
-        with open(tmp.name) as f:
-            loaded_function = saving.load(f, jaxrts.ureg)
+    fd, tmp = tempfile.mkstemp()
+    with open(tmp, "w") as f:
+        saving.dump(test_function, f)
+    with open(tmp) as f:
+        loaded_function = saving.load(f, jaxrts.ureg)
+    os.close(fd)
+    os.remove(tmp)
     assert test_function(3, 5) == loaded_function(3, 5)
 
 
@@ -119,14 +120,15 @@ def test_saving_and_restoring_custom_model():
     state = deepcopy(test_state)
     state["test"] = AlwaysPiModel()
 
-    with tempfile.NamedTemporaryFile() as tmp:
-        with open(tmp.name, "w") as f:
-            saving.dump(state, f)
-        with open(tmp.name) as f:
-            loaded_state = saving.load(
-                f,
-                jaxrts.ureg,
-                additional_mappings={"AlwaysPiModel": AlwaysPiModel},
-            )
-
+    fd, tmp = tempfile.mkstemp()
+    with open(tmp, "w") as f:
+        saving.dump(state, f)
+    with open(tmp) as f:
+        loaded_state = saving.load(
+            f,
+            jaxrts.ureg,
+            additional_mappings={"AlwaysPiModel": AlwaysPiModel},
+        )
+    os.close(fd)
+    os.remove(tmp)
     assert loaded_state.evaluate("test", None) == jnp.pi
