@@ -9,8 +9,8 @@ import jaxrts
 import pathlib
 
 project = "jaxrts"
-copyright = "2024, J. Lütgert and S. Schumacher"
-author = "J. Lütgert, S. Schumacher"
+copyright = "2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors"
+author = "J. Lütgert, S. Schumacher, and the jaxrts contributors"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -98,7 +98,7 @@ plt.plot(Data_E, Data_I, ls="none", marker="o", alpha=0.5)
 plt.yscale("log")
 
 plt.xlabel("Energy [eV]")
-plt.ylabel("Scatting Intensity [a. u.]")
+plt.ylabel("Scattering Intensity [a. u.]")
 plt.xlim(5550, 6000)
 plt.ylim(1e-3, 1.2)
 plt.show()

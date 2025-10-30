@@ -1,3 +1,7 @@
+"""
+A Python package for X-ray Thomson Scattering from dense plasmas, using jax.
+"""
+
 # These version placeholders will be replaced by poetry-dynamic-versioning
 __version__ = "0.0.0"
 __version_tuple__ = (0, 0, 0)

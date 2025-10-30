@@ -14,6 +14,11 @@ from .units import Quantity, ureg
 
 
 class Setup:
+    """
+    Class containing the information about the experiment's geometry, the
+    energy of the probing and measured x-rays, and the combined source
+    instrument function.
+    """
 
     def __init__(
         self,

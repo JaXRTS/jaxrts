@@ -50,6 +50,18 @@ def generate_available_model_overview_page():
 
         >>> state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
 
+
+        For more details on an individual model, we refer to the literature,
+        provided in the :py:attr:`jaxrts.models.Model.cite_keys` attribute.
+        You can easily obtain the bibliographic information by using the
+        :py:meth:`jaxrts.models.Model.citation` method, e.g., calling
+
+        >>> import jaxrts
+        >>> print(jaxrts.models.RPA_DandreaFit().citation()
+        R. G. Dandrea, N. W. Ashcroft, and A. E. Carlsson. Electron liquid at
+        any degeneracy. Physical Review B, 34:2097–2111, 8 1986.
+        doi:10.1103/physrevb.34.2097.
+
         """
         )
 

@@ -3,7 +3,7 @@ HNC: Pair correlation function for different Γ
 ==============================================
 
 This example reproduces Figure 4.4 in :cite:`Wunsch.2011`, showing the the pair
-distribution function oscillating more with increasing :math:`Gamma` (e.g,
+distribution function oscillating more with increasing :math:`\\Gamma` (e.g,
 increasing density when temperature stays constant).
 
 We assume fully ionized hydrogen at a temperature of 10 eV, and a statistically

@@ -1,3 +1,8 @@
+"""
+Definition of the :py:class:`~.PlasmaState` class, is describing the
+experiment's target.
+"""
+
 import logging
 from abc import ABCMeta
 from copy import deepcopy
@@ -24,6 +29,33 @@ logger = logging.getLogger(__name__)
 
 
 class PlasmaState:
+    """
+    Define a plasma. The :py:class:`~.PlasmaState` is defined by the set of state
+    parameters, which are attributes of this object and have to be set during
+    initialization:
+
+    * :py:attr:`~.ions`: a list of :py:class:`jaxrts.elements.Element` objects
+      that define the constituents of the plasma.
+    * :py:attr:`~.Z_free`: a list of ionization states for each of the
+      constituents.
+    * :py:attr:`~.mass_density`: a list of partial mass densities for the ions.
+      Therefore, the `mass_density` also contains the information about the
+      stoichiometry plasma (see :py:attr:~.number_fraction`. Summing up
+      mass_density gives the total mass density.
+    * :py:attr:`~.T_e`: The electronic temperature of the system.
+    * :py:attr:`~.T_i`: The ionic temperature of the system. One temperature
+      per ion species. If ``T_i`` is not given when initializing the plasma
+      state, we assume equilibrium between electron- and ion temperatures.
+
+    Instances of a :py:class:`jaxrts.models.Model` can be set to describe
+    certain aspects of a plasa state, i.e., the ionization potential depression
+    model, or the description of free-free scattering. To attach such a Models
+    instance to a :py:class:`~.PlasmaState`, assign it to a key that is valid
+    for the specific :py:class:`jaxrts.models.Model`, e.g.,
+
+    >>> state["free-free scattering"] = jaxrts.models.RPA()
+
+    """
 
     def __init__(
         self,
@@ -42,11 +74,18 @@ class PlasmaState:
                 T_i
             ), "WARNING: Input parameters should be the same shape as <ions>!"
 
+        #: A list of :py:class:`jaxrts.elements.Element` objects that define
+        #: the constituents of the plasma.
         self.ions = ions
 
         # Define charge configuration
+        #: A list of ionization states for each of the constituents.
         self.Z_free = to_array(Z_free)
 
+        #: A list of partial mass densities for the ions.
+        #: Therefore, the `mass_density` also contains the information about
+        #: the stoichiometry plasma (see :py:attr:~.number_fraction`.
+        #: Summing up mass_density gives the total mass density.
         self.mass_density = to_array(mass_density)
 
         if (
@@ -54,12 +93,17 @@ class PlasmaState:
             or isinstance(T_e.magnitude, jnp.ndarray)
             and len(T_e.shape) == 1
         ):
+            #: The electronic temperature of the system.
             self.T_e = T_e[0]
         else:
             self.T_e = T_e
 
         if T_i is None:
             T_i = T_e * jnp.ones(self.nions)
+        #:  The ionic temperature of the system. One temperature per ion
+        #: species. If this value is not given when the
+        #: :py:class:`~.PlasmaState` is initialized, we assume equilibrium and
+        #: set the ionic temperature to :py:attr:`~.T_e`.
         self.T_i = to_array(T_i)
         self.models = JittableDict()
         self._overwritten = {
@@ -206,6 +250,9 @@ class PlasmaState:
 
     @property
     def nions(self) -> int:
+        """
+        The number of species in the plasma.
+        """
         return len(self.ions)
 
     @property
@@ -233,10 +280,12 @@ class PlasmaState:
 
     @property
     def n_i(self):
+        """The ion number density."""
         return (self.mass_density / self.atomic_masses).to_base_units()
 
     @property
     def n_e(self):
+        """The free electron number density."""
         return (jnpu.sum(self.n_i * self.Z_free)).to_base_units()
 
     @property
@@ -264,7 +313,7 @@ class PlasmaState:
     @property
     def T_F(self):
         """
-        Return the fermi temperature of the free electron system, determined 
+        Return the fermi temperature of the free electron system, determined
         by the electron density.
         """
 
@@ -377,6 +426,19 @@ class PlasmaState:
 
     @jax.jit
     def probe(self, setup: Setup) -> Quantity:
+        """
+        Function to generate a spectrum by combining the
+        :py:class:~.PlasmaState` (and the connected Models therein) with a
+        :py:class:`jaxrts.setup.Setup`.
+
+        This function evaluates the contributions to the Chihara decomposition
+        :cite:`Chihara.2000, Gregori.2003` and summs them up.
+
+        Parameters
+        ----------
+        setup: Setup
+            Contains the information about the geometry of the experiment.
+        """
         ionic = self["ionic scattering"].evaluate(self, setup)
         free_free = self["free-free scattering"].evaluate(self, setup)
         bound_free = self["bound-free scattering"].evaluate(self, setup)
@@ -386,8 +448,15 @@ class PlasmaState:
 
     def evaluate(self, key: str, setup: Setup) -> Quantity:
         """
-        This is just a to avoid the redundancy when one wants to evaluate a
-        specific model and would otherwise need to provide the state, again.
+        Evaluate an individual :py:class:~`jaxrts.models.Model`, attached to
+        this :py:class`~.PlasmaState` with the modelkey ``key``.
+
+        Parameters
+        ----------
+        key: str
+            key under which the model is registered in the PlasmaState.
+        setup: Setup
+            Geometry under which the model should be evaluated.
         """
         return self[key].evaluate(self, setup)
 

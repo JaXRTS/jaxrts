@@ -1,6 +1,6 @@
 """
-Calculate the full full structure factors for various plasma conditions
-=======================================================================
+Calculate the full structure factors for various plasma conditions
+==================================================================
 
 This code reproduces Fig. 6 of :cite:`Gregori.2003`, showing the impact of
 changing temperature, ionization and electron density on the scattering
