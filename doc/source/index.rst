@@ -3,7 +3,7 @@ jaxrts
 
 A Python package for X-ray Thomson scattering, using jax.
 
-.. image:: gen_examples/free_bound/images/sphx_glr_plot_free_bound_scattering_001.svg
+.. image:: images/jaxrts_logo.svg
    :width: 600
 
 X-ray Thomson scattering (XRTS) is a diagnostics widely used in the warm dense
