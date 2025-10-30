@@ -85,6 +85,48 @@ class PlasmaState:
         model.model_key = key
         self.models[key] = model
 
+    def __repr__(self) -> str:
+        ion_string = ", ".join(
+            [f"{element.symbol:>7}" for element in self.ions]
+        )
+        rho_string = ", ".join(
+            [
+                f"{rho.m_as(ureg.gram/ureg.centimeter**3):7.2f}"
+                for rho in self.mass_density
+            ]
+        )
+        Z_string = ", ".join([f"{Z:7.2f}" for Z in self.Z_free])
+        T_i_string = ", ".join(
+            [
+                f"{(ureg.k_B * T).m_as(ureg.electron_volt):7.1f}"
+                for T in self.T_i
+            ]
+        )
+        T_e_string = f"{(ureg.k_B * self.T_e).m_as(ureg.electron_volt):7.1f}"
+
+        model_string = "\n".join(
+            [f"{key:<25}: {self.models[key].__name__}" for key in self.keys()]
+        )
+
+        out = f"""{'ions':<25}: {ion_string}
+{'mass densities (g/cc)':<25}: {rho_string}
+{'ionization':<25}: {Z_string}
+{'ion temperatures (eV)':<25}: {T_i_string}
+{'e- temperature (eV)':<25}: {T_e_string}
+
+Models attached
+===============
+{model_string}
+        """
+        return out
+
+    def keys(self) -> list[str]:
+        """
+        Return a list of keys under which :py:class:`jaxrts.models.Model` s are
+        attached to the PlasmaState.
+        """
+        return self.models.keys()
+
     def citation(
         self, style: Literal["plain", "cite", "bibtex"] = "plain"
     ) -> str:
@@ -264,7 +306,7 @@ class PlasmaState:
     @property
     def T_F(self):
         """
-        Return the fermi temperature of the free electron system, determined 
+        Return the fermi temperature of the free electron system, determined
         by the electron density.
         """
 
