@@ -585,6 +585,11 @@ class HNCPotential(metaclass=abc.ABCMeta):
         obj.include_electrons = aux_data["include_electrons"]
         return obj
 
+    def __repr__(self) -> str:
+        children, aux_data = self._tree_flatten()
+        out = f"{self.__name__}\nchildren: {children}\nstatic: {aux_data}"
+        return out
+
 
 class PotentialSum(HNCPotential):
     """
