@@ -2,7 +2,7 @@
 
 **A Python package for simulating x-ray Thomson scattering (XRTS) spectra of dense plasmas, heavily relying on [jax](https://jax.readthedocs.io/en/latest/index.html).**
 
-![An example result](getting_started.png)
+![](doc/source/images/jaxrts_logo.svg)
 
 ## Disclaimer
 
@@ -11,6 +11,8 @@ This module is still under active development and should be considered experimen
 This project would not have been possible without the pioneering work of D. Chapman, G. Gregori, K. Wünsch, and D. O. Gericke. A full bibliography can be found under `src/jaxrts/literature.bib`.
 
 The code was written by Samuel Schumacher and Julian Lütgert in the High Energy Density Group of Dominik Kraus at the University of Rostock.
+
+![An example result](getting_started.png)
 
 ## Documentation
 
