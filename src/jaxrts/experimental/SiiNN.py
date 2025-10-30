@@ -10,6 +10,7 @@ slight additions to save properties of the net architecture).
 """
 
 import json
+from pathlib import Path
 
 import jax
 import jax.numpy as jnp
@@ -23,7 +24,41 @@ ureg = jaxrts.ureg
 
 
 class NNModel(nnx.Module):
-    def __init__(self, din, dhid, dout, rngs: nnx.Rngs, no_of_atoms=1):
+    """
+    A class inheriting from :py:class:`nnx.Module`, adding quality of life
+    features and defining normalization features for the input of the NN.
+    """
+
+    def __init__(
+        self,
+        din: int,
+        dhid: list[int],
+        dout: int,
+        rngs: nnx.Rngs,
+        no_of_atoms: int | None = None,
+    ):
+        """
+        Creates the network as a set of fully connected
+        :py:class:`flax.nnx.Linear` layers.
+
+        Parameters
+        ----------
+        din: int
+            Number of input nodes. For a typical setup, this should be ``3 +
+            no_of_atoms``.
+        dhid: list[int]
+            List of integers, containing the size of each hidden layer.
+        dout: int
+            Number of output nodes. Typically, this is
+            ``no_of_ions * (no_of_ions + 1)/2``.
+        rngs: nnx.Rngs
+            A random number generator.
+        no_of_atoms: int or None, defaults to None
+            Number of species in the plasma. If this value is not given,
+            explicitly, it is calculated from :py:attr:`din` as ``din - 3``.
+        """
+        if no_of_atoms is None:
+            no_of_atoms = din - 3
         self.linears = [nnx.Linear(din, dhid[0], rngs=rngs)]
         for i in range(len(dhid) - 1):
             self.linears.append(nnx.Linear(dhid[i], dhid[i + 1], rngs=rngs))
@@ -34,9 +69,16 @@ class NNModel(nnx.Module):
         # We store them here to be able to obtain physical quantities from
         # scaled ones. For starters, set all values to unity. When the training
         # data is defined, replace these values.
+        #: Normalization for theta
         self.norm_theta = nnx.Variable(1.0)
+        #: Normalization for rho.
+        #: This is given as a float, as quantities would be in conflict with
+        #: flax. The unit is g/cm³
         self.norm_rho = nnx.Variable(1.0)
+        #: Normalization the ionization (this is an array with one entry for
+        #: each component.
         self.norm_Z = nnx.Variable([1.0] * no_of_atoms)
+        #: Normalization for k_over_qk
         self.norm_k_over_qk = nnx.Variable(1.0)
 
     @nnx.jit
@@ -47,14 +89,22 @@ class NNModel(nnx.Module):
         x = self.linears[-1](x)
         return x
 
-    def set_norms(self, theta, rho, Z, k_over_qk):
+    def set_norms(
+        self, theta: float, rho: float, Z: list[float], k_over_qk: float
+    ):
+        """
+        Set the normalization of the input layers.
+        """
         self.norm_theta = nnx.Variable(theta)
         self.norm_rho = nnx.Variable(rho)
         self.norm_Z = nnx.Variable(Z)
         self.norm_k_over_qk = nnx.Variable(k_over_qk)
 
     @property
-    def norms(self):
+    def norms(self) -> dict[str, nnx.Variable]:
+        """
+        Get the input layer normalizations as a dictionary.
+        """
         return {
             "theta": self.norm_theta,
             "rho": self.norm_rho,
@@ -63,28 +113,31 @@ class NNModel(nnx.Module):
         }
 
     @property
-    def din(self):
+    def din(self) -> int:
         """
         Shape of the input layer.
         """
         return self.linears[0].in_features
 
     @property
-    def dhid(self):
+    def dhid(self) -> list[int]:
         """
         Shape of the hidden layers.
         """
         return [layer.in_features for layer in self.linears[1:]]
 
     @property
-    def dout(self):
+    def dout(self) -> list[int]:
         """
         Shape of the output layer.
         """
         return self.linears[-1].out_features
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, list[int], int]:
+        """
+        Shape of the full model (input, hidden, and output layers).
+        """
         return self.din, self.dhid, self.dout
 
 
@@ -100,7 +153,28 @@ def set_sharding(x: jax.ShapeDtypeStruct) -> jax.ShapeDtypeStruct:
 
 
 class NNSiiModel(jaxrts.models.IonFeatModel):
-    def __init__(self, checkpoint_dir):
+    """
+    A :py:class:`jaxrts.model.IonFeatModel` to use a neural network to obtain
+    ion-ion static structure factors.
+
+    .. note::
+
+       This is a parent class that, in itself, has no practical application, as
+       it defines no :py:meth:`jaxrts.models.IonFeatModel.S_ii` method.
+       This class only handles loading the neural network from an
+       :py:mod:`orbax` checkpoint.
+
+    """
+
+    def __init__(self, checkpoint_dir: Path):
+        """
+        Initialize the NNSiiModel.
+
+        Parameters
+        ----------
+        checkpoint_dir : Path
+            The Path to the checkpoint directory.
+        """
         # This requires that the network shape was saved in the checkpoint
         # directory. This is done in a slightly hacky way, see the train.py
         # file.
@@ -150,6 +224,11 @@ def _sort_func(ion):
 
 
 class OneComponentNNModel(NNSiiModel):
+    """
+    A :py:class:`~.NNSiiModel` for a :py:class:`jaxrts.plasmastate.PlasmaState`
+    with one component.
+    """
+
     @jax.jit
     def S_ii(
         self,
@@ -188,6 +267,11 @@ class OneComponentNNModel(NNSiiModel):
 
 
 class TwoComponentNNModel(NNSiiModel):
+    """
+    A :py:class:`~.NNSiiModel` for a :py:class:`jaxrts.plasmastate.PlasmaState`
+    with two components.
+    """
+
     @jax.jit
     def S_ii(
         self,

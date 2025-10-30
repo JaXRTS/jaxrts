@@ -45,6 +45,12 @@ logger = logging.getLogger(__name__)
 
 # This defines a Model, abstractly.
 class Model(metaclass=abc.ABCMeta):
+    """
+    Abstract definition of a Model in jaxrts.
+    A :py:class:`~.Model`, at a minimum, has to define a :py:meth:`~.evaluate`
+    method.
+    """
+
     #: A list of keywords where this model is adequate for
     allowed_keys: list[str] = []
     #: A list of bibtex keys. Can be in the format ``[key1, key2]``, for
@@ -62,7 +68,12 @@ class Model(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def evaluate(
         self, plasma_state: "PlasmaState", setup: Setup
-    ) -> jnp.ndarray: ...
+    ) -> jnp.ndarray:
+        """
+        Return the result of the model given a :py:class:`~.PlasmaState` and a
+        :py:class:`Setup`.
+        """
+        ...
 
     def prepare(  # noqa: B027
         self, plasma_state: "PlasmaState", key: str
@@ -197,7 +208,13 @@ class ScatteringModel(Model):
     @abc.abstractmethod
     def evaluate_raw(
         self, plasma_state: "PlasmaState", setup: Setup
-    ) -> jnp.ndarray: ...
+    ) -> jnp.ndarray:
+        """
+        Returning the dynamic structure factor (no convolution with the
+        source-instrument function, and no frequency redistribution
+        correction).
+        """
+        ...
 
     def sample_grid(self, setup) -> Quantity:
         """
@@ -334,7 +351,12 @@ class IonFeatModel(Model):
         self,
         plasma_state: "PlasmaState",
         setup: Setup,
-    ) -> jnp.ndarray: ...
+    ) -> jnp.ndarray:
+        """
+        Calculate the ion-ion static structure factor in the given
+        :py:class:`~.IonFeatModel`.
+        """
+        ...
 
     @jax.jit
     def Rayleigh_weight(
@@ -1116,7 +1138,7 @@ class DebyeWallerSolid(IonFeatModel):
             A model for the static structure factor of the plasma-like
             scattering contribution.
         b: IonFeatModel
-            A model for the lattice bragg-peak structure. Likely a
+            A model for the lattice Bragg-peak structure. Likely a
             :py:class:`~.PeakCollection`.
         """
         self.S_plasma = S_plasma
@@ -3606,7 +3628,7 @@ class IonSphereIPD(Model):
 
 class EckerKroellIPD(Model):
     """
-    Ecker-Kröll IPD Model:cite:`EckerKroell.1963`.
+    Ecker-Kröll IPD Model::cite:`EckerKroell.1963`.
 
     In contrast to the Stewart-Pyatt:cite:`Stewart.1966` model the Ecker-Kröll
     model assumes that the relevant length scale for determining the IPD in

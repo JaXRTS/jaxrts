@@ -13,7 +13,7 @@ model. The simulation was performed with 8000 atoms using the software package
 LAMMPS :cite:`Thompson.2022`. For the interatomic potential, the work by and
 Purja Pun and Mishin :cite:`Pun.2017` was used, which improves on the Tersoff
 potential. Static ion-ion structure factors where calculated by averaging over
-scatting vectors realizing the same absolute :math:`k`, and over 10000 time
+scattering vectors realizing the same absolute :math:`k`, and over 10000 time
 steps.
 """
 

@@ -1,2 +1,2 @@
-Ionic scatting examples
------------------------
+Ionic scattering examples
+-------------------------

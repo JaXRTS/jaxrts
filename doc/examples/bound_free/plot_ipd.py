@@ -2,8 +2,8 @@
 Compare IPD Models
 ==================
 
-This example shows different IOD models implemented in the code for Carbon at
-100eV and for varying densities.
+This example shows different IPD models implemented in the code for Carbon at
+100 eV and for varying densities.
 """
 
 import jax.numpy as jnp

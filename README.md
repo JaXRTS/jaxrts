@@ -1,23 +1,23 @@
-# JaXRTS
+# jaxrts
 
-**Python code for x-ray Thomson scattering (XRTS), heavily relying on [jax](https://jax.readthedocs.io/en/latest/index.html).**
+**A Python package for simulating x-ray Thomson scattering (XRTS) spectra of dense plasmas, heavily relying on [jax](https://jax.readthedocs.io/en/latest/index.html).**
 
 ![An example result](getting_started.png)
 
 ## Disclaimer
 
-This module is very much work in progress, and experimental in itself, but also in it's dependencies. These scripts are an attempt to summarize published XRTS theory into code usable to compare to experiments, as the state-of-the art software for this purpose, the Multi-Component Scattering Spectra Code MCSS by Dave Chapman is not freely available.
+This module is still under active development and should be considered experimental, both in its implementation and its dependencies. The package presented here represents an effort to encapsulate published XRTS theory into accessible code for comparison with experimental results, as the state-of-the art software for this purpose, the Multi-Component Scattering Spectra Code (MCSS) by Dave Chapman is not publicly available.
 
-We would not have been able to write this without the seminal work by D. Chapman, G. Gregori, K. Wünsch and D. O. Gericke. A full bibliography can be found under `doc/source/literature.bib`.
+This project would not have been possible without the pioneering work of D. Chapman, G. Gregori, K. Wünsch, and D. O. Gericke. A full bibliography can be found under `src/jaxrts/literature.bib`.
 
-The code was written by Samuel Schumacher and Julian Lütgert in the High Energy Density Group of Dominik Kraus at University Rostock.
+The code was written by Samuel Schumacher and Julian Lütgert in the High Energy Density Group of Dominik Kraus at the University of Rostock.
 
 ## Documentation
 
 The documentation can be found in the `doc` directory. To generate it for yourself, just run
 
 ```bash
-poetry make html
+poetry run make html
 ```
 
 in the `doc` directory, after installing the module.
@@ -44,10 +44,10 @@ This `-e` flag installs the module in 'edit' mode, i.e., changes you made are av
 
 ## Getting started
 
-The `jaxrts` module provides a user with two classes, a `Setup` and a `PlasmaState`
-While the former specifies the probing energy and measurement grid, scattering angle and instrument function, the latter is defines the state to be probed, and allows for adding `Models` as keys to the plasma state.
+The `jaxrts` module provides a user with two classes, a `Setup` and a `PlasmaState`.
+While the former specifies the probing energy and measurement grid, scattering angle and instrument function, the latter defines the state to be probed, and allows for adding `Models` as keys to the plasma state.
 To calculate a spectrum, use the `PlasmaState.probe()` method.
 
 A simple example (which generated the figure above) can be found at `doc/examples/plot_getting_started.py`. More examples can be found in the `doc/example` directory.
 
-To get an overview over all the models available, we recommend building the documentation and opening `doc/build/html/models.html`. This page should list all the available model keys and the models with are allowed.
+To get an overview over all the models available, we recommend building the documentation and opening `doc/build/html/models.html`. This page should list all the available model keys and the models which are allowed. 

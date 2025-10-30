@@ -38,5 +38,5 @@ ax.set_xlabel("$k$ [1/angstrom]")
 
 ax.legend()
 plt.tight_layout()
-plt.title("$f_{1s}$ for beryllium${3.5+}$")
+plt.title("$f_{1s}$ for beryllium ${3.5+}$")
 plt.show()

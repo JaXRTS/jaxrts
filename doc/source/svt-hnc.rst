@@ -1,10 +1,11 @@
 SVT–OZ and notation
 ===================
 
-We derive the linear-algebra form of the SVT--OZ relation :cite:`Shaffer.2017`
-for a general :math:`M`-component, :math:`M`-temperature plasma. First, we use
-the explicit :math:`M=2` case as a warm-up, then we extend this to the full
-formula for the :math:`M^2 \times M^2` matrix entries.
+We derive the linear-algebra form of the SVT--OZ relation
+:cite:`Seuferling.1989,Shaffer.2017` for a general :math:`M`-component,
+:math:`M`-temperature plasma. First, we use the explicit :math:`M=2` case as a
+warm-up, then we extend this to the full formula for the :math:`M^2 \times M^2`
+matrix entries.
 
 Consider :math:`M` species (note that with electrons included in the
 calculation, this means: M-1 ions plus electron) with number densities

@@ -1,7 +1,15 @@
 Development and Poetry
 ======================
 
-The code can easily be installed using
+For development, please clone the code first
+
+.. code:: bash
+
+   git clone https://github.com/jaxrts/jaxrts.git
+   cd jaxrts
+
+
+Afterwards, all dependencies can easily be installed using
 `poetry <https://python-poetry.org/>`__ by calling
 
 .. code:: bash
@@ -14,22 +22,15 @@ This will create an virual environment for the project and install the
 required dependencies. To execute commands within the virtual
 environment, prefix them with ``poetry run``.
 
-**However, you can completely ignore poetry, if you need to. Just make
-sure you have the required packages installed**
+However, you can completely ignore poetry, if you need to. In that case, it
+is recommended to install the package in edit mode ( ``pip install -e .`` ), in
+a virtual environment.
+
+Building a new release version
+------------------------------
 
 A new release can be built using
 
 .. code:: bash
 
    poetry build
-
-Creating a new version
-----------------------
-
-To bump a new version
-
-1. Change ``__version__`` in the ``src/jaxrts/__init__.py`` file
-2. Change the ``version`` in ``pyproject.toml``
-3. Commit your changes
-4. Create a new git tag via ``git tag 0.3.0``
-5. Push the tag ``git push --tags``

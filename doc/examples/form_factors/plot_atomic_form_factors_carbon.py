@@ -2,7 +2,7 @@
 Atomic form factors of C, by Pauling and Sherman
 ================================================
 
-Calculate the atomic formfactors of carbon using a hydrogen-like atom, as
+Calculate the atomic form factors of carbon using a hydrogen-like atom, as
 presented in :cite:`Pauling.1932`.
 
 .. note::
