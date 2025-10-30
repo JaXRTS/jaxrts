@@ -147,6 +147,13 @@ class Model(metaclass=abc.ABCMeta):
             return self._tree_flatten() == other._tree_flatten()
         return NotImplemented
 
+    def __repr__(self) -> str:
+        children, aux_data = self._tree_flatten()
+        out = (
+            f"{self.__name__} Model\nchildren: {children}\nstatic: {aux_data}"
+        )
+        return out
+
 
 class ScatteringModel(Model):
     """
