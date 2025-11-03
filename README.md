@@ -3,6 +3,7 @@
 **A Python package for simulating X-ray Thomson scattering (XRTS) spectra of dense plasmas, heavily relying on [jax](https://jax.readthedocs.io/en/latest/index.html).**
 
 <p align="center">
+  <source media="(prefers-color-scheme: dark)" srcset="doc/source/images/jaxrts_logo_bright_text.svg">
   <img src="doc/source/images/jaxrts_logo.svg" width="600">
 </p>
 
