@@ -3258,13 +3258,46 @@ class BohmStaver(Model):
 # Ionization Potential Depression Models
 # ======================================
 
+class IPDModel(Model):
+    """
+    A subset of :py:class:`Model`'s, to model the effect of ionization
+    potential depression.
+    """
 
-class ConstantIPD(Model):
+    allowed_keys = ["idp"]
+
+    @abc.abstractmethod
+    def all_element_states(
+        self, plasma_state: "PlasmaState", ion_population=None
+    ) -> list[jnp.ndarray]:
+        """
+        Return the IPD for each possible ionization state for the consituents
+        of the plasma, assuming the average plasma conditions are given by the
+        passed ``plasma_state``. Can optinally be handed the argument
+        ``ion_population`` to not only operate on average quantities, but over
+        the whole distribution of elements.
+
+        Parameters
+        ----------
+        plasma_state: PlasmaState
+            The plasma state containing the average plasma properties
+        ion_population, optional
+
+        Returns
+        -------
+        list[jnp.ndarray]
+            A list with an entry for each element in
+            :py:attr:`jaxrts.plasmastate.PlasmaState.ions`. The entry contains
+            the IPD for each possible ionization process of the ion, starting
+            by 0 to :py:attr:`jaxrts.elements.Element.Z` - 1. 
+        """
+        ...
+
+class ConstantIPD(IPDModel):
     """
     A model that returns a constant value for the IPD, set by the user.
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "ConstantIPD"
 
     def __init__(self, value):
@@ -3309,7 +3342,7 @@ class ConstantIPD(Model):
         return out
 
 
-class DebyeHueckelIPD(Model):
+class DebyeHueckelIPD(IPDModel):
     """
     Debye-Hückel IPD Model :cite:`Debye.1923`.
     The Debye-Hückel Model is applicable for low-density and high-temperature
@@ -3325,7 +3358,6 @@ class DebyeHueckelIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "DebyeHueckel"
     cite_keys = ["Debye.1923", "Crowley.2014"]
 
@@ -3382,7 +3414,7 @@ class DebyeHueckelIPD(Model):
         return obj
 
 
-class StewartPyattPrestonIPD(Model):
+class StewartPyattPrestonIPD(IPDModel):
     """
     Stewart Pyatt IPD Model :cite:`Stewart.1966`.
     The Stewart–Pyatt model interpolates between the
@@ -3408,7 +3440,6 @@ class StewartPyattPrestonIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "StewartPyatt"
     cite_keys = ["Stewart.1966", "Preston.2013", "Crowley.2014"]
 
@@ -3471,7 +3502,7 @@ class StewartPyattPrestonIPD(Model):
         return out
 
 
-class StewartPyattIPD(Model):
+class StewartPyattIPD(IPDModel):
     """
     Stewart Pyatt IPD Model :cite:`Stewart.1966`.
     The Stewart–Pyatt model interpolates between the Debye–Hückel
@@ -3488,7 +3519,6 @@ class StewartPyattIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "StewartPyatt"
     cite_keys = ["Stewart.1966", "Ropke.2019", "Calisti.2015"]
 
@@ -3545,7 +3575,7 @@ class StewartPyattIPD(Model):
         return obj
 
 
-class IonSphereIPD(Model):
+class IonSphereIPD(IPDModel):
     """
     Ion Sphere IPD Model :cite:`Rozsnyai.1972`.
 
@@ -3569,7 +3599,6 @@ class IonSphereIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "IonSphere"
     cite_keys = ["Rozsnyai.1972", "Zimmermann.1980", "Crowley.2014"]
 
@@ -3626,7 +3655,7 @@ class IonSphereIPD(Model):
         return obj
 
 
-class EckerKroellIPD(Model):
+class EckerKroellIPD(IPDModel):
     """
     Ecker-Kröll IPD Model::cite:`EckerKroell.1963`.
 
@@ -3654,7 +3683,6 @@ class EckerKroellIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "EckerKroell"
     cite_keys = [
         "EckerKroell.1963",
@@ -3726,7 +3754,7 @@ class EckerKroellIPD(Model):
         return obj
 
 
-class PauliBlockingIPD(Model):
+class PauliBlockingIPD(IPDModel):
     """
     Pauli Blocking IPD Model :cite:`Ropke.2019`.
 
@@ -3742,7 +3770,6 @@ class PauliBlockingIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "PauliBlocking"
     cite_keys = ["Ropke.2019"]
 
@@ -3780,14 +3807,13 @@ class PauliBlockingIPD(Model):
         return out
 
 
-class IPDSum(Model):
+class IPDSum(IPDModel):
     """
     A sum of several ipd :py:class:`~.Model` s. Can be used e.g., to combine
     :py:class:`~.PauliBlockingIPD` with another IPD model.
     """
 
     __name__ = "IPDSum"
-    allowed_keys = ["ipd"]
 
     def __init__(self, list_of_ipds: list[Model]) -> None:
         """
