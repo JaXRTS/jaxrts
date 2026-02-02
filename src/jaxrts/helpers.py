@@ -159,6 +159,57 @@ def mass_from_number_fraction(number_fractions, elements):
     return mass_fractions
 
 
+def mass_density_from_electron_density(n_e, Z, number_fractions, elements):
+    """
+    Calculate the mass density of a mixture from electron density.
+
+    Parameters
+    ----------
+    n_e (electron density): scalar
+        electron density of mixture 
+    Z (charge): array_like
+        The charge of each chemical element in the plasma.
+    number_fractions : array_like
+        The number fractions of each chemical element.
+    elements : list
+        The masses of the respective chemical elements.
+
+    Returns
+    -------
+    array_like
+        The mass density of the mixture. Can be splitted up in its componentes by multiply with mass_from_number_fraction() 
+
+    Raises
+    ------
+    ValueError
+        If the lengths of `Z`, `number_fractions` and `elements` are not the same.
+
+    Examples
+    --------
+    >>> n_e = 0.8e24 / ureg.cm**3
+    >>> number_fractions = [1/2, 2/2]
+    >>> elements = [jaxrts.Element("C"), jaxrts.Element("H")]
+    >>> Z_free = jnp.array([4.0, 1.0])
+    >>> mass_density_from_electron_density(n_e, Z_free, number_fraction, elements)
+    Array(3.45897 dtype=float64) #g/cc
+    """
+    
+    if not (number_fractions.shape[0] == Z.shape[0] == len(elements)): 
+        raise ValueError(
+            "Z, number_fractions and elements must have the same length"
+        )
+    
+    m = [x.atomic_mass for x in elements]
+    
+    #model avarage atom in the mixture
+    nom = sum(x_i * m_i for x_i, m_i in zip(number_fractions, m))
+    denom = sum(x_i * Z_i for Z_i, x_i in zip(Z, number_fractions))
+    
+    rho = n_e * nom/denom
+    return rho.to(ureg.gram/ureg.cm**3)
+
+
+
 class JittableDict(dict):
     # The following is required to jit a state
     def _tree_flatten(self):

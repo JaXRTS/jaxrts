@@ -1,7 +1,9 @@
 import jax.numpy as jnp
 import pytest
-
 import jaxrts
+ureg = jaxrts.ureg
+
+import jpu.numpy as jnpu
 
 
 def test_dictionary_inversion():
@@ -35,3 +37,30 @@ def test_number_to_mass_density():
     )
 
     assert jnp.isclose(ratio, state.number_fraction).all()
+
+
+
+def test_mass_density_from_electron_density():
+    n_e = 1e24 / ureg.cm**3
+    elements = [jaxrts.Element("C"), jaxrts.Element("H"), jaxrts.Element("F")]
+    Z_free = jnp.array([1, 1, 1])
+    ratio = jnp.array([0.2, 0.3, 0.5])
+    mass_ratio = jaxrts.helpers.mass_from_number_fraction(ratio, elements)
+    rho = jaxrts.helpers.mass_density_from_electron_density(n_e, Z_free, ratio, elements)
+
+    # The actual state is not really relevant...
+    state = jaxrts.PlasmaState(
+        ions=elements,
+        Z_free=Z_free,
+        mass_density= rho*mass_ratio,
+        T_e=jnp.array([80]) * jaxrts.ureg.electron_volt / jaxrts.ureg.k_B,
+    )
+    assert jnpu.isclose(n_e, state.n_e)
+    
+    
+    
+    
+    
+    
+    
+    
