@@ -146,7 +146,9 @@ def mass_from_number_fraction(number_fractions, elements):
     masses = jnp.array([e.atomic_mass.m_as(ureg.gram) for e in elements])
 
     if number_fractions.shape != masses.shape:
-        raise ValueError("number_fractions and elements must have the same length")
+        raise ValueError(
+            "number_fractions and elements must have the same length"
+        )
 
     # Calculate the total mass of the mixture
     total_mass = jnp.sum(number_fractions * masses)
@@ -175,14 +177,15 @@ def mass_density_from_electron_density(n_e, Z, number_fractions, elements):
     Returns
     -------
     array_like, scalar
-        The full mass density of the mixture. Can be split into the partial mass
-        densities for each component by multiplying it by the result of
+        The full mass density of the mixture. Can be split into the partial
+        mass densities for each component by multiplying it by the result of
         `py:func:~mass_from_number_fraction`.
 
     Raises
     ------
     ValueError
-        If the lengths of `Z`, `number_fractions` and `elements` are not the same.
+        If the lengths of `Z`, `number_fractions` and `elements` are not the
+        same.
 
     Examples
     --------
@@ -190,18 +193,24 @@ def mass_density_from_electron_density(n_e, Z, number_fractions, elements):
     >>> number_fractions = [1/2, 2/2]
     >>> elements = [jaxrts.Element("C"), jaxrts.Element("H")]
     >>> Z_free = jnp.array([4.0, 1.0])
-    >>> mass_density_from_electron_density(n_e, Z_free, number_fraction, elements)
+    >>> mass_density_from_electron_density(
+    >>>     n_e, Z_free, number_fraction, elements
+    >>> )
     Array(3.45897 dtype=float64) #g/cc
     """
 
     if not (number_fractions.shape[0] == Z.shape[0] == len(elements)):
-        raise ValueError("Z, number_fractions and elements must have the same length")
+        raise ValueError(
+            "Z, number_fractions and elements must have the same length"
+        )
 
     m = [x.atomic_mass for x in elements]
 
     # model avarage atom in the mixture
     nom = sum(x_i * m_i for x_i, m_i in zip(number_fractions, m, strict=False))
-    denom = sum(x_i * Z_i for Z_i, x_i in zip(Z, number_fractions, strict=False))
+    denom = sum(
+        x_i * Z_i for Z_i, x_i in zip(Z, number_fractions, strict=False)
+    )
 
     rho = n_e * nom / denom
     return rho.to(ureg.gram / ureg.cm**3)
