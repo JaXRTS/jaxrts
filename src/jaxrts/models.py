@@ -2590,9 +2590,10 @@ class SchumacherImpulse(ScatteringModel):
                     return r_k
 
                 r_k = jax.lax.cond(self.r_k < 0, rk_on, rk_off, self.r_k)
-                B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (
-                    2 * ureg.electron_mass
-                )
+                # B as in [Gregori.2004], eqn. 22 is applied as
+                # frc_exponent in the Setup class.
+                # Hence set it to unity, here
+                B = 1 * ureg.dimensionless
                 factor = r_k / (Z_core * B**3).m_as(ureg.dimensionless)
                 sbe = factor * bound_free.J_impulse_approx(
                     omega, k, population, Zeff, E_b
@@ -2764,9 +2765,10 @@ class SchumacherImpulseColdEdges(ScatteringModel):
                 return r_k
 
             r_k = jax.lax.cond(self.r_k < 0, rk_on, rk_off, self.r_k)
-            B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
-            # B should be close to unity
-            # B = 1 * ureg.dimensionless
+            # B as in [Gregori.2004], eqn. 22 is applied as
+            # frc_exponent in the Setup class.
+            # Hence set it to unity, here
+            B = 1 * ureg.dimensionless
             factor = r_k / (Z_c * B**3).m_as(ureg.dimensionless)
             sbe = factor * bound_free.J_impulse_approx(
                 omega, k, population, Zeff, E_b
