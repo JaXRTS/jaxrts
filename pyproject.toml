@@ -69,6 +69,9 @@ folders = [
   { path = "src/jaxrts" }
 ]
 
+[tool.ruff]
+line-length = 79
+
 [tool.ruff.lint]
 select = [
     # pycodestyle
