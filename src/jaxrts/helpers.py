@@ -9,6 +9,7 @@ from time import time
 import jaxrts
 import jax
 from jax import numpy as jnp
+import jpu.numpy as jnpu
 
 from .units import Quantity, ureg
 
@@ -108,7 +109,7 @@ def timer(func, custom_prefix=None, loglevel=logging.INFO):
         result = func(*args, **kwargs)
         t2 = time()
         print(f"Executed {func.__name__!r} ...", end="")
-        print(f"in {(t2-t1):.4f} s\n")
+        print(f"in {(t2 - t1):.4f} s\n")
 
         return result
 
@@ -160,14 +161,16 @@ def mass_from_number_fraction(number_fractions, elements):
     return mass_fractions
 
 
-def mass_density_from_electron_density(n_e, Z, number_fractions, elements, partial=False):
+def mass_density_from_electron_density(
+    n_e, Z, number_fractions, elements, partial=False
+):
     """
     Calculate the mass density of a mixture from electron density.
 
     Parameters
     ----------
     n_e (electron density): scalar
-        electron density of mixture 
+        electron density of mixture
     Z (charge): array_like
         The charge of each chemical element in the plasma.
     number_fractions : array_like
@@ -175,17 +178,20 @@ def mass_density_from_electron_density(n_e, Z, number_fractions, elements, parti
     elements : list
         The masses of the respective chemical elements.
     partial: boolean
-        default false = density of mixture, if true: density vector splitted for mixture is returned
+        default false = density of mixture, if true: density vector splitted
+        for mixture is returned.
     Returns
     -------
     array_like
-        The mass density of the mixture. 
-        When partial=True: density is splitted up in mixture-componentes by multiply with mass_from_number_fraction() 
+        The mass density of the mixture.
+        When partial=True: density is splitted up in mixture-componentes by
+        multiply with :py:func:`~.mass_from_number_fraction`.
 
     Raises
     ------
     ValueError
-        If the lengths of `Z`, `number_fractions` and `elements` are not the same.
+        If the lengths of `Z`, `number_fractions` and `elements` are not the
+        same.
 
     Examples
     --------
@@ -193,29 +199,30 @@ def mass_density_from_electron_density(n_e, Z, number_fractions, elements, parti
     >>> number_fractions = jnp.array([1/2, 1/2])
     >>> elements = [jaxrts.Element("C"), jaxrts.Element("H")]
     >>> Z_free = jnp.array([4.0, 1.0])
-    >>> mass_density_from_electron_density(n_e, Z_free, number_fractions, elements)
+    >>> mass_density_from_electron_density(,
+    >>>     n_e, Z_free, number_fractions, elements
+    >>> )
     partial=False: Array(3.459 dtype=float64) #g/cc
     partial=True: Array([3.191, 0.268] dtype=float64) #g/cc
     """
-    
-    if not (len(number_fractions) == len(Z) == len(elements)): 
+
+    if not (len(number_fractions) == len(Z) == len(elements)):
         raise ValueError(
             "Z, number_fractions and elements must have the same length"
         )
-    
-    #model average atom in the mixture
+
+    # model average atom in the mixture
     m = jaxrts.units.to_array([x.atomic_mass for x in elements])
-    nom = sum(m * number_fractions)
-    denom = sum(Z * number_fractions)
-    
-    rho = n_e * nom/denom
-    
-    if partial==True:
+    nom = jnpu.sum(m * number_fractions)
+    denom = jnpu.sum(Z * number_fractions)
+
+    rho = n_e * nom / denom
+
+    if partial:
         mass_fraction = mass_from_number_fraction(number_fractions, elements)
         rho = mass_fraction * rho
-    
-    return rho.to(ureg.gram/ureg.cm**3)
 
+    return rho.to(ureg.gram / ureg.cm**3)
 
 
 class JittableDict(dict):
