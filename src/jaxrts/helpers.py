@@ -199,11 +199,14 @@ def mass_density_from_electron_density(
     >>> number_fractions = jnp.array([1/2, 1/2])
     >>> elements = [jaxrts.Element("C"), jaxrts.Element("H")]
     >>> Z_free = jnp.array([4.0, 1.0])
-    >>> mass_density_from_electron_density(,
+    >>> mass_density_from_electron_density(
     >>>     n_e, Z_free, number_fractions, elements
     >>> )
-    partial=False: Array(3.459 dtype=float64) #g/cc
-    partial=True: Array([3.191, 0.268] dtype=float64) #g/cc
+    <Quantity(3.4589693021231165, 'gram / centimeter ** 3')>
+    >>> mass_density_from_electron_density(
+    >>>     n_e, Z_free, number_fractions, elements, partial=True
+    >>> )
+    <Quantity([3.19115756 0.26781174], 'gram / centimeter ** 3')>
     """
 
     if not (len(number_fractions) == len(Z) == len(elements)):
