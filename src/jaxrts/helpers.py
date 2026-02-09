@@ -321,6 +321,64 @@ def partialclass(cls, *args, **kwds):
     return NewCls
 
 
+@jax.jit
+def bisection(
+    func, a, b, tolerance=1e-4, max_iter: int = 1e4, min_iter: int = 1e2
+):
+    """
+    Find the root of a function ``func`` between the points ``a`` and ``b`` by
+    bisection.
+
+    This is a simple implementation, without any checks guaranteeing that the
+    root is found.
+
+    Parameters
+    ----------
+    func
+        The function of which a root should be found.
+    a
+        Lower end of the interval within which the root should be searched.
+    b
+        Upper limit of the interval within which the root should be searched.
+    tolerance
+        Tolerance that sets the condition to stop the iterative search. Applies
+        to both the absolute value of the function, and the absolute distance
+        between two consecutive candidates.
+    max_iter : int
+        Maximal number of steps before the loop aborts.
+    min_iter : int
+        Minimal number of steps the algorithm has to run before a value is
+        returned.
+
+    Returns
+    -------
+    One of the function ``func``.
+    """
+
+    def condition(state):
+        prev_x, next_x, count = state
+
+        return (
+            (count < max_iter)
+            & (jnp.abs(func(next_x)) > tolerance)
+            & (jnp.abs(prev_x - next_x) > tolerance)
+        ) | (count < min_iter)
+
+    def body(state):
+        a, b, i = state
+        c = (a + b) / 2  # middlepoint
+        bound = jnp.where(jnp.sign(func(c)) == jnp.sign(func(b)), a, b)
+        return bound, c, i + 1
+
+    initial_state = (a, b, 0)
+
+    _, final_state, iterations = jax.lax.while_loop(
+        condition, body, initial_state
+    )
+
+    return final_state, iterations
+
+
 jax.tree_util.register_pytree_node(
     JittableDict,
     JittableDict._tree_flatten,

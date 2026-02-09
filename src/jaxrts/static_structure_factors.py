@@ -16,7 +16,7 @@ from .plasma_physics import (
     fermi_energy,
     wiegner_seitz_radius,
 )
-from .saha import bisection
+from .helpers import bisection
 from .units import Quantity, ureg
 
 jax.config.update("jax_enable_x64", True)
