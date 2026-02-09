@@ -444,7 +444,7 @@ def solve_saha(
         skip += element.Z + 1
 
     return (
-        to_array(res) / jnpu.sum(to_array(res)),
+        to_array(res),
         sol_ne * ne_scale,
         to_array(Z_mean).m_as(ureg.dimensionless),
     )
@@ -696,15 +696,6 @@ def solve_gen_saha(
     )
 
 
-    # fig, ax = plt.subplots()
-
-    # x = onp.linspace(2, 4*(max_ne / ne_scale).m_as(ureg.dimensionless), 200)
-    # y = [det_M_func(_x) for _x in x]
-    # plt.plot(x,y)
-    # # plt.vlines(sol_ne, 0, 1E8, color = "black", lw = 1.5)
-    # plt.show()
-
-    # jax.debug.print("Needed iterations for convergence: {x}", x=iterations)
 
     # Create the matrix that describes the linear system of equations we solve.
     # Insert n_e.
@@ -740,7 +731,7 @@ def solve_gen_saha(
         skip += element.Z + 1
 
     return (
-        to_array(res) / jnpu.sum(to_array(res)),
+        to_array(res),
         sol_ne * ne_scale,
         to_array(Z_mean).m_as(ureg.dimensionless),
     )
