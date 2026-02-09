@@ -244,6 +244,9 @@ def solve_saha(
     continuum_lowering: Quantity, default: 0 eV
         A fixed value that is subtracted from all binding energies. Defaults to
         0 eV.
+    exclude_non_negative_energies : bool, default = True
+        If true, bound states for which the ionization energy is pushed into the continuum are removed 
+        from the calculation and do not appear with their Boltzmann factors in the Saha equations.
 
     Returns
     -------
@@ -253,6 +256,8 @@ def solve_saha(
         I.e., `[nIon0 0+, nIon0 1+, ..., nIon1 0+, nion1 1+, ...]`.
     n_e: Quantity
         The free electron number density.
+    Z_mean:  Quantity
+        The mean free charge of each ion in the plasma.
 
     See Also
     --------
@@ -517,6 +522,11 @@ def solve_gen_saha(
     continuum_lowering: Quantity, default: 0 eV
         A fixed value that is subtracted from all binding energies. Defaults to
         0 eV.
+    chem_pot_ideal: Quantity, default: 0 eV
+        The ideal chemical potential used in the Saha equation.
+    exclude_non_negative_energies : bool, default = True
+        If true, bound states for which the ionization energy is pushed into the continuum are removed 
+        from the calculation and do not appear with their Boltzmann factors in the Saha equations.
 
     Returns
     -------
@@ -526,6 +536,8 @@ def solve_gen_saha(
         I.e., `[nIon0 0+, nIon0 1+, ..., nIon1 0+, nion1 1+, ...]`.
     n_e: Quantity
         The free electron number density.
+    Z_mean:  Quantity
+        The mean free charge of each ion in the plasma.
 
     See Also
     --------
@@ -789,6 +801,9 @@ def calculate_mean_free_charge_saha(
         non-degenerate limiting case.
     use_distribution:
         If true, the ipd is evaluated for each ion species separately.
+    exclude_non_negative_energies : bool, default = True
+        If true, bound states for which the ionization energy is pushed into the continuum are removed 
+        from the calculation and do not appear with their Boltzmann factors in the Saha equations.
 
     Returns
     -------
