@@ -606,14 +606,15 @@ class Gregori2006IonFeat(IonFeatModel):
         n = jnpu.sum(plasma_state.n_i)
         Z_f = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.Z_free)
         M = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.atomic_masses)
-        T_i = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.T_i)
 
         T_D = plasma_state["Debye temperature"].evaluate(plasma_state, setup)
 
         T_e_eff = static_structure_factors.T_cf_Greg(
             plasma_state.T_e, plasma_state.n_e
         )
-        T_i_eff = static_structure_factors.T_i_eff_Greg(T_i, T_D)
+        T_i_eff = static_structure_factors.T_i_eff_Greg(plasma_state.T_i, T_D)
+        T_i_eff = 1 / n * jnpu.sum(plasma_state.n_i * T_i_eff)
+
         S_ii = ion_feature.S_ii_AD(
             setup.k,
             T_e_eff,
