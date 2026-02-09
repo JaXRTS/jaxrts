@@ -18,68 +18,11 @@ from .plasma_physics import (
     therm_de_broglie_wl,
 )
 from .units import Quantity, to_array, ureg
+from .helpers import bisection
 
 h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
 m_e = 1 * ureg.electron_mass
-
-
-@jax.jit
-def bisection(
-    func, a, b, tolerance=1e-4, max_iter: int = 1e4, min_iter: int = 1e2
-):
-    """
-    Find the root of a function ``func`` between the points ``a`` and ``b`` by
-    bisection.
-
-    This is a simple implementation, without any checks guaranteeing that the
-    root is found.
-
-    Parameters
-    ----------
-    func
-        The function of which a root should be found.
-    a
-        Lower end of the interval within which the root should be searched.
-    b
-        Upper limit of the interval within which the root should be searched.
-    tolerance
-        Tolerance that sets the condition to stop the iterative search. Applies
-        to both the absolute value of the function, and the absolute distance
-        between two consecutive candidates.
-    max_iter : int
-        Maximal number of steps before the loop aborts.
-    min_iter : int
-        Minimal number of steps the algorithm has to run before a value is
-        returned.
-
-    Returns
-    -------
-    One of the function ``func``.
-    """
-
-    def condition(state):
-        prev_x, next_x, count = state
-
-        return (
-            (count < max_iter)
-            & (jnp.abs(func(next_x)) > tolerance)
-            & (jnp.abs(prev_x - next_x) > tolerance)
-        ) | (count < min_iter)
-
-    def body(state):
-        a, b, i = state
-        c = (a + b) / 2  # middlepoint
-        bound = jnp.where(jnp.sign(func(c)) == jnp.sign(func(b)), a, b)
-        return bound, c, i + 1
-
-    initial_state = (a, b, 0)
-
-    _, final_state, iterations = jax.lax.while_loop(
-        condition, body, initial_state
-    )
-
-    return final_state, iterations
 
 
 @jax.jit
@@ -286,7 +229,6 @@ def solve_saha(
 
     Ebs = []
     for element, ipd in zip(element_list, continuum_lowering, strict=True):
-
         stat_weight = element.ionization.statistical_weights
 
         Ebs.append(
@@ -326,7 +268,6 @@ def solve_saha(
     for ion_dens, element, Eb in zip(
         ion_number_densities, element_list, Ebs, strict=True
     ):
-
         stat_weight = element.ionization.statistical_weights
 
         # def scan_fn(pref, inputs):
@@ -387,7 +328,6 @@ def solve_saha(
 
         skip = -1
         for element, Eb in zip(element_list, Ebs, strict=True):
-
             # Not the full off-diagonal equals n_e: The density rows don't
             # contain it!
             ne_line = ne_line.at[skip + 1 : skip + element.Z + 1].multiply(
@@ -568,7 +508,6 @@ def solve_gen_saha(
     # temperature to avoid numerical instabilities
     Ebs = []
     for element, ipd in zip(element_list, continuum_lowering, strict=True):
-
         stat_weight = element.ionization.statistical_weights
 
         Ebs.append(
@@ -610,7 +549,6 @@ def solve_gen_saha(
     for ion_dens, element, Eb in zip(
         ion_number_densities, element_list, Ebs, strict=True
     ):
-
         stat_weight = element.ionization.statistical_weights
 
         # def scan_fn(pref, inputs):
@@ -672,8 +610,7 @@ def solve_gen_saha(
         ne_line = jnp.ones(len(element_list) + int(onp.sum(Z))) * ne
 
         skip = -1
-        for element, Eb in zip(element_list, Ebs, strict=True):
-
+        for element in element_list:
             # Not the full off-diagonal equals n_e: The density rows don't
             # contain it!
             ne_line = ne_line.at[skip + 1 : skip + element.Z + 1].multiply(
@@ -851,7 +788,6 @@ def calculate_mean_free_charge_saha(
             plasma_state.Z_free = jnp.array(Z_mean)
 
     else:
-
         charge_distribution, ne, Z_mean = solve_saha(
             tuple(plasma_state.ions),
             plasma_state.T_e,

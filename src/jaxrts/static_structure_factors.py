@@ -11,7 +11,12 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 from quadax import quadts as quad
 
-from .plasma_physics import fermi_energy, wiegner_seitz_radius
+from .plasma_physics import (
+    coulomb_potential_fourier,
+    fermi_energy,
+    wiegner_seitz_radius,
+)
+from .helpers import bisection
 from .units import Quantity, ureg
 
 jax.config.update("jax_enable_x64", True)
@@ -162,7 +167,9 @@ def _Delta_AD(
             1.0 / ((1 + k**2 * lamee**2) * (1 + k**2 * lamii**2))
             - 1 / (1 + k**2 * lamei**2) ** 2
         )
-        + A * k**2 * k_De**2
+        + A
+        * k**2
+        * k_De**2
         # The original paper :cite:`Arkhipov.1998` differs in the following
         # line. This has been rectified by the authors their paper from 2000.
         * (k**2 + k_Di**2 / (1 + k**2 * lamii**2))
@@ -763,3 +770,208 @@ def debyeWallerFactor(
         )
     )
     return jnpu.exp(-TwoM).m_as(ureg.dimensionless)
+
+
+def _G07eta(n_i, sig_c):
+    """
+    :cite:`Gregori.2007`, eqn. (17)
+    """
+    return jnp.pi / 6 * (n_i * sig_c**3).m_as(ureg.dimensionless)
+
+
+def _G07gamma(Z, T_ii, sig_c):
+    """
+    :cite:`Gregori.2007`, eqn. (18)
+    """
+    return (
+        (Z**2 * ureg.elementary_charge**2)
+        / (4 * jnp.pi * ureg.epsilon_0 * sig_c * ureg.k_B * T_ii)
+    ).m_as(ureg.dimensionless)
+
+
+def _G07chi(n_i, Z, T_ii, sig_c):
+    """
+    :cite:`Gregori.2007`, eqn. (18)
+    """
+    return (24 * _G07eta(n_i, sig_c) * _G07gamma(Z, T_ii, sig_c)) ** (1 / 2)
+
+
+def _G07h0(n_i, Z, T_ii, sig_c):
+    """
+    :cite:`Gregori.2007`, eqn. (27)
+    """
+    eta = _G07eta(n_i, sig_c)
+    chi = _G07chi(n_i, Z, T_ii, sig_c)
+    return ((1 + 2 * eta) / (1 - eta)) * (
+        1 - (1 + (2 * (1 - eta) ** 3 * chi) / ((1 + 2 * eta) ** 2)) ** (1 / 2)
+    )
+
+
+def _G07h1(n_i, Z, T_ii, sig_c):
+    """
+    :cite:`Gregori.2007`, eqn. (27)
+    """
+    eta = _G07eta(n_i, sig_c)
+    h0 = _G07h0(n_i, Z, T_ii, sig_c)
+    h1 = h0**2 / (24 * eta) - (1 + eta / 2) / ((1 - eta) ** 2)
+    return h1
+
+
+@jax.jit
+def S_ii_CHS(
+    k: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
+    n_i: Quantity,
+    lfc,
+) -> Quantity:
+    """
+    The ion ion static structure factors from :cite:`Gregori.2007`. A typo
+    comparing to :cite:`Sing.1982` in the equation for :math:`C_{ii}` has been
+    corrected.
+    """
+    # In equations (17)-(29), :cite:`Gregori.2007`
+    dist = (3 / (4 * jnp.pi) * Z_f / n_e) ** (1 / 3)
+    sig_c, _ = bisection(
+        jax.tree_util.Partial(
+            lambda sig_0: _G07h1(n_i, Z_f, T_i, sig_0 * ureg.angstrom)
+        ),
+        1e-3 * dist.m_as(ureg.angstrom),
+        1.5 * dist.m_as(ureg.angstrom),
+        tolerance=1e-15,
+        min_iter=0,
+    )
+    sig_c *= ureg.angstrom
+
+    eta = _G07eta(n_i, sig_c)
+    gamma = _G07gamma(Z_f, T_i, sig_c)
+    chi = _G07chi(n_i, Z_f, T_i, sig_c)
+    q = k * sig_c
+    S = jnpu.sin(q)
+    C = jnpu.cos(q)
+
+    k_De = _k_D_AD(T_e, n_e)
+    k_Di = _k_D_AD(T_i, n_e, Z_f)
+
+    h0 = _G07h0(n_i, Z_f, T_i, sig_c)
+    h1 = _G07h1(n_i, Z_f, T_i, sig_c)
+    h2 = -(1 + eta - eta**2 / 5) / (12 * eta) - (
+        ((1 - eta) * h0) / (12 * eta * chi)
+    )
+
+    y0 = (
+        -(((1 + 2 * eta) ** 2) / (1 - eta) ** 4)
+        + (h0**2 / (4 * (1 - eta) ** 2))
+        - (((1 + eta) * h0 * chi) / (12 * eta))
+        - (((5 + eta**2) * chi**2) / (60 * eta))
+    )
+    y1 = 6 * eta * h1**2
+    y2 = chi**2 / 6
+    y3 = eta / 2 * (y0 + chi**2 * h2)
+    y4 = eta * chi**2 / 60
+
+    Cii = (24 * eta / q**6) * (
+        (y0 * q**3 * (S - q * C))
+        + (y1 * q**2 * (2 * q * S - (q**2 - 2) * C - 2))
+        + (y2 * q * ((3 * q**3 - 6) * S - (q**2 - 6) * q * C))
+        + (y3 * ((4 * q**2 - 24) * q * S - (q**4 - 12 * q**2 + 24) * C + 24))
+        + (
+            y4
+            * (
+                (6 * (q**4 - 20 * q**2 + 120) * q * S)
+                - ((q**6 - 30 * q**4 + 360 * q**2 - 720) * C)
+                - 720
+            )
+            / (q**2)
+        )
+        - (gamma * q**4 * C)
+    )
+
+    Cii = (24 * eta / q**6) * (
+        (y0 * q**3 * (S - q * C))
+        + (y1 * q**2 * (2 * q * S - (q**2 - 2) * C - 2))
+        # Note: There is a typo in the seminal Gregori.2007 paper. The exponent
+        # of the first q is taken from the earlier paper :cite:`Sing.1982`,
+        # reproducing Geregori's plots.
+        + (y2 * q * ((3 * q**2 - 6) * S - (q**2 - 6) * q * C))
+        + (y3 * ((4 * q**2 - 24) * q * S - (q**4 - 12 * q**2 + 24) * C + 24))
+        + (
+            y4
+            * (
+                6 * (q**4 - 20 * q**2 + 120) * q * S
+                - (q**6 - 30 * q**4 + 360 * q**2 - 720) * C
+                - 720
+            )
+            / q**2
+        )
+        - gamma * q**4 * C
+    )
+
+    S_iiOCP = 1 / (1 - Cii)
+
+    # Get q from eqn (33)
+    S_ee0 = k**2 / (k**2 + k_De**2 * (1 - lfc))
+    q_sc = Z_f * (k_De / k) ** (2) * S_ee0
+
+    f = -(jnpu.cos(q / 2) ** 2 * q_sc / Z_f * (k_Di / k) ** 2)
+    # "truncate f after the first node", justified by reference 38:
+    # D.K. Chaturvedi, M. Rovere, G. Senatore, M.P. Tosi, Physica 111B
+    # (1981) 11
+    f = jnpu.where(k < jnp.pi / sig_c, f, 0)
+
+    return S_iiOCP / (1 + f * S_iiOCP)
+
+
+@jax.jit
+def S_ei_CHS(
+    k: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
+    n_i: Quantity,
+    lfc,
+) -> Quantity:
+    """
+    The electron ion static structure factors from :cite:`Gregori.2007`.
+    Requires :py:func:`~.S_ii_CHS` to calculate the ion ion structure factors.
+    """
+    k_De = _k_D_AD(T_e, n_e)
+    S_ii = S_ii_CHS(k, T_e, T_i, n_e, m_i, Z_f, n_i, lfc)
+
+    S_ee0 = k**2 / (k**2 + k_De**2 * (1 - lfc))
+    q_sc = Z_f * (k_De / k) ** (2) * S_ee0
+
+    return q_sc / jnpu.sqrt(Z_f) * S_ii
+
+
+@jax.jit
+def S_ee_CHS(
+    k: Quantity,
+    T_e: Quantity,
+    T_i: Quantity,
+    n_e: Quantity,
+    m_i: Quantity,
+    Z_f: float,
+    n_i: Quantity,
+    lfc,
+) -> Quantity:
+    """
+    The electron electron static structure factors from :cite:`Gregori.2007`.
+    Note that according to :cite:`Chihara.2000` the screening contribution
+    should be squared (this is the implementation of JaXRTS) rather than
+    linear (as in :cite:`Gregori.2007`).
+
+    Requires :py:func:`~.S_ii_CHS` to calculate the ion ion structure factors.
+    """
+    k_De = _k_D_AD(T_e, n_e)
+    S_ii = S_ii_CHS(k, T_e, T_i, n_e, m_i, Z_f, n_i, lfc)
+
+    S_ee0 = k**2 / (k**2 + k_De**2 * (1 - lfc))
+    q_sc = Z_f * (k_De / k) ** (2) * S_ee0
+
+    return q_sc**2 / Z_f * S_ii + S_ee0
