@@ -15,7 +15,7 @@ from quadax import quadts as quad
 
 from .math import fermi_neg12_rational_approximation_antia
 from .plasma_physics import (
-    chem_pot_interpolationIchimaru as chem_pot_interpolation,
+    chem_pot_interpolationIchimaru as chem_pot_interpolation, fermi_energy
 )
 from .units import Quantity, ureg
 
@@ -36,7 +36,9 @@ def inverse_screening_length_e(ne: Quantity, Te: Quantity) -> Quantity:
     """
     q = -1 * ureg.elementary_charge
 
+    # This should take the chemical potential of the plasma state instead.
     chem_pot = chem_pot_interpolation(Te, ne)
+
     beta = 1 / (1 * ureg.boltzmann_constant * Te)
 
     fermi_integral_neg1_2 = fermi_neg12_rational_approximation_antia(

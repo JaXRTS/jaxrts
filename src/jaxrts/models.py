@@ -3160,6 +3160,43 @@ class SommerfeldChemPotential(Model):
         )
 
 
+class NonDegenerateElectronChemPotential(Model):
+    """
+    Chemical Potential of a non-degenerate electron gas.
+    """
+
+    __name__ = "NonDegenerateElectronChemPotential"
+    allowed_keys = ["chemical potential"]
+    cite_keys = []
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        return 1 * ureg.boltzmann_constant * plasma_state.T_e * jnpu.log(
+            plasma_physics.degeneracy_param(
+                plasma_state.n_e, plasma_state.T_e
+            )
+            / 2
+        )
+
+
+class DegenerateElectronChemPotential(Model):
+    """
+    Chemical Potential of a fully degenerate electron gas, given by the Fermi energy.
+    """
+
+    __name__ = "DegenerateElectronChemPotential"
+    allowed_keys = ["chemical potential"]
+    cite_keys = []
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        return plasma_physics.fermi_energy(plasma_state.n_e)
+
+
 class ConstantChemPotential(Model):
     """
     A model that returns a constant chemical potential, specified by a user.
@@ -4764,6 +4801,8 @@ _all_models = [
     StewartPyattIPD,
     StewartPyattPrestonIPD,
     SommerfeldChemPotential,
+    NonDegenerateElectronChemPotential,
+    DegenerateElectronChemPotential,
     ThreePotentialHNCIonFeat,
 ]
 
