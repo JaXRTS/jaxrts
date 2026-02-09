@@ -347,4 +347,111 @@ def test_rayleigh_weight_multi_component_expanded_state():
     W_r_expanded = jax.vmap(calc_Wr_expanded)(k)
 
     assert 2 * len(state) == len(expanded_state)
-    assert jnp.max(jnp.abs(W_r - W_r_expanded)/W_r) < 0.02
+    assert jnp.max(jnp.abs(W_r - W_r_expanded) / W_r) < 0.02
+
+
+def test_CHS_Gregori2007_Fig3():
+    """
+    This test reproduces Fig.3 in :cite:`Gregori.2007, verifying the CHS model.
+    """
+    m_i = jaxrts.Element("Be").atomic_mass
+    n_e = ureg("2.5e23/cm³")
+    T_e = ureg("20eV") / (1 * ureg.k_B)
+    Z_f = 2
+    T_e_prime = jaxrts.static_structure_factors.T_cf_Greg(T_e, n_e)
+    T_D = jaxrts.static_structure_factors.T_Debye_Bohm_Staver(
+        T_e_prime, n_e, m_i, Z_f
+    )
+    k_De = jaxrts.static_structure_factors._k_D_AD(T_e_prime, n_e)
+    k_f = jaxrts.plasma_physics.fermi_wavenumber(n_e)
+
+    Sii_test_files = (
+        pathlib.Path(__file__).parent / "data/Gregori2007/"
+    ).glob("Fig3_Sii*.csv")
+    Sei_test_files = (
+        pathlib.Path(__file__).parent / "data/Gregori2007/"
+    ).glob("Fig3_Sei*.csv")
+    See_test_files = (
+        pathlib.Path(__file__).parent / "data/Gregori2007/"
+    ).glob("Fig3_See*.csv")
+
+    for test in Sii_test_files:
+        k_over_kf, lit_Sii = onp.genfromtxt(test, unpack=True, delimiter=",")
+        T_i_over_T_e = float(test.stem.split("_")[-1])
+
+        k = k_over_kf * k_f
+
+        T_i = T_e * T_i_over_T_e
+        T_i_prime = jaxrts.static_structure_factors.T_i_eff_Greg(T_i, T_D)
+        lfc = jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori2007(
+            k, T_e, n_e
+        )
+
+        Sii = jaxrts.static_structure_factors.S_ii_CHS(
+            k,
+            T_e_prime,
+            T_i_prime,
+            n_e,
+            m_i,
+            Z_f,
+            n_e / Z_f,
+            lfc,
+        )
+        assert (
+            jnpu.max(jnpu.absolute(Sii - lit_Sii)).m_as(ureg.dimensionless)
+            < 0.01
+        )
+
+    for test in Sei_test_files:
+        k_over_kf, lit_Sei = onp.genfromtxt(test, unpack=True, delimiter=",")
+        T_i_over_T_e = float(test.stem.split("_")[-1])
+
+        k = k_over_kf * k_f
+
+        T_i = T_e * T_i_over_T_e
+        T_i_prime = jaxrts.static_structure_factors.T_i_eff_Greg(T_i, T_D)
+        lfc = jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori2007(
+            k, T_e, n_e
+        )
+
+        Sei = jaxrts.static_structure_factors.S_ei_CHS(
+            k,
+            T_e_prime,
+            T_i_prime,
+            n_e,
+            m_i,
+            Z_f,
+            n_e / Z_f,
+            lfc,
+        )
+        assert (
+            jnpu.max(jnpu.absolute(Sei - lit_Sei)).m_as(ureg.dimensionless)
+            < 0.01
+        )
+
+    for test in See_test_files:
+        k_over_kf, lit_See = onp.genfromtxt(test, unpack=True, delimiter=",")
+        T_i_over_T_e = float(test.stem.split("_")[-1])
+
+        k = k_over_kf * k_f
+
+        T_i = T_e * T_i_over_T_e
+        T_i_prime = jaxrts.static_structure_factors.T_i_eff_Greg(T_i, T_D)
+        lfc = jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori2007(
+            k, T_e, n_e
+        )
+
+        See = jaxrts.static_structure_factors.S_ee_CHS(
+            k,
+            T_e_prime,
+            T_i_prime,
+            n_e,
+            m_i,
+            Z_f,
+            n_e / Z_f,
+            lfc,
+        )
+        assert (
+            jnpu.max(jnpu.absolute(See - lit_See)).m_as(ureg.dimensionless)
+            < 0.01
+        )

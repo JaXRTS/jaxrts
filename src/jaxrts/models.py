@@ -630,6 +630,72 @@ class Gregori2006IonFeat(IonFeatModel):
         )
 
 
+class CHSIonFeat(IonFeatModel):
+    """
+    Model for the ion feature of the scattering, presented in
+    :cite:`Gregori.2007`. Treating the ions as charged hard spheres (CHS).
+
+    .. note::
+
+       :cite:`Gregori.2006` uses effective temperatures for the ion and
+       electron temperatures to obtain sane limits to :math:`T\\rightarrow 0`.
+       This is done by calling
+       :py:func:`jaxrts.static_structure_factors.T_cf_Greg` for the electron
+       temperature and :py:func:`jaxrts.static_structure_factors.T_i_eff_Greg`,
+       for the ionic temperatures. The latter requires a 'Debye temperature'
+       model.
+
+    Requires a 'Debye temperature' model (defaults to :py:class:`~BohmStaver`).
+
+    Extension to multicomponent plasmas is taken from :cite:`Gregori.2006b`:
+
+    .. math  ::
+
+       S_{a b}(k)=\\delta_{a b}+\\frac{\\sqrt{n_{a}n_{b}}}{n}
+       \\frac{Z_{a}Z_{b}}{\\bar{Z}^{2}}\\left[S_{i i}^\\text{Avg}(k)-1\\right]
+
+    It is only valid in RPA, see, e.g., :cite:`Wunsch.2011b`.
+    """
+
+    __name__ = "CHSIonFeat"
+    cite_keys = [
+        (["Gregori.2007", "Singh.1983"], "Formulation of model"),
+        ("Gregori.2006", "Effective temperatures"),
+        ("Gregori.2006b", "Extension to multicomponent system"),
+    ]
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        super().prepare(plasma_state, key)
+        plasma_state.update_default_model("Debye temperature", BohmStaver())
+
+    @jax.jit
+    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+        Z_ab = jnpu.outer(plasma_state.Z_free, plasma_state.Z_free)
+        n_ab = jnpu.outer(plasma_state.n_i, plasma_state.n_i)
+        n = jnpu.sum(plasma_state.n_i)
+        Z_f = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.Z_free)
+        M = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.atomic_masses)
+        N = 1 / n * jnpu.sum(plasma_state.n_i**2)
+
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        T_D = plasma_state["Debye temperature"].evaluate(plasma_state, setup)
+
+        T_e_eff = static_structure_factors.T_cf_Greg(
+            plasma_state.T_e, plasma_state.n_e
+        )
+        T_i_eff = static_structure_factors.T_i_eff_Greg(plasma_state.T_i, T_D)
+        T_i_eff = 1 / n * jnpu.sum(plasma_state.n_i * T_i_eff)
+
+        S_ii = static_structure_factors.S_ii_CHS(
+            setup.k, T_e_eff, T_i_eff, plasma_state.n_e, M, Z_f, N, lfc
+        )
+        return (
+            jnp.eye(len(plasma_state))
+            + (jnpu.sqrt(n_ab) / n * Z_ab / Z_f**2 * (S_ii - 1))
+            * ureg.dimensionless
+        )
+
+
 class FixedSii(IonFeatModel):
     """
     Model for the ion feature with a fixed value for :math:`S_{ii}`. Note that
@@ -4750,6 +4816,7 @@ _all_models = [
     BornMermin_Full,
     BornMermin_Fit,
     BornMermin_Fortmann,
+    CHSIonFeat,
     ConstantChemPotential,
     ConstantDebyeTemp,
     ConstantIPD,
