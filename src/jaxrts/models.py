@@ -3921,6 +3921,66 @@ class PauliBlockingIPD(Model):
         return out
 
 
+class IPDSum(Model):
+    """
+    A sum of several ipd :py:class:`~.Model` s. Can be used e.g., to combine
+    :py:class:`~.PauliBlockingIPD` with another IPD model.
+    """
+
+    __name__ = "IPDSum"
+    allowed_keys = ["ipd"]
+
+    def __init__(self, list_of_ipds: list[Model]) -> None:
+        """
+        Parameters
+        ----------
+
+        list_of_ipds: list[Model]
+           A list of the IPD :py:class:`~.Model` to be added up.
+        """
+        self.list_of_ipds = list_of_ipds
+        super().__init__()
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        out = 0 * ureg.electron_volt
+        for ipd_model in self.list_of_ipds:
+            out += ipd_model.evaluate(plasma_state, setup)
+        return out
+
+    @jax.jit
+    def all_element_states(
+        self,
+        plasma_state: "PlasmaState",
+        ion_population=None,
+    ) -> list[jnp.ndarray]:
+        individual_ipd_output = []
+        for ipd_model in self.list_of_ipds:
+            individual_ipd_output.append(
+                ipd_model.all_element_states(plasma_state, ion_population)
+            )
+        out = individual_ipd_output[0]
+        for j in range(len(out)):
+            for i in range(len(individual_ipd_output) - 1):
+                out[j] += individual_ipd_output[i + 1][j]
+        return out
+
+    def _tree_flatten(self):
+        children = (self.list_of_ipds,)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj.list_of_ipds,) = children
+
+        return obj
+
+
 # Screening Length Models
 # =======================
 
@@ -4879,6 +4939,7 @@ _all_models = [
     Gregori2004Screening,
     Gregori2006IonFeat,
     IchimaruChemPotential,
+    IPDSum,
     IonSphereIPD,
     LinearResponseScreening,
     LinearResponseScreeningGericke2010,
