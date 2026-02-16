@@ -840,7 +840,7 @@ def S_ii_CHS(
             lambda sig_0: _G07h1(n_i, Z_f, T_i, sig_0 * ureg.angstrom)
         ),
         1e-3 * dist.m_as(ureg.angstrom),
-        1.5 * dist.m_as(ureg.angstrom),
+        2.1 * dist.m_as(ureg.angstrom),
         tolerance=1e-15,
         min_iter=0,
     )
@@ -872,23 +872,6 @@ def S_ii_CHS(
     y2 = chi**2 / 6
     y3 = eta / 2 * (y0 + chi**2 * h2)
     y4 = eta * chi**2 / 60
-
-    Cii = (24 * eta / q**6) * (
-        (y0 * q**3 * (S - q * C))
-        + (y1 * q**2 * (2 * q * S - (q**2 - 2) * C - 2))
-        + (y2 * q * ((3 * q**3 - 6) * S - (q**2 - 6) * q * C))
-        + (y3 * ((4 * q**2 - 24) * q * S - (q**4 - 12 * q**2 + 24) * C + 24))
-        + (
-            y4
-            * (
-                (6 * (q**4 - 20 * q**2 + 120) * q * S)
-                - ((q**6 - 30 * q**4 + 360 * q**2 - 720) * C)
-                - 720
-            )
-            / (q**2)
-        )
-        - (gamma * q**4 * C)
-    )
 
     Cii = (24 * eta / q**6) * (
         (y0 * q**3 * (S - q * C))
