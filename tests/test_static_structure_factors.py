@@ -383,7 +383,7 @@ def test_CHS_Gregori2007_Fig3():
 
         T_i = T_e * T_i_over_T_e
         T_i_prime = jaxrts.static_structure_factors.T_i_eff_Greg(T_i, T_D)
-        lfc = jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori2007(
+        lfc = jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007(
             k, T_e, n_e
         )
 
@@ -410,7 +410,7 @@ def test_CHS_Gregori2007_Fig3():
 
         T_i = T_e * T_i_over_T_e
         T_i_prime = jaxrts.static_structure_factors.T_i_eff_Greg(T_i, T_D)
-        lfc = jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori2007(
+        lfc = jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007(
             k, T_e, n_e
         )
 
@@ -437,7 +437,7 @@ def test_CHS_Gregori2007_Fig3():
 
         T_i = T_e * T_i_over_T_e
         T_i_prime = jaxrts.static_structure_factors.T_i_eff_Greg(T_i, T_D)
-        lfc = jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori2007(
+        lfc = jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007(
             k, T_e, n_e
         )
 

@@ -29,7 +29,11 @@ from . import (
 )
 from .analysis import ITCF_fsum
 from .elements import MixElement, electron_distribution_ionized_state
-from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
+from .plasma_physics import (
+    noninteracting_susceptibility_from_eps_RPA,
+    fermi_energy,
+    wiegner_seitz_radius,
+)
 from .setup import (
     Setup,
     convolve_stucture_factor_with_instrument,
@@ -3275,11 +3279,16 @@ class NonDegenerateElectronChemPotential(Model):
     def evaluate(
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
-        return 1 * ureg.boltzmann_constant * plasma_state.T_e * jnpu.log(
-            plasma_physics.degeneracy_param(
-                plasma_state.n_e, plasma_state.T_e
+        return (
+            1
+            * ureg.boltzmann_constant
+            * plasma_state.T_e
+            * jnpu.log(
+                plasma_physics.degeneracy_param(
+                    plasma_state.n_e, plasma_state.T_e
+                )
+                / 2
             )
-            / 2
         )
 
 
@@ -4111,8 +4120,10 @@ class LinearResponseScreeningGericke2010(Model):
         # Screening vanishes if there are no free electrons
         q = jax.lax.cond(
             jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis]
-            * ureg.dimensionless,
+            lambda: (
+                jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis]
+                * ureg.dimensionless
+            ),
             lambda: q,
         )
         return q
@@ -4337,10 +4348,12 @@ class Gregori2004Screening(Model):
 #
 
 
-class ElectronicLFCGeldartVosko(Model):
+class SLFCGeldart1966(Model):
     """
     Static local field correction model by Geldart and Vosko
-    :cite:`Geldart.1966`
+    :cite:`Geldart.1966`. This LFC should provide reasonable results in the
+    limit of high temperatures, but will not exhibit a resonance around twice
+    the Fermi wavenumber, as it is espected for low :math:`T`.
 
     See Also
     --------
@@ -4349,7 +4362,7 @@ class ElectronicLFCGeldartVosko(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "GeldartVosko Static LFC"
+    __name__ = "SLFCGeldart1966"
     cite_keys = ["Geldart.1966"]
 
     @jax.jit
@@ -4378,10 +4391,11 @@ class ElectronicLFCGeldartVosko(Model):
         )
 
 
-class ElectronicLFCUtsumiIchimaru(Model):
+class SLFCUtsumi1982(Model):
     """
     Static local field correction model by Utsumi and Ichimaru
-    :cite:`UtsumiIchimaru.1982`.
+    :cite:`UtsumiIchimaru.1982`. This LFC is only valid for zero temperature,
+    and does not include any temperature dependence.
 
     See Also
     --------
@@ -4390,8 +4404,18 @@ class ElectronicLFCUtsumiIchimaru(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "UtsumiIchimaru Static LFC"
+    __name__ = "SLFCUtsumi1982"
     cite_keys = ["UtsumiIchimaru.1982"]
+
+    def check(self, plasma_state: "PlasmaState") -> None:
+        Theta = (
+            plasma_state.T_e
+            / (fermi_energy(plasma_state.n_e) / (1 * ureg.boltzmann_constant))
+        ).m_as(ureg.dimensionless)
+        if Theta > 0.1:
+            logger.warning(
+                f"Theta is {Theta}, but the applied model {self.__name__} is only valid as a zero temperature result."  # noqa: E501
+            )
 
     @jax.jit
     def evaluate(
@@ -4419,11 +4443,64 @@ class ElectronicLFCUtsumiIchimaru(Model):
         )
 
 
-class ElectronicLFCDornheimAnalyticalInterp(Model):
+class SLFCFarid1993(Model):
     """
-    Static local field correction model by Dornheim et al.
-    :cite:`Dornheim.2021`. Their model is an analytical interpolation of
-    ab-initio PIMC simulations.
+    Static local field correction model by Farid at al. :cite:`Farid.1993`.
+    This LFC is only valid for zero temperature, and does not include any
+    temperature dependence.
+
+    See Also
+    --------
+    jaxrts.ee_localfieldcorrections.eelfc_farid
+        Function used to calculate the LFC.
+    """
+
+    allowed_keys = ["ee-lfc"]
+    __name__ = "SLFCFarid1993"
+    cite_keys = ["Farid.1993"]
+
+    def check(self, plasma_state: "PlasmaState") -> None:
+        Theta = (
+            plasma_state.T_e
+            / (fermi_energy(plasma_state.n_e) / (1 * ureg.boltzmann_constant))
+        ).m_as(ureg.dimensionless)
+        if Theta > 0.1:
+            logger.warning(
+                f"Theta is {Theta}, but the applied model {self.__name__} is only valid as a zero temperature result."  # noqa: E501
+            )
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_farid(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_farid(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
+
+class ESLFCDornheim2021(Model):
+    """
+    Effective static approximation (ESA) of the local field correction model by
+    Dornheim et al. :cite:`Dornheim.2021`. Their model is an analytical
+    interpolation of the ESA, obtained by comparison to ab-initio PIMC
+    simulations and asymptotic limits.
 
     See Also
     --------
@@ -4432,8 +4509,25 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "ElectronicLFCDornheimAnalyticalInterp"
+    __name__ = "ESLFCDornheim2021"
     cite_keys = ["Dornheim.2021"]
+
+    def check(self, plasma_state: "PlasmaState") -> None:
+        Theta = (
+            plasma_state.T_e
+            / (fermi_energy(plasma_state.n_e) / (1 * ureg.boltzmann_constant))
+        ).m_as(ureg.dimensionless)
+        rs = (wiegner_seitz_radius(plasma_state.n_e) / (1 * ureg.a0)).m_as(
+            ureg.dimensionless
+        )
+        if Theta > 4:
+            logger.warning(
+                f"Theta is {Theta}, which is bigger than 4. The fit in Dornheim.2021 is outside of the validity region."  # noqa:E501
+            )
+        if (rs > 20) or (rs < 0.7):
+            logger.warning(
+                f"rs is {rs}, which is outside of [0.7, 20]. The fit in Dornheim.2021 is outside of the validity region."  # noqa:E501
+            )
 
     @jax.jit
     def evaluate(
@@ -4462,20 +4556,21 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
         )(k, plasma_state.T_e, plasma_state.n_e)
 
 
-class ElectronicLFCStaticInterpolation(Model):
+class SLFCInterpFortmann2010(Model):
     """
-    Static local field correction model that interpolates between the
-    high-degeneracy result by Farid :cite:`Farid.1993` and the Geldart result
-    :cite:`Geldart.1966`. See, e.g., :cite:`Fortmann.2010`.
+    Static local field correction model that interpolates between the zero
+    temperature result by Farid :cite:`Farid.1993` and the Geldart result
+    :cite:`Geldart.1966` for high temperatures. See, e.g.,
+    :cite:`Fortmann.2010`.
 
     See Also
     --------
-    jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori_farid
+    jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010
         Function used to calculate the LFC.
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "Static Interpolation"
+    __name__ = "SLFCInterpFortmann2010"
     cite_keys = [
         ("Fortmann.2010", "Interpolation."),
         (["Farid.1993", "Geldart.1966"], "Limits."),
@@ -4489,7 +4584,7 @@ class ElectronicLFCStaticInterpolation(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+        return ee_localfieldcorrections.eelfc_interp_fortmann2010(
             setup.k, plasma_state.T_e, plasma_state.n_e
         )
 
@@ -4502,18 +4597,64 @@ class ElectronicLFCStaticInterpolation(Model):
         **kwargs,
     ) -> jnp.ndarray:
         k = setup.dispersion_corrected_k(plasma_state.n_e)
-        return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+        return ee_localfieldcorrections.eelfc_interp_fortmann2010(
             k, plasma_state.T_e, plasma_state.n_e
         )
 
 
-class ElectronicLFCConstant(Model):
+class SLFCInterpGregori2007(Model):
+    """
+    Static local field correction model that interpolates between the zero
+    temperature result by Utsumi and Ichimaru :cite:`UtsumiIchimaru.1982`
+    and the Geldart result :cite:`Geldart.1966` for high temperatures. See,
+    e.g., :cite:`Gregori.2007`.
+
+    See Also
+    --------
+    jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007
+        Function used to calculate the LFC.
+    """
+
+    allowed_keys = ["ee-lfc"]
+    __name__ = "SLFCInterpGregori2007"
+    cite_keys = [
+        ("Gregori.2007", "Interpolation."),
+        (["UtsumiIchimaru.1982", "Geldart.1966"], "Limits."),
+    ]
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_interp_gregori2007(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_interp_gregori2007(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
+
+class LFCConstant(Model):
     """
     A constant local field correction which can be defined by the user.
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "ElectronicLFCConstant"
+    __name__ = "LFCConstant"
 
     def __init__(self, value):
         self.value = value
@@ -4865,11 +5006,13 @@ _all_models = [
     DebyeWallerSolid,
     DetailedBalance,
     EckerKroellIPD,
-    ElectronicLFCConstant,
-    ElectronicLFCDornheimAnalyticalInterp,
-    ElectronicLFCGeldartVosko,
-    ElectronicLFCStaticInterpolation,
-    ElectronicLFCUtsumiIchimaru,
+    LFCConstant,
+    ESLFCDornheim2021,
+    SLFCGeldart1966,
+    SLFCInterpFortmann2010,
+    SLFCInterpGregori2007,
+    SLFCUtsumi1982,
+    SLFCFarid1993,
     FiniteWavelengthScreening,
     FiniteWavelength_BM_V,
     FixedSii,

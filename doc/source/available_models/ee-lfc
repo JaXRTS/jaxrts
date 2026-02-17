@@ -1,2 +1,15 @@
 The electron–electron local field correction (LFC) modifies the electron response to account for short-range correlations and exchange effects beyond the mean-field approximation.
 
+Local field corrections :math:`G` describe exchange correlation effects. The
+full linear susceptibility can be written as
+
+.. math::
+
+    \chi_\text{ee} =
+    \frac{\chi_\text{ee}^\text{0}}{1 - V_{\text{ee}}
+    (1 - G) \chi_\text{ee}^\text{0}}\quad
+
+
+where :math:`V_{\text{ee}}` is the Coulomb potential between two electrons and :math:`\chi_\text{ee}^\text{0}` is Lindhard's function. While this is formally correct, :math:`G` is practically often unknown and has to be approximated.
+
+Currently, only static and effective static approximations of the local field corrections are treated in `jaxrts`.

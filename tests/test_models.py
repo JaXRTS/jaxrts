@@ -41,7 +41,7 @@ def additional_model_parameters(
         return (12.1 * ureg.angstrom,)
     if model == jaxrts.models.ConstantIPD:
         return (23.42 * ureg.electron_volt,)
-    if model == jaxrts.models.ElectronicLFCConstant:
+    if model == jaxrts.models.LFCConstant:
         return (1.2,)
     if model == jaxrts.models.FixedSii:
         return (
