@@ -65,18 +65,15 @@ for T, axis in zip(temp, ax):
         axis.text(0, 2, "outside Dornheim.2021 validity", color="C3")
     G_hubbard = jaxrts.ee_localfieldcorrections.eelfc_hubbard(k, T, n_e)
     G_geldart = jaxrts.ee_localfieldcorrections.eelfc_geldartvosko(k, T, n_e)
-    G_gregori = jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori2007(
+    G_gregori = jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007(
         k, T, n_e
     )
     G_farid = jaxrts.ee_localfieldcorrections.eelfc_farid(k, T, n_e)
     G_utsumi = jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru(k, T, n_e)
     G_fortmann = (
-        jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+        jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010(
             k, T, n_e
         )
-    )
-    G_um = jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori_farid(
-        k, T, n_e
     )
     axis.plot(
         (k / kf).m_as(ureg.dimensionless),

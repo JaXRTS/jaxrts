@@ -4348,7 +4348,7 @@ class Gregori2004Screening(Model):
 #
 
 
-class ElectronicLFCGeldartVosko(Model):
+class SLFCGeldart1966(Model):
     """
     Static local field correction model by Geldart and Vosko
     :cite:`Geldart.1966`. This LFC should provide reasonable results in the
@@ -4362,7 +4362,7 @@ class ElectronicLFCGeldartVosko(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "GeldartVosko Static LFC"
+    __name__ = "SLFCGeldart1966"
     cite_keys = ["Geldart.1966"]
 
     @jax.jit
@@ -4391,7 +4391,7 @@ class ElectronicLFCGeldartVosko(Model):
         )
 
 
-class ElectronicLFCUtsumiIchimaru(Model):
+class SLFCUtsumi1982(Model):
     """
     Static local field correction model by Utsumi and Ichimaru
     :cite:`UtsumiIchimaru.1982`. This LFC is only valid for zero temperature,
@@ -4404,7 +4404,7 @@ class ElectronicLFCUtsumiIchimaru(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "UtsumiIchimaru Static LFC"
+    __name__ = "SLFCUtsumi1982"
     cite_keys = ["UtsumiIchimaru.1982"]
 
     def check(self, plasma_state: "PlasmaState") -> None:
@@ -4443,7 +4443,7 @@ class ElectronicLFCUtsumiIchimaru(Model):
         )
 
 
-class ElectronicLFCDornheimAnalyticalInterp(Model):
+class ESLFCDornheim2021(Model):
     """
     Effective static approximation (ESA) of the local field correction model by
     Dornheim et al. :cite:`Dornheim.2021`. Their model is an analytical
@@ -4457,7 +4457,7 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "ElectronicLFCDornheimAnalyticalInterp"
+    __name__ = "ESLFCDornheim2021"
     cite_keys = ["Dornheim.2021"]
 
     def check(self, plasma_state: "PlasmaState") -> None:
@@ -4504,7 +4504,7 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
         )(k, plasma_state.T_e, plasma_state.n_e)
 
 
-class ElectronicLFCStaticInterpolation(Model):
+class SLFCInterpFortmann2010(Model):
     """
     Static local field correction model that interpolates between the zero
     temperature result by Farid :cite:`Farid.1993` and the Geldart result
@@ -4513,12 +4513,12 @@ class ElectronicLFCStaticInterpolation(Model):
 
     See Also
     --------
-    jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori_farid
+    jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010
         Function used to calculate the LFC.
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "Static Interpolation"
+    __name__ = "SLFCInterpFortmann2010"
     cite_keys = [
         ("Fortmann.2010", "Interpolation."),
         (["Farid.1993", "Geldart.1966"], "Limits."),
@@ -4532,7 +4532,7 @@ class ElectronicLFCStaticInterpolation(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+        return ee_localfieldcorrections.eelfc_interp_fortmann2010(
             setup.k, plasma_state.T_e, plasma_state.n_e
         )
 
@@ -4545,18 +4545,18 @@ class ElectronicLFCStaticInterpolation(Model):
         **kwargs,
     ) -> jnp.ndarray:
         k = setup.dispersion_corrected_k(plasma_state.n_e)
-        return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+        return ee_localfieldcorrections.eelfc_interp_fortmann2010(
             k, plasma_state.T_e, plasma_state.n_e
         )
 
 
-class ElectronicLFCConstant(Model):
+class LFCConstant(Model):
     """
     A constant local field correction which can be defined by the user.
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "ElectronicLFCConstant"
+    __name__ = "LFCConstant"
 
     def __init__(self, value):
         self.value = value
@@ -4908,11 +4908,11 @@ _all_models = [
     DebyeWallerSolid,
     DetailedBalance,
     EckerKroellIPD,
-    ElectronicLFCConstant,
-    ElectronicLFCDornheimAnalyticalInterp,
-    ElectronicLFCGeldartVosko,
-    ElectronicLFCStaticInterpolation,
-    ElectronicLFCUtsumiIchimaru,
+    LFCConstant,
+    ESLFCDornheim2021,
+    SLFCGeldart1966,
+    SLFCInterpFortmann2010,
+    SLFCUtsumi1982,
     FiniteWavelengthScreening,
     FiniteWavelength_BM_V,
     FixedSii,

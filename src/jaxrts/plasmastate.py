@@ -15,7 +15,7 @@ from jax import numpy as jnp
 
 from .elements import Element
 from .helpers import JittableDict
-from .models import DebyeHueckelScreeningLength, ElectronicLFCConstant
+from .models import DebyeHueckelScreeningLength, LFCConstant
 from .plasma_physics import (
     degeneracy_param,
     fermi_energy,
@@ -113,7 +113,7 @@ class PlasmaState:
         }
         # Set a default screening length & LFC
         self["screening length"] = DebyeHueckelScreeningLength()
-        self["ee-lfc"] = ElectronicLFCConstant(0.0)
+        self["ee-lfc"] = LFCConstant(0.0)
 
     def __len__(self) -> int:
         return len(self.ions)

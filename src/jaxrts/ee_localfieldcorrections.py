@@ -269,7 +269,7 @@ def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
 
 
 @jax.jit
-def eelfc_interpolationgregori2007(
+def eelfc_interp_gregori2007(
     k: Quantity, T_e: Quantity, n_e: Quantity
 ) -> Quantity:
     """
@@ -290,7 +290,7 @@ def eelfc_interpolationgregori2007(
 
 
 @jax.jit
-def eelfc_interpolationgregori_farid(
+def eelfc_interp_fortmann2010(
     k: Quantity, T_e: Quantity, n_e: Quantity
 ) -> Quantity:
     """

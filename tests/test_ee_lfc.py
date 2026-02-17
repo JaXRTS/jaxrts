@@ -22,7 +22,7 @@ def test_staticInterp_Gregori2007_reproduction():
         k = k_over_kf * kf
 
         G_calc = (
-            jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori2007(
+            jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007(
                 k, T, n_e
             )
         )

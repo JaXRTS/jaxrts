@@ -80,7 +80,7 @@ k = jnp.linspace(0, 2) * k_f
 E = jnp.linspace(-10, 1, 1000) * E_f
 mu = jaxrts.plasma_physics.chem_pot_interpolationIchimaru(T, n_e)
 
-sLFC = jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+sLFC = jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010(
     k[:, jnp.newaxis], T, n_e
 )
 
