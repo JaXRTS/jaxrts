@@ -43,6 +43,13 @@ def xi_lfc_corrected(
 def eelfc_hubbard(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     """
     Static local field correction introduced and based on :cite:`Hubbard.1957`.
+
+    ..math::
+
+      G(k) = \\frac{1}{2}\\frac{k^2}{k^2 + k_F^2}
+
+    While improving on RPA results for degenerate systems, neither long- nor
+    short wavelength limits are correct.
     """
 
     k_F = fermi_wavenumber(n_e)
@@ -53,6 +60,7 @@ def eelfc_hubbard(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
 def eelfc_geldartvosko(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     """
     Static local field correction introduced and based on :cite:`Geldart.1966`.
+    Yields reasonable results at high temperatures.
     """
 
     k_F = fermi_wavenumber(n_e)
@@ -113,7 +121,9 @@ def eelfc_utsumiichimaru(
 ) -> Quantity:
     """
     Static local field correction introduced and based on
-    :cite:`UtsumiIchimaru.1982`.
+    :cite:`UtsumiIchimaru.1982`. This is a result for zero temperature.
+    The argument `T_e` is only included to have signatures comparable with
+    other static LFC models.
     """
 
     rs = interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)
@@ -157,8 +167,10 @@ def eelfc_utsumiichimaru(
 @jax.jit
 def eelfc_farid(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     """
-    Improved version of Utsumi and Ichimaru, based on QMC results
-    (:cite:`Farid.1993`).
+    Improved version of Utsumi and Ichimaru (:py:func:`~.eelfc_utsumiichimaru`,
+    based on QMC results (:cite:`Farid.1993`). This is a result for zero
+    temperature. The argument `T_e` is only included to have signatures
+    comparable with other static LFC models.
     """
     rs = (interparticle_spacing(1, 1, n_e) / (1 * ureg.a0)).m_as(
         ureg.dimensionless
@@ -261,9 +273,10 @@ def eelfc_interpolationgregori2007(
     k: Quantity, T_e: Quantity, n_e: Quantity
 ) -> Quantity:
     """
-    Interpolation function between the UtsumiIchimaru result (high-degeneracy)
-    for the local field correction and the GeldartVosko result
-    (low-degeneracy). :cite:`Fortmann.2010`
+    Interpolation function between the UtsumiIchimaru result
+    :py:func:`~.eelfc_utsumiichimaru` (zero T) for the local field correction
+    and the GeldartVosko result :py:func:`eelfc_geldartvosko` (high T).
+    :cite:`Gregori.2007`
     """
 
     Theta = (T_e / (fermi_energy(n_e) / (1 * ureg.boltzmann_constant))).m_as(
@@ -281,9 +294,9 @@ def eelfc_interpolationgregori_farid(
     k: Quantity, T_e: Quantity, n_e: Quantity
 ) -> Quantity:
     """
-    Interpolation function between the Farid result (high-degeneracy)
-    for the local field correction and the GeldartVosko result
-    (low-degeneracy). :cite:`Fortmann.2010`
+    Interpolation function between the Farid result :py:func:`~.eelfc_farid`
+    (zero T) for the local field correction and the GeldartVosko result
+    :py:func:`eelfc_geldartvosko` (high T). :cite:`Fortmann.2010`
     """
 
     Theta = (T_e / (fermi_energy(n_e) / (1 * ureg.boltzmann_constant))).m_as(
@@ -298,8 +311,11 @@ def eelfc_interpolationgregori_farid(
 @jax.jit
 def eelfc_dornheim2021(k: Quantity, T_e: Quantity, n_e: Quantity) -> Quantity:
     """
-    Use the analytical interpolation of the ab initio LFC from
-    :cite:`Dornheim.2021`
+    Use the analytical interpolation of the effective static approximation for
+    the LFC given by :cite:`Dornheim.2021`. Interpolating path-integral Monte
+    Carlo simulations while preserving correct limits.
+
+    Valid for 0.7 <= r_s <= 20, and theta <=4.
     """
 
     Theta = (T_e / (fermi_energy(n_e) / (1 * ureg.boltzmann_constant))).m_as(

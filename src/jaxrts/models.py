@@ -4340,7 +4340,9 @@ class Gregori2004Screening(Model):
 class ElectronicLFCGeldartVosko(Model):
     """
     Static local field correction model by Geldart and Vosko
-    :cite:`Geldart.1966`
+    :cite:`Geldart.1966`. This LFC should provide reasonable results in the
+    limit of high temperatures, but will not exhibit a resonance around twice
+    the Fermi wavenumber, as it is espected for low :math:`T`.
 
     See Also
     --------
@@ -4381,7 +4383,8 @@ class ElectronicLFCGeldartVosko(Model):
 class ElectronicLFCUtsumiIchimaru(Model):
     """
     Static local field correction model by Utsumi and Ichimaru
-    :cite:`UtsumiIchimaru.1982`.
+    :cite:`UtsumiIchimaru.1982`. This LFC is only valid for zero temperature,
+    and does not include any temperature dependence.
 
     See Also
     --------
@@ -4421,9 +4424,10 @@ class ElectronicLFCUtsumiIchimaru(Model):
 
 class ElectronicLFCDornheimAnalyticalInterp(Model):
     """
-    Static local field correction model by Dornheim et al.
-    :cite:`Dornheim.2021`. Their model is an analytical interpolation of
-    ab-initio PIMC simulations.
+    Effective static approximation (ESA) of the local field correction model by
+    Dornheim et al. :cite:`Dornheim.2021`. Their model is an analytical
+    interpolation of the ESA, obtained by comparison to ab-initio PIMC
+    simulations and asymptotic limits.
 
     See Also
     --------
@@ -4464,9 +4468,10 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
 
 class ElectronicLFCStaticInterpolation(Model):
     """
-    Static local field correction model that interpolates between the
-    high-degeneracy result by Farid :cite:`Farid.1993` and the Geldart result
-    :cite:`Geldart.1966`. See, e.g., :cite:`Fortmann.2010`.
+    Static local field correction model that interpolates between the zero
+    temperature result by Farid :cite:`Farid.1993` and the Geldart result
+    :cite:`Geldart.1966` for high temperatures. See, e.g.,
+    :cite:`Fortmann.2010`.
 
     See Also
     --------
