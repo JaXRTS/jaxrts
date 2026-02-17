@@ -52,7 +52,7 @@ for T, axis in zip(temp, ax):
         G_dornheim = [
             jaxrts.ee_localfieldcorrections.eelfc_dornheim2021(
                 _k, T, n_e
-            )
+            ).m_as(ureg.dimensionless)
             for _k in k
         ]
         axis.plot(
@@ -102,7 +102,7 @@ for T, axis in zip(temp, ax):
     )
     axis.plot(
         (k / kf).m_as(ureg.dimensionless),
-        G_farid,
+        G_farid.m_as(ureg.dimensionless),
         label="Farid (zero T)",
         ls="dotted",
         color="black",
