@@ -15,6 +15,7 @@ import jax
 import jax.numpy as jnp
 import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
+import scienceplots
 
 import jaxrts
 
