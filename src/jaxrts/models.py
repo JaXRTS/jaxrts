@@ -29,7 +29,11 @@ from . import (
 )
 from .analysis import ITCF_fsum
 from .elements import MixElement, electron_distribution_ionized_state
-from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
+from .plasma_physics import (
+    noninteracting_susceptibility_from_eps_RPA,
+    fermi_energy,
+    wiegner_seitz_radius,
+)
 from .setup import (
     Setup,
     convolve_stucture_factor_with_instrument,
@@ -3275,11 +3279,16 @@ class NonDegenerateElectronChemPotential(Model):
     def evaluate(
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
-        return 1 * ureg.boltzmann_constant * plasma_state.T_e * jnpu.log(
-            plasma_physics.degeneracy_param(
-                plasma_state.n_e, plasma_state.T_e
+        return (
+            1
+            * ureg.boltzmann_constant
+            * plasma_state.T_e
+            * jnpu.log(
+                plasma_physics.degeneracy_param(
+                    plasma_state.n_e, plasma_state.T_e
+                )
+                / 2
             )
-            / 2
         )
 
 
@@ -4111,8 +4120,10 @@ class LinearResponseScreeningGericke2010(Model):
         # Screening vanishes if there are no free electrons
         q = jax.lax.cond(
             jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis]
-            * ureg.dimensionless,
+            lambda: (
+                jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis]
+                * ureg.dimensionless
+            ),
             lambda: q,
         )
         return q
@@ -4396,6 +4407,16 @@ class ElectronicLFCUtsumiIchimaru(Model):
     __name__ = "UtsumiIchimaru Static LFC"
     cite_keys = ["UtsumiIchimaru.1982"]
 
+    def check(self, plasma_state: "PlasmaState") -> None:
+        Theta = (
+            plasma_state.T_e
+            / (fermi_energy(plasma_state.n_e) / (1 * ureg.boltzmann_constant))
+        ).m_as(ureg.dimensionless)
+        if Theta > 0.1:
+            logger.warning(
+                f"Theta is {Theta}, but the applied model {self.__name__} is only valid as a zero temperature result."  # noqa: E501
+            )
+
     @jax.jit
     def evaluate(
         self,
@@ -4438,6 +4459,23 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
     allowed_keys = ["ee-lfc"]
     __name__ = "ElectronicLFCDornheimAnalyticalInterp"
     cite_keys = ["Dornheim.2021"]
+
+    def check(self, plasma_state: "PlasmaState") -> None:
+        Theta = (
+            plasma_state.T_e
+            / (fermi_energy(plasma_state.n_e) / (1 * ureg.boltzmann_constant))
+        ).m_as(ureg.dimensionless)
+        rs = (wiegner_seitz_radius(plasma_state.n_e) / (1 * ureg.a0)).m_as(
+            ureg.dimensionless
+        )
+        if Theta > 4:
+            logger.warning(
+                f"Theta is {Theta}, which is bigger than 4. The fit in Dornheim.2021 is outside of the validity region."  # noqa:E501
+            )
+        if (rs > 20) or (rs < 0.7):
+            logger.warning(
+                f"rs is {rs}, which is outside of [0.7, 20]. The fit in Dornheim.2021 is outside of the validity region."  # noqa:E501
+            )
 
     @jax.jit
     def evaluate(
