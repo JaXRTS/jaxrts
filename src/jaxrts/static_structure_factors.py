@@ -830,7 +830,7 @@ def S_ii_CHS(
 ) -> Quantity:
     """
     The ion ion static structure factors from :cite:`Gregori.2007`. A typo
-    comparing to :cite:`Singh.1982` in the equation for :math:`C_{ii}` has been
+    comparing to :cite:`Singh.1983` in the equation for :math:`C_{ii}` has been
     corrected.
     """
     # In equations (17)-(29), :cite:`Gregori.2007`
@@ -877,7 +877,7 @@ def S_ii_CHS(
         (y0 * q**3 * (S - q * C))
         + (y1 * q**2 * (2 * q * S - (q**2 - 2) * C - 2))
         # Note: There is a typo in the seminal Gregori.2007 paper. The exponent
-        # of the first q is taken from the earlier paper :cite:`Singh.1982`,
+        # of the first q is taken from the earlier paper :cite:`Singh.1983`,
         # reproducing Geregori's plots.
         + (y2 * q * ((3 * q**2 - 6) * S - (q**2 - 6) * q * C))
         + (y3 * ((4 * q**2 - 24) * q * S - (q**4 - 12 * q**2 + 24) * C + 24))
