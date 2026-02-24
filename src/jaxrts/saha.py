@@ -610,7 +610,7 @@ def solve_gen_saha(
         ne_line = jnp.ones(len(element_list) + int(onp.sum(Z))) * ne
 
         skip = -1
-        for element in element_list:
+        for element, Eb in zip(element_list, Ebs, strict=True):
             # Not the full off-diagonal equals n_e: The density rows don't
             # contain it!
             ne_line = ne_line.at[skip + 1 : skip + element.Z + 1].multiply(
@@ -633,7 +633,7 @@ def solve_gen_saha(
         # Use the bisection method, boundaries are fixed by max_ne and 0.
 
     def det_M_func(ne):
-        return det_M(M=M, ne=ne) #* 1E-10
+        return det_M(M=M, ne=ne)  # * 1E-10
 
     sol_ne, iterations = bisection(
         jax.tree_util.Partial(det_M_func),
@@ -643,8 +643,6 @@ def solve_gen_saha(
         max_iter=1000,
         min_iter=1,
     )
-
-
 
     # Create the matrix that describes the linear system of equations we solve.
     # Insert n_e.
@@ -719,7 +717,7 @@ def calculate_mean_free_charge_saha(
     use_ipd: bool = False,
     use_chem_pot: bool = False,
     use_distribution: bool = False,
-    exclude_non_negative_energies : bool = True
+    exclude_non_negative_energies: bool = True,
 ):
     """
     Calculates the mean charge of each ion in a plasma using the Saha-Boltzmann
