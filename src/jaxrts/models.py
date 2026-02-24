@@ -3446,11 +3446,11 @@ class ConstantIPD(Model):
         self, plasma_state: "PlasmaState", ion_population=None
     ) -> list[jnp.ndarray]:
         out = []
-        for _, element in enumerate(plasma_state.ions):
+        for idx, element in enumerate(plasma_state.ions):
             out.append(
                 jnp.array(
                     [
-                        self.value.m_as(ureg.electron_volt)
+                        self.value[idx].m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
                 )
