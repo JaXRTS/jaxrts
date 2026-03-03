@@ -3244,8 +3244,9 @@ class IchimaruChemPotential(Model):
 
 class SommerfeldChemPotential(Model):
     """
-    Interpolation function for the chemical potential of a non-interacting
-    (ideal) fermi gas given in the paper of Cowan :cite:`Cowan.2019`.
+    Interpolation function between the low and high temperature limit
+    for the chemical potential of a non-interacting (ideal) fermi gas given
+    in the paper of Cowan :cite:`Cowan.2019`.
 
     See Also
     --------
