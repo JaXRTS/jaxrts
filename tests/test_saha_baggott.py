@@ -1,11 +1,9 @@
-from pathlib import Path
-
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
+import pathlib
 
 import jaxrts
 from jaxrts import ureg
-from jaxrts.units import to_array
 from jaxrts.plasma_physics import (
     fermi_energy,
     chem_pot_interpolationIchimaru,
@@ -14,16 +12,15 @@ from jaxrts.plasma_physics import (
 )
 from jaxrts.saha import (
     calculate_mean_free_charge_saha,
-    calculate_charge_state_distribution,
 )
-from functools import partial
 import jpu.numpy as jnpu
-from collections import defaultdict
-from tqdm import tqdm
 import numpy as np
 
 import pytest
 import os
+
+
+data_dir = pathlib.Path(__file__).parent / "data/Baggott2017/"
 
 
 def plot_chemical_potentials():
@@ -85,16 +82,15 @@ def plot_chemical_potentials():
     plt.show()
 
 
-def test_compare_hydrogen_baggot():
+def test_compare_hydrogen_baggott():
     """
-    Reproducing Fig. 3.6 from Baggot.2017.
+    Reproducing Fig. 3.6 from Baggott.2017.
     """
 
     TOLERANCE = 0.25
-    DATA_DIR = "data/Baggot2017"
 
-    if not os.path.exists(DATA_DIR):
-        pytest.fail(f"Data directory '{DATA_DIR}' not found. Test cannot run.")
+    if not os.path.exists(data_dir):
+        pytest.fail(f"Data directory '{data_dir}' not found. Test cannot run.")
 
     # Setup Plasma State
     state = jaxrts.PlasmaState(
@@ -135,19 +131,14 @@ def test_compare_hydrogen_baggot():
         exclude_non_negative_energies = config[2]
 
         for T_e in [2, 5, 15]:
-            filename = os.path.join(DATA_DIR, f"baggot{k+1}_{int(T_e)}eV.csv")
+            filename = data_dir / f"baggott{k + 1}_{int(T_e)}eV.csv"
 
             if not os.path.exists(filename):
                 pytest.fail(f"Reference file missing: {filename}")
 
-            try:
-                data = np.genfromtxt(
-                    filename, delimiter=",", skip_header=1, unpack=True
-                )
-            except ValueError:
-                pytest.fail(
-                    f"File exists but is empty or malformed: {filename}"
-                )
+            data = np.genfromtxt(
+                filename, delimiter=",", skip_header=1, unpack=True
+            )
 
             ref_n, ref_Z = data
 
@@ -171,28 +162,27 @@ def test_compare_hydrogen_baggot():
                 if len(Z_free) == 1:
                     calculated_Z_free.append(Z_free[0])
 
-            # Compare only data which is not in the WDM regime (Θ ~ 1), as there can be expected 
-            # high differences!
-
+            # Compare only data which is not in the WDM regime (Θ ~ 1), as
+            # there can be expected high differences!
 
             # Calculate Θ
             deg_param = degeneracy_param(
-                        ref_n * (1 / ureg.cc), T_e * 1 * ureg.eV / ureg.k_B
-                    ).m_as(ureg.dimensionless)
+                ref_n * (1 / ureg.cc), T_e * 1 * ureg.eV / ureg.k_B
+            ).m_as(ureg.dimensionless)
 
-            diffs = np.abs(calculated_Z_free - ref_Z)[np.abs(deg_param) - 1 > 1]
-            max_diff = np.max(
-                diffs
-            )
+            diffs = np.abs(calculated_Z_free - ref_Z)[
+                np.abs(deg_param) - 1 > 1
+            ]
+            max_diff = np.max(diffs)
 
             max_diffs.append(max_diff)
 
     assert np.max(max_diffs) < TOLERANCE
 
 
-def plot_hydrogen_baggot():
+def plot_hydrogen_baggott():
     """
-    Reproducing Fig. 3.6 from Baggot.2017.
+    Reproducing Fig. 3.6 from Baggott.2017.
     """
 
     fig, axs = plt.subplots(figsize=(6.5, 6), ncols=2, nrows=2)
@@ -237,11 +227,9 @@ def plot_hydrogen_baggot():
         color = ["darkred", "darkblue", "darkgreen", "darkorange", "lime"]
 
         for i, T_e in enumerate([2, 5, 15]):
-
             Zfree = []
 
             for n in densities:
-
                 state.T_e = (
                     T_e * 1 * ureg.electron_volt / ureg.boltzmann_constant
                 )
@@ -271,16 +259,13 @@ def plot_hydrogen_baggot():
                 color=color[i],
             )
 
-            try:
-                n, Z = np.genfromtxt(
-                    f"Baggot_data/baggot{k+1}_{int(T_e)}eV.csv",
-                    delimiter=",",
-                    skip_header=1,
-                    unpack=True,
-                )
-                ax.scatter(n, Z, color=color[i])
-            except:
-                pass
+            n, Z = np.genfromtxt(
+                data_dir / f"baggott{k + 1}_{int(T_e)}eV.csv",
+                delimiter=",",
+                skip_header=1,
+                unpack=True,
+            )
+            ax.scatter(n, Z, color=color[i])
 
             ax.plot(
                 densities,
