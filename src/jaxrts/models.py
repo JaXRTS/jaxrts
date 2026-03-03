@@ -3220,7 +3220,7 @@ class FormFactorLowering(Model):
 
 class IchimaruChemPotential(Model):
     """
-    A fitting formula for the chemical potential of a plasma between the
+    A fitting formula for the chemical potential of an ideal electron gas between the
     classical and the quantum regime, given by :cite:`Gregori.2003`.
 
     See Also
@@ -4097,9 +4097,9 @@ class LinearResponseScreeningGericke2010(Model):
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
         )
-        plasma_state[
-            "electron-ion Potential"
-        ].include_electrons = "SpinAveraged"
+        plasma_state["electron-ion Potential"].include_electrons = (
+            "SpinAveraged"
+        )
 
     @jax.jit
     def evaluate(
@@ -4126,6 +4126,72 @@ class LinearResponseScreeningGericke2010(Model):
             ),
             lambda: q,
         )
+        return q
+
+
+class GregoriCHSScreening(Model):
+    """
+
+    Screening model to calculate the screening charge q
+    based on expression for the static structure factors given
+    in :cite:`Gregori.2007`. treating the ions as charged hard spheres (CHS).
+    The screening charge is calculated using
+
+    .. math::
+
+    \sqrt{Z_f}\,\frac{S_{ei}(k)}{S_{ii}(k)}
+
+    See Also
+    --------
+    jaxrts.ion_feature.q_Glenzer2009
+        The function used to calculate ``q``.
+    """
+
+    allowed_keys = ["screening"]
+    __name__ = "GregoriCHSScreening"
+    cite_keys = ["Glenzer.2009", "Gregori.2007"]
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        Z_ab = jnpu.outer(plasma_state.Z_free, plasma_state.Z_free)
+        n_ab = jnpu.outer(plasma_state.n_i, plasma_state.n_i)
+        n = jnpu.sum(plasma_state.n_i)
+        Z_f = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.Z_free)
+        M = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.atomic_masses)
+        N = 1 / n * jnpu.sum(plasma_state.n_i**2)
+
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        T_D = plasma_state["Debye temperature"].evaluate(plasma_state, setup)
+
+        T_e_eff = static_structure_factors.T_cf_Greg(
+            plasma_state.T_e, plasma_state.n_e
+        )
+        T_i_eff = static_structure_factors.T_i_eff_Greg(plasma_state.T_i, T_D)
+        T_i_eff = 1 / n * jnpu.sum(plasma_state.n_i * T_i_eff)
+
+        S_ii = static_structure_factors.S_ii_CHS(
+            setup.k, T_e_eff, T_i_eff, plasma_state.n_e, M, Z_f, N, lfc
+        )
+        S_ei = static_structure_factors.S_ei_CHS(
+            setup.k, T_e_eff, T_i_eff, plasma_state.n_e, M, Z_f, N, lfc
+        )
+
+        q = ion_feature.q_Glenzer2009(
+            S_ei,
+            S_ii,
+            plasma_state.Z_free,
+        )[:, jnp.newaxis]
+        q = jnp.real(q.m_as(ureg.dimensionless))
+
+        # Screening vanishes if there are no free electrons
+        q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
         return q
 
 
@@ -4173,9 +4239,9 @@ class FiniteWavelengthScreening(Model):
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
         )
-        plasma_state[
-            "electron-ion Potential"
-        ].include_electrons = "SpinAveraged"
+        plasma_state["electron-ion Potential"].include_electrons = (
+            "SpinAveraged"
+        )
 
     @jax.jit
     def evaluate(
@@ -4276,9 +4342,9 @@ class LinearResponseScreening(Model):
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
         )
-        plasma_state[
-            "electron-ion Potential"
-        ].include_electrons = "SpinAveraged"
+        plasma_state["electron-ion Potential"].include_electrons = (
+            "SpinAveraged"
+        )
         plasma_state["free-free scattering"] = RPA_DandreaFit()
 
     @jax.jit
@@ -5020,6 +5086,7 @@ _all_models = [
     Gericke2010ScreeningLength,
     Gregori2003IonFeat,
     Gregori2004Screening,
+    GregoriCHSScreening,
     Gregori2006IonFeat,
     IchimaruChemPotential,
     IonSphereIPD,
