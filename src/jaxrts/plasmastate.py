@@ -15,7 +15,7 @@ from jax import numpy as jnp
 
 from .elements import Element
 from .helpers import JittableDict
-from .models import DebyeHueckelScreeningLength, LFCConstant
+from .models import DebyeHueckelScreeningLength, LFCConstant, Neglect
 from .plasma_physics import (
     degeneracy_param,
     fermi_energy,
@@ -30,9 +30,9 @@ logger = logging.getLogger(__name__)
 
 class PlasmaState:
     """
-    Define a plasma. The :py:class:`~.PlasmaState` is defined by the set of state
-    parameters, which are attributes of this object and have to be set during
-    initialization:
+    Define a plasma. The :py:class:`~.PlasmaState` is defined by the set of
+    state parameters, which are attributes of this object and have to be set
+    during initialization:
 
     * :py:attr:`~.ions`: a list of :py:class:`jaxrts.elements.Element` objects
       that define the constituents of the plasma.
@@ -70,9 +70,9 @@ class PlasmaState:
             len(ions) == len(mass_density)
         ), "WARNING: Input parameters should be the same shape as <ions>!"
         if T_i is not None:
-            assert len(ions) == len(
-                T_i
-            ), "WARNING: Input parameters should be the same shape as <ions>!"
+            assert len(ions) == len(T_i), (
+                "WARNING: Input parameters should be the same shape as <ions>!"
+            )
 
         #: A list of :py:class:`jaxrts.elements.Element` objects that define
         #: the constituents of the plasma.
@@ -111,9 +111,10 @@ class PlasmaState:
             * jnp.ones_like(self.Z_free)
             * ureg.angstrom,
         }
-        # Set a default screening length & LFC
+        # Set a default screening length, LFC and free-bound scattering
         self["screening length"] = DebyeHueckelScreeningLength()
         self["ee-lfc"] = LFCConstant(0.0)
+        self["free-bound scattering"] = Neglect()
 
     def __len__(self) -> int:
         return len(self.ions)
@@ -135,7 +136,7 @@ class PlasmaState:
         )
         rho_string = ", ".join(
             [
-                f"{rho.m_as(ureg.gram/ureg.centimeter**3):7.2f}"
+                f"{rho.m_as(ureg.gram / ureg.centimeter**3):7.2f}"
                 for rho in self.mass_density
             ]
         )
@@ -152,11 +153,11 @@ class PlasmaState:
             [f"{key:<25}: {self.models[key].__name__}" for key in self.keys()]
         )
 
-        out = f"""{'ions':<25}: {ion_string}
-{'mass densities (g/cc)':<25}: {rho_string}
-{'ionization':<25}: {Z_string}
-{'ion temperatures (eV)':<25}: {T_i_string}
-{'e- temperature (eV)':<25}: {T_e_string}
+        out = f"""{"ions":<25}: {ion_string}
+{"mass densities (g/cc)":<25}: {rho_string}
+{"ionization":<25}: {Z_string}
+{"ion temperatures (eV)":<25}: {T_i_string}
+{"e- temperature (eV)":<25}: {T_e_string}
 
 Models attached
 ===============
@@ -430,9 +431,9 @@ Models attached
         if isinstance(kind, str):
             kind = [kind]
         for par in kind:
-            assert (par == "e-") or (
-                par in self.ions
-            ), "Kind must be one of the ion species or an electron (e-)!"
+            assert (par == "e-") or (par in self.ions), (
+                "Kind must be one of the ion species or an electron (e-)!"
+            )
             if par == "e-":
                 wavelengths.append(
                     (
