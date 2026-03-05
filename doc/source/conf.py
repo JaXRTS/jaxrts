@@ -25,6 +25,8 @@ extensions = [
     "sphinx.ext.viewcode",
 ]
 
+html_static_path = ['_static']
+html_css_files = ['custom.css']
 
 autoclass_content = "both"  # include both class docstring and __init__
 autodoc_default_flags = [
