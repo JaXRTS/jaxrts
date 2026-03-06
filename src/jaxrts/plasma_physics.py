@@ -37,8 +37,7 @@ def plasma_frequency(electron_density: Quantity) -> Quantity:
     ).to(ureg.Hz)
 
 
-def thomson_momentum_transfer(energy: Quantity, angle: Quantity
-) -> Quantity:
+def thomson_momentum_transfer(energy: Quantity, angle: Quantity) -> Quantity:
     """
     Momentum transfer :math:`k = \\mid\\vec{k}\\mid`, assuming that the
     absolute value of the momentum for incoming and scattered light is only
@@ -456,3 +455,36 @@ def noninteracting_susceptibility_from_eps_RPA(
     """
     Vee = coulomb_potential_fourier(-1, -1, k)
     return (1 - epsilon) / Vee
+
+
+@jax.jit
+def mean_free_charge_more(Z_A : float, n_e : Quantity, T_e : Quantity) -> Quantity:
+    """
+    Finite Temperature Thomas Fermi Charge State using an analytical fit provided by
+    :cite:`More.1985` p. 332 (Table IV).
+    """
+
+    alpha = 14.3139
+    beta = 0.6624
+    a1 = 0.003323
+    a2 = 0.9718
+    a3 = 9.26148e-5
+    a4 = 3.10165
+    b0 = -1.7630
+    b1 = 1.43175
+    b2 = 0.31546
+    c1 = -0.366667
+    c2 = 0.983333
+
+    convert = n_e.m_as(1 / ureg.cc) * 1.6726e-24
+    R = convert / Z_A
+    T0 = T_e.m_as(ureg.eV / ureg.k_B) / Z_A ** (4.0 / 3.0)
+    Tf = T0 / (1 + T0)
+    A = a1 * T0**a2 + a3 * T0**a4
+    B = -jnp.exp(b0 + b1 * Tf + b2 * Tf**7)
+    C = c1 * Tf + c2
+    Q1 = A * R**B
+    Q = (R**C + Q1**C) ** (1 / C)
+    x = alpha * Q**beta
+
+    return Z_A * x / (1 + x + jnp.sqrt(1 + 2.0 * x))
