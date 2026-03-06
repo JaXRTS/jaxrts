@@ -458,7 +458,7 @@ def noninteracting_susceptibility_from_eps_RPA(
 
 
 @jax.jit
-def mean_free_charge_more(Z_A : float, n_e : Quantity, T_e : Quantity):
+def mean_free_charge_more(Z_A : float, n_e : Quantity, T_e : Quantity) -> Quantity:
     """
     Finite Temperature Thomas Fermi Charge State using an analytical fit provided by
     :cite:`More.1985` p. 332 (Table IV).
