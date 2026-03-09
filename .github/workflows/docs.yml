@@ -20,6 +20,17 @@ jobs:
         with:
           python-version: '3.12'
 
+        # LaTex is required for the matplotlib figures
+        # in the docs
+      - name: Install LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            dvipng \
+            cm-super
+
       - name: Install Poetry
         # the v1 does **not** fix the poetry version
         uses: snok/install-poetry@v1
