@@ -6,11 +6,10 @@ for easily using a trained NN with jaxrts.
 Models have to be trained, for each sample type, separately. Tools for doing so
 are provided in the `tools/SiiInterpolation/` directory of the jaxrts
 repository. The trained network is saved as an :py:mod:`orbax` checkpoint (with
-slight additions to save properties of the net architecture).
+slight additions to save properties of the net architecture.
 """
 
 import json
-from pathlib import Path
 
 import jax
 import jax.numpy as jnp
@@ -24,61 +23,19 @@ ureg = jaxrts.ureg
 
 
 class NNModel(nnx.Module):
-    """
-    A class inheriting from :py:class:`nnx.Module`, adding quality of life
-    features and defining normalization features for the input of the NN.
-    """
-
-    def __init__(
-        self,
-        din: int,
-        dhid: list[int],
-        dout: int,
-        rngs: nnx.Rngs,
-        no_of_atoms: int | None = None,
-    ):
-        """
-        Creates the network as a set of fully connected
-        :py:class:`flax.nnx.Linear` layers.
-
-        Parameters
-        ----------
-        din: int
-            Number of input nodes. For a typical setup, this should be ``3 +
-            no_of_atoms``.
-        dhid: list[int]
-            List of integers, containing the size of each hidden layer.
-        dout: int
-            Number of output nodes. Typically, this is
-            ``no_of_ions * (no_of_ions + 1)/2``.
-        rngs: nnx.Rngs
-            A random number generator.
-        no_of_atoms: int or None, defaults to None
-            Number of species in the plasma. If this value is not given,
-            explicitly, it is calculated from :py:attr:`din` as ``din - 3``.
-        """
-        if no_of_atoms is None:
-            no_of_atoms = din - 3
+    def __init__(self, din, dhid, dout, rngs: nnx.Rngs, no_of_atoms=1):
         self.linears = [nnx.Linear(din, dhid[0], rngs=rngs)]
         for i in range(len(dhid) - 1):
             self.linears.append(nnx.Linear(dhid[i], dhid[i + 1], rngs=rngs))
         self.linears.append(nnx.Linear(dhid[-1], dout, rngs=rngs))
 
-        # These are the values with which we norm the quantities for the input
-        # layer of the model.
+        # These are the norming values for the input layer of the model.
         # We store them here to be able to obtain physical quantities from
         # scaled ones. For starters, set all values to unity. When the training
         # data is defined, replace these values.
-        #: Normalization for theta
         self.norm_theta = nnx.Variable(1.0)
-        #: Normalization for rho.
-        #: This is given as a float, as quantities would be in conflict with
-        #: flax. The unit is g/cm³
         self.norm_rho = nnx.Variable(1.0)
-        #: Normalization the ionization (this is an array with one entry for
-        #: each component.
         self.norm_Z = nnx.Variable([1.0] * no_of_atoms)
-        #: Normalization for k_over_qk
         self.norm_k_over_qk = nnx.Variable(1.0)
 
     @nnx.jit
@@ -89,22 +46,14 @@ class NNModel(nnx.Module):
         x = self.linears[-1](x)
         return x
 
-    def set_norms(
-        self, theta: float, rho: float, Z: list[float], k_over_qk: float
-    ):
-        """
-        Set the normalization of the input layers.
-        """
+    def set_norms(self, theta, rho, Z, k_over_qk):
         self.norm_theta = nnx.Variable(theta)
         self.norm_rho = nnx.Variable(rho)
         self.norm_Z = nnx.Variable(Z)
         self.norm_k_over_qk = nnx.Variable(k_over_qk)
 
     @property
-    def norms(self) -> dict[str, nnx.Variable]:
-        """
-        Get the input layer normalizations as a dictionary.
-        """
+    def norms(self):
         return {
             "theta": self.norm_theta,
             "rho": self.norm_rho,
@@ -113,31 +62,28 @@ class NNModel(nnx.Module):
         }
 
     @property
-    def din(self) -> int:
+    def din(self):
         """
-        Shape of the input layer.
+        Number of input nodes
         """
         return self.linears[0].in_features
 
     @property
-    def dhid(self) -> list[int]:
+    def dhid(self):
         """
-        Shape of the hidden layers.
+        Size of the hidden nodes
         """
         return [layer.in_features for layer in self.linears[1:]]
 
     @property
-    def dout(self) -> list[int]:
+    def dout(self):
         """
-        Shape of the output layer.
+        Size of the hidden nodes
         """
         return self.linears[-1].out_features
 
     @property
-    def shape(self) -> tuple[int, list[int], int]:
-        """
-        Shape of the full model (input, hidden, and output layers).
-        """
+    def shape(self):
         return self.din, self.dhid, self.dout
 
 
@@ -153,28 +99,7 @@ def set_sharding(x: jax.ShapeDtypeStruct) -> jax.ShapeDtypeStruct:
 
 
 class NNSiiModel(jaxrts.models.IonFeatModel):
-    """
-    A :py:class:`jaxrts.model.IonFeatModel` to use a neural network to obtain
-    ion-ion static structure factors.
-
-    .. note::
-
-       This is a parent class that, in itself, has no practical application, as
-       it defines no :py:meth:`jaxrts.models.IonFeatModel.S_ii` method.
-       This class only handles loading the neural network from an
-       :py:mod:`orbax` checkpoint.
-
-    """
-
-    def __init__(self, checkpoint_dir: Path):
-        """
-        Initialize the NNSiiModel.
-
-        Parameters
-        ----------
-        checkpoint_dir : Path
-            The Path to the checkpoint directory.
-        """
+    def __init__(self, checkpoint_dir):
         # This requires that the network shape was saved in the checkpoint
         # directory. This is done in a slightly hacky way, see the train.py
         # file.
@@ -223,55 +148,7 @@ def _sort_func(ion):
     return ion.symbol
 
 
-class OneComponentNNModel(NNSiiModel):
-    """
-    A :py:class:`~.NNSiiModel` for a :py:class:`jaxrts.plasmastate.PlasmaState`
-    with one component.
-    """
-
-    @jax.jit
-    def S_ii(
-        self,
-        plasma_state: jaxrts.PlasmaState,
-        setup: jaxrts.Setup,
-    ) -> jnp.ndarray:
-
-        # This has to be done within a jax.jitted function.
-        nn_model = nnx.merge(self.graphdef, self.model_state)
-
-        E_f = jaxrts.plasma_physics.fermi_energy(plasma_state.n_e)
-        q_k = jnpu.sqrt(2 * ureg.electron_mass * E_f)
-
-        theta = (plasma_state.T_e * ureg.k_B / E_f).m_as(ureg.dimensionless)
-
-        x = jnp.array(
-            [
-                jnp.sum(theta) / nn_model.norm_theta,
-                jnp.sum(
-                    plasma_state.mass_density.m_as(
-                        ureg.gram / ureg.centimeter**3
-                    )
-                )
-                / nn_model.norm_rho,
-                jnp.sum(plasma_state.number_fraction * plasma_state.Z_free)
-                / nn_model.norm_Z[0],
-                (setup.k * (1 * ureg.hbar) / q_k).m_as(ureg.dimensionless)
-                / nn_model.norm_k_over_qk,
-            ]
-        )
-
-        Sii = nn_model(x)
-
-        S_out = jnp.eye(plasma_state.nions) * Sii
-        return S_out * ureg.dimensionless
-
-
-class TwoComponentNNModel(NNSiiModel):
-    """
-    A :py:class:`~.NNSiiModel` for a :py:class:`jaxrts.plasmastate.PlasmaState`
-    with two components.
-    """
-
+class NComponentNNModel(NNSiiModel):
     @jax.jit
     def S_ii(
         self,
@@ -288,34 +165,39 @@ class TwoComponentNNModel(NNSiiModel):
         theta = (plasma_state.T_e * ureg.k_B / E_f).m_as(ureg.dimensionless)
 
         # Get the elements of the model:
-        element0 = jaxrts.Element(self.model_elements[0])
-        element1 = jaxrts.Element(self.model_elements[1])
+        elements = [jaxrts.Element(e.strip("+")) for e in self.model_elements]
 
-        # Catch an ionization_exanded plasma state:
-        # Re-calculate plasma_state mean ionization
-        indices_element_0 = [
-            i for i, x in enumerate(plasma_state.ions) if x == element0
-        ]
-        indices_element_1 = [
-            i for i, x in enumerate(plasma_state.ions) if x == element1
-        ]
-        Z0 = 0
-
-        n0 = 0
-        for idx in indices_element_0:
-            Z0 += plasma_state.number_fraction[idx] * plasma_state.Z_free[idx]
-            n0 += plasma_state.number_fraction[idx]
-        Z0 /= n0
-
-        Z1 = 0
-        n1 = 0
-        for idx in indices_element_1:
-            Z1 += plasma_state.number_fraction[idx] * plasma_state.Z_free[idx]
-            n1 += plasma_state.number_fraction[idx]
-        Z1 /= n1
+        unique_elements = list(dict.fromkeys(elements))
+        # jax.debug.print("{x}", x=unique_elements)
+        # unique_elements = [e for e in elements if e in plasma_state.ions]
+        # jax.debug.print("{x}", x=unique_elements)
+        idx_arr = jnp.array(
+            [
+                [i for i, x in enumerate(plasma_state.ions) if x == elem]
+                for elem in unique_elements
+            ]
+        )
+        n = len(unique_elements)
 
         # Norm the inputs to the NN
+        Z_arr = jnp.zeros(n)
+        n_arr = jnp.zeros(n)
+        for i in range(n):
+            for idx in idx_arr[i]:
+                # idx = int(idx)
 
+                Z_arr = Z_arr.at[i].add(
+                    plasma_state.number_fraction[idx]
+                    * plasma_state.Z_free[idx]
+                )
+                n_arr = n_arr.at[i].add(plasma_state.number_fraction[idx])
+
+            Z_arr = Z_arr.at[i].set(Z_arr[i] / n_arr[i])
+
+        # jax.debug.print("Z_arr = {x}", x=Z_arr)
+        # jax.debug.print("nn_model_norm =  {x}", x=nn_model.norm_Z)
+
+        # create input array to the Neural Net
         x = jnp.array(
             [
                 theta / nn_model.norm_theta,
@@ -325,37 +207,210 @@ class TwoComponentNNModel(NNSiiModel):
                     )
                 )
                 / nn_model.norm_rho,
-                Z0 / nn_model.norm_Z[0],
-                Z1 / nn_model.norm_Z[1],
+                # *[Z_dict[i] / nn_model.norm_Z[i] for i in range(n)],
+                *(Z_arr / jnp.array(nn_model.norm_Z)),
                 (setup.k * (1 * ureg.hbar) / q_k).m_as(ureg.dimensionless)
                 / nn_model.norm_k_over_qk,
             ]
         )
-
+        # jax.debug.print("x = {x}", x=x)
         Sii = nn_model(x)
 
-        # Work with several ions of the same species, allow for a mutation of
-        # ion species in the plasma_state.
-        # This is a somewhat complicated mapping for
-        # [[Sii[0], Sii[1]],[Sii[1], Sii[2]]].
-        # This is to make it work with expanded state (approximately)
+        # Create S_base adaptive for N components
+        # for 4 components it looks like
+        # S_base = jnp.array(
+        #     [
+        #         [Sii[0], Sii[1], Sii[2], Sii[3]],
+        #         [Sii[1], Sii[4], Sii[5], Sii[6]],
+        #         [Sii[2], Sii[5], Sii[7], Sii[8]],
+        #         [Sii[3], Sii[6], Sii[8], Sii[9]],
+        #     ]
+        # )
+        m = len(elements)
+        iu = jnp.triu_indices(m)
+        S_base = jnp.zeros((m, m), dtype=Sii.dtype)
+        S_base = S_base.at[iu].set(Sii)
+        S_base = S_base + jnp.triu(S_base, 1).T
 
-        S_out = jnp.zeros((plasma_state.nions, plasma_state.nions))
+        # Determine permutation order based on ion order of plasma_state
+        perm = []
+        for entry in idx_arr:
+            # jax.debug.print("{x}", x=entry)
+            perm = [*perm, *entry]
+        perm = jnp.array(perm)
+        # jax.debug.print("{x}", x=perm)
 
-        for a in range(plasma_state.nions):
-            if plasma_state.ions[a] == element0:
-                _Sii = Sii[0]
-            elif plasma_state.ions[a] == element1:
-                _Sii = Sii[2]
-            S_out = S_out.at[a, a].set(_Sii)
+        # perm = jnp.array([elements.index(ion) for ion in plasma_state.ions])
 
-        S_out = S_out.at[0, -1].set(Sii[1])
-        S_out = S_out.at[-1, 0].set(Sii[1])
-
+        # Apply the permutation to S_base to capture wronge order of plasma state elements
+        # compared to order of elements used to train the NN,
+        # e.g. Plasma_state element list = ["C","H"] but NN element list =["H","C"]
+        # would result in wrong Sii values set for the elements
+        S_out = S_base[perm][:, perm]
+        # jax.debug.print("{x}", x=S_out)
         return S_out * ureg.dimensionless
 
 
-_models = [OneComponentNNModel, TwoComponentNNModel]
+# class OneComponentExpandedIonizationStateNNModel(NNSiiModel):
+#     @jax.jit
+#     def S_ii(
+#         self,
+#         plasma_state: jaxrts.PlasmaState,
+#         setup: jaxrts.Setup,
+#     ) -> jnp.ndarray:
+
+#         # This has to be done within a jax.jitted function.
+#         nn_model = nnx.merge(self.graphdef, self.model_state)
+
+#         E_f = jaxrts.plasma_physics.fermi_energy(plasma_state.n_e)
+#         q_k = jnpu.sqrt(2 * ureg.electron_mass * E_f)
+
+#         theta = (plasma_state.T_e * ureg.k_B / E_f).m_as(ureg.dimensionless)
+
+#         x = jnp.array(
+#             [
+#                 jnp.sum(theta) / nn_model.norm_theta,
+#                 jnp.sum(
+#                     plasma_state.mass_density.m_as(
+#                         ureg.gram / ureg.centimeter**3
+#                     )
+#                 )
+#                 / nn_model.norm_rho,
+#                 jnp.sum(plasma_state.number_fraction * plasma_state.Z_free)
+#                 / nn_model.norm_Z[0],
+#                 (setup.k * (1 * ureg.hbar) / q_k).m_as(ureg.dimensionless)
+#                 / nn_model.norm_k_over_qk,
+#             ]
+#         )
+
+#         Sii = nn_model(x)
+
+#         S_out = jnp.array(
+#             [
+#                 [Sii[0], Sii[1]],
+#                 [Sii[1], Sii[2]],
+#             ]
+#         )
+#         return S_out * ureg.dimensionless
+
+
+# class TwoComponentExpandedIonizationStateNNModel(NNSiiModel):
+#     @jax.jit
+#     def S_ii(
+#         self,
+#         plasma_state: jaxrts.PlasmaState,
+#         setup: jaxrts.Setup,
+#     ) -> jnp.ndarray:
+
+#         # This has to be done within a jax.jitted function.
+#         nn_model = nnx.merge(self.graphdef, self.model_state)
+
+#         E_f = jaxrts.plasma_physics.fermi_energy(plasma_state.n_e)
+#         q_k = jnpu.sqrt(2 * ureg.electron_mass * E_f)
+
+#         theta = (plasma_state.T_e * ureg.k_B / E_f).m_as(ureg.dimensionless)
+
+#         # Get the elements of the model:
+#         element0 = jaxrts.Element(self.model_elements[0])
+#         element1 = jaxrts.Element(self.model_elements[2])
+
+#         # Catch an ionization_exanded plasma state:
+#         # Re-calculate plasma_state mean ionization
+#         indices_element_0 = [
+#             i for i, x in enumerate(plasma_state.ions) if x == element0
+#         ]
+#         indices_element_1 = [
+#             i for i, x in enumerate(plasma_state.ions) if x == element1
+#         ]
+#         Z0 = 0
+
+#         n0 = 0
+#         for idx in indices_element_0:
+#             Z0 += plasma_state.number_fraction[idx] * plasma_state.Z_free[idx]
+#             n0 += plasma_state.number_fraction[idx]
+#         Z0 /= n0
+
+#         Z1 = 0
+#         n1 = 0
+#         for idx in indices_element_1:
+#             Z1 += plasma_state.number_fraction[idx] * plasma_state.Z_free[idx]
+#             n1 += plasma_state.number_fraction[idx]
+#         Z1 /= n1
+
+#         # Norm the inputs to the NN
+
+#         x = jnp.array(
+#             [
+#                 theta / nn_model.norm_theta,
+#                 jnp.sum(
+#                     plasma_state.mass_density.m_as(
+#                         ureg.gram / ureg.centimeter**3
+#                     )
+#                 )
+#                 / nn_model.norm_rho,
+#                 Z0 / nn_model.norm_Z[0],
+#                 Z1 / nn_model.norm_Z[1],
+#                 (setup.k * (1 * ureg.hbar) / q_k).m_as(ureg.dimensionless)
+#                 / nn_model.norm_k_over_qk,
+#             ]
+#         )
+
+#         Sii = nn_model(x)
+
+#         # jax.debug.print("{x}", x=Sii)
+#         # Work with several ions of the same species, allow for a mutation of
+#         # ion species in the plasma_state.
+#         # This is a somewhat complicated mapping for
+#         # [[Sii[0], Sii[1]],[Sii[1], Sii[2]]].
+#         # This is to make it work with expanded state (approximately)
+#         S_out = jnp.zeros((plasma_state.nions, plasma_state.nions))
+
+#         # S_base = jnp.array(
+#         #     [
+#         #         [Sii[0], Sii[1], Sii[2], Sii[3]],
+#         #         [Sii[1], Sii[4], Sii[5], Sii[6]],
+#         #         [Sii[2], Sii[5], Sii[7], Sii[8]],
+#         #         [Sii[3], Sii[6], Sii[8], Sii[9]],
+#         #     ]
+#         # )
+
+#         # elements = [jaxrts.Element(elem) for elem in self.model_elements]
+
+#         # perm = jnp.array([elements.index(ion) for ion in plasma_state.ions])
+
+#         # # Apply the permutation to both axes
+#         # S_out = S_base[perm][:, perm]
+
+#         if plasma_state.ions[0] == element0:
+#             S_out = jnp.array(
+#                 [
+#                     [Sii[0], Sii[1], Sii[2], Sii[3]],
+#                     [Sii[1], Sii[4], Sii[5], Sii[6]],
+#                     [Sii[2], Sii[5], Sii[7], Sii[8]],
+#                     [Sii[3], Sii[6], Sii[8], Sii[9]],
+#                 ]
+#             )
+
+#         elif plasma_state.ions[0] == element1:
+#             # If input PlasmaState has different sequence of the Elements
+#             # Positions of the Sii's inside the output have to be adjusted
+#             S_out = jnp.array(
+#                 [
+#                     [Sii[7], Sii[8], Sii[2], Sii[5]],
+#                     [Sii[8], Sii[9], Sii[3], Sii[6]],
+#                     [Sii[2], Sii[3], Sii[0], Sii[1]],
+#                     [Sii[5], Sii[6], Sii[1], Sii[4]],
+#                 ]
+#             )
+#         jax.debug.print("{x}", x=S_out)
+#         return S_out * ureg.dimensionless
+
+
+_models = [
+    # OneComponentExpandedIonizationStateNNModel,
+    # TwoComponentExpandedIonizationStateNNModel,
+    NComponentNNModel,
+]
 
 for _m in _models:
     jax.tree_util.register_pytree_node(
