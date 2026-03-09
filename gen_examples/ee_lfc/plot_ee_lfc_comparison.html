@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LFC comparison &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="form-factor examples" href="../form_factors/index.html" />
+    <link rel="prev" title="Electronic local field correction examples" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Example gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../plot_getting_started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_multi_component.html">Multi-Species Plasmas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_reproduce_Gregori2003_fig6.html">Calculate the full structure factors for various plasma conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis-module-examples">Analysis module examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#bound-free-scattering-examples">bound-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#electronic-local-field-correction-examples">Electronic local field correction examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#form-factor-examples">form-factor examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-bound-scattering-examples">free-bound scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-free-scattering-examples">free-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#ionic-scattering-examples">Ionic scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#saha-examples">Saha Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#setup-examples">Setup Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#utility-tool-examples">Utility tool examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis/index.html">Analysis module examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bound_free/index.html">bound-free scattering examples</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Electronic local field correction examples</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">LFC comparison</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../form_factors/index.html">form-factor examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_bound/index.html">free-bound scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_free/index.html">free-free scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ionic/index.html">Ionic scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../saha/index.html">Saha Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../setup/index.html">Setup Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/index.html">Utility tool examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Electronic local field correction examples</a></li>
+      <li class="breadcrumb-item active">LFC comparison</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gen_examples/ee_lfc/plot_ee_lfc_comparison.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gen-examples-ee-lfc-plot-ee-lfc-comparison-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="lfc-comparison">
+<span id="sphx-glr-gen-examples-ee-lfc-plot-ee-lfc-comparison-py"></span><h1>LFC comparison<a class="headerlink" href="#lfc-comparison" title="Link to this heading"></a></h1>
+<p>This example compares different static (and quasi-static) local field
+corrections that are available in jaxrts.</p>
+<p>The model by Hubbard <span id="id1">[<a class="reference internal" href="../../bibliography.html#id53" title="J. Hubbard and Rudolf Ernst Peierls. The description of collective motions in terms of many-body perturbation theory. Proceedings of the Royal Society of London. Series A. Mathematical and Physical Sciences, 240(1223):539–560, 1957. doi:10.1098/rspa.1957.0106.">Hubbard and Peierls, 1957</a>]</span> is a simple formula, and the first
+attempt to formulate a LFC, but does not obey the correct limiting cases.</p>
+<p>The dotted curves showing the models by <span id="id2">[<a class="reference internal" href="../../bibliography.html#id94" title="Kenichi Utsumi and Setsuo Ichimaru. Dielectric formulation of strongly coupled electron liquids at metallic densities. vi. analytic expression for the local-field correction. Phys. Rev. A, 26:603–610, Jul 1982. doi:10.1103/PhysRevA.26.603.">Utsumi and Ichimaru, 1982</a>]</span> and
+<span id="id3">[<a class="reference internal" href="../../bibliography.html#id35" title="Behnam Farid, Volker Heine, G. E. Engel, and I. J. Robertson. Extremal properties of the harris-foulkes functional and an improved screening calculation for the electron gas. Phys. Rev. B, 48:11602–11621, Oct 1993. doi:10.1103/PhysRevB.48.11602.">Farid et al., 1993</a>]</span> show no temperature dependence as they are only implemented
+for zero-temperature, whey they are the respective limits for the interpolation
+formulas.</p>
+<p>Dornheim et al. <span id="id4">[<a class="reference internal" href="../../bibliography.html#id29" title="Tobias Dornheim, Attila Cangi, Kushal Ramakrishna, Maximilian Böhme, Shigenori Tanaka, and Jan Vorberger. Effective static approximation: a fast and reliable tool for warm-dense matter theory. Physical Review Letters, 125:235001, 12 2020. doi:10.1103/physrevlett.125.235001.">Dornheim et al., 2020</a>]</span> argue, that while the <span class="math notranslate nohighlight">\(k^2\)</span> scaling
+for large <span class="math notranslate nohighlight">\(k\)</span> as presented by Farid is correct for the static LFC, in
+practice, rather an effective static LFC should be used that obeys the correct
+limiting case for a full, <span class="math notranslate nohighlight">\(\omega\)</span> dependent LCF. An analytical function
+fitting their datapoints is provided in <span id="id5">[<a class="reference internal" href="../../bibliography.html#id30" title="Tobias Dornheim, Zhandos A. Moldabekov, and Panagiotis Tolias. Analytical representation of the local field correction of the uniform electron gas within the effective static approximation. Physical Review B, 4 2021. doi:10.1103/physrevb.103.165102.">Dornheim et al., 2021</a>]</span>.</p>
+<img src="../../_images/sphx_glr_plot_ee_lfc_comparison_001.svg" srcset="../../_images/sphx_glr_plot_ee_lfc_comparison_001.svg" alt="$k_BT=$1e-01 eV, $k_BT=$5e+01 eV, $k_BT=$1e+03 eV" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>theta = 0.0069
+theta = 3.5
+theta = 6.9e+01
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scienceplots</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
+
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">ureg</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
+
+
+<span class="n">temp</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">1000</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span>
+<span class="p">)</span>
+
+<span class="n">n_e</span> <span class="o">=</span> <span class="mf">2.5e23</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span>
+<span class="n">kf</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.plasma_physics.fermi_wavenumber.html#jaxrts.plasma_physics.fermi_wavenumber" title="jaxrts.plasma_physics.fermi_wavenumber" class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">fermi_wavenumber</span></a><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
+<span class="n">k</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">kf</span><span class="p">,</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">kf</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+
+
+<span class="k">for</span> <span class="n">T</span><span class="p">,</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">/</span> <a href="../../_autosummary/jaxrts.plasma_physics.fermi_temperature.html#jaxrts.plasma_physics.fermi_temperature" title="jaxrts.plasma_physics.fermi_temperature" class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">fermi_temperature</span></a><span class="p">(</span><span class="n">n_e</span><span class="p">))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+        <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;theta = </span><span class="si">{</span><span class="n">theta</span><span class="si">:</span><span class="s2">.2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">G_dornheim</span> <span class="o">=</span> <span class="p">[</span>
+            <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_dornheim2021.html#jaxrts.ee_localfieldcorrections.eelfc_dornheim2021" title="jaxrts.ee_localfieldcorrections.eelfc_dornheim2021" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_dornheim2021</span></a><span class="p">(</span>
+                <span class="n">_k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_k</span> <span class="ow">in</span> <span class="n">k</span>
+        <span class="p">]</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+            <span class="n">G_dornheim</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Dornheim.2021 (QSA)&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;outside Dornheim.2021 validity&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">)</span>
+    <span class="n">G_hubbard</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_hubbard.html#jaxrts.ee_localfieldcorrections.eelfc_hubbard" title="jaxrts.ee_localfieldcorrections.eelfc_hubbard" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_hubbard</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">G_geldart</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_geldartvosko.html#jaxrts.ee_localfieldcorrections.eelfc_geldartvosko" title="jaxrts.ee_localfieldcorrections.eelfc_geldartvosko" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_geldartvosko</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">G_gregori</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007.html#jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007" title="jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_interp_gregori2007</span></a><span class="p">(</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span>
+    <span class="p">)</span>
+    <span class="n">G_farid</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_farid.html#jaxrts.ee_localfieldcorrections.eelfc_farid" title="jaxrts.ee_localfieldcorrections.eelfc_farid" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_farid</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">G_utsumi</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru.html#jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru" title="jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_utsumiichimaru</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">G_fortmann</span> <span class="o">=</span> <span class="p">(</span>
+        <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010.html#jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010" title="jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_interp_fortmann2010</span></a><span class="p">(</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">G_gregori</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Interp. Gregori.2007&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">G_fortmann</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Interp. Fortmann.2010&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">G_hubbard</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Hubbard.1957&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">G_utsumi</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Utsumi </span><span class="se">\\</span><span class="s2">&amp; Ichimaru (zero T)&quot;</span><span class="p">,</span>
+        <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">G_farid</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Farid (zero T)&quot;</span><span class="p">,</span>
+        <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">G_geldart</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Geldart </span><span class="se">\\</span><span class="s2">&amp; Vosko (high T)&quot;</span><span class="p">,</span>
+        <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;$k_BT=$</span><span class="si">{</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="si">:</span><span class="s2">.0e</span><span class="si">}</span><span class="s2"> eV&quot;</span>  <span class="c1"># noqa:E501</span>
+    <span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$G$&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;$k / k_f$&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 11.697 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-ee-lfc-plot-ee-lfc-comparison-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/4f1033d388470197e8aaf51102f43812/plot_ee_lfc_comparison.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_ee_lfc_comparison.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/8a07d9d744a99a93e39a639b1b0a8359/plot_ee_lfc_comparison.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_ee_lfc_comparison.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Electronic local field correction examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../form_factors/index.html" class="btn btn-neutral float-right" title="form-factor examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

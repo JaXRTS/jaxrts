@@ -1,0 +1,38 @@
+jaxrts.models.LinearResponseScreening
+=====================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: LinearResponseScreening
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~LinearResponseScreening.__init__
+      ~LinearResponseScreening.check
+      ~LinearResponseScreening.citation
+      ~LinearResponseScreening.evaluate
+      ~LinearResponseScreening.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~LinearResponseScreening.allowed_keys
+      ~LinearResponseScreening.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.LinearResponseScreening:
+
+   .. minigallery:: jaxrts.models.LinearResponseScreening
+       :add-heading:

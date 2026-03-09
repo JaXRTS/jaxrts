@@ -1,0 +1,38 @@
+jaxrts.models.Gregori2004Screening
+==================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: Gregori2004Screening
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Gregori2004Screening.__init__
+      ~Gregori2004Screening.check
+      ~Gregori2004Screening.citation
+      ~Gregori2004Screening.evaluate
+      ~Gregori2004Screening.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Gregori2004Screening.allowed_keys
+      ~Gregori2004Screening.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.Gregori2004Screening:
+
+   .. minigallery:: jaxrts.models.Gregori2004Screening
+       :add-heading:

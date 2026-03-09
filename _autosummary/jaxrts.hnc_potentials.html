@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.hnc_potentials &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jaxrts.hnc_potentials.construct_alpha_matrix" href="jaxrts.hnc_potentials.construct_alpha_matrix.html" />
+    <link rel="prev" title="jaxrts.helpers.JittableDict.values" href="jaxrts.helpers.JittableDict.values.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="jaxrts.html">jaxrts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.absorption_edges_ionized_ions_data.html">jaxrts.absorption_edges_ionized_ions_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.analysis.html">jaxrts.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.bound_free.html">jaxrts.bound_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections.html">jaxrts.ee_localfieldcorrections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections_dornheim_2021.html">jaxrts.ee_localfieldcorrections_dornheim_2021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.elements.html">jaxrts.elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.experimental.html">jaxrts.experimental</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.form_factors.html">jaxrts.form_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_bound.html">jaxrts.free_bound</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_free.html">jaxrts.free_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.helpers.html">jaxrts.helpers</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">jaxrts.hnc_potentials</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hnc-potentials">HNC Potentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.construct_alpha_matrix.html">jaxrts.hnc_potentials.construct_alpha_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.construct_q_matrix.html">jaxrts.hnc_potentials.construct_q_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.pauli_potential_from_classical_map_SpinAveraged.html">jaxrts.hnc_potentials.pauli_potential_from_classical_map_SpinAveraged</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.pauli_potential_from_classical_map_SpinSeparated.html">jaxrts.hnc_potentials.pauli_potential_from_classical_map_SpinSeparated</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.transformPotential.html">jaxrts.hnc_potentials.transformPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.CoulombPotential.html">jaxrts.hnc_potentials.CoulombPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.DebyeHueckelPotential.html">jaxrts.hnc_potentials.DebyeHueckelPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.DeutschPotential.html">jaxrts.hnc_potentials.DeutschPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.EmptyCorePotential.html">jaxrts.hnc_potentials.EmptyCorePotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.HNCPotential.html">jaxrts.hnc_potentials.HNCPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.KelbgPotential.html">jaxrts.hnc_potentials.KelbgPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.KlimontovichKraeftPotential.html">jaxrts.hnc_potentials.KlimontovichKraeftPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.PauliClassicalMap.html">jaxrts.hnc_potentials.PauliClassicalMap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.PotentialSum.html">jaxrts.hnc_potentials.PotentialSum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.ScaledPotential.html">jaxrts.hnc_potentials.ScaledPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.SoftCorePotential.html">jaxrts.hnc_potentials.SoftCorePotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.SpinAveragedEEExchange.html">jaxrts.hnc_potentials.SpinAveragedEEExchange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.SpinSeparatedEEExchange.html">jaxrts.hnc_potentials.SpinSeparatedEEExchange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html">jaxrts.hnc_potentials.YukawaShortRangeRepulsion</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hypernetted_chain.html">jaxrts.hypernetted_chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.instrument_function.html">jaxrts.instrument_function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ion_feature.html">jaxrts.ion_feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ipd.html">jaxrts.ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.literature.html">jaxrts.literature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.math.html">jaxrts.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.models.html">jaxrts.models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasma_physics.html">jaxrts.plasma_physics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasmastate.html">jaxrts.plasmastate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saha.html">jaxrts.saha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saving.html">jaxrts.saving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.setup.html">jaxrts.setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.static_structure_factors.html">jaxrts.static_structure_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.units.html">jaxrts.units</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.html">jaxrts</a></li>
+      <li class="breadcrumb-item active">jaxrts.hnc_potentials</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/jaxrts.hnc_potentials.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-jaxrts.hnc_potentials">
+<span id="jaxrts-hnc-potentials"></span><h1>jaxrts.hnc_potentials<a class="headerlink" href="#module-jaxrts.hnc_potentials" title="Link to this heading"></a></h1>
+<section id="hnc-potentials">
+<h2>HNC Potentials<a class="headerlink" href="#hnc-potentials" title="Link to this heading"></a></h2>
+<p>This module contains a set of Parameters to be used when performing HNC
+calculations. This includes that the potential is split into a long-range and a
+short-range part and is also Fourier-transformed to k-space.</p>
+</section>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.construct_alpha_matrix.html#jaxrts.hnc_potentials.construct_alpha_matrix" title="jaxrts.hnc_potentials.construct_alpha_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">construct_alpha_matrix</span></code></a>(n)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.construct_q_matrix.html#jaxrts.hnc_potentials.construct_q_matrix" title="jaxrts.hnc_potentials.construct_q_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">construct_q_matrix</span></code></a>(q)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.pauli_potential_from_classical_map_SpinAveraged.html#jaxrts.hnc_potentials.pauli_potential_from_classical_map_SpinAveraged" title="jaxrts.hnc_potentials.pauli_potential_from_classical_map_SpinAveraged"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pauli_potential_from_classical_map_SpinAveraged</span></code></a>(r1, ...)</p></td>
+<td><p>This method utilizes the exact non-interacting solution for the pair distribution function (PDF) as input (see <span id="id1">[<a class="reference internal" href="../bibliography.html#id10" title="Richard Bredow. Berechnung der Struktureigenschaften dichter Plasmen mit der Classical-Map Hypernetted Chain Approximation. PhD thesis, Universität Rostock, Rostock, 2017.">Bredow, 2017</a>]</span>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.pauli_potential_from_classical_map_SpinSeparated.html#jaxrts.hnc_potentials.pauli_potential_from_classical_map_SpinSeparated" title="jaxrts.hnc_potentials.pauli_potential_from_classical_map_SpinSeparated"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pauli_potential_from_classical_map_SpinSeparated</span></code></a>(r1, ...)</p></td>
+<td><p>This method utilizes the exact non-interacting solution for the pair distribution function (PDF) as input.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.transformPotential.html#jaxrts.hnc_potentials.transformPotential" title="jaxrts.hnc_potentials.transformPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transformPotential</span></code></a>(V, r)</p></td>
+<td><p>ToDo: Test this, potentially, there is something wrong, here.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.CoulombPotential.html#jaxrts.hnc_potentials.CoulombPotential" title="jaxrts.hnc_potentials.CoulombPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoulombPotential</span></code></a>([include_electrons])</p></td>
+<td><p>A full Coulomb Potential.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.DebyeHueckelPotential.html#jaxrts.hnc_potentials.DebyeHueckelPotential" title="jaxrts.hnc_potentials.DebyeHueckelPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DebyeHueckelPotential</span></code></a>([include_electrons])</p></td>
+<td><p>The Debye-Hückel screening potential as defined, e.g., in <span id="id2">[<a class="reference internal" href="../bibliography.html#id96" title="K. Wünsch, P. Hilse, M. Schlanges, and D. O. Gericke. Structure of strongly coupled multicomponent plasmas. Physical Review E, 5 2008. doi:10.1103/physreve.77.056404.">Wünsch et al., 2008</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.DeutschPotential.html#jaxrts.hnc_potentials.DeutschPotential" title="jaxrts.hnc_potentials.DeutschPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DeutschPotential</span></code></a>([include_electrons])</p></td>
+<td><p>Quantum diffraction potential suggested by C.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.EmptyCorePotential.html#jaxrts.hnc_potentials.EmptyCorePotential" title="jaxrts.hnc_potentials.EmptyCorePotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EmptyCorePotential</span></code></a>()</p></td>
+<td><p>The Empty core potential, which is essentially a <a class="reference internal" href="jaxrts.hnc_potentials.CoulombPotential.html#jaxrts.hnc_potentials.CoulombPotential" title="jaxrts.hnc_potentials.CoulombPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoulombPotential</span></code></a> for all radii bigger than <span class="math notranslate nohighlight">\(r_\text{cut}\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.HNCPotential.html#jaxrts.hnc_potentials.HNCPotential" title="jaxrts.hnc_potentials.HNCPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HNCPotential</span></code></a>([include_electrons])</p></td>
+<td><p>Potentials, intended to be used in the HNC scheme.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.KelbgPotential.html#jaxrts.hnc_potentials.KelbgPotential" title="jaxrts.hnc_potentials.KelbgPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KelbgPotential</span></code></a>([include_electrons])</p></td>
+<td><p>Quantum diffraction potential suggested by Kelbg.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.KlimontovichKraeftPotential.html#jaxrts.hnc_potentials.KlimontovichKraeftPotential" title="jaxrts.hnc_potentials.KlimontovichKraeftPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KlimontovichKraeftPotential</span></code></a>([include_electrons])</p></td>
+<td><p>Quantum diffraction potential suggested by Klimontovich and Kraeft.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.PauliClassicalMap.html#jaxrts.hnc_potentials.PauliClassicalMap" title="jaxrts.hnc_potentials.PauliClassicalMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PauliClassicalMap</span></code></a>()</p></td>
+<td><p>Calculates the Pauli potential from the exact non-interacting UEG pair distribution function by inverting the Hyper-Netted-Chain calculations:cite:<cite>DharmaWardana.2012</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.PotentialSum.html#jaxrts.hnc_potentials.PotentialSum" title="jaxrts.hnc_potentials.PotentialSum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PotentialSum</span></code></a>(list_of_potentials)</p></td>
+<td><p>A sum of several <a class="reference internal" href="jaxrts.hnc_potentials.HNCPotential.html#jaxrts.hnc_potentials.HNCPotential" title="jaxrts.hnc_potentials.HNCPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">HNCPotential</span></code></a> s.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.ScaledPotential.html#jaxrts.hnc_potentials.ScaledPotential" title="jaxrts.hnc_potentials.ScaledPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ScaledPotential</span></code></a>(potential[, factor])</p></td>
+<td><p>A <a class="reference internal" href="jaxrts.hnc_potentials.HNCPotential.html#jaxrts.hnc_potentials.HNCPotential" title="jaxrts.hnc_potentials.HNCPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">HNCPotential</span></code></a>, scaled with a constant factor.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.SoftCorePotential.html#jaxrts.hnc_potentials.SoftCorePotential" title="jaxrts.hnc_potentials.SoftCorePotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SoftCorePotential</span></code></a>([beta])</p></td>
+<td><p>Comparable to <a class="reference internal" href="jaxrts.hnc_potentials.EmptyCorePotential.html#jaxrts.hnc_potentials.EmptyCorePotential" title="jaxrts.hnc_potentials.EmptyCorePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmptyCorePotential</span></code></a>, but to circumvent the hard cutoff, rather introduce a soft, exponential cutoff.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.SpinAveragedEEExchange.html#jaxrts.hnc_potentials.SpinAveragedEEExchange" title="jaxrts.hnc_potentials.SpinAveragedEEExchange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpinAveragedEEExchange</span></code></a>([include_electrons])</p></td>
+<td><p>See <span id="id3">[<a class="reference internal" href="../bibliography.html#id96" title="K. Wünsch, P. Hilse, M. Schlanges, and D. O. Gericke. Structure of strongly coupled multicomponent plasmas. Physical Review E, 5 2008. doi:10.1103/physreve.77.056404.">Wünsch et al., 2008</a>]</span>, Eqn (18).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.SpinSeparatedEEExchange.html#jaxrts.hnc_potentials.SpinSeparatedEEExchange" title="jaxrts.hnc_potentials.SpinSeparatedEEExchange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpinSeparatedEEExchange</span></code></a>()</p></td>
+<td><p>See <span id="id4">[<a class="reference internal" href="../bibliography.html#id96" title="K. Wünsch, P. Hilse, M. Schlanges, and D. O. Gericke. Structure of strongly coupled multicomponent plasmas. Physical Review E, 5 2008. doi:10.1103/physreve.77.056404.">Wünsch et al., 2008</a>]</span>, Eqn (17), Citing <span id="id5">[<a class="reference internal" href="../bibliography.html#id52" title="Kerson Huang. Statistical Mechanics. John Wiley \&amp; Sons, Nashville, TN, 2 edition, April 1987.">Huang, 1987</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion" title="jaxrts.hnc_potentials.YukawaShortRangeRepulsion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">YukawaShortRangeRepulsion</span></code></a>(sigma)</p></td>
+<td><p>Yukawa Potential with a short-range repulsion as used in <span id="id6">[<a class="reference internal" href="../bibliography.html#id37" title="L. B. Fletcher, H. J. Lee, T. Döppner, E. Galtier, B. Nagler, P. Heimann, C. Fortmann, S. LePape, T. Ma, M. Millot, A. Pak, D. Turnbull, D. A. Chapman, D. O. Gericke, J. Vorberger, T. White, G. Gregori, M. Wei, B. Barbrel, R. W. Falcone, C.-C. Kao, H. Nuhn, J. Welch, U. Zastrau, P. Neumayer, J. B. Hastings, and S. H. Glenzer. Ultrabright x-ray laser scattering for dynamic warm dense matter physics. Nature Photonics, 9:274–279, 4 2015. doi:10.1038/nphoton.2015.41.">Fletcher et al., 2015</a>]</span>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jaxrts.helpers.JittableDict.values.html" class="btn btn-neutral float-left" title="jaxrts.helpers.JittableDict.values" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.hnc_potentials.construct_alpha_matrix.html" class="btn btn-neutral float-right" title="jaxrts.hnc_potentials.construct_alpha_matrix" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

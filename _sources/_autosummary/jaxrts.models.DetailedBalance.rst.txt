@@ -1,0 +1,41 @@
+jaxrts.models.DetailedBalance
+=============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: DetailedBalance
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~DetailedBalance.__init__
+      ~DetailedBalance.check
+      ~DetailedBalance.citation
+      ~DetailedBalance.evaluate
+      ~DetailedBalance.evaluate_raw
+      ~DetailedBalance.prepare
+      ~DetailedBalance.sample_grid
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~DetailedBalance.allowed_keys
+      ~DetailedBalance.cite_keys
+      ~DetailedBalance.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.DetailedBalance:
+
+   .. minigallery:: jaxrts.models.DetailedBalance
+       :add-heading:

@@ -1,0 +1,49 @@
+jaxrts.experimental.SiiNN.NNModel
+=================================
+
+.. currentmodule:: jaxrts.experimental.SiiNN
+
+.. autoclass:: NNModel
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~NNModel.__init__
+      ~NNModel.eval
+      ~NNModel.iter_children
+      ~NNModel.iter_modules
+      ~NNModel.perturb
+      ~NNModel.set_attributes
+      ~NNModel.set_norms
+      ~NNModel.sow
+      ~NNModel.train
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~NNModel.dhid
+      ~NNModel.din
+      ~NNModel.dout
+      ~NNModel.norms
+      ~NNModel.shape
+      ~NNModel.norm_theta
+      ~NNModel.norm_rho
+      ~NNModel.norm_Z
+      ~NNModel.norm_k_over_qk
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.experimental.SiiNN.NNModel:
+
+   .. minigallery:: jaxrts.experimental.SiiNN.NNModel
+       :add-heading:

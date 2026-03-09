@@ -1,0 +1,42 @@
+jaxrts.models.RPA\_DandreaFit
+=============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: RPA_DandreaFit
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~RPA_DandreaFit.__init__
+      ~RPA_DandreaFit.check
+      ~RPA_DandreaFit.citation
+      ~RPA_DandreaFit.evaluate
+      ~RPA_DandreaFit.evaluate_raw
+      ~RPA_DandreaFit.prepare
+      ~RPA_DandreaFit.sample_grid
+      ~RPA_DandreaFit.susceptibility
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~RPA_DandreaFit.allowed_keys
+      ~RPA_DandreaFit.cite_keys
+      ~RPA_DandreaFit.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.RPA_DandreaFit:
+
+   .. minigallery:: jaxrts.models.RPA_DandreaFit
+       :add-heading:

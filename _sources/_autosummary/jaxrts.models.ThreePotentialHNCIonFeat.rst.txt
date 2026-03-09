@@ -1,0 +1,47 @@
+jaxrts.models.ThreePotentialHNCIonFeat
+======================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: ThreePotentialHNCIonFeat
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~ThreePotentialHNCIonFeat.Rayleigh_weight
+      ~ThreePotentialHNCIonFeat.S_ii
+      ~ThreePotentialHNCIonFeat.__init__
+      ~ThreePotentialHNCIonFeat.check
+      ~ThreePotentialHNCIonFeat.citation
+      ~ThreePotentialHNCIonFeat.evaluate
+      ~ThreePotentialHNCIonFeat.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~ThreePotentialHNCIonFeat.allowed_keys
+      ~ThreePotentialHNCIonFeat.cite_keys
+      ~ThreePotentialHNCIonFeat.k
+      ~ThreePotentialHNCIonFeat.r
+      ~ThreePotentialHNCIonFeat.r_max
+      ~ThreePotentialHNCIonFeat.pot
+      ~ThreePotentialHNCIonFeat.mix
+      ~ThreePotentialHNCIonFeat.SVT
+      ~ThreePotentialHNCIonFeat.tmult
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.ThreePotentialHNCIonFeat:
+
+   .. minigallery:: jaxrts.models.ThreePotentialHNCIonFeat
+       :add-heading:

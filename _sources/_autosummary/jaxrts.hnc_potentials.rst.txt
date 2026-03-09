@@ -1,0 +1,56 @@
+jaxrts.hnc\_potentials
+======================
+
+.. automodule:: jaxrts.hnc_potentials
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      construct_alpha_matrix
+      construct_q_matrix
+      pauli_potential_from_classical_map_SpinAveraged
+      pauli_potential_from_classical_map_SpinSeparated
+      transformPotential
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      CoulombPotential
+      DebyeHueckelPotential
+      DeutschPotential
+      EmptyCorePotential
+      HNCPotential
+      KelbgPotential
+      KlimontovichKraeftPotential
+      PauliClassicalMap
+      PotentialSum
+      ScaledPotential
+      SoftCorePotential
+      SpinAveragedEEExchange
+      SpinSeparatedEEExchange
+      YukawaShortRangeRepulsion
+   
+   
+
+   
+   
+   
+
+
+

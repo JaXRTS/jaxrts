@@ -1,0 +1,39 @@
+jaxrts.elements.Element
+=======================
+
+.. currentmodule:: jaxrts.elements
+
+.. autoclass:: Element
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Element.__init__
+      ~Element.get_binding_energies
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Element.Z
+      ~Element.symbol
+      ~Element.name
+      ~Element.electron_distribution
+      ~Element.atomic_mass
+      ~Element.cold_binding_energies
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.elements.Element:
+
+   .. minigallery:: jaxrts.elements.Element
+       :add-heading:

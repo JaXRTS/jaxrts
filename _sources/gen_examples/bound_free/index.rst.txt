@@ -1,0 +1,59 @@
+
+
+.. _sphx_glr_gen_examples_bound_free:
+
+bound-free scattering examples
+------------------------------
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows different IPD models implemented in the code for Carbon at 100 eV and for va...">
+
+.. only:: html
+
+  .. image:: /gen_examples/bound_free/images/thumb/sphx_glr_plot_ipd_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_bound_free_plot_ipd.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Compare IPD Models</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This script is used to test the bound-free edges using ionization energies from FAC code calcul...">
+
+.. only:: html
+
+  .. image:: /gen_examples/bound_free/images/thumb/sphx_glr_plot_moving_edges_vs_cold_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_bound_free_plot_moving_edges_vs_cold.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Moving edges vs cold ionoization edges</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gen_examples/bound_free/plot_ipd
+   /gen_examples/bound_free/plot_moving_edges_vs_cold
+

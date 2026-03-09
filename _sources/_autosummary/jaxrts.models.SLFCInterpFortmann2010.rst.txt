@@ -1,0 +1,39 @@
+jaxrts.models.SLFCInterpFortmann2010
+====================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: SLFCInterpFortmann2010
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SLFCInterpFortmann2010.__init__
+      ~SLFCInterpFortmann2010.check
+      ~SLFCInterpFortmann2010.citation
+      ~SLFCInterpFortmann2010.evaluate
+      ~SLFCInterpFortmann2010.evaluate_fullk
+      ~SLFCInterpFortmann2010.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SLFCInterpFortmann2010.allowed_keys
+      ~SLFCInterpFortmann2010.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.SLFCInterpFortmann2010:
+
+   .. minigallery:: jaxrts.models.SLFCInterpFortmann2010
+       :add-heading:

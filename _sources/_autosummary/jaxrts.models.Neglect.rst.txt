@@ -1,0 +1,40 @@
+jaxrts.models.Neglect
+=====================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: Neglect
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Neglect.__init__
+      ~Neglect.all_element_states
+      ~Neglect.check
+      ~Neglect.citation
+      ~Neglect.evaluate
+      ~Neglect.evaluate_raw
+      ~Neglect.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Neglect.allowed_keys
+      ~Neglect.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.Neglect:
+
+   .. minigallery:: jaxrts.models.Neglect
+       :add-heading:

@@ -1,0 +1,40 @@
+jaxrts.experimental.SiiNN.NNSiiModel
+====================================
+
+.. currentmodule:: jaxrts.experimental.SiiNN
+
+.. autoclass:: NNSiiModel
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~NNSiiModel.Rayleigh_weight
+      ~NNSiiModel.S_ii
+      ~NNSiiModel.__init__
+      ~NNSiiModel.check
+      ~NNSiiModel.citation
+      ~NNSiiModel.evaluate
+      ~NNSiiModel.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~NNSiiModel.allowed_keys
+      ~NNSiiModel.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.experimental.SiiNN.NNSiiModel:
+
+   .. minigallery:: jaxrts.experimental.SiiNN.NNSiiModel
+       :add-heading:

@@ -1,0 +1,50 @@
+jaxrts.hnc\_potentials.EmptyCorePotential
+=========================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: EmptyCorePotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~EmptyCorePotential.T
+      ~EmptyCorePotential.__init__
+      ~EmptyCorePotential.alpha
+      ~EmptyCorePotential.check
+      ~EmptyCorePotential.citation
+      ~EmptyCorePotential.full_k
+      ~EmptyCorePotential.full_r
+      ~EmptyCorePotential.lambda_ab
+      ~EmptyCorePotential.long_k
+      ~EmptyCorePotential.long_r
+      ~EmptyCorePotential.mu
+      ~EmptyCorePotential.prepare
+      ~EmptyCorePotential.q2
+      ~EmptyCorePotential.r_cut
+      ~EmptyCorePotential.short_k
+      ~EmptyCorePotential.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~EmptyCorePotential.allowed_keys
+      ~EmptyCorePotential.cite_keys
+      ~EmptyCorePotential.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.EmptyCorePotential:
+
+   .. minigallery:: jaxrts.hnc_potentials.EmptyCorePotential
+       :add-heading:

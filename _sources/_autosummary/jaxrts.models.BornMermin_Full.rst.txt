@@ -1,0 +1,42 @@
+jaxrts.models.BornMermin\_Full
+==============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: BornMermin_Full
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~BornMermin_Full.__init__
+      ~BornMermin_Full.check
+      ~BornMermin_Full.citation
+      ~BornMermin_Full.evaluate
+      ~BornMermin_Full.evaluate_raw
+      ~BornMermin_Full.prepare
+      ~BornMermin_Full.sample_grid
+      ~BornMermin_Full.susceptibility
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~BornMermin_Full.allowed_keys
+      ~BornMermin_Full.cite_keys
+      ~BornMermin_Full.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.BornMermin_Full:
+
+   .. minigallery:: jaxrts.models.BornMermin_Full
+       :add-heading:

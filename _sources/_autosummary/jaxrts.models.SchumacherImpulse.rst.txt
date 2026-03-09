@@ -1,0 +1,42 @@
+jaxrts.models.SchumacherImpulse
+===============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: SchumacherImpulse
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SchumacherImpulse.__init__
+      ~SchumacherImpulse.check
+      ~SchumacherImpulse.citation
+      ~SchumacherImpulse.evaluate
+      ~SchumacherImpulse.evaluate_raw
+      ~SchumacherImpulse.prepare
+      ~SchumacherImpulse.sample_grid
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SchumacherImpulse.allowed_keys
+      ~SchumacherImpulse.cite_keys
+      ~SchumacherImpulse.r_k
+      ~SchumacherImpulse.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.SchumacherImpulse:
+
+   .. minigallery:: jaxrts.models.SchumacherImpulse
+       :add-heading:

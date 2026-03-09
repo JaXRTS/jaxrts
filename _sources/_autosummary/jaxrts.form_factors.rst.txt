@@ -1,0 +1,47 @@
+jaxrts.form\_factors
+====================
+
+.. automodule:: jaxrts.form_factors
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      form_factor_lowering_10
+      form_factor_lowering_Zeff_10
+      pauling_all_ff
+      pauling_atomic_ff
+      pauling_effective_charge
+      pauling_f10
+      pauling_f20
+      pauling_f21
+      pauling_f30
+      pauling_f31
+      pauling_f32
+      pauling_f40
+      pauling_f41
+      pauling_f42
+      pauling_f43
+      pauling_size_screening_constants
+      pauling_xf
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

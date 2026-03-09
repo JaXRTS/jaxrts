@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plot static structure Factors in the Approximation by Arkhipov and Devletov &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="HNC: Potentials" href="plot_HNC_potentials.html" />
+    <link rel="prev" title="Ionic scattering examples" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Example gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../plot_getting_started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_multi_component.html">Multi-Species Plasmas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_reproduce_Gregori2003_fig6.html">Calculate the full structure factors for various plasma conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis-module-examples">Analysis module examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#bound-free-scattering-examples">bound-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#electronic-local-field-correction-examples">Electronic local field correction examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#form-factor-examples">form-factor examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-bound-scattering-examples">free-bound scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-free-scattering-examples">free-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#ionic-scattering-examples">Ionic scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#saha-examples">Saha Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#setup-examples">Setup Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#utility-tool-examples">Utility tool examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis/index.html">Analysis module examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bound_free/index.html">bound-free scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ee_lfc/index.html">Electronic local field correction examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../form_factors/index.html">form-factor examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_bound/index.html">free-bound scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_free/index.html">free-free scattering examples</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Ionic scattering examples</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Plot static structure Factors in the Approximation by Arkhipov and Devletov</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_potentials.html">HNC: Potentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_electron_ion_potential.html">HNC: Electron-Ion Potentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_pair_correlation_functions.html">HNC: Pair correlation function for different Γ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_static_structure_factors_Gregori2006.html">Plot static structure factors in the Approximation by Gregori for T_i != T_e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_electron_ion_potentials_II.html">Electron ion potentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_Gregori_Comparison.html">Compare HNC Calculations to Gregori.2006</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_static_structure_factors_Gregori2007.html">Plot static structure factors in Charged Hard Sphere Approximation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_multicomponent.html">HNC: Multicomponent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_LatticeDebyeModel.html">LatticeDebyeModel for approximating diffuse scattering in crystals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_ThreePotential_Wuensch.html">Static structure factor of the electron-ion system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_SVT_HNC_multicomponent.html">HNC-SVT: multi-component, multi-temperature (M-SVT)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_exchange.html">HNC calculations with Quantum exchange potentials</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../saha/index.html">Saha Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../setup/index.html">Setup Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/index.html">Utility tool examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Ionic scattering examples</a></li>
+      <li class="breadcrumb-item active">Plot static structure Factors in the Approximation by Arkhipov and Devletov</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gen_examples/ionic/plot_static_structure_factors_Arkhipov_Devletov.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gen-examples-ionic-plot-static-structure-factors-arkhipov-devletov-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="plot-static-structure-factors-in-the-approximation-by-arkhipov-and-devletov">
+<span id="sphx-glr-gen-examples-ionic-plot-static-structure-factors-arkhipov-devletov-py"></span><h1>Plot static structure Factors in the Approximation by Arkhipov and Devletov<a class="headerlink" href="#plot-static-structure-factors-in-the-approximation-by-arkhipov-and-devletov" title="Link to this heading"></a></h1>
+<p>This scripts plots <span class="math notranslate nohighlight">\(S_{ee}\)</span>, <span class="math notranslate nohighlight">\(S_{ei}\)</span>, and <span class="math notranslate nohighlight">\(S_{ii}\)</span> for
+Carbon with an ionization of 4.5 at <span class="math notranslate nohighlight">\(T = 13\text{eV}\)</span> and
+<span class="math notranslate nohighlight">\(n_e = 1\times 10^{22} 1 / \text{cm}^3\)</span>, in the approach presented
+by <span id="id1">[<a class="reference internal" href="../../bibliography.html#id4" title="Yu.V. Arkhipov and A.E. Davletov. Screened pseudopotential and static structure factors of semiclassical two-component plasmas. Physics Letters A, 247:339–342, 10 1998. doi:10.1016/s0375-9601(98)00613-6.">Arkhipov and Davletov, 1998</a>]</span>.</p>
+<img src="../../_images/sphx_glr_plot_static_structure_factors_Arkhipov_Devletov_001.svg" srcset="../../_images/sphx_glr_plot_static_structure_factors_Arkhipov_Devletov_001.svg" alt="plot static structure factors Arkhipov Devletov" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
+
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ureg</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
+
+<span class="n">k</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span>
+<span class="n">n_e</span> <span class="o">=</span> <span class="mf">1e22</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span>
+<span class="n">T_e</span> <span class="o">=</span> <span class="mf">13.0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span>
+<span class="n">T_cf</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.static_structure_factors.T_cf_Greg.html#jaxrts.static_structure_factors.T_cf_Greg" title="jaxrts.static_structure_factors.T_cf_Greg" class="sphx-glr-backref-module-jaxrts-static_structure_factors sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">static_structure_factors</span><span class="o">.</span><span class="n">T_cf_Greg</span></a><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+<span class="n">Z_f</span> <span class="o">=</span> <span class="mf">4.5</span>
+<span class="n">m_i</span> <span class="o">=</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">atomic_mass_constant</span>
+
+<span class="n">See</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.static_structure_factors.S_ee_AD.html#jaxrts.static_structure_factors.S_ee_AD" title="jaxrts.static_structure_factors.S_ee_AD" class="sphx-glr-backref-module-jaxrts-static_structure_factors sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">static_structure_factors</span><span class="o">.</span><span class="n">S_ee_AD</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_cf</span><span class="p">,</span> <span class="n">T_cf</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+<span class="n">Sei</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.static_structure_factors.S_ei_AD.html#jaxrts.static_structure_factors.S_ei_AD" title="jaxrts.static_structure_factors.S_ei_AD" class="sphx-glr-backref-module-jaxrts-static_structure_factors sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">static_structure_factors</span><span class="o">.</span><span class="n">S_ei_AD</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_cf</span><span class="p">,</span> <span class="n">T_cf</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+<span class="n">Sii</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.static_structure_factors.S_ii_AD.html#jaxrts.static_structure_factors.S_ii_AD" title="jaxrts.static_structure_factors.S_ii_AD" class="sphx-glr-backref-module-jaxrts-static_structure_factors sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">static_structure_factors</span><span class="o">.</span><span class="n">S_ii_AD</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_cf</span><span class="p">,</span> <span class="n">T_cf</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
+    <span class="n">See</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$S_</span><span class="si">{ee}</span><span class="s2">$&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
+    <span class="n">Sii</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$S_</span><span class="si">{ii}</span><span class="s2">$&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
+    <span class="n">Sei</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$S_</span><span class="si">{ei}</span><span class="s2">$&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C2&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$k$ [1/$\AA$]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Static structure factor [arb. units]&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.955 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-ionic-plot-static-structure-factors-arkhipov-devletov-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/a3f22cb529e3b2a3db378c08533f03e1/plot_static_structure_factors_Arkhipov_Devletov.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_static_structure_factors_Arkhipov_Devletov.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/76cf6f7b99d71492c79bd9f7fef473f5/plot_static_structure_factors_Arkhipov_Devletov.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_static_structure_factors_Arkhipov_Devletov.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Ionic scattering examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_HNC_potentials.html" class="btn btn-neutral float-right" title="HNC: Potentials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

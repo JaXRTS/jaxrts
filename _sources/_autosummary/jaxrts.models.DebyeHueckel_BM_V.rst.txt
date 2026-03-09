@@ -1,0 +1,39 @@
+jaxrts.models.DebyeHueckel\_BM\_V
+=================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: DebyeHueckel_BM_V
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~DebyeHueckel_BM_V.V
+      ~DebyeHueckel_BM_V.__init__
+      ~DebyeHueckel_BM_V.check
+      ~DebyeHueckel_BM_V.citation
+      ~DebyeHueckel_BM_V.evaluate
+      ~DebyeHueckel_BM_V.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~DebyeHueckel_BM_V.allowed_keys
+      ~DebyeHueckel_BM_V.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.DebyeHueckel_BM_V:
+
+   .. minigallery:: jaxrts.models.DebyeHueckel_BM_V
+       :add-heading:

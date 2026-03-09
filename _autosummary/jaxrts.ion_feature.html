@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.ion_feature &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jaxrts.ion_feature.free_electron_susceptilibily_RPA" href="jaxrts.ion_feature.free_electron_susceptilibily_RPA.html" />
+    <link rel="prev" title="jaxrts.instrument_function.instrument_supergaussian" href="jaxrts.instrument_function.instrument_supergaussian.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="jaxrts.html">jaxrts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.absorption_edges_ionized_ions_data.html">jaxrts.absorption_edges_ionized_ions_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.analysis.html">jaxrts.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.bound_free.html">jaxrts.bound_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections.html">jaxrts.ee_localfieldcorrections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections_dornheim_2021.html">jaxrts.ee_localfieldcorrections_dornheim_2021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.elements.html">jaxrts.elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.experimental.html">jaxrts.experimental</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.form_factors.html">jaxrts.form_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_bound.html">jaxrts.free_bound</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_free.html">jaxrts.free_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.helpers.html">jaxrts.helpers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hnc_potentials.html">jaxrts.hnc_potentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hypernetted_chain.html">jaxrts.hypernetted_chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.instrument_function.html">jaxrts.instrument_function</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">jaxrts.ion_feature</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ion_feature.free_electron_susceptilibily_RPA.html">jaxrts.ion_feature.free_electron_susceptilibily_RPA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ion_feature.q_DebyeHueckelChapman2015.html">jaxrts.ion_feature.q_DebyeHueckelChapman2015</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ion_feature.q_FiniteWLChapman2015.html">jaxrts.ion_feature.q_FiniteWLChapman2015</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ion_feature.q_Glenzer2009.html">jaxrts.ion_feature.q_Glenzer2009</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ion_feature.q_Gregori2004.html">jaxrts.ion_feature.q_Gregori2004</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ipd.html">jaxrts.ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.literature.html">jaxrts.literature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.math.html">jaxrts.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.models.html">jaxrts.models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasma_physics.html">jaxrts.plasma_physics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasmastate.html">jaxrts.plasmastate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saha.html">jaxrts.saha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saving.html">jaxrts.saving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.setup.html">jaxrts.setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.static_structure_factors.html">jaxrts.static_structure_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.units.html">jaxrts.units</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.html">jaxrts</a></li>
+      <li class="breadcrumb-item active">jaxrts.ion_feature</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/jaxrts.ion_feature.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-jaxrts.ion_feature">
+<span id="jaxrts-ion-feature"></span><h1>jaxrts.ion_feature<a class="headerlink" href="#module-jaxrts.ion_feature" title="Link to this heading"></a></h1>
+<p>This submodule is dedicated to the calculation of the ion-feature.</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.ion_feature.free_electron_susceptilibily_RPA.html#jaxrts.ion_feature.free_electron_susceptilibily_RPA" title="jaxrts.ion_feature.free_electron_susceptilibily_RPA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">free_electron_susceptilibily_RPA</span></code></a>(k, kappa[, lfc])</p></td>
+<td><p>Return the free electron susceptilibily given by <span id="id1">[<a class="reference internal" href="../bibliography.html#id43" title="D. O. Gericke, J. Vorberger, K. Wünsch, and G. Gregori. Screening of ionic cores in partially ionized plasmas within linear response. Physical Review E, 6 2010. doi:10.1103/physreve.81.065401.">Gericke et al., 2010</a>]</span> eqn 4</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.ion_feature.q_DebyeHueckelChapman2015.html#jaxrts.ion_feature.q_DebyeHueckelChapman2015" title="jaxrts.ion_feature.q_DebyeHueckelChapman2015"><code class="xref py py-obj docutils literal notranslate"><span class="pre">q_DebyeHueckelChapman2015</span></code></a>(k, kappa, Z_f)</p></td>
+<td><p>Calculates the Debye Hückel screening presented in <span id="id2">[<a class="reference internal" href="../bibliography.html#id13" title="D. A. Chapman, J. Vorberger, L. B. Fletcher, R. A. Baggott, L. Divol, T. Döppner, R. W. Falcone, S. H. Glenzer, G. Gregori, T. M. Guymer, A. L. Kritcher, O. L. Landen, T. Ma, A. E. Pak, and D. O. Gericke. Observation of finite-wavelength screening in high-energy-density matter. Nature Communications, 4 2015. doi:10.1038/ncomms7839.">Chapman et al., 2015</a>]</span>, eqn (5).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.ion_feature.q_FiniteWLChapman2015.html#jaxrts.ion_feature.q_FiniteWLChapman2015" title="jaxrts.ion_feature.q_FiniteWLChapman2015"><code class="xref py py-obj docutils literal notranslate"><span class="pre">q_FiniteWLChapman2015</span></code></a>(k, V_ei, T, n_e[, lfc])</p></td>
+<td><p>Calculates the Finite wavelength screening presented in <span id="id3">[<a class="reference internal" href="../bibliography.html#id13" title="D. A. Chapman, J. Vorberger, L. B. Fletcher, R. A. Baggott, L. Divol, T. Döppner, R. W. Falcone, S. H. Glenzer, G. Gregori, T. M. Guymer, A. L. Kritcher, O. L. Landen, T. Ma, A. E. Pak, and D. O. Gericke. Observation of finite-wavelength screening in high-energy-density matter. Nature Communications, 4 2015. doi:10.1038/ncomms7839.">Chapman et al., 2015</a>]</span>, eqn (3).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.ion_feature.q_Glenzer2009.html#jaxrts.ion_feature.q_Glenzer2009" title="jaxrts.ion_feature.q_Glenzer2009"><code class="xref py py-obj docutils literal notranslate"><span class="pre">q_Glenzer2009</span></code></a>(S_ei, S_ii, Z_f)</p></td>
+<td><p>Calculates the screening charge by the Function given by <span id="id4">[<a class="reference internal" href="../bibliography.html#id44" title="Siegfried H. Glenzer and Ronald Redmer. X-ray thomson scattering in high energy density plasmas. Reviews of Modern Physics, 81:1625–1663, 12 2009. doi:10.1103/revmodphys.81.1625.">Glenzer and Redmer, 2009</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.ion_feature.q_Gregori2004.html#jaxrts.ion_feature.q_Gregori2004" title="jaxrts.ion_feature.q_Gregori2004"><code class="xref py py-obj docutils literal notranslate"><span class="pre">q_Gregori2004</span></code></a>(k, m_ion, n_e, T_e, T_i, Z_f)</p></td>
+<td><p>Calculates the screening charge by the Function given by <span id="id5">[<a class="reference internal" href="../bibliography.html#id46" title="G. Gregori, S. H. Glenzer, F. J. Rogers, S. M. Pollaine, O. L. Landen, C. Blancard, G. Faussurier, P. Renaudin, S. Kuhlbrodt, and R. Redmer. Electronic structure measurements of dense plasmas. Physics of Plasmas, 11:2754–2762, 5 2004. doi:10.1063/1.1689664.">Gregori et al., 2004</a>]</span>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jaxrts.instrument_function.instrument_supergaussian.html" class="btn btn-neutral float-left" title="jaxrts.instrument_function.instrument_supergaussian" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.ion_feature.free_electron_susceptilibily_RPA.html" class="btn btn-neutral float-right" title="jaxrts.ion_feature.free_electron_susceptilibily_RPA" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

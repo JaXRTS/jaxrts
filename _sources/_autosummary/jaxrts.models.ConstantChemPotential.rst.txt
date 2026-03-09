@@ -1,0 +1,38 @@
+jaxrts.models.ConstantChemPotential
+===================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: ConstantChemPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~ConstantChemPotential.__init__
+      ~ConstantChemPotential.check
+      ~ConstantChemPotential.citation
+      ~ConstantChemPotential.evaluate
+      ~ConstantChemPotential.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~ConstantChemPotential.allowed_keys
+      ~ConstantChemPotential.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.ConstantChemPotential:
+
+   .. minigallery:: jaxrts.models.ConstantChemPotential
+       :add-heading:

@@ -1,0 +1,38 @@
+jaxrts.models.ArbitraryDegeneracyScreeningLength
+================================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: ArbitraryDegeneracyScreeningLength
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~ArbitraryDegeneracyScreeningLength.__init__
+      ~ArbitraryDegeneracyScreeningLength.check
+      ~ArbitraryDegeneracyScreeningLength.citation
+      ~ArbitraryDegeneracyScreeningLength.evaluate
+      ~ArbitraryDegeneracyScreeningLength.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~ArbitraryDegeneracyScreeningLength.allowed_keys
+      ~ArbitraryDegeneracyScreeningLength.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.ArbitraryDegeneracyScreeningLength:
+
+   .. minigallery:: jaxrts.models.ArbitraryDegeneracyScreeningLength
+       :add-heading:

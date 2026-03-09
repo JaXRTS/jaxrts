@@ -1,0 +1,38 @@
+jaxrts.models.FiniteWavelengthScreening
+=======================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: FiniteWavelengthScreening
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~FiniteWavelengthScreening.__init__
+      ~FiniteWavelengthScreening.check
+      ~FiniteWavelengthScreening.citation
+      ~FiniteWavelengthScreening.evaluate
+      ~FiniteWavelengthScreening.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~FiniteWavelengthScreening.allowed_keys
+      ~FiniteWavelengthScreening.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.FiniteWavelengthScreening:
+
+   .. minigallery:: jaxrts.models.FiniteWavelengthScreening
+       :add-heading:

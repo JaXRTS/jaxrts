@@ -1,0 +1,77 @@
+
+
+.. _sphx_glr_gen_examples_analysis:
+
+Analysis module examples
+------------------------
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows the computation of the f-sum rule for an example spectrum as suggested by Do...">
+
+.. only:: html
+
+  .. image:: /gen_examples/analysis/images/thumb/sphx_glr_plot_f-sum-rule_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_analysis_plot_f-sum-rule.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">f-sum rule for the dynamic stucture factor</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we apply the ITCFT to increasingly noisy data with different scattering angles...">
+
+.. only:: html
+
+  .. image:: /gen_examples/analysis/images/thumb/sphx_glr_plot_ITCFT_noise_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT_noise.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">ITCFT Impact of noise</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases how apply the analysis functions to get temperatures from the Laplace tr...">
+
+.. only:: html
+
+  .. image:: /gen_examples/analysis/images/thumb/sphx_glr_plot_ITCFT_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Imaginary time correlation function thermometry</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gen_examples/analysis/plot_f-sum-rule
+   /gen_examples/analysis/plot_ITCFT_noise
+   /gen_examples/analysis/plot_ITCFT
+

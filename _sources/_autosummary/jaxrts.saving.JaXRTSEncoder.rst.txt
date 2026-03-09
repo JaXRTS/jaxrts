@@ -1,0 +1,37 @@
+jaxrts.saving.JaXRTSEncoder
+===========================
+
+.. currentmodule:: jaxrts.saving
+
+.. autoclass:: JaXRTSEncoder
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~JaXRTSEncoder.__init__
+      ~JaXRTSEncoder.default
+      ~JaXRTSEncoder.encode
+      ~JaXRTSEncoder.iterencode
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~JaXRTSEncoder.item_separator
+      ~JaXRTSEncoder.key_separator
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.saving.JaXRTSEncoder:
+
+   .. minigallery:: jaxrts.saving.JaXRTSEncoder
+       :add-heading:

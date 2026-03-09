@@ -1,0 +1,38 @@
+jaxrts.models.Gericke2010ScreeningLength
+========================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: Gericke2010ScreeningLength
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Gericke2010ScreeningLength.__init__
+      ~Gericke2010ScreeningLength.check
+      ~Gericke2010ScreeningLength.citation
+      ~Gericke2010ScreeningLength.evaluate
+      ~Gericke2010ScreeningLength.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Gericke2010ScreeningLength.allowed_keys
+      ~Gericke2010ScreeningLength.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.Gericke2010ScreeningLength:
+
+   .. minigallery:: jaxrts.models.Gericke2010ScreeningLength
+       :add-heading:

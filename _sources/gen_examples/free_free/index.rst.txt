@@ -1,0 +1,131 @@
+
+
+.. _sphx_glr_gen_examples_free_free:
+
+free-free scattering examples
+-----------------------------
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following plot is a reproduction of Fig 1b in Gregori.2003.">
+
+.. only:: html
+
+  .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_See0_QCSA_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_free_free_plot_See0_QCSA.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plot See0 using the Quantum corrected Salpetera approximation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This script reprocudes Gregori.2003, Fig. 1c. showing the calculation of S_\text{ee}^{0, \text{...">
+
+.. only:: html
+
+  .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_See0_RPA_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_free_free_plot_See0_RPA.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plot See0 using the RPA approximation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Calculate the Born Collision Frequency and compare it to the published data shown in Fortmann.2...">
+
+.. only:: html
+
+  .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_BornCollision_Frequency_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_free_free_plot_BornCollision_Frequency.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Born Collision Frequency</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This examples shows how local field corrections can be very relevant and might change the resul...">
+
+.. only:: html
+
+  .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_Fortmann_BMA_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_free_free_plot_Fortmann_BMA.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Introduce LFC to Born Mermin Calculations</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The Chapman Interpolation of the Born Mermin approximation saves computation time by evaluating...">
+
+.. only:: html
+
+  .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_BM_ChapmanInterp_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_free_free_plot_BM_ChapmanInterp.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Number of interpolation in the Born Mermin Chapman Interpolation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This script reprocudes Glenzer.2009, Fig. 9b. showing the calculation of S_\text{ee}^{0, \text{...">
+
+.. only:: html
+
+  .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_See0_RPA_BM_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_free_free_plot_See0_RPA_BM.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Showing the relevance of the Born Mermin Approximation</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gen_examples/free_free/plot_See0_QCSA
+   /gen_examples/free_free/plot_See0_RPA
+   /gen_examples/free_free/plot_BornCollision_Frequency
+   /gen_examples/free_free/plot_Fortmann_BMA
+   /gen_examples/free_free/plot_BM_ChapmanInterp
+   /gen_examples/free_free/plot_See0_RPA_BM
+

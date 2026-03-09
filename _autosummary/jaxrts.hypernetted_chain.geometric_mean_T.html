@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.hypernetted_chain.geometric_mean_T &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jaxrts.hypernetted_chain.mass_weighted_T" href="jaxrts.hypernetted_chain.mass_weighted_T.html" />
+    <link rel="prev" title="jaxrts.hypernetted_chain.fourier_transform_sine" href="jaxrts.hypernetted_chain.fourier_transform_sine.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="jaxrts.html">jaxrts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.absorption_edges_ionized_ions_data.html">jaxrts.absorption_edges_ionized_ions_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.analysis.html">jaxrts.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.bound_free.html">jaxrts.bound_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections.html">jaxrts.ee_localfieldcorrections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections_dornheim_2021.html">jaxrts.ee_localfieldcorrections_dornheim_2021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.elements.html">jaxrts.elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.experimental.html">jaxrts.experimental</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.form_factors.html">jaxrts.form_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_bound.html">jaxrts.free_bound</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_free.html">jaxrts.free_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.helpers.html">jaxrts.helpers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hnc_potentials.html">jaxrts.hnc_potentials</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="jaxrts.hypernetted_chain.html">jaxrts.hypernetted_chain</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.hnc_interp.html">jaxrts.hypernetted_chain.hnc_interp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.S_ii_HNC.html">jaxrts.hypernetted_chain.S_ii_HNC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.bessel_0_5.html">jaxrts.hypernetted_chain.bessel_0_5</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.bessel_2ndkind_0_5.html">jaxrts.hypernetted_chain.bessel_2ndkind_0_5</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.bessel_3_2.html">jaxrts.hypernetted_chain.bessel_3_2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.bessel_neg0_5.html">jaxrts.hypernetted_chain.bessel_neg0_5</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.dpsi.html">jaxrts.hypernetted_chain.dpsi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.four1.html">jaxrts.hypernetted_chain.four1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.fourier_transform_ogata.html">jaxrts.hypernetted_chain.fourier_transform_ogata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.fourier_transform_sine.html">jaxrts.hypernetted_chain.fourier_transform_sine</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">jaxrts.hypernetted_chain.geometric_mean_T</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.mass_weighted_T.html">jaxrts.hypernetted_chain.mass_weighted_T</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.pair_distribution_function_HNC.html">jaxrts.hypernetted_chain.pair_distribution_function_HNC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.pair_distribution_function_SVT_HNC.html">jaxrts.hypernetted_chain.pair_distribution_function_SVT_HNC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.psi.html">jaxrts.hypernetted_chain.psi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.realfft.html">jaxrts.hypernetted_chain.realfft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.realfftnp.html">jaxrts.hypernetted_chain.realfftnp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.sinft.html">jaxrts.hypernetted_chain.sinft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hypernetted_chain.zaf_dst.html">jaxrts.hypernetted_chain.zaf_dst</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.instrument_function.html">jaxrts.instrument_function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ion_feature.html">jaxrts.ion_feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ipd.html">jaxrts.ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.literature.html">jaxrts.literature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.math.html">jaxrts.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.models.html">jaxrts.models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasma_physics.html">jaxrts.plasma_physics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasmastate.html">jaxrts.plasmastate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saha.html">jaxrts.saha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saving.html">jaxrts.saving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.setup.html">jaxrts.setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.static_structure_factors.html">jaxrts.static_structure_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.units.html">jaxrts.units</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.html">jaxrts</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.hypernetted_chain.html">jaxrts.hypernetted_chain</a></li>
+      <li class="breadcrumb-item active">jaxrts.hypernetted_chain.geometric_mean_T</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/jaxrts.hypernetted_chain.geometric_mean_T.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jaxrts-hypernetted-chain-geometric-mean-t">
+<h1>jaxrts.hypernetted_chain.geometric_mean_T<a class="headerlink" href="#jaxrts-hypernetted-chain-geometric-mean-t" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="jaxrts.hypernetted_chain.geometric_mean_T">
+<span class="sig-prename descclassname"><span class="pre">jaxrts.hypernetted_chain.</span></span><span class="sig-name descname"><span class="pre">geometric_mean_T</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/hypernetted_chain.html#geometric_mean_T"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.hypernetted_chain.geometric_mean_T" title="Link to this definition"></a></dt>
+<dd><p>Returns the geometric mean of a given temperature pair, according to
+<span id="id1">[<a class="reference internal" href="../bibliography.html#id88" title="V. Schwarz, Th. Bornath, W.-D. Kraeft, S. H. Glenzer, A. Höll, and R. Redmer. Hypernetted chain calculations for two-component plasmas. Contributions to Plasma Physics, 47:324–330, 7 2007. doi:10.1002/ctpp.200710043.">Schwarz et al., 2007</a>]</span>.</p>
+<div class="math notranslate nohighlight">
+\[\bar{T}_{ab} = \sqrt{T_aT_b}\]</div>
+</dd></dl>
+
+<span class="target" id="sphx-glr-backref-jaxrts-hypernetted-chain-geometric-mean-t"></span></section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jaxrts.hypernetted_chain.fourier_transform_sine.html" class="btn btn-neutral float-left" title="jaxrts.hypernetted_chain.fourier_transform_sine" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.hypernetted_chain.mass_weighted_T.html" class="btn btn-neutral float-right" title="jaxrts.hypernetted_chain.mass_weighted_T" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

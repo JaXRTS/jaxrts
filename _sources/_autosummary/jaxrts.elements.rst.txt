@@ -1,0 +1,42 @@
+jaxrts.elements
+===============
+
+.. automodule:: jaxrts.elements
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      electron_distribution
+      electron_distribution_ionized_state
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      Element
+      Ionization
+      MixElement
+   
+   
+
+   
+   
+   
+
+
+

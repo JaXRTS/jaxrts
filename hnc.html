@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hypernetted Chain &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SVT–OZ and notation" href="svt-hnc.html" />
+    <link rel="prev" title="Implementation details" href="implementation-details.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="usage.html">Usage</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="physics.html">Physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="first-spectrum.html">Generating a first spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">Models implemented</a></li>
+<li class="toctree-l2"><a class="reference internal" href="first_model.html">Creating your own model</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="implementation-details.html">Implementation details</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Hypernetted Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svt-hnc.html">SVT–OZ and notation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="usage.html">Usage</a></li>
+          <li class="breadcrumb-item"><a href="implementation-details.html">Implementation details</a></li>
+      <li class="breadcrumb-item active">Hypernetted Chain</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/hnc.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="hypernetted-chain">
+<h1>Hypernetted Chain<a class="headerlink" href="#hypernetted-chain" title="Link to this heading"></a></h1>
+<p>The calculation of the ion-ion static structure using hypernetted chain (HNC)
+calculations can provide good agreement with more costly techniques if adequate
+potentials are chosen <span id="id1">[<a class="reference internal" href="bibliography.html#id37" title="L. B. Fletcher, H. J. Lee, T. Döppner, E. Galtier, B. Nagler, P. Heimann, C. Fortmann, S. LePape, T. Ma, M. Millot, A. Pak, D. Turnbull, D. A. Chapman, D. O. Gericke, J. Vorberger, T. White, G. Gregori, M. Wei, B. Barbrel, R. W. Falcone, C.-C. Kao, H. Nuhn, J. Welch, U. Zastrau, P. Neumayer, J. B. Hastings, and S. H. Glenzer. Ultrabright x-ray laser scattering for dynamic warm dense matter physics. Nature Photonics, 9:274–279, 4 2015. doi:10.1038/nphoton.2015.41.">Fletcher et al., 2015</a>, <a class="reference internal" href="bibliography.html#id97" title="K. Wünsch, J. Vorberger, and D. O. Gericke. Ion structure in warm dense matter: benchmarking solutions of hypernetted-chain equations by first-principle simulations. Physical Review E, 1 2009. doi:10.1103/physreve.79.010201.">Wünsch et al., 2009</a>]</span>.</p>
+<p>It allows for obtaining pair distribution functions <span class="math notranslate nohighlight">\(g_{ab} = 1 + h_{ab}\)</span>
+by iteratively solving the Ornstein Zernike equation of a classical liquid,
+splitting it into a direct correlation function <span class="math notranslate nohighlight">\(c_{\text{ab}}\)</span> and an
+indirect term.</p>
+<div class="math notranslate nohighlight">
+\[h_{\text{ab}}(r) = c_{\text{ab}}(r) + \sum_\text{j} n_\text{j} \int
+d\mathbf{r}' \, c_{\text{aj}}\left(|\mathbf{r} - \mathbf{r}'|\right)
+h_{\text{jb}}(|\mathbf{r}'|),\]</div>
+<p>and closing it with the HNC approximation, where <span class="math notranslate nohighlight">\(V_\text{ab}\)</span> are the
+potentials between particles <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[g_{\text{ab}}(r) = \exp\left[-\beta V_{\text{ab}}(r) + h_{\text{ab}}(r) -
+c_{\text{ab}}(r)\right],\]</div>
+<p>Structure factors can the be calculated via</p>
+<div class="math notranslate nohighlight">
+\[S_{\text{ab}}(\mathbf{k}) = \delta_{\text{ab}} + \sqrt{n_a
+n_b}\int_V\mathrm{d}\mathbf{r}e^{-i\mathbf{k}\mathbf{r}}\left[g_{\text{ab}}(\mathbf{r})
+- 1\right].\]</div>
+<p>Our implementation is based on the work of Kathrin Wünsch <span id="id2">[<a class="reference internal" href="bibliography.html#id98" title="Kathrin Wünsch. Theory of X-ray Thomson scattering in warm dense matter. PhD thesis, University of Warwick, Warwick, 2011.">Wünsch, 2011</a>]</span>.
+See especially the flowchart in Figure 4.1 therein, and also
+<span id="id3">[<a class="reference internal" href="bibliography.html#id86" title="Samuel Schumacher, Julian Lütgert, Dirk O. Gericke, Mandy Bethkenhagen, Tilo Döppner, Otto L. Landen, Nathaniel R. Shaffer, Charles E. Starrett, and Dominik Kraus. Modelling thomson scattering in a hydrogen plasma at stellar interior conditions using the hypernetted-chain approach. Contributions to Plasma Physics, 3 2025. doi:10.1002/ctpp.70002.">Schumacher et al., 2025</a>]</span> and <span id="id4">[<a class="reference internal" href="bibliography.html#id90" title="Nathaniel R. Shaffer, Sanat Kumar Tiwari, and Scott D. Baalrud. Pair correlation functions of strongly coupled two-temperature plasma. Physics of Plasmas, 2017. doi:10.1063/1.4999185.">Shaffer et al., 2017</a>]</span>.</p>
+<p>Within the HNC modules, all quantities have three axis with <span class="math notranslate nohighlight">\((n\times n
+\times m)\)</span> entries, where <span class="math notranslate nohighlight">\(n\)</span> is the number of ion species considered and
+<span class="math notranslate nohighlight">\(m\)</span> is the number of <span class="math notranslate nohighlight">\(r\)</span> or <span class="math notranslate nohighlight">\(k\)</span> points considered.</p>
+<a class="reference internal image-reference" href="_images/ThreePotentialHNC.svg"><img alt="_images/ThreePotentialHNC.svg" src="_images/ThreePotentialHNC.svg" style="width: 600px;" /></a>
+<p>The HNC approach is capable of incorporating electrons, natively, by adding it
+as an additional ion species. This is normally achieved by setting
+<a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.HNCPotential.include_electrons.html#jaxrts.hnc_potentials.HNCPotential.include_electrons" title="jaxrts.hnc_potentials.HNCPotential.include_electrons"><code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.HNCPotential.include_electrons</span></code></a> to
+<code class="docutils literal notranslate"><span class="pre">&quot;SpinAverged&quot;</span></code>.
+This adds one additional entry to the first two dimensions (see figure above).</p>
+<p>If a user requires to separate two kinds of electrons for their different
+spins, set <a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.HNCPotential.include_electrons.html#jaxrts.hnc_potentials.HNCPotential.include_electrons" title="jaxrts.hnc_potentials.HNCPotential.include_electrons"><code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.HNCPotential.include_electrons</span></code></a> to
+<code class="docutils literal notranslate"><span class="pre">&quot;SpinSeparated&quot;</span></code>. This will introduce two additional entries, instead, with
+half of the electron density for each of them.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="implementation-details.html" class="btn btn-neutral float-left" title="Implementation details" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="svt-hnc.html" class="btn btn-neutral float-right" title="SVT–OZ and notation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

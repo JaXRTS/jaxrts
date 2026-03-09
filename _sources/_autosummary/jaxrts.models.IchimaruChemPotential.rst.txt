@@ -1,0 +1,38 @@
+jaxrts.models.IchimaruChemPotential
+===================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: IchimaruChemPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~IchimaruChemPotential.__init__
+      ~IchimaruChemPotential.check
+      ~IchimaruChemPotential.citation
+      ~IchimaruChemPotential.evaluate
+      ~IchimaruChemPotential.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~IchimaruChemPotential.allowed_keys
+      ~IchimaruChemPotential.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.IchimaruChemPotential:
+
+   .. minigallery:: jaxrts.models.IchimaruChemPotential
+       :add-heading:

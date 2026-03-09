@@ -1,0 +1,43 @@
+jaxrts.setup.Setup
+==================
+
+.. currentmodule:: jaxrts.setup
+
+.. autoclass:: Setup
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Setup.__init__
+      ~Setup.dispersion_corrected_k
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Setup.frequency_redistribution_correction
+      ~Setup.full_k
+      ~Setup.k
+      ~Setup.lambda0
+      ~Setup.scattering_angle
+      ~Setup.energy
+      ~Setup.measured_energy
+      ~Setup.instrument
+      ~Setup.correct_k_dispersion
+      ~Setup.frc_exponent
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.setup.Setup:
+
+   .. minigallery:: jaxrts.setup.Setup
+       :add-heading:

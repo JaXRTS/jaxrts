@@ -1,0 +1,38 @@
+jaxrts.models.GregoriCHSScreening
+=================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: GregoriCHSScreening
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~GregoriCHSScreening.__init__
+      ~GregoriCHSScreening.check
+      ~GregoriCHSScreening.citation
+      ~GregoriCHSScreening.evaluate
+      ~GregoriCHSScreening.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~GregoriCHSScreening.allowed_keys
+      ~GregoriCHSScreening.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.GregoriCHSScreening:
+
+   .. minigallery:: jaxrts.models.GregoriCHSScreening
+       :add-heading:

@@ -1,0 +1,39 @@
+jaxrts.models.ConstantIPD
+=========================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: ConstantIPD
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~ConstantIPD.__init__
+      ~ConstantIPD.all_element_states
+      ~ConstantIPD.check
+      ~ConstantIPD.citation
+      ~ConstantIPD.evaluate
+      ~ConstantIPD.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~ConstantIPD.allowed_keys
+      ~ConstantIPD.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.ConstantIPD:
+
+   .. minigallery:: jaxrts.models.ConstantIPD
+       :add-heading:

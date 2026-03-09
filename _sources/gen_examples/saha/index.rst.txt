@@ -1,0 +1,59 @@
+
+
+.. _sphx_glr_gen_examples_saha:
+
+Saha Examples
+-------------
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example compares the Rayleigh weights for a carbon plasma when a fractional ionization sta...">
+
+.. only:: html
+
+  .. image:: /gen_examples/saha/images/thumb/sphx_glr_plot_WR_expanded_ionization_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_saha_plot_WR_expanded_ionization.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Rayleigh weights for integer expanded ionization states</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases the use of the saha equation solver. This example consideres abundances ...">
+
+.. only:: html
+
+  .. image:: /gen_examples/saha/images/thumb/sphx_glr_plot_saha_hot_jupiter_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_saha_plot_saha_hot_jupiter.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Saha equation for hot jupiter materials</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gen_examples/saha/plot_WR_expanded_ionization
+   /gen_examples/saha/plot_saha_hot_jupiter
+

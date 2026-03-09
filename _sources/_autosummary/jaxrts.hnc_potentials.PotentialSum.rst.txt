@@ -1,0 +1,51 @@
+jaxrts.hnc\_potentials.PotentialSum
+===================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: PotentialSum
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~PotentialSum.T
+      ~PotentialSum.__init__
+      ~PotentialSum.alpha
+      ~PotentialSum.check
+      ~PotentialSum.citation
+      ~PotentialSum.full_k
+      ~PotentialSum.full_r
+      ~PotentialSum.lambda_ab
+      ~PotentialSum.long_k
+      ~PotentialSum.long_r
+      ~PotentialSum.mu
+      ~PotentialSum.prepare
+      ~PotentialSum.q2
+      ~PotentialSum.r_cut
+      ~PotentialSum.short_k
+      ~PotentialSum.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~PotentialSum.allowed_keys
+      ~PotentialSum.cite_keys
+      ~PotentialSum.description
+      ~PotentialSum.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.PotentialSum:
+
+   .. minigallery:: jaxrts.hnc_potentials.PotentialSum
+       :add-heading:

@@ -1,0 +1,43 @@
+jaxrts.free\_bound.FreeBoundFlippedSetup
+========================================
+
+.. currentmodule:: jaxrts.free_bound
+
+.. autoclass:: FreeBoundFlippedSetup
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~FreeBoundFlippedSetup.__init__
+      ~FreeBoundFlippedSetup.dispersion_corrected_k
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~FreeBoundFlippedSetup.frequency_redistribution_correction
+      ~FreeBoundFlippedSetup.full_k
+      ~FreeBoundFlippedSetup.k
+      ~FreeBoundFlippedSetup.lambda0
+      ~FreeBoundFlippedSetup.scattering_angle
+      ~FreeBoundFlippedSetup.energy
+      ~FreeBoundFlippedSetup.measured_energy
+      ~FreeBoundFlippedSetup.instrument
+      ~FreeBoundFlippedSetup.correct_k_dispersion
+      ~FreeBoundFlippedSetup.frc_exponent
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.free_bound.FreeBoundFlippedSetup:
+
+   .. minigallery:: jaxrts.free_bound.FreeBoundFlippedSetup
+       :add-heading:

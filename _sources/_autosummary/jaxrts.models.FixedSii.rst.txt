@@ -1,0 +1,40 @@
+jaxrts.models.FixedSii
+======================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: FixedSii
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~FixedSii.Rayleigh_weight
+      ~FixedSii.S_ii
+      ~FixedSii.__init__
+      ~FixedSii.check
+      ~FixedSii.citation
+      ~FixedSii.evaluate
+      ~FixedSii.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~FixedSii.allowed_keys
+      ~FixedSii.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.FixedSii:
+
+   .. minigallery:: jaxrts.models.FixedSii
+       :add-heading:

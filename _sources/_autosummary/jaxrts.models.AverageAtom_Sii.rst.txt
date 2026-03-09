@@ -1,0 +1,44 @@
+jaxrts.models.AverageAtom\_Sii
+==============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: AverageAtom_Sii
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~AverageAtom_Sii.__init__
+      ~AverageAtom_Sii.check
+      ~AverageAtom_Sii.citation
+      ~AverageAtom_Sii.evaluate
+      ~AverageAtom_Sii.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~AverageAtom_Sii.allowed_keys
+      ~AverageAtom_Sii.cite_keys
+      ~AverageAtom_Sii.k
+      ~AverageAtom_Sii.r
+      ~AverageAtom_Sii.r_max
+      ~AverageAtom_Sii.pot
+      ~AverageAtom_Sii.mix
+      ~AverageAtom_Sii.tmult
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.AverageAtom_Sii:
+
+   .. minigallery:: jaxrts.models.AverageAtom_Sii
+       :add-heading:

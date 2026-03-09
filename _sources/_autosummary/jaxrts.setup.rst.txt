@@ -1,0 +1,40 @@
+jaxrts.setup
+============
+
+.. automodule:: jaxrts.setup
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      convolve_stucture_factor_with_instrument
+      get_probe_setup
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      Setup
+   
+   
+
+   
+   
+   
+
+
+

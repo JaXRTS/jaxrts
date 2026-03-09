@@ -1,0 +1,39 @@
+jaxrts.models.IonSphereIPD
+==========================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: IonSphereIPD
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~IonSphereIPD.__init__
+      ~IonSphereIPD.all_element_states
+      ~IonSphereIPD.check
+      ~IonSphereIPD.citation
+      ~IonSphereIPD.evaluate
+      ~IonSphereIPD.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~IonSphereIPD.allowed_keys
+      ~IonSphereIPD.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.IonSphereIPD:
+
+   .. minigallery:: jaxrts.models.IonSphereIPD
+       :add-heading:

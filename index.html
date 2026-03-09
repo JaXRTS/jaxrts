@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">jaxrts</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jaxrts">
+<h1>jaxrts<a class="headerlink" href="#jaxrts" title="Link to this heading"></a></h1>
+<p>A Python package for X-ray Thomson scattering, using jax.</p>
+<a class="reference internal image-reference" href="_images/jaxrts_logo.svg"><img alt="_images/jaxrts_logo.svg" src="_images/jaxrts_logo.svg" style="width: 600px;" /></a>
+<p>X-ray Thomson scattering (XRTS) is a diagnostic widely used in the warm dense
+matter and dense plasma community.
+The theory of XRTS has been discussed in many publications, e.g.
+<span id="id1">[<a class="reference internal" href="bibliography.html#id12" title="David Alan Chapman. Probing the dynamic response of dense matter with x-ray Thomson scattering. PhD thesis, The University of, Warwick, 2015.">Chapman, 2015</a>, <a class="reference internal" href="bibliography.html#id44" title="Siegfried H. Glenzer and Ronald Redmer. X-ray thomson scattering in high energy density plasmas. Reviews of Modern Physics, 81:1625–1663, 12 2009. doi:10.1103/revmodphys.81.1625.">Glenzer and Redmer, 2009</a>, <a class="reference internal" href="bibliography.html#id45" title="G. Gregori, S. H. Glenzer, W. Rozmus, R. W. Lee, and O. L. Landen. Theoretical model of x-ray scattering as a dense matter probe. Physical Review E, 2 2003. doi:10.1103/physreve.67.026412.">Gregori et al., 2003</a>, <a class="reference internal" href="bibliography.html#id46" title="G. Gregori, S. H. Glenzer, F. J. Rogers, S. M. Pollaine, O. L. Landen, C. Blancard, G. Faussurier, P. Renaudin, S. Kuhlbrodt, and R. Redmer. Electronic structure measurements of dense plasmas. Physics of Plasmas, 11:2754–2762, 5 2004. doi:10.1063/1.1689664.">Gregori et al., 2004</a>, <a class="reference internal" href="bibliography.html#id98" title="Kathrin Wünsch. Theory of X-ray Thomson scattering in warm dense matter. PhD thesis, University of Warwick, Warwick, 2011.">Wünsch, 2011</a>]</span>,</p>
+<p>Since the method of XRTS embarked, many models have been formulated to
+calculate spectra. This code collects several of these efforts and
+thereby assists experiment analysis and planning with easy forward
+calculations.
+By splitting the full signal in different contributions according to the Chihara
+decomposition <span id="id2">[<a class="reference internal" href="bibliography.html#id16" title="Junzo Chihara. Interaction of photons with plasmas and liquid metals - photoabsorption and scattering. Journal of Physics: Condensed Matter, 12:231–247, 1 2000. doi:10.1088/0953-8984/12/3/303.">Chihara, 2000</a>, <a class="reference internal" href="bibliography.html#id45" title="G. Gregori, S. H. Glenzer, W. Rozmus, R. W. Lee, and O. L. Landen. Theoretical model of x-ray scattering as a dense matter probe. Physical Review E, 2 2003. doi:10.1103/physreve.67.026412.">Gregori et al., 2003</a>]</span>, we allow users to combine
+the implemented models, applicable to different plasma conditions and
+involving varying computational cost to find a description according to their
+needs.</p>
+<p>This documentation aims on providing an overview about the capabilities of
+jaxrts, and should help you taking your first steps. A discussion focussing on
+more details about the physics implemented is currently in the works.
+A detailed description of the <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module is available under
+<a class="reference internal" href="module_overview.html"><span class="doc">The jaxrts module</span></a>. If you prefer to learn by examples, we kindly refer you
+to the <a class="reference internal" href="gen_examples/index.html"><span class="doc">example gallery</span></a>.</p>
+<p>We would not have been able to write jaxrts without the seminal work by D.
+Chapman, G. Gregori, K. Wünsch and D. O. Gericke, and many other authors. A
+full bibliography can be found in the <a class="reference internal" href="bibliography.html"><span class="doc">Bibliography</span></a>.</p>
+<p>The code is currently maintained by Samuel Schumacher and Julian Lütgert in the
+High Energy Density Group of Dominik Kraus at the University of Rostock.
+<a class="reference external" href="https://github.com/JaXRTS/jaxrts/graphs/contributors">See here</a> for a list
+of contributors to the software.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This code is still under active development, so are it’s dependencies. While
+we successfully reproduce data found in the literature and applied several
+models to experimental data, we are still implementing new features and
+correct bugs. Please kindly reach out to us if you note faulty behavior, and
+understand that – while we attempt to maintain a stable user experience –
+some results might change when errors are fixed.
+See <a class="reference external" href="https://github.com/jaxrts/jaxrts">https://github.com/jaxrts/jaxrts</a> for the most up-to-date version of
+jaxrts.</p>
+<p>We highly recommend installing the code in a virtual environemnt of it’s
+own, to not interfere with other python packages in your system.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Currently, the code is only tested on linux operating systems. While the
+project itself should run on other platforms, too, we do not actively test
+jaxrts against them. Please also note that currently, GPU acceleration is
+only available on linux,
+<a class="reference external" href="https://docs.jax.dev/en/latest/installation.html#supported-platforms">as we rely on jax</a> .
+CPU computation should be supported on Mac, Windows, and linux.</p>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installing.html#installing-additional-features">Installing additional features</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="physics.html">Physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="first-spectrum.html">Generating a first spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">Models implemented</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#screening-length">screening length</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#ionic-scattering">ionic scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#bm-s-ii">BM S_ii</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#debye-temperature">Debye temperature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#free-free-scattering">free-free scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#chemical-potential">chemical potential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#ipd">ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#screening">screening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#bm-v-eis">BM V_eiS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#free-bound-scattering">free-bound scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#ee-lfc">ee-lfc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#form-factors">form-factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#bound-free-scattering">bound-free scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#ion-ion-potential">ion-ion Potential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#electron-ion-potential">electron-ion Potential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#electron-electron-potential">electron-electron Potential</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="first_model.html">Creating your own model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementation-details.html">Implementation details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hnc.html">Hypernetted Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svt-hnc.html">SVT–OZ and notation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gen_examples/index.html">Example gallery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gen_examples/index.html#analysis-module-examples">Analysis module examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen_examples/index.html#bound-free-scattering-examples">bound-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen_examples/index.html#electronic-local-field-correction-examples">Electronic local field correction examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen_examples/index.html#form-factor-examples">form-factor examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen_examples/index.html#free-bound-scattering-examples">free-bound scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen_examples/index.html#free-free-scattering-examples">free-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen_examples/index.html#ionic-scattering-examples">Ionic scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen_examples/index.html#saha-examples">Saha Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen_examples/index.html#setup-examples">Setup Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen_examples/index.html#utility-tool-examples">Utility tool examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development and Poetry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development.html#building-a-new-release-version">Building a new release version</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/jaxrts.html">jaxrts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.absorption_edges_ionized_ions_data.html">jaxrts.absorption_edges_ionized_ions_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.analysis.html">jaxrts.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.bound_free.html">jaxrts.bound_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.ee_localfieldcorrections.html">jaxrts.ee_localfieldcorrections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.ee_localfieldcorrections_dornheim_2021.html">jaxrts.ee_localfieldcorrections_dornheim_2021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.elements.html">jaxrts.elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.experimental.html">jaxrts.experimental</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.form_factors.html">jaxrts.form_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.free_bound.html">jaxrts.free_bound</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.free_free.html">jaxrts.free_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.helpers.html">jaxrts.helpers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.html">jaxrts.hnc_potentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.hypernetted_chain.html">jaxrts.hypernetted_chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.instrument_function.html">jaxrts.instrument_function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.ion_feature.html">jaxrts.ion_feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.ipd.html">jaxrts.ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.literature.html">jaxrts.literature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.math.html">jaxrts.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.models.html">jaxrts.models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.plasma_physics.html">jaxrts.plasma_physics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.plasmastate.html">jaxrts.plasmastate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.saha.html">jaxrts.saha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.saving.html">jaxrts.saving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.setup.html">jaxrts.setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.static_structure_factors.html">jaxrts.static_structure_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/jaxrts.units.html">jaxrts.units</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installing.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+jaxrts.models.FormFactorLowering
+================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: FormFactorLowering
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~FormFactorLowering.__init__
+      ~FormFactorLowering.check
+      ~FormFactorLowering.citation
+      ~FormFactorLowering.evaluate
+      ~FormFactorLowering.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~FormFactorLowering.allowed_keys
+      ~FormFactorLowering.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.FormFactorLowering:
+
+   .. minigallery:: jaxrts.models.FormFactorLowering
+       :add-heading:

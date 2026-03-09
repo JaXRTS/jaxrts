@@ -1,0 +1,51 @@
+jaxrts.hnc\_potentials.SoftCorePotential
+========================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: SoftCorePotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SoftCorePotential.T
+      ~SoftCorePotential.__init__
+      ~SoftCorePotential.alpha
+      ~SoftCorePotential.check
+      ~SoftCorePotential.citation
+      ~SoftCorePotential.full_k
+      ~SoftCorePotential.full_r
+      ~SoftCorePotential.lambda_ab
+      ~SoftCorePotential.long_k
+      ~SoftCorePotential.long_r
+      ~SoftCorePotential.mu
+      ~SoftCorePotential.prepare
+      ~SoftCorePotential.q2
+      ~SoftCorePotential.r_cut
+      ~SoftCorePotential.short_k
+      ~SoftCorePotential.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SoftCorePotential.allowed_keys
+      ~SoftCorePotential.cite_keys
+      ~SoftCorePotential.beta
+      ~SoftCorePotential.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.SoftCorePotential:
+
+   .. minigallery:: jaxrts.hnc_potentials.SoftCorePotential
+       :add-heading:

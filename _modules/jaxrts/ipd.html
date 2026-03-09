@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.ipd &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.ipd</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.ipd</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module to account for Ionization Potential Depression (IPD)</span>
+
+<span class="sd">All these implementations and formulas are taken from &#39;Modifications of Bound</span>
+<span class="sd">States in Dense Plasma Environments&#39; by Rory A. Baggott. :cite:`Baggott.2017`</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jpu</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnpu</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">quadax</span><span class="w"> </span><span class="kn">import</span> <span class="n">quadts</span> <span class="k">as</span> <span class="n">quad</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.math</span><span class="w"> </span><span class="kn">import</span> <span class="n">fermi_neg12_rational_approximation_antia</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plasma_physics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">chem_pot_interpolationIchimaru</span> <span class="k">as</span> <span class="n">chem_pot_interpolation</span><span class="p">,</span> <span class="n">fermi_energy</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="inverse_screening_length_e">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.inverse_screening_length_e.html#jaxrts.ipd.inverse_screening_length_e">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">inverse_screening_length_e</span><span class="p">(</span><span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Te</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inverse screening length for arbitrary degeneracy for the electron</span>
+<span class="sd">    as needed for WDM applications. (Taken from :cite:`Baggott.2017`)</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">       This result reproduces eqn. 19 in :cite:`Ropke.2019`, up to a factor of</span>
+<span class="sd">       :math:`4 \\pi`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span>
+
+    <span class="c1"># This should take the chemical potential of the plasma state instead.</span>
+    <span class="n">chem_pot</span> <span class="o">=</span> <span class="n">chem_pot_interpolation</span><span class="p">(</span><span class="n">Te</span><span class="p">,</span> <span class="n">ne</span><span class="p">)</span>
+
+    <span class="n">beta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Te</span><span class="p">)</span>
+
+    <span class="n">fermi_integral_neg1_2</span> <span class="o">=</span> <span class="n">fermi_neg12_rational_approximation_antia</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">chem_pot</span> <span class="o">*</span> <span class="n">beta</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">therm_wv</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Te</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">k_sq</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Te</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">/</span> <span class="n">therm_wv</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">fermi_integral_neg1_2</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">k_sq</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ipd_debye_hueckel">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.ipd_debye_hueckel.html#jaxrts.ipd.ipd_debye_hueckel">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;arb_deg&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipd_debye_hueckel</span><span class="p">(</span>
+    <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">ni</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Te</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Ti</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Zbar</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">arb_deg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The correction to the ionization potential for the m-th ionization stage in</span>
+<span class="sd">    Debye-Hueckel approximation.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">       The Debye-Hueckel approximation is physically meaningful only when</span>
+<span class="sd">       the coupling parameter &lt;&lt; 1, such that Coulomb forces are weak</span>
+<span class="sd">       perturbations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Zi</span>
+<span class="sd">        The charge state of the atom (note that this is the state before the</span>
+<span class="sd">        ionization).</span>
+<span class="sd">    ne</span>
+<span class="sd">        Electron density. Units of 1/[length]**3.</span>
+<span class="sd">    ni</span>
+<span class="sd">        Ion density. Units of 1/[length]**3.</span>
+<span class="sd">    Te</span>
+<span class="sd">        The electron temperature.</span>
+<span class="sd">    Ti</span>
+<span class="sd">        The ion temperature.</span>
+<span class="sd">    arb_deg: bool, default false</span>
+<span class="sd">        If ``True`` the Debye screening length is evaluated using</span>
+<span class="sd">        :py:func:`inverse_screening_length_e`, which includes solving the Fermi</span>
+<span class="sd">        integral, rather than the classical value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity.</span>
+<span class="sd">        The ipd shift in units of electronvolt.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">Zbar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Zbar</span> <span class="o">=</span> <span class="n">Zi</span>
+
+    <span class="n">kappa_i_sq</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Zbar</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ni</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Ti</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">arb_deg</span><span class="p">:</span>
+        <span class="n">kappa_e</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inverse_screening_length_e</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">Te</span><span class="p">))</span>
+        <span class="n">kappa_D</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_i_sq</span> <span class="o">+</span> <span class="n">kappa_e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kappa_e_sq</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ne</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Te</span>
+        <span class="p">)</span>
+        <span class="n">kappa_D</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_i_sq</span> <span class="o">+</span> <span class="n">kappa_e_sq</span><span class="p">)</span>
+
+    <span class="c1"># The ionization potential depression energy shift</span>
+    <span class="n">ipd_shift</span> <span class="o">=</span> <span class="n">kappa_D</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="o">-</span><span class="p">(</span><span class="n">Zi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ipd_shift</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ipd_ion_sphere">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.ipd_ion_sphere.html#jaxrts.ipd.ipd_ion_sphere">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipd_ion_sphere</span><span class="p">(</span>
+    <span class="n">Zi</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">ni</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">C</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">Zbar</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The correction to the ionization potential for the m-th ionization stage in</span>
+<span class="sd">    the ion-sphere model. The ion-sphere model considers the ions to be</span>
+<span class="sd">    strongly correlated. (see also :cite:`Zimmermann.1980`)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Zi</span>
+<span class="sd">        The charge state of the atom (note that this is the state before the</span>
+<span class="sd">        ionization)</span>
+<span class="sd">    ne</span>
+<span class="sd">        Electron density. Units of 1/[length]**3.</span>
+<span class="sd">    ni</span>
+<span class="sd">        Ion density. Units of 1/[length]**3.</span>
+<span class="sd">    C: float, optional</span>
+<span class="sd">        A linear scaling factor of it ion Sphere IPD. The default value is 3/2,</span>
+<span class="sd">        which is consistent with the limit of :py:func:`~.ipd_stewart_pyatt`</span>
+<span class="sd">        and :cite:`Crowley.2014`. Another typical value would be 9/5,</span>
+<span class="sd">        introduced by :cite:`Zimmermann.1980`. See also :cite:`Lin.2017` and</span>
+<span class="sd">        :cite:`Ciricosta.2012`.</span>
+<span class="sd">    Zbar: float, optional</span>
+<span class="sd">        The average ionization of the plasma. If not given, Zi is assumed to be</span>
+<span class="sd">        the average ionization of the plasma.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The ipd shift in units of electronvolt.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Zi</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Zi</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+    <span class="n">Zbar</span> <span class="o">=</span> <span class="n">Zi</span> <span class="k">if</span> <span class="n">Zbar</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Zbar</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+
+    <span class="c1"># The ion-sphere radius, determined by the ion density n_i such that the</span>
+    <span class="c1"># average distance to the nearest neighbor ion is</span>
+    <span class="c1"># approximately 2 R_0.</span>
+    <span class="n">R_0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">Zbar</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ne</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">C</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="n">ipd_shift</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">C</span> <span class="o">*</span> <span class="p">(</span><span class="n">Zi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">R_0</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ipd_shift</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ipd_stewart_pyatt">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.ipd_stewart_pyatt.html#jaxrts.ipd.ipd_stewart_pyatt">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;arb_deg&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipd_stewart_pyatt</span><span class="p">(</span>
+    <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">ni</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Te</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Ti</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Zbar</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">arb_deg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stewart-Pyatt IPD model, using the formulation which can be found, e.g., in</span>
+<span class="sd">    :cite:`Calisti.2015` or :cite:`Ropke.2019`.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">       The Stewart-Pyatt value is always below both the Debye and ion sphere</span>
+<span class="sd">       results.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Zi</span>
+<span class="sd">        The charge state of the atom (note that this is the state before the</span>
+<span class="sd">        ionization).</span>
+<span class="sd">    ne</span>
+<span class="sd">        Electron density. Units of 1/[length]**3.</span>
+<span class="sd">    ni</span>
+<span class="sd">        Ion density. Units of 1/[length]**3.</span>
+<span class="sd">    Te</span>
+<span class="sd">        The electron temperature.</span>
+<span class="sd">    Ti</span>
+<span class="sd">        The ion temperature.</span>
+<span class="sd">    Zbar: float, optional</span>
+<span class="sd">        The average ionization of the plasma. If not given, Zi is assumed to be</span>
+<span class="sd">        the average ionization of the plasma.</span>
+<span class="sd">    arb_deg: bool, default false</span>
+<span class="sd">        If ``True`` the Debye screening length is evaluated using</span>
+<span class="sd">        :py:func:`inverse_screening_length_e`, which includes solving the Fermi</span>
+<span class="sd">        integral, rather than the classical value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The ipd shift in units of electronvolt.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Zi</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Zi</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+    <span class="n">Zbar</span> <span class="o">=</span> <span class="n">Zi</span> <span class="k">if</span> <span class="n">Zbar</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Zbar</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+
+    <span class="n">kappa_i_sq</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Zbar</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ni</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Ti</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">arb_deg</span><span class="p">:</span>
+        <span class="n">kappa_e</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inverse_screening_length_e</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">Te</span><span class="p">))</span>
+        <span class="n">kappa_D</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_i_sq</span> <span class="o">+</span> <span class="n">kappa_e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kappa_e_sq</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ne</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Te</span>
+        <span class="p">)</span>
+        <span class="n">kappa_D</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_i_sq</span> <span class="o">+</span> <span class="n">kappa_e_sq</span><span class="p">)</span>
+
+    <span class="n">R_0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ni</span><span class="p">)))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">kappa_D</span> <span class="o">/</span> <span class="n">R_0</span>
+
+    <span class="n">ipd_shift</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">Zi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">R_0</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">s</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">s</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ipd_shift</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ipd_stewart_pyatt_preston">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.ipd_stewart_pyatt_preston.html#jaxrts.ipd.ipd_stewart_pyatt_preston">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;arb_deg&quot;</span><span class="p">,</span> <span class="s2">&quot;crowley_correction&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipd_stewart_pyatt_preston</span><span class="p">(</span>
+    <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">ni</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Te</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Ti</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">ion_population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">arb_deg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">crowley_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Stewart Pyatt IPD, as presented by :cite:`Preston.2013`, which closely</span>
+<span class="sd">    resembles the seminal work of :cite:`Stewart.1966`.</span>
+
+<span class="sd">    The IPD is dependent on the quantity</span>
+<span class="sd">    :math:`z^* = \\frac{\\langle z^2 \\rangle}{\\langle z\\rangle}` which is</span>
+<span class="sd">    only calculated if an ``ion_population`` argument is given. Otherwise, we</span>
+<span class="sd">    assume this value was the average ionization state, which is, however, not</span>
+<span class="sd">    accurate.</span>
+
+<span class="sd">    The connection between this formulation and the implementation in</span>
+<span class="sd">    :py:func:`~.ipd_stewart_pyatt` can be found in Appendix A of</span>
+<span class="sd">    :cite:`Pain.2022`.</span>
+
+<span class="sd">    :cite:`Crowley.2014` pointed out a correction to the formula used by</span>
+<span class="sd">    Stewart and Pyatt. This can be handled by setting the</span>
+<span class="sd">    ``crowley_correction`` flag to true</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Z</span>
+<span class="sd">        The charge state of the atom (note that this is the state before the</span>
+<span class="sd">        ionization).</span>
+<span class="sd">    ne</span>
+<span class="sd">        Electron density. Units of 1/[length]**3.</span>
+<span class="sd">    ni</span>
+<span class="sd">        Ion density. Units of 1/[length]**3.</span>
+<span class="sd">    Te</span>
+<span class="sd">        The electron temperature.</span>
+<span class="sd">    Ti</span>
+<span class="sd">        The ion temperature.</span>
+<span class="sd">    ion_population</span>
+<span class="sd">        The ion population fractions.</span>
+<span class="sd">    arb_deg: bool, default false</span>
+<span class="sd">        If ``True`` the Debye screening length is evaluated using</span>
+<span class="sd">        :py:func:`inverse_screening_length_e`, which includes solving the Fermi</span>
+<span class="sd">        integral, rather than the classical value.</span>
+<span class="sd">    crowley_correction: bool, default False</span>
+<span class="sd">        If ``True`` apply the correction presented by :cite:`Crowley.2014`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The ipd shift in units of electronvolt.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">ion_population</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Zp</span> <span class="o">=</span> <span class="n">ne</span> <span class="o">/</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ni</span><span class="p">)</span>
+        <span class="n">Zbar</span> <span class="o">=</span> <span class="n">ne</span> <span class="o">/</span> <span class="n">ni</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ion_population</span><span class="p">))</span>
+        <span class="n">Zbar</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Z</span> <span class="o">*</span> <span class="n">ion_population</span><span class="p">)</span>
+        <span class="n">Zp</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Z</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ion_population</span><span class="p">)</span> <span class="o">/</span> <span class="n">Zbar</span>
+
+    <span class="n">cc</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">crowley_correction</span> <span class="k">else</span> <span class="mi">1</span>
+
+    <span class="n">kappa_i_sq</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Zbar</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ni</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Ti</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">arb_deg</span><span class="p">:</span>
+        <span class="n">kappa_e</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inverse_screening_length_e</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">Te</span><span class="p">))</span>
+        <span class="n">kappa_D</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_i_sq</span> <span class="o">+</span> <span class="n">kappa_e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kappa_e_sq</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ne</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Te</span>
+        <span class="p">)</span>
+        <span class="n">kappa_D</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_i_sq</span> <span class="o">+</span> <span class="n">kappa_e_sq</span><span class="p">)</span>
+    <span class="n">lambda_D</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">kappa_D</span>
+
+    <span class="n">Lambda</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">3</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">Zp</span> <span class="o">+</span> <span class="n">cc</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">Zi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">/</span> <span class="p">(</span>
+            <span class="mi">4</span>
+            <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span>
+            <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span>
+            <span class="o">*</span> <span class="n">lambda_D</span>
+            <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span>
+            <span class="o">*</span> <span class="n">Ti</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">ipd_shift</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Ti</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">Zp</span> <span class="o">+</span> <span class="n">cc</span><span class="p">))</span>
+        <span class="o">*</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Lambda</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ipd_shift</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ipd_ecker_kroell">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.ipd_ecker_kroell.html#jaxrts.ipd.ipd_ecker_kroell">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;arb_deg&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipd_ecker_kroell</span><span class="p">(</span>
+    <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">ni</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Te</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Ti</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_max</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Zbar</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">arb_deg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">C</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The ionization potential for an atom with charge Zi in the Ecker-Kroell</span>
+<span class="sd">    model.</span>
+<span class="sd">    Defines a critical density under which the IPD is identical to</span>
+<span class="sd">    :py:func:`~.ipd_debye_hueckel`. Above that value, the IPD is given by a</span>
+<span class="sd">    Ecker Kröll length. If no value ``C`` is given, the latter value is scaled</span>
+<span class="sd">    to have a continuous IPD. Some studies (e.g. :cite:`Preston.2013` use a</span>
+<span class="sd">    modified Ecker Kröll model, where a specific value of ``C`` (often 1) is</span>
+<span class="sd">    set instead. For details see :cite:`EckerKroell.1963`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Zi</span>
+<span class="sd">        The charge state of the atom (note that this is the state before the</span>
+<span class="sd">        ionization)</span>
+<span class="sd">    ne</span>
+<span class="sd">        Electron density. Units of 1/[length]**3.</span>
+<span class="sd">    ni</span>
+<span class="sd">        Ion density. Units of 1/[length]**3.</span>
+<span class="sd">    Te</span>
+<span class="sd">        The electron temperature.</span>
+<span class="sd">    Ti</span>
+<span class="sd">        The ion temperature.</span>
+<span class="sd">    Z_max: Quantity</span>
+<span class="sd">        Array of maximal charges of the ions. Must be of the same shape as ni.</span>
+<span class="sd">    Zbar: float, optional</span>
+<span class="sd">        The average ionization of the plasma. If not given, Zi is assumed to be</span>
+<span class="sd">        the average ionization of the plasma.</span>
+<span class="sd">    arb_deg: bool, default false</span>
+<span class="sd">        If ``True`` the Debye screening length is evaluated using</span>
+<span class="sd">        :py:func:`inverse_screening_length_e`, which includes solving the Fermi</span>
+<span class="sd">        integral, rather than the classical value.</span>
+<span class="sd">    C: float or None, default None</span>
+<span class="sd">        Multiplicative factor for the high-density part of the EK model. If set</span>
+<span class="sd">        to None, the factor is chosen to achieve a continuous IPD.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The ipd shift in units of electronvolt.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">Zbar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Zbar</span> <span class="o">=</span> <span class="n">Zi</span>
+    <span class="c1"># The critical density in the model of Ecker-Kroell</span>
+    <span class="n">n_c</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span>
+        <span class="o">*</span> <span class="n">Te</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">Z_max</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
+
+    <span class="c1"># Calculating lambda_D at the critical density if arb_deg is given requires</span>
+    <span class="c1"># to split n_c = n_i + n_e, to that the electronic part can be treated</span>
+    <span class="c1"># individually.</span>
+
+    <span class="n">ne_crit</span> <span class="o">=</span> <span class="n">n_c</span> <span class="o">/</span> <span class="p">(</span><span class="n">ne</span> <span class="o">+</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ni</span><span class="p">))</span> <span class="o">*</span> <span class="n">ne</span>
+    <span class="n">ni_crit</span> <span class="o">=</span> <span class="n">n_c</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">ne</span> <span class="o">+</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ni</span><span class="p">))</span> <span class="o">*</span> <span class="n">ni</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="n">kappa_i_sq</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+        <span class="n">Zbar</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">*</span> <span class="n">ni</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Ti</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">kappa_i_sq_crit</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+        <span class="n">Zbar</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">*</span> <span class="n">ni_crit</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Ti</span><span class="p">),</span>
+        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">arb_deg</span><span class="p">:</span>
+        <span class="n">kappa_e</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inverse_screening_length_e</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">Te</span><span class="p">))</span>
+        <span class="n">kappa_D</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_i_sq</span> <span class="o">+</span> <span class="n">kappa_e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">kappa_e_crit</span> <span class="o">=</span> <span class="n">inverse_screening_length_e</span><span class="p">(</span><span class="n">ne_crit</span><span class="p">,</span> <span class="n">Te</span><span class="p">)</span>
+        <span class="n">kappa_D_crit</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_i_sq_crit</span> <span class="o">+</span> <span class="n">kappa_e_crit</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kappa_e_sq</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ne</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Te</span>
+        <span class="p">)</span>
+        <span class="n">kappa_D</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_i_sq</span> <span class="o">+</span> <span class="n">kappa_e_sq</span><span class="p">)</span>
+        <span class="n">kappa_e_sq_crit</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
+            <span class="o">*</span> <span class="n">ne_crit</span>
+            <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Te</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">kappa_D_crit</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_i_sq_crit</span> <span class="o">+</span> <span class="n">kappa_e_sq_crit</span><span class="p">)</span>
+    <span class="n">lambda_D</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">kappa_D</span>
+
+    <span class="c1"># For the definitions, see e.g., :cite:`Preston.2013`.</span>
+    <span class="n">R_EK</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">ne</span> <span class="o">+</span> <span class="n">ni</span><span class="p">)))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">R_EK_crit</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">n_c</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">C</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="p">(</span><span class="n">kappa_D_crit</span> <span class="o">*</span> <span class="n">R_EK_crit</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+
+    <span class="n">ipd_c1</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mi">1</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">lambda_D</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">Zi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">ipd_c2</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="n">C</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">R_EK</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">Zi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># The ionization potential depression energy shift</span>
+    <span class="n">ipd_shift</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">ni</span> <span class="o">+</span> <span class="n">ne</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">n_c</span><span class="p">,</span> <span class="n">ipd_c1</span><span class="p">,</span> <span class="n">ipd_c2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ipd_shift</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ipd_pauli_blocking">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.ipd_pauli_blocking.html#jaxrts.ipd.ipd_pauli_blocking">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipd_pauli_blocking</span><span class="p">(</span>
+    <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ni</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Te</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Ti</span><span class="p">:</span> <span class="n">Quantity</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The correction to the ionization potential due to Pauli blocking, as</span>
+<span class="sd">    described in :cite:`Ropke.2019`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Zi</span>
+<span class="sd">        The charge state of the atom (note that this is the state before the</span>
+<span class="sd">        ionization)</span>
+<span class="sd">    ne</span>
+<span class="sd">        Electron density. Units of 1/[length]**3.</span>
+<span class="sd">    ni</span>
+<span class="sd">        Ion density. Units of 1/[length]**3.</span>
+<span class="sd">    Te</span>
+<span class="sd">        The electron temperature.</span>
+<span class="sd">    Ti</span>
+<span class="sd">        The ion temperature.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The ipd shift in units of electronvolt.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This function is not well-defined for Zi==0:</span>
+    <span class="n">Zi</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Zi</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+
+    <span class="n">chem_pot</span> <span class="o">=</span> <span class="n">chem_pot_interpolation</span><span class="p">(</span><span class="n">Te</span><span class="p">,</span> <span class="n">ne</span><span class="p">)</span>
+
+    <span class="c1"># Reduced Bohr radius</span>
+    <span class="n">a_Z</span> <span class="o">=</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span> <span class="o">/</span> <span class="n">Zi</span>
+
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">integrand</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">/=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">p</span><span class="o">**</span><span class="mi">2</span>
+            <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">a_Z</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">p</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="mi">1</span>
+                <span class="o">/</span> <span class="p">(</span>
+                    <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">*</span> <span class="n">p</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">)</span>
+                            <span class="o">-</span> <span class="n">chem_pot</span>
+                        <span class="p">)</span>
+                        <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Te</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="o">+</span> <span class="mi">1</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">integral</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span>
+        <span class="n">integrand</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span> <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span> <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-15</span>
+    <span class="p">)</span>
+    <span class="n">integral</span> <span class="o">/=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="o">**</span><span class="mi">3</span>
+    <span class="c1"># The ionization potential depression energy shift</span>
+    <span class="n">ipd_shift</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">Zi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="mi">16</span> <span class="o">*</span> <span class="n">a_Z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span>
+        <span class="o">*</span> <span class="n">integral</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ipd_shift</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

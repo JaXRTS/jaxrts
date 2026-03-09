@@ -1,0 +1,42 @@
+jaxrts.models.SchumacherImpulseColdEdges
+========================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: SchumacherImpulseColdEdges
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SchumacherImpulseColdEdges.__init__
+      ~SchumacherImpulseColdEdges.check
+      ~SchumacherImpulseColdEdges.citation
+      ~SchumacherImpulseColdEdges.evaluate
+      ~SchumacherImpulseColdEdges.evaluate_raw
+      ~SchumacherImpulseColdEdges.prepare
+      ~SchumacherImpulseColdEdges.sample_grid
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SchumacherImpulseColdEdges.allowed_keys
+      ~SchumacherImpulseColdEdges.cite_keys
+      ~SchumacherImpulseColdEdges.r_k
+      ~SchumacherImpulseColdEdges.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.SchumacherImpulseColdEdges:
+
+   .. minigallery:: jaxrts.models.SchumacherImpulseColdEdges
+       :add-heading:

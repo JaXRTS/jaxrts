@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.models.QCSalpeterApproximation &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jaxrts.models.QCSalpeterApproximation.__init__" href="jaxrts.models.QCSalpeterApproximation.__init__.html" />
+    <link rel="prev" title="jaxrts.models.BornMermin_Full.sample_points" href="jaxrts.models.BornMermin_Full.sample_points.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Usage</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../physics.html">Physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../first-spectrum.html">Generating a first spectrum</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../models.html">Models implemented</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../models.html#screening-length">screening length</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ionic-scattering">ionic scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#bm-s-ii">BM S_ii</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#debye-temperature">Debye temperature</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../models.html#free-free-scattering">free-free scattering</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.BornMermin.html">jaxrts.models.BornMermin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.BornMermin_Fit.html">jaxrts.models.BornMermin_Fit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.BornMermin_Fortmann.html">jaxrts.models.BornMermin_Fortmann</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.BornMermin_Full.html">jaxrts.models.BornMermin_Full</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Neglect.html">jaxrts.models.Neglect</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">jaxrts.models.QCSalpeterApproximation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.RPA.html">jaxrts.models.RPA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.RPA_DandreaFit.html">jaxrts.models.RPA_DandreaFit</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#chemical-potential">chemical potential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ipd">ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#screening">screening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#bm-v-eis">BM V_eiS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#free-bound-scattering">free-bound scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ee-lfc">ee-lfc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#form-factors">form-factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#bound-free-scattering">bound-free scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ion-ion-potential">ion-ion Potential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#electron-ion-potential">electron-ion Potential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#electron-electron-potential">electron-electron Potential</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../first_model.html">Creating your own model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implementation-details.html">Implementation details</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../usage.html">Usage</a></li>
+          <li class="breadcrumb-item"><a href="../models.html">Models implemented</a></li>
+      <li class="breadcrumb-item active">jaxrts.models.QCSalpeterApproximation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/jaxrts.models.QCSalpeterApproximation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jaxrts-models-qcsalpeterapproximation">
+<h1>jaxrts.models.QCSalpeterApproximation<a class="headerlink" href="#jaxrts-models-qcsalpeterapproximation" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="jaxrts.models.QCSalpeterApproximation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jaxrts.models.</span></span><span class="sig-name descname"><span class="pre">QCSalpeterApproximation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/models.html#QCSalpeterApproximation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.QCSalpeterApproximation" title="Link to this definition"></a></dt>
+<dd><p>Quantum Corrected Salpeter Approximation for free-free scattering.
+Presented in <span id="id1">[<a class="reference internal" href="../bibliography.html#id45" title="G. Gregori, S. H. Glenzer, W. Rozmus, R. W. Lee, and O. L. Landen. Theoretical model of x-ray scattering as a dense matter probe. Physical Review E, 2 2003. doi:10.1103/physreve.67.026412.">Gregori et al., 2003</a>]</span>, which provide a quantum correction to
+the results by Salpeter (<span id="id2">[<a class="reference internal" href="../bibliography.html#id82" title="E. E. Salpeter. Electron density fluctuations in a plasma. Physical Review, 120:1528–1535, 12 1960. doi:10.1103/physrev.120.1528.">Salpeter, 1960</a>]</span>), increasing the range of
+applicability.</p>
+<p>However, this model should mainly be rather considered to be educational,
+as it is only valid for small(er) densities and probing energies. Instead,
+for most practical use-cases one might use :py:class:~RPA_DandreaFit` which
+should give more accurate results (according to, e.g.,
+“cite:<cite>Gregori.2003</cite>) at a comparable computation time.</p>
+<p>This model does not provide a straight-forward approach to include local
+field corrections. We have included it, by assuming the behavior would be
+the same as it is for the RPA.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="jaxrts.free_free.S0_ee_Salpeter.html#jaxrts.free_free.S0_ee_Salpeter" title="jaxrts.free_free.S0_ee_Salpeter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.free_free.S0_ee_Salpeter</span></code></a></dt><dd><p>Function used to calculate the dynamic free electron-electron structure factor.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.__init__.html#jaxrts.models.QCSalpeterApproximation.__init__" title="jaxrts.models.QCSalpeterApproximation.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([sample_points])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.check.html#jaxrts.models.QCSalpeterApproximation.check" title="jaxrts.models.QCSalpeterApproximation.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(plasma_state)</p></td>
+<td><p>Test if the model is applicable to the PlasmaState.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.citation.html#jaxrts.models.QCSalpeterApproximation.citation" title="jaxrts.models.QCSalpeterApproximation.citation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></a>([style, comment])</p></td>
+<td><p>Return bibliographic information for the Model used.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.evaluate.html#jaxrts.models.QCSalpeterApproximation.evaluate" title="jaxrts.models.QCSalpeterApproximation.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a>(plasma_state, setup, *args, **kwargs)</p></td>
+<td><p>If <a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.sample_points.html#jaxrts.models.QCSalpeterApproximation.sample_points" title="jaxrts.models.QCSalpeterApproximation.sample_points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sample_points</span></code></a> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>, generate a low-resulution :py:class`~.setup.Setup`.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.evaluate_raw.html#jaxrts.models.QCSalpeterApproximation.evaluate_raw" title="jaxrts.models.QCSalpeterApproximation.evaluate_raw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_raw</span></code></a>(plasma_state, setup, *args, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.prepare.html#jaxrts.models.QCSalpeterApproximation.prepare" title="jaxrts.models.QCSalpeterApproximation.prepare"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare</span></code></a>(plasma_state, key)</p></td>
+<td><p>Modify the plasma_state in place.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.sample_grid.html#jaxrts.models.QCSalpeterApproximation.sample_grid" title="jaxrts.models.QCSalpeterApproximation.sample_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_grid</span></code></a>(setup)</p></td>
+<td><p>Define the sample-grid if <a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.sample_points.html#jaxrts.models.QCSalpeterApproximation.sample_points" title="jaxrts.models.QCSalpeterApproximation.sample_points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sample_points</span></code></a> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.susceptibility.html#jaxrts.models.QCSalpeterApproximation.susceptibility" title="jaxrts.models.QCSalpeterApproximation.susceptibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">susceptibility</span></code></a>(plasma_state, setup, E, ...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.allowed_keys.html#jaxrts.models.QCSalpeterApproximation.allowed_keys" title="jaxrts.models.QCSalpeterApproximation.allowed_keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">allowed_keys</span></code></a></p></td>
+<td><p>A list of keywords where this model is adequate for</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.cite_keys.html#jaxrts.models.QCSalpeterApproximation.cite_keys" title="jaxrts.models.QCSalpeterApproximation.cite_keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cite_keys</span></code></a></p></td>
+<td><p>A list of bibtex keys.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.sample_points.html#jaxrts.models.QCSalpeterApproximation.sample_points" title="jaxrts.models.QCSalpeterApproximation.sample_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_points</span></code></a></p></td>
+<td><p>The number of points for re-sampeling the model.</p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="sphx-glr-backref-jaxrts-models-qcsalpeterapproximation"></span></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jaxrts.models.BornMermin_Full.sample_points.html" class="btn btn-neutral float-left" title="jaxrts.models.BornMermin_Full.sample_points" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.models.QCSalpeterApproximation.__init__.html" class="btn btn-neutral float-right" title="jaxrts.models.QCSalpeterApproximation.__init__" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

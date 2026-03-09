@@ -1,0 +1,64 @@
+jaxrts.free\_free
+=================
+
+.. automodule:: jaxrts.free_free
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      KramersKronigTransform
+      S0_ee_BMA
+      S0_ee_BMA_Fortmann
+      S0_ee_BMA_chapman_interp
+      S0_ee_BMA_chapman_interpFit
+      S0_ee_RPA
+      S0_ee_RPA_Dandrea
+      S0_ee_RPA_no_damping
+      S0_ee_Salpeter
+      S0ee_from_dielectric_func_FDT
+      S0ee_from_susceptibility_FDT
+      collision_frequency_BA_0K
+      collision_frequency_BA_Chapman_interp
+      collision_frequency_BA_Chapman_interpFit
+      collision_frequency_BA_full
+      collision_frequency_BA_fullFit
+      dielectric_function_BMA_Fortmann
+      dielectric_function_BMA_chapman_interp
+      dielectric_function_BMA_chapman_interpFit
+      dielectric_function_BMA_full
+      dielectric_function_RPA
+      dielectric_function_RPA_0K
+      dielectric_function_RPA_Dandrea1986
+      dielectric_function_RPA_no_damping
+      dielectric_function_RPA_rewrite
+      dielectric_function_salpeter
+      guess_E_cutoff_max
+      guess_E_cutoff_min
+      inverse_screening_length_exact
+      inverse_screening_length_non_degenerate
+      noninteracting_susceptibility_0K
+      noninteracting_susceptibility_Dandrea1986
+      statically_screened_ie_debye_potential
+      susceptibility_BMA_Fortmann
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

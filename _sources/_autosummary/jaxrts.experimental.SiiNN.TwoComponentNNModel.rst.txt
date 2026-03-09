@@ -1,0 +1,40 @@
+jaxrts.experimental.SiiNN.TwoComponentNNModel
+=============================================
+
+.. currentmodule:: jaxrts.experimental.SiiNN
+
+.. autoclass:: TwoComponentNNModel
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~TwoComponentNNModel.Rayleigh_weight
+      ~TwoComponentNNModel.S_ii
+      ~TwoComponentNNModel.__init__
+      ~TwoComponentNNModel.check
+      ~TwoComponentNNModel.citation
+      ~TwoComponentNNModel.evaluate
+      ~TwoComponentNNModel.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~TwoComponentNNModel.allowed_keys
+      ~TwoComponentNNModel.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.experimental.SiiNN.TwoComponentNNModel:
+
+   .. minigallery:: jaxrts.experimental.SiiNN.TwoComponentNNModel
+       :add-heading:

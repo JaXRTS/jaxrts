@@ -1,0 +1,39 @@
+jaxrts.models.SLFCUtsumi1982
+============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: SLFCUtsumi1982
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SLFCUtsumi1982.__init__
+      ~SLFCUtsumi1982.check
+      ~SLFCUtsumi1982.citation
+      ~SLFCUtsumi1982.evaluate
+      ~SLFCUtsumi1982.evaluate_fullk
+      ~SLFCUtsumi1982.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SLFCUtsumi1982.allowed_keys
+      ~SLFCUtsumi1982.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.SLFCUtsumi1982:
+
+   .. minigallery:: jaxrts.models.SLFCUtsumi1982
+       :add-heading:

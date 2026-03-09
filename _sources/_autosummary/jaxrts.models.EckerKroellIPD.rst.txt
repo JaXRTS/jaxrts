@@ -1,0 +1,39 @@
+jaxrts.models.EckerKroellIPD
+============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: EckerKroellIPD
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~EckerKroellIPD.__init__
+      ~EckerKroellIPD.all_element_states
+      ~EckerKroellIPD.check
+      ~EckerKroellIPD.citation
+      ~EckerKroellIPD.evaluate
+      ~EckerKroellIPD.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~EckerKroellIPD.allowed_keys
+      ~EckerKroellIPD.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.EckerKroellIPD:
+
+   .. minigallery:: jaxrts.models.EckerKroellIPD
+       :add-heading:

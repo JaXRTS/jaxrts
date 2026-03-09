@@ -1,0 +1,42 @@
+jaxrts.models.QCSalpeterApproximation
+=====================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: QCSalpeterApproximation
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~QCSalpeterApproximation.__init__
+      ~QCSalpeterApproximation.check
+      ~QCSalpeterApproximation.citation
+      ~QCSalpeterApproximation.evaluate
+      ~QCSalpeterApproximation.evaluate_raw
+      ~QCSalpeterApproximation.prepare
+      ~QCSalpeterApproximation.sample_grid
+      ~QCSalpeterApproximation.susceptibility
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~QCSalpeterApproximation.allowed_keys
+      ~QCSalpeterApproximation.cite_keys
+      ~QCSalpeterApproximation.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.QCSalpeterApproximation:
+
+   .. minigallery:: jaxrts.models.QCSalpeterApproximation
+       :add-heading:

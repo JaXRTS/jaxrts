@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.experimental.SiiNN.NNModel.sow &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jaxrts.experimental.SiiNN.NNModel.train" href="jaxrts.experimental.SiiNN.NNModel.train.html" />
+    <link rel="prev" title="jaxrts.experimental.SiiNN.NNModel.set_norms" href="jaxrts.experimental.SiiNN.NNModel.set_norms.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="jaxrts.html">jaxrts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.absorption_edges_ionized_ions_data.html">jaxrts.absorption_edges_ionized_ions_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.analysis.html">jaxrts.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.bound_free.html">jaxrts.bound_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections.html">jaxrts.ee_localfieldcorrections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections_dornheim_2021.html">jaxrts.ee_localfieldcorrections_dornheim_2021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.elements.html">jaxrts.elements</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="jaxrts.experimental.html">jaxrts.experimental</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="jaxrts.experimental.SiiNN.html">jaxrts.experimental.SiiNN</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.form_factors.html">jaxrts.form_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_bound.html">jaxrts.free_bound</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_free.html">jaxrts.free_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.helpers.html">jaxrts.helpers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hnc_potentials.html">jaxrts.hnc_potentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hypernetted_chain.html">jaxrts.hypernetted_chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.instrument_function.html">jaxrts.instrument_function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ion_feature.html">jaxrts.ion_feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ipd.html">jaxrts.ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.literature.html">jaxrts.literature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.math.html">jaxrts.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.models.html">jaxrts.models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasma_physics.html">jaxrts.plasma_physics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasmastate.html">jaxrts.plasmastate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saha.html">jaxrts.saha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saving.html">jaxrts.saving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.setup.html">jaxrts.setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.static_structure_factors.html">jaxrts.static_structure_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.units.html">jaxrts.units</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.html">jaxrts</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.experimental.html">jaxrts.experimental</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.experimental.SiiNN.html">jaxrts.experimental.SiiNN</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.experimental.SiiNN.NNModel.html">jaxrts.experimental.SiiNN.NNModel</a></li>
+      <li class="breadcrumb-item active">jaxrts.experimental.SiiNN.NNModel.sow</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/jaxrts.experimental.SiiNN.NNModel.sow.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jaxrts-experimental-siinn-nnmodel-sow">
+<h1>jaxrts.experimental.SiiNN.NNModel.sow<a class="headerlink" href="#jaxrts-experimental-siinn-nnmodel-sow" title="Link to this heading"></a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="jaxrts.experimental.SiiNN.NNModel.sow">
+<span class="sig-prename descclassname"><span class="pre">NNModel.</span></span><span class="sig-name descname"><span class="pre">sow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">variable_type:</span> <span class="pre">type[~flax.nnx.variablelib.Variable[~flax.nnx.module.B]]</span> <span class="pre">|</span> <span class="pre">str,</span> <span class="pre">name:</span> <span class="pre">str,</span> <span class="pre">value:</span> <span class="pre">~flax.nnx.module.A,</span> <span class="pre">reduce_fn:</span> <span class="pre">~typing.Callable[[~flax.nnx.module.B,</span> <span class="pre">~flax.nnx.module.A],</span> <span class="pre">~flax.nnx.module.B]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;,</span> <span class="pre">init_fn:</span> <span class="pre">~typing.Callable[[],</span> <span class="pre">~flax.nnx.module.B]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#jaxrts.experimental.SiiNN.NNModel.sow" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">sow()</span></code> can be used to collect intermediate values without
+the overhead of explicitly passing a container through each Module call.
+<code class="docutils literal notranslate"><span class="pre">sow()</span></code> stores a value in a new <code class="docutils literal notranslate"><span class="pre">Module</span></code> attribute, denoted by <code class="docutils literal notranslate"><span class="pre">name</span></code>.
+The value will be wrapped by a <code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code> of type <code class="docutils literal notranslate"><span class="pre">variable_type</span></code>,
+which can be useful to filter for in <code class="xref py py-func docutils literal notranslate"><span class="pre">split()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">state()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pop()</span></code>.</p>
+<p>By default the values are stored in a tuple and each stored value
+is appended at the end. This way all intermediates can be tracked when
+the same module is called multiple times.</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">flax</span><span class="w"> </span><span class="kn">import</span> <span class="n">nnx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">nnx</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rngs</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">rngs</span><span class="o">=</span><span class="n">rngs</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">linear2</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">rngs</span><span class="o">=</span><span class="n">rngs</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">sow</span><span class="p">(</span><span class="n">nnx</span><span class="o">.</span><span class="n">Intermediate</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">+</span><span class="n">add</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">rngs</span><span class="o">=</span><span class="n">nnx</span><span class="o">.</span><span class="n">Rngs</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="c1"># tuple of length 1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="c1"># tuple of length 2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Alternatively, a custom init/reduce function can be passed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">nnx</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rngs</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">rngs</span><span class="o">=</span><span class="n">rngs</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">linear2</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">rngs</span><span class="o">=</span><span class="n">rngs</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">sow</span><span class="p">(</span><span class="n">nnx</span><span class="o">.</span><span class="n">Intermediate</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="n">init_fn</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="n">reduce_fn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">prev</span><span class="p">,</span> <span class="n">curr</span><span class="p">:</span> <span class="n">prev</span><span class="o">+</span><span class="n">curr</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">sow</span><span class="p">(</span><span class="n">nnx</span><span class="o">.</span><span class="n">Intermediate</span><span class="p">,</span> <span class="s1">&#39;product&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="n">init_fn</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="n">reduce_fn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">prev</span><span class="p">,</span> <span class="n">curr</span><span class="p">:</span> <span class="n">prev</span><span class="o">*</span><span class="n">curr</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">rngs</span><span class="o">=</span><span class="n">nnx</span><span class="o">.</span><span class="n">Rngs</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">sum</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">product</span><span class="p">[</span><span class="o">...</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">intermediate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sum</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">sum</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">==</span> <span class="n">intermediate</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">product</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">==</span> <span class="n">intermediate</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>variable_type: The <code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code> type for the stored value.</dt><dd><p>Typically <code class="xref py py-class docutils literal notranslate"><span class="pre">Intermediate</span></code> is used to indicate an
+intermediate value.</p>
+</dd>
+<dt>name: A string denoting the <code class="docutils literal notranslate"><span class="pre">Module</span></code> attribute name, where</dt><dd><p>the sowed value is stored.</p>
+</dd>
+</dl>
+<p>value: The value to be stored.
+reduce_fn: The function used to combine the existing value with the new</p>
+<blockquote>
+<div><p>value. The default is to append the value to a tuple.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>init_fn: For the first value stored, <code class="docutils literal notranslate"><span class="pre">reduce_fn</span></code> will be passed the result</dt><dd><p>of <code class="docutils literal notranslate"><span class="pre">init_fn</span></code> together with the value to be stored. The default is an
+empty tuple.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="sphx-glr-backref-jaxrts-experimental-siinn-nnmodel-sow"></span></section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jaxrts.experimental.SiiNN.NNModel.set_norms.html" class="btn btn-neutral float-left" title="jaxrts.experimental.SiiNN.NNModel.set_norms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.experimental.SiiNN.NNModel.train.html" class="btn btn-neutral float-right" title="jaxrts.experimental.SiiNN.NNModel.train" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

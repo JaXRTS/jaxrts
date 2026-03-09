@@ -1,0 +1,50 @@
+jaxrts.hnc\_potentials.DeutschPotential
+=======================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: DeutschPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~DeutschPotential.T
+      ~DeutschPotential.__init__
+      ~DeutschPotential.alpha
+      ~DeutschPotential.check
+      ~DeutschPotential.citation
+      ~DeutschPotential.full_k
+      ~DeutschPotential.full_r
+      ~DeutschPotential.lambda_ab
+      ~DeutschPotential.long_k
+      ~DeutschPotential.long_r
+      ~DeutschPotential.mu
+      ~DeutschPotential.prepare
+      ~DeutschPotential.q2
+      ~DeutschPotential.r_cut
+      ~DeutschPotential.short_k
+      ~DeutschPotential.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~DeutschPotential.allowed_keys
+      ~DeutschPotential.cite_keys
+      ~DeutschPotential.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.DeutschPotential:
+
+   .. minigallery:: jaxrts.hnc_potentials.DeutschPotential
+       :add-heading:

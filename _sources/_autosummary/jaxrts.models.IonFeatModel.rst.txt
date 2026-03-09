@@ -1,0 +1,40 @@
+jaxrts.models.IonFeatModel
+==========================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: IonFeatModel
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~IonFeatModel.Rayleigh_weight
+      ~IonFeatModel.S_ii
+      ~IonFeatModel.__init__
+      ~IonFeatModel.check
+      ~IonFeatModel.citation
+      ~IonFeatModel.evaluate
+      ~IonFeatModel.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~IonFeatModel.allowed_keys
+      ~IonFeatModel.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.IonFeatModel:
+
+   .. minigallery:: jaxrts.models.IonFeatModel
+       :add-heading:

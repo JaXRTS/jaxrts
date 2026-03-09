@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.setup &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.setup</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.setup</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This submodule is dedicated to handling the setup configuration for the</span>
+<span class="sd">calculation of the synthetic spectra.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jpu</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnpu</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plasma_physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">plasma_frequency</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+
+
+<div class="viewcode-block" id="Setup">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Setup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class containing the information about the experiment&#39;s geometry, the</span>
+<span class="sd">    energy of the probing and measured x-rays, and the combined source</span>
+<span class="sd">    instrument function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Setup.__init__">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.setup.Setup.__init__.html#jaxrts.setup.Setup.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">scattering_angle</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+        <span class="n">energy</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+        <span class="n">measured_energy</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">correct_k_dispersion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">frc_exponent</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="c1">#: The scattering angle of the experiment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="n">scattering_angle</span>
+        <span class="c1">#: The base-energy at which we probe. This should be the central</span>
+        <span class="c1">#: energy, for the instrument function, see :py:attr:`~.instrument`.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="n">energy</span>
+        <span class="c1">#: The energies at which the scattering is recorded. This is an array</span>
+        <span class="c1">#: of absolute energies and not an energy shift.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="n">measured_energy</span>
+        <span class="c1">#: A callable function over energy shifts that gives the total</span>
+        <span class="c1">#: instrument spread. The curve should be normed so that the integral</span>
+        <span class="c1">#: from `-inf` to `inf` should be one.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">Partial</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span>
+        <span class="c1">#: In an experiment, the value of k is dependent on the measured energy</span>
+        <span class="c1">#: at this position on the detector. When including this effect, the</span>
+        <span class="c1">#: returned spectrum will, however, violate detailed balance. It might</span>
+        <span class="c1">#: therefore be instructive  to set this value (which is ``True`` be</span>
+        <span class="c1">#: default) to ``False`` to #: check, e.g. temperature differences when</span>
+        <span class="c1">#: applying ITCF analysis methods.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">correct_k_dispersion</span>
+        <span class="c1">#: Exponent of the frequency redistribution correction in the</span>
+        <span class="c1">#: differential cross-section.</span>
+        <span class="c1">#:</span>
+        <span class="c1">#: .. math::</span>
+        <span class="c1">#:</span>
+        <span class="c1">#:    \left(\frac{\omega_\text{out}}{\omega_\text{in}}\right)^\nu</span>
+        <span class="c1">#:    S(\omega, k)</span>
+        <span class="c1">#:</span>
+        <span class="c1">#: See :cite:`Crowley.2013`.</span>
+        <span class="c1">#:</span>
+        <span class="c1">#: Defaults to 0.</span>
+        <span class="c1">#:</span>
+        <span class="c1">#: * If 0, the methods :py:meth:`~.PlasmaState.probe` and</span>
+        <span class="c1">#:   :py:meth:`~.PlasmaState.evaluate` will return dynamic structure</span>
+        <span class="c1">#:   factors (this is the default behavior of jaxrts).</span>
+        <span class="c1">#: * However, when comparing to experimental data in which the signal</span>
+        <span class="c1">#:   is proportional to the number of photons on the detector, the apt</span>
+        <span class="c1">#:   comparison is to the differential cross-section, which is</span>
+        <span class="c1">#:   proportional to</span>
+        <span class="c1">#:   :math:`\frac{\omega_\text{out}}{\omega_\text{in}} S(\omega, k)`</span>
+        <span class="c1">#:   i.e., :math:`\nu = 1`.</span>
+        <span class="c1">#: * If the detector-signal is proportional to the deposited energy</span>
+        <span class="c1">#:   instead (as is should be the case for CCD detectors if no further</span>
+        <span class="c1">#:   processing occurs), an additional scaling with energy is</span>
+        <span class="c1">#:   introduced and ``frc_exponent`` should be set to 2.</span>
+        <span class="c1">#:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frc_exponent</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">frc_exponent</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">degree</span><span class="p">)</span><span class="si">:</span><span class="s2">1f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Setup probing with </span><span class="si">{</span><span class="n">E</span><span class="si">}</span><span class="s2"> eV at </span><span class="si">{</span><span class="n">theta</span><span class="si">}</span><span class="s2"> deg (k = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">/angstrom).&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frc_exponent</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; frc_exponent = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">frc_exponent</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">+</span> <span class="s2">&quot; Dispersion correction is turned off.&quot;</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">k</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The scattering vector length probed in the experiment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda0</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span>
+            <span class="n">jnpu</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">full_k</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The scattering vector length probed in the experiment at each energy</span>
+<span class="sd">        channel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">:</span>
+            <span class="n">k_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span>
+            <span class="n">k_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span>
+
+            <span class="n">k</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">k_out</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_in</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="o">-</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k_out</span> <span class="o">*</span> <span class="n">k_in</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">k</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">frequency_redistribution_correction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the frequency redistribution correction.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\left(\\frac{\\omega_\\text{out}}{\\omega_\\text{in}}\\right)^\\nu</span>
+
+<span class="sd">        where :math:`\\nu` is :py:attr:`~.frc_exponent`.</span>
+<span class="sd">        Will return an array of ones if :py:attr:`~.frc_exponent` ``==0``,</span>
+<span class="sd">        i.e., this setup will produce dynamic structure factors.</span>
+<span class="sd">        Otherwise, this correction yields the correction to have outputs</span>
+<span class="sd">        proportional to the adequate differential cross-sections for</span>
+<span class="sd">        single-photon counting measurements</span>
+<span class="sd">        (:py:attr:`~.frc_exponent` ``==1``),</span>
+<span class="sd">        or measurements proportional to the energy deposited</span>
+<span class="sd">        (:py:attr:`~.frc_exponent` ``==2``).</span>
+<span class="sd">        See :cite:`Crowley.2013`, for details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+            <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
+        <span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frc_exponent</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Setup.dispersion_corrected_k">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.setup.Setup.dispersion_corrected_k.html#jaxrts.setup.Setup.dispersion_corrected_k">[docs]</a>
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dispersion_corrected_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the dispersion corrected wavenumber.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">:</span>
+            <span class="n">omega_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
+            <span class="n">omega_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
+            <span class="n">omega_pl</span> <span class="o">=</span> <span class="n">plasma_frequency</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
+            <span class="n">k_in</span> <span class="o">=</span> <span class="n">omega_in</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span>
+            <span class="n">k_out</span> <span class="o">=</span> <span class="n">omega_out</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span>
+
+            <span class="c1"># Do the dispersion correction:</span>
+            <span class="n">k_in</span> <span class="o">*=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">omega_pl</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">omega_in</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">k_out</span> <span class="o">*=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">omega_pl</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">omega_out</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="n">k</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">k_out</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_in</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k_out</span> <span class="o">*</span> <span class="n">k_in</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">k</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lambda0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The wavelength of the probing light, i.e., the wavelength</span>
+<span class="sd">        corresponding to :py:attr:`~energy`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ureg</span><span class="o">.</span><span class="n">planck_constant</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span>
+
+    <span class="c1"># The following is required to jit a setup</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">frc_exponent</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">aux_data</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">,)</span>  <span class="c1"># static values</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">Setup</span><span class="p">)</span>
+        <span class="p">(</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">instrument</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">frc_exponent</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">children</span>
+        <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">,)</span> <span class="o">=</span> <span class="n">aux_data</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
+
+<div class="viewcode-block" id="convolve_stucture_factor_with_instrument">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.setup.convolve_stucture_factor_with_instrument.html#jaxrts.setup.convolve_stucture_factor_with_instrument">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convolve_stucture_factor_with_instrument</span><span class="p">(</span>
+    <span class="n">Sfac</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convolve a dynamic structure factor with the instrument function, given by</span>
+<span class="sd">    the ``setup``.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">       The convolution grid is automatically determined from the ``setup``.</span>
+<span class="sd">       This step requires :py:attr:`jaxrts.setup.Setup.measured_energy` to be</span>
+<span class="sd">       spaced out equidistantly.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Sfac: Quantity</span>
+<span class="sd">        A dynamic structure factor. Should have units of [time].</span>
+<span class="sd">    setup: Setup</span>
+<span class="sd">        The Setup object containing the instrument function</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The convolution of the structure factor with the instrument function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conv_grid</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span> <span class="o">-</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
+
+    <span class="c1"># Shift the grid by the minimal difference to zero.</span>
+    <span class="c1"># This ensures that the position of a peak will not move during</span>
+    <span class="c1"># convolution. See the test</span>
+    <span class="c1"># test_setup.test_peak_position_stability_with_convolution.</span>
+    <span class="c1"># Even a small shift might be very relevant for ITCF based analysis and</span>
+    <span class="c1"># tests.</span>
+    <span class="n">conv_grid</span> <span class="o">+=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">conv_grid</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">jnp</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span>
+            <span class="n">Sfac</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
+            <span class="n">setup</span><span class="o">.</span><span class="n">instrument</span><span class="p">(</span><span class="n">conv_grid</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_probe_setup">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.setup.get_probe_setup.html#jaxrts.setup.get_probe_setup">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_probe_setup</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Setup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a :py:class:`~.Setup`, which has the same properties of setup, but</span>
+<span class="sd">    a different `k`. This is realized by modifying the</span>
+<span class="sd">    :py:attr:`~.Setup.measured_energy` attribute of setup.</span>
+
+<span class="sd">    This helper function can be useful when evaluating e.g., `S_ii` Models at a</span>
+<span class="sd">    different `k` than realized in an experiment, as it is required, e.g., for</span>
+<span class="sd">    the Born collision frequency.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k: Quantity</span>
+<span class="sd">        The target value of k, the new Setup class should probe.</span>
+<span class="sd">    setup: Setup</span>
+<span class="sd">        The original setup, from which the new setup should the derived from</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Setup</span>
+<span class="sd">        A new :py:class:`jaxrts.Setup` that now probes at the specified</span>
+<span class="sd">        :math:`k`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">k</span>
+        <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">scattering_angle</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">Setup</span><span class="p">(</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">,</span>
+        <span class="n">E</span><span class="p">,</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">,</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">instrument</span><span class="p">,</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">,</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">frc_exponent</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="n">jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">register_pytree_node</span><span class="p">(</span>
+    <span class="n">Setup</span><span class="p">,</span>
+    <span class="n">Setup</span><span class="o">.</span><span class="n">_tree_flatten</span><span class="p">,</span>
+    <span class="n">Setup</span><span class="o">.</span><span class="n">_tree_unflatten</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

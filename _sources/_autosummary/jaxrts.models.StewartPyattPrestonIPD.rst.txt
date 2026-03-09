@@ -1,0 +1,39 @@
+jaxrts.models.StewartPyattPrestonIPD
+====================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: StewartPyattPrestonIPD
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~StewartPyattPrestonIPD.__init__
+      ~StewartPyattPrestonIPD.all_element_states
+      ~StewartPyattPrestonIPD.check
+      ~StewartPyattPrestonIPD.citation
+      ~StewartPyattPrestonIPD.evaluate
+      ~StewartPyattPrestonIPD.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~StewartPyattPrestonIPD.allowed_keys
+      ~StewartPyattPrestonIPD.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.StewartPyattPrestonIPD:
+
+   .. minigallery:: jaxrts.models.StewartPyattPrestonIPD
+       :add-heading:

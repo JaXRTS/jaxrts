@@ -1,0 +1,101 @@
+jaxrts.models
+=============
+
+.. automodule:: jaxrts.models
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      averagePlasmaState
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      ArbitraryDegeneracyScreeningLength
+      ArkhipovIonFeat
+      AverageAtom_Sii
+      BM_V_eiSModel
+      BohmStaver
+      BornMermin
+      BornMermin_Fit
+      BornMermin_Fortmann
+      BornMermin_Full
+      CHSIonFeat
+      ConstantChemPotential
+      ConstantDebyeTemp
+      ConstantIPD
+      ConstantScreeningLength
+      DebyeHueckelIPD
+      DebyeHueckelScreening
+      DebyeHueckelScreeningLength
+      DebyeHueckel_BM_V
+      DebyeWallerSolid
+      DegenerateElectronChemPotential
+      DetailedBalance
+      ESLFCDornheim2021
+      EckerKroellIPD
+      FiniteWavelengthScreening
+      FiniteWavelength_BM_V
+      FixedSii
+      FormFactorLowering
+      FreeFreeModel
+      Gericke2010ScreeningLength
+      Gregori2003IonFeat
+      Gregori2004Screening
+      Gregori2006IonFeat
+      GregoriCHSScreening
+      IchimaruChemPotential
+      IonFeatModel
+      IonSphereIPD
+      LFCConstant
+      LinearResponseScreening
+      LinearResponseScreeningGericke2010
+      Model
+      Neglect
+      NonDegenerateElectronChemPotential
+      OnePotentialHNCIonFeat
+      PauliBlockingIPD
+      PaulingFormFactors
+      PeakCollection
+      QCSalpeterApproximation
+      RPA
+      RPA_DandreaFit
+      SLFCFarid1993
+      SLFCGeldart1966
+      SLFCInterpFortmann2010
+      SLFCInterpGregori2007
+      SLFCUtsumi1982
+      ScatteringModel
+      SchumacherImpulse
+      SchumacherImpulseColdEdges
+      SchumacherImpulseFitRk
+      SommerfeldChemPotential
+      StewartPyattIPD
+      StewartPyattPrestonIPD
+      Sum_Sii
+      ThreePotentialHNCIonFeat
+   
+   
+
+   
+   
+   
+
+
+

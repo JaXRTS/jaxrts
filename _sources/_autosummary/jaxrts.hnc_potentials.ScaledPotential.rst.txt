@@ -1,0 +1,51 @@
+jaxrts.hnc\_potentials.ScaledPotential
+======================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: ScaledPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~ScaledPotential.T
+      ~ScaledPotential.__init__
+      ~ScaledPotential.alpha
+      ~ScaledPotential.check
+      ~ScaledPotential.citation
+      ~ScaledPotential.full_k
+      ~ScaledPotential.full_r
+      ~ScaledPotential.lambda_ab
+      ~ScaledPotential.long_k
+      ~ScaledPotential.long_r
+      ~ScaledPotential.mu
+      ~ScaledPotential.prepare
+      ~ScaledPotential.q2
+      ~ScaledPotential.r_cut
+      ~ScaledPotential.short_k
+      ~ScaledPotential.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~ScaledPotential.allowed_keys
+      ~ScaledPotential.cite_keys
+      ~ScaledPotential.description
+      ~ScaledPotential.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.ScaledPotential:
+
+   .. minigallery:: jaxrts.hnc_potentials.ScaledPotential
+       :add-heading:

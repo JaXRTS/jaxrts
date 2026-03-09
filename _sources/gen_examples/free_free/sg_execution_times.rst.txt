@@ -1,0 +1,52 @@
+
+:orphan:
+
+.. _sphx_glr_gen_examples_free_free_sg_execution_times:
+
+
+Computation times
+=================
+**02:31.595** total execution time for 6 files **from gen_examples/free_free**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_gen_examples_free_free_plot_BM_ChapmanInterp.py` (``plot_BM_ChapmanInterp.py``)
+     - 01:11.442
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_free_free_plot_See0_RPA_BM.py` (``plot_See0_RPA_BM.py``)
+     - 00:44.962
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_free_free_plot_Fortmann_BMA.py` (``plot_Fortmann_BMA.py``)
+     - 00:17.498
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_free_free_plot_BornCollision_Frequency.py` (``plot_BornCollision_Frequency.py``)
+     - 00:11.039
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_free_free_plot_See0_QCSA.py` (``plot_See0_QCSA.py``)
+     - 00:03.934
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_free_free_plot_See0_RPA.py` (``plot_See0_RPA.py``)
+     - 00:02.720
+     - 0.0

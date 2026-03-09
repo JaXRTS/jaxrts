@@ -1,0 +1,113 @@
+
+
+.. _sphx_glr_gen_examples_form_factors:
+
+form-factor examples
+--------------------
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This figure reproduces Fig.8 in Pauling.1932 for elements up to Z=36.">
+
+.. only:: html
+
+  .. image:: /gen_examples/form_factors/images/thumb/sphx_glr_plot_pauling_full_scattering_factors_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_form_factors_plot_pauling_full_scattering_factors.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Full atomic Formfactors according to Pauling and Sherman</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot form factor lowering effect for Beryllium">
+
+.. only:: html
+
+  .. image:: /gen_examples/form_factors/images/thumb/sphx_glr_plot_ffl_beryllium_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_beryllium.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plot form factor lowering effect for Beryllium</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Calculate the atomic form factors of carbon using a hydrogen-like atom, as presented in Pauling...">
+
+.. only:: html
+
+  .. image:: /gen_examples/form_factors/images/thumb/sphx_glr_plot_atomic_form_factors_carbon_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_form_factors_plot_atomic_form_factors_carbon.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Atomic form factors of C, by Pauling and Sherman</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This examples compares the limits of the Form Factor lowering reported by Doppner.2023 (:pyjaxr...">
+
+.. only:: html
+
+  .. image:: /gen_examples/form_factors/images/thumb/sphx_glr_plot_ffl_H_He-like_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_H_He-like.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Zero IPD limit form factor lowering</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This examples compares the limits of the Form Factor lowering reported by Doppner.2023 (:pyjaxr...">
+
+.. only:: html
+
+  .. image:: /gen_examples/form_factors/images/thumb/sphx_glr_plot_ffl_zero_IPD_limit_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_zero_IPD_limit.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Zero IPD limit for effective charge when using form factor lowering</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gen_examples/form_factors/plot_pauling_full_scattering_factors
+   /gen_examples/form_factors/plot_ffl_beryllium
+   /gen_examples/form_factors/plot_atomic_form_factors_carbon
+   /gen_examples/form_factors/plot_ffl_H_He-like
+   /gen_examples/form_factors/plot_ffl_zero_IPD_limit
+

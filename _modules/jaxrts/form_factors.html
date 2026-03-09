@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.form_factors &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.form_factors</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.form_factors</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This submodule is dedicated to form factors.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">onp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jpu</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnpu</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="pauling_size_screening_constants">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_size_screening_constants.html#jaxrts.form_factors.pauling_size_screening_constants">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_size_screening_constants</span><span class="p">(</span><span class="n">Z</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    See Table I in :cite:`Pauling.1932`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">S1s</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.19</span><span class="p">]))</span>
+    <span class="n">S2s</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.25</span><span class="p">,</span> <span class="mf">3.10</span><span class="p">]))</span>
+    <span class="n">S2p</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.50</span><span class="p">,</span> <span class="mf">4.57</span><span class="p">]))</span>
+    <span class="n">S3s</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+        <span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">11</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">6.6</span><span class="p">,</span> <span class="mf">9.1</span><span class="p">,</span> <span class="mf">9.1</span><span class="p">,</span> <span class="mf">10.9</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">S3p</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+        <span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">13</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">8.7</span><span class="p">,</span> <span class="mf">10.9</span><span class="p">,</span> <span class="mf">10.9</span><span class="p">,</span> <span class="mf">13.2</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">S3d</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">21</span><span class="p">,</span> <span class="mi">30</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">14.7</span><span class="p">,</span> <span class="mf">17.7</span><span class="p">]))</span>
+    <span class="n">S4s</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+        <span class="n">Z</span><span class="p">,</span>
+        <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">71</span><span class="p">]),</span>
+        <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">13.4</span><span class="p">,</span> <span class="mf">13.9</span><span class="p">,</span> <span class="mf">21.5</span><span class="p">,</span> <span class="mf">24.2</span><span class="p">,</span> <span class="mf">24.2</span><span class="p">,</span> <span class="mf">25.6</span><span class="p">,</span> <span class="mf">25.6</span><span class="p">,</span> <span class="mf">29.4</span><span class="p">]),</span>
+    <span class="p">)</span>
+    <span class="n">S4p</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+        <span class="n">Z</span><span class="p">,</span>
+        <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">31</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">71</span><span class="p">]),</span>
+        <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">24.4</span><span class="p">,</span> <span class="mf">26.6</span><span class="p">,</span> <span class="mf">26.6</span><span class="p">,</span> <span class="mf">28.4</span><span class="p">,</span> <span class="mf">28.4</span><span class="p">,</span> <span class="mf">32.8</span><span class="p">]),</span>
+    <span class="p">)</span>
+    <span class="n">S4d</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+        <span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">39</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">71</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">31.8</span><span class="p">,</span> <span class="mf">34.0</span><span class="p">,</span> <span class="mf">34.0</span><span class="p">,</span> <span class="mf">39.6</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">S4f</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">58</span><span class="p">,</span> <span class="mi">71</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">43</span><span class="p">,</span> <span class="mf">49.8</span><span class="p">]))</span>
+    <span class="c1"># S5s = jnpu.interp(</span>
+    <span class="c1">#     Z,</span>
+    <span class="c1">#     onp.array([37, 38, 39, 48, 54, 56, 71, 80]),</span>
+    <span class="c1">#     onp.array([30.4, 30.8, 31.3, 37.0, 38.8, 38.8, 47.8, 50]),</span>
+    <span class="c1"># )</span>
+    <span class="c1"># S5p = jnpu.interp(</span>
+    <span class="c1">#     Z,</span>
+    <span class="c1">#     onp.array([49, 54, 56, 71, 80]),</span>
+    <span class="c1">#     onp.array([39.4, 41.8, 41.8, 51.4, 54]),</span>
+    <span class="c1"># )</span>
+    <span class="c1"># S5d = jnpu.interp(Z, onp.array([57, 71, 80]), onp.array([48.6, 59, 62]))</span>
+    <span class="c1"># S6s = jnpu.interp(</span>
+    <span class="c1">#     Z,</span>
+    <span class="c1">#     onp.array([54, 55, 56, 71, 80, 86, 92]),</span>
+    <span class="c1">#     onp.array([47, 47.4, 48, 62, 66, 67, 68]),</span>
+    <span class="c1"># )</span>
+    <span class="c1"># S6p = jnpu.interp(Z, onp.array([81, 86, 92]), onp.array([71.0, 72, 73]))</span>
+    <span class="c1"># S6d = jnpu.interp(Z, onp.array([89, 92]), onp.array([81.0, 82]))</span>
+    <span class="c1"># S7s = jnpu.interp(Z, onp.array([87, 92]), onp.array([80, 82.4]))</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">S1s</span><span class="p">,</span>
+            <span class="n">S2s</span><span class="p">,</span>
+            <span class="n">S2p</span><span class="p">,</span>
+            <span class="n">S3s</span><span class="p">,</span>
+            <span class="n">S3p</span><span class="p">,</span>
+            <span class="n">S3d</span><span class="p">,</span>
+            <span class="n">S4s</span><span class="p">,</span>
+            <span class="n">S4p</span><span class="p">,</span>
+            <span class="n">S4d</span><span class="p">,</span>
+            <span class="n">S4f</span><span class="p">,</span>
+            <span class="c1"># S5s,</span>
+            <span class="c1"># S5p,</span>
+            <span class="c1"># S5d,</span>
+            <span class="c1"># S6s,</span>
+            <span class="c1"># S6p,</span>
+            <span class="c1"># S6d,</span>
+            <span class="c1"># S7s,</span>
+        <span class="p">]</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_effective_charge">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_effective_charge.html#jaxrts.form_factors.pauling_effective_charge">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_effective_charge</span><span class="p">(</span><span class="n">Z</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Z</span> <span class="o">-</span> <span class="n">pauling_size_screening_constants</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_xf">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_xf.html#jaxrts.form_factors.pauling_xf">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a_0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Zeff</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_f10">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_f10.html#jaxrts.form_factors.pauling_f10">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_f10</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_f21">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_f21.html#jaxrts.form_factors.pauling_f21">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_f21</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_f20">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_f20.html#jaxrts.form_factors.pauling_f20">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_f20</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">pauling_f21</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_f32">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_f32.html#jaxrts.form_factors.pauling_f32">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_f32</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">-</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_f31">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_f31.html#jaxrts.form_factors.pauling_f31">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_f31</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">pauling_f32</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_f30">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_f30.html#jaxrts.form_factors.pauling_f30">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_f30</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="n">pauling_f32</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_f43">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_f43.html#jaxrts.form_factors.pauling_f43">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_f43</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">8</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_f42">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_f42.html#jaxrts.form_factors.pauling_f42">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_f42</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">pauling_f43</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_f41">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_f41.html#jaxrts.form_factors.pauling_f41">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_f41</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="n">pauling_f43</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_f40">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_f40.html#jaxrts.form_factors.pauling_f40">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_f40</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">pauling_xf</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">18</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="n">pauling_f43</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_atomic_ff">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_atomic_ff.html#jaxrts.form_factors.pauling_atomic_ff">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_atomic_ff</span><span class="p">(</span>
+    <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span>  <span class="c1"># noqa: E741</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Atomic formfactor of a hydrogen-like atom taken from :cite:`Pauling.1932`.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">       This function is only intended as a wrapper for more convenient</span>
+<span class="sd">       access. It it not possible to compile this function, using</span>
+<span class="sd">       :py:func:`jax.jit`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n : int</span>
+<span class="sd">        Principal quantum number</span>
+<span class="sd">    l : int</span>
+<span class="sd">        Azimuthal quantum number</span>
+<span class="sd">    k : Quantity</span>
+<span class="sd">        Length of the scattering number (given by the scattering angle and the</span>
+<span class="sd">        energies of the incident photons (unit: 1 / [length]).</span>
+<span class="sd">    Zeff : Quantity</span>
+<span class="sd">        Effective charge (unit: dimensionless)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    f: Quantity</span>
+<span class="sd">        Contribution of one electron in the given state to the atomic form</span>
+<span class="sd">        factor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Find the correct _fxx function and execute it</span>
+    <span class="n">form_factor</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;pauling_f</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">1d</span><span class="si">}{</span><span class="n">l</span><span class="si">:</span><span class="s2">1d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">](</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">form_factor</span></div>
+
+
+
+<div class="viewcode-block" id="pauling_all_ff">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_all_ff.html#jaxrts.form_factors.pauling_all_ff">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pauling_all_ff</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">pauling_f10</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+            <span class="n">pauling_f20</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+            <span class="n">pauling_f21</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+            <span class="n">pauling_f30</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+            <span class="n">pauling_f31</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+            <span class="n">pauling_f32</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+            <span class="n">pauling_f40</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+            <span class="n">pauling_f41</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+            <span class="n">pauling_f42</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+            <span class="n">pauling_f43</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="form_factor_lowering_Zeff_10">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.form_factor_lowering_Zeff_10.html#jaxrts.form_factors.form_factor_lowering_Zeff_10">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Z_squared_correction&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">form_factor_lowering_Zeff_10</span><span class="p">(</span>
+    <span class="n">binding_E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_A</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">Z_squared_correction</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the form factor lowering for the 1s orbital. See</span>
+<span class="sd">    :cite:`Doppner.2023`.</span>
+
+<span class="sd">    For hydrogen-like ions, the binding energy has to be compared to 13.6eV.</span>
+<span class="sd">    He-like ions use a corrected ground-state value, instead, to account for</span>
+<span class="sd">    screening. This has to be chosen to reproduce the known form factors</span>
+<span class="sd">    :py:func:`~.pauling_f10` in the case of no IPD, and scales with `1/Z_A`</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        E_n^\\text{H-like} = 13.6 \\text{eV}</span>
+<span class="sd">        E_n^\\text{He-like} = (13.6 - 12.13/Z_A)\\text{eV}</span>
+
+<span class="sd">    We noted that with growing Z, the simple functions above start to deviate</span>
+<span class="sd">    from the values given by :cite:`Pauling.1932`.</span>
+
+<span class="sd">    We fitted an additional correction term:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\Delta E_n = 1.77 \\times 10^{-4} \\text{eV} \\cdot Z_A^2</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    binding_E: Quantity</span>
+<span class="sd">        The binding energies of the two 1s electrons. Has to be an array with 2</span>
+<span class="sd">        entries. Note that this potentially has to be reduced by the IPD.</span>
+<span class="sd">    Z_A: float</span>
+<span class="sd">        Atomic number of the element, i.e., number of protons in the core.</span>
+<span class="sd">    Z_squared_correction: bool</span>
+<span class="sd">        If ``True``, the quadratic correction term discussed above is added to</span>
+<span class="sd">        better match the zero IPD limit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">En_H</span> <span class="o">=</span> <span class="mf">13.605693122994</span>
+    <span class="n">En_He</span> <span class="o">=</span> <span class="n">En_H</span> <span class="o">-</span> <span class="mf">12.1318355</span> <span class="o">/</span> <span class="n">Z_A</span>
+
+    <span class="n">En</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">En_H</span><span class="p">,</span> <span class="n">En_He</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">Z_squared_correction</span><span class="p">:</span>
+        <span class="n">En</span> <span class="o">+=</span> <span class="mf">1.7728e-04</span> <span class="o">*</span> <span class="n">Z_A</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="c1"># calculate Z_eff for H and He like species</span>
+    <span class="n">Z_eff</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">binding_E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">))</span> <span class="o">*</span> <span class="n">n</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">En</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Z_eff</span></div>
+
+
+
+<div class="viewcode-block" id="form_factor_lowering_10">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.form_factor_lowering_10.html#jaxrts.form_factors.form_factor_lowering_10">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Z_squared_correction&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">form_factor_lowering_10</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">binding_E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_core</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">Z_A</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">Z_squared_correction</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the form factor lowering for the 1s orbital. See</span>
+<span class="sd">    :cite:`Doppner.2023`. Calculates the effective charge from the binding</span>
+<span class="sd">    energies (incl. IPD) from :py:func:`~form_factor_lowering_Zeff_10`. Then,</span>
+<span class="sd">    insert this effective charge in the function from :cite:`Pauling.1932`,</span>
+<span class="sd">    :py:func:`pauling_f10`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k: Quantity</span>
+<span class="sd">        The scattering vector.</span>
+<span class="sd">    binding_E: Quantity</span>
+<span class="sd">        The binding energies of the two 1s electrons. Has to be an array with 2</span>
+<span class="sd">        entries. Note that this potentially has to be reduced by the IPD.</span>
+<span class="sd">    Z_core: float</span>
+<span class="sd">        Average number of bound electrons to the core.</span>
+<span class="sd">    Z_A: float</span>
+<span class="sd">        Atomic number of the element, i.e., number of protons in the core.</span>
+<span class="sd">    Z_squared_correction: bool</span>
+<span class="sd">        If ``True``, the quadratic correction term discussed above is added to</span>
+<span class="sd">        better match the zero IPD limit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Z_eff</span> <span class="o">=</span> <span class="n">form_factor_lowering_Zeff_10</span><span class="p">(</span><span class="n">binding_E</span><span class="p">,</span> <span class="n">Z_A</span><span class="p">,</span> <span class="n">Z_squared_correction</span><span class="p">)</span>
+
+    <span class="c1"># calculate the form factors for H and He like ions</span>
+    <span class="c1"># Note: when there are two electrons, they cannot be distinguished.</span>
+    <span class="c1"># In case of Z_core being fractional, though, we need to average ions with</span>
+    <span class="c1"># H and He-like structure, with the correct ratio.</span>
+    <span class="n">f_1s_H_like</span> <span class="o">=</span> <span class="n">pauling_f10</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Z_eff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">f_1s_He_like</span> <span class="o">=</span> <span class="n">pauling_f10</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Z_eff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">x_1s_He_like</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Z_core</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">x_1s_H_like</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">x_1s_He_like</span>
+
+    <span class="n">f_1s</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_1s_H_like</span> <span class="o">*</span> <span class="n">f_1s_H_like</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">x_1s_He_like</span> <span class="o">*</span> <span class="n">f_1s_He_like</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f_1s</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

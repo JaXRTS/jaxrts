@@ -1,0 +1,37 @@
+jaxrts.bound\_free
+==================
+
+.. automodule:: jaxrts.bound_free
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      J_BM_HR_approx
+      J_BM_approx
+      J_impulse_approx
+      all_J_BM
+      all_J_HR
+      all_J_Schum75
+      bm_bound_wavefunction
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,44 @@
+jaxrts.models.BornMermin
+========================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: BornMermin
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~BornMermin.__init__
+      ~BornMermin.check
+      ~BornMermin.citation
+      ~BornMermin.evaluate
+      ~BornMermin.evaluate_raw
+      ~BornMermin.guess_E_cutoffs
+      ~BornMermin.prepare
+      ~BornMermin.sample_grid
+      ~BornMermin.set_guessed_E_cutoffs
+      ~BornMermin.susceptibility
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~BornMermin.allowed_keys
+      ~BornMermin.cite_keys
+      ~BornMermin.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.BornMermin:
+
+   .. minigallery:: jaxrts.models.BornMermin
+       :add-heading:

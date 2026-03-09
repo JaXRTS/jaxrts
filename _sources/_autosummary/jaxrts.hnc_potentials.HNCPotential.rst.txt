@@ -1,0 +1,50 @@
+jaxrts.hnc\_potentials.HNCPotential
+===================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: HNCPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~HNCPotential.T
+      ~HNCPotential.__init__
+      ~HNCPotential.alpha
+      ~HNCPotential.check
+      ~HNCPotential.citation
+      ~HNCPotential.full_k
+      ~HNCPotential.full_r
+      ~HNCPotential.lambda_ab
+      ~HNCPotential.long_k
+      ~HNCPotential.long_r
+      ~HNCPotential.mu
+      ~HNCPotential.prepare
+      ~HNCPotential.q2
+      ~HNCPotential.r_cut
+      ~HNCPotential.short_k
+      ~HNCPotential.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~HNCPotential.allowed_keys
+      ~HNCPotential.cite_keys
+      ~HNCPotential.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.HNCPotential:
+
+   .. minigallery:: jaxrts.hnc_potentials.HNCPotential
+       :add-heading:

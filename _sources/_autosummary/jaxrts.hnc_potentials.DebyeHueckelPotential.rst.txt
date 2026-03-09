@@ -1,0 +1,51 @@
+jaxrts.hnc\_potentials.DebyeHueckelPotential
+============================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: DebyeHueckelPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~DebyeHueckelPotential.T
+      ~DebyeHueckelPotential.__init__
+      ~DebyeHueckelPotential.alpha
+      ~DebyeHueckelPotential.check
+      ~DebyeHueckelPotential.citation
+      ~DebyeHueckelPotential.full_k
+      ~DebyeHueckelPotential.full_r
+      ~DebyeHueckelPotential.kappa
+      ~DebyeHueckelPotential.lambda_ab
+      ~DebyeHueckelPotential.long_k
+      ~DebyeHueckelPotential.long_r
+      ~DebyeHueckelPotential.mu
+      ~DebyeHueckelPotential.prepare
+      ~DebyeHueckelPotential.q2
+      ~DebyeHueckelPotential.r_cut
+      ~DebyeHueckelPotential.short_k
+      ~DebyeHueckelPotential.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~DebyeHueckelPotential.allowed_keys
+      ~DebyeHueckelPotential.cite_keys
+      ~DebyeHueckelPotential.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.DebyeHueckelPotential:
+
+   .. minigallery:: jaxrts.hnc_potentials.DebyeHueckelPotential
+       :add-heading:

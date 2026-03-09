@@ -1,0 +1,44 @@
+jaxrts.analysis
+===============
+
+.. automodule:: jaxrts.analysis
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      ITCFT
+      ITCFT_grid
+      ITCF_from_setup
+      ITCF_fsum
+      ITCF_ssf
+      twoSidedLaplace
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      ITCF
+   
+   
+
+   
+   
+   
+
+
+

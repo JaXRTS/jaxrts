@@ -1,0 +1,38 @@
+jaxrts.models.Sum\_Sii
+======================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: Sum_Sii
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Sum_Sii.__init__
+      ~Sum_Sii.check
+      ~Sum_Sii.citation
+      ~Sum_Sii.evaluate
+      ~Sum_Sii.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Sum_Sii.allowed_keys
+      ~Sum_Sii.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.Sum_Sii:
+
+   .. minigallery:: jaxrts.models.Sum_Sii
+       :add-heading:

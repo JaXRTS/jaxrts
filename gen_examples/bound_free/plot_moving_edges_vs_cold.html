@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moving edges vs cold ionoization edges &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Electronic local field correction examples" href="../ee_lfc/index.html" />
+    <link rel="prev" title="Compare IPD Models" href="plot_ipd.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Example gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../plot_getting_started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_multi_component.html">Multi-Species Plasmas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_reproduce_Gregori2003_fig6.html">Calculate the full structure factors for various plasma conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis-module-examples">Analysis module examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#bound-free-scattering-examples">bound-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#electronic-local-field-correction-examples">Electronic local field correction examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#form-factor-examples">form-factor examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-bound-scattering-examples">free-bound scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-free-scattering-examples">free-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#ionic-scattering-examples">Ionic scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#saha-examples">Saha Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#setup-examples">Setup Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#utility-tool-examples">Utility tool examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis/index.html">Analysis module examples</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">bound-free scattering examples</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_ipd.html">Compare IPD Models</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Moving edges vs cold ionoization edges</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../ee_lfc/index.html">Electronic local field correction examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../form_factors/index.html">form-factor examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_bound/index.html">free-bound scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_free/index.html">free-free scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ionic/index.html">Ionic scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../saha/index.html">Saha Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../setup/index.html">Setup Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/index.html">Utility tool examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">bound-free scattering examples</a></li>
+      <li class="breadcrumb-item active">Moving edges vs cold ionoization edges</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gen_examples/bound_free/plot_moving_edges_vs_cold.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gen-examples-bound-free-plot-moving-edges-vs-cold-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="moving-edges-vs-cold-ionoization-edges">
+<span id="sphx-glr-gen-examples-bound-free-plot-moving-edges-vs-cold-py"></span><h1>Moving edges vs cold ionoization edges<a class="headerlink" href="#moving-edges-vs-cold-ionoization-edges" title="Link to this heading"></a></h1>
+<p>This script is used to test the bound-free edges using ionization energies from
+FAC code calculated by the FAC code:
+<a class="reference external" href="https://github.com/flexible-atomic-code/fac">https://github.com/flexible-atomic-code/fac</a> and compares them to a bound-free
+model using only the cold edges.</p>
+<img src="../../_images/sphx_glr_plot_moving_edges_vs_cold_001.svg" srcset="../../_images/sphx_glr_plot_moving_edges_vs_cold_001.svg" alt="Synthetic spectrum, [$C^{3.5+}+H^{1+}$] plasma" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
+
+<span class="c1"># ----------- Global settings ------------</span>
+<span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;font.size&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+        <span class="s2">&quot;axes.labelsize&quot;</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
+        <span class="s2">&quot;axes.titlesize&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="s2">&quot;legend.fontsize&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+        <span class="s2">&quot;xtick.labelsize&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+        <span class="s2">&quot;ytick.labelsize&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+        <span class="s2">&quot;font.family&quot;</span><span class="p">:</span> <span class="s2">&quot;serif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;figure.dpi&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="s2">&quot;axes.linewidth&quot;</span><span class="p">:</span> <span class="mf">1.2</span><span class="p">,</span>
+        <span class="s2">&quot;lines.linewidth&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;text.usetex&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">ureg</span>
+
+
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_BF</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">setup</span><span class="p">):</span>
+    <span class="n">See_bf</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;bound-free scattering&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">E</span><span class="p">,</span>
+        <span class="n">See_bf</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># ==========================================================</span>
+<span class="c1">#                   Input parameters</span>
+<span class="c1"># ----------------------------------------------------------</span>
+<span class="n">ions</span> <span class="o">=</span> <span class="p">(</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">),</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">))</span>
+<span class="n">rho</span> <span class="o">=</span> <span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;1g/cc&quot;</span><span class="p">)</span>
+<span class="n">number_fraction</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">])</span>
+
+<span class="n">temperature</span> <span class="o">=</span> <span class="mf">50.0</span>
+<span class="n">Z_free</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">scattering_angle</span> <span class="o">=</span> <span class="mf">166.0</span>
+<span class="n">photon_energy</span> <span class="o">=</span> <span class="mf">8.5</span>
+<span class="n">source_fwhm</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="c1"># ----------------------------------------------------------</span>
+
+<span class="n">measured_energy</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">8.6</span><span class="p">,</span> <span class="mi">4096</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kiloelectron_volt</span>
+<span class="n">T_e</span> <span class="o">=</span> <span class="n">temperature</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span>
+<span class="n">T_i</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">temperature</span><span class="p">,</span> <span class="n">temperature</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span>
+
+<span class="c1"># Calculate the spectrum</span>
+<span class="c1"># ==========================================================</span>
+
+<span class="c1"># Initialize plasma state with different temperatures for electrons</span>
+<span class="n">mass_fraction</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.helpers.mass_from_number_fraction.html#jaxrts.helpers.mass_from_number_fraction" title="jaxrts.helpers.mass_from_number_fraction" class="sphx-glr-backref-module-jaxrts-helpers sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">mass_from_number_fraction</span></a><span class="p">(</span><span class="n">number_fraction</span><span class="p">,</span> <span class="n">ions</span><span class="p">)</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">(</span>
+    <span class="n">ions</span><span class="o">=</span><span class="n">ions</span><span class="p">,</span>
+    <span class="n">Z_free</span><span class="o">=</span><span class="n">Z_free</span><span class="p">,</span>  <span class="c1"># Ionization per species</span>
+    <span class="n">mass_density</span><span class="o">=</span><span class="n">rho</span> <span class="o">*</span> <span class="n">mass_fraction</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="o">=</span><span class="n">T_e</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="o">=</span><span class="n">T_i</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">setup</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span>
+    <span class="n">scattering_angle</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scattering_angle</span><span class="si">}</span><span class="s2"> deg&quot;</span><span class="p">),</span>  <span class="c1"># Explicit units</span>
+    <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">photon_energy</span><span class="si">}</span><span class="s2"> keV&quot;</span><span class="p">),</span>
+    <span class="n">measured_energy</span><span class="o">=</span><span class="n">measured_energy</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span>
+        <a href="../../_autosummary/jaxrts.instrument_function.instrument_gaussian.html#jaxrts.instrument_function.instrument_gaussian" title="jaxrts.instrument_function.instrument_gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">instrument_gaussian</span></a><span class="p">,</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source_fwhm</span><span class="si">}</span><span class="s2">eV&quot;</span><span class="p">)</span>
+        <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))),</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.StewartPyattIPD.html#jaxrts.models.StewartPyattIPD" title="jaxrts.models.StewartPyattIPD" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">StewartPyattIPD</span></a><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;bound-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.SchumacherImpulse.html#jaxrts.models.SchumacherImpulse" title="jaxrts.models.SchumacherImpulse" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SchumacherImpulse</span></a><span class="p">(</span><span class="n">r_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># =============================================================================</span>
+
+<span class="n">E</span><span class="p">,</span> <span class="n">See_bf</span> <span class="o">=</span> <span class="n">calc_BF</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;bound-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.SchumacherImpulseColdEdges.html#jaxrts.models.SchumacherImpulseColdEdges" title="jaxrts.models.SchumacherImpulseColdEdges" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SchumacherImpulseColdEdges</span></a><span class="p">(</span>
+    <span class="n">r_k</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+<span class="n">E</span><span class="p">,</span> <span class="n">See_bf_cold</span> <span class="o">=</span> <span class="n">calc_BF</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">E</span> <span class="o">-</span> <span class="mi">8500</span><span class="p">,</span>
+    <span class="n">See_bf_cold</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;total bound-free (cold edge)&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
+    <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">E</span> <span class="o">-</span> <span class="mi">8500</span><span class="p">,</span> <span class="n">See_bf</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;total bound-free&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Energy [eV]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$S_</span><span class="si">{ee}</span><span class="s2">^</span><span class="si">{bf}</span><span class="s2">$ [s]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Synthetic spectrum, [$C^{3.5+}+H^{1+}$] plasma&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="o">-</span><span class="mi">800</span><span class="p">,</span> <span class="mi">50</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 6.795 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-bound-free-plot-moving-edges-vs-cold-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/4ce6fc9d2c0ca6239190c2216f71ce83/plot_moving_edges_vs_cold.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_moving_edges_vs_cold.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/79a336a517710f477232a7e0b40b14f2/plot_moving_edges_vs_cold.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_moving_edges_vs_cold.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_ipd.html" class="btn btn-neutral float-left" title="Compare IPD Models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../ee_lfc/index.html" class="btn btn-neutral float-right" title="Electronic local field correction examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

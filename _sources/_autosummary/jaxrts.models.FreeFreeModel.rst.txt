@@ -1,0 +1,42 @@
+jaxrts.models.FreeFreeModel
+===========================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: FreeFreeModel
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~FreeFreeModel.__init__
+      ~FreeFreeModel.check
+      ~FreeFreeModel.citation
+      ~FreeFreeModel.evaluate
+      ~FreeFreeModel.evaluate_raw
+      ~FreeFreeModel.prepare
+      ~FreeFreeModel.sample_grid
+      ~FreeFreeModel.susceptibility
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~FreeFreeModel.allowed_keys
+      ~FreeFreeModel.cite_keys
+      ~FreeFreeModel.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.FreeFreeModel:
+
+   .. minigallery:: jaxrts.models.FreeFreeModel
+       :add-heading:

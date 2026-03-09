@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generating a first spectrum &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Models implemented" href="models.html" />
+    <link rel="prev" title="Physics" href="physics.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="usage.html">Usage</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="physics.html">Physics</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Generating a first spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">Models implemented</a></li>
+<li class="toctree-l2"><a class="reference internal" href="first_model.html">Creating your own model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementation-details.html">Implementation details</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="usage.html">Usage</a></li>
+      <li class="breadcrumb-item active">Generating a first spectrum</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/first-spectrum.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="generating-a-first-spectrum">
+<h1>Generating a first spectrum<a class="headerlink" href="#generating-a-first-spectrum" title="Link to this heading"></a></h1>
+<p>This page introduces the design of <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code>, and guides you through the
+process of generating a first spectrum.
+Note that the full script is available in the example section of this
+documentation, under <a class="reference internal" href="gen_examples/plot_getting_started.html"><span class="doc">Getting Started</span></a>.</p>
+<p>jaxrts provides three main types:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.plasmastate.PlasmaState</span></code></a> contains information about the plasma. It
+defines, e.g., the constituents of the plasma (in form of
+<a class="reference internal" href="_autosummary/jaxrts.elements.Element.html#jaxrts.elements.Element" title="jaxrts.elements.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.elements.Element</span></code></a> s), electron- and ion temperature, density, and
+ionization.</p></li>
+<li><p><a class="reference internal" href="_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.setup.Setup"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.setup.Setup</span></code></a>, on the other hand, defines the geometry of the
+experiment, like probing energy, scattering angle, and source-instrument
+function.</p></li>
+<li><p><a class="reference internal" href="_autosummary/jaxrts.models.Model.html#jaxrts.models.Model" title="jaxrts.models.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.Model</span></code></a> contain approximations for a given aspect of the plasma.
+A model should at least contain a <a class="reference internal" href="_autosummary/jaxrts.models.Model.evaluate.html#jaxrts.models.Model.evaluate" title="jaxrts.models.Model.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">jaxrts.models.Model.evaluate()</span></code></a>,
+which takes a <code class="docutils literal notranslate"><span class="pre">PlasmaState</span></code> and a <code class="docutils literal notranslate"><span class="pre">Setup</span></code> as argument, and computes the relevant quantities.</p></li>
+</ul>
+<p>First, import the relevant packages:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
+
+<span class="c1"># We use the jpu package (which is enabling the usage of pint with jax) to</span>
+<span class="c1"># handle units.</span>
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">ureg</span>
+</pre></div>
+</div>
+<p>Here, please note two important features: We import <code class="xref py py-mod docutils literal notranslate"><span class="pre">jax.numpy</span></code>, in
+favor of <code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code>. This is crucial, as it enables us to use jax’ just in
+time compilation.
+For most cases, you can just use it as a drop-in replacement without any
+errors. However, some problems might arise, especially when changing individual
+entries of an array in-place. We highly recommend reading the <a class="reference external" href="https://docs.jax.dev/en/latest/notebooks/Common_Gotchas_in_JAX.html">documentation of
+jax on potential pitfalls</a>.</p>
+<p>Secondly, we utilize units, throughout. This is achieved with the <code class="docutils literal notranslate"><span class="pre">ureg</span></code>
+instance; its application should be clear after reading this example.
+We rely on <a class="reference external" href="https://github.com/dfm/jpu">jpu</a>, a port of <a class="reference external" href="https://pint.readthedocs.io">pint</a> to the jax ecosystem.</p>
+<p>With this out of the way, we lets the define a two-times ionized beryllium
+plasma at <span class="math notranslate nohighlight">\(\rho=1\text{g/cc}\)</span> and an electron temperature <span class="math notranslate nohighlight">\(k_BT_e =
+1\text{eV}\)</span>.</p>
+<p>If no ion temperature is given explicitly, we assume equilibrium of ion and
+electron temperatures as a default.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">(</span>
+    <span class="n">ions</span><span class="o">=</span><span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;Be&quot;</span><span class="p">)],</span>
+    <span class="n">Z_free</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">]),</span>
+    <span class="n">mass_density</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">,</span>  <span class="c1"># T_e is the electron temperature.</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, we also have to define a <a class="reference internal" href="_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.setup.Setup"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.setup.Setup</span></code></a>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">jpu</span></code>
+also allows to convert string to quantities with units, as you can see below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">setup</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span>
+    <span class="n">scattering_angle</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;60°&quot;</span><span class="p">),</span>
+    <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;4700 eV&quot;</span><span class="p">),</span>
+    <span class="n">measured_energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;4700 eV&quot;</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span>
+        <span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">instrument_gaussian</span><span class="p">,</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;5.0eV&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))),</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>To attach a <a class="reference internal" href="_autosummary/jaxrts.models.Model.html#jaxrts.models.Model" title="jaxrts.models.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.Model</span></code></a> instance to the
+<a class="reference internal" href="_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.plasmastate.PlasmaState</span></code></a>, just assign the instance to the
+appropriate key. The four keys you see below are mandatory to be set. However,
+depending on the models implemented, you might have to specify different
+additional models, e.g., <code class="docutils literal notranslate"><span class="pre">ipd</span></code>. See <a class="reference internal" href="models.html"><span class="doc">Models implemented</span></a> for a comprehensive list of
+models available in jaxrts.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;ionic scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">OnePotentialHNCIonFeat</span><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">RPA_DandreaFit</span><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;bound-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SchumacherImpulse</span><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-bound scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DetailedBalance</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Finally, we call <a class="reference internal" href="_autosummary/jaxrts.plasmastate.PlasmaState.probe.html#jaxrts.plasmastate.PlasmaState.probe" title="jaxrts.plasmastate.PlasmaState.probe"><code class="xref py py-meth docutils literal notranslate"><span class="pre">jaxrts.plasmastate.PlasmaState.probe()</span></code></a>, to evaluate
+the scattering on the plasma state with the geometry defined.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate the spectrum</span>
+<span class="n">See_tot</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">probe</span><span class="p">(</span><span class="n">setup</span><span class="p">)</span>
+
+<span class="c1"># Plot the result</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
+    <span class="n">See_tot</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Probed Energy [eV]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$S_</span><span class="si">{ee}</span><span class="s2">^</span><span class="si">{tot}</span><span class="s2">$ [s]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Be plasma at 2eV and 1g/cc with Z=2&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Above code produces the following plot:</p>
+<a class="reference internal image-reference" href="_images/sphx_glr_plot_getting_started_001.svg"><img alt="_images/sphx_glr_plot_getting_started_001.svg" src="_images/sphx_glr_plot_getting_started_001.svg" style="width: 600px;" /></a>
+<p>Since we did not set <a class="reference internal" href="_autosummary/jaxrts.setup.Setup.frc_exponent.html#jaxrts.setup.Setup.frc_exponent" title="jaxrts.setup.Setup.frc_exponent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.setup.Setup.frc_exponent</span></code></a>, above, it defaults
+to zero, i.e., the output of jaxrts is proportional to the dynamic structure
+factor, convolved with the source instrument function. See
+<a class="reference internal" href="gen_examples/setup/plot_frequency_redistibution_correction.html"><span class="doc">Frequency redistribution correction</span></a> for an
+example showing the effect of this correction, if it was used.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="physics.html" class="btn btn-neutral float-left" title="Physics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="models.html" class="btn btn-neutral float-right" title="Models implemented" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

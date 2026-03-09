@@ -1,0 +1,43 @@
+
+
+.. _sphx_glr_gen_examples_setup:
+
+Setup Examples
+--------------
+
+Examples related to the :py:class:`jaxrts.Setup` class.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how the frequency redistribution correction (:pyjaxrts.Setup.frc_exponent) i...">
+
+.. only:: html
+
+  .. image:: /gen_examples/setup/images/thumb/sphx_glr_plot_frequency_redistibution_correction_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_setup_plot_frequency_redistibution_correction.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Frequency redistribution correction</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gen_examples/setup/plot_frequency_redistibution_correction
+

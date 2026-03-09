@@ -1,0 +1,40 @@
+jaxrts.models.DebyeWallerSolid
+==============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: DebyeWallerSolid
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~DebyeWallerSolid.Rayleigh_weight
+      ~DebyeWallerSolid.S_ii
+      ~DebyeWallerSolid.__init__
+      ~DebyeWallerSolid.check
+      ~DebyeWallerSolid.citation
+      ~DebyeWallerSolid.evaluate
+      ~DebyeWallerSolid.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~DebyeWallerSolid.allowed_keys
+      ~DebyeWallerSolid.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.DebyeWallerSolid:
+
+   .. minigallery:: jaxrts.models.DebyeWallerSolid
+       :add-heading:

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frequency redistribution correction &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Utility tool examples" href="../utils/index.html" />
+    <link rel="prev" title="Setup Examples" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Example gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../plot_getting_started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_multi_component.html">Multi-Species Plasmas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_reproduce_Gregori2003_fig6.html">Calculate the full structure factors for various plasma conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis-module-examples">Analysis module examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#bound-free-scattering-examples">bound-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#electronic-local-field-correction-examples">Electronic local field correction examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#form-factor-examples">form-factor examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-bound-scattering-examples">free-bound scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-free-scattering-examples">free-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#ionic-scattering-examples">Ionic scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#saha-examples">Saha Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#setup-examples">Setup Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#utility-tool-examples">Utility tool examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis/index.html">Analysis module examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bound_free/index.html">bound-free scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ee_lfc/index.html">Electronic local field correction examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../form_factors/index.html">form-factor examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_bound/index.html">free-bound scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_free/index.html">free-free scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ionic/index.html">Ionic scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../saha/index.html">Saha Examples</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Setup Examples</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Frequency redistribution correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/index.html">Utility tool examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Setup Examples</a></li>
+      <li class="breadcrumb-item active">Frequency redistribution correction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gen_examples/setup/plot_frequency_redistibution_correction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gen-examples-setup-plot-frequency-redistibution-correction-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="frequency-redistribution-correction">
+<span id="sphx-glr-gen-examples-setup-plot-frequency-redistibution-correction-py"></span><h1>Frequency redistribution correction<a class="headerlink" href="#frequency-redistribution-correction" title="Link to this heading"></a></h1>
+<p>This example shows how the frequency redistribution correction
+(<code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.Setup.frc_exponent</span></code>) influences the outcome of
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">jaxrts.PlasmaState.probe()</span></code>.</p>
+<p>For a discussion, see <span id="id1">[<a class="reference internal" href="../../bibliography.html#id19" title="B J B Crowley and G Gregori. X-ray scattering by many-particle systems. New Journal of Physics, 15:015014, 1 2013. doi:10.1088/1367-2630/15/1/015014.">Crowley and Gregori, 2013</a>]</span>.</p>
+<img src="../../_images/sphx_glr_plot_frequency_redistibution_correction_001.svg" srcset="../../_images/sphx_glr_plot_frequency_redistibution_correction_001.svg" alt="plot frequency redistibution correction" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.axes_grid1.inset_locator</span><span class="w"> </span><span class="kn">import</span> <span class="n">inset_axes</span><span class="p">,</span> <span class="n">mark_inset</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
+
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">ureg</span>
+
+<span class="n">state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">(</span>
+    <span class="n">ions</span><span class="o">=</span><span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;Be&quot;</span><span class="p">)],</span>
+    <span class="n">Z_free</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">]),</span>
+    <span class="n">mass_density</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">setup</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span>
+    <span class="n">scattering_angle</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;170°&quot;</span><span class="p">),</span>
+    <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;8700 eV&quot;</span><span class="p">),</span>
+    <span class="n">measured_energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;8700 eV&quot;</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">666</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span>
+        <a href="../../_autosummary/jaxrts.instrument_function.instrument_gaussian.html#jaxrts.instrument_function.instrument_gaussian" title="jaxrts.instrument_function.instrument_gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">instrument_gaussian</span></a><span class="p">,</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;5.0eV&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))),</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;ionic scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.OnePotentialHNCIonFeat.html#jaxrts.models.OnePotentialHNCIonFeat" title="jaxrts.models.OnePotentialHNCIonFeat" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">OnePotentialHNCIonFeat</span></a><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.RPA_DandreaFit.html#jaxrts.models.RPA_DandreaFit" title="jaxrts.models.RPA_DandreaFit" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">RPA_DandreaFit</span></a><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;bound-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.SchumacherImpulse.html#jaxrts.models.SchumacherImpulse" title="jaxrts.models.SchumacherImpulse" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SchumacherImpulse</span></a><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-bound scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.DetailedBalance.html#jaxrts.models.DetailedBalance" title="jaxrts.models.DetailedBalance" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DetailedBalance</span></a><span class="p">()</span>
+
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax_inset1</span> <span class="o">=</span> <span class="n">inset_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="s2">&quot;50%&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;70%&quot;</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">)</span>
+<span class="c1"># Generate the spectrum</span>
+<span class="k">for</span> <span class="n">frc</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]:</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">frc_exponent</span> <span class="o">=</span> <span class="n">frc</span>
+    <span class="n">See_tot</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">probe</span><span class="p">(</span><span class="n">setup</span><span class="p">)</span>
+
+    <span class="c1"># Plot the result</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
+        <span class="n">See_tot</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;frc_exponent = </span><span class="si">{</span><span class="n">frc</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax_inset1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
+        <span class="n">See_tot</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;frc_exponent = </span><span class="si">{</span><span class="n">frc</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">frequency_redistribution_correction</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;frc_exponent = </span><span class="si">{</span><span class="n">frc</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="n">ax_inset1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">8300</span><span class="p">,</span> <span class="mi">8550</span><span class="p">)</span>
+<span class="n">ax_inset1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span><span class="o">=</span><span class="mf">0.3e-18</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="mf">3e-18</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Probed Energy [eV]&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span>
+    <span class="s2">&quot;$S_</span><span class="si">{ee}</span><span class="s2">^</span><span class="si">{tot}</span><span class="s2">$ or</span><span class="se">\n</span><span class="s2"> class. diff. crosssection or</span><span class="se">\n</span><span class="s2"> quantum diff. crosssection [s]&quot;</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;FRC&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+
+<span class="n">ax_inset1</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_xaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_ticks</span><span class="p">([])</span>
+<span class="n">ax_inset1</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_ticks</span><span class="p">([])</span>
+<span class="n">mark_inset</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax_inset1</span><span class="p">,</span> <span class="n">loc1</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">loc2</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 6.758 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-setup-plot-frequency-redistibution-correction-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/2b6a9471023a53d0cf240ec426af89d3/plot_frequency_redistibution_correction.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_frequency_redistibution_correction.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/39d11b810667eaed3a64df0f46e8f3ff/plot_frequency_redistibution_correction.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_frequency_redistibution_correction.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Setup Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../utils/index.html" class="btn btn-neutral float-right" title="Utility tool examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

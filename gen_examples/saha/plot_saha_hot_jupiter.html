@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saha equation for hot jupiter materials &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Setup Examples" href="../setup/index.html" />
+    <link rel="prev" title="Rayleigh weights for integer expanded ionization states" href="plot_WR_expanded_ionization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Example gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../plot_getting_started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_multi_component.html">Multi-Species Plasmas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_reproduce_Gregori2003_fig6.html">Calculate the full structure factors for various plasma conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis-module-examples">Analysis module examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#bound-free-scattering-examples">bound-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#electronic-local-field-correction-examples">Electronic local field correction examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#form-factor-examples">form-factor examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-bound-scattering-examples">free-bound scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-free-scattering-examples">free-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#ionic-scattering-examples">Ionic scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#saha-examples">Saha Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#setup-examples">Setup Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#utility-tool-examples">Utility tool examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis/index.html">Analysis module examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bound_free/index.html">bound-free scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ee_lfc/index.html">Electronic local field correction examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../form_factors/index.html">form-factor examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_bound/index.html">free-bound scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_free/index.html">free-free scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ionic/index.html">Ionic scattering examples</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Saha Examples</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_WR_expanded_ionization.html">Rayleigh weights for integer expanded ionization states</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Saha equation for hot jupiter materials</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../setup/index.html">Setup Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/index.html">Utility tool examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Saha Examples</a></li>
+      <li class="breadcrumb-item active">Saha equation for hot jupiter materials</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gen_examples/saha/plot_saha_hot_jupiter.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gen-examples-saha-plot-saha-hot-jupiter-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="saha-equation-for-hot-jupiter-materials">
+<span id="sphx-glr-gen-examples-saha-plot-saha-hot-jupiter-py"></span><h1>Saha equation for hot jupiter materials<a class="headerlink" href="#saha-equation-for-hot-jupiter-materials" title="Link to this heading"></a></h1>
+<p>This example showcases the use of the saha equation solver. This example
+consideres abundances as reported by <span id="id1">[<a class="reference internal" href="../../bibliography.html#id68" title="Katharina Lodders. Solar system abundances of the elements. 10 2010. doi:10.1007/978-3-642-10352-0\_8.">Lodders, 2010</a>]</span>, and reproduces a
+plot generated with M. Schöttler’s MALGS programm – which is discussed, e.g.
+in <span id="id2">[<a class="reference internal" href="../../bibliography.html#id66" title="Sandeep Kumar, Anna Julia Poser, Manuel Schöttler, Uwe Kleinschmidt, Wieland Dietrich, Johannes Wicht, Martin French, and Ronald Redmer. Ionization and transport in partially ionized multicomponent plasmas: application to atmospheres of hot jupiters. Physical Review E, 6 2021. doi:10.1103/physreve.103.063203.">Kumar et al., 2021</a>]</span>.</p>
+<img src="../../_images/sphx_glr_plot_saha_hot_jupiter_001.svg" srcset="../../_images/sphx_glr_plot_saha_hot_jupiter_001.svg" alt="plot saha hot jupiter" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jaxrts.saha</span><span class="w"> </span><span class="kn">import</span> <a href="../../_autosummary/jaxrts.saha.solve_saha.html#jaxrts.saha.solve_saha" title="jaxrts.saha.solve_saha" class="sphx-glr-backref-module-jaxrts-saha sphx-glr-backref-type-py-function"><span class="n">solve_saha</span></a>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jaxrts.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">ureg</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">number_fraction</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="mi">1</span><span class="p">,</span>
+            <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="mf">10.925</span> <span class="o">-</span> <span class="mi">12</span><span class="p">),</span>
+            <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="mf">6.29</span> <span class="o">-</span> <span class="mi">12</span><span class="p">),</span>
+            <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="mf">5.11</span> <span class="o">-</span> <span class="mi">12</span><span class="p">),</span>
+            <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="mf">3.28</span> <span class="o">-</span> <span class="mi">12</span><span class="p">),</span>
+            <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="mf">7.46</span> <span class="o">-</span> <span class="mi">12</span><span class="p">),</span>
+            <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="mf">6.31</span> <span class="o">-</span> <span class="mi">12</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">number_fraction</span> <span class="o">/=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">number_fraction</span><span class="p">)</span>
+    <span class="n">ions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">),</span>
+        <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;He&quot;</span><span class="p">),</span>
+        <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;Na&quot;</span><span class="p">),</span>
+        <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">),</span>
+        <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;Li&quot;</span><span class="p">),</span>
+        <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;Fe&quot;</span><span class="p">),</span>
+        <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;Ca&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">mass_fraction</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.helpers.mass_from_number_fraction.html#jaxrts.helpers.mass_from_number_fraction" title="jaxrts.helpers.mass_from_number_fraction" class="sphx-glr-backref-module-jaxrts-helpers sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">mass_from_number_fraction</span></a><span class="p">(</span>
+        <span class="n">number_fraction</span><span class="p">,</span> <span class="n">ions</span>
+    <span class="p">)</span>
+
+    <span class="n">plasma_state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">(</span>
+        <span class="n">ions</span><span class="o">=</span><span class="n">ions</span><span class="p">,</span>
+        <span class="n">Z_free</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">mass_fraction</span><span class="p">),</span>
+        <span class="n">mass_density</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;1e-5g/cc&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">mass_fraction</span><span class="p">,</span>
+        <span class="n">T_e</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">40</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ion_population</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">ions</span><span class="p">}</span>
+    <span class="n">ion_population</span><span class="p">[</span><span class="s2">&quot;n_free&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">ions</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">charge</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>  <span class="c1"># noqa: B007</span>
+            <span class="n">ion_population</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+    <span class="n">Tes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">250</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span>
+    <span class="k">for</span> <span class="n">Te</span> <span class="ow">in</span> <span class="n">Tes</span><span class="p">:</span>
+        <span class="n">ion_population</span><span class="p">[</span><span class="s2">&quot;n_free&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">]))</span>
+        <span class="n">sol</span><span class="p">,</span> <span class="n">ne</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.saha.solve_saha.html#jaxrts.saha.solve_saha" title="jaxrts.saha.solve_saha" class="sphx-glr-backref-module-jaxrts-saha sphx-glr-backref-type-py-function"><span class="n">solve_saha</span></a><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">),</span>
+            <span class="n">Te</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">mass_density</span> <span class="o">/</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">atomic_masses</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">sol</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">meter</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">ne</span> <span class="o">=</span> <span class="n">ne</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">meter</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">ions</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">charge</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">ion_population</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span><span class="p">][</span><span class="n">charge</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sol</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+                <span class="n">ion_population</span><span class="p">[</span><span class="s2">&quot;n_free&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">charge</span> <span class="o">*</span> <span class="n">sol</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+    <span class="n">ls</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;solid&quot;</span><span class="p">,</span> <span class="s2">&quot;dashed&quot;</span><span class="p">,</span> <span class="s2">&quot;dotted&quot;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ions</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">charge</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">Tes</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">),</span>
+                <span class="n">ion_population</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span><span class="p">][</span><span class="n">charge</span><span class="p">],</span>
+                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;$^{&quot;</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">charge</span><span class="si">}</span><span class="s2">+&quot;</span> <span class="o">+</span> <span class="s2">&quot;}$&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">ls</span><span class="o">=</span><span class="n">ls</span><span class="p">[</span><span class="n">charge</span><span class="p">],</span>
+            <span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">Tes</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">),</span>
+        <span class="n">ion_population</span><span class="p">[</span><span class="s2">&quot;n_free&quot;</span><span class="p">],</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$n_e$&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">1e9</span><span class="p">,</span> <span class="mf">1e25</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;T [K]&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;ion density [1/m³]&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 35.550 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-saha-plot-saha-hot-jupiter-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/c64a39a5ddcec0c823c74ae556f9f600/plot_saha_hot_jupiter.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_saha_hot_jupiter.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/7896c2b7f3b8fdd50b6767f3b6fe1a1f/plot_saha_hot_jupiter.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_saha_hot_jupiter.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_WR_expanded_ionization.html" class="btn btn-neutral float-left" title="Rayleigh weights for integer expanded ionization states" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../setup/index.html" class="btn btn-neutral float-right" title="Setup Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

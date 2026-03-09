@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.plasma_physics &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jaxrts.plasma_physics.Debye_Hueckel_screening_length" href="jaxrts.plasma_physics.Debye_Hueckel_screening_length.html" />
+    <link rel="prev" title="jaxrts.models.ScatteringModel.sample_points" href="jaxrts.models.ScatteringModel.sample_points.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="jaxrts.html">jaxrts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.absorption_edges_ionized_ions_data.html">jaxrts.absorption_edges_ionized_ions_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.analysis.html">jaxrts.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.bound_free.html">jaxrts.bound_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections.html">jaxrts.ee_localfieldcorrections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections_dornheim_2021.html">jaxrts.ee_localfieldcorrections_dornheim_2021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.elements.html">jaxrts.elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.experimental.html">jaxrts.experimental</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.form_factors.html">jaxrts.form_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_bound.html">jaxrts.free_bound</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_free.html">jaxrts.free_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.helpers.html">jaxrts.helpers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hnc_potentials.html">jaxrts.hnc_potentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hypernetted_chain.html">jaxrts.hypernetted_chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.instrument_function.html">jaxrts.instrument_function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ion_feature.html">jaxrts.ion_feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ipd.html">jaxrts.ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.literature.html">jaxrts.literature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.math.html">jaxrts.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.models.html">jaxrts.models</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">jaxrts.plasma_physics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.Debye_Hueckel_screening_length.html">jaxrts.plasma_physics.Debye_Hueckel_screening_length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.chem_pot_interpolationIchimaru.html">jaxrts.plasma_physics.chem_pot_interpolationIchimaru</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation.html">jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.compton_energy.html">jaxrts.plasma_physics.compton_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.coulomb_potential_fourier.html">jaxrts.plasma_physics.coulomb_potential_fourier</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.coupling_param.html">jaxrts.plasma_physics.coupling_param</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.degeneracy_param.html">jaxrts.plasma_physics.degeneracy_param</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.epsilon_from_susceptibility.html">jaxrts.plasma_physics.epsilon_from_susceptibility</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.fermi_dirac.html">jaxrts.plasma_physics.fermi_dirac</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.fermi_energy.html">jaxrts.plasma_physics.fermi_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.fermi_temperature.html">jaxrts.plasma_physics.fermi_temperature</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.fermi_wavenumber.html">jaxrts.plasma_physics.fermi_wavenumber</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.interparticle_spacing.html">jaxrts.plasma_physics.interparticle_spacing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.kin_energy.html">jaxrts.plasma_physics.kin_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA.html">jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.plasma_frequency.html">jaxrts.plasma_physics.plasma_frequency</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.susceptibility_from_epsilon.html">jaxrts.plasma_physics.susceptibility_from_epsilon</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.temperature_interpolation.html">jaxrts.plasma_physics.temperature_interpolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.therm_de_broglie_wl.html">jaxrts.plasma_physics.therm_de_broglie_wl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.thomson_momentum_transfer.html">jaxrts.plasma_physics.thomson_momentum_transfer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.wiegner_seitz_radius.html">jaxrts.plasma_physics.wiegner_seitz_radius</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasmastate.html">jaxrts.plasmastate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saha.html">jaxrts.saha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saving.html">jaxrts.saving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.setup.html">jaxrts.setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.static_structure_factors.html">jaxrts.static_structure_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.units.html">jaxrts.units</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.html">jaxrts</a></li>
+      <li class="breadcrumb-item active">jaxrts.plasma_physics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/jaxrts.plasma_physics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-jaxrts.plasma_physics">
+<span id="jaxrts-plasma-physics"></span><h1>jaxrts.plasma_physics<a class="headerlink" href="#module-jaxrts.plasma_physics" title="Link to this heading"></a></h1>
+<p>This submodule contains basic formulas used in plasma physics.</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.Debye_Hueckel_screening_length.html#jaxrts.plasma_physics.Debye_Hueckel_screening_length" title="jaxrts.plasma_physics.Debye_Hueckel_screening_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Debye_Hueckel_screening_length</span></code></a>(n, T[, Z])</p></td>
+<td><p>Calculate the Debye-Hückel screening length.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.chem_pot_interpolationIchimaru.html#jaxrts.plasma_physics.chem_pot_interpolationIchimaru" title="jaxrts.plasma_physics.chem_pot_interpolationIchimaru"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chem_pot_interpolationIchimaru</span></code></a>(T, n_e)</p></td>
+<td><p>Interpolation function for the chemical potential between the classical and quantum region, originally from <span id="id1">[<a class="reference internal" href="../bibliography.html#id54" title="S. Ichimaru. Statistical Plasma Physics, Volume I: Basic Principles. Frontiers in Physics. CRC Press, 2018. ISBN 9780429965708.">Ichimaru, 2018</a>]</span>, eqn.(3.147).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation.html#jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation" title="jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chem_pot_sommerfeld_fermi_interpolation</span></code></a>(T, n_e)</p></td>
+<td><p>Interpolation function for the chemical potential of a non-interacting (ideal) fermi gas given in the paper of <span id="id2">[<a class="reference internal" href="../bibliography.html#id18" title="Brian Cowan. On the chemical potential of ideal fermi and bose gases. Journal of Low Temperature Physics, 197(5-6):412–444, 2019. doi:10.1007/s10909-019-02228-0.">Cowan, 2019</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.compton_energy.html#jaxrts.plasma_physics.compton_energy" title="jaxrts.plasma_physics.compton_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compton_energy</span></code></a>(probe_energy, scattering_angle)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.coulomb_potential_fourier.html#jaxrts.plasma_physics.coulomb_potential_fourier" title="jaxrts.plasma_physics.coulomb_potential_fourier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coulomb_potential_fourier</span></code></a>(Z1, Z2, k)</p></td>
+<td><p>The Fourier transform of the Coloumb potential.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.coupling_param.html#jaxrts.plasma_physics.coupling_param" title="jaxrts.plasma_physics.coupling_param"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coupling_param</span></code></a>(Z1, Z2, n_e, T_e)</p></td>
+<td><p>Returns the degree of interparticle coupling with corresponding charge numbers Z1 and Z2 at temperature T_e and density n_e.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.degeneracy_param.html#jaxrts.plasma_physics.degeneracy_param" title="jaxrts.plasma_physics.degeneracy_param"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degeneracy_param</span></code></a>(n_e, T_e)</p></td>
+<td><p>Calculate the plasma degeneracy parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.epsilon_from_susceptibility.html#jaxrts.plasma_physics.epsilon_from_susceptibility" title="jaxrts.plasma_physics.epsilon_from_susceptibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">epsilon_from_susceptibility</span></code></a>(xi, k)</p></td>
+<td><p>Calculate the dielectric function from a full susceptibility xi</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_dirac.html#jaxrts.plasma_physics.fermi_dirac" title="jaxrts.plasma_physics.fermi_dirac"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_dirac</span></code></a>(k, chem_pot, T)</p></td>
+<td><p>Return the Fermi-Dirac distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_energy.html#jaxrts.plasma_physics.fermi_energy" title="jaxrts.plasma_physics.fermi_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_energy</span></code></a>(n_e)</p></td>
+<td><p>Calculate the Fermi energy of an ideal fermi gas from a given electron density.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_temperature.html#jaxrts.plasma_physics.fermi_temperature" title="jaxrts.plasma_physics.fermi_temperature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_temperature</span></code></a>(n_e)</p></td>
+<td><p>Calculates the Fermi temperature of an ideal fermi gas from a given electron density.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_wavenumber.html#jaxrts.plasma_physics.fermi_wavenumber" title="jaxrts.plasma_physics.fermi_wavenumber"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_wavenumber</span></code></a>(n_e)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.interparticle_spacing.html#jaxrts.plasma_physics.interparticle_spacing" title="jaxrts.plasma_physics.interparticle_spacing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interparticle_spacing</span></code></a>(Z1, Z2, n_e)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.kin_energy.html#jaxrts.plasma_physics.kin_energy" title="jaxrts.plasma_physics.kin_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kin_energy</span></code></a>(k)</p></td>
+<td><p>Kinetic energy of a free electron with wavevector <code class="docutils literal notranslate"><span class="pre">k</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA.html#jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA" title="jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noninteracting_susceptibility_from_eps_RPA</span></code></a>(...)</p></td>
+<td><p>Calculates the non-interacting susceptilibily from a given dielectric function epsilon in RPA.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.plasma_frequency.html#jaxrts.plasma_physics.plasma_frequency" title="jaxrts.plasma_physics.plasma_frequency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plasma_frequency</span></code></a>(electron_density)</p></td>
+<td><p>Calculate the plasma frequency <span class="math notranslate nohighlight">\(\omega_\text{pe}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.susceptibility_from_epsilon.html#jaxrts.plasma_physics.susceptibility_from_epsilon" title="jaxrts.plasma_physics.susceptibility_from_epsilon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">susceptibility_from_epsilon</span></code></a>(epsilon, k)</p></td>
+<td><p>Calculate the full susceptilibily from a given dielectric function epsilon by inverting</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.temperature_interpolation.html#jaxrts.plasma_physics.temperature_interpolation" title="jaxrts.plasma_physics.temperature_interpolation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">temperature_interpolation</span></code></a>(n_e, T_e[, power])</p></td>
+<td><p>Interpolate between electron temperature and Fermi temperature.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.therm_de_broglie_wl.html#jaxrts.plasma_physics.therm_de_broglie_wl" title="jaxrts.plasma_physics.therm_de_broglie_wl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">therm_de_broglie_wl</span></code></a>(T)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.thomson_momentum_transfer.html#jaxrts.plasma_physics.thomson_momentum_transfer" title="jaxrts.plasma_physics.thomson_momentum_transfer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">thomson_momentum_transfer</span></code></a>(energy, angle)</p></td>
+<td><p>Momentum transfer <span class="math notranslate nohighlight">\(k = \mid\vec{k}\mid\)</span>, assuming that the absolute value of the momentum for incoming and scattered light is only slightly changed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.wiegner_seitz_radius.html#jaxrts.plasma_physics.wiegner_seitz_radius" title="jaxrts.plasma_physics.wiegner_seitz_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wiegner_seitz_radius</span></code></a>(n_e)</p></td>
+<td><p>Return the Wiegner Seitz Radius <span class="math notranslate nohighlight">\(r_s\)</span>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jaxrts.models.ScatteringModel.sample_points.html" class="btn btn-neutral float-left" title="jaxrts.models.ScatteringModel.sample_points" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.plasma_physics.Debye_Hueckel_screening_length.html" class="btn btn-neutral float-right" title="jaxrts.plasma_physics.Debye_Hueckel_screening_length" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

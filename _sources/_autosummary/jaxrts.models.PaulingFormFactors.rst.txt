@@ -1,0 +1,38 @@
+jaxrts.models.PaulingFormFactors
+================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: PaulingFormFactors
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~PaulingFormFactors.__init__
+      ~PaulingFormFactors.check
+      ~PaulingFormFactors.citation
+      ~PaulingFormFactors.evaluate
+      ~PaulingFormFactors.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~PaulingFormFactors.allowed_keys
+      ~PaulingFormFactors.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.PaulingFormFactors:
+
+   .. minigallery:: jaxrts.models.PaulingFormFactors
+       :add-heading:

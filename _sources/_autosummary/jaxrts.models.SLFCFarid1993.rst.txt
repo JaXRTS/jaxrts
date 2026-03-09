@@ -1,0 +1,39 @@
+jaxrts.models.SLFCFarid1993
+===========================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: SLFCFarid1993
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SLFCFarid1993.__init__
+      ~SLFCFarid1993.check
+      ~SLFCFarid1993.citation
+      ~SLFCFarid1993.evaluate
+      ~SLFCFarid1993.evaluate_fullk
+      ~SLFCFarid1993.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SLFCFarid1993.allowed_keys
+      ~SLFCFarid1993.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.SLFCFarid1993:
+
+   .. minigallery:: jaxrts.models.SLFCFarid1993
+       :add-heading:

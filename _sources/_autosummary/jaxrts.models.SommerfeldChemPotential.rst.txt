@@ -1,0 +1,38 @@
+jaxrts.models.SommerfeldChemPotential
+=====================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: SommerfeldChemPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SommerfeldChemPotential.__init__
+      ~SommerfeldChemPotential.check
+      ~SommerfeldChemPotential.citation
+      ~SommerfeldChemPotential.evaluate
+      ~SommerfeldChemPotential.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SommerfeldChemPotential.allowed_keys
+      ~SommerfeldChemPotential.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.SommerfeldChemPotential:
+
+   .. minigallery:: jaxrts.models.SommerfeldChemPotential
+       :add-heading:

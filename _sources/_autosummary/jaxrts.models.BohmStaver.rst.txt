@@ -1,0 +1,38 @@
+jaxrts.models.BohmStaver
+========================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: BohmStaver
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~BohmStaver.__init__
+      ~BohmStaver.check
+      ~BohmStaver.citation
+      ~BohmStaver.evaluate
+      ~BohmStaver.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~BohmStaver.allowed_keys
+      ~BohmStaver.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.BohmStaver:
+
+   .. minigallery:: jaxrts.models.BohmStaver
+       :add-heading:

@@ -1,0 +1,50 @@
+jaxrts.hnc\_potentials.PauliClassicalMap
+========================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: PauliClassicalMap
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~PauliClassicalMap.T
+      ~PauliClassicalMap.__init__
+      ~PauliClassicalMap.alpha
+      ~PauliClassicalMap.check
+      ~PauliClassicalMap.citation
+      ~PauliClassicalMap.full_k
+      ~PauliClassicalMap.full_r
+      ~PauliClassicalMap.lambda_ab
+      ~PauliClassicalMap.long_k
+      ~PauliClassicalMap.long_r
+      ~PauliClassicalMap.mu
+      ~PauliClassicalMap.prepare
+      ~PauliClassicalMap.q2
+      ~PauliClassicalMap.r_cut
+      ~PauliClassicalMap.short_k
+      ~PauliClassicalMap.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~PauliClassicalMap.allowed_keys
+      ~PauliClassicalMap.cite_keys
+      ~PauliClassicalMap.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.PauliClassicalMap:
+
+   .. minigallery:: jaxrts.hnc_potentials.PauliClassicalMap
+       :add-heading:

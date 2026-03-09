@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ionic scattering examples &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Plot static structure Factors in the Approximation by Arkhipov and Devletov" href="plot_static_structure_factors_Arkhipov_Devletov.html" />
+    <link rel="prev" title="Showing the relevance of the Born Mermin Approximation" href="../free_free/plot_See0_RPA_BM.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Example gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../plot_getting_started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_multi_component.html">Multi-Species Plasmas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_reproduce_Gregori2003_fig6.html">Calculate the full structure factors for various plasma conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis-module-examples">Analysis module examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#bound-free-scattering-examples">bound-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#electronic-local-field-correction-examples">Electronic local field correction examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#form-factor-examples">form-factor examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-bound-scattering-examples">free-bound scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-free-scattering-examples">free-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#ionic-scattering-examples">Ionic scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#saha-examples">Saha Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#setup-examples">Setup Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#utility-tool-examples">Utility tool examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis/index.html">Analysis module examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bound_free/index.html">bound-free scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ee_lfc/index.html">Electronic local field correction examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../form_factors/index.html">form-factor examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_bound/index.html">free-bound scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_free/index.html">free-free scattering examples</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Ionic scattering examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="plot_static_structure_factors_Arkhipov_Devletov.html">Plot static structure Factors in the Approximation by Arkhipov and Devletov</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_potentials.html">HNC: Potentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_electron_ion_potential.html">HNC: Electron-Ion Potentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_pair_correlation_functions.html">HNC: Pair correlation function for different Γ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_static_structure_factors_Gregori2006.html">Plot static structure factors in the Approximation by Gregori for T_i != T_e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_electron_ion_potentials_II.html">Electron ion potentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_Gregori_Comparison.html">Compare HNC Calculations to Gregori.2006</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_static_structure_factors_Gregori2007.html">Plot static structure factors in Charged Hard Sphere Approximation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_multicomponent.html">HNC: Multicomponent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_LatticeDebyeModel.html">LatticeDebyeModel for approximating diffuse scattering in crystals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_ThreePotential_Wuensch.html">Static structure factor of the electron-ion system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_SVT_HNC_multicomponent.html">HNC-SVT: multi-component, multi-temperature (M-SVT)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_exchange.html">HNC calculations with Quantum exchange potentials</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../saha/index.html">Saha Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../setup/index.html">Setup Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/index.html">Utility tool examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example gallery</a></li>
+      <li class="breadcrumb-item active">Ionic scattering examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gen_examples/ionic/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ionic-scattering-examples">
+<span id="sphx-glr-gen-examples-ionic"></span><h1>Ionic scattering examples<a class="headerlink" href="#ionic-scattering-examples" title="Link to this heading"></a></h1>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This scripts plots S_{ee}, S_{ei}, and S_{ii} for Carbon with an ionization of 4.5 at T = 13\te..."><img alt="" src="../../_images/sphx_glr_plot_static_structure_factors_Arkhipov_Devletov_thumb.svg" />
+<p><a class="reference internal" href="plot_static_structure_factors_Arkhipov_Devletov.html#sphx-glr-gen-examples-ionic-plot-static-structure-factors-arkhipov-devletov-py"><span class="std std-ref">Plot static structure Factors in the Approximation by Arkhipov and Devletov</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Plot static structure Factors in the Approximation by Arkhipov and Devletov</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="HNC: Potentials"><img alt="" src="../../_images/sphx_glr_plot_HNC_potentials_thumb.svg" />
+<p><a class="reference internal" href="plot_HNC_potentials.html#sphx-glr-gen-examples-ionic-plot-hnc-potentials-py"><span class="std std-ref">HNC: Potentials</span></a></p>
+  <div class="sphx-glr-thumbnail-title">HNC: Potentials</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Figure 4.6 in Wunsch.2011, showing the different potentials implemented..."><img alt="" src="../../_images/sphx_glr_plot_HNC_electron_ion_potential_thumb.svg" />
+<p><a class="reference internal" href="plot_HNC_electron_ion_potential.html#sphx-glr-gen-examples-ionic-plot-hnc-electron-ion-potential-py"><span class="std std-ref">HNC: Electron-Ion Potentials</span></a></p>
+  <div class="sphx-glr-thumbnail-title">HNC: Electron-Ion Potentials</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Figure 4.4 in Wunsch.2011, showing the the pair distribution function o..."><img alt="" src="../../_images/sphx_glr_plot_HNC_pair_correlation_functions_thumb.svg" />
+<p><a class="reference internal" href="plot_HNC_pair_correlation_functions.html#sphx-glr-gen-examples-ionic-plot-hnc-pair-correlation-functions-py"><span class="std std-ref">HNC: Pair correlation function for different Γ</span></a></p>
+  <div class="sphx-glr-thumbnail-title">HNC: Pair correlation function for different Γ</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This scripts plots S_{ee}, S_{ei}, S_{ii} and q for Beryllium with an ionization of 2 at T_e = ..."><img alt="" src="../../_images/sphx_glr_plot_static_structure_factors_Gregori2006_thumb.svg" />
+<p><a class="reference internal" href="plot_static_structure_factors_Gregori2006.html#sphx-glr-gen-examples-ionic-plot-static-structure-factors-gregori2006-py"><span class="std std-ref">Plot static structure factors in the Approximation by Gregori for T_i != T_e</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Plot static structure factors in the Approximation by Gregori for T_i != T_e</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Plot electron-ion potentials which are used to calculate the screening cloud from the results o..."><img alt="" src="../../_images/sphx_glr_plot_HNC_electron_ion_potentials_II_thumb.svg" />
+<p><a class="reference internal" href="plot_HNC_electron_ion_potentials_II.html#sphx-glr-gen-examples-ionic-plot-hnc-electron-ion-potentials-ii-py"><span class="std std-ref">Electron ion potentials</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Electron ion potentials</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This figure is reproducing Fig. 2 in Schwarz.2007, showing the notable difference of the two ap..."><img alt="" src="../../_images/sphx_glr_plot_HNC_Gregori_Comparison_thumb.svg" />
+<p><a class="reference internal" href="plot_HNC_Gregori_Comparison.html#sphx-glr-gen-examples-ionic-plot-hnc-gregori-comparison-py"><span class="std std-ref">Compare HNC Calculations to Gregori.2006</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Compare HNC Calculations to Gregori.2006</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This plot reproduces Fig. 3. of Gregori.2007, introducing the charged hard sphere (CHS) approxi..."><img alt="" src="../../_images/sphx_glr_plot_static_structure_factors_Gregori2007_thumb.svg" />
+<p><a class="reference internal" href="plot_static_structure_factors_Gregori2007.html#sphx-glr-gen-examples-ionic-plot-static-structure-factors-gregori2007-py"><span class="std std-ref">Plot static structure factors in Charged Hard Sphere Approximation</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Plot static structure factors in Charged Hard Sphere Approximation</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Fig. 4.12 from Wunsch.2011, and shows how to use the HNC approximation ..."><img alt="" src="../../_images/sphx_glr_plot_HNC_multicomponent_thumb.svg" />
+<p><a class="reference internal" href="plot_HNC_multicomponent.html#sphx-glr-gen-examples-ionic-plot-hnc-multicomponent-py"><span class="std std-ref">HNC: Multicomponent</span></a></p>
+  <div class="sphx-glr-thumbnail-title">HNC: Multicomponent</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example showcases the increased diffuse scattering in heated crystals by the Debye Waller ..."><img alt="" src="../../_images/sphx_glr_plot_LatticeDebyeModel_thumb.svg" />
+<p><a class="reference internal" href="plot_LatticeDebyeModel.html#sphx-glr-gen-examples-ionic-plot-latticedebyemodel-py"><span class="std std-ref">LatticeDebyeModel for approximating diffuse scattering in crystals</span></a></p>
+  <div class="sphx-glr-thumbnail-title">LatticeDebyeModel for approximating diffuse scattering in crystals</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This shows the calculation of pair-distribution functions and static structure factors of a rel..."><img alt="" src="../../_images/sphx_glr_plot_HNC_ThreePotential_Wuensch_thumb.svg" />
+<p><a class="reference internal" href="plot_HNC_ThreePotential_Wuensch.html#sphx-glr-gen-examples-ionic-plot-hnc-threepotential-wuensch-py"><span class="std std-ref">Static structure factor of the electron-ion system</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Static structure factor of the electron-ion system</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example tests M-SVT model and reproduces Fig. 4.12 from Wunsch.2011."><img alt="" src="../../_images/sphx_glr_plot_SVT_HNC_multicomponent_thumb.svg" />
+<p><a class="reference internal" href="plot_SVT_HNC_multicomponent.html#sphx-glr-gen-examples-ionic-plot-svt-hnc-multicomponent-py"><span class="std std-ref">HNC-SVT: multi-component, multi-temperature (M-SVT)</span></a></p>
+  <div class="sphx-glr-thumbnail-title">HNC-SVT: multi-component, multi-temperature (M-SVT)</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example shows the usage of the :pyjaxrts.hnc_potentials.SpinAveragedEEExchange potential, ..."><img alt="" src="../../_images/sphx_glr_plot_HNC_exchange_thumb.svg" />
+<p><a class="reference internal" href="plot_HNC_exchange.html#sphx-glr-gen-examples-ionic-plot-hnc-exchange-py"><span class="std std-ref">HNC calculations with Quantum exchange potentials</span></a></p>
+  <div class="sphx-glr-thumbnail-title">HNC calculations with Quantum exchange potentials</div>
+</div></div><div class="toctree-wrapper compound">
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../free_free/plot_See0_RPA_BM.html" class="btn btn-neutral float-left" title="Showing the relevance of the Born Mermin Approximation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_static_structure_factors_Arkhipov_Devletov.html" class="btn btn-neutral float-right" title="Plot static structure Factors in the Approximation by Arkhipov and Devletov" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

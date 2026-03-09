@@ -1,0 +1,37 @@
+jaxrts.math
+===========
+
+.. automodule:: jaxrts.math
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      fermi_12_rational_approximation_antia
+      fermi_32_rational_approximation_antia
+      fermi_52_rational_approximation_antia
+      fermi_integral
+      fermi_neg12_rational_approximation_antia
+      inverse_fermi_12_fukushima_single_prec
+      inverse_fermi_12_rational_approximation_antia
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,38 @@
+jaxrts.models.DegenerateElectronChemPotential
+=============================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: DegenerateElectronChemPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~DegenerateElectronChemPotential.__init__
+      ~DegenerateElectronChemPotential.check
+      ~DegenerateElectronChemPotential.citation
+      ~DegenerateElectronChemPotential.evaluate
+      ~DegenerateElectronChemPotential.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~DegenerateElectronChemPotential.allowed_keys
+      ~DegenerateElectronChemPotential.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.DegenerateElectronChemPotential:
+
+   .. minigallery:: jaxrts.models.DegenerateElectronChemPotential
+       :add-heading:

@@ -1,0 +1,39 @@
+jaxrts.models.ESLFCDornheim2021
+===============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: ESLFCDornheim2021
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~ESLFCDornheim2021.__init__
+      ~ESLFCDornheim2021.check
+      ~ESLFCDornheim2021.citation
+      ~ESLFCDornheim2021.evaluate
+      ~ESLFCDornheim2021.evaluate_fullk
+      ~ESLFCDornheim2021.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~ESLFCDornheim2021.allowed_keys
+      ~ESLFCDornheim2021.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.ESLFCDornheim2021:
+
+   .. minigallery:: jaxrts.models.ESLFCDornheim2021
+       :add-heading:

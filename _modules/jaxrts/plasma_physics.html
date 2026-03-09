@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.plasma_physics &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.plasma_physics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.plasma_physics</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This submodule contains basic formulas used in plasma physics.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jpu</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnpu</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">to_array</span><span class="p">,</span> <span class="n">ureg</span>
+
+
+<div class="viewcode-block" id="plasma_frequency">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.plasma_frequency.html#jaxrts.plasma_physics.plasma_frequency">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plasma_frequency</span><span class="p">(</span><span class="n">electron_density</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the plasma frequency :math:`\\omega_\\text{pe}`</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">       \\omega_\\text{pe} = \\sqrt{\\frac{e^2 n_e}{\\epsilon_0 m_e}}</span>
+
+<span class="sd">    where :math:`e` is the elementary charge,</span>
+<span class="sd">    where :math:`n_e` is the electron density,</span>
+<span class="sd">    where :math:`\\epsilon_0` is the vacuum permittivity,</span>
+<span class="sd">    where :math:`m_e` is the electron&#39;s mass.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    electron_density</span>
+<span class="sd">        The electron density in units of 1/volume.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The plasma frequency in units of Hz.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">electron_density</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">vacuum_permittivity</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="thomson_momentum_transfer">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.thomson_momentum_transfer.html#jaxrts.plasma_physics.thomson_momentum_transfer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">thomson_momentum_transfer</span><span class="p">(</span><span class="n">energy</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">Quantity</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Momentum transfer :math:`k = \\mid\\vec{k}\\mid`, assuming that the</span>
+<span class="sd">    absolute value of the momentum for incoming and scattered light is only</span>
+<span class="sd">    slightly changed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">energy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="coulomb_potential_fourier">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.coulomb_potential_fourier.html#jaxrts.plasma_physics.coulomb_potential_fourier">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">coulomb_potential_fourier</span><span class="p">(</span>
+    <span class="n">Z1</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Z2</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Fourier transform of the Coloumb potential.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Z1, Z2 : Quantity | float</span>
+<span class="sd">        Charge 1 and Charge 2</span>
+<span class="sd">    k : Quantity</span>
+<span class="sd">        Scattering vector length</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The Fourier transform of the Coloub potential.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">vacuum_permittivity</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">Z1</span> <span class="o">*</span> <span class="n">Z2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">/</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="kin_energy">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.kin_energy.html#jaxrts.plasma_physics.kin_energy">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">kin_energy</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Kinetic energy of a free electron with wavevector ``k``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k : Quantity</span>
+<span class="sd">        Wavevector in units of 1/[length]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        Kinetic energy</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fermi_dirac">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.fermi_dirac.html#jaxrts.plasma_physics.fermi_dirac">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fermi_dirac</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the Fermi-Dirac distribution.</span>
+
+<span class="sd">    ..math ::</span>
+
+<span class="sd">        f=\\frac{1}{\\exp \\left((E-\\mu) / k_{\\mathrm{B}} T\\right)+1}</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k : Quantity</span>
+<span class="sd">        Length of the scattering number (given by the scattering angle and the</span>
+<span class="sd">        energies of the incident photons (unit: 1 / [length]).</span>
+<span class="sd">    chem_pot : Quantity</span>
+<span class="sd">        The chemical potential in units of energy.</span>
+<span class="sd">    T : Quantity</span>
+<span class="sd">        The plasma temperature in Kelvin.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The Fermi-Dirac distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">kin_energy</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">exponent</span> <span class="o">=</span> <span class="p">(</span><span class="n">energy</span> <span class="o">-</span> <span class="n">chem_pot</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">exponent</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fermi_wavenumber">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.fermi_wavenumber.html#jaxrts.plasma_physics.fermi_wavenumber">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fermi_wavenumber</span><span class="p">(</span><span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fermi_energy">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.fermi_energy.html#jaxrts.plasma_physics.fermi_energy">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the Fermi energy of an ideal fermi gas from a given electron</span>
+<span class="sd">    density.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        E_F=\\frac{{\\hbar}^2}{2m_e}\\left(3{\\pi}^2 n_e\\right)^{\\frac{2}{3}}</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_e : Quantity</span>
+<span class="sd">        Electron density. Units of 1/[length]**3.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    E_F : Quantity</span>
+<span class="sd">        Fermi energy</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">factor1</span> <span class="o">=</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">m_e</span><span class="p">)</span>
+    <span class="n">k_fsquared</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">E_F</span> <span class="o">=</span> <span class="n">factor1</span> <span class="o">*</span> <span class="n">k_fsquared</span>
+    <span class="k">return</span> <span class="n">E_F</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fermi_temperature">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.fermi_temperature.html#jaxrts.plasma_physics.fermi_temperature">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fermi_temperature</span><span class="p">(</span><span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the Fermi temperature of an ideal fermi gas from a given</span>
+<span class="sd">    electron density.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_e : Quantity</span>
+<span class="sd">        Electron density. Units of 1/[length]**3.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    T_F : Quantity</span>
+<span class="sd">        Fermi temperaure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="wiegner_seitz_radius">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.wiegner_seitz_radius.html#jaxrts.plasma_physics.wiegner_seitz_radius">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">wiegner_seitz_radius</span><span class="p">(</span><span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the Wiegner Seitz Radius :math:`r_s`.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        r_s = \\sqrt[3]{\\frac{3}{4\\pi n_e}}</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        Some authors use the Wiegner-Seitz radius as a dimensionless unit by</span>
+<span class="sd">        dividing by the Bohr radius. This is not done here, rather :math:`r_s`</span>
+<span class="sd">        has the dimensionality of a length.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_e</span>
+<span class="sd">        Electron density. Units of 1/[length]**3.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The Wiegner Seitz Radius :math:`r_s` in units of a length.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">n_e</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="chem_pot_sommerfeld_fermi_interpolation">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation.html#jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">chem_pot_sommerfeld_fermi_interpolation</span><span class="p">(</span><span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpolation function for the chemical potential of a non-interacting</span>
+<span class="sd">    (ideal) fermi gas given in the paper of :cite:`Cowan.2019`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">E_F</span> <span class="o">=</span> <span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
+    <span class="n">T_F</span> <span class="o">=</span> <span class="n">E_F</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">T</span> <span class="o">/</span> <span class="n">T_F</span>
+
+    <span class="c1"># Low temperature interpolation formula</span>
+    <span class="n">lowT</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">4</span> <span class="o">/</span> <span class="mi">80</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span>
+
+    <span class="c1"># High temperature interpolation formula</span>
+    <span class="n">highT</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">x</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="n">x</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="n">x</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="o">-</span> <span class="p">(</span><span class="mi">16</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="mi">27</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">81</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lowT</span> <span class="o">&lt;</span> <span class="n">highT</span><span class="p">,</span> <span class="n">highT</span><span class="p">,</span> <span class="n">lowT</span><span class="p">)</span> <span class="o">*</span> <span class="n">E_F</span></div>
+
+
+
+<div class="viewcode-block" id="chem_pot_interpolationIchimaru">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.chem_pot_interpolationIchimaru.html#jaxrts.plasma_physics.chem_pot_interpolationIchimaru">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">chem_pot_interpolationIchimaru</span><span class="p">(</span><span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpolation function for the chemical potential between the classical and</span>
+<span class="sd">    quantum region, originally from :cite:`Ichimaru.2018`, eqn.(3.147). The</span>
+<span class="sd">    same formula (with a number flip in parameter A) is  in</span>
+<span class="sd">    :cite:`Gregori.2003`, eqn. (19).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T</span>
+<span class="sd">        The plasma temperature in Kelvin.</span>
+<span class="sd">    n_e</span>
+<span class="sd">        Electron density. Units of 1/[length]**3.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        Chemical potential</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="mf">0.25954</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="mf">0.072</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="mf">0.858</span>
+
+    <span class="n">Ef</span> <span class="o">=</span> <span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
+    <span class="n">Theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">Ef</span><span class="p">)</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="o">-</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Theta</span><span class="p">))</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">))))</span>
+        <span class="o">+</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">A</span> <span class="o">*</span> <span class="n">Theta</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">b</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">B</span> <span class="o">*</span> <span class="n">Theta</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">A</span> <span class="o">*</span> <span class="n">Theta</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">b</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T</span></div>
+
+
+
+<div class="viewcode-block" id="Debye_Hueckel_screening_length">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.Debye_Hueckel_screening_length.html#jaxrts.plasma_physics.Debye_Hueckel_screening_length">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Debye_Hueckel_screening_length</span><span class="p">(</span>
+    <span class="n">n</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the Debye-Hückel screening length. Use the general formula using</span>
+<span class="sd">    a sum over n, Z.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n : Quantity or List</span>
+<span class="sd">        Electron density in 1/[length]**3</span>
+<span class="sd">    T : Quantity</span>
+<span class="sd">        The temperature in [K]. Many authors, e.g., :cite:`Gericke.2010`</span>
+<span class="sd">        suggest an effective temperature which interpolates between the</span>
+<span class="sd">        system&#39;s temperature and the fermi temperature.</span>
+<span class="sd">        See :py:func:`temperature_interpolation`</span>
+<span class="sd">    Z : float, list or np.ndarray, defaults to 1</span>
+<span class="sd">        Ionization. The default value of 1 corresponds to electrons</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T</span>
+    <span class="n">denom</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">Z</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num</span> <span class="o">/</span> <span class="n">denom</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="temperature_interpolation">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.temperature_interpolation.html#jaxrts.plasma_physics.temperature_interpolation">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">temperature_interpolation</span><span class="p">(</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">power</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpolate between electron temperature and Fermi temperature. (See, e.g.,</span>
+<span class="sd">    :cite:`Gericke.2010`, who propose a `power` of 4)</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        T = \\left( T_e^p + T_F^p\\right)^(1/p)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_e : Quantity</span>
+<span class="sd">        Electron density in 1/[length]**3</span>
+<span class="sd">    T_e : Quantity</span>
+<span class="sd">        Electron temperature in [K]</span>
+<span class="sd">    power : int, optional</span>
+<span class="sd">        Power to use for interpolation (default: 2)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        Interpolated temperature</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Calculate the fermi temperature</span>
+    <span class="n">T_f</span> <span class="o">=</span> <span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">T_e</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">)</span> <span class="o">**</span> <span class="n">power</span> <span class="o">+</span> <span class="n">T_f</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">)</span> <span class="o">**</span> <span class="n">power</span><span class="p">)</span>
+        <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">power</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span></div>
+
+
+
+<div class="viewcode-block" id="degeneracy_param">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.degeneracy_param.html#jaxrts.plasma_physics.degeneracy_param">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">degeneracy_param</span><span class="p">(</span><span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the plasma degeneracy parameter.</span>
+
+<span class="sd">    The plasma degeneracy parameter is given by the product of the electron</span>
+<span class="sd">    density `n_e` and the cube of the thermal de Broglie wavelength.</span>
+<span class="sd">    For values about unity, the probability clouds of the electron wave</span>
+<span class="sd">    functions overlap.</span>
+
+<span class="sd">    A classical treatment of the plasma is allowed for values &lt;&lt; 1, while a</span>
+<span class="sd">    fully degenerate electron gas is appropriate for values &gt; 10. See</span>
+<span class="sd">    :cite:`Kraus.2012`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_e : Quantity</span>
+<span class="sd">        Electron density in 1/[length]**3</span>
+<span class="sd">    T_e : Quantity</span>
+<span class="sd">        Electron temperature in [K]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    degeneracy_param : Quantity</span>
+<span class="sd">        Plasma degeneracy parameter</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">n_e</span> <span class="o">*</span> <span class="n">therm_de_broglie_wl</span><span class="p">(</span><span class="n">T_e</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span></div>
+
+
+
+<div class="viewcode-block" id="interparticle_spacing">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.interparticle_spacing.html#jaxrts.plasma_physics.interparticle_spacing">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">interparticle_spacing</span><span class="p">(</span><span class="n">Z1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Z2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">Z1</span> <span class="o">*</span> <span class="n">Z2</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">n_e</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="coupling_param">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.coupling_param.html#jaxrts.plasma_physics.coupling_param">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">coupling_param</span><span class="p">(</span><span class="n">Z1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Z2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the degree of interparticle coupling with corresponding charge</span>
+<span class="sd">    numbers Z1 and Z2 at temperature T_e and density n_e.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">intspac</span> <span class="o">=</span> <span class="n">interparticle_spacing</span><span class="p">(</span><span class="n">Z1</span><span class="p">,</span> <span class="n">Z2</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">Z1</span>
+        <span class="o">*</span> <span class="n">Z2</span>
+        <span class="o">*</span> <span class="mi">1</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">/</span> <span class="p">(</span>
+            <span class="mi">4</span>
+            <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span>
+            <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span>
+            <span class="o">*</span> <span class="n">intspac</span>
+            <span class="o">*</span> <span class="mi">1</span>
+            <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span>
+            <span class="o">*</span> <span class="n">T_e</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="therm_de_broglie_wl">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.therm_de_broglie_wl.html#jaxrts.plasma_physics.therm_de_broglie_wl">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">therm_de_broglie_wl</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="compton_energy">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.compton_energy.html#jaxrts.plasma_physics.compton_energy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compton_energy</span><span class="p">(</span><span class="n">probe_energy</span><span class="p">,</span> <span class="n">scattering_angle</span><span class="p">):</span>
+
+    <span class="n">shift</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">probe_energy</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="mi">1</span>
+            <span class="o">-</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="o">/</span> <span class="p">(</span>
+                <span class="mi">1</span>
+                <span class="o">+</span> <span class="n">probe_energy</span>
+                <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">speed_of_light</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scattering_angle</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">shift</span></div>
+
+
+
+<div class="viewcode-block" id="susceptibility_from_epsilon">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.susceptibility_from_epsilon.html#jaxrts.plasma_physics.susceptibility_from_epsilon">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">susceptibility_from_epsilon</span><span class="p">(</span><span class="n">epsilon</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the full susceptilibily from a given dielectric function epsilon</span>
+<span class="sd">    by inverting</span>
+
+<span class="sd">    ..math::</span>
+
+<span class="sd">        \\varepsilon^{-1} = 1 + V_{ee} xi_{ee}</span>
+
+<span class="sd">    Where :math:`V_{ee}` is the Coulomb potential in k space.</span>
+
+<span class="sd">    See, e.g., :cite:`Dandrea.1986`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Vee</span> <span class="o">=</span> <span class="n">coulomb_potential_fourier</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">epsilon</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vee</span></div>
+
+
+
+<div class="viewcode-block" id="epsilon_from_susceptibility">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.epsilon_from_susceptibility.html#jaxrts.plasma_physics.epsilon_from_susceptibility">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">epsilon_from_susceptibility</span><span class="p">(</span><span class="n">xi</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the dielectric function from a full susceptibility xi</span>
+
+<span class="sd">    ..math::</span>
+
+<span class="sd">        \\varepsilon^{-1} = 1 + V_{ee} xi_{ee}</span>
+
+<span class="sd">    Where :math:`V_{ee}` is the Coulomb potential in k space.</span>
+
+<span class="sd">    See, e.g., :cite:`Dandrea.1986`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Vee</span> <span class="o">=</span> <span class="n">coulomb_potential_fourier</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Vee</span> <span class="o">*</span> <span class="n">xi</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="noninteracting_susceptibility_from_eps_RPA">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA.html#jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">noninteracting_susceptibility_from_eps_RPA</span><span class="p">(</span>
+    <span class="n">epsilon</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the non-interacting susceptilibily from a given dielectric</span>
+<span class="sd">    function epsilon in RPA.</span>
+
+<span class="sd">    See, e.g., :cite:`Fortmann.2010`.</span>
+
+<span class="sd">    ..math::</span>
+
+<span class="sd">        \\xi^{(0)}_{e} = \\frac{1 - \\varepsilon^{RPA}}{V_{ee}(k)}</span>
+
+<span class="sd">    Where :math:`V_{ee}` is the Coulomb potential in k space.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Vee</span> <span class="o">=</span> <span class="n">coulomb_potential_fourier</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vee</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

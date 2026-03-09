@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.hypernetted_chain &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.hypernetted_chain</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.hypernetted_chain</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This submodule is dedicated to the using the hypernetted chain approach</span>
+<span class="sd">to calculate static structure factors.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.interpreters</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">jaxrts.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+
+
+<span class="c1"># Helper functions.</span>
+<div class="viewcode-block" id="psi">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.psi.html#jaxrts.hypernetted_chain.psi">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">psi</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">t</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="dpsi">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.dpsi.html#jaxrts.hypernetted_chain.dpsi">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dpsi</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">res</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Jitted-versions of Bessel functions of various orders and kinds.</span>
+<div class="viewcode-block" id="bessel_3_2">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.bessel_3_2.html#jaxrts.hypernetted_chain.bessel_3_2">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bessel_3_2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">x</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="bessel_0_5">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.bessel_0_5.html#jaxrts.hypernetted_chain.bessel_0_5">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bessel_0_5</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">))</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="bessel_neg0_5">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.bessel_neg0_5.html#jaxrts.hypernetted_chain.bessel_neg0_5">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bessel_neg0_5</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">))</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="bessel_2ndkind_0_5">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.bessel_2ndkind_0_5.html#jaxrts.hypernetted_chain.bessel_2ndkind_0_5">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bessel_2ndkind_0_5</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">bessel_0_5</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">bessel_neg0_5</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fourier_transform_ogata">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.fourier_transform_ogata.html#jaxrts.hypernetted_chain.fourier_transform_ogata">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fourier_transform_ogata</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A numerical algorithm to calculate the discrete fourier transform based on</span>
+<span class="sd">    work by Ogata.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">runits</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">units</span>
+    <span class="n">units</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">units</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">runits</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">runits</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">units</span><span class="p">)</span>
+    <span class="n">r_k</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">y_k</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">psi</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">r_k</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">internal</span><span class="p">(</span><span class="n">onek</span><span class="p">):</span>
+        <span class="n">f_int</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">y_k</span> <span class="o">/</span> <span class="n">onek</span><span class="p">,</span>
+            <span class="n">xp</span><span class="o">=</span><span class="n">r</span><span class="p">,</span>
+            <span class="n">fp</span><span class="o">=</span><span class="n">f</span> <span class="o">*</span> <span class="n">r</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">left</span><span class="o">=</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">right</span><span class="o">=</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">dpsi_k</span> <span class="o">=</span> <span class="n">dpsi</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">r_k</span><span class="p">)</span>
+        <span class="n">w_k</span> <span class="o">=</span> <span class="n">bessel_2ndkind_0_5</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">r_k</span><span class="p">)</span> <span class="o">/</span> <span class="n">bessel_3_2</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">r_k</span><span class="p">)</span>
+        <span class="n">series_sum</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">w_k</span> <span class="o">*</span> <span class="n">f_int</span> <span class="o">*</span> <span class="n">bessel_0_5</span><span class="p">(</span><span class="n">y_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">dpsi_k</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">series_sum</span><span class="p">)</span> <span class="o">/</span> <span class="n">onek</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">onek</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">res</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span><span class="n">internal</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">out_axes</span><span class="o">=</span><span class="mi">0</span><span class="p">)(</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">units</span> <span class="o">*</span> <span class="n">runits</span><span class="o">**</span><span class="mi">3</span></div>
+
+
+
+<span class="c1">##########</span>
+
+
+<div class="viewcode-block" id="fourier_transform_sine">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.fourier_transform_sine.html#jaxrts.hypernetted_chain.fourier_transform_sine">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fourier_transform_sine</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">rvals</span><span class="p">,</span> <span class="n">fvals</span><span class="p">):</span>
+    <span class="n">arg</span> <span class="o">=</span> <span class="n">rvals</span> <span class="o">*</span> <span class="n">fvals</span>
+    <span class="n">units</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">units</span>
+    <span class="n">dr</span> <span class="o">=</span> <span class="n">rvals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">rvals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">zaf_dst</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">units</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="n">units</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="n">k</span> <span class="o">*</span> <span class="n">dr</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="four1">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.four1.html#jaxrts.hypernetted_chain.four1">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;isign&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">four1</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">isign</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    See :cite:`Press.1994`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># y_indices = [1, ...., 2 * nn]</span>
+
+    <span class="c1"># Replaces data[1..2*nn] by its discrete Fourier transform, if isign is</span>
+    <span class="c1"># input as 1; or replaces data[1..2*nn] by nn times its inverse discrete</span>
+    <span class="c1"># Fourier transform, if isign is input as −1. data is a complex array of</span>
+    <span class="c1"># length nn or, equivalently, a real array of length 2*nn. nn MUST be an</span>
+    <span class="c1"># integer power of 2 (this is not checked for!).</span>
+    <span class="n">nn</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">nn</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">temp1</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">temp2</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">temp1</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">temp2</span><span class="p">)</span>
+            <span class="n">temp1</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">temp2</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">temp1</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">temp2</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">nn</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">m</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="n">m</span><span class="p">):</span>
+            <span class="n">j</span> <span class="o">-=</span> <span class="n">m</span>
+            <span class="n">m</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span>
+        <span class="n">j</span> <span class="o">+=</span> <span class="n">m</span>
+
+    <span class="n">mmax</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">mmax</span><span class="p">:</span>
+        <span class="n">istep</span> <span class="o">=</span> <span class="n">mmax</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">isign</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">mmax</span><span class="p">)</span>
+        <span class="n">wtemp</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">theta</span><span class="p">)</span>
+        <span class="n">wpr</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">wtemp</span><span class="o">**</span><span class="mi">2</span>
+
+        <span class="n">wpi</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">wr</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">wi</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mmax</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">istep</span><span class="p">):</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">mmax</span>
+                <span class="n">tempr</span> <span class="o">=</span> <span class="n">wr</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">tempi</span> <span class="o">=</span> <span class="n">wr</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">tempr</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">tempi</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">tempr</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">tempi</span><span class="p">)</span>
+            <span class="n">wtemp</span> <span class="o">=</span> <span class="n">wr</span>
+            <span class="n">wr</span> <span class="o">=</span> <span class="n">wtemp</span> <span class="o">*</span> <span class="n">wpr</span> <span class="o">-</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">wpi</span> <span class="o">+</span> <span class="n">wr</span>
+            <span class="n">wi</span> <span class="o">=</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">wpr</span> <span class="o">+</span> <span class="n">wtemp</span> <span class="o">*</span> <span class="n">wpi</span> <span class="o">+</span> <span class="n">wi</span>
+
+        <span class="n">mmax</span> <span class="o">=</span> <span class="n">istep</span>
+
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+
+<div class="viewcode-block" id="realfft">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.realfft.html#jaxrts.hypernetted_chain.realfft">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;isign&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">realfft</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">isign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    See :cite:`Press.1994`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">c2</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">isign</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+    <span class="k">if</span> <span class="n">isign</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">four1</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">isign</span> <span class="o">*</span> <span class="n">theta</span>
+
+    <span class="n">wtemp</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">theta</span><span class="p">)</span>
+    <span class="n">wpr</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">wtemp</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">wpi</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+    <span class="n">wr</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">wpr</span>
+    <span class="n">wi</span> <span class="o">=</span> <span class="n">wpi</span>
+    <span class="n">np3</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">3</span>
+
+    <span class="n">c1</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">i1</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">i2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">i1</span>
+        <span class="n">i3</span> <span class="o">=</span> <span class="n">np3</span> <span class="o">-</span> <span class="n">i2</span>
+        <span class="n">i4</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">i3</span>
+
+        <span class="n">h1r</span> <span class="o">=</span> <span class="n">c1</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="n">i3</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">h1i</span> <span class="o">=</span> <span class="n">c1</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">i4</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">h2r</span> <span class="o">=</span> <span class="o">-</span><span class="n">c2</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="n">i4</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">h2i</span> <span class="o">=</span> <span class="n">c2</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">i3</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">+</span><span class="n">h1r</span> <span class="o">+</span> <span class="n">wr</span> <span class="o">*</span> <span class="n">h2r</span> <span class="o">-</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">h2i</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">+</span><span class="n">h1i</span> <span class="o">+</span> <span class="n">wr</span> <span class="o">*</span> <span class="n">h2i</span> <span class="o">+</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">h2r</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i3</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">+</span><span class="n">h1r</span> <span class="o">-</span> <span class="n">wr</span> <span class="o">*</span> <span class="n">h2r</span> <span class="o">+</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">h2i</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i4</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">-</span><span class="n">h1i</span> <span class="o">+</span> <span class="n">wr</span> <span class="o">*</span> <span class="n">h2i</span> <span class="o">+</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">h2r</span><span class="p">)</span>
+
+        <span class="n">wtemp</span> <span class="o">=</span> <span class="n">wr</span>
+        <span class="n">wr</span> <span class="o">=</span> <span class="n">wtemp</span> <span class="o">*</span> <span class="n">wpr</span> <span class="o">-</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">wpi</span> <span class="o">+</span> <span class="n">wr</span>
+        <span class="n">wi</span> <span class="o">=</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">wpr</span> <span class="o">+</span> <span class="n">wtemp</span> <span class="o">*</span> <span class="n">wpi</span> <span class="o">+</span> <span class="n">wi</span>
+
+    <span class="k">if</span> <span class="n">isign</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+        <span class="n">h1r</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">h1r</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">h1r</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">h1r</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">c1</span> <span class="o">*</span> <span class="p">(</span><span class="n">h1r</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">c1</span> <span class="o">*</span> <span class="p">(</span><span class="n">h1r</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">four1</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+
+<div class="viewcode-block" id="realfftnp">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.realfftnp.html#jaxrts.hypernetted_chain.realfftnp">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">realfftnp</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+    <span class="n">rfft</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">y</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">rfft</span><span class="p">))</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">rfft</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+
+<div class="viewcode-block" id="sinft">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.sinft.html#jaxrts.hypernetted_chain.sinft">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sinft</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    See :cite:`Press.1994`.</span>
+
+<span class="sd">    This function implements the Sine FFT algorithm, which is can be used</span>
+<span class="sd">    efficiently compute the Fourier transform of a three-dimensional</span>
+<span class="sd">    function with rotational symmetry.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="n">halfn</span> <span class="o">=</span> <span class="n">n</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span>
+
+    <span class="n">wi</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">halfn</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">wi</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">halfn</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">halfn</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="n">n</span> <span class="p">:</span> <span class="n">halfn</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">f2</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">halfn</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">n</span> <span class="p">:</span> <span class="n">halfn</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">halfn</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">f1</span> <span class="o">+</span> <span class="n">f2</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">n</span> <span class="p">:</span> <span class="n">halfn</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">f1</span> <span class="o">-</span> <span class="n">f2</span><span class="p">)</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">realfftnp</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">sum_val</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">y</span><span class="p">[::</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">sum_val</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+
+<div class="viewcode-block" id="zaf_dst">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.zaf_dst.html#jaxrts.hypernetted_chain.zaf_dst">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dst_type&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">zaf_dst</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dst_type</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the discrete sine transform (DST) using the fast Fourier transform</span>
+<span class="sd">    (FFT).</span>
+
+<span class="sd">    Taken from `Zaf Python</span>
+<span class="sd">    &lt;https://github.com/zafarrafii/Zaf-Python/tree/master&gt;`_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">window_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dst_type</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Compute the DST-I using the FFT</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">window_length</span> <span class="o">+</span> <span class="mi">2</span> <span class="p">:]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">-</span><span class="n">f</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">elif</span> <span class="n">dst_type</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># Compute the DST-II using the FFT</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">window_length</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">window_length</span> <span class="p">:</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">window_length</span> <span class="p">:</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">elif</span> <span class="n">dst_type</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># Pre-process the signal to make the DST-III matrix orthogonal</span>
+        <span class="c1"># (copy the signal to avoid modifying it outside of the function)</span>
+        <span class="n">f_copy</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">f_copy</span> <span class="o">=</span> <span class="n">f_copy</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">f_copy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="c1"># Compute the DST-III using the FFT</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">window_length</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">f_copy</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">window_length</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">f_copy</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">f_copy</span>
+        <span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">window_length</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">f_copy</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">window_length</span> <span class="p">:</span> <span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="mi">4</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">elif</span> <span class="n">dst_type</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">window_length</span><span class="p">)</span>
+
+        <span class="c1"># Compute the DST-IV using the FFT</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">window_length</span> <span class="p">:</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">window_length</span> <span class="p">:</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">f</span><span class="p">[</span><span class="n">window_length</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">::</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">window_length</span> <span class="p">:</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">-</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">6</span> <span class="o">*</span> <span class="n">window_length</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">window_length</span> <span class="p">:</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">f</span><span class="p">[</span><span class="n">window_length</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">::</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">window_length</span> <span class="p">:</span> <span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="mi">4</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<span class="n">_3Dfour_sine</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span>
+    <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span><span class="n">fourier_transform_sine</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">out_axes</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+    <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">out_axes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">_3Dfour_ogata</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span>
+    <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">k</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">V</span><span class="p">:</span> <span class="n">fourier_transform_ogata</span><span class="p">(</span>
+            <span class="n">k</span><span class="p">,</span>
+            <span class="n">r</span><span class="p">,</span>
+            <span class="n">V</span><span class="p">,</span>
+            <span class="n">N</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">h</span><span class="o">=</span><span class="mi">10</span> <span class="o">*</span> <span class="p">((</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">r</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">out_axes</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">out_axes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">_3Dfour</span> <span class="o">=</span> <span class="n">_3Dfour_sine</span>
+
+
+<div class="viewcode-block" id="pair_distribution_function_SVT_HNC">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.pair_distribution_function_SVT_HNC.html#jaxrts.hypernetted_chain.pair_distribution_function_SVT_HNC">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pair_distribution_function_SVT_HNC</span><span class="p">(</span>
+    <span class="n">V_s</span><span class="p">,</span> <span class="n">V_l_k</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">T_ab</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">mix</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">tmult</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Multi-component, multi-temperature version of the SVT-OZ-HNC, by extending</span>
+<span class="sd">    the sum to all species in Eq. 7 in :cite:`Shaffer.2017`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">tmult</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tmult</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">tmult</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">tmult</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+
+    <span class="n">delta</span> <span class="o">=</span> <span class="mf">1e-6</span>
+
+    <span class="n">dr</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dk</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">r</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="o">*</span> <span class="n">dk</span>
+
+    <span class="n">m_ab</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">m</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">m</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="p">)</span>  <span class="c1"># m_a * m_b / (m_a + m_b)</span>
+
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_coeffs</span><span class="p">(</span>
+        <span class="n">n</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mab</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        n: (M,), T: (M,M) pairwise array, m: (M,)</span>
+<span class="sd">        Returns coeff1, coeff2 with shape (M, M, M) and axes (a,b,s)</span>
+<span class="sd">        coeff1[a,b,s] = n[s] * (mab[a,b] * T[a,s]) / (m[a] * T[a,b])</span>
+<span class="sd">        coeff2[a,b,s] = n[s] * (mab[a,b] * T[s,b]) / (m[b] * T[a,b])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># extend the axis that is not given</span>
+        <span class="n">_T</span> <span class="o">=</span> <span class="n">T</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">Tab</span> <span class="o">=</span> <span class="n">_T</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">Tas</span> <span class="o">=</span> <span class="n">_T</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">Tbs</span> <span class="o">=</span> <span class="n">_T</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+        <span class="n">mab</span> <span class="o">=</span> <span class="n">mab</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+        <span class="n">numer1</span> <span class="o">=</span> <span class="n">mab</span> <span class="o">*</span> <span class="n">Tas</span>
+        <span class="n">denom1</span> <span class="o">=</span> <span class="n">m</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">Tab</span>
+        <span class="n">coeff1</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="n">numer1</span> <span class="o">/</span> <span class="n">denom1</span><span class="p">)</span>
+
+        <span class="n">numer2</span> <span class="o">=</span> <span class="n">mab</span> <span class="o">*</span> <span class="n">Tbs</span>
+        <span class="n">denom2</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">Tab</span>
+        <span class="n">coeff2</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="n">numer2</span> <span class="o">/</span> <span class="n">denom2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">coeff1</span><span class="p">,</span> <span class="n">coeff2</span>
+
+    <span class="k">for</span> <span class="n">titer</span><span class="p">,</span> <span class="n">mult</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmult</span><span class="p">):</span>
+
+        <span class="n">beta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">mult</span> <span class="o">*</span> <span class="n">T_ab</span><span class="p">)</span>
+
+        <span class="n">v_s</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">V_s</span>
+        <span class="n">v_l_k</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">V_l_k</span>
+
+        <span class="n">log_g_r0</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">v_s</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+        <span class="n">Ns_r0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">log_g_r0</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
+
+        <span class="n">coeff_1</span><span class="p">,</span> <span class="n">coeff_2</span> <span class="o">=</span> <span class="n">build_coeffs</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">mult</span> <span class="o">*</span> <span class="n">T_ab</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">m_ab</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">svt_ozr_ei</span><span class="p">(</span><span class="n">c_k</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            The modified Ornstein-Zernicke Relation</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="n">M</span> <span class="o">=</span> <span class="n">c_k</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ar</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+
+            <span class="c1"># index grids</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">ar</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>  <span class="c1"># shape (M,1,1)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">ar</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>  <span class="c1"># shape (1,M,1)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">ar</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># shape (1,1,M)</span>
+
+            <span class="c1"># broadcast to full (M,M,M) so every (a,b,s) is explicit</span>
+            <span class="n">a3</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">))</span>
+            <span class="n">b3</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">))</span>
+            <span class="n">s3</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">))</span>
+
+            <span class="c1"># flattened row &amp; column indices in the big matrix A</span>
+            <span class="n">p_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">a3</span> <span class="o">*</span> <span class="n">M</span> <span class="o">+</span> <span class="n">b3</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>  <span class="c1"># (M^3,)</span>
+            <span class="n">q1_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">s3</span> <span class="o">*</span> <span class="n">M</span> <span class="o">+</span> <span class="n">b3</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>  <span class="c1"># idx(s,b)</span>
+            <span class="n">q2_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">a3</span> <span class="o">*</span> <span class="n">M</span> <span class="o">+</span> <span class="n">s3</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>  <span class="c1"># idx(a,s)</span>
+
+            <span class="c1"># values to scatter:</span>
+            <span class="c1"># -alpha[a,b,s] * C[a,s] and -beta[a,b,s] * C[s,b]</span>
+            <span class="n">vals1</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="o">-</span><span class="p">(</span><span class="n">coeff_1</span> <span class="o">*</span> <span class="n">c_k</span><span class="p">[</span><span class="n">a3</span><span class="p">,</span> <span class="n">s3</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">vals2</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="o">-</span><span class="p">(</span><span class="n">coeff_2</span> <span class="o">*</span> <span class="n">c_k</span><span class="p">[</span><span class="n">s3</span><span class="p">,</span> <span class="n">b3</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Build A = I + scattered contributions</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">M</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">c_k</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">p_idx</span><span class="p">,</span> <span class="n">q1_idx</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vals1</span><span class="p">)</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">p_idx</span><span class="p">,</span> <span class="n">q2_idx</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vals2</span><span class="p">)</span>
+
+            <span class="c1"># RHS is vec(C) with mapping p = a*M + b matching reshape order</span>
+            <span class="n">rhs</span> <span class="o">=</span> <span class="n">c_k</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">H_flat</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">A</span><span class="p">),</span> <span class="n">rhs</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">H_flat</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">))</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">condition</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            If this is False, the loop will stop. Abort if too many steps were</span>
+<span class="sd">            reached, or if convergence was reached.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">Ns_r_old</span><span class="p">,</span> <span class="n">n_iter</span> <span class="o">=</span> <span class="n">val</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">Ns_r</span> <span class="o">-</span> <span class="n">Ns_r_old</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">n_iter</span> <span class="o">&lt;</span> <span class="mi">2000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">err</span> <span class="o">&gt;</span> <span class="n">delta</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+            <span class="n">log_g_r</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="n">val</span>
+
+            <span class="n">h_r</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">expm1</span><span class="p">(</span><span class="n">log_g_r</span><span class="p">)</span>
+
+            <span class="n">cs_r</span> <span class="o">=</span> <span class="n">h_r</span> <span class="o">-</span> <span class="n">Ns_r</span>
+
+            <span class="n">cs_k</span> <span class="o">=</span> <span class="n">_3Dfour</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">cs_r</span><span class="p">)</span>
+
+            <span class="n">c_k</span> <span class="o">=</span> <span class="n">cs_k</span> <span class="o">-</span> <span class="n">v_l_k</span>
+
+            <span class="c1"># Ornstein-Zernike relation</span>
+            <span class="n">h_k</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span><span class="n">svt_ozr_ei</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">out_axes</span><span class="o">=</span><span class="mi">2</span><span class="p">)(</span><span class="n">c_k</span><span class="p">)</span>
+
+            <span class="n">Ns_k</span> <span class="o">=</span> <span class="n">h_k</span> <span class="o">-</span> <span class="n">cs_k</span>
+
+            <span class="n">Ns_r_new_full</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">_3Dfour</span><span class="p">(</span>
+                    <span class="n">r</span><span class="p">,</span>
+                    <span class="n">k</span><span class="p">,</span>
+                    <span class="n">Ns_k</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
+            <span class="p">)</span>
+
+            <span class="n">Ns_r_new</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mix</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ns_r_new_full</span> <span class="o">+</span> <span class="n">mix</span> <span class="o">*</span> <span class="n">Ns_r</span>
+
+            <span class="c1"># Maybe do some clipping here to avoid numerical issues?</span>
+            <span class="n">log_g_r_new</span> <span class="o">=</span> <span class="n">Ns_r_new</span> <span class="o">-</span> <span class="n">v_s</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">log_g_r_new</span><span class="p">,</span>
+                <span class="n">Ns_r_new</span><span class="p">,</span>
+                <span class="n">Ns_r</span><span class="p">,</span>
+                <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">titer</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">log_g_r0</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">v_s</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+            <span class="n">Ns_r0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">log_g_r0</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="p">(</span><span class="n">log_g_r0</span><span class="p">,</span> <span class="n">Ns_r0</span><span class="p">,</span> <span class="n">Ns_r0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># Otherwise, use the result of the previous temperature</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Do a few steps, to not abort, directly,</span>
+            <span class="c1"># because the previous cycle was converged.</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+                <span class="n">log_g_r</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">Ns_r_old</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">step</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">log_g_r</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">Ns_r_old</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>  <span class="c1"># noqa: F821</span>
+                <span class="p">)</span>
+                <span class="n">iterations</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="p">(</span><span class="n">log_g_r</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">Ns_r_old</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">log_g_r</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">Ns_r_old</span><span class="p">,</span> <span class="n">niter</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">while_loop</span><span class="p">(</span>
+            <span class="n">condition</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">init</span>
+        <span class="p">)</span>
+        <span class="n">iterations</span> <span class="o">+=</span> <span class="n">niter</span>
+
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_g_r</span><span class="p">),</span> <span class="n">niter</span></div>
+
+
+
+<div class="viewcode-block" id="pair_distribution_function_HNC">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.pair_distribution_function_HNC.html#jaxrts.hypernetted_chain.pair_distribution_function_HNC">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pair_distribution_function_HNC</span><span class="p">(</span><span class="n">V_s</span><span class="p">,</span> <span class="n">V_l_k</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">Ti</span><span class="p">,</span> <span class="n">ni</span><span class="p">,</span> <span class="n">mix</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">tmult</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the Pair distribution function in the Hypernetted Chain approach,</span>
+<span class="sd">    as it was published by :cite:`Wunsch.2011`.</span>
+
+<span class="sd">    The `mix` argument should lie within the interval [0, 1) and controls</span>
+<span class="sd">    the amount by which the short-range nodal diagram term `N_ab` is updated</span>
+<span class="sd">    with each iteration. `mix=0` corresponds to fully using the newly obtained</span>
+<span class="sd">    result, while increasing `mix` mixes more of the previous iteration&#39;s value</span>
+<span class="sd">    to `N_ab`. This addition to the HNC scheme presented by :cite:`Wunsch.2011`</span>
+<span class="sd">    was introduced in the MCSS User Guide :cite:`Chapman.2016` and is</span>
+<span class="sd">    especially relevant e.g., at low temperatures, where the HNC scheme becomes</span>
+<span class="sd">    numerically unstable.</span>
+
+<span class="sd">    Additionally, the `tmult` attribute can be used to avoid unwanted behavior</span>
+<span class="sd">    at low temperatures. If given, a full HNC cycle is calculated for the first</span>
+<span class="sd">    of the temperature multipliers given, until converged. This value is then</span>
+<span class="sd">    taken as initial condition for the second entry and so on, until finally a</span>
+<span class="sd">    multiplier of `1.0` is appended, performing a last HNC cycle for the</span>
+<span class="sd">    desired temperature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">tmult</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tmult</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="mf">1e-6</span>
+
+    <span class="n">dr</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dk</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">r</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="o">*</span> <span class="n">dk</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">ni</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">ni</span>
+
+    <span class="c1"># Append the list of temperature multipliers with the target T</span>
+    <span class="n">tmult</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">tmult</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ozr</span><span class="p">(</span><span class="n">input_vec</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ornstein-Zernicke Relation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span>
+            <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">ni</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">input_vec</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+                    <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">input_vec</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">condition</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If this is False, the loop will stop. Abort if too many steps were</span>
+<span class="sd">        reached, or if convergence was reached.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">Ns_r_old</span><span class="p">,</span> <span class="n">n_iter</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">Ns_r</span> <span class="o">-</span> <span class="n">Ns_r_old</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">n_iter</span> <span class="o">&lt;</span> <span class="mi">2000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">err</span> <span class="o">&gt;</span> <span class="n">delta</span><span class="p">)</span>
+
+    <span class="c1"># Perform the full HNC cycle for each temperature</span>
+    <span class="k">for</span> <span class="n">titer</span><span class="p">,</span> <span class="n">mult</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmult</span><span class="p">):</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span> <span class="o">*</span> <span class="n">Ti</span> <span class="o">*</span> <span class="n">mult</span><span class="p">)</span>
+
+        <span class="n">v_s</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">V_s</span>
+        <span class="n">v_l_k</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">V_l_k</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+            <span class="n">log_g_r</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="n">val</span>
+
+            <span class="n">h_r</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">expm1</span><span class="p">(</span><span class="n">log_g_r</span><span class="p">)</span>
+            <span class="n">cs_r</span> <span class="o">=</span> <span class="n">h_r</span> <span class="o">-</span> <span class="n">Ns_r</span>
+            <span class="n">cs_k</span> <span class="o">=</span> <span class="n">_3Dfour</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">cs_r</span><span class="p">)</span>
+            <span class="n">c_k</span> <span class="o">=</span> <span class="n">cs_k</span> <span class="o">-</span> <span class="n">v_l_k</span>
+
+            <span class="c1"># Ornstein-Zernike relation</span>
+            <span class="n">h_k</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span><span class="n">ozr</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">out_axes</span><span class="o">=</span><span class="mi">2</span><span class="p">)(</span><span class="n">c_k</span><span class="p">)</span>
+
+            <span class="n">Ns_k</span> <span class="o">=</span> <span class="n">h_k</span> <span class="o">-</span> <span class="n">cs_k</span>
+            <span class="n">Ns_r_new_full</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">_3Dfour</span><span class="p">(</span>
+                    <span class="n">r</span><span class="p">,</span>
+                    <span class="n">k</span><span class="p">,</span>
+                    <span class="n">Ns_k</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
+            <span class="p">)</span>
+            <span class="n">Ns_r_new</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mix</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ns_r_new_full</span> <span class="o">+</span> <span class="n">mix</span> <span class="o">*</span> <span class="n">Ns_r</span>
+            <span class="n">log_g_r_new</span> <span class="o">=</span> <span class="n">Ns_r_new</span> <span class="o">-</span> <span class="n">v_s</span>
+            <span class="k">return</span> <span class="n">log_g_r_new</span><span class="p">,</span> <span class="n">Ns_r_new</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># Set initial conditions</span>
+        <span class="c1"># ----------------------</span>
+
+        <span class="c1"># In the first iteration, use zeros for Ns_r, and v_s for log_g_r</span>
+        <span class="k">if</span> <span class="n">titer</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">log_g_r0</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">v_s</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+            <span class="n">Ns_r0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">log_g_r0</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="p">(</span><span class="n">log_g_r0</span><span class="p">,</span> <span class="n">Ns_r0</span><span class="p">,</span> <span class="n">Ns_r0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># Otherwise, use the result of the previous temperature</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Do a few steps, to not abort, directly,</span>
+            <span class="c1"># because the previous cycle was converged.</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+                <span class="n">log_g_r</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">Ns_r_old</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">step</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">log_g_r</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">Ns_r_old</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>  <span class="c1"># noqa: F821</span>
+                <span class="p">)</span>
+                <span class="n">iterations</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="p">(</span><span class="n">log_g_r</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">Ns_r_old</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">log_g_r</span><span class="p">,</span> <span class="n">Ns_r</span><span class="p">,</span> <span class="n">Ns_r_old</span><span class="p">,</span> <span class="n">niter</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">while_loop</span><span class="p">(</span>
+            <span class="n">condition</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">init</span>
+        <span class="p">)</span>
+        <span class="n">iterations</span> <span class="o">+=</span> <span class="n">niter</span>
+
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_g_r</span><span class="p">),</span> <span class="n">iterations</span></div>
+
+
+
+<div class="viewcode-block" id="geometric_mean_T">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.geometric_mean_T.html#jaxrts.hypernetted_chain.geometric_mean_T">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">geometric_mean_T</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the geometric mean of a given temperature pair, according to</span>
+<span class="sd">    :cite:`Schwarz.2007`.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       \\bar{T}_{ab} = \\sqrt{T_aT_b}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">T</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="mass_weighted_T">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.mass_weighted_T.html#jaxrts.hypernetted_chain.mass_weighted_T">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mass_weighted_T</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The mass weighted temperature average of a pair, according to</span>
+<span class="sd">    :cite:`Schwarz.2007`.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       \\bar{T}_{ab} = \\frac{T_a m_b + T_b m_a}{m_a + m_b}</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">m</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">T</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="o">+</span> <span class="n">m</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">T</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">m</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">m</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:])</span></div>
+
+
+
+<div class="viewcode-block" id="S_ii_HNC">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.hypernetted_chain.S_ii_HNC.html#jaxrts.hypernetted_chain.S_ii_HNC">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">S_ii_HNC</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">ni</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the static structure factor for an isotropic system from the</span>
+<span class="sd">    pair distribution function obtained used the HNC approach.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        Due to the numerical implementation of :py:func:`~.sinft`, we force the</span>
+<span class="sd">        entry ``S_ii[0]`` to the value ``S_ii[1]``, as it would be always</span>
+<span class="sd">        unity, otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">S_k</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">ni</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])[:,</span> <span class="p">:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="o">+</span> <span class="p">(</span>
+            <span class="n">_3Dfour</span><span class="p">(</span>
+                <span class="n">k</span><span class="p">,</span>
+                <span class="n">r</span><span class="p">,</span>
+                <span class="n">pdf</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">ni</span><span class="p">,</span> <span class="n">ni</span><span class="p">))[:,</span> <span class="p">:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+
+    <span class="c1"># The first index is forced to 1. Set it to the entry [1], as this is not</span>
+    <span class="c1"># desired</span>
+    <span class="k">return</span> <span class="n">S_k</span><span class="o">.</span><span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">S_k</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#: The equivalent of jnp.interp for HNC-shaped arrays</span>
+<span class="n">hnc_interp</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span>
+    <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">out_axes</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+    <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">out_axes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

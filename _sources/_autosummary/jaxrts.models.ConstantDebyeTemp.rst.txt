@@ -1,0 +1,38 @@
+jaxrts.models.ConstantDebyeTemp
+===============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: ConstantDebyeTemp
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~ConstantDebyeTemp.__init__
+      ~ConstantDebyeTemp.check
+      ~ConstantDebyeTemp.citation
+      ~ConstantDebyeTemp.evaluate
+      ~ConstantDebyeTemp.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~ConstantDebyeTemp.allowed_keys
+      ~ConstantDebyeTemp.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.ConstantDebyeTemp:
+
+   .. minigallery:: jaxrts.models.ConstantDebyeTemp
+       :add-heading:

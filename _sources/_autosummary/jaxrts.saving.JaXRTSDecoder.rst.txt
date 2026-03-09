@@ -1,0 +1,37 @@
+jaxrts.saving.JaXRTSDecoder
+===========================
+
+.. currentmodule:: jaxrts.saving
+
+.. autoclass:: JaXRTSDecoder
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~JaXRTSDecoder.__init__
+      ~JaXRTSDecoder.decode
+      ~JaXRTSDecoder.object_hook
+      ~JaXRTSDecoder.raw_decode
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~JaXRTSDecoder.hnc_potentials
+      ~JaXRTSDecoder.models
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.saving.JaXRTSDecoder:
+
+   .. minigallery:: jaxrts.saving.JaXRTSDecoder
+       :add-heading:

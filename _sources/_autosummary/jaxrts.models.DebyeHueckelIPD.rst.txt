@@ -1,0 +1,39 @@
+jaxrts.models.DebyeHueckelIPD
+=============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: DebyeHueckelIPD
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~DebyeHueckelIPD.__init__
+      ~DebyeHueckelIPD.all_element_states
+      ~DebyeHueckelIPD.check
+      ~DebyeHueckelIPD.citation
+      ~DebyeHueckelIPD.evaluate
+      ~DebyeHueckelIPD.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~DebyeHueckelIPD.allowed_keys
+      ~DebyeHueckelIPD.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.DebyeHueckelIPD:
+
+   .. minigallery:: jaxrts.models.DebyeHueckelIPD
+       :add-heading:

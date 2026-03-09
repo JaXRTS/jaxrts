@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.analysis &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.analysis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.analysis</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Some analysis functions, mainly used for benchmarking and testing.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jpu</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnpu</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">secant_extrema_finding</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.setup</span><span class="w"> </span><span class="kn">import</span> <span class="n">Setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+
+
+<div class="viewcode-block" id="twoSidedLaplace">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.analysis.twoSidedLaplace.html#jaxrts.analysis.twoSidedLaplace">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">twoSidedLaplace</span><span class="p">(</span>
+    <span class="n">intensity</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">tau</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">E_shift</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">E_min</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">E_max</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform the two-sided Lapace transform of intensity numerically.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       \\mathscr{L}[I] = \\int_{E_{min}}^{E_{max}}</span>
+<span class="sd">       I \\exp(-\\tau E) \\mathrm{d}E</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Set default values for E_min and E_max if they are not given</span>
+    <span class="n">E_min</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">E_shift</span><span class="p">)</span> <span class="k">if</span> <span class="n">E_min</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">E_min</span>
+    <span class="n">E_max</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">E_shift</span><span class="p">)</span> <span class="k">if</span> <span class="n">E_max</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">E_max</span>
+
+    <span class="c1"># Sort energy and intensity for the integration</span>
+    <span class="n">inten_sorted</span> <span class="o">=</span> <span class="n">intensity</span><span class="p">[</span><span class="n">jnpu</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">E_shift</span><span class="p">)]</span>
+    <span class="n">E_sorted</span> <span class="o">=</span> <span class="n">E_shift</span><span class="p">[</span><span class="n">jnpu</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">E_shift</span><span class="p">)]</span>
+
+    <span class="c1"># Integrate in energy space (this way, the integral is numerically more</span>
+    <span class="c1"># stable compared to omega_space. This results in a dimensionless result,</span>
+    <span class="c1"># when considering dynamic structure factors</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">inten_sorted</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">tau</span> <span class="o">*</span> <span class="n">E_sorted</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
+    <span class="n">kernel_unit</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">units</span>
+    <span class="c1"># Set the kernel to 0 where the energy is outside of the defined range,</span>
+    <span class="c1"># i.e., don&#39;t include it for the integral</span>
+    <span class="n">cut_kernel</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">E_sorted</span> <span class="o">&gt;=</span> <span class="n">E_min</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">E_sorted</span> <span class="o">&lt;=</span> <span class="n">E_max</span><span class="p">),</span> <span class="n">kernel</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">kernel_unit</span><span class="p">),</span> <span class="mi">0</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">jnp</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span><span class="n">cut_kernel</span><span class="p">,</span> <span class="p">(</span><span class="n">E_sorted</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">kernel_unit</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_ITCFT_grid</span><span class="p">(</span>
+    <span class="n">S_ee_conv</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">tau</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">E_shift</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">instrument_E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">E_cut</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    1. Calculate :math:`\\mathscr{L}[S]` where S is the real dynamic structure</span>
+<span class="sd">       factor (i.e., not convolved with the instrument function) See</span>
+<span class="sd">       :cite:`Dornheim.2022`, Eqn (2).</span>
+<span class="sd">    2. Find the :math:`\\tau` for which the Laplace transform is minimal</span>
+<span class="sd">    3. Get the corresponding temperature</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">L_inst</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span>
+        <span class="n">twoSidedLaplace</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">out_axes</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">)(</span><span class="n">instrument</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">instrument_E</span><span class="p">,</span> <span class="o">-</span><span class="n">E_cut</span><span class="p">,</span> <span class="n">E_cut</span><span class="p">)</span>
+    <span class="n">L_S_ee</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span>
+        <span class="n">twoSidedLaplace</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">out_axes</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">)(</span><span class="n">S_ee_conv</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">E_shift</span><span class="p">,</span> <span class="o">-</span><span class="n">E_cut</span><span class="p">,</span> <span class="n">E_cut</span><span class="p">)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">L_S_ee</span> <span class="o">/</span> <span class="n">L_inst</span>
+    <span class="n">tau_min</span> <span class="o">=</span> <span class="n">tau</span><span class="p">[</span><span class="n">jnpu</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">L</span><span class="p">)]</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">tau_min</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">T</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">),</span> <span class="n">L</span>
+
+
+<div class="viewcode-block" id="ITCF">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.analysis.ITCF.html#jaxrts.analysis.ITCF">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ITCF</span><span class="p">:</span>
+<div class="viewcode-block" id="ITCF.__init__">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.analysis.ITCF.__init__.html#jaxrts.analysis.ITCF.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">S_ee_conv</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+        <span class="n">E_shift</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+        <span class="n">instrument_E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+        <span class="n">E_cut</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+        <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        1. Calculate :math:`F=\\mathscr{L}[S]` where S is the real dynamic</span>
+<span class="sd">           structure factor (i.e., not convolved with the instrument function)</span>
+<span class="sd">           See :cite:`Dornheim.2022`, Eqn (2).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">S_ee_conv</span> <span class="o">=</span> <span class="n">S_ee_conv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E_shift</span> <span class="o">=</span> <span class="n">E_shift</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="n">instrument</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrument_E</span> <span class="o">=</span> <span class="n">instrument_E</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E_cut</span> <span class="o">=</span> <span class="n">E_cut</span>
+        <span class="c1">#: If ``raw==True``, don&#39;t deconvolve with the instrument function.</span>
+        <span class="c1">#: This can be used for testing, benchmarking and toubleshooting.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">raw</span></div>
+
+
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_F</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_dimensionless</span><span class="p">):</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">tau_dimensionless</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kiloelectron_volt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">F</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span>
+
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Alias to :py:meth:`~.F`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">F</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ITCF.F">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.analysis.ITCF.F.html#jaxrts.analysis.ITCF.F">[docs]</a>
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">F</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the Laplace Transform for the given structure factor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">L_S_ee</span> <span class="o">=</span> <span class="n">twoSidedLaplace</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">S_ee_conv</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">E_shift</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">E_cut</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">E_cut</span>
+        <span class="p">)</span>
+        <span class="n">L_inst</span> <span class="o">=</span> <span class="n">twoSidedLaplace</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span><span class="p">,</span>
+            <span class="n">tau</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instrument_E</span><span class="p">,</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">E_cut</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_cut</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">L_S_ee</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">L_S_ee</span> <span class="o">/</span> <span class="n">L_inst</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ITCF.get_T">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.analysis.ITCF.get_T.html#jaxrts.analysis.ITCF.get_T">[docs]</a>
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_T</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_max</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        1. Find the :math:`\\tau` for which the Laplace transform is minimal</span>
+<span class="sd">        2. Get the corresponding temperature</span>
+
+<span class="sd">        See :cite:`Dornheim.2022`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t_min</span> <span class="o">=</span> <span class="mf">1e-8</span>  <span class="c1"># / ureg.kiloelectron_volt</span>
+        <span class="n">t_max</span> <span class="o">=</span> <span class="n">tau_max</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kiloelectron_volt</span><span class="p">)</span>
+
+        <span class="n">sol</span><span class="p">,</span> <span class="n">iterations</span> <span class="o">=</span> <span class="n">secant_extrema_finding</span><span class="p">(</span>
+            <span class="n">jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">Partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_F</span><span class="p">),</span> <span class="n">t_min</span><span class="p">,</span> <span class="n">t_max</span>
+        <span class="p">)</span>
+
+        <span class="n">minimizing_tau</span> <span class="o">=</span> <span class="n">sol</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kiloelectron_volt</span><span class="p">)</span>
+
+        <span class="n">T</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">minimizing_tau</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">T</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">S_ee_conv</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_shift</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instrument_E</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_cut</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">aux_data</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">,)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">ITCF</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="p">(</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">S_ee_conv</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">E_shift</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">instrument</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">instrument_E</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">E_cut</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">children</span>
+        <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">raw</span><span class="p">,)</span> <span class="o">=</span> <span class="n">aux_data</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
+
+<div class="viewcode-block" id="ITCFT">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.analysis.ITCFT.html#jaxrts.analysis.ITCFT">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ITCFT</span><span class="p">(</span>
+    <span class="n">S_ee_conv</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">tau_max</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span>
+    <span class="n">E_cut</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    1. Calculate :math:`F=\\mathscr{L}[S]` where S is the real dynamic</span>
+<span class="sd">       structure factor (i.e., not convolved with the instrument function) See</span>
+<span class="sd">       :cite:`Dornheim.2022`, Eqn (2).</span>
+<span class="sd">    2. Find the :math:`\\tau` for which the Laplace transform is minimal</span>
+<span class="sd">    3. Get the corresponding temperature</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note the sign, here! Lower energy in a spectrum is a positive energy</span>
+    <span class="c1"># shift.</span>
+    <span class="n">ITCF_func</span> <span class="o">=</span> <span class="n">ITCF_from_setup</span><span class="p">(</span><span class="n">S_ee_conv</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">E_cut</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ITCF_func</span><span class="o">.</span><span class="n">get_T</span><span class="p">(</span><span class="n">tau_max</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ITCFT_grid">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.analysis.ITCFT_grid.html#jaxrts.analysis.ITCFT_grid">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ITCFT_grid</span><span class="p">(</span>
+    <span class="n">S_ee_conv</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">tau</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span>
+    <span class="n">E_cut</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is akin to :py:func:`~.ITCFT`, but rather than an adoptive</span>
+<span class="sd">    minimization, it runs on a naive :math:`\\tau` grid.</span>
+
+<span class="sd">    1. Calculate :math:`F=\\mathscr{L}[S]` where S is the real dynamic</span>
+<span class="sd">       structure factor (i.e., not convolved with the instrument function) See</span>
+<span class="sd">       :cite:`Dornheim.2022`, Eqn (2).</span>
+<span class="sd">    2. Find the :math:`\\tau` for which the Laplace transform is minimal</span>
+<span class="sd">    3. Get the corresponding temperature</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note the sign, here! Lower energy in a spectrum is a positive energy</span>
+    <span class="c1"># shift.</span>
+    <span class="n">E_shift</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span> <span class="o">-</span> <span class="n">setup</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span>
+    <span class="n">instrument</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">instrument</span><span class="p">(</span><span class="n">E_shift</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_ITCFT_grid</span><span class="p">(</span><span class="n">S_ee_conv</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">E_shift</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> <span class="n">E_shift</span><span class="p">,</span> <span class="n">E_cut</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ITCF_from_setup">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.analysis.ITCF_from_setup.html#jaxrts.analysis.ITCF_from_setup">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ITCF_from_setup</span><span class="p">(</span>
+    <span class="n">S_ee_conv</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span>
+    <span class="n">E_cut</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ITCF&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a :py:class:`~.ITCF`object from the given given</span>
+<span class="sd">    :py:class:`jaxrts.setup.Setup` instance and a dynamic structure factor.</span>
+<span class="sd">    If ``raw`` is True, the returned object will omit the deconvolution</span>
+<span class="sd">    with the instrument function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note the sign, here! Lower energy in a spectrum is a positive energy</span>
+    <span class="c1"># shift.</span>
+    <span class="n">E_shift</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span> <span class="o">-</span> <span class="n">setup</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span>
+    <span class="n">instrument</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">instrument</span><span class="p">(</span><span class="n">E_shift</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ITCF</span><span class="p">(</span><span class="n">S_ee_conv</span><span class="p">,</span> <span class="n">E_shift</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> <span class="n">E_shift</span><span class="p">,</span> <span class="n">E_cut</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ITCF_fsum">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.analysis.ITCF_fsum.html#jaxrts.analysis.ITCF_fsum">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ITCF_fsum</span><span class="p">(</span>
+    <span class="n">S_ee_conv</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span>
+    <span class="n">E_cut</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the f-sum rule by evaluating the first derivative of the Laplace</span>
+<span class="sd">    transform at 0/eV.</span>
+<span class="sd">    See :cite:`Dornheim.2024`.</span>
+
+<span class="sd">    1. Calculate :math:`F=\\mathscr{L}[S]` where S is the real dynamic</span>
+<span class="sd">       structure factor (i.e., not convolved with the instrument function) See</span>
+<span class="sd">       :cite:`Dornheim.2022`, Eqn (2).</span>
+<span class="sd">    2. Calculate the derivative of the Laplace transform at :math:`\\tau = 0`.</span>
+<span class="sd">    3. Get the f-sum.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note the sign, here! Lower energy in a spectrum is a positive energy</span>
+    <span class="c1"># shift.</span>
+    <span class="n">ITCF_func</span> <span class="o">=</span> <span class="n">ITCF_from_setup</span><span class="p">(</span><span class="n">S_ee_conv</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">E_cut</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">ITCF_func</span><span class="o">.</span><span class="n">_F</span><span class="p">)(</span><span class="mf">0.0</span><span class="p">))</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kiloelectron_volt</span></div>
+
+
+
+<div class="viewcode-block" id="ITCF_ssf">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.analysis.ITCF_ssf.html#jaxrts.analysis.ITCF_ssf">[docs]</a>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ITCF_ssf</span><span class="p">(</span>
+    <span class="n">S_ee_conv</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span>
+    <span class="n">E_cut</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the Static structure Factor by evaluating the Laplace transform</span>
+<span class="sd">    at 0/eV.</span>
+
+<span class="sd">    1. Calculate :math:`F=\\mathscr{L}[S]` where S is the real dynamic</span>
+<span class="sd">       structure factor (i.e., not convolved with the instrument function) See</span>
+<span class="sd">       :cite:`Dornheim.2022`, Eqn (2).</span>
+<span class="sd">    2. Calculate :math:`F(0/eV) = S_ee(k)`, the static structure factor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note the sign, here! Lower energy in a spectrum is a positive energy</span>
+    <span class="c1"># shift.</span>
+    <span class="n">ITCF_func</span> <span class="o">=</span> <span class="n">ITCF_from_setup</span><span class="p">(</span><span class="n">S_ee_conv</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">E_cut</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ITCF_func</span><span class="o">.</span><span class="n">_F</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span></div>
+
+
+
+<span class="n">jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">register_pytree_node</span><span class="p">(</span>
+    <span class="n">ITCF</span><span class="p">,</span>
+    <span class="n">ITCF</span><span class="o">.</span><span class="n">_tree_flatten</span><span class="p">,</span>
+    <span class="n">ITCF</span><span class="o">.</span><span class="n">_tree_unflatten</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

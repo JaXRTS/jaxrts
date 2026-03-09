@@ -1,0 +1,44 @@
+jaxrts.models.BornMermin\_Fortmann
+==================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: BornMermin_Fortmann
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~BornMermin_Fortmann.__init__
+      ~BornMermin_Fortmann.check
+      ~BornMermin_Fortmann.citation
+      ~BornMermin_Fortmann.evaluate
+      ~BornMermin_Fortmann.evaluate_raw
+      ~BornMermin_Fortmann.guess_E_cutoffs
+      ~BornMermin_Fortmann.prepare
+      ~BornMermin_Fortmann.sample_grid
+      ~BornMermin_Fortmann.set_guessed_E_cutoffs
+      ~BornMermin_Fortmann.susceptibility
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~BornMermin_Fortmann.allowed_keys
+      ~BornMermin_Fortmann.cite_keys
+      ~BornMermin_Fortmann.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.BornMermin_Fortmann:
+
+   .. minigallery:: jaxrts.models.BornMermin_Fortmann
+       :add-heading:

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.free_free &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jaxrts.free_free.KramersKronigTransform" href="jaxrts.free_free.KramersKronigTransform.html" />
+    <link rel="prev" title="jaxrts.free_bound.FreeBoundFlippedSetup.frc_exponent" href="jaxrts.free_bound.FreeBoundFlippedSetup.frc_exponent.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="jaxrts.html">jaxrts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.absorption_edges_ionized_ions_data.html">jaxrts.absorption_edges_ionized_ions_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.analysis.html">jaxrts.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.bound_free.html">jaxrts.bound_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections.html">jaxrts.ee_localfieldcorrections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections_dornheim_2021.html">jaxrts.ee_localfieldcorrections_dornheim_2021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.elements.html">jaxrts.elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.experimental.html">jaxrts.experimental</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.form_factors.html">jaxrts.form_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_bound.html">jaxrts.free_bound</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">jaxrts.free_free</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.KramersKronigTransform.html">jaxrts.free_free.KramersKronigTransform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.S0_ee_BMA.html">jaxrts.free_free.S0_ee_BMA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.S0_ee_BMA_Fortmann.html">jaxrts.free_free.S0_ee_BMA_Fortmann</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.S0_ee_BMA_chapman_interp.html">jaxrts.free_free.S0_ee_BMA_chapman_interp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.S0_ee_BMA_chapman_interpFit.html">jaxrts.free_free.S0_ee_BMA_chapman_interpFit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.S0_ee_RPA.html">jaxrts.free_free.S0_ee_RPA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.S0_ee_RPA_Dandrea.html">jaxrts.free_free.S0_ee_RPA_Dandrea</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.S0_ee_RPA_no_damping.html">jaxrts.free_free.S0_ee_RPA_no_damping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.S0_ee_Salpeter.html">jaxrts.free_free.S0_ee_Salpeter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.S0ee_from_dielectric_func_FDT.html">jaxrts.free_free.S0ee_from_dielectric_func_FDT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.S0ee_from_susceptibility_FDT.html">jaxrts.free_free.S0ee_from_susceptibility_FDT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.collision_frequency_BA_0K.html">jaxrts.free_free.collision_frequency_BA_0K</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.collision_frequency_BA_Chapman_interp.html">jaxrts.free_free.collision_frequency_BA_Chapman_interp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.collision_frequency_BA_Chapman_interpFit.html">jaxrts.free_free.collision_frequency_BA_Chapman_interpFit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.collision_frequency_BA_full.html">jaxrts.free_free.collision_frequency_BA_full</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.collision_frequency_BA_fullFit.html">jaxrts.free_free.collision_frequency_BA_fullFit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.dielectric_function_BMA_Fortmann.html">jaxrts.free_free.dielectric_function_BMA_Fortmann</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.dielectric_function_BMA_chapman_interp.html">jaxrts.free_free.dielectric_function_BMA_chapman_interp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.dielectric_function_BMA_chapman_interpFit.html">jaxrts.free_free.dielectric_function_BMA_chapman_interpFit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.dielectric_function_BMA_full.html">jaxrts.free_free.dielectric_function_BMA_full</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.dielectric_function_RPA.html">jaxrts.free_free.dielectric_function_RPA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.dielectric_function_RPA_0K.html">jaxrts.free_free.dielectric_function_RPA_0K</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.dielectric_function_RPA_Dandrea1986.html">jaxrts.free_free.dielectric_function_RPA_Dandrea1986</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.dielectric_function_RPA_no_damping.html">jaxrts.free_free.dielectric_function_RPA_no_damping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.dielectric_function_RPA_rewrite.html">jaxrts.free_free.dielectric_function_RPA_rewrite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.dielectric_function_salpeter.html">jaxrts.free_free.dielectric_function_salpeter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.guess_E_cutoff_max.html">jaxrts.free_free.guess_E_cutoff_max</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.guess_E_cutoff_min.html">jaxrts.free_free.guess_E_cutoff_min</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.inverse_screening_length_exact.html">jaxrts.free_free.inverse_screening_length_exact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.inverse_screening_length_non_degenerate.html">jaxrts.free_free.inverse_screening_length_non_degenerate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.noninteracting_susceptibility_0K.html">jaxrts.free_free.noninteracting_susceptibility_0K</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.noninteracting_susceptibility_Dandrea1986.html">jaxrts.free_free.noninteracting_susceptibility_Dandrea1986</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.statically_screened_ie_debye_potential.html">jaxrts.free_free.statically_screened_ie_debye_potential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.free_free.susceptibility_BMA_Fortmann.html">jaxrts.free_free.susceptibility_BMA_Fortmann</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.helpers.html">jaxrts.helpers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hnc_potentials.html">jaxrts.hnc_potentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hypernetted_chain.html">jaxrts.hypernetted_chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.instrument_function.html">jaxrts.instrument_function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ion_feature.html">jaxrts.ion_feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ipd.html">jaxrts.ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.literature.html">jaxrts.literature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.math.html">jaxrts.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.models.html">jaxrts.models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasma_physics.html">jaxrts.plasma_physics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasmastate.html">jaxrts.plasmastate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saha.html">jaxrts.saha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saving.html">jaxrts.saving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.setup.html">jaxrts.setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.static_structure_factors.html">jaxrts.static_structure_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.units.html">jaxrts.units</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.html">jaxrts</a></li>
+      <li class="breadcrumb-item active">jaxrts.free_free</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/jaxrts.free_free.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-jaxrts.free_free">
+<span id="jaxrts-free-free"></span><h1>jaxrts.free_free<a class="headerlink" href="#module-jaxrts.free_free" title="Link to this heading"></a></h1>
+<p>This submodule is dedicated to the calculation of the free electron dynamic
+structure.</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.KramersKronigTransform.html#jaxrts.free_free.KramersKronigTransform" title="jaxrts.free_free.KramersKronigTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KramersKronigTransform</span></code></a>(E_vals, I_vals[, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.S0_ee_BMA.html#jaxrts.free_free.S0_ee_BMA" title="jaxrts.free_free.S0_ee_BMA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0_ee_BMA</span></code></a>(k, T, chem_pot, S_ii, V_eiS, n_e, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.S0_ee_BMA_Fortmann.html#jaxrts.free_free.S0_ee_BMA_Fortmann" title="jaxrts.free_free.S0_ee_BMA_Fortmann"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0_ee_BMA_Fortmann</span></code></a>(k, T, chem_pot, S_ii, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.S0_ee_BMA_chapman_interp.html#jaxrts.free_free.S0_ee_BMA_chapman_interp" title="jaxrts.free_free.S0_ee_BMA_chapman_interp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0_ee_BMA_chapman_interp</span></code></a>(k, T, chem_pot, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.S0_ee_BMA_chapman_interpFit.html#jaxrts.free_free.S0_ee_BMA_chapman_interpFit" title="jaxrts.free_free.S0_ee_BMA_chapman_interpFit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0_ee_BMA_chapman_interpFit</span></code></a>(k, T, chem_pot, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.S0_ee_RPA.html#jaxrts.free_free.S0_ee_RPA" title="jaxrts.free_free.S0_ee_RPA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0_ee_RPA</span></code></a>(k, T_e, n_e, E, chem_pot[, lfc, ...])</p></td>
+<td><p>Calculates the free electron dynamics structure using the quantum corrected Salpeter approximation of the electron dielectric response function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.S0_ee_RPA_Dandrea.html#jaxrts.free_free.S0_ee_RPA_Dandrea" title="jaxrts.free_free.S0_ee_RPA_Dandrea"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0_ee_RPA_Dandrea</span></code></a>(k, T, n_e, E[, lfc])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.S0_ee_RPA_no_damping.html#jaxrts.free_free.S0_ee_RPA_no_damping" title="jaxrts.free_free.S0_ee_RPA_no_damping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0_ee_RPA_no_damping</span></code></a>(k, T_e, n_e, E, chem_pot)</p></td>
+<td><p>Calculates the free electron dynamics structure using the quantum corrected Salpeter approximation of the electron dielectric response function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.S0_ee_Salpeter.html#jaxrts.free_free.S0_ee_Salpeter" title="jaxrts.free_free.S0_ee_Salpeter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0_ee_Salpeter</span></code></a>(k, T_e, n_e, E[, lfc])</p></td>
+<td><p>Calculates the free electron dynamics structure using the quantum corrected Salpeter approximation of the electron dielectric response function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.S0ee_from_dielectric_func_FDT.html#jaxrts.free_free.S0ee_from_dielectric_func_FDT" title="jaxrts.free_free.S0ee_from_dielectric_func_FDT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0ee_from_dielectric_func_FDT</span></code></a>(k, T_e, n_e, ...)</p></td>
+<td><p>Links the dielectric function to S0_ee via the fluctuation dissipation theorem, see, e.g., eqn (9) in <span id="id1">[<a class="reference internal" href="../bibliography.html#id46" title="G. Gregori, S. H. Glenzer, F. J. Rogers, S. M. Pollaine, O. L. Landen, C. Blancard, G. Faussurier, P. Renaudin, S. Kuhlbrodt, and R. Redmer. Electronic structure measurements of dense plasmas. Physics of Plasmas, 11:2754–2762, 5 2004. doi:10.1063/1.1689664.">Gregori et al., 2004</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.S0ee_from_susceptibility_FDT.html#jaxrts.free_free.S0ee_from_susceptibility_FDT" title="jaxrts.free_free.S0ee_from_susceptibility_FDT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0ee_from_susceptibility_FDT</span></code></a>(k, T_e, n_e, E, ...)</p></td>
+<td><p>Links the dielectric function to S0_ee via the fluctuation dissipation theorem, see, e.g., <span id="id2">[<a class="reference internal" href="../bibliography.html#id39" title="Carsten Fortmann, August Wierling, and Gerd Röpke. Influence of local-field corrections on thomson scattering in collision-dominated two-component plasmas. Physical Review E, 2 2010. doi:10.1103/physreve.81.026405.">Fortmann et al., 2010</a>]</span>, Eqn (2).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.collision_frequency_BA_0K.html#jaxrts.free_free.collision_frequency_BA_0K" title="jaxrts.free_free.collision_frequency_BA_0K"><code class="xref py py-obj docutils literal notranslate"><span class="pre">collision_frequency_BA_0K</span></code></a>(E, S_ii, V_eiS, ...)</p></td>
+<td><p>Calculate the Born electron-ion collision frequency at 0 K.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.collision_frequency_BA_Chapman_interp.html#jaxrts.free_free.collision_frequency_BA_Chapman_interp" title="jaxrts.free_free.collision_frequency_BA_Chapman_interp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">collision_frequency_BA_Chapman_interp</span></code></a>(E, T, ...)</p></td>
+<td><p>Calculate the electron-ion collision frequency for the Born approximation, at it is done in <code class="xref py py-func docutils literal notranslate"><span class="pre">collision_frequency_BA()</span></code>, but instead of using a quadrature, we evaluate only at a <cite>no_of_point</cite> points between the frequencies <span class="math notranslate nohighlight">\(10^-8 \omega_{pe}\)</span> and <span class="math notranslate nohighlight">\(1.1 \max(\mid \omega \mid)\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.collision_frequency_BA_Chapman_interpFit.html#jaxrts.free_free.collision_frequency_BA_Chapman_interpFit" title="jaxrts.free_free.collision_frequency_BA_Chapman_interpFit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">collision_frequency_BA_Chapman_interpFit</span></code></a>(E, ...)</p></td>
+<td><p>Calculate the electron-ion collision frequency for the Born approximation, at it is done in <code class="xref py py-func docutils literal notranslate"><span class="pre">collision_frequency_BA()</span></code>, but instead of using a quadrature, we evaluate only at a <cite>no_of_point</cite> points between the frequencies <span class="math notranslate nohighlight">\(10^-8 \omega_{pe}\)</span> and <span class="math notranslate nohighlight">\(1.1 \max(\mid \omega \mid)\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.collision_frequency_BA_full.html#jaxrts.free_free.collision_frequency_BA_full" title="jaxrts.free_free.collision_frequency_BA_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">collision_frequency_BA_full</span></code></a>(E, T, S_ii, ...)</p></td>
+<td><p>Calculate the Born electron-ion collision frequency.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.collision_frequency_BA_fullFit.html#jaxrts.free_free.collision_frequency_BA_fullFit" title="jaxrts.free_free.collision_frequency_BA_fullFit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">collision_frequency_BA_fullFit</span></code></a>(E, T, S_ii, ...)</p></td>
+<td><p>Calculate the Born electron-ion collision frequency.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.dielectric_function_BMA_Fortmann.html#jaxrts.free_free.dielectric_function_BMA_Fortmann" title="jaxrts.free_free.dielectric_function_BMA_Fortmann"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielectric_function_BMA_Fortmann</span></code></a>(k, E, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.dielectric_function_BMA_chapman_interp.html#jaxrts.free_free.dielectric_function_BMA_chapman_interp" title="jaxrts.free_free.dielectric_function_BMA_chapman_interp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielectric_function_BMA_chapman_interp</span></code></a>(k, E, ...)</p></td>
+<td><p>Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions into account.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.dielectric_function_BMA_chapman_interpFit.html#jaxrts.free_free.dielectric_function_BMA_chapman_interpFit" title="jaxrts.free_free.dielectric_function_BMA_chapman_interpFit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielectric_function_BMA_chapman_interpFit</span></code></a>(k, ...)</p></td>
+<td><p>Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions into account.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.dielectric_function_BMA_full.html#jaxrts.free_free.dielectric_function_BMA_full" title="jaxrts.free_free.dielectric_function_BMA_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielectric_function_BMA_full</span></code></a>(k, E, chem_pot, ...)</p></td>
+<td><p>Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions into account.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.dielectric_function_RPA.html#jaxrts.free_free.dielectric_function_RPA" title="jaxrts.free_free.dielectric_function_RPA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielectric_function_RPA</span></code></a>(k, E, chem_pot, T)</p></td>
+<td><p>The the dielectric function including potentially a complex argument for E.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.dielectric_function_RPA_0K.html#jaxrts.free_free.dielectric_function_RPA_0K" title="jaxrts.free_free.dielectric_function_RPA_0K"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielectric_function_RPA_0K</span></code></a>(k, E, n_e)</p></td>
+<td><p>Calculates the Dielektric function for the limiting case of 0 Kelivn.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.dielectric_function_RPA_Dandrea1986.html#jaxrts.free_free.dielectric_function_RPA_Dandrea1986" title="jaxrts.free_free.dielectric_function_RPA_Dandrea1986"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielectric_function_RPA_Dandrea1986</span></code></a>(k, E, T, n_e)</p></td>
+<td><p>Calculate the dielectric function in random phase approximation by using the fitts given by <span id="id3">[<a class="reference internal" href="../bibliography.html#id21" title="R. G. Dandrea, N. W. Ashcroft, and A. E. Carlsson. Electron liquid at any degeneracy. Physical Review B, 34:2097–2111, 8 1986. doi:10.1103/physrevb.34.2097.">Dandrea et al., 1986</a>]</span>, which should give a notable increase in the calculation time over solving the integrals, numerically.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.dielectric_function_RPA_no_damping.html#jaxrts.free_free.dielectric_function_RPA_no_damping" title="jaxrts.free_free.dielectric_function_RPA_no_damping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielectric_function_RPA_no_damping</span></code></a>(k, E, ...)</p></td>
+<td><p>The the dielectric function without damping (i.e., in the limit nu → 0) from Bonitz's 'dielectric theory' script, Eqn 1.120 and Eqn 1.122, assuming a Fermi function for the particles' velocity distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.dielectric_function_RPA_rewrite.html#jaxrts.free_free.dielectric_function_RPA_rewrite" title="jaxrts.free_free.dielectric_function_RPA_rewrite"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielectric_function_RPA_rewrite</span></code></a>(k, E, ...)</p></td>
+<td><p>The the dielectric function extended to incorporate a ei collisions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.dielectric_function_salpeter.html#jaxrts.free_free.dielectric_function_salpeter" title="jaxrts.free_free.dielectric_function_salpeter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielectric_function_salpeter</span></code></a>(k, T_e, n_e, E)</p></td>
+<td><p>Implementation of the quantum corrected Salpeter approximation of the electron dielectric response function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.guess_E_cutoff_max.html#jaxrts.free_free.guess_E_cutoff_max" title="jaxrts.free_free.guess_E_cutoff_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">guess_E_cutoff_max</span></code></a>(k, T, ne, E_max, KKT)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.guess_E_cutoff_min.html#jaxrts.free_free.guess_E_cutoff_min" title="jaxrts.free_free.guess_E_cutoff_min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">guess_E_cutoff_min</span></code></a>(ne, KKT)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.inverse_screening_length_exact.html#jaxrts.free_free.inverse_screening_length_exact" title="jaxrts.free_free.inverse_screening_length_exact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inverse_screening_length_exact</span></code></a>(T, chem_pot)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.inverse_screening_length_non_degenerate.html#jaxrts.free_free.inverse_screening_length_non_degenerate" title="jaxrts.free_free.inverse_screening_length_non_degenerate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inverse_screening_length_non_degenerate</span></code></a>(n_e, T)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.noninteracting_susceptibility_0K.html#jaxrts.free_free.noninteracting_susceptibility_0K" title="jaxrts.free_free.noninteracting_susceptibility_0K"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noninteracting_susceptibility_0K</span></code></a>(k, E, n_e)</p></td>
+<td><p>Calculates the non-interacting susceptilibily for the limiting case of 0 Kelivn.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.noninteracting_susceptibility_Dandrea1986.html#jaxrts.free_free.noninteracting_susceptibility_Dandrea1986" title="jaxrts.free_free.noninteracting_susceptibility_Dandrea1986"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noninteracting_susceptibility_Dandrea1986</span></code></a>(k, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.free_free.statically_screened_ie_debye_potential.html#jaxrts.free_free.statically_screened_ie_debye_potential" title="jaxrts.free_free.statically_screened_ie_debye_potential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">statically_screened_ie_debye_potential</span></code></a>(q, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.free_free.susceptibility_BMA_Fortmann.html#jaxrts.free_free.susceptibility_BMA_Fortmann" title="jaxrts.free_free.susceptibility_BMA_Fortmann"><code class="xref py py-obj docutils literal notranslate"><span class="pre">susceptibility_BMA_Fortmann</span></code></a>(k, E, chem_pot, ...)</p></td>
+<td><p>Calculates the Born-Mermin Approximation for the dielectric function, which takes collisions into account.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jaxrts.free_bound.FreeBoundFlippedSetup.frc_exponent.html" class="btn btn-neutral float-left" title="jaxrts.free_bound.FreeBoundFlippedSetup.frc_exponent" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.free_free.KramersKronigTransform.html" class="btn btn-neutral float-right" title="jaxrts.free_free.KramersKronigTransform" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

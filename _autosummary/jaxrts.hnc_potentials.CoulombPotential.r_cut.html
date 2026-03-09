@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.hnc_potentials.CoulombPotential.r_cut &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jaxrts.hnc_potentials.CoulombPotential.short_k" href="jaxrts.hnc_potentials.CoulombPotential.short_k.html" />
+    <link rel="prev" title="jaxrts.hnc_potentials.CoulombPotential.q2" href="jaxrts.hnc_potentials.CoulombPotential.q2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Usage</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../physics.html">Physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../first-spectrum.html">Generating a first spectrum</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../models.html">Models implemented</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../models.html#screening-length">screening length</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ionic-scattering">ionic scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#bm-s-ii">BM S_ii</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#debye-temperature">Debye temperature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#free-free-scattering">free-free scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#chemical-potential">chemical potential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ipd">ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#screening">screening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#bm-v-eis">BM V_eiS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#free-bound-scattering">free-bound scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ee-lfc">ee-lfc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#form-factors">form-factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#bound-free-scattering">bound-free scattering</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../models.html#ion-ion-potential">ion-ion Potential</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="jaxrts.hnc_potentials.CoulombPotential.html">jaxrts.hnc_potentials.CoulombPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.DebyeHueckelPotential.html">jaxrts.hnc_potentials.DebyeHueckelPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.DeutschPotential.html">jaxrts.hnc_potentials.DeutschPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.HNCPotential.html">jaxrts.hnc_potentials.HNCPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.KelbgPotential.html">jaxrts.hnc_potentials.KelbgPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.PauliClassicalMap.html">jaxrts.hnc_potentials.PauliClassicalMap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.PotentialSum.html">jaxrts.hnc_potentials.PotentialSum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.ScaledPotential.html">jaxrts.hnc_potentials.ScaledPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.SpinAveragedEEExchange.html">jaxrts.hnc_potentials.SpinAveragedEEExchange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.SpinSeparatedEEExchange.html">jaxrts.hnc_potentials.SpinSeparatedEEExchange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html">jaxrts.hnc_potentials.YukawaShortRangeRepulsion</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../models.html#electron-ion-potential">electron-ion Potential</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="jaxrts.hnc_potentials.CoulombPotential.html">jaxrts.hnc_potentials.CoulombPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.DebyeHueckelPotential.html">jaxrts.hnc_potentials.DebyeHueckelPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.DeutschPotential.html">jaxrts.hnc_potentials.DeutschPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.EmptyCorePotential.html">jaxrts.hnc_potentials.EmptyCorePotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.HNCPotential.html">jaxrts.hnc_potentials.HNCPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.KelbgPotential.html">jaxrts.hnc_potentials.KelbgPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.KlimontovichKraeftPotential.html">jaxrts.hnc_potentials.KlimontovichKraeftPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.PauliClassicalMap.html">jaxrts.hnc_potentials.PauliClassicalMap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.PotentialSum.html">jaxrts.hnc_potentials.PotentialSum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.ScaledPotential.html">jaxrts.hnc_potentials.ScaledPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.SoftCorePotential.html">jaxrts.hnc_potentials.SoftCorePotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.SpinAveragedEEExchange.html">jaxrts.hnc_potentials.SpinAveragedEEExchange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.SpinSeparatedEEExchange.html">jaxrts.hnc_potentials.SpinSeparatedEEExchange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html">jaxrts.hnc_potentials.YukawaShortRangeRepulsion</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../models.html#electron-electron-potential">electron-electron Potential</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="jaxrts.hnc_potentials.CoulombPotential.html">jaxrts.hnc_potentials.CoulombPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.DebyeHueckelPotential.html">jaxrts.hnc_potentials.DebyeHueckelPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.DeutschPotential.html">jaxrts.hnc_potentials.DeutschPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.HNCPotential.html">jaxrts.hnc_potentials.HNCPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.KelbgPotential.html">jaxrts.hnc_potentials.KelbgPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.PauliClassicalMap.html">jaxrts.hnc_potentials.PauliClassicalMap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.PotentialSum.html">jaxrts.hnc_potentials.PotentialSum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.ScaledPotential.html">jaxrts.hnc_potentials.ScaledPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.SpinAveragedEEExchange.html">jaxrts.hnc_potentials.SpinAveragedEEExchange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.SpinSeparatedEEExchange.html">jaxrts.hnc_potentials.SpinSeparatedEEExchange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html">jaxrts.hnc_potentials.YukawaShortRangeRepulsion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../first_model.html">Creating your own model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implementation-details.html">Implementation details</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../usage.html">Usage</a></li>
+          <li class="breadcrumb-item"><a href="../models.html">Models implemented</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.hnc_potentials.CoulombPotential.html">jaxrts.hnc_potentials.CoulombPotential</a></li>
+      <li class="breadcrumb-item active">jaxrts.hnc_potentials.CoulombPotential.r_cut</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/jaxrts.hnc_potentials.CoulombPotential.r_cut.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jaxrts-hnc-potentials-coulombpotential-r-cut">
+<h1>jaxrts.hnc_potentials.CoulombPotential.r_cut<a class="headerlink" href="#jaxrts-hnc-potentials-coulombpotential-r-cut" title="Link to this heading"></a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="jaxrts.hnc_potentials.CoulombPotential.r_cut">
+<span class="sig-prename descclassname"><span class="pre">CoulombPotential.</span></span><span class="sig-name descname"><span class="pre">r_cut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plasma_state</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Quantity</span></span></span><a class="headerlink" href="#jaxrts.hnc_potentials.CoulombPotential.r_cut" title="Link to this definition"></a></dt>
+<dd><p>This casts <code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.PlasmaState.ion_core_radius</span></code> in the form
+required to be used with an :py:class:~.HNCPotential`. However, this
+quantity is only relevant if we consider electron-ion interactions.
+Hence, the returned array will be 0 for all ion-ion pairs and the
+electron-electron pair(s).</p>
+</dd></dl>
+
+<span class="target" id="sphx-glr-backref-jaxrts-hnc-potentials-coulombpotential-r-cut"></span></section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jaxrts.hnc_potentials.CoulombPotential.q2.html" class="btn btn-neutral float-left" title="jaxrts.hnc_potentials.CoulombPotential.q2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.hnc_potentials.CoulombPotential.short_k.html" class="btn btn-neutral float-right" title="jaxrts.hnc_potentials.CoulombPotential.short_k" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

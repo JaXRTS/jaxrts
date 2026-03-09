@@ -1,0 +1,40 @@
+jaxrts.models.ArkhipovIonFeat
+=============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: ArkhipovIonFeat
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~ArkhipovIonFeat.Rayleigh_weight
+      ~ArkhipovIonFeat.S_ii
+      ~ArkhipovIonFeat.__init__
+      ~ArkhipovIonFeat.check
+      ~ArkhipovIonFeat.citation
+      ~ArkhipovIonFeat.evaluate
+      ~ArkhipovIonFeat.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~ArkhipovIonFeat.allowed_keys
+      ~ArkhipovIonFeat.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.ArkhipovIonFeat:
+
+   .. minigallery:: jaxrts.models.ArkhipovIonFeat
+       :add-heading:

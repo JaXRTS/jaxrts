@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.ee_localfieldcorrections &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.ee_localfieldcorrections</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.ee_localfieldcorrections</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This submodule is dedicated to the calculation of static and dynamic local</span>
+<span class="sd">field corrections. structure.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jpu</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnpu</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">quadax</span><span class="w"> </span><span class="kn">import</span> <span class="n">quadts</span> <span class="k">as</span> <span class="n">quad</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.ee_localfieldcorrections_dornheim_2021</span><span class="w"> </span><span class="kn">import</span> <span class="n">G_analytical</span> <span class="k">as</span> <span class="n">dornheim_G</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plasma_physics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">coupling_param</span><span class="p">,</span>
+    <span class="n">fermi_energy</span><span class="p">,</span>
+    <span class="n">fermi_wavenumber</span><span class="p">,</span>
+    <span class="n">interparticle_spacing</span><span class="p">,</span>
+    <span class="n">wiegner_seitz_radius</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="xi_lfc_corrected">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.xi_lfc_corrected.html#jaxrts.ee_localfieldcorrections.xi_lfc_corrected">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">xi_lfc_corrected</span><span class="p">(</span>
+    <span class="n">xi</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">lfc</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function corrects the susceptibility according to the local field</span>
+<span class="sd">    correction formalism.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">xi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">v</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">lfc</span><span class="p">)</span> <span class="o">*</span> <span class="n">xi</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Static local-field corrections</span>
+<span class="c1"># ===============================================</span>
+<span class="c1">#</span>
+
+
+<div class="viewcode-block" id="eelfc_hubbard">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_hubbard.html#jaxrts.ee_localfieldcorrections.eelfc_hubbard">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">eelfc_hubbard</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Static local field correction introduced and based on :cite:`Hubbard.1957`.</span>
+
+<span class="sd">    ..math::</span>
+
+<span class="sd">      G(k) = \\frac{1}{2}\\frac{k^2}{k^2 + k_F^2}</span>
+
+<span class="sd">    While improving on RPA results for degenerate systems, neither long- nor</span>
+<span class="sd">    short wavelength limits are correct.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">k_F</span> <span class="o">=</span> <span class="n">fermi_wavenumber</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_F</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="eelfc_geldartvosko">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_geldartvosko.html#jaxrts.ee_localfieldcorrections.eelfc_geldartvosko">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">eelfc_geldartvosko</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Static local field correction introduced and based on :cite:`Geldart.1966`.</span>
+<span class="sd">    Yields reasonable results at high temperatures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">k_F</span> <span class="o">=</span> <span class="n">fermi_wavenumber</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
+    <span class="n">T_F</span> <span class="o">=</span> <span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span>
+    <span class="c1"># Effective temperature (Gregori)</span>
+    <span class="n">T_q</span> <span class="o">=</span> <span class="n">T_F</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="mf">1.3251</span>
+        <span class="o">-</span> <span class="mf">0.1779</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">interparticle_spacing</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">T_ee</span> <span class="o">=</span> <span class="p">(</span><span class="n">T_e</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">T_q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">Gamma_ee</span> <span class="o">=</span> <span class="n">coupling_param</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">T_ee</span><span class="p">)</span>
+
+    <span class="n">gamma_T</span> <span class="o">=</span> <span class="p">(</span><span class="mf">12.0</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mf">0.0999305</span>
+        <span class="o">+</span> <span class="mf">0.0187058</span> <span class="o">/</span> <span class="n">Gamma_ee</span>
+        <span class="o">+</span> <span class="p">(</span><span class="mf">0.0013240</span> <span class="o">/</span> <span class="n">Gamma_ee</span> <span class="o">**</span> <span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="o">-</span> <span class="mf">0.0479236</span> <span class="o">/</span> <span class="p">(</span><span class="n">Gamma_ee</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Fitting formula for H_0, see &#39;Gregori &amp; Ravasio et al:2007&#39;</span>
+    <span class="n">C_sc</span> <span class="o">=</span> <span class="mf">1.0754</span>
+    <span class="n">H_0</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_sc</span> <span class="o">*</span> <span class="n">Gamma_ee</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">C_sc</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">Gamma_ee</span><span class="o">**</span><span class="mi">4</span>
+    <span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="n">xi</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span>
+            <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="o">*</span> <span class="mi">1</span>
+            <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span>
+            <span class="o">*</span> <span class="n">T_ee</span>
+            <span class="o">*</span> <span class="mi">1</span>
+            <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="o">**</span><span class="mi">2</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+
+    <span class="n">prefactor</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">integrand</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">u</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">xi</span> <span class="o">*</span> <span class="n">u</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">u</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="n">g_bin_0</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">prefactor</span>
+        <span class="o">*</span> <span class="n">quad</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span> <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-16</span><span class="p">,</span> <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-16</span><span class="p">)[</span>
+            <span class="mi">0</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">gT_ee_0</span> <span class="o">=</span> <span class="n">g_bin_0</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">H_0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">gamma_T</span> <span class="o">*</span> <span class="n">k_F</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">gT_ee_0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="eelfc_utsumiichimaru">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru.html#jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">eelfc_utsumiichimaru</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Static local field correction introduced and based on</span>
+<span class="sd">    :cite:`UtsumiIchimaru.1982`. This is a result for zero temperature.</span>
+<span class="sd">    The argument `T_e` is only included to have signatures comparable with</span>
+<span class="sd">    other static LFC models.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rs</span> <span class="o">=</span> <span class="n">interparticle_spacing</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span><span class="p">)</span>
+
+    <span class="c1"># Expression of g0_ee (T = 0) by Yasuhara</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="p">(</span><span class="mi">9</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rs</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">g0_ee</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">jax</span><span class="o">.</span><span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">i1</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)))</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="n">rs2dEc_drs</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0621814</span> <span class="o">+</span> <span class="mf">0.61024</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">+</span> <span class="mf">9.81379</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">2.82224</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">+</span> <span class="mf">0.736411</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">rs3d2Ec_d2rs</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mf">8.23505</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mf">2.486</span> <span class="o">*</span> <span class="n">rs</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">-</span> <span class="mf">23.0573</span> <span class="o">*</span> <span class="n">rs</span>
+        <span class="o">-</span> <span class="mf">4.50109</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mf">0.229324</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">3.83243</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">+</span> <span class="mf">13.3265</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.35794</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="n">gamma_0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="p">(</span><span class="mi">9</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">24</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">rs3d2Ec_d2rs</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rs2dEc_drs</span>
+    <span class="p">)</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="mf">0.029</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="mi">9</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">gamma_0</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">64</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">g0_ee</span><span class="p">)</span> <span class="o">-</span> <span class="mi">16</span> <span class="o">/</span> <span class="mi">15</span> <span class="o">*</span> <span class="n">A</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="o">-</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">gamma_0</span> <span class="o">+</span> <span class="mi">9</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">g0_ee</span><span class="p">)</span> <span class="o">-</span> <span class="mi">16</span> <span class="o">/</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">A</span>
+
+    <span class="n">k_F</span> <span class="o">=</span> <span class="n">fermi_wavenumber</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">k_F</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">A</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">4</span>
+        <span class="o">+</span> <span class="n">B</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">A</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="n">B</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">A</span><span class="p">)</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">C</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">((</span><span class="mi">4</span> <span class="o">-</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">Q</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Q</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">Q</span><span class="p">)))</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="eelfc_farid">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_farid.html#jaxrts.ee_localfieldcorrections.eelfc_farid">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">eelfc_farid</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Improved version of Utsumi and Ichimaru (:py:func:`~.eelfc_utsumiichimaru`,</span>
+<span class="sd">    based on QMC results (:cite:`Farid.1993`). This is a result for zero</span>
+<span class="sd">    temperature. The argument `T_e` is only included to have signatures</span>
+<span class="sd">    comparable with other static LFC models.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rs</span> <span class="o">=</span> <span class="p">(</span><span class="n">interparticle_spacing</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span><span class="p">))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+        <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
+    <span class="p">)</span>
+
+    <span class="n">lamb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="p">(</span><span class="mi">9</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">k_F</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">lamb</span> <span class="o">*</span> <span class="n">rs</span><span class="p">)</span>
+    <span class="n">E_F</span> <span class="o">=</span> <span class="n">k_F</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">w_p</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="n">rs</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># w_p = plasma_frequency(n_e)</span>
+    <span class="c1"># E_F = fermi_energy(n_e)</span>
+    <span class="c1"># k_F = fermi_wavenumber(n_e)</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">fermi_wavenumber</span><span class="p">(</span><span class="n">n_e</span><span class="p">))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+
+    <span class="n">rs2dEc_drs</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0621814</span> <span class="o">+</span> <span class="mf">0.61024</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">+</span> <span class="mf">9.81379</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">2.82224</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">+</span> <span class="mf">0.736411</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">rs3d2Ec_d2rs</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mf">8.23505</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mf">2.486</span> <span class="o">*</span> <span class="n">rs</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">-</span> <span class="mf">23.0573</span> <span class="o">*</span> <span class="n">rs</span>
+        <span class="o">-</span> <span class="mf">4.50109</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mf">0.229324</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">3.83243</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">+</span> <span class="mf">13.3265</span> <span class="o">*</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.35794</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="n">gamma_0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="p">(</span><span class="mi">9</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">24</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">rs3d2Ec_d2rs</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rs2dEc_drs</span>
+    <span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">rs</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">delta_2</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mf">2.2963827e-3</span> <span class="o">*</span> <span class="n">x</span>
+        <span class="o">+</span> <span class="mf">5.6991691e-2</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">+</span> <span class="o">-</span><span class="mf">0.8533622</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span>
+        <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">8.7736539</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span>
+        <span class="o">+</span> <span class="mf">0.7881997</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">5</span>
+        <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.2707788e-2</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">x</span><span class="o">**</span><span class="mi">4</span>
+        <span class="o">+</span> <span class="o">-</span><span class="mf">79.9684540</span>
+        <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">140.5268938</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span>
+        <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">35.2575566</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">10.6331769</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span>
+    <span class="p">)</span>
+
+    <span class="n">delta_4</span> <span class="o">=</span> <span class="n">delta_2</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="p">(</span>
+            <span class="mf">23.0118890</span>
+            <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">64.8378723</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span>
+            <span class="o">+</span> <span class="mf">63.5105927</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+            <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">13.9457829</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span>
+            <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">12.6252782</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span>
+            <span class="o">+</span> <span class="mf">13.8524989</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">5</span>
+            <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">5.2740937</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">6</span>
+            <span class="o">+</span> <span class="mf">1.0156885</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">7</span>
+            <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.1039532e-2</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">8</span>
+        <span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span>
+            <span class="n">x</span><span class="o">**</span><span class="mi">6</span>
+            <span class="o">+</span> <span class="mf">9.5753544</span>
+            <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">32.9770151</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span>
+            <span class="o">+</span> <span class="mf">48.2528870</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+            <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">38.7189788</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span>
+            <span class="o">+</span> <span class="mf">20.5595956</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span>
+            <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">6.3066750</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">5</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mf">0.029</span>
+
+    <span class="c1"># Expression of g0_ee (T = 0) by Yasuhara</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="p">(</span><span class="mi">9</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rs</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">g0_ee</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">jax</span><span class="o">.</span><span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">i1</span><span class="p">(</span><span class="n">z</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="n">b0A</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">g0_ee</span><span class="p">)</span>
+    <span class="n">b0B</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">E_F</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">35</span> <span class="o">*</span> <span class="n">w_p</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">delta_4</span>
+    <span class="n">b0C</span> <span class="o">=</span> <span class="o">-</span><span class="mi">16</span> <span class="o">/</span> <span class="mi">25</span> <span class="o">*</span> <span class="p">(</span><span class="n">E_F</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">w_p</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">delta_2</span> <span class="o">+</span> <span class="n">delta_2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">bm2</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">E_F</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">w_p</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">delta_2</span>
+    <span class="n">b0</span> <span class="o">=</span> <span class="n">b0A</span> <span class="o">+</span> <span class="n">b0B</span> <span class="o">+</span> <span class="n">b0C</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="mi">63</span> <span class="o">/</span> <span class="mi">64</span> <span class="o">*</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">15</span> <span class="o">/</span> <span class="mi">4096</span> <span class="o">*</span> <span class="p">(</span><span class="n">b0A</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">b0B</span> <span class="o">+</span> <span class="n">b0C</span><span class="p">)</span> <span class="o">-</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">bm2</span><span class="p">)</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="mi">9</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">gamma_0</span> <span class="o">+</span> <span class="mi">7</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">bm2</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">64</span> <span class="o">*</span> <span class="n">b0</span> <span class="o">-</span> <span class="mi">16</span> <span class="o">/</span> <span class="mi">15</span> <span class="o">*</span> <span class="n">A</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="o">-</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">gamma_0</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">bm2</span> <span class="o">+</span> <span class="mi">9</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">b0</span> <span class="o">-</span> <span class="mi">16</span> <span class="o">/</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">A</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mi">9</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">gamma_0</span> <span class="o">-</span> <span class="mi">9</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">bm2</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">64</span> <span class="o">*</span> <span class="n">b0</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">/</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">A</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">A</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">4</span>
+        <span class="o">+</span> <span class="n">B</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">A</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="n">D</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">C</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">Q</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Q</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">Q</span><span class="p">)))</span>
+    <span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span></div>
+
+
+
+<div class="viewcode-block" id="eelfc_interp_gregori2007">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007.html#jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">eelfc_interp_gregori2007</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpolation function between the UtsumiIchimaru result</span>
+<span class="sd">    :py:func:`~.eelfc_utsumiichimaru` (zero T) for the local field correction</span>
+<span class="sd">    and the GeldartVosko result :py:func:`eelfc_geldartvosko` (high T).</span>
+<span class="sd">    :cite:`Gregori.2007`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">T_e</span> <span class="o">/</span> <span class="p">(</span><span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+        <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">eelfc_utsumiichimaru</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">Theta</span> <span class="o">*</span> <span class="n">eelfc_geldartvosko</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Theta</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="eelfc_interp_fortmann2010">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010.html#jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">eelfc_interp_fortmann2010</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpolation function between the Farid result :py:func:`~.eelfc_farid`</span>
+<span class="sd">    (zero T) for the local field correction and the GeldartVosko result</span>
+<span class="sd">    :py:func:`eelfc_geldartvosko` (high T). :cite:`Fortmann.2010`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">T_e</span> <span class="o">/</span> <span class="p">(</span><span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+        <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">eelfc_farid</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">+</span> <span class="n">Theta</span> <span class="o">*</span> <span class="n">eelfc_geldartvosko</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Theta</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="eelfc_dornheim2021">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_dornheim2021.html#jaxrts.ee_localfieldcorrections.eelfc_dornheim2021">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">eelfc_dornheim2021</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Use the analytical interpolation of the effective static approximation for</span>
+<span class="sd">    the LFC given by :cite:`Dornheim.2021`. Interpolating path-integral Monte</span>
+<span class="sd">    Carlo simulations while preserving correct limits.</span>
+
+<span class="sd">    Valid for 0.7 &lt;= r_s &lt;= 20, and theta &lt;=4.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">T_e</span> <span class="o">/</span> <span class="p">(</span><span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+        <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
+    <span class="p">)</span>
+    <span class="n">k_over_k_f</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">fermi_wavenumber</span><span class="p">(</span><span class="n">n_e</span><span class="p">))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+    <span class="n">rs</span> <span class="o">=</span> <span class="p">(</span><span class="n">wiegner_seitz_radius</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span><span class="p">))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dornheim_G</span><span class="p">(</span><span class="n">k_over_k_f</span><span class="p">,</span> <span class="n">rs</span><span class="p">,</span> <span class="n">Theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

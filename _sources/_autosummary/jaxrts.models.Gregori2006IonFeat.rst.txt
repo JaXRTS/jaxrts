@@ -1,0 +1,40 @@
+jaxrts.models.Gregori2006IonFeat
+================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: Gregori2006IonFeat
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Gregori2006IonFeat.Rayleigh_weight
+      ~Gregori2006IonFeat.S_ii
+      ~Gregori2006IonFeat.__init__
+      ~Gregori2006IonFeat.check
+      ~Gregori2006IonFeat.citation
+      ~Gregori2006IonFeat.evaluate
+      ~Gregori2006IonFeat.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Gregori2006IonFeat.allowed_keys
+      ~Gregori2006IonFeat.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.Gregori2006IonFeat:
+
+   .. minigallery:: jaxrts.models.Gregori2006IonFeat
+       :add-heading:

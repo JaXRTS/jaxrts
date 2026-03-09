@@ -1,0 +1,41 @@
+jaxrts.models.ScatteringModel
+=============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: ScatteringModel
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~ScatteringModel.__init__
+      ~ScatteringModel.check
+      ~ScatteringModel.citation
+      ~ScatteringModel.evaluate
+      ~ScatteringModel.evaluate_raw
+      ~ScatteringModel.prepare
+      ~ScatteringModel.sample_grid
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~ScatteringModel.allowed_keys
+      ~ScatteringModel.cite_keys
+      ~ScatteringModel.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.ScatteringModel:
+
+   .. minigallery:: jaxrts.models.ScatteringModel
+       :add-heading:

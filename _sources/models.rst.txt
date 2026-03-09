@@ -1,0 +1,333 @@
+Models implemented
+==================
+
+        This page shows an automatically generated overview over all models
+        defined in :py:mod:`jaxrts.models` and :py:mod:`jaxrts.hnc_potentials`.
+        The latter module contains only the potentials relevant for calculating
+        the elastic scattering in the Hypernetted Chain approach.
+
+
+        The following keys are available to add to
+        :py:class:`jaxrts.plasmastate.PlasmaState`:
+
+        ``screening length``, ``ionic scattering``, ``BM S_ii``, ``Debye temperature``, ``free-free scattering``, ``chemical potential``, ``ipd``, ``screening``, ``BM V_eiS``, ``free-bound scattering``, ``ee-lfc``, ``form-factors``, ``bound-free scattering``, ``ion-ion Potential``, ``electron-ion Potential``, ``electron-electron Potential``
+
+        To set a specific model, add it to a
+        :py:class:`jaxrts.plasmastate.PlasmaState`,
+        e.g.,
+
+        >>> state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
+
+
+        For more details on an individual model, we refer to the literature,
+        provided in the :py:attr:`jaxrts.models.Model.cite_keys` attribute.
+        You can easily obtain the bibliographic information by using the
+        :py:meth:`jaxrts.models.Model.citation` method, e.g., calling
+
+        >>> import jaxrts
+        >>> print(jaxrts.models.RPA_DandreaFit().citation()
+        R. G. Dandrea, N. W. Ashcroft, and A. E. Carlsson. Electron liquid at
+        any degeneracy. Physical Review B, 34:2097–2111, 8 1986.
+        doi:10.1103/physrevb.34.2097.
+
+        
+
+screening length
+----------------
+
+The screening length characterizes the spatial scale over which electric fields are screened by the surrounding electrons.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.ArbitraryDegeneracyScreeningLength
+    jaxrts.models.ConstantScreeningLength
+    jaxrts.models.DebyeHueckelScreeningLength
+    jaxrts.models.Gericke2010ScreeningLength
+
+
+ionic scattering
+----------------
+
+The ionic (elastic) scattering component, :math:`S_{ee}^{\text{el}}(k, \omega)`, represents the coherent scattering of photons from electrons that are tightly bound to ions and follow their motion, and from the screening cloud. This term reflects the static ion–ion correlations in the system and typically gives rise to a sharp elastic peak centered at :math:`\omega = 0`.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.ArkhipovIonFeat
+    jaxrts.models.CHSIonFeat
+    jaxrts.models.DebyeWallerSolid
+    jaxrts.models.FixedSii
+    jaxrts.models.Gregori2003IonFeat
+    jaxrts.models.Gregori2006IonFeat
+    jaxrts.models.Neglect
+    jaxrts.models.OnePotentialHNCIonFeat
+    jaxrts.models.PeakCollection
+    jaxrts.models.ThreePotentialHNCIonFeat
+
+
+BM S_ii
+-------
+
+When calculating the the Born collision frequencies in :py:class:`jaxrts.models.BornMermin` and derived free-free scattering models, one needs a notion of the static ionic structure factor. For a single species, :py:class:`jaxrts.models.Sum_Sii` is identical to the model used for the ``ionic scattering`` key. However, it is not clear if the sum calculated there also holds true for a multi-species plasma, where we would run an HNC calculation, which cannot be directly used. In this case, :py:class:`jaxrts.models.AverageAtom_Sii` might be a reasonable alternative, as it calculates S_ii in an HNC step for an average atom.
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.AverageAtom_Sii
+    jaxrts.models.Sum_Sii
+
+
+Debye temperature
+-----------------
+
+The Debye temperature defines the characteristic temperature below which the vibrational modes of a solid begin to freeze out, marking the transition from classical to quantum behavior in lattice vibrations.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.BohmStaver
+    jaxrts.models.ConstantDebyeTemp
+
+
+free-free scattering
+--------------------
+
+The free–free scattering component, :math:`S_{ee}^{\text{ff}}(k, \omega)`, describes inelastic scattering from unbound (free) electrons. In the **RPA** (Random Phase Approximation), electrons are treated as a weakly coupled gas with collective screening effects, while the **Born–Mermin** approach extends this by including electron–ion collisions and finite damping, providing a more accurate description in partially or strongly coupled plasmas.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.BornMermin
+    jaxrts.models.BornMermin_Fit
+    jaxrts.models.BornMermin_Fortmann
+    jaxrts.models.BornMermin_Full
+    jaxrts.models.Neglect
+    jaxrts.models.QCSalpeterApproximation
+    jaxrts.models.RPA
+    jaxrts.models.RPA_DandreaFit
+
+
+chemical potential
+------------------
+
+The chemical potential is the energy required to add one particle to a system at constant temperature and volume.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.ConstantChemPotential
+    jaxrts.models.DegenerateElectronChemPotential
+    jaxrts.models.IchimaruChemPotential
+    jaxrts.models.NonDegenerateElectronChemPotential
+    jaxrts.models.SommerfeldChemPotential
+
+
+ipd
+---
+
+**Ionization Potential Depression** (IPD) refers to the lowering of an atom’s or ion’s ionization energy due to the presence of surrounding plasma, which modifies the effective potential experienced by bound electrons and can lead to phenomena like pressure ionization.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.ConstantIPD
+    jaxrts.models.DebyeHueckelIPD
+    jaxrts.models.EckerKroellIPD
+    jaxrts.models.IonSphereIPD
+    jaxrts.models.Neglect
+    jaxrts.models.PauliBlockingIPD
+    jaxrts.models.StewartPyattIPD
+    jaxrts.models.StewartPyattPrestonIPD
+
+
+screening
+---------
+
+Screening refers to the reduction of the effective interaction between charged particles due to the redistribution of surrounding charges.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.DebyeHueckelScreening
+    jaxrts.models.FiniteWavelengthScreening
+    jaxrts.models.Gregori2004Screening
+    jaxrts.models.GregoriCHSScreening
+    jaxrts.models.LinearResponseScreening
+    jaxrts.models.LinearResponseScreeningGericke2010
+
+
+BM V_eiS
+--------
+
+These models implement potentials which can be when calculating the Born collision frequencies in :py:class:`jaxrts.models.BornMermin` and derived free-free scattering models.
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.DebyeHueckel_BM_V
+    jaxrts.models.FiniteWavelength_BM_V
+
+
+free-bound scattering
+---------------------
+
+The free–bound scattering component, :math:`S_{ee}^{\text{fb}}(k, \omega)`, represents inelastic scattering events in which a free electron recombines into a bound state, emitting a photon. In thermodynamic equilibrium and for :math:`k \ll k_0`, its spectral shape is directly related to the bound free component, :math:`S_{ee}^{\text{bf}}(k, \omega)`, through the principle of detailed balance :cite:`Bohme.2023`.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.DetailedBalance
+    jaxrts.models.Neglect
+
+
+ee-lfc
+------
+
+The electron–electron local field correction (LFC) modifies the electron response to account for short-range correlations and exchange effects beyond the mean-field approximation.
+
+Local field corrections :math:`G` describe exchange correlation effects. The
+full linear susceptibility can be written as
+
+.. math::
+
+    \chi_\text{ee} =
+    \frac{\chi_\text{ee}^\text{0}}{1 - V_{\text{ee}}
+    (1 - G) \chi_\text{ee}^\text{0}}\quad
+
+
+where :math:`V_{\text{ee}}` is the Coulomb potential between two electrons and :math:`\chi_\text{ee}^\text{0}` is Lindhard's function. While this is formally correct, :math:`G` is practically often unknown and has to be approximated.
+
+Currently, only static and effective static approximations of the local field corrections are treated in `jaxrts`.
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.ESLFCDornheim2021
+    jaxrts.models.LFCConstant
+    jaxrts.models.SLFCFarid1993
+    jaxrts.models.SLFCGeldart1966
+    jaxrts.models.SLFCInterpFortmann2010
+    jaxrts.models.SLFCInterpGregori2007
+    jaxrts.models.SLFCUtsumi1982
+
+
+form-factors
+------------
+
+Form factors describe how the spatial distribution of charge within an atom or ion affects scattering, modulating the scattering intensity as a function of momentum transfer :math:`k`.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.FormFactorLowering
+    jaxrts.models.PaulingFormFactors
+
+
+bound-free scattering
+---------------------
+
+The bound–free scattering component, :math:`S_{ee}^{\text{bf}}(k, \omega)` , arises from inelastic scattering events in which a photon ejects an electron from a bound state into the continuum.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.Neglect
+    jaxrts.models.SchumacherImpulse
+    jaxrts.models.SchumacherImpulseColdEdges
+    jaxrts.models.SchumacherImpulseFitRk
+
+
+ion-ion Potential
+-----------------
+
+The potential modelling the interaction between two ions.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.hnc_potentials.CoulombPotential
+    jaxrts.hnc_potentials.DebyeHueckelPotential
+    jaxrts.hnc_potentials.DeutschPotential
+    jaxrts.hnc_potentials.HNCPotential
+    jaxrts.hnc_potentials.KelbgPotential
+    jaxrts.hnc_potentials.PauliClassicalMap
+    jaxrts.hnc_potentials.PotentialSum
+    jaxrts.hnc_potentials.ScaledPotential
+    jaxrts.hnc_potentials.SpinAveragedEEExchange
+    jaxrts.hnc_potentials.SpinSeparatedEEExchange
+    jaxrts.hnc_potentials.YukawaShortRangeRepulsion
+
+
+electron-ion Potential
+----------------------
+
+The potential modelling the interaction between electrons and ions.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.hnc_potentials.CoulombPotential
+    jaxrts.hnc_potentials.DebyeHueckelPotential
+    jaxrts.hnc_potentials.DeutschPotential
+    jaxrts.hnc_potentials.EmptyCorePotential
+    jaxrts.hnc_potentials.HNCPotential
+    jaxrts.hnc_potentials.KelbgPotential
+    jaxrts.hnc_potentials.KlimontovichKraeftPotential
+    jaxrts.hnc_potentials.PauliClassicalMap
+    jaxrts.hnc_potentials.PotentialSum
+    jaxrts.hnc_potentials.ScaledPotential
+    jaxrts.hnc_potentials.SoftCorePotential
+    jaxrts.hnc_potentials.SpinAveragedEEExchange
+    jaxrts.hnc_potentials.SpinSeparatedEEExchange
+    jaxrts.hnc_potentials.YukawaShortRangeRepulsion
+
+
+electron-electron Potential
+---------------------------
+
+The potential modelling the interaction between two electrons.
+
+
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.hnc_potentials.CoulombPotential
+    jaxrts.hnc_potentials.DebyeHueckelPotential
+    jaxrts.hnc_potentials.DeutschPotential
+    jaxrts.hnc_potentials.HNCPotential
+    jaxrts.hnc_potentials.KelbgPotential
+    jaxrts.hnc_potentials.PauliClassicalMap
+    jaxrts.hnc_potentials.PotentialSum
+    jaxrts.hnc_potentials.ScaledPotential
+    jaxrts.hnc_potentials.SpinAveragedEEExchange
+    jaxrts.hnc_potentials.SpinSeparatedEEExchange
+    jaxrts.hnc_potentials.YukawaShortRangeRepulsion

@@ -1,0 +1,39 @@
+jaxrts.models.LFCConstant
+=========================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: LFCConstant
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~LFCConstant.__init__
+      ~LFCConstant.check
+      ~LFCConstant.citation
+      ~LFCConstant.evaluate
+      ~LFCConstant.evaluate_fullk
+      ~LFCConstant.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~LFCConstant.allowed_keys
+      ~LFCConstant.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.LFCConstant:
+
+   .. minigallery:: jaxrts.models.LFCConstant
+       :add-heading:

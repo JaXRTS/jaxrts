@@ -1,0 +1,58 @@
+jaxrts.plasmastate.PlasmaState
+==============================
+
+.. currentmodule:: jaxrts.plasmastate
+
+.. autoclass:: PlasmaState
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~PlasmaState.__init__
+      ~PlasmaState.citation
+      ~PlasmaState.db_wavelength
+      ~PlasmaState.evaluate
+      ~PlasmaState.expand_integer_ionization_states
+      ~PlasmaState.keys
+      ~PlasmaState.probe
+      ~PlasmaState.update_default_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~PlasmaState.T_F
+      ~PlasmaState.Teff_e
+      ~PlasmaState.Z_A
+      ~PlasmaState.Z_core
+      ~PlasmaState.atomic_masses
+      ~PlasmaState.degeneracy_param
+      ~PlasmaState.ee_coupling
+      ~PlasmaState.ion_core_radius
+      ~PlasmaState.mean_Z_A
+      ~PlasmaState.n_e
+      ~PlasmaState.n_i
+      ~PlasmaState.nions
+      ~PlasmaState.number_fraction
+      ~PlasmaState.screening_length
+      ~PlasmaState.ions
+      ~PlasmaState.Z_free
+      ~PlasmaState.mass_density
+      ~PlasmaState.T_e
+      ~PlasmaState.T_i
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.plasmastate.PlasmaState:
+
+   .. minigallery:: jaxrts.plasmastate.PlasmaState
+       :add-heading:

@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.static_structure_factors &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.static_structure_factors</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.static_structure_factors</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module handeling the calculation of static structure factors. Note that this</span>
+<span class="sd">file does not include the implementation of the hypernetted chain scheme, which</span>
+<span class="sd">can be found in :py:mod:`jaxrts.hypernetted_chain`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jpu</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnpu</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">quadax</span><span class="w"> </span><span class="kn">import</span> <span class="n">quadts</span> <span class="k">as</span> <span class="n">quad</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plasma_physics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">coulomb_potential_fourier</span><span class="p">,</span>
+    <span class="n">fermi_energy</span><span class="p">,</span>
+    <span class="n">wiegner_seitz_radius</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">bisection</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+
+<span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;__name__&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="T_cf_Greg">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.T_cf_Greg.html#jaxrts.static_structure_factors.T_cf_Greg">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">T_cf_Greg</span><span class="p">(</span><span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    T_cf_Greg(T_e: Quantity, n_e: Quantity) -&gt; Quantity</span>
+
+<span class="sd">    The effective temperature to be inserted in the approach by Arkhipov and</span>
+<span class="sd">    Davletov, see :cite:`Arkhipov.1998` according to :cite:`Gregori.2003`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># The Fermi temperature</span>
+    <span class="n">T_f</span> <span class="o">=</span> <span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span>
+    <span class="n">dimless_rs</span> <span class="o">=</span> <span class="n">wiegner_seitz_radius</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a_0</span>
+    <span class="n">T_q</span> <span class="o">=</span> <span class="n">T_f</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.3251</span> <span class="o">-</span> <span class="mf">0.1779</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dimless_rs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T_e</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">T_q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="T_i_eff_Greg">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.T_i_eff_Greg.html#jaxrts.static_structure_factors.T_i_eff_Greg">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">T_i_eff_Greg</span><span class="p">(</span><span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_D</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    T_i_eff_Greg(T_i: Quantity, T_D: Quantity) -&gt; Quantity</span>
+
+<span class="sd">    The effective ion temperature as it is proposed by :cite:`Gregori.2006`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T_i: Quantity</span>
+<span class="sd">        Ion temperature.</span>
+<span class="sd">    T_D: Quantity</span>
+<span class="sd">        The Debye temperature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y0</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T_i</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">T_D</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="T_Debye_Bohm_Staver">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.T_Debye_Bohm_Staver.html#jaxrts.static_structure_factors.T_Debye_Bohm_Staver">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">T_Debye_Bohm_Staver</span><span class="p">(</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bohm Staver relation, as presented in eqn (3) of :cite:`Gregori.2006`. An</span>
+<span class="sd">    approximation function for the Debye temperature of &#39;simple metals&#39;.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T_e: Quantity</span>
+<span class="sd">        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the</span>
+<span class="sd">        effective temperature used in :cite:`Gregori.2003`.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron density in 1/[volume].</span>
+<span class="sd">    m_i: Quantity</span>
+<span class="sd">        The mass of the ion.</span>
+<span class="sd">    Z_f: float</span>
+<span class="sd">        Number of free electrons per ion.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kmax</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_e</span> <span class="o">/</span> <span class="n">Z_f</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">k_De</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">Z_f</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">Omega</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">omega</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">kmax</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">Omega</span></div>
+
+
+
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_lambda_AD</span><span class="p">(</span><span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">m1</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">m2</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    _lambda_AD(T: Quantity, m1: Quantity, m2: Quantity) -&gt; Quantity</span>
+
+<span class="sd">    :cite:`Gregori.2003` states this as the thermal de Broglie Wavelength, but</span>
+<span class="sd">    this is not reproducing the known formula for ``m1 == m2``.</span>
+<span class="sd">    However, both :cite:`Arkhipov.1998` and :cite:`Gregori` use this notation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T: Quantity</span>
+<span class="sd">        Temperature</span>
+<span class="sd">    m1: Quantity</span>
+<span class="sd">        Mass of the first object particle of the pair.</span>
+<span class="sd">    m2: Quantity</span>
+<span class="sd">        Mass of the second object particle of the pair.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="p">(</span><span class="n">m1</span> <span class="o">*</span> <span class="n">m2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span><span class="p">)</span>
+    <span class="n">denumerator</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">mu</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T</span>
+
+    <span class="k">return</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">denumerator</span><span class="p">)</span>
+
+
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_k_D_AD</span><span class="p">(</span><span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    _k_D_AD(T: Quantity, n_e: Quantity, Z_f: float = 1.0) -&gt; Quantity</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">Z_f</span> <span class="o">*</span> <span class="n">n_e</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">denumerator</span> <span class="o">=</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T</span>
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numerator</span> <span class="o">/</span> <span class="n">denumerator</span><span class="p">)</span>
+
+
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_b_AD</span><span class="p">(</span><span class="n">lam_ee</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">lam_ee</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_A_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A helper function for the approach by Arkhipov and Davletov, see</span>
+<span class="sd">    :cite:`Arkhipov.1998` and :cite:`Gregori.2003`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span>
+        <span class="o">*</span> <span class="n">T_e</span>
+        <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">b</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span>
+        <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_Delta_AD</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">k_De</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">k_Di</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">lamee</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">lamii</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">lamei</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">b</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">A</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    See :cite:`Gregori.2003`, Eqn. (11) or :cite:`Arkhipov.2000` (Eqn 10, which</span>
+<span class="sd">    is this equation, divided by :math:`k^4`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">k</span><span class="o">**</span><span class="mi">4</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamee</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k_Di</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamii</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">*</span> <span class="n">k_Di</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="mf">1.0</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamee</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamii</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamei</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="o">+</span> <span class="n">A</span>
+        <span class="o">*</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">*</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span>
+        <span class="c1"># The original paper :cite:`Arkhipov.1998` differs in the following</span>
+        <span class="c1"># line. This has been rectified by the authors their paper from 2000.</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_Di</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamii</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_T_rs_Greg2006</span><span class="p">(</span>
+    <span class="n">T_r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_s</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">m_r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">m_s</span><span class="p">:</span> <span class="n">Quantity</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the effective temperature between an interacting pair of species</span>
+<span class="sd">    ``r`` and ``s`` (ions and / or electrons). See eqn 4 in</span>
+<span class="sd">    :cite:`Gregori.2006`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T_r: Quantity</span>
+<span class="sd">        Temperature of species ``r``</span>
+<span class="sd">    T_s: Quantity</span>
+<span class="sd">        Temperature of species ``s``</span>
+<span class="sd">    m_r: Quantity</span>
+<span class="sd">        Mass of species ``r``</span>
+<span class="sd">    m_s: Quantity</span>
+<span class="sd">        Mass of species ``s``</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The effective (mix) temperature. If both temperatures are identical,</span>
+<span class="sd">        than the result is this temperature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">m_s</span> <span class="o">*</span> <span class="n">T_r</span> <span class="o">+</span> <span class="n">m_r</span> <span class="o">*</span> <span class="n">T_s</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">m_r</span> <span class="o">+</span> <span class="n">m_s</span><span class="p">)</span>
+
+
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_Phi_ee_AD</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    See :cite:`Gregori.2003`, eqn (8) for the coefficient</span>
+<span class="sd">    :math:`\\Phi_ee(k)` in the approach by Arkhipov and Davletov</span>
+<span class="sd">    :cite:`Arkhipov.1998`.</span>
+
+<span class="sd">    While the seminal papers treated the electron- and ion temperature to be</span>
+<span class="sd">    equal, we follow the work of :cite:`Gregori.2006` to allow for different</span>
+<span class="sd">    temperatures of the two components. The results of :cite:`Arkhipov.1998`</span>
+<span class="sd">    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k: Quantity</span>
+<span class="sd">        The scattering vector length (units of 1/[length])</span>
+<span class="sd">    T_e: Quantity</span>
+<span class="sd">        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the</span>
+<span class="sd">        effective temperature used in :cite:`Gregori.2003`.</span>
+<span class="sd">    T_i: Quantity</span>
+<span class="sd">        The ion temperature in Kelvin.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron density in 1/[volume]</span>
+<span class="sd">    m_i: Quantity</span>
+<span class="sd">        The mass of the ion</span>
+<span class="sd">    Z_f: float</span>
+<span class="sd">        Number of free electrons per ion.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Set up all the variables</span>
+    <span class="n">T_ei</span> <span class="o">=</span> <span class="n">_T_rs_Greg2006</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="n">lam_ee</span> <span class="o">=</span> <span class="n">_lambda_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">)</span>
+    <span class="n">lam_ei</span> <span class="o">=</span> <span class="n">_lambda_AD</span><span class="p">(</span><span class="n">T_ei</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="n">lam_ii</span> <span class="o">=</span> <span class="n">_lambda_AD</span><span class="p">(</span><span class="n">T_i</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">_b_AD</span><span class="p">(</span><span class="n">lam_ee</span><span class="p">)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">_A_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">k_De</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">k_Di</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+    <span class="n">Delta</span> <span class="o">=</span> <span class="n">_Delta_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k_De</span><span class="p">,</span> <span class="n">k_Di</span><span class="p">,</span> <span class="n">lam_ee</span><span class="p">,</span> <span class="n">lam_ii</span><span class="p">,</span> <span class="n">lam_ei</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+
+    <span class="n">pref</span> <span class="o">=</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">vacuum_permittivity</span> <span class="o">*</span> <span class="n">Delta</span><span class="p">)</span>
+    <span class="n">sum1</span> <span class="o">=</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ee</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sum2</span> <span class="o">=</span> <span class="n">k_Di</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ee</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ii</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ei</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">sum3</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">A</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_Di</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ii</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">pref</span> <span class="o">*</span> <span class="p">(</span><span class="n">sum1</span> <span class="o">+</span> <span class="n">sum2</span> <span class="o">+</span> <span class="n">sum3</span><span class="p">))</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
+
+
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_Phi_ii_AD</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    See :cite:`Gregori.2003`, eqn (9) for the coefficient</span>
+<span class="sd">    :math:`\\Phi_ii(k)` in the approach by Arkhipov and Davletov</span>
+<span class="sd">    :cite:`Arkhipov.1998`.</span>
+
+<span class="sd">    While the seminal papers treated the electron- and ion temperature to be</span>
+<span class="sd">    equal, we follow the work of :cite:`Gregori.2006` to allow for different</span>
+<span class="sd">    temperatures of the two components. The results of :cite:`Arkhipov.1998`</span>
+<span class="sd">    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k: Quantity</span>
+<span class="sd">        The scattering vector length (units of 1/[length])</span>
+<span class="sd">    T_e: Quantity</span>
+<span class="sd">        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the</span>
+<span class="sd">        effective temperature used in :cite:`Gregori.2003`.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron density in 1/[volume]</span>
+<span class="sd">    m_i: Quantity</span>
+<span class="sd">        The mass of the ion</span>
+<span class="sd">    Z_f: float</span>
+<span class="sd">        Number of free electrons per ion.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Set up all the variables</span>
+    <span class="n">T_ei</span> <span class="o">=</span> <span class="n">_T_rs_Greg2006</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="n">lam_ee</span> <span class="o">=</span> <span class="n">_lambda_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">)</span>
+    <span class="n">lam_ei</span> <span class="o">=</span> <span class="n">_lambda_AD</span><span class="p">(</span><span class="n">T_ei</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="n">lam_ii</span> <span class="o">=</span> <span class="n">_lambda_AD</span><span class="p">(</span><span class="n">T_i</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">_b_AD</span><span class="p">(</span><span class="n">lam_ee</span><span class="p">)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">_A_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">k_De</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">k_Di</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+    <span class="n">Delta</span> <span class="o">=</span> <span class="n">_Delta_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k_De</span><span class="p">,</span> <span class="n">k_Di</span><span class="p">,</span> <span class="n">lam_ee</span><span class="p">,</span> <span class="n">lam_ii</span><span class="p">,</span> <span class="n">lam_ei</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+
+    <span class="n">pref</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Z_f</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">vacuum_permittivity</span> <span class="o">*</span> <span class="n">Delta</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">sum1</span> <span class="o">=</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ii</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sum2</span> <span class="o">=</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ee</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ii</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ei</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">sum3</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">A</span> <span class="o">*</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ii</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">pref</span> <span class="o">*</span> <span class="p">(</span><span class="n">sum1</span> <span class="o">+</span> <span class="n">sum2</span> <span class="o">+</span> <span class="n">sum3</span><span class="p">))</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
+
+
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_Phi_ei_AD</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    See :cite:`Gregori.2003`, eqn (10) for the coefficient</span>
+<span class="sd">    :math:`\\Phi_ee(k)` in the approach by Arkhipov and Davletov</span>
+<span class="sd">    :cite:`Arkhipov.1998`.</span>
+
+<span class="sd">    While the seminal papers treated the electron- and ion temperature to be</span>
+<span class="sd">    equal, we follow the work of :cite:`Gregori.2006` to allow for different</span>
+<span class="sd">    temperatures of the two components. The results of :cite:`Arkhipov.1998`</span>
+<span class="sd">    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k: Quantity</span>
+<span class="sd">        The scattering vector length (units of 1/[length])</span>
+<span class="sd">    T_e: Quantity</span>
+<span class="sd">        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the</span>
+<span class="sd">        effective temperature used in :cite:`Gregori.2003`.</span>
+<span class="sd">    T_i: Quantity</span>
+<span class="sd">        The ion temperature in Kelvin.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron density in 1/[volume]</span>
+<span class="sd">    m_i: Quantity</span>
+<span class="sd">        The mass of the ion</span>
+<span class="sd">    Z_f: float</span>
+<span class="sd">        Number of free electrons per ion.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Set up all the variables</span>
+    <span class="n">T_ei</span> <span class="o">=</span> <span class="n">_T_rs_Greg2006</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="n">lam_ee</span> <span class="o">=</span> <span class="n">_lambda_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">)</span>
+    <span class="n">lam_ei</span> <span class="o">=</span> <span class="n">_lambda_AD</span><span class="p">(</span><span class="n">T_ei</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="n">lam_ii</span> <span class="o">=</span> <span class="n">_lambda_AD</span><span class="p">(</span><span class="n">T_i</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">_b_AD</span><span class="p">(</span><span class="n">lam_ee</span><span class="p">)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">_A_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">k_De</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">k_Di</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+    <span class="n">Delta</span> <span class="o">=</span> <span class="n">_Delta_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k_De</span><span class="p">,</span> <span class="n">k_Di</span><span class="p">,</span> <span class="n">lam_ee</span><span class="p">,</span> <span class="n">lam_ii</span><span class="p">,</span> <span class="n">lam_ei</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="o">-</span><span class="p">(</span><span class="n">Z_f</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">Delta</span><span class="p">))</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lam_ei</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="S_ii_AD">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.S_ii_AD.html#jaxrts.static_structure_factors.S_ii_AD">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">S_ii_AD</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The static ion-ion structure factor, in the approach by Arkhipov</span>
+<span class="sd">    and Davletov :cite:`Arkhipov.1998`, as presented by :cite:`Gregori.2003` in</span>
+<span class="sd">    equation (7).</span>
+
+<span class="sd">    The method is using the Random Phase Approximation, treating the problem</span>
+<span class="sd">    semi-classically and uses a pseudopotential between charged particles to</span>
+<span class="sd">    account for quantum diffraction effects and symmetry.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k: Quantity</span>
+<span class="sd">        The scattering vector length (units of 1/[length])</span>
+<span class="sd">    T_e: Quantity</span>
+<span class="sd">        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the</span>
+<span class="sd">        effective temperature used in :cite:`Gregori.2003`.</span>
+<span class="sd">    T_i: Quantity</span>
+<span class="sd">        The ion temperature in Kelvin.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron density in 1/[volume]</span>
+<span class="sd">    m_i: Quantity</span>
+<span class="sd">        The mass of the ion</span>
+<span class="sd">    Z_f: float</span>
+<span class="sd">        Number of free electrons per ion.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        Sii, the static ion ion structure factor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_i</span> <span class="o">=</span> <span class="n">n_e</span> <span class="o">/</span> <span class="n">Z_f</span>
+    <span class="n">Phi_ii</span> <span class="o">=</span> <span class="n">_Phi_ii_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">n_i</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T_i</span><span class="p">)</span> <span class="o">*</span> <span class="n">Phi_ii</span><span class="p">)</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="S_ei_AD">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.S_ei_AD.html#jaxrts.static_structure_factors.S_ei_AD">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">S_ei_AD</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The static electron-ion structure factor, in the approach by Arkhipov</span>
+<span class="sd">    and Davletov :cite:`Arkhipov.1998`, as presented by :cite:`Gregori.2003` in</span>
+<span class="sd">    equation (7).</span>
+
+<span class="sd">    The method is using the Random Phase Approximation, treating the problem</span>
+<span class="sd">    semi-classically and uses a pseudopotential between charged particles to</span>
+<span class="sd">    account for quantum diffraction effects and symmetry</span>
+
+<span class="sd">    While the seminal papers treated the electron- and ion temperature to be</span>
+<span class="sd">    equal, we follow the work of :cite:`Gregori.2006` to allow for different</span>
+<span class="sd">    temperatures of the two components. The results of :cite:`Arkhipov.1998`</span>
+<span class="sd">    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k: Quantity</span>
+<span class="sd">        The scattering vector length (units of 1/[length])</span>
+<span class="sd">    T_e: Quantity</span>
+<span class="sd">        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the</span>
+<span class="sd">        effective temperature used in :cite:`Gregori.2003`.</span>
+<span class="sd">    T_i: Quantity</span>
+<span class="sd">        The ion temperature in Kelvin.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron density in 1/[volume]</span>
+<span class="sd">    m_i: Quantity</span>
+<span class="sd">        The mass of the ion</span>
+<span class="sd">    Z_f: float</span>
+<span class="sd">        Number of free electrons per ion.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        Sei, the static electron ion structure factor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">T_ei</span> <span class="o">=</span> <span class="n">_T_rs_Greg2006</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+    <span class="n">n_i</span> <span class="o">=</span> <span class="n">n_e</span> <span class="o">/</span> <span class="n">Z_f</span>
+    <span class="n">Phi_ei</span> <span class="o">=</span> <span class="n">_Phi_ei_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T_ei</span><span class="p">)</span> <span class="o">*</span> <span class="n">Phi_ei</span><span class="p">)</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="S_ee_AD">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.S_ee_AD.html#jaxrts.static_structure_factors.S_ee_AD">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">S_ee_AD</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The static electron-electron structure factor, in the approach by Arkhipov</span>
+<span class="sd">    and Davletov :cite:`Arkhipov.1998`, as presented by :cite:`Gregori.2003` in</span>
+<span class="sd">    equation (7).</span>
+
+<span class="sd">    The method is using the Random Phase Approximation, treating the problem</span>
+<span class="sd">    semi-classically and uses a pseudopotential between charged particles to</span>
+<span class="sd">    account for quantum diffraction effects and symmetry</span>
+
+<span class="sd">    While the seminal papers treated the electron- and ion temperature to be</span>
+<span class="sd">    equal, we follow the work of :cite:`Gregori.2006` to allow for different</span>
+<span class="sd">    temperatures of the two components. The results of :cite:`Arkhipov.1998`</span>
+<span class="sd">    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``</span>
+
+<span class="sd">    The function is amended compared to the earlier paper by a summand given in</span>
+<span class="sd">    :Gregori.2006`, which cite Seuferling at al. For both temperatures being</span>
+<span class="sd">    equal, this second term vanishes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k: Quantity</span>
+<span class="sd">        The scattering vector length (units of 1/[length])</span>
+<span class="sd">    T_e: Quantity</span>
+<span class="sd">        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the</span>
+<span class="sd">        effective temperature used in :cite:`Gregori.2003`.</span>
+<span class="sd">    T_i: Quantity</span>
+<span class="sd">        The ion temperature in Kelvin.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron density in 1/[volume]</span>
+<span class="sd">    m_i: Quantity</span>
+<span class="sd">        The mass of the ion</span>
+<span class="sd">    Z_f: float</span>
+<span class="sd">        Number of free electrons per ion.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        See, the static electron electron structure factor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Phi_ee</span> <span class="o">=</span> <span class="n">_Phi_ee_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+    <span class="n">S_ee_AD</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">n_e</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T_e</span><span class="p">)</span> <span class="o">*</span> <span class="n">Phi_ee</span><span class="p">)</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
+    <span class="c1"># This the addition by Gregori.2006:</span>
+    <span class="n">S_ei</span> <span class="o">=</span> <span class="n">S_ei_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+    <span class="n">S_ii</span> <span class="o">=</span> <span class="n">S_ii_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Z_f</span><span class="p">)</span> <span class="o">*</span> <span class="n">S_ei</span> <span class="o">/</span> <span class="n">S_ii</span>
+    <span class="n">S_ee_Greg_addition</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">T_e</span> <span class="o">/</span> <span class="n">T_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">Z_f</span> <span class="o">*</span> <span class="n">S_ii</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">S_ee_AD</span> <span class="o">-</span> <span class="n">S_ee_Greg_addition</span></div>
+
+
+
+<div class="viewcode-block" id="g_ee_ABD">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.g_ee_ABD.html#jaxrts.static_structure_factors.g_ee_ABD">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">g_ee_ABD</span><span class="p">(</span>
+    <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The radial electron-electron distribution function, in the approach by</span>
+<span class="sd">    Arkhipov, Baimbetov and Davletov :cite:`Arkhipov.2000` (Eqn. 17).</span>
+
+<span class="sd">    The method is using the Random Phase Approximation, treating the problem</span>
+<span class="sd">    semi-classically and uses a pseudopotential between charged particles to</span>
+<span class="sd">    account for quantum diffraction effects and symmetry.</span>
+
+<span class="sd">    While the seminal papers treated the electron- and ion temperature to be</span>
+<span class="sd">    equal, we follow the work of :cite:`Gregori.2006` to allow for different</span>
+<span class="sd">    temperatures of the two components. The results of :cite:`Arkhipov.1998`</span>
+<span class="sd">    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    r: Quantity</span>
+<span class="sd">        Distance in [length] units.</span>
+<span class="sd">    T_e: Quantity</span>
+<span class="sd">        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the</span>
+<span class="sd">        effective temperature used in :cite:`Gregori.2003`.</span>
+<span class="sd">    T_i: Quantity</span>
+<span class="sd">        The ion temperature in Kelvin.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron density in 1/[volume]</span>
+<span class="sd">    m_i: Quantity</span>
+<span class="sd">        The mass of the ion</span>
+<span class="sd">    Z_f: float</span>
+<span class="sd">        Number of free electrons per ion.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The radial electron-electron distribution function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_integrate</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span>
+        <span class="n">Phi_ee_k</span> <span class="o">=</span> <span class="n">_Phi_ee_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+        <span class="n">fac</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">r</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span> <span class="o">*</span> <span class="n">k</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Phi_ee_k</span> <span class="o">*</span> <span class="n">fac</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">joule</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">integ</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span>
+        <span class="n">to_integrate</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span> <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span> <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span>
+    <span class="p">)</span>
+
+    <span class="n">integ</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">joule</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+    <span class="n">integ</span> <span class="o">/=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
+
+    <span class="n">Phi_ee_r</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">r</span> <span class="o">*</span> <span class="n">integ</span>
+
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Phi_ee_r</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T_e</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="g_ii_ABD">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.g_ii_ABD.html#jaxrts.static_structure_factors.g_ii_ABD">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">g_ii_ABD</span><span class="p">(</span>
+    <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The radial ion-ion distribution function, in the approach by Arkhipov,</span>
+<span class="sd">    Baimbetov and Davletov :cite:`Arkhipov.2000` (Eqn. 17).</span>
+
+<span class="sd">    The method is using the Random Phase Approximation, treating the problem</span>
+<span class="sd">    semi-classically and uses a pseudopotential between charged particles to</span>
+<span class="sd">    account for quantum diffraction effects and symmetry.</span>
+
+<span class="sd">    While the seminal papers treated the electron- and ion temperature to be</span>
+<span class="sd">    equal, we follow the work of :cite:`Gregori.2006` to allow for different</span>
+<span class="sd">    temperatures of the two components. The results of :cite:`Arkhipov.1998`</span>
+<span class="sd">    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    r: Quantity</span>
+<span class="sd">        Distance in [length] units.</span>
+<span class="sd">    T_e: Quantity</span>
+<span class="sd">        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the</span>
+<span class="sd">        effective temperature used in :cite:`Gregori.2003`.</span>
+<span class="sd">    T_i: Quantity</span>
+<span class="sd">        The ion temperature in Kelvin.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron density in 1/[volume].</span>
+<span class="sd">    m_i: Quantity</span>
+<span class="sd">        The mass of the ion.</span>
+<span class="sd">    Z_f: float</span>
+<span class="sd">        Number of free electrons per ion.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The radial ion-ion distribution function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_integrate</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span>
+        <span class="n">Phi_ii_k</span> <span class="o">=</span> <span class="n">_Phi_ii_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+        <span class="n">fac</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">r</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span> <span class="o">*</span> <span class="n">k</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Phi_ii_k</span> <span class="o">*</span> <span class="n">fac</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">joule</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">integ</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span>
+        <span class="n">to_integrate</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span> <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span> <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span>
+    <span class="p">)</span>
+
+    <span class="n">integ</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">joule</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+    <span class="n">integ</span> <span class="o">/=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
+
+    <span class="n">Phi_ii_r</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">r</span> <span class="o">*</span> <span class="n">integ</span>
+
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Phi_ii_r</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T_i</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="g_ei_ABD">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.g_ei_ABD.html#jaxrts.static_structure_factors.g_ei_ABD">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">g_ei_ABD</span><span class="p">(</span>
+    <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The radial electron-ion distribution function, in the approach by Arkhipov,</span>
+<span class="sd">    Baimbetov and Davletov :cite:`Arkhipov.2000` (Eqn. 17)</span>
+
+<span class="sd">    The method is using the Random Phase Approximation, treating the problem</span>
+<span class="sd">    semi-classically and uses a pseudopotential between charged particles to</span>
+<span class="sd">    account for quantum diffraction effects and symmetry.</span>
+
+<span class="sd">    While the seminal papers treated the electron- and ion temperature to be</span>
+<span class="sd">    equal, we follow the work of :cite:`Gregori.2006` to allow for different</span>
+<span class="sd">    temperatures of the two components. The results of :cite:`Arkhipov.1998`</span>
+<span class="sd">    and :cite:`Gregori.2003` can be obtained by setting ``T_e == T_i``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    r: Quantity</span>
+<span class="sd">        Distance in [length] units.</span>
+<span class="sd">    T_e: Quantity</span>
+<span class="sd">        The electron temperature in Kelvin. Use :py:func:`~.T_cf_Greg` for the</span>
+<span class="sd">        effective temperature used in :cite:`Gregori.2003`.</span>
+<span class="sd">    T_i: Quantity</span>
+<span class="sd">        The ion temperature in Kelvin.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron density in 1/[volume].</span>
+<span class="sd">    m_i: Quantity</span>
+<span class="sd">        The mass of the ion</span>
+<span class="sd">    Z_f: float</span>
+<span class="sd">        Number of free electrons per ion.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The radial electron-ion distribution function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">T_ei</span> <span class="o">=</span> <span class="n">_T_rs_Greg2006</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">,</span> <span class="n">m_i</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_integrate</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span>
+        <span class="n">Phi_ei_k</span> <span class="o">=</span> <span class="n">_Phi_ei_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+        <span class="n">fac</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">r</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span> <span class="o">*</span> <span class="n">k</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Phi_ei_k</span> <span class="o">*</span> <span class="n">fac</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">joule</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">integ</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span>
+        <span class="n">to_integrate</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span> <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span> <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span>
+    <span class="p">)</span>
+
+    <span class="n">integ</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">joule</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+    <span class="n">integ</span> <span class="o">/=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
+
+    <span class="n">Phi_ei_r</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">r</span> <span class="o">*</span> <span class="n">integ</span>
+
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Phi_ei_r</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T_ei</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="debyeWallerFactor">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.debyeWallerFactor.html#jaxrts.static_structure_factors.debyeWallerFactor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">debyeWallerFactor</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">atomic_mass</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">debye_temp</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">temp</span><span class="p">:</span> <span class="n">Quantity</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reduction of an XRD peak due to an increase in temperature (without taking</span>
+<span class="sd">    to account possible phase transitions), according to :cite:`Murphy.2008`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k: Quantity</span>
+<span class="sd">        The scattering vector.</span>
+<span class="sd">    atomic_mass: Quantity</span>
+<span class="sd">        Mass of an ion.</span>
+<span class="sd">    debye_temp: Quantity</span>
+<span class="sd">        The material-specific Debye Temperature.</span>
+<span class="sd">    temp: Quantity</span>
+<span class="sd">        The temperature of the lattice.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        The Debye-Waller factor :math:`\\exp(-2M)`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">k</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">phi</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Eqn (6)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">quad</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="n">interval</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="p">]),</span>
+                <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
+                <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Eqn (5) of :cite:`Murphy.2008`:</span>
+    <span class="n">TwoM</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">planck_constant</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">N_A</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">atomic_mass</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">debye_temp</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">temp</span> <span class="o">/</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">debye_temp</span><span class="p">)</span> <span class="o">*</span> <span class="n">phi</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">debye_temp</span><span class="p">)</span> <span class="o">/</span> <span class="n">temp</span><span class="p">)</span>
+            <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">TwoM</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_G07eta</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :cite:`Gregori.2007`, eqn. (17)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">sig_c</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_G07gamma</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">T_ii</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :cite:`Gregori.2007`, eqn. (18)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">Z</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">sig_c</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T_ii</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_G07chi</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">T_ii</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :cite:`Gregori.2007`, eqn. (18)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="n">_G07eta</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">)</span> <span class="o">*</span> <span class="n">_G07gamma</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">T_ii</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_G07h0</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">T_ii</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :cite:`Gregori.2007`, eqn. (27)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">_G07eta</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">)</span>
+    <span class="n">chi</span> <span class="o">=</span> <span class="n">_G07chi</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">T_ii</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">eta</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eta</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">chi</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">eta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_G07h1</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">T_ii</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :cite:`Gregori.2007`, eqn. (27)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">_G07eta</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">)</span>
+    <span class="n">h0</span> <span class="o">=</span> <span class="n">_G07h0</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">T_ii</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">)</span>
+    <span class="n">h1</span> <span class="o">=</span> <span class="n">h0</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="n">eta</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eta</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">h1</span>
+
+
+<div class="viewcode-block" id="S_ii_CHS">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.S_ii_CHS.html#jaxrts.static_structure_factors.S_ii_CHS">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">S_ii_CHS</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">n_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">lfc</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The ion ion static structure factors from :cite:`Gregori.2007`. A typo</span>
+<span class="sd">    comparing to :cite:`Singh.1983` in the equation for :math:`C_{ii}` has been</span>
+<span class="sd">    corrected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># In equations (17)-(29), :cite:`Gregori.2007`</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">Z_f</span> <span class="o">/</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">sig_c</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">bisection</span><span class="p">(</span>
+        <span class="n">jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">Partial</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">sig_0</span><span class="p">:</span> <span class="n">_G07h1</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">sig_0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="mf">1e-3</span> <span class="o">*</span> <span class="n">dist</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
+        <span class="mf">2.1</span> <span class="o">*</span> <span class="n">dist</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
+        <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span>
+        <span class="n">min_iter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">sig_c</span> <span class="o">*=</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">_G07eta</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">)</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">_G07gamma</span><span class="p">(</span><span class="n">Z_f</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">)</span>
+    <span class="n">chi</span> <span class="o">=</span> <span class="n">_G07chi</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">k</span> <span class="o">*</span> <span class="n">sig_c</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+    <span class="n">k_De</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">k_Di</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+
+    <span class="n">h0</span> <span class="o">=</span> <span class="n">_G07h0</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">)</span>
+    <span class="n">h1</span> <span class="o">=</span> <span class="n">_G07h1</span><span class="p">(</span><span class="n">n_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">sig_c</span><span class="p">)</span>
+    <span class="n">h2</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eta</span> <span class="o">-</span> <span class="n">eta</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">12</span> <span class="o">*</span> <span class="n">eta</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span>
+        <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eta</span><span class="p">)</span> <span class="o">*</span> <span class="n">h0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">12</span> <span class="o">*</span> <span class="n">eta</span> <span class="o">*</span> <span class="n">chi</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">y0</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="p">(((</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">eta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">h0</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="o">-</span> <span class="p">(((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eta</span><span class="p">)</span> <span class="o">*</span> <span class="n">h0</span> <span class="o">*</span> <span class="n">chi</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">12</span> <span class="o">*</span> <span class="n">eta</span><span class="p">))</span>
+        <span class="o">-</span> <span class="p">(((</span><span class="mi">5</span> <span class="o">+</span> <span class="n">eta</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">chi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="n">eta</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">y1</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">eta</span> <span class="o">*</span> <span class="n">h1</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">y2</span> <span class="o">=</span> <span class="n">chi</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">6</span>
+    <span class="n">y3</span> <span class="o">=</span> <span class="n">eta</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">y0</span> <span class="o">+</span> <span class="n">chi</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">h2</span><span class="p">)</span>
+    <span class="n">y4</span> <span class="o">=</span> <span class="n">eta</span> <span class="o">*</span> <span class="n">chi</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">60</span>
+
+    <span class="n">Cii</span> <span class="o">=</span> <span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">q</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">y0</span> <span class="o">*</span> <span class="n">q</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">S</span> <span class="o">-</span> <span class="n">q</span> <span class="o">*</span> <span class="n">C</span><span class="p">))</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">y1</span> <span class="o">*</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">S</span> <span class="o">-</span> <span class="p">(</span><span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">C</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="c1"># Note: There is a typo in the seminal Gregori.2007 paper. The exponent</span>
+        <span class="c1"># of the first q is taken from the earlier paper :cite:`Singh.1983`,</span>
+        <span class="c1"># reproducing Geregori&#39;s plots.</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">y2</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="p">((</span><span class="mi">3</span> <span class="o">*</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="n">S</span> <span class="o">-</span> <span class="p">(</span><span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">C</span><span class="p">))</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">y3</span> <span class="o">*</span> <span class="p">((</span><span class="mi">4</span> <span class="o">*</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">24</span><span class="p">)</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">S</span> <span class="o">-</span> <span class="p">(</span><span class="n">q</span><span class="o">**</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">24</span><span class="p">)</span> <span class="o">*</span> <span class="n">C</span> <span class="o">+</span> <span class="mi">24</span><span class="p">))</span>
+        <span class="o">+</span> <span class="p">(</span>
+            <span class="n">y4</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="mi">6</span> <span class="o">*</span> <span class="p">(</span><span class="n">q</span><span class="o">**</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">S</span>
+                <span class="o">-</span> <span class="p">(</span><span class="n">q</span><span class="o">**</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">30</span> <span class="o">*</span> <span class="n">q</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">360</span> <span class="o">*</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">720</span><span class="p">)</span> <span class="o">*</span> <span class="n">C</span>
+                <span class="o">-</span> <span class="mi">720</span>
+            <span class="p">)</span>
+            <span class="o">/</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="o">-</span> <span class="n">gamma</span> <span class="o">*</span> <span class="n">q</span><span class="o">**</span><span class="mi">4</span> <span class="o">*</span> <span class="n">C</span>
+    <span class="p">)</span>
+
+    <span class="n">S_iiOCP</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Cii</span><span class="p">)</span>
+
+    <span class="c1"># Get q from eqn (33)</span>
+    <span class="n">S_ee0</span> <span class="o">=</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">lfc</span><span class="p">))</span>
+    <span class="n">q_sc</span> <span class="o">=</span> <span class="n">Z_f</span> <span class="o">*</span> <span class="p">(</span><span class="n">k_De</span> <span class="o">/</span> <span class="n">k</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">S_ee0</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">q_sc</span> <span class="o">/</span> <span class="n">Z_f</span> <span class="o">*</span> <span class="p">(</span><span class="n">k_Di</span> <span class="o">/</span> <span class="n">k</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># &quot;truncate f after the first node&quot;, justified by reference 38:</span>
+    <span class="c1"># D.K. Chaturvedi, M. Rovere, G. Senatore, M.P. Tosi, Physica 111B</span>
+    <span class="c1"># (1981) 11</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">k</span> <span class="o">&lt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">sig_c</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">S_iiOCP</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">f</span> <span class="o">*</span> <span class="n">S_iiOCP</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="S_ei_CHS">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.S_ei_CHS.html#jaxrts.static_structure_factors.S_ei_CHS">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">S_ei_CHS</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">n_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">lfc</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The electron ion static structure factors from :cite:`Gregori.2007`.</span>
+<span class="sd">    Requires :py:func:`~.S_ii_CHS` to calculate the ion ion structure factors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">k_De</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">S_ii</span> <span class="o">=</span> <span class="n">S_ii_CHS</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">lfc</span><span class="p">)</span>
+
+    <span class="n">S_ee0</span> <span class="o">=</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">lfc</span><span class="p">))</span>
+    <span class="n">q_sc</span> <span class="o">=</span> <span class="n">Z_f</span> <span class="o">*</span> <span class="p">(</span><span class="n">k_De</span> <span class="o">/</span> <span class="n">k</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">S_ee0</span>
+
+    <span class="k">return</span> <span class="n">q_sc</span> <span class="o">/</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Z_f</span><span class="p">)</span> <span class="o">*</span> <span class="n">S_ii</span></div>
+
+
+
+<div class="viewcode-block" id="S_ee_CHS">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.static_structure_factors.S_ee_CHS.html#jaxrts.static_structure_factors.S_ee_CHS">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">S_ee_CHS</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">n_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">lfc</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The electron electron static structure factors from :cite:`Gregori.2007`.</span>
+<span class="sd">    Note that according to :cite:`Chihara.2000` the screening contribution</span>
+<span class="sd">    should be squared (this is the implementation of JaXRTS) rather than</span>
+<span class="sd">    linear (as in :cite:`Gregori.2007`).</span>
+
+<span class="sd">    Requires :py:func:`~.S_ii_CHS` to calculate the ion ion structure factors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">k_De</span> <span class="o">=</span> <span class="n">_k_D_AD</span><span class="p">(</span><span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
+    <span class="n">S_ii</span> <span class="o">=</span> <span class="n">S_ii_CHS</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_i</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">lfc</span><span class="p">)</span>
+
+    <span class="n">S_ee0</span> <span class="o">=</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">lfc</span><span class="p">))</span>
+    <span class="n">q_sc</span> <span class="o">=</span> <span class="n">Z_f</span> <span class="o">*</span> <span class="p">(</span><span class="n">k_De</span> <span class="o">/</span> <span class="n">k</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">S_ee0</span>
+
+    <span class="k">return</span> <span class="n">q_sc</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">Z_f</span> <span class="o">*</span> <span class="n">S_ii</span> <span class="o">+</span> <span class="n">S_ee0</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

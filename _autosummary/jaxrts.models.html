@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.models &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jaxrts.models.averagePlasmaState" href="jaxrts.models.averagePlasmaState.html" />
+    <link rel="prev" title="jaxrts.math.inverse_fermi_12_rational_approximation_antia" href="jaxrts.math.inverse_fermi_12_rational_approximation_antia.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="jaxrts.html">jaxrts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.absorption_edges_ionized_ions_data.html">jaxrts.absorption_edges_ionized_ions_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.analysis.html">jaxrts.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.bound_free.html">jaxrts.bound_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections.html">jaxrts.ee_localfieldcorrections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections_dornheim_2021.html">jaxrts.ee_localfieldcorrections_dornheim_2021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.elements.html">jaxrts.elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.experimental.html">jaxrts.experimental</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.form_factors.html">jaxrts.form_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_bound.html">jaxrts.free_bound</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.free_free.html">jaxrts.free_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.helpers.html">jaxrts.helpers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hnc_potentials.html">jaxrts.hnc_potentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.hypernetted_chain.html">jaxrts.hypernetted_chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.instrument_function.html">jaxrts.instrument_function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ion_feature.html">jaxrts.ion_feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.ipd.html">jaxrts.ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.literature.html">jaxrts.literature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.math.html">jaxrts.math</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">jaxrts.models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.averagePlasmaState.html">jaxrts.models.averagePlasmaState</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ArbitraryDegeneracyScreeningLength.html">jaxrts.models.ArbitraryDegeneracyScreeningLength</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.html">jaxrts.models.ArkhipovIonFeat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.html">jaxrts.models.AverageAtom_Sii</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.BM_V_eiSModel.html">jaxrts.models.BM_V_eiSModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.BohmStaver.html">jaxrts.models.BohmStaver</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.BornMermin.html">jaxrts.models.BornMermin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.BornMermin_Fit.html">jaxrts.models.BornMermin_Fit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.BornMermin_Fortmann.html">jaxrts.models.BornMermin_Fortmann</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.BornMermin_Full.html">jaxrts.models.BornMermin_Full</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.CHSIonFeat.html">jaxrts.models.CHSIonFeat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ConstantChemPotential.html">jaxrts.models.ConstantChemPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ConstantDebyeTemp.html">jaxrts.models.ConstantDebyeTemp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ConstantIPD.html">jaxrts.models.ConstantIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ConstantScreeningLength.html">jaxrts.models.ConstantScreeningLength</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DebyeHueckelIPD.html">jaxrts.models.DebyeHueckelIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DebyeHueckelScreening.html">jaxrts.models.DebyeHueckelScreening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DebyeHueckelScreeningLength.html">jaxrts.models.DebyeHueckelScreeningLength</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DebyeHueckel_BM_V.html">jaxrts.models.DebyeHueckel_BM_V</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DebyeWallerSolid.html">jaxrts.models.DebyeWallerSolid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DegenerateElectronChemPotential.html">jaxrts.models.DegenerateElectronChemPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DetailedBalance.html">jaxrts.models.DetailedBalance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ESLFCDornheim2021.html">jaxrts.models.ESLFCDornheim2021</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.EckerKroellIPD.html">jaxrts.models.EckerKroellIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FiniteWavelengthScreening.html">jaxrts.models.FiniteWavelengthScreening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FiniteWavelength_BM_V.html">jaxrts.models.FiniteWavelength_BM_V</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FixedSii.html">jaxrts.models.FixedSii</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FormFactorLowering.html">jaxrts.models.FormFactorLowering</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FreeFreeModel.html">jaxrts.models.FreeFreeModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gericke2010ScreeningLength.html">jaxrts.models.Gericke2010ScreeningLength</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2003IonFeat.html">jaxrts.models.Gregori2003IonFeat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2004Screening.html">jaxrts.models.Gregori2004Screening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2006IonFeat.html">jaxrts.models.Gregori2006IonFeat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.GregoriCHSScreening.html">jaxrts.models.GregoriCHSScreening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IchimaruChemPotential.html">jaxrts.models.IchimaruChemPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IonFeatModel.html">jaxrts.models.IonFeatModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IonSphereIPD.html">jaxrts.models.IonSphereIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.LFCConstant.html">jaxrts.models.LFCConstant</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.LinearResponseScreening.html">jaxrts.models.LinearResponseScreening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.LinearResponseScreeningGericke2010.html">jaxrts.models.LinearResponseScreeningGericke2010</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Model.html">jaxrts.models.Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Neglect.html">jaxrts.models.Neglect</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NonDegenerateElectronChemPotential.html">jaxrts.models.NonDegenerateElectronChemPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.OnePotentialHNCIonFeat.html">jaxrts.models.OnePotentialHNCIonFeat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PauliBlockingIPD.html">jaxrts.models.PauliBlockingIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PaulingFormFactors.html">jaxrts.models.PaulingFormFactors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PeakCollection.html">jaxrts.models.PeakCollection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.html">jaxrts.models.QCSalpeterApproximation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.RPA.html">jaxrts.models.RPA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.RPA_DandreaFit.html">jaxrts.models.RPA_DandreaFit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SLFCFarid1993.html">jaxrts.models.SLFCFarid1993</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SLFCGeldart1966.html">jaxrts.models.SLFCGeldart1966</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SLFCInterpFortmann2010.html">jaxrts.models.SLFCInterpFortmann2010</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SLFCInterpGregori2007.html">jaxrts.models.SLFCInterpGregori2007</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SLFCUtsumi1982.html">jaxrts.models.SLFCUtsumi1982</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ScatteringModel.html">jaxrts.models.ScatteringModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SchumacherImpulse.html">jaxrts.models.SchumacherImpulse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SchumacherImpulseColdEdges.html">jaxrts.models.SchumacherImpulseColdEdges</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SchumacherImpulseFitRk.html">jaxrts.models.SchumacherImpulseFitRk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SommerfeldChemPotential.html">jaxrts.models.SommerfeldChemPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.StewartPyattIPD.html">jaxrts.models.StewartPyattIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.StewartPyattPrestonIPD.html">jaxrts.models.StewartPyattPrestonIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Sum_Sii.html">jaxrts.models.Sum_Sii</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.html">jaxrts.models.ThreePotentialHNCIonFeat</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasma_physics.html">jaxrts.plasma_physics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.plasmastate.html">jaxrts.plasmastate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saha.html">jaxrts.saha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.saving.html">jaxrts.saving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.setup.html">jaxrts.setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.static_structure_factors.html">jaxrts.static_structure_factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.units.html">jaxrts.units</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+          <li class="breadcrumb-item"><a href="jaxrts.html">jaxrts</a></li>
+      <li class="breadcrumb-item active">jaxrts.models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/jaxrts.models.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-jaxrts.models">
+<span id="jaxrts-models"></span><h1>jaxrts.models<a class="headerlink" href="#module-jaxrts.models" title="Link to this heading"></a></h1>
+<p>This submodule contains high-level wrappers for the different Models
+implemented.</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.averagePlasmaState.html#jaxrts.models.averagePlasmaState" title="jaxrts.models.averagePlasmaState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">averagePlasmaState</span></code></a>(state)</p></td>
+<td><p>Create an average plasma state that shares the models of the original.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ArbitraryDegeneracyScreeningLength.html#jaxrts.models.ArbitraryDegeneracyScreeningLength" title="jaxrts.models.ArbitraryDegeneracyScreeningLength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ArbitraryDegeneracyScreeningLength</span></code></a>()</p></td>
+<td><p>A screening length valid for arbitrary degeneracy <span id="id1">[<a class="reference internal" href="../bibliography.html#id6" title="Rory A. Baggott. Modifications of Bound States in Dense Plasma Environments. PhD thesis, University of Warwick, Warwick, 2017.">Baggott, 2017</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.html#jaxrts.models.ArkhipovIonFeat" title="jaxrts.models.ArkhipovIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ArkhipovIonFeat</span></code></a>()</p></td>
+<td><p>Model for the ion feature of the scattering, presented in <span id="id2">[<a class="reference internal" href="../bibliography.html#id4" title="Yu.V. Arkhipov and A.E. Davletov. Screened pseudopotential and static structure factors of semiclassical two-component plasmas. Physics Letters A, 247:339–342, 10 1998. doi:10.1016/s0375-9601(98)00613-6.">Arkhipov and Davletov, 1998</a>]</span> and <span id="id3">[<a class="reference internal" href="../bibliography.html#id5" title="Yu. V. Arkhipov, F. B. Baimbetov, and A. E. Davletov. Thermodynamics of dense high-temperature plasmas: semiclassical approach. The European Physical Journal D, 8:299–304, 1 2000. doi:10.1007/s10053-000-8809-x.">Arkhipov et al., 2000</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.html#jaxrts.models.AverageAtom_Sii" title="jaxrts.models.AverageAtom_Sii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AverageAtom_Sii</span></code></a>(rmin, rmax, pot, mix, tmult)</p></td>
+<td><p>This model performs a HNC calculation, assuming one average atom with a given, average charge state.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.BM_V_eiSModel.html#jaxrts.models.BM_V_eiSModel" title="jaxrts.models.BM_V_eiSModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BM_V_eiSModel</span></code></a>()</p></td>
+<td><p>These models implement potentials which can be when calculating the Born collision frequencies in <a class="reference internal" href="jaxrts.models.BornMermin.html#jaxrts.models.BornMermin" title="jaxrts.models.BornMermin"><code class="xref py py-class docutils literal notranslate"><span class="pre">BornMermin</span></code></a> and derived free-free scattering models.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.BohmStaver.html#jaxrts.models.BohmStaver" title="jaxrts.models.BohmStaver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BohmStaver</span></code></a>()</p></td>
+<td><p>The Bohm-Staver relation for the Debye temperature, valid for 'simple metals', as it is presented in Eqn (3) of <span id="id4">[<a class="reference internal" href="../bibliography.html#id47" title="G. Gregori, S. H. Glenzer, and O. L. Landen. Generalized x-ray scattering cross section from nonequilibrium plasmas. Physical Review E, 8 2006. doi:10.1103/physreve.74.026402.">Gregori et al., 2006a</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.BornMermin.html#jaxrts.models.BornMermin" title="jaxrts.models.BornMermin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin</span></code></a>(no_of_freq, RPA_rewrite, KKT, ...)</p></td>
+<td><p>Model for the free-free scattering, based on the Born Mermin Approximation (<span id="id5">[<a class="reference internal" href="../bibliography.html#id71" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.BornMermin_Fit.html#jaxrts.models.BornMermin_Fit" title="jaxrts.models.BornMermin_Fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin_Fit</span></code></a>(no_of_freq, RPA_rewrite, KKT, ...)</p></td>
+<td><p>Model for the free-free scattering, based on the Born Mermin Approximation (<span id="id6">[<a class="reference internal" href="../bibliography.html#id71" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.BornMermin_Fortmann.html#jaxrts.models.BornMermin_Fortmann" title="jaxrts.models.BornMermin_Fortmann"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin_Fortmann</span></code></a>(no_of_freq, RPA_rewrite, ...)</p></td>
+<td><p>Model for the free-free scattering, based on the Born Mermin Approximation (<span id="id7">[<a class="reference internal" href="../bibliography.html#id71" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.BornMermin_Full.html#jaxrts.models.BornMermin_Full" title="jaxrts.models.BornMermin_Full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin_Full</span></code></a>([RPA_rewrite, KKT])</p></td>
+<td><p>Model for the free-free scattering, based on the Born Mermin Approximation (<span id="id8">[<a class="reference internal" href="../bibliography.html#id71" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.html#jaxrts.models.CHSIonFeat" title="jaxrts.models.CHSIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CHSIonFeat</span></code></a>()</p></td>
+<td><p>Model for the ion feature of the scattering, presented in <span id="id9">[<a class="reference internal" href="../bibliography.html#id49" title="G. Gregori, A. Ravasio, A. Höll, S.H. Glenzer, and S.J. Rose. Derivation of the static structure factor in strongly coupled non-equilibrium plasmas for x-ray scattering studies. High Energy Density Physics, 3:99–108, 5 2007. doi:10.1016/j.hedp.2007.02.006.">Gregori et al., 2007</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ConstantChemPotential.html#jaxrts.models.ConstantChemPotential" title="jaxrts.models.ConstantChemPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConstantChemPotential</span></code></a>(value)</p></td>
+<td><p>A model that returns a constant chemical potential, specified by a user.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ConstantDebyeTemp.html#jaxrts.models.ConstantDebyeTemp" title="jaxrts.models.ConstantDebyeTemp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConstantDebyeTemp</span></code></a>(value)</p></td>
+<td><p>A model of constant Debye Temperature.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ConstantIPD.html#jaxrts.models.ConstantIPD" title="jaxrts.models.ConstantIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConstantIPD</span></code></a>(value)</p></td>
+<td><p>A model that returns a constant value for the IPD, set by the user.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ConstantScreeningLength.html#jaxrts.models.ConstantScreeningLength" title="jaxrts.models.ConstantScreeningLength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConstantScreeningLength</span></code></a>(value)</p></td>
+<td><p>A model that returns a constant screening length, given by a user.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.DebyeHueckelIPD.html#jaxrts.models.DebyeHueckelIPD" title="jaxrts.models.DebyeHueckelIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DebyeHueckelIPD</span></code></a>([arb_deg])</p></td>
+<td><p>Debye-Hückel IPD Model <span id="id10">[<a class="reference internal" href="../bibliography.html#id22" title="P. Debye and E. Hückel. The theory of electrolytes. i. lowering of freezing point and related phenomena. Physikalische Zeitschrift, 24:185–206, 1923.">Debye and Hückel, 1923</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.DebyeHueckelScreening.html#jaxrts.models.DebyeHueckelScreening" title="jaxrts.models.DebyeHueckelScreening"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DebyeHueckelScreening</span></code></a>()</p></td>
+<td><p>Debye Hückel screening as presented by <span id="id11">[<a class="reference internal" href="../bibliography.html#id13" title="D. A. Chapman, J. Vorberger, L. B. Fletcher, R. A. Baggott, L. Divol, T. Döppner, R. W. Falcone, S. H. Glenzer, G. Gregori, T. M. Guymer, A. L. Kritcher, O. L. Landen, T. Ma, A. E. Pak, and D. O. Gericke. Observation of finite-wavelength screening in high-energy-density matter. Nature Communications, 4 2015. doi:10.1038/ncomms7839.">Chapman et al., 2015</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.DebyeHueckelScreeningLength.html#jaxrts.models.DebyeHueckelScreeningLength" title="jaxrts.models.DebyeHueckelScreeningLength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DebyeHueckelScreeningLength</span></code></a>()</p></td>
+<td><p>The standard Debye Hückel screening length.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.DebyeHueckel_BM_V.html#jaxrts.models.DebyeHueckel_BM_V" title="jaxrts.models.DebyeHueckel_BM_V"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DebyeHueckel_BM_V</span></code></a>()</p></td>
+<td><p>A Debye Hückel potential, using the <a class="reference internal" href="jaxrts.plasmastate.PlasmaState.screening_length.html#jaxrts.plasmastate.PlasmaState.screening_length" title="jaxrts.plasmastate.PlasmaState.screening_length"><code class="xref py py-meth docutils literal notranslate"><span class="pre">jaxrts.plasmastate.PlasmaState.screening_length()</span></code></a> method to get the screening length.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.DebyeWallerSolid.html#jaxrts.models.DebyeWallerSolid" title="jaxrts.models.DebyeWallerSolid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DebyeWallerSolid</span></code></a>(S_plasma, b)</p></td>
+<td><p>This model approximates the static structure factor (SSF) of a solid at finite temperature as suggested by <span id="id12">[<a class="reference internal" href="../bibliography.html#id47" title="G. Gregori, S. H. Glenzer, and O. L. Landen. Generalized x-ray scattering cross section from nonequilibrium plasmas. Physical Review E, 8 2006. doi:10.1103/physreve.74.026402.">Gregori et al., 2006a</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.DegenerateElectronChemPotential.html#jaxrts.models.DegenerateElectronChemPotential" title="jaxrts.models.DegenerateElectronChemPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DegenerateElectronChemPotential</span></code></a>()</p></td>
+<td><p>Chemical Potential of a fully degenerate electron gas, given by the Fermi energy.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.DetailedBalance.html#jaxrts.models.DetailedBalance" title="jaxrts.models.DetailedBalance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DetailedBalance</span></code></a>([sample_points])</p></td>
+<td><p>Calculate the free-bound scattering by mirroring the free-bound scattering around the probing energy and applying a detailed balance factor to the intensity.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ESLFCDornheim2021.html#jaxrts.models.ESLFCDornheim2021" title="jaxrts.models.ESLFCDornheim2021"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ESLFCDornheim2021</span></code></a>()</p></td>
+<td><p>Effective static approximation (ESA) of the local field correction model by Dornheim et al. <span id="id13">[<a class="reference internal" href="../bibliography.html#id30" title="Tobias Dornheim, Zhandos A. Moldabekov, and Panagiotis Tolias. Analytical representation of the local field correction of the uniform electron gas within the effective static approximation. Physical Review B, 4 2021. doi:10.1103/physrevb.103.165102.">Dornheim et al., 2021</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.EckerKroellIPD.html#jaxrts.models.EckerKroellIPD" title="jaxrts.models.EckerKroellIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EckerKroellIPD</span></code></a>([C, arb_deg])</p></td>
+<td><p>Ecker-Kröll IPD Model:<span id="id14">[<a class="reference internal" href="../bibliography.html#id34" title="G. Ecker and W. Kröll. Lowering of the Ionization Energy for a Plasma in Thermodynamic Equilibrium. The Physics of Fluids, 6(1):62–69, 01 1963. doi:10.1063/1.1724509.">Ecker and Kröll, 1963</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.FiniteWavelengthScreening.html#jaxrts.models.FiniteWavelengthScreening" title="jaxrts.models.FiniteWavelengthScreening"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FiniteWavelengthScreening</span></code></a>()</p></td>
+<td><p>Finite wavelength screening as presented by <span id="id15">[<a class="reference internal" href="../bibliography.html#id13" title="D. A. Chapman, J. Vorberger, L. B. Fletcher, R. A. Baggott, L. Divol, T. Döppner, R. W. Falcone, S. H. Glenzer, G. Gregori, T. M. Guymer, A. L. Kritcher, O. L. Landen, T. Ma, A. E. Pak, and D. O. Gericke. Observation of finite-wavelength screening in high-energy-density matter. Nature Communications, 4 2015. doi:10.1038/ncomms7839.">Chapman et al., 2015</a>]</span>, using a using a result from linear to calculate the screening density <span class="math notranslate nohighlight">\(q\)</span>:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.FiniteWavelength_BM_V.html#jaxrts.models.FiniteWavelength_BM_V" title="jaxrts.models.FiniteWavelength_BM_V"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FiniteWavelength_BM_V</span></code></a>()</p></td>
+<td><p>Uses finite wavelength screening to screen the bare Coulomb potential, i.e., <span class="math notranslate nohighlight">\(V_{s}=\frac{V_\mathrm{Coulomb}}{\varepsilon_\text{RPA}(k, E=0)}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.FixedSii.html#jaxrts.models.FixedSii" title="jaxrts.models.FixedSii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FixedSii</span></code></a>(Sii)</p></td>
+<td><p>Model for the ion feature with a fixed value for <span class="math notranslate nohighlight">\(S_{ii}\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.FormFactorLowering.html#jaxrts.models.FormFactorLowering" title="jaxrts.models.FormFactorLowering"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FormFactorLowering</span></code></a>([Z_squared_correction])</p></td>
+<td><p>Form factor lowering model as introduced by <span id="id16">[<a class="reference internal" href="../bibliography.html#id27" title="T. Döppner, M. Bethkenhagen, D. Kraus, P. Neumayer, D. A. Chapman, B. Bachmann, R. A. Baggott, M. P. Böhme, L. Divol, R. W. Falcone, L. B. Fletcher, O. L. Landen, M. J. MacDonald, A. M. Saunders, M. Schörner, P. A. Sterne, J. Vorberger, B. B. L. Witte, A. Yi, R. Redmer, S. H. Glenzer, and D. O. Gericke. Observing the onset of pressure-driven k-shell delocalization. Nature, 5 2023. doi:10.1038/s41586-023-05996-8.">Döppner et al., 2023</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.FreeFreeModel.html#jaxrts.models.FreeFreeModel" title="jaxrts.models.FreeFreeModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FreeFreeModel</span></code></a>([sample_points])</p></td>
+<td><p>A class of models suitable for <code class="docutils literal notranslate"><span class="pre">'free-free</span> <span class="pre">scattering'</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.Gericke2010ScreeningLength.html#jaxrts.models.Gericke2010ScreeningLength" title="jaxrts.models.Gericke2010ScreeningLength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gericke2010ScreeningLength</span></code></a>()</p></td>
+<td><p>The Debye-Hückel screening length.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.Gregori2003IonFeat.html#jaxrts.models.Gregori2003IonFeat" title="jaxrts.models.Gregori2003IonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gregori2003IonFeat</span></code></a>()</p></td>
+<td><p>Model for the ion feature of the scattering, presented in <span id="id17">[<a class="reference internal" href="../bibliography.html#id45" title="G. Gregori, S. H. Glenzer, W. Rozmus, R. W. Lee, and O. L. Landen. Theoretical model of x-ray scattering as a dense matter probe. Physical Review E, 2 2003. doi:10.1103/physreve.67.026412.">Gregori et al., 2003</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.Gregori2004Screening.html#jaxrts.models.Gregori2004Screening" title="jaxrts.models.Gregori2004Screening"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gregori2004Screening</span></code></a>()</p></td>
+<td><p>Calculating the screening from free electrons according to <span id="id18">[<a class="reference internal" href="../bibliography.html#id46" title="G. Gregori, S. H. Glenzer, F. J. Rogers, S. M. Pollaine, O. L. Landen, C. Blancard, G. Faussurier, P. Renaudin, S. Kuhlbrodt, and R. Redmer. Electronic structure measurements of dense plasmas. Physics of Plasmas, 11:2754–2762, 5 2004. doi:10.1063/1.1689664.">Gregori et al., 2004</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.Gregori2006IonFeat.html#jaxrts.models.Gregori2006IonFeat" title="jaxrts.models.Gregori2006IonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gregori2006IonFeat</span></code></a>()</p></td>
+<td><p>Model for the ion feature of the scattering, presented in <span id="id19">[<a class="reference internal" href="../bibliography.html#id47" title="G. Gregori, S. H. Glenzer, and O. L. Landen. Generalized x-ray scattering cross section from nonequilibrium plasmas. Physical Review E, 8 2006. doi:10.1103/physreve.74.026402.">Gregori et al., 2006a</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.GregoriCHSScreening.html#jaxrts.models.GregoriCHSScreening" title="jaxrts.models.GregoriCHSScreening"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GregoriCHSScreening</span></code></a>()</p></td>
+<td><p>Screening model to calculate the screening charge q</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.IchimaruChemPotential.html#jaxrts.models.IchimaruChemPotential" title="jaxrts.models.IchimaruChemPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IchimaruChemPotential</span></code></a>()</p></td>
+<td><p>A fitting formula for the chemical potential of an ideal electron gas between the classical and the quantum regime, given by <span id="id20">[<a class="reference internal" href="../bibliography.html#id45" title="G. Gregori, S. H. Glenzer, W. Rozmus, R. W. Lee, and O. L. Landen. Theoretical model of x-ray scattering as a dense matter probe. Physical Review E, 2 2003. doi:10.1103/physreve.67.026412.">Gregori et al., 2003</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.IonFeatModel.html#jaxrts.models.IonFeatModel" title="jaxrts.models.IonFeatModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IonFeatModel</span></code></a>()</p></td>
+<td><p>Abstract class of <a href="#id21"><span class="problematic" id="id22">`</span></a>Model`s, describing the scattering by electrons tightly bound to the ions, causing quasi-elastic scattering.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.IonSphereIPD.html#jaxrts.models.IonSphereIPD" title="jaxrts.models.IonSphereIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IonSphereIPD</span></code></a>([C, arb_deg])</p></td>
+<td><p>Ion Sphere IPD Model <span id="id23">[<a class="reference internal" href="../bibliography.html#id81" title="B. F. Rozsnyai. Relativistic hartree-fock-slater calculations for arbitrary temperature and matter density. Physical Review A, 5:1137–1149, 1972. doi:10.1103/PhysRevA.5.1137.">Rozsnyai, 1972</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.LFCConstant.html#jaxrts.models.LFCConstant" title="jaxrts.models.LFCConstant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LFCConstant</span></code></a>(value)</p></td>
+<td><p>A constant local field correction which can be defined by the user.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.LinearResponseScreening.html#jaxrts.models.LinearResponseScreening" title="jaxrts.models.LinearResponseScreening"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearResponseScreening</span></code></a>()</p></td>
+<td><p>The screening density <span class="math notranslate nohighlight">\(q\)</span> is calculated using a result from linear response:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.LinearResponseScreeningGericke2010.html#jaxrts.models.LinearResponseScreeningGericke2010" title="jaxrts.models.LinearResponseScreeningGericke2010"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearResponseScreeningGericke2010</span></code></a>()</p></td>
+<td><p>The screening density <span class="math notranslate nohighlight">\(q\)</span> is calculated using a result from linear response:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.Model.html#jaxrts.models.Model" title="jaxrts.models.Model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model</span></code></a>()</p></td>
+<td><p>Abstract definition of a Model in jaxrts.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.Neglect.html#jaxrts.models.Neglect" title="jaxrts.models.Neglect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Neglect</span></code></a>()</p></td>
+<td><p>Universal model to neglect a contribution and set it to zero.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.NonDegenerateElectronChemPotential.html#jaxrts.models.NonDegenerateElectronChemPotential" title="jaxrts.models.NonDegenerateElectronChemPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NonDegenerateElectronChemPotential</span></code></a>()</p></td>
+<td><p>Chemical Potential of a non-degenerate electron gas.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.OnePotentialHNCIonFeat.html#jaxrts.models.OnePotentialHNCIonFeat" title="jaxrts.models.OnePotentialHNCIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OnePotentialHNCIonFeat</span></code></a>(rmin, rmax, pot, SVT, ...)</p></td>
+<td><p>Calculates <span class="math notranslate nohighlight">\(S_{ab}\)</span> in the Hypernetted Chain approximation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.PauliBlockingIPD.html#jaxrts.models.PauliBlockingIPD" title="jaxrts.models.PauliBlockingIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PauliBlockingIPD</span></code></a>()</p></td>
+<td><p>Pauli Blocking IPD Model <span id="id24">[<a class="reference internal" href="../bibliography.html#id80" title="Gerd Röpke, David Blaschke, Tilo Döppner, Chengliang Lin, Wolf-Dietrich Kraeft, Ronald Redmer, and Heidi Reinholz. Ionization potential depression and pauli blocking in degenerate plasmas at extreme densities. Phys. Rev. E, 99:033201, Mar 2019. doi:10.1103/PhysRevE.99.033201.">Röpke et al., 2019</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.PaulingFormFactors.html#jaxrts.models.PaulingFormFactors" title="jaxrts.models.PaulingFormFactors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PaulingFormFactors</span></code></a>()</p></td>
+<td><p>Analytical functions for each electrons in quantum states defined by the quantum numbers <cite>n</cite> and <cite>l</cite>, assuming a hydrogen-like atom.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.PeakCollection.html#jaxrts.models.PeakCollection" title="jaxrts.models.PeakCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeakCollection</span></code></a>(k_pos, intensity, peak_function)</p></td>
+<td><p>A model for approximating <span class="math notranslate nohighlight">\(S_\text{ii}\)</span> as a sum of peaks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.QCSalpeterApproximation.html#jaxrts.models.QCSalpeterApproximation" title="jaxrts.models.QCSalpeterApproximation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QCSalpeterApproximation</span></code></a>([sample_points])</p></td>
+<td><p>Quantum Corrected Salpeter Approximation for free-free scattering.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.RPA.html#jaxrts.models.RPA" title="jaxrts.models.RPA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RPA</span></code></a>([sample_points])</p></td>
+<td><p>Model for free-free scattering based on the Random Phase Approximation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.RPA_DandreaFit.html#jaxrts.models.RPA_DandreaFit" title="jaxrts.models.RPA_DandreaFit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RPA_DandreaFit</span></code></a>([sample_points])</p></td>
+<td><p>Model for free-free scattering based fitting to the Random Phase Approximation, as presented by <span id="id25">[<a class="reference internal" href="../bibliography.html#id21" title="R. G. Dandrea, N. W. Ashcroft, and A. E. Carlsson. Electron liquid at any degeneracy. Physical Review B, 34:2097–2111, 8 1986. doi:10.1103/physrevb.34.2097.">Dandrea et al., 1986</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.SLFCFarid1993.html#jaxrts.models.SLFCFarid1993" title="jaxrts.models.SLFCFarid1993"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SLFCFarid1993</span></code></a>()</p></td>
+<td><p>Static local field correction model by Farid at al.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.SLFCGeldart1966.html#jaxrts.models.SLFCGeldart1966" title="jaxrts.models.SLFCGeldart1966"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SLFCGeldart1966</span></code></a>()</p></td>
+<td><p>Static local field correction model by Geldart and Vosko <span id="id26">[<a class="reference internal" href="../bibliography.html#id42" title="D. J. W. Geldart and S. H. Vosko. The screening function of an interacting electron gas. Canadian Journal of Physics, 44(9):2137–2171, 1966. doi:10.1139/p66-174.">Geldart and Vosko, 1966</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.SLFCInterpFortmann2010.html#jaxrts.models.SLFCInterpFortmann2010" title="jaxrts.models.SLFCInterpFortmann2010"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SLFCInterpFortmann2010</span></code></a>()</p></td>
+<td><p>Static local field correction model that interpolates between the zero temperature result by Farid <span id="id27">[<a class="reference internal" href="../bibliography.html#id35" title="Behnam Farid, Volker Heine, G. E. Engel, and I. J. Robertson. Extremal properties of the harris-foulkes functional and an improved screening calculation for the electron gas. Phys. Rev. B, 48:11602–11621, Oct 1993. doi:10.1103/PhysRevB.48.11602.">Farid et al., 1993</a>]</span> and the Geldart result <span id="id28">[<a class="reference internal" href="../bibliography.html#id42" title="D. J. W. Geldart and S. H. Vosko. The screening function of an interacting electron gas. Canadian Journal of Physics, 44(9):2137–2171, 1966. doi:10.1139/p66-174.">Geldart and Vosko, 1966</a>]</span> for high temperatures.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.SLFCInterpGregori2007.html#jaxrts.models.SLFCInterpGregori2007" title="jaxrts.models.SLFCInterpGregori2007"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SLFCInterpGregori2007</span></code></a>()</p></td>
+<td><p>Static local field correction model that interpolates between the zero temperature result by Utsumi and Ichimaru <span id="id29">[<a class="reference internal" href="../bibliography.html#id94" title="Kenichi Utsumi and Setsuo Ichimaru. Dielectric formulation of strongly coupled electron liquids at metallic densities. vi. analytic expression for the local-field correction. Phys. Rev. A, 26:603–610, Jul 1982. doi:10.1103/PhysRevA.26.603.">Utsumi and Ichimaru, 1982</a>]</span> and the Geldart result <span id="id30">[<a class="reference internal" href="../bibliography.html#id42" title="D. J. W. Geldart and S. H. Vosko. The screening function of an interacting electron gas. Canadian Journal of Physics, 44(9):2137–2171, 1966. doi:10.1139/p66-174.">Geldart and Vosko, 1966</a>]</span> for high temperatures.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.SLFCUtsumi1982.html#jaxrts.models.SLFCUtsumi1982" title="jaxrts.models.SLFCUtsumi1982"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SLFCUtsumi1982</span></code></a>()</p></td>
+<td><p>Static local field correction model by Utsumi and Ichimaru <span id="id31">[<a class="reference internal" href="../bibliography.html#id94" title="Kenichi Utsumi and Setsuo Ichimaru. Dielectric formulation of strongly coupled electron liquids at metallic densities. vi. analytic expression for the local-field correction. Phys. Rev. A, 26:603–610, Jul 1982. doi:10.1103/PhysRevA.26.603.">Utsumi and Ichimaru, 1982</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ScatteringModel.html#jaxrts.models.ScatteringModel" title="jaxrts.models.ScatteringModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ScatteringModel</span></code></a>([sample_points])</p></td>
+<td><p>A subset of <a class="reference internal" href="jaxrts.models.Model.html#jaxrts.models.Model" title="jaxrts.models.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a>'s, used to provide some extra functionalities to (mainly elastic) scattering models.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.html#jaxrts.models.SchumacherImpulse" title="jaxrts.models.SchumacherImpulse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SchumacherImpulse</span></code></a>([r_k])</p></td>
+<td><p>Bound-free scattering based on the Schumacher Impulse Approximation <span id="id32">[<a class="reference internal" href="../bibliography.html#id85" title="M Schumacher, F Smend, and I Borchert. Incoherent scattering of gamma rays by inner-shell electrons. Journal of Physics B: Atomic and Molecular Physics, 8:1428–1439, 6 1975. doi:10.1088/0022-3700/8/9/010.">Schumacher et al., 1975</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulseColdEdges.html#jaxrts.models.SchumacherImpulseColdEdges" title="jaxrts.models.SchumacherImpulseColdEdges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SchumacherImpulseColdEdges</span></code></a>([r_k])</p></td>
+<td><p>Bound-free scattering based on the Schumacher Impulse Approximation <span id="id33">[<a class="reference internal" href="../bibliography.html#id85" title="M Schumacher, F Smend, and I Borchert. Incoherent scattering of gamma rays by inner-shell electrons. Journal of Physics B: Atomic and Molecular Physics, 8:1428–1439, 6 1975. doi:10.1088/0022-3700/8/9/010.">Schumacher et al., 1975</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulseFitRk.html#jaxrts.models.SchumacherImpulseFitRk" title="jaxrts.models.SchumacherImpulseFitRk"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SchumacherImpulseFitRk</span></code></a>()</p></td>
+<td><p>Bound-free scattering based on the Schumacher Impulse Approximation <span id="id34">[<a class="reference internal" href="../bibliography.html#id85" title="M Schumacher, F Smend, and I Borchert. Incoherent scattering of gamma rays by inner-shell electrons. Journal of Physics B: Atomic and Molecular Physics, 8:1428–1439, 6 1975. doi:10.1088/0022-3700/8/9/010.">Schumacher et al., 1975</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.SommerfeldChemPotential.html#jaxrts.models.SommerfeldChemPotential" title="jaxrts.models.SommerfeldChemPotential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SommerfeldChemPotential</span></code></a>()</p></td>
+<td><p>Interpolation function between the low and high temperature limit for the chemical potential of a non-interacting (ideal) fermi gas given in the paper of Cowan <span id="id35">[<a class="reference internal" href="../bibliography.html#id18" title="Brian Cowan. On the chemical potential of ideal fermi and bose gases. Journal of Low Temperature Physics, 197(5-6):412–444, 2019. doi:10.1007/s10909-019-02228-0.">Cowan, 2019</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.StewartPyattIPD.html#jaxrts.models.StewartPyattIPD" title="jaxrts.models.StewartPyattIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StewartPyattIPD</span></code></a>([arb_deg])</p></td>
+<td><p>Stewart Pyatt IPD Model <span id="id36">[<a class="reference internal" href="../bibliography.html#id92" title="J. C. Stewart and Jr Pyatt, K. D. Lowering of ionization potentials in plasmas. Astrophysical Journal, 144:1203–1211, 1966.">Stewart and Pyatt, 1966</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.StewartPyattPrestonIPD.html#jaxrts.models.StewartPyattPrestonIPD" title="jaxrts.models.StewartPyattPrestonIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StewartPyattPrestonIPD</span></code></a>([arb_deg, ...])</p></td>
+<td><p>Stewart Pyatt IPD Model <span id="id37">[<a class="reference internal" href="../bibliography.html#id92" title="J. C. Stewart and Jr Pyatt, K. D. Lowering of ionization potentials in plasmas. Astrophysical Journal, 144:1203–1211, 1966.">Stewart and Pyatt, 1966</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.Sum_Sii.html#jaxrts.models.Sum_Sii" title="jaxrts.models.Sum_Sii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sum_Sii</span></code></a>()</p></td>
+<td><p>This model sums up all <span class="math notranslate nohighlight">\(S_{ab}\)</span> from the HNC and multiplies it with <span class="math notranslate nohighlight">\(\sqrt{x_{a}\cdot x_{b}}\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.html#jaxrts.models.ThreePotentialHNCIonFeat" title="jaxrts.models.ThreePotentialHNCIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ThreePotentialHNCIonFeat</span></code></a>(rmin, rmax, pot, ...)</p></td>
+<td><p>Calculates <span class="math notranslate nohighlight">\(S_{ab}\)</span> including electron-ion and electron-electron static structure factors using the Hypernetted Chain approximation.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jaxrts.math.inverse_fermi_12_rational_approximation_antia.html" class="btn btn-neutral float-left" title="jaxrts.math.inverse_fermi_12_rational_approximation_antia" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.models.averagePlasmaState.html" class="btn btn-neutral float-right" title="jaxrts.models.averagePlasmaState" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

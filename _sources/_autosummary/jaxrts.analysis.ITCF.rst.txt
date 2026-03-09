@@ -1,0 +1,35 @@
+jaxrts.analysis.ITCF
+====================
+
+.. currentmodule:: jaxrts.analysis
+
+.. autoclass:: ITCF
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~ITCF.F
+      ~ITCF.__init__
+      ~ITCF.get_T
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~ITCF.raw
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.analysis.ITCF:
+
+   .. minigallery:: jaxrts.analysis.ITCF
+       :add-heading:

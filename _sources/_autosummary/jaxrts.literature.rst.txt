@@ -1,0 +1,33 @@
+jaxrts.literature
+=================
+
+.. automodule:: jaxrts.literature
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      get_bibtex_ref_string
+      get_cite_ref_string
+      get_formatted_ref_string
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

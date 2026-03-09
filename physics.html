@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Physics &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Generating a first spectrum" href="first-spectrum.html" />
+    <link rel="prev" title="Usage" href="usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="usage.html">Usage</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="first-spectrum.html">Generating a first spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">Models implemented</a></li>
+<li class="toctree-l2"><a class="reference internal" href="first_model.html">Creating your own model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementation-details.html">Implementation details</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="usage.html">Usage</a></li>
+      <li class="breadcrumb-item active">Physics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/physics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="physics">
+<h1>Physics<a class="headerlink" href="#physics" title="Link to this heading"></a></h1>
+<p>XRTS is describing the scattering of an X-ray photon on electrons. In the WDM
+community, the term summarizes Raman, Rayleigh and Thomson scattering processes
+<span id="id1">[<a class="reference internal" href="bibliography.html#id44" title="Siegfried H. Glenzer and Ronald Redmer. X-ray thomson scattering in high energy density plasmas. Reviews of Modern Physics, 81:1625–1663, 12 2009. doi:10.1103/revmodphys.81.1625.">Glenzer and Redmer, 2009</a>]</span>.</p>
+<p>In a typical setup, a light-source provides photons carying momentum
+<span class="math notranslate nohighlight">\(\hbar\vec{k_0}\)</span> and energy <span class="math notranslate nohighlight">\(\hbar\omega_0\)</span>.
+This light scatteres off a target, often a WDM or plasma state, defined by a
+set of plasma paramters, such as density, temperature, and ionization.
+A detector, located at an angle <span class="math notranslate nohighlight">\(\theta\)</span> collects scattered photons, with
+energy <span class="math notranslate nohighlight">\(\hbar\omega_s\)</span>, and momentum <span class="math notranslate nohighlight">\(\hbar\vec{k}_s\)</span>. The
+transferred quantities shall be denoted with <span class="math notranslate nohighlight">\(\vec{k}\)</span> (the <strong>scattering vector</strong>) and
+<span class="math notranslate nohighlight">\(\omega\)</span> (<strong>photon frequency shift</strong>).</p>
+<p>Since the plasma is isotropic, we simplify that only the absolute value of the scattering vector <span class="math notranslate nohighlight">\(\vec{k}\)</span> has to be considered.
+This quantity can be expressed as</p>
+<div class="math notranslate nohighlight">
+\[k = \sqrt{k_s^2 + k_0^2 - 2 k_s k_0 \cos \theta}
+    \approx 2 \frac{\omega_0}{c} \sin\left(\frac{\theta}{2}\right),\]</div>
+<p>where the approximation holds when <span class="math notranslate nohighlight">\(k\)</span> is small compared to <span class="math notranslate nohighlight">\(k_0\)</span>. A sketch of the geometry of
+a typical XRTS experiment can be seen in the figure.</p>
+<a class="reference internal image-reference" href="_images/XRTS_geometry.svg"><img alt="_images/XRTS_geometry.svg" src="_images/XRTS_geometry.svg" style="width: 600px;" /></a>
+<p>An actual XRTS signal arises from several distinct
+mechanisms that are interpreted according to the chemical picture introduced by Chihara <span id="id2">[<a class="reference internal" href="bibliography.html#id16" title="Junzo Chihara. Interaction of photons with plasmas and liquid metals - photoabsorption and scattering. Journal of Physics: Condensed Matter, 12:231–247, 1 2000. doi:10.1088/0953-8984/12/3/303.">Chihara, 2000</a>]</span>.
+In this model, and in jaxrts, the total electron–electron dynamic structure
+factor is decomposed into a sum of contributions that correspond to
+different physical origins—namely, elastic (<strong>el</strong>), free–free (<strong>ff</strong>), bound–free (<strong>bf</strong>), and
+free–bound (<strong>fb</strong>) interactions between electrons and ions.</p>
+<div class="math notranslate nohighlight">
+\[S_{ee}^{\text{tot}}(k, \omega) =
+    S_{ee}^{\text{el}}(k, \omega)
+    + S_{ee}^{\text{ff}}(k, \omega)
+    + S_{ee}^{\text{bf}}(k, \omega)
+    + S_{ee}^{\text{fb}}(k, \omega)\]</div>
+<p>Each of these four contributions have to be defined, in order to generate a spectrum.
+See <a class="reference internal" href="first-spectrum.html"><span class="doc">Generating a first spectrum</span></a> on how this is done.
+A comprehensive list of available models can be found under <a class="reference internal" href="models.html"><span class="doc">Models implemented</span></a>.</p>
+<p><span class="math notranslate nohighlight">\(S_{ee}^{\text{tot}}\)</span> is related to the intensity <span class="math notranslate nohighlight">\(I\)</span> measured in
+an experiment via:</p>
+<div class="math notranslate nohighlight">
+\[I(k, \omega) \propto \left(\frac{\omega + \omega_0}{\omega_0}\right)^\nu S_{\text{ee}}^\text{tot}(k, \omega) \circledast R\left(\omega\right)\quad,
+\label{eqn:signal}\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(R\)</span> is the combined source instrument function
+(<a class="reference internal" href="_autosummary/jaxrts.setup.Setup.instrument.html#jaxrts.setup.Setup.instrument" title="jaxrts.setup.Setup.instrument"><code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.setup.Setup.instrument</span></code></a>), <span class="math notranslate nohighlight">\(\circledast\)</span> is the
+convolution, and the exponent <span class="math notranslate nohighlight">\(\nu\)</span> accounts for the frequency
+redistrubution correction (<a class="reference internal" href="_autosummary/jaxrts.setup.Setup.frc_exponent.html#jaxrts.setup.Setup.frc_exponent" title="jaxrts.setup.Setup.frc_exponent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.setup.Setup.frc_exponent</span></code></a>, see
+<span id="id3">[<a class="reference internal" href="bibliography.html#id19" title="B J B Crowley and G Gregori. X-ray scattering by many-particle systems. New Journal of Physics, 15:015014, 1 2013. doi:10.1088/1367-2630/15/1/015014.">Crowley and Gregori, 2013</a>]</span>.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="first-spectrum.html" class="btn btn-neutral float-right" title="Generating a first spectrum" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

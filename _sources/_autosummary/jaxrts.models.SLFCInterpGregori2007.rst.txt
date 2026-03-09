@@ -1,0 +1,39 @@
+jaxrts.models.SLFCInterpGregori2007
+===================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: SLFCInterpGregori2007
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SLFCInterpGregori2007.__init__
+      ~SLFCInterpGregori2007.check
+      ~SLFCInterpGregori2007.citation
+      ~SLFCInterpGregori2007.evaluate
+      ~SLFCInterpGregori2007.evaluate_fullk
+      ~SLFCInterpGregori2007.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SLFCInterpGregori2007.allowed_keys
+      ~SLFCInterpGregori2007.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.SLFCInterpGregori2007:
+
+   .. minigallery:: jaxrts.models.SLFCInterpGregori2007
+       :add-heading:

@@ -1,0 +1,50 @@
+jaxrts.hnc\_potentials.CoulombPotential
+=======================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: CoulombPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~CoulombPotential.T
+      ~CoulombPotential.__init__
+      ~CoulombPotential.alpha
+      ~CoulombPotential.check
+      ~CoulombPotential.citation
+      ~CoulombPotential.full_k
+      ~CoulombPotential.full_r
+      ~CoulombPotential.lambda_ab
+      ~CoulombPotential.long_k
+      ~CoulombPotential.long_r
+      ~CoulombPotential.mu
+      ~CoulombPotential.prepare
+      ~CoulombPotential.q2
+      ~CoulombPotential.r_cut
+      ~CoulombPotential.short_k
+      ~CoulombPotential.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~CoulombPotential.allowed_keys
+      ~CoulombPotential.cite_keys
+      ~CoulombPotential.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.CoulombPotential:
+
+   .. minigallery:: jaxrts.hnc_potentials.CoulombPotential
+       :add-heading:

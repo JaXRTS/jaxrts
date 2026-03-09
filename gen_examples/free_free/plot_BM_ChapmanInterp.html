@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Number of interpolation in the Born Mermin Chapman Interpolation &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Showing the relevance of the Born Mermin Approximation" href="plot_See0_RPA_BM.html" />
+    <link rel="prev" title="Introduce LFC to Born Mermin Calculations" href="plot_Fortmann_BMA.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Example gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../plot_getting_started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_multi_component.html">Multi-Species Plasmas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_reproduce_Gregori2003_fig6.html">Calculate the full structure factors for various plasma conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis-module-examples">Analysis module examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#bound-free-scattering-examples">bound-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#electronic-local-field-correction-examples">Electronic local field correction examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#form-factor-examples">form-factor examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-bound-scattering-examples">free-bound scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-free-scattering-examples">free-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#ionic-scattering-examples">Ionic scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#saha-examples">Saha Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#setup-examples">Setup Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#utility-tool-examples">Utility tool examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis/index.html">Analysis module examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bound_free/index.html">bound-free scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ee_lfc/index.html">Electronic local field correction examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../form_factors/index.html">form-factor examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_bound/index.html">free-bound scattering examples</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">free-free scattering examples</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_See0_QCSA.html">Plot See0 using the Quantum corrected Salpetera approximation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_See0_RPA.html">Plot See0 using the RPA approximation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_BornCollision_Frequency.html">Born Collision Frequency</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_Fortmann_BMA.html">Introduce LFC to Born Mermin Calculations</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Number of interpolation in the Born Mermin Chapman Interpolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_See0_RPA_BM.html">Showing the relevance of the Born Mermin Approximation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../ionic/index.html">Ionic scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../saha/index.html">Saha Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../setup/index.html">Setup Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/index.html">Utility tool examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">free-free scattering examples</a></li>
+      <li class="breadcrumb-item active">Number of interpolation in the Born Mermin Chapman Interpolation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gen_examples/free_free/plot_BM_ChapmanInterp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gen-examples-free-free-plot-bm-chapmaninterp-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="number-of-interpolation-in-the-born-mermin-chapman-interpolation">
+<span id="sphx-glr-gen-examples-free-free-plot-bm-chapmaninterp-py"></span><h1>Number of interpolation in the Born Mermin Chapman Interpolation<a class="headerlink" href="#number-of-interpolation-in-the-born-mermin-chapman-interpolation" title="Link to this heading"></a></h1>
+<p>The Chapman Interpolation of the Born Mermin approximation saves computation
+time by evaluating the Structure factor not on all frequencies, but only on a
+given number of points, and interpolates after. This example is investigating
+the required number of points for the interpolation.</p>
+<p>We also compare the number of points required when solving the integral for the
+imaginary part of the collision frequency, or connecting it via a Kramers
+Kronig relation (<code class="docutils literal notranslate"><span class="pre">KKT</span> <span class="pre">=</span> <span class="pre">True</span></code>). We observe that the number of grid-points has
+to be higher for comparable quality of the result, when using <code class="docutils literal notranslate"><span class="pre">KKT</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The time printed in this script is the time after the first compilation
+(which normally takes a notable time).</p>
+</div>
+<img src="../../_images/sphx_glr_plot_BM_ChapmanInterp_001.svg" srcset="../../_images/sphx_glr_plot_BM_ChapmanInterp_001.svg" alt="plot BM ChapmanInterp" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Full BMA: 2.635244607925415s
+2 interp points: 0.14974522590637207s       Mean deviation from full RPA:  -6.417660737971308e-20 Max deviation from full RPA:  3.3269295227579567e-18
+4 interp points: 0.15662813186645508s       Mean deviation from full RPA:  5.842183106337609e-20 Max deviation from full RPA:  1.1313588367551087e-18
+20 interp points: 0.20065951347351074s       Mean deviation from full RPA:  -2.8298423586592834e-20 Max deviation from full RPA:  4.2172178767420766e-20
+100 interp points: 0.33132386207580566s       Mean deviation from full RPA:  -3.277086057580894e-20 Max deviation from full RPA:  2.137215271671695e-20
+2 interp points: 0.15129685401916504s       Mean deviation from full RPA:  2.200652021343034e-19 Max deviation from full RPA:  2.9810113737122587e-18
+4 interp points: 0.1614997386932373s       Mean deviation from full RPA:  1.1844918959575883e-19 Max deviation from full RPA:  1.0306087100343865e-18
+20 interp points: 0.2066798210144043s       Mean deviation from full RPA:  2.278627298005906e-20 Max deviation from full RPA:  1.2710680301020966e-18
+100 interp points: 0.3295910358428955s       Mean deviation from full RPA:  2.0669797057135996e-20 Max deviation from full RPA:  1.2838363569820362e-18
+RPA: 0.055373430252075195s
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
+
+<span class="c1"># Allow jax to use 6 CPUs, see</span>
+<span class="c1"># https://astralord.github.io/posts/exploring-parallel-strategies-with-jax/</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;XLA_FLAGS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;--xla_force_host_platform_device_count=6&quot;</span>
+
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ureg</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create a sharding for the probing energies</span>
+<span class="n">measured_energy</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">295</span><span class="p">,</span> <span class="mi">305</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
+
+<span class="n">setup</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span>
+    <span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;60°&quot;</span><span class="p">),</span>
+    <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;300eV&quot;</span><span class="p">),</span>
+    <span class="n">measured_energy</span><span class="o">=</span><span class="n">measured_energy</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span>
+        <a href="../../_autosummary/jaxrts.instrument_function.instrument_gaussian.html#jaxrts.instrument_function.instrument_gaussian" title="jaxrts.instrument_function.instrument_gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">instrument_gaussian</span></a><span class="p">,</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">)],</span>
+    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">]),</span>
+    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0017</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">,</span>
+    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.BornMermin_Full.html#jaxrts.models.BornMermin_Full" title="jaxrts.models.BornMermin_Full" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">BornMermin_Full</span></a><span class="p">()</span>
+<span class="c1"># This is required for the S_ii in the collision frequency</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;ionic scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.ArkhipovIonFeat.html#jaxrts.models.ArkhipovIonFeat" title="jaxrts.models.ArkhipovIonFeat" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ArkhipovIonFeat</span></a><span class="p">()</span>
+
+<span class="c1"># This is required for the V_eiS in the collision frequency</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;BM V_eiS&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.DebyeHueckel_BM_V.html#jaxrts.models.DebyeHueckel_BM_V" title="jaxrts.models.DebyeHueckel_BM_V" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DebyeHueckel_BM_V</span></a><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;BM S_ii&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.Sum_Sii.html#jaxrts.models.Sum_Sii" title="jaxrts.models.Sum_Sii" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Sum_Sii</span></a><span class="p">()</span>
+<span class="n">state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">BM_free_free_scatter</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+    <span class="n">ureg</span><span class="o">.</span><span class="n">second</span>
+<span class="p">)</span>
+<span class="n">jax</span><span class="o">.</span><span class="n">block_until_ready</span><span class="p">(</span><span class="n">BM_free_free_scatter</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Full BMA: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.BornMermin.html#jaxrts.models.BornMermin" title="jaxrts.models.BornMermin" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">BornMermin</span></a><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_guessed_E_cutoffs</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+
+
+<span class="k">for</span> <span class="n">ls</span><span class="p">,</span> <span class="n">KKT</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="s2">&quot;solid&quot;</span><span class="p">,</span> <span class="s2">&quot;dotted&quot;</span><span class="p">],</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">no_of_freq</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">]):</span>
+        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">no_of_freq</span> <span class="o">=</span> <span class="n">no_of_freq</span>
+        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">KKT</span> <span class="o">=</span> <span class="n">KKT</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">free_free_scatter</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+            <span class="n">ureg</span><span class="o">.</span><span class="n">second</span>
+        <span class="p">)</span>
+        <span class="n">jax</span><span class="o">.</span><span class="n">block_until_ready</span><span class="p">(</span><span class="n">free_free_scatter</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">no_of_freq</span><span class="si">}</span><span class="s2"> interp points: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0</span><span class="si">}</span><span class="s2">s      &quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Mean deviation from full RPA: &quot;</span><span class="p">,</span>
+            <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">free_free_scatter</span> <span class="o">-</span> <span class="n">BM_free_free_scatter</span><span class="p">),</span>
+            <span class="s2">&quot;Max deviation from full RPA: &quot;</span><span class="p">,</span>
+            <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">free_free_scatter</span> <span class="o">-</span> <span class="n">BM_free_free_scatter</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
+            <span class="n">free_free_scatter</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">no_of_freq</span><span class="si">}</span><span class="s2"> interpolation points&quot;</span><span class="p">,</span>
+            <span class="n">linestyle</span><span class="o">=</span><span class="n">ls</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
+    <span class="n">BM_free_free_scatter</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Full BMA&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.RPA.html#jaxrts.models.RPA" title="jaxrts.models.RPA" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">RPA</span></a><span class="p">()</span>
+<span class="n">state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">free_free_scatter</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+    <span class="n">ureg</span><span class="o">.</span><span class="n">second</span>
+<span class="p">)</span>
+<span class="n">jax</span><span class="o">.</span><span class="n">block_until_ready</span><span class="p">(</span><span class="n">free_free_scatter</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RPA: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
+    <span class="n">free_free_scatter</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;RPA&quot;</span><span class="p">,</span>
+    <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Energy [eV]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Scattering intensity&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">1.05</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 11.442 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-free-free-plot-bm-chapmaninterp-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/afa8a7543d9f49503e73dc08337fcbe1/plot_BM_ChapmanInterp.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_BM_ChapmanInterp.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/57d9a46f026cd4dd6fd7e24ddc9699dd/plot_BM_ChapmanInterp.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_BM_ChapmanInterp.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_Fortmann_BMA.html" class="btn btn-neutral float-left" title="Introduce LFC to Born Mermin Calculations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_See0_RPA_BM.html" class="btn btn-neutral float-right" title="Showing the relevance of the Born Mermin Approximation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

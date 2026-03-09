@@ -1,0 +1,39 @@
+jaxrts.models.SLFCGeldart1966
+=============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: SLFCGeldart1966
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SLFCGeldart1966.__init__
+      ~SLFCGeldart1966.check
+      ~SLFCGeldart1966.citation
+      ~SLFCGeldart1966.evaluate
+      ~SLFCGeldart1966.evaluate_fullk
+      ~SLFCGeldart1966.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SLFCGeldart1966.allowed_keys
+      ~SLFCGeldart1966.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.SLFCGeldart1966:
+
+   .. minigallery:: jaxrts.models.SLFCGeldart1966
+       :add-heading:

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.free_bound &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.free_bound</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.free_bound</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This submodule is dedicated to calculate the contribution of the free bound</span>
+<span class="sd">contributions to the dynamic structure factor.</span>
+<span class="sd">Currently the free-bound contribution is calculated using the bound-free</span>
+<span class="sd">contribution and assuming the principle of detailed balance.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jpu</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnpu</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.setup</span><span class="w"> </span><span class="kn">import</span> <span class="n">Setup</span><span class="p">,</span> <span class="n">plasma_frequency</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+
+
+<div class="viewcode-block" id="FreeBoundFlippedSetup">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.free_bound.FreeBoundFlippedSetup.html#jaxrts.free_bound.FreeBoundFlippedSetup">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FreeBoundFlippedSetup</span><span class="p">(</span><span class="n">Setup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An auxiliary setup, which flips the measured energy, but not k. This object</span>
+<span class="sd">    can be used to :py:meth:`jaxrts.models.Model.evaluate_raw` a bound-free</span>
+<span class="sd">    :py:class:`jaxrts.models.Model`</span>
+
+<span class="sd">    .. warning ::</span>
+
+<span class="sd">       Due to the nature of this object,</span>
+<span class="sd">       :py:meth:`~FreeBoundFlippedSetup.full_k` and</span>
+<span class="sd">       :py:meth:`~FreeBoundFlippedSetup.dispersion_corrected_k` are not</span>
+<span class="sd">       monotonically rising with</span>
+<span class="sd">       :py:attr:`~FreeBoundFlippedSetup.measured_energy`, anymore, but rather</span>
+<span class="sd">       falling. In other words, the k values do not correspond to the probing</span>
+<span class="sd">       energy.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FreeBoundFlippedSetup.__init__">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.free_bound.FreeBoundFlippedSetup.__init__.html#jaxrts.free_bound.FreeBoundFlippedSetup.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">scattering_angle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">energy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mi">2</span> <span class="o">*</span> <span class="n">setup</span><span class="o">.</span><span class="n">energy</span> <span class="o">-</span> <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">instrument</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">correct_k_dispersion</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">full_k</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The scattering vector length probed in the experiment at each energy</span>
+<span class="sd">        channel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">:</span>
+            <span class="n">original_measured_energy</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span>
+            <span class="n">k_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span>
+            <span class="n">k_out</span> <span class="o">=</span> <span class="n">original_measured_energy</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span>
+
+            <span class="n">k</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">k_out</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_in</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="o">-</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k_out</span> <span class="o">*</span> <span class="n">k_in</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">k</span>
+
+<div class="viewcode-block" id="FreeBoundFlippedSetup.dispersion_corrected_k">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.free_bound.FreeBoundFlippedSetup.dispersion_corrected_k.html#jaxrts.free_bound.FreeBoundFlippedSetup.dispersion_corrected_k">[docs]</a>
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dispersion_corrected_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the dispersion corrected wavenumber.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">:</span>
+            <span class="n">original_measured_energy</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span>
+            <span class="n">omega_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
+            <span class="n">omega_out</span> <span class="o">=</span> <span class="n">original_measured_energy</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
+            <span class="n">omega_pl</span> <span class="o">=</span> <span class="n">plasma_frequency</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
+            <span class="n">k_in</span> <span class="o">=</span> <span class="n">omega_in</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span>
+            <span class="n">k_out</span> <span class="o">=</span> <span class="n">omega_out</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">c</span>
+
+            <span class="c1"># Do the dispersion correction:</span>
+            <span class="n">k_in</span> <span class="o">*=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">omega_pl</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">omega_in</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">k_out</span> <span class="o">*=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">omega_pl</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">omega_out</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="n">k</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">k_out</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_in</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k_out</span> <span class="o">*</span> <span class="n">k_in</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">k</span></div>
+
+
+    <span class="c1"># The following is required to jit a setup</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">aux_data</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">,)</span>  <span class="c1"># static values</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">FreeBoundFlippedSetup</span><span class="p">)</span>
+        <span class="p">(</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">instrument</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">children</span>
+        <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">correct_k_dispersion</span><span class="p">,)</span> <span class="o">=</span> <span class="n">aux_data</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
+
+<span class="n">jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">register_pytree_node</span><span class="p">(</span>
+    <span class="n">FreeBoundFlippedSetup</span><span class="p">,</span>
+    <span class="n">FreeBoundFlippedSetup</span><span class="o">.</span><span class="n">_tree_flatten</span><span class="p">,</span>
+    <span class="n">FreeBoundFlippedSetup</span><span class="o">.</span><span class="n">_tree_unflatten</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

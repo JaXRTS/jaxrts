@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SVT–OZ and notation &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Example gallery" href="gen_examples/index.html" />
+    <link rel="prev" title="Hypernetted Chain" href="hnc.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="usage.html">Usage</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="physics.html">Physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="first-spectrum.html">Generating a first spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">Models implemented</a></li>
+<li class="toctree-l2"><a class="reference internal" href="first_model.html">Creating your own model</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="implementation-details.html">Implementation details</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hnc.html">Hypernetted Chain</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">SVT–OZ and notation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#for-two-component-plasma-m-2-system">For two-component plasma <span class="math notranslate nohighlight">\(M{=}2\)</span> system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#from-the-m-2-pattern-to-the-general-m-a-selector-delta-derivation">From the <span class="math notranslate nohighlight">\(M{=}2\)</span> pattern to the general <span class="math notranslate nohighlight">\(M\)</span>: a selector-<span class="math notranslate nohighlight">\(\delta\)</span> derivation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="usage.html">Usage</a></li>
+          <li class="breadcrumb-item"><a href="implementation-details.html">Implementation details</a></li>
+      <li class="breadcrumb-item active">SVT–OZ and notation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/svt-hnc.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="svtoz-and-notation">
+<h1>SVT–OZ and notation<a class="headerlink" href="#svtoz-and-notation" title="Link to this heading"></a></h1>
+<p>We derive the linear-algebra form of the SVT–OZ relation
+<span id="id1">[<a class="reference internal" href="bibliography.html#id89" title="P. Seuferling, J. Vogel, and C. Toepffer. Correlations in a two-temperature plasma. Physical review. A, General physics, 40(1):323–329, 1989. doi:10.1103/physreva.40.323.">Seuferling et al., 1989</a>, <a class="reference internal" href="bibliography.html#id90" title="Nathaniel R. Shaffer, Sanat Kumar Tiwari, and Scott D. Baalrud. Pair correlation functions of strongly coupled two-temperature plasma. Physics of Plasmas, 2017. doi:10.1063/1.4999185.">Shaffer et al., 2017</a>]</span> for a general <span class="math notranslate nohighlight">\(M\)</span>-component,
+<span class="math notranslate nohighlight">\(M\)</span>-temperature plasma. First, we use the explicit <span class="math notranslate nohighlight">\(M=2\)</span> case as a
+warm-up, then we extend this to the full formula for the <span class="math notranslate nohighlight">\(M^2 \times M^2\)</span>
+matrix entries.</p>
+<p>Consider <span class="math notranslate nohighlight">\(M\)</span> species (note that with electrons included in the
+calculation, this means: M-1 ions plus electron) with number densities
+<span class="math notranslate nohighlight">\(\{n_a\}\)</span>, masses <span class="math notranslate nohighlight">\(\{m_a\}\)</span>, and temperatures <span class="math notranslate nohighlight">\(\{T_a\}\)</span>
+(<span class="math notranslate nohighlight">\(a=1,\dots,M\)</span>). In <span class="math notranslate nohighlight">\(k\)</span>-space, the multi-component SVT–OZ relation
+can be obtained by extending the work of <span id="id2">[<a class="reference internal" href="bibliography.html#id90" title="Nathaniel R. Shaffer, Sanat Kumar Tiwari, and Scott D. Baalrud. Pair correlation functions of strongly coupled two-temperature plasma. Physics of Plasmas, 2017. doi:10.1063/1.4999185.">Shaffer et al., 2017</a>]</span> through summation
+over all species, yielding</p>
+<div class="math notranslate nohighlight">
+\[\hat h_{ab}
+=\hat c_{ab}
++\sum_{s=1}^M n_s\frac{m_{ab}\,T_{as}}{m_a\,T_{ab}}\;\hat c_{as}\hat h_{sb}
++\sum_{s=1}^M n_s\frac{m_{ab}\,T_{sb}}{m_b\,T_{ab}}\;\hat h_{as}\hat c_{sb},
+\qquad a,b\in\{1,\dots,M\}.
+\label{eq:svt-oz}\]</div>
+<p>The mass-weighted cross temperatures and reduced masses are</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{aligned}
+m_{ab}&amp;=\frac{m_a m_b}{m_a+m_b}, &amp;
+T_{ab}&amp;=\frac{m_a T_b + m_b T_a}{m_a+m_b}, \label{eq:def-Tab-mab}\\
+T_{as}&amp;=\frac{m_a T_s + m_s T_a}{m_a+m_s}, &amp;
+T_{sb}&amp;=\frac{m_s T_b + m_b T_s}{m_s+m_b}.
+\end{aligned}\end{split}\]</div>
+<p>For brevity define</p>
+<div class="math notranslate nohighlight">
+\[\alpha_{abs}=n_s\,\frac{m_{ab}\,T_{as}}{m_a\,T_{ab}},
+\qquad
+\beta_{abs}=n_s\,\frac{m_{ab}\,T_{sb}}{m_b\,T_{ab}}.
+\label{eq:def-alpha-beta}\]</div>
+<p>Moving all terms to the left, except <span class="math notranslate nohighlight">\(\hat c_{ab}\)</span>.</p>
+<div class="math notranslate nohighlight" id="equation-svt-oz-lhs">
+<span class="eqno">(1)<a class="headerlink" href="#equation-svt-oz-lhs" title="Link to this equation"></a></span>\[\hat h_{ab}
+-\sum_{s=1}^M \alpha_{abs}\,\hat c_{as}\,\hat h_{sb}
+-\sum_{s=1}^M \beta_{abs}\,\hat h_{as}\,\hat c_{sb}
+=\hat c_{ab}.\]</div>
+<p>In real space we use the HNC closure with the <em>cross</em> temperature
+<span class="math notranslate nohighlight">\(T_{ab}\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[\ln g_{ab}(r)=-\beta_{ab}V_{ab}(r)+N_{ab}(r),\qquad
+\beta_{ab}=\frac{1}{k_B T_{ab}},\quad
+h_{ab}=g_{ab}-1,\quad N_{ab}=h_{ab}-c_{ab}.
+\label{eq:hnc-closure}\]</div>
+<p>For isotropic fields we use the 3D radial transforms</p>
+<div class="math notranslate nohighlight">
+\[\begin{aligned}
+\hat f(k)&amp;=\frac{4\pi}{k}\int_0^\infty r\,f(r)\sin(kr)\,dr,
+&amp;
+f(r)&amp;=\frac{1}{2\pi^2 r}\int_0^\infty k\,\hat f(k)\sin(kr)\,dk.
+\label{eq:radialFT}
+\end{aligned}\]</div>
+<section id="for-two-component-plasma-m-2-system">
+<h2>For two-component plasma <span class="math notranslate nohighlight">\(M{=}2\)</span> system<a class="headerlink" href="#for-two-component-plasma-m-2-system" title="Link to this heading"></a></h2>
+<p>For <span class="math notranslate nohighlight">\(M{=}2\)</span>, the four unknowns are</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{vec}(\hat H)=
+\begin{bmatrix}\hat h_{11}&amp;\hat h_{12}&amp;\hat h_{21}&amp;\hat h_{22}\end{bmatrix}^{\!\top}\!,
+\qquad
+\mathrm{vec}(\hat C)=
+\begin{bmatrix}\hat c_{11}&amp;\hat c_{12}&amp;\hat c_{21}&amp;\hat c_{22}\end{bmatrix}^{\!\top}.\]</div>
+<p>Writing <a class="reference internal" href="#equation-svt-oz-lhs">(1)</a> for
+<span class="math notranslate nohighlight">\((a,b)=(1,1),(1,2),(2,1),(2,2)\)</span> gives</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{aligned}
+\hat{h}_{11} -
+\alpha_{111}\, \hat{c}_{11}\, \hat{h}_{11}  -
+\alpha_{112}\, \hat{c}_{12}\, \hat{h}_{21} -
+\beta_{111}\, \hat{h}_{11}\, \hat{c}_{11} -
+\beta_{112}\, \hat{h}_{12}\, \hat{c}_{21} &amp;=
+\hat{c}_{11},\\
+\hat{h}_{12} -
+\alpha_{121}\, \hat{c}_{11}\, \hat{h}_{12}  -
+\alpha_{122}\, \hat{c}_{12}\, \hat{h}_{22} -
+\beta_{121}\, \hat{h}_{11}\, \hat{c}_{12} -
+\beta_{122}\, \hat{h}_{12}\, \hat{c}_{22} &amp;=
+\hat{c}_{12},\\
+\hat{h}_{21} -
+\alpha_{211}\, \hat{c}_{21}\, \hat{h}_{11}  -
+\alpha_{212}\, \hat{c}_{22}\, \hat{h}_{21} -
+\beta_{211}\, \hat{h}_{21}\, \hat{c}_{11} -
+\beta_{212}\, \hat{h}_{22}\, \hat{c}_{21} &amp;=
+\hat{c}_{21},\\
+\hat{h}_{22} -
+\alpha_{221}\, \hat{c}_{21}\, \hat{h}_{12}  -
+\alpha_{222}\, \hat{c}_{22}\, \hat{h}_{22} -
+\beta_{221}\, \hat{h}_{21}\, \hat{c}_{12} -
+\beta_{222}\, \hat{h}_{22}\, \hat{c}_{22} &amp;=
+\hat{c}_{22}.
+\end{aligned}\end{split}\]</div>
+<p>Collecting like terms yields the <span class="math notranslate nohighlight">\(4\times4\)</span> linear system</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\underbrace{
+\begin{pmatrix}
+1 - (\alpha_{111} + \beta_{111})\hat{c}_{11} &amp; -\beta_{112}\hat{c}_{21} &amp; -\alpha_{112}\hat{c}_{12} &amp; 0 \\
+-\beta_{121}\hat{c}_{12} &amp; 1 - \alpha_{121}\hat{c}_{11} - \beta_{122}\hat{c}_{22} &amp; 0 &amp; -\alpha_{122}\hat{c}_{12} \\
+-\alpha_{211}\hat{c}_{21} &amp; 0 &amp; 1 - \alpha_{212}\hat{c}_{22} - \beta_{211}\hat{c}_{11} &amp; -\beta_{212}\hat{c}_{21} \\
+0 &amp; -\alpha_{221}\hat{c}_{21} &amp; -\beta_{221}\hat{c}_{12} &amp; 1 - (\alpha_{222} + \beta_{222})\hat{c}_{22}
+\end{pmatrix}
+}_{\displaystyle A}
+\;
+\underbrace{
+\begin{pmatrix}
+\hat{h}_{11} \\
+\hat{h}_{12} \\
+\hat{h}_{21} \\
+\hat{h}_{22}
+\end{pmatrix}
+}_{\displaystyle \mathrm{vec}(\hat H)}
+=
+\underbrace{
+\begin{pmatrix}
+\hat{c}_{11} \\
+\hat{c}_{12} \\
+\hat{c}_{21} \\
+\hat{c}_{22}
+\end{pmatrix}
+}_{\displaystyle \mathrm{vec}(\hat C)}.
+\label{eq:M2-matrix}\end{split}\]</div>
+<p>Now we just need to solve this linear equation to get <span class="math notranslate nohighlight">\(h_{ab}\)</span></p>
+</section>
+<section id="from-the-m-2-pattern-to-the-general-m-a-selector-delta-derivation">
+<h2>From the <span class="math notranslate nohighlight">\(M{=}2\)</span> pattern to the general <span class="math notranslate nohighlight">\(M\)</span>: a selector-<span class="math notranslate nohighlight">\(\delta\)</span> derivation<a class="headerlink" href="#from-the-m-2-pattern-to-the-general-m-a-selector-delta-derivation" title="Link to this heading"></a></h2>
+<p>We now derive the general matrix entries <span class="math notranslate nohighlight">\(A[p,q]\)</span></p>
+<section id="flattening">
+<h3>Flattening<a class="headerlink" href="#flattening" title="Link to this heading"></a></h3>
+<p>Fix a wave number <span class="math notranslate nohighlight">\(k\)</span> and vectorize by lexicographic order. Using
+0-based indexing,</p>
+<div class="math notranslate nohighlight">
+\[p=\mathrm{idx}(a,b)=(a-1)M+(b-1),\qquad
+q=\mathrm{idx}(u,v)=(u-1)M+(v-1).
+\label{eq:idx}\]</div>
+</section>
+<section id="turn-the-single-s-sum-into-a-matrixvector-product">
+<h3>Turn the single <span class="math notranslate nohighlight">\(s\)</span>-sum into a matrix–vector product<a class="headerlink" href="#turn-the-single-s-sum-into-a-matrixvector-product" title="Link to this heading"></a></h3>
+<p>For a fixed row <span class="math notranslate nohighlight">\((a,b)\)</span> (i.e. fixed <span class="math notranslate nohighlight">\(p\)</span>), rewrite each term
+of <a class="reference external" href="#eq:svt-oz-LHS">[eq:svt-oz-LHS]</a> as a sum over <em>all</em> column
+indices <span class="math notranslate nohighlight">\((u,v)\)</span> using Kronecker deltas that <em>select</em> which columns
+are hit:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{aligned}
+\hat{h}_{ab} &amp;= \sum_{u,v} \delta_{u,a} \delta_{v,b} \, \hat{h}_{uv}, \\
+\sum_{s} \alpha_{abs} \, \hat{c}_{as} \, \hat{h}_{sb} &amp;= \sum_{u,v} \left( \sum_{s} \alpha_{abs} \, \hat{c}_{as} \, \delta_{u,s} \, \delta_{v,b} \right) \hat{h}_{uv} = \sum_{u,v} \left( \alpha_{ab,u} \, \hat{c}_{au} \, \delta_{v,b} \right) \hat{h}_{uv}, \\
+\sum_{s} \beta_{abs} \, \hat{h}_{as} \, \hat{c}_{sb} &amp;= \sum_{u,v} \left( \sum_{s} \beta_{abs} \, \delta_{u,a} \, \delta_{v,s} \, \hat{c}_{sb} \right) \hat{h}_{uv} = \sum_{u,v} \left( \beta_{ab,v} \, \hat{c}_{vb} \, \delta_{u,a} \right) \hat{h}_{uv}.
+\end{aligned}\end{split}\]</div>
+<p>Therefore,</p>
+<div class="math notranslate nohighlight">
+\[\sum_{u,v}\Big[\,
+\delta_{u,a}\delta_{v,b}
+-\alpha_{ab\,u}\,\hat c_{a u}\,\delta_{v,b}
+-\beta_{ab\,v}\,\hat c_{v b}\,\delta_{u,a}\,\Big]\hat h_{uv}
+=\hat c_{ab}.\]</div>
+<p>Comparing with <span class="math notranslate nohighlight">\(\sum_q A[p,q]\,H[q]=C[p]\)</span> and
+<span class="math notranslate nohighlight">\(H[q]=\hat h_{uv}\)</span>, <span class="math notranslate nohighlight">\(C[p]=\hat c_{ab}\)</span>, we <em>define</em> the
+entry formula</p>
+<div class="math notranslate nohighlight">
+\[\boxed{%
+A\big[p,q]
+=A\big[(a{-}1)M+(b{-}1),\ (u{-}1)M+(v{-}1)\big]
+=\delta_{u,a}\delta_{v,b}
+-\alpha_{ab\,u}\,\hat c_{a u}\,\delta_{v,b}
+-\beta_{ab\,v}\,\hat c_{v b}\,\delta_{u,a}.}
+\label{eq:A-elem}\]</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hnc.html" class="btn btn-neutral float-left" title="Hypernetted Chain" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gen_examples/index.html" class="btn btn-neutral float-right" title="Example gallery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

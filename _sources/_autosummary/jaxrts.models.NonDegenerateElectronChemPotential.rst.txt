@@ -1,0 +1,38 @@
+jaxrts.models.NonDegenerateElectronChemPotential
+================================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: NonDegenerateElectronChemPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~NonDegenerateElectronChemPotential.__init__
+      ~NonDegenerateElectronChemPotential.check
+      ~NonDegenerateElectronChemPotential.citation
+      ~NonDegenerateElectronChemPotential.evaluate
+      ~NonDegenerateElectronChemPotential.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~NonDegenerateElectronChemPotential.allowed_keys
+      ~NonDegenerateElectronChemPotential.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.NonDegenerateElectronChemPotential:
+
+   .. minigallery:: jaxrts.models.NonDegenerateElectronChemPotential
+       :add-heading:

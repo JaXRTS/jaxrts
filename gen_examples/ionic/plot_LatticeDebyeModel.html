@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LatticeDebyeModel for approximating diffuse scattering in crystals &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Static structure factor of the electron-ion system" href="plot_HNC_ThreePotential_Wuensch.html" />
+    <link rel="prev" title="HNC: Multicomponent" href="plot_HNC_multicomponent.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Example gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../plot_getting_started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_multi_component.html">Multi-Species Plasmas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_reproduce_Gregori2003_fig6.html">Calculate the full structure factors for various plasma conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis-module-examples">Analysis module examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#bound-free-scattering-examples">bound-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#electronic-local-field-correction-examples">Electronic local field correction examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#form-factor-examples">form-factor examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-bound-scattering-examples">free-bound scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#free-free-scattering-examples">free-free scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#ionic-scattering-examples">Ionic scattering examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#saha-examples">Saha Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#setup-examples">Setup Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#utility-tool-examples">Utility tool examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis/index.html">Analysis module examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bound_free/index.html">bound-free scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ee_lfc/index.html">Electronic local field correction examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../form_factors/index.html">form-factor examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_bound/index.html">free-bound scattering examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../free_free/index.html">free-free scattering examples</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Ionic scattering examples</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_static_structure_factors_Arkhipov_Devletov.html">Plot static structure Factors in the Approximation by Arkhipov and Devletov</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_potentials.html">HNC: Potentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_electron_ion_potential.html">HNC: Electron-Ion Potentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_pair_correlation_functions.html">HNC: Pair correlation function for different Γ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_static_structure_factors_Gregori2006.html">Plot static structure factors in the Approximation by Gregori for T_i != T_e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_electron_ion_potentials_II.html">Electron ion potentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_Gregori_Comparison.html">Compare HNC Calculations to Gregori.2006</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_static_structure_factors_Gregori2007.html">Plot static structure factors in Charged Hard Sphere Approximation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_multicomponent.html">HNC: Multicomponent</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">LatticeDebyeModel for approximating diffuse scattering in crystals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_ThreePotential_Wuensch.html">Static structure factor of the electron-ion system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_SVT_HNC_multicomponent.html">HNC-SVT: multi-component, multi-temperature (M-SVT)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_HNC_exchange.html">HNC calculations with Quantum exchange potentials</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../saha/index.html">Saha Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../setup/index.html">Setup Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/index.html">Utility tool examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Ionic scattering examples</a></li>
+      <li class="breadcrumb-item active">LatticeDebyeModel for approximating diffuse scattering in crystals</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gen_examples/ionic/plot_LatticeDebyeModel.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gen-examples-ionic-plot-latticedebyemodel-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="latticedebyemodel-for-approximating-diffuse-scattering-in-crystals">
+<span id="sphx-glr-gen-examples-ionic-plot-latticedebyemodel-py"></span><h1>LatticeDebyeModel for approximating diffuse scattering in crystals<a class="headerlink" href="#latticedebyemodel-for-approximating-diffuse-scattering-in-crystals" title="Link to this heading"></a></h1>
+<p>This example showcases the increased diffuse scattering in heated crystals by
+the Debye Waller Effect, as implemented by the
+<a class="reference internal" href="../../_autosummary/jaxrts.models.DebyeWallerSolid.html#jaxrts.models.DebyeWallerSolid" title="jaxrts.models.DebyeWallerSolid"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.DebyeWallerSolid</span></code></a> model.</p>
+<p>For <span class="math notranslate nohighlight">\(S_\text{Plasma}\)</span> the model assumes a fixed value of unity, for all
+<span class="math notranslate nohighlight">\(k\)</span>.
+A comparison with MD-simulations helps to asses the quality of this very simple
+model. The simulation was performed with 8000 atoms using the software package
+LAMMPS <span id="id1">[<a class="reference internal" href="../../bibliography.html#id93" title="Aidan P. Thompson, H. Metin Aktulga, Richard Berger, Dan S. Bolintineanu, W. Michael Brown, Paul S. Crozier, Pieter J. in \textquotesingle  t Veld, Axel Kohlmeyer, Stan G. Moore, Trung Dac Nguyen, Ray Shan, Mark J. Stevens, Julien Tranchida, Christian Trott, and Steven J. Plimpton. Lammps - a flexible simulation tool for particle-based materials modeling at the atomic, meso, and continuum scales. Computer Physics Communications, 271:108171, 2 2022. doi:10.1016/j.cpc.2021.108171.">Thompson et al., 2022</a>]</span>. For the interatomic potential, the work by and
+Purja Pun and Mishin <span id="id2">[<a class="reference internal" href="../../bibliography.html#id77" title="G. P. Purja Pun and Y. Mishin. Optimized interatomic potential for silicon and its application to thermal stability of silicene. Physical Review B, 6 2017. doi:10.1103/physrevb.95.224103.">Pun and Mishin, 2017</a>]</span> was used, which improves on the Tersoff
+potential. Static ion-ion structure factors where calculated by averaging over
+scattering vectors realizing the same absolute <span class="math notranslate nohighlight">\(k\)</span>, and over 10000 time
+steps.</p>
+<img src="../../_images/sphx_glr_plot_LatticeDebyeModel_001.svg" srcset="../../_images/sphx_glr_plot_LatticeDebyeModel_001.svg" alt="plot LatticeDebyeModel" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.lines</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mlines</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">onp</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
+
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">ureg</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+<span class="n">theta_Debye</span> <span class="o">=</span> <span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;692K&quot;</span><span class="p">)</span>
+
+<span class="n">rho0</span> <span class="o">=</span> <span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;2.329085g/cc&quot;</span><span class="p">)</span>
+<span class="c1"># We don&#39;t compress, so rhos is just rho0</span>
+<span class="n">rhos</span> <span class="o">=</span> <span class="n">rho0</span>
+<span class="n">a0</span> <span class="o">=</span> <span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;543.0986 pm&quot;</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">rho0</span> <span class="o">/</span> <span class="n">rhos</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">a0</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">current_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="n">current_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">peak_function</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="p">(</span>
+                    <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span>
+                    <span class="o">*</span> <a href="../../_autosummary/jaxrts.instrument_function.instrument_gaussian.html#jaxrts.instrument_function.instrument_gaussian" title="jaxrts.instrument_function.instrument_gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">instrument_gaussian</span></a><span class="p">(</span>
+                        <span class="n">k</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.02</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+                    <span class="p">)</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+
+<span class="n">k_pos</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">intensities</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># Calculate the peak positions and intensities</span>
+<span class="k">for</span> <span class="n">h</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="p">[</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+<span class="p">]:</span>
+    <span class="n">d_hkl</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">h</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">l</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">k_pos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">d_hkl</span><span class="p">)</span>
+    <span class="c1"># Calculate the form factors / forbidden peaks</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">k</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">l</span> <span class="o">/</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">l</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">l</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">k</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">h</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">l</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">h</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">l</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">h</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">l</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">intensities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">I</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+
+<span class="n">k_pos</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">k_pos</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span>
+    <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+<span class="p">)</span>
+<span class="n">intensities</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">intensities</span><span class="p">)</span>
+
+<a href="../../_autosummary/jaxrts.models.PeakCollection.html#jaxrts.models.PeakCollection" title="jaxrts.models.PeakCollection" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PowderModel</span></a> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.PeakCollection.html#jaxrts.models.PeakCollection" title="jaxrts.models.PeakCollection" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">PeakCollection</span></a><span class="p">(</span><span class="n">k_pos</span><span class="p">,</span> <span class="n">intensities</span><span class="p">,</span> <span class="n">peak_function</span><span class="p">)</span>
+
+<span class="c1"># Set the plasma model to 1</span>
+<a href="../../_autosummary/jaxrts.models.FixedSii.html#jaxrts.models.FixedSii" title="jaxrts.models.FixedSii" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">S_plasmaModel</span></a> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.FixedSii.html#jaxrts.models.FixedSii" title="jaxrts.models.FixedSii" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">FixedSii</span></a><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">]]))</span>
+
+<span class="c1"># Use a fixed Debye temperature</span>
+<a href="../../_autosummary/jaxrts.models.DebyeWallerSolid.html#jaxrts.models.DebyeWallerSolid" title="jaxrts.models.DebyeWallerSolid" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">DebyeSolid</span></a> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.DebyeWallerSolid.html#jaxrts.models.DebyeWallerSolid" title="jaxrts.models.DebyeWallerSolid" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DebyeWallerSolid</span></a><span class="p">(</span><a href="../../_autosummary/jaxrts.models.FixedSii.html#jaxrts.models.FixedSii" title="jaxrts.models.FixedSii" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">S_plasmaModel</span></a><span class="p">,</span> <a href="../../_autosummary/jaxrts.models.PeakCollection.html#jaxrts.models.PeakCollection" title="jaxrts.models.PeakCollection" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PowderModel</span></a><span class="p">)</span>
+
+<span class="n">probe_k</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span>
+
+<span class="c1"># This is a dummy setup</span>
+<span class="n">_setup</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;90°&quot;</span><span class="p">),</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="n">state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">([</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;Si&quot;</span><span class="p">)],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">rhos</span><span class="p">],</span> <span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;300K&quot;</span><span class="p">))</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">&quot;Debye temperature&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.ConstantDebyeTemp.html#jaxrts.models.ConstantDebyeTemp" title="jaxrts.models.ConstantDebyeTemp" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ConstantDebyeTemp</span></a><span class="p">(</span><span class="n">theta_Debye</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">300</span><span class="p">,</span> <span class="mi">800</span><span class="p">,</span> <span class="mi">1300</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">):</span>
+    <span class="n">Sii</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">T_e</span> <span class="o">=</span> <span class="n">T</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">T_i</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">)])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">probe_k</span><span class="p">:</span>
+        <span class="n">setup</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.setup.get_probe_setup.html#jaxrts.setup.get_probe_setup" title="jaxrts.setup.get_probe_setup" class="sphx-glr-backref-module-jaxrts-setup sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">get_probe_setup</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">_setup</span><span class="p">)</span>
+        <span class="n">Sii_out</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.DebyeWallerSolid.S_ii.html#jaxrts.models.DebyeWallerSolid.S_ii" title="jaxrts.models.DebyeWallerSolid.S_ii" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-method"><span class="n">DebyeSolid</span><span class="o">.</span><span class="n">S_ii</span></a><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+        <span class="n">Sii</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Sii_out</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">Sii</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Sii</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">probe_k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
+        <span class="n">Sii</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">)</span><span class="si">}</span><span class="s2">K&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">kMD</span><span class="p">,</span> <span class="n">SiiMD</span> <span class="o">=</span> <span class="n">onp</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span>
+            <span class="n">current_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;MD-sims/Si</span><span class="si">{</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">)</span><span class="si">}</span><span class="s2">K.dat&quot;</span><span class="p">,</span>
+            <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">MD_sort</span> <span class="o">=</span> <span class="n">onp</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">kMD</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kMD</span><span class="p">[</span><span class="n">MD_sort</span><span class="p">],</span> <span class="n">SiiMD</span><span class="p">[</span><span class="n">MD_sort</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$S_</span><span class="si">{ii}</span><span class="s2">(k)$&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;$k$ [1/</span><span class="se">\\</span><span class="s2">AA]&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
+
+<span class="n">first_legend</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="c1"># Add a second legend</span>
+<span class="n">line1</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;DebyeWallerSolid&quot;</span><span class="p">)</span>
+<span class="n">line2</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;MD-Simulation&quot;</span><span class="p">)</span>
+<span class="n">second_legend</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+    <span class="n">handles</span><span class="o">=</span><span class="p">[</span><span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="c1"># fig.add_artist(second_legend)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">first_legend</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.471 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-ionic-plot-latticedebyemodel-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/82c3495d5545985ee77532c962ce80ec/plot_LatticeDebyeModel.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_LatticeDebyeModel.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/307450861027555f8d37777fb53d8e52/plot_LatticeDebyeModel.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_LatticeDebyeModel.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_HNC_multicomponent.html" class="btn btn-neutral float-left" title="HNC: Multicomponent" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_HNC_ThreePotential_Wuensch.html" class="btn btn-neutral float-right" title="Static structure factor of the electron-ion system" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

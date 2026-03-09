@@ -1,0 +1,51 @@
+jaxrts.plasma\_physics
+======================
+
+.. automodule:: jaxrts.plasma_physics
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      Debye_Hueckel_screening_length
+      chem_pot_interpolationIchimaru
+      chem_pot_sommerfeld_fermi_interpolation
+      compton_energy
+      coulomb_potential_fourier
+      coupling_param
+      degeneracy_param
+      epsilon_from_susceptibility
+      fermi_dirac
+      fermi_energy
+      fermi_temperature
+      fermi_wavenumber
+      interparticle_spacing
+      kin_energy
+      noninteracting_susceptibility_from_eps_RPA
+      plasma_frequency
+      susceptibility_from_epsilon
+      temperature_interpolation
+      therm_de_broglie_wl
+      thomson_momentum_transfer
+      wiegner_seitz_radius
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

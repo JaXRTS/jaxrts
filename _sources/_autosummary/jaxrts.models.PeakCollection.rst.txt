@@ -1,0 +1,40 @@
+jaxrts.models.PeakCollection
+============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: PeakCollection
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~PeakCollection.Rayleigh_weight
+      ~PeakCollection.S_ii
+      ~PeakCollection.__init__
+      ~PeakCollection.check
+      ~PeakCollection.citation
+      ~PeakCollection.evaluate
+      ~PeakCollection.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~PeakCollection.allowed_keys
+      ~PeakCollection.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.PeakCollection:
+
+   .. minigallery:: jaxrts.models.PeakCollection
+       :add-heading:

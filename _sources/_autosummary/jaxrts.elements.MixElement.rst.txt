@@ -1,0 +1,39 @@
+jaxrts.elements.MixElement
+==========================
+
+.. currentmodule:: jaxrts.elements
+
+.. autoclass:: MixElement
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~MixElement.__init__
+      ~MixElement.get_binding_energies
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~MixElement.Z
+      ~MixElement.symbol
+      ~MixElement.name
+      ~MixElement.electron_distribution
+      ~MixElement.atomic_mass
+      ~MixElement.cold_binding_energies
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.elements.MixElement:
+
+   .. minigallery:: jaxrts.elements.MixElement
+       :add-heading:

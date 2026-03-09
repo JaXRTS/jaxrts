@@ -1,0 +1,37 @@
+jaxrts.helpers.JittableDict
+===========================
+
+.. currentmodule:: jaxrts.helpers
+
+.. autoclass:: JittableDict
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~JittableDict.__init__
+      ~JittableDict.clear
+      ~JittableDict.copy
+      ~JittableDict.fromkeys
+      ~JittableDict.get
+      ~JittableDict.items
+      ~JittableDict.keys
+      ~JittableDict.pop
+      ~JittableDict.popitem
+      ~JittableDict.setdefault
+      ~JittableDict.update
+      ~JittableDict.values
+   
+   
+
+   
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.helpers.JittableDict:
+
+   .. minigallery:: jaxrts.helpers.JittableDict
+       :add-heading:

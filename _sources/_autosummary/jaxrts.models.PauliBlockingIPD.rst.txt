@@ -1,0 +1,39 @@
+jaxrts.models.PauliBlockingIPD
+==============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: PauliBlockingIPD
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~PauliBlockingIPD.__init__
+      ~PauliBlockingIPD.all_element_states
+      ~PauliBlockingIPD.check
+      ~PauliBlockingIPD.citation
+      ~PauliBlockingIPD.evaluate
+      ~PauliBlockingIPD.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~PauliBlockingIPD.allowed_keys
+      ~PauliBlockingIPD.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.PauliBlockingIPD:
+
+   .. minigallery:: jaxrts.models.PauliBlockingIPD
+       :add-heading:

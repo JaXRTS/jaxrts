@@ -1,0 +1,77 @@
+
+
+.. _sphx_glr_gen_examples_free_bound:
+
+free-bound scattering examples
+------------------------------
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This plot is comparable to the target analzed by Doppner.2023, is this example is one of the da...">
+
+.. only:: html
+
+  .. image:: /gen_examples/free_bound/images/thumb/sphx_glr_plot_free_bound_scattering_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_free_bound_plot_free_bound_scattering.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Showcase the DetailedBalace free-bound scattering Model</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="It was suggested by Bohme.2023 that the evaluation of some experiments need to consider free-bo...">
+
+.. only:: html
+
+  .. image:: /gen_examples/free_bound/images/thumb/sphx_glr_plot_bohme_kraus_relevance_of_bound_free_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_free_bound_plot_bohme_kraus_relevance_of_bound_free.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Showcase of the relavance of including free-bound scattering</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The free-bound and bound-free contributions only fulfill the detailed balance relation in the (...">
+
+.. only:: html
+
+  .. image:: /gen_examples/free_bound/images/thumb/sphx_glr_plot_k_dispersion_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_free_bound_plot_k_dispersion.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">k dispersion and free-bound scattering</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gen_examples/free_bound/plot_free_bound_scattering
+   /gen_examples/free_bound/plot_bohme_kraus_relevance_of_bound_free
+   /gen_examples/free_bound/plot_k_dispersion
+

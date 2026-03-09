@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.models.SchumacherImpulse &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jaxrts.models.SchumacherImpulse.__init__" href="jaxrts.models.SchumacherImpulse.__init__.html" />
+    <link rel="prev" title="jaxrts.models.PaulingFormFactors.cite_keys" href="jaxrts.models.PaulingFormFactors.cite_keys.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Usage</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../physics.html">Physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../first-spectrum.html">Generating a first spectrum</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../models.html">Models implemented</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../models.html#screening-length">screening length</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ionic-scattering">ionic scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#bm-s-ii">BM S_ii</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#debye-temperature">Debye temperature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#free-free-scattering">free-free scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#chemical-potential">chemical potential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ipd">ipd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#screening">screening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#bm-v-eis">BM V_eiS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#free-bound-scattering">free-bound scattering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ee-lfc">ee-lfc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#form-factors">form-factors</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../models.html#bound-free-scattering">bound-free scattering</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Neglect.html">jaxrts.models.Neglect</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">jaxrts.models.SchumacherImpulse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SchumacherImpulseColdEdges.html">jaxrts.models.SchumacherImpulseColdEdges</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.SchumacherImpulseFitRk.html">jaxrts.models.SchumacherImpulseFitRk</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#ion-ion-potential">ion-ion Potential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#electron-ion-potential">electron-ion Potential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#electron-electron-potential">electron-electron Potential</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../first_model.html">Creating your own model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implementation-details.html">Implementation details</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../usage.html">Usage</a></li>
+          <li class="breadcrumb-item"><a href="../models.html">Models implemented</a></li>
+      <li class="breadcrumb-item active">jaxrts.models.SchumacherImpulse</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/jaxrts.models.SchumacherImpulse.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jaxrts-models-schumacherimpulse">
+<h1>jaxrts.models.SchumacherImpulse<a class="headerlink" href="#jaxrts-models-schumacherimpulse" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="jaxrts.models.SchumacherImpulse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jaxrts.models.</span></span><span class="sig-name descname"><span class="pre">SchumacherImpulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/models.html#SchumacherImpulse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.SchumacherImpulse" title="Link to this definition"></a></dt>
+<dd><p>Bound-free scattering based on the Schumacher Impulse Approximation
+<span id="id1">[<a class="reference internal" href="../bibliography.html#id85" title="M Schumacher, F Smend, and I Borchert. Incoherent scattering of gamma rays by inner-shell electrons. Journal of Physics B: Atomic and Molecular Physics, 8:1428–1439, 6 1975. doi:10.1088/0022-3700/8/9/010.">Schumacher et al., 1975</a>]</span>. The implementation considers the first order
+asymmetric correction to the impulse approximation, as given in the
+aforementioned paper.</p>
+<p>Should yield similar results as
+<a class="reference internal" href="jaxrts.models.SchumacherImpulseColdEdges.html#jaxrts.models.SchumacherImpulseColdEdges" title="jaxrts.models.SchumacherImpulseColdEdges"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchumacherImpulseColdEdges</span></code></a>. However, rather than using
+absorption edges beof the cold sample, here we use edges of isolated ions
+in a plasma instead.</p>
+<p>Requires a ‘form-factors’ model (defaults to
+<a class="reference internal" href="jaxrts.models.PaulingFormFactors.html#jaxrts.models.PaulingFormFactors" title="jaxrts.models.PaulingFormFactors"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaulingFormFactors</span></code></a>).</p>
+<p>Requires an ‘ipd’ model (defaults to
+<a class="reference internal" href="jaxrts.models.Neglect.html#jaxrts.models.Neglect" title="jaxrts.models.Neglect"><code class="xref py py-class docutils literal notranslate"><span class="pre">Neglect</span></code></a>).</p>
+<p>r_k is the correction given in <span id="id2">[<a class="reference internal" href="../bibliography.html#id46" title="G. Gregori, S. H. Glenzer, F. J. Rogers, S. M. Pollaine, O. L. Landen, C. Blancard, G. Faussurier, P. Renaudin, S. Kuhlbrodt, and R. Redmer. Electronic structure measurements of dense plasmas. Physics of Plasmas, 11:2754–2762, 5 2004. doi:10.1063/1.1689664.">Gregori et al., 2004</a>]</span>. If <cite>None</cite>, or if a
+negative value is given, we use the formula given by
+<span id="id3">[<a class="reference internal" href="../bibliography.html#id46" title="G. Gregori, S. H. Glenzer, F. J. Rogers, S. M. Pollaine, O. L. Landen, C. Blancard, G. Faussurier, P. Renaudin, S. Kuhlbrodt, and R. Redmer. Electronic structure measurements of dense plasmas. Physics of Plasmas, 11:2754–2762, 5 2004. doi:10.1063/1.1689664.">Gregori et al., 2004</a>]</span>. Otherwise, it is just the value provided by the
+user.</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.__init__.html#jaxrts.models.SchumacherImpulse.__init__" title="jaxrts.models.SchumacherImpulse.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([r_k])</p></td>
+<td><p>r_k is the correction given in <span id="id4">[<a class="reference internal" href="../bibliography.html#id46" title="G. Gregori, S. H. Glenzer, F. J. Rogers, S. M. Pollaine, O. L. Landen, C. Blancard, G. Faussurier, P. Renaudin, S. Kuhlbrodt, and R. Redmer. Electronic structure measurements of dense plasmas. Physics of Plasmas, 11:2754–2762, 5 2004. doi:10.1063/1.1689664.">Gregori et al., 2004</a>]</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.check.html#jaxrts.models.SchumacherImpulse.check" title="jaxrts.models.SchumacherImpulse.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(plasma_state)</p></td>
+<td><p>Test if the model is applicable to the PlasmaState.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.citation.html#jaxrts.models.SchumacherImpulse.citation" title="jaxrts.models.SchumacherImpulse.citation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></a>([style, comment])</p></td>
+<td><p>Return bibliographic information for the Model used.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.evaluate.html#jaxrts.models.SchumacherImpulse.evaluate" title="jaxrts.models.SchumacherImpulse.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a>(plasma_state, setup, *args, **kwargs)</p></td>
+<td><p>If <a class="reference internal" href="jaxrts.models.SchumacherImpulse.sample_points.html#jaxrts.models.SchumacherImpulse.sample_points" title="jaxrts.models.SchumacherImpulse.sample_points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sample_points</span></code></a> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>, generate a low-resulution :py:class`~.setup.Setup`.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.evaluate_raw.html#jaxrts.models.SchumacherImpulse.evaluate_raw" title="jaxrts.models.SchumacherImpulse.evaluate_raw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_raw</span></code></a>(plasma_state, setup)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.prepare.html#jaxrts.models.SchumacherImpulse.prepare" title="jaxrts.models.SchumacherImpulse.prepare"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare</span></code></a>(plasma_state, key)</p></td>
+<td><p>Modify the plasma_state in place.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.sample_grid.html#jaxrts.models.SchumacherImpulse.sample_grid" title="jaxrts.models.SchumacherImpulse.sample_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_grid</span></code></a>(setup)</p></td>
+<td><p>Define the sample-grid if <a class="reference internal" href="jaxrts.models.SchumacherImpulse.sample_points.html#jaxrts.models.SchumacherImpulse.sample_points" title="jaxrts.models.SchumacherImpulse.sample_points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sample_points</span></code></a> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.allowed_keys.html#jaxrts.models.SchumacherImpulse.allowed_keys" title="jaxrts.models.SchumacherImpulse.allowed_keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">allowed_keys</span></code></a></p></td>
+<td><p>A list of keywords where this model is adequate for</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.cite_keys.html#jaxrts.models.SchumacherImpulse.cite_keys" title="jaxrts.models.SchumacherImpulse.cite_keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cite_keys</span></code></a></p></td>
+<td><p>Built-in mutable sequence.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.r_k.html#jaxrts.models.SchumacherImpulse.r_k" title="jaxrts.models.SchumacherImpulse.r_k"><code class="xref py py-obj docutils literal notranslate"><span class="pre">r_k</span></code></a></p></td>
+<td><p>The value for r_k (see <span id="id5">[<a class="reference internal" href="../bibliography.html#id46" title="G. Gregori, S. H. Glenzer, F. J. Rogers, S. M. Pollaine, O. L. Landen, C. Blancard, G. Faussurier, P. Renaudin, S. Kuhlbrodt, and R. Redmer. Electronic structure measurements of dense plasmas. Physics of Plasmas, 11:2754–2762, 5 2004. doi:10.1063/1.1689664.">Gregori et al., 2004</a>]</span>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.SchumacherImpulse.sample_points.html#jaxrts.models.SchumacherImpulse.sample_points" title="jaxrts.models.SchumacherImpulse.sample_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_points</span></code></a></p></td>
+<td><p>The number of points for re-sampeling the model.</p></td>
+</tr>
+</tbody>
+</table>
+<section id="examples-using-jaxrts-models-schumacherimpulse">
+<span id="sphx-glr-backref-jaxrts-models-schumacherimpulse"></span><h2>Examples using <code class="docutils literal notranslate"><span class="pre">jaxrts.models.SchumacherImpulse</span></code><a class="headerlink" href="#examples-using-jaxrts-models-schumacherimpulse" title="Link to this heading"></a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This example showcases a simple, one-component plasma, and might be a good starting point."><img alt="" src="../_images/sphx_glr_plot_getting_started_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/plot_getting_started.html#sphx-glr-gen-examples-plot-getting-started-py"><span class="std std-ref">Getting Started</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Getting Started</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example calculates a synthetic spectrum of a CHO plasma."><img alt="" src="../_images/sphx_glr_plot_multi_component_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/plot_multi_component.html#sphx-glr-gen-examples-plot-multi-component-py"><span class="std std-ref">Multi-Species Plasmas</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Multi-Species Plasmas</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This code reproduces Fig. 6 of Gregori.2003, showing the impact of changing temperature, ioniza..."><img alt="" src="../_images/sphx_glr_plot_reproduce_Gregori2003_fig6_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/plot_reproduce_Gregori2003_fig6.html#sphx-glr-gen-examples-plot-reproduce-gregori2003-fig6-py"><span class="std std-ref">Calculate the full structure factors for various plasma conditions</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Calculate the full structure factors for various plasma conditions</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In this example, we apply the ITCFT to increasingly noisy data with different scattering angles..."><img alt="" src="../_images/sphx_glr_plot_ITCFT_noise_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/analysis/plot_ITCFT_noise.html#sphx-glr-gen-examples-analysis-plot-itcft-noise-py"><span class="std std-ref">ITCFT Impact of noise</span></a></p>
+  <div class="sphx-glr-thumbnail-title">ITCFT Impact of noise</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example showcases how apply the analysis functions to get temperatures from the Laplace tr..."><img alt="" src="../_images/sphx_glr_plot_ITCFT_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/analysis/plot_ITCFT.html#sphx-glr-gen-examples-analysis-plot-itcft-py"><span class="std std-ref">Imaginary time correlation function thermometry</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Imaginary time correlation function thermometry</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This script is used to test the bound-free edges using ionization energies from FAC code calcul..."><img alt="" src="../_images/sphx_glr_plot_moving_edges_vs_cold_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/bound_free/plot_moving_edges_vs_cold.html#sphx-glr-gen-examples-bound-free-plot-moving-edges-vs-cold-py"><span class="std std-ref">Moving edges vs cold ionoization edges</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Moving edges vs cold ionoization edges</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This plot is comparable to the target analzed by Doppner.2023, is this example is one of the da..."><img alt="" src="../_images/sphx_glr_plot_free_bound_scattering_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/free_bound/plot_free_bound_scattering.html#sphx-glr-gen-examples-free-bound-plot-free-bound-scattering-py"><span class="std std-ref">Showcase the DetailedBalace free-bound scattering Model</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Showcase the DetailedBalace free-bound scattering Model</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="It was suggested by Bohme.2023 that the evaluation of some experiments need to consider free-bo..."><img alt="" src="../_images/sphx_glr_plot_bohme_kraus_relevance_of_bound_free_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/free_bound/plot_bohme_kraus_relevance_of_bound_free.html#sphx-glr-gen-examples-free-bound-plot-bohme-kraus-relevance-of-bound-free-py"><span class="std std-ref">Showcase of the relavance of including free-bound scattering</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Showcase of the relavance of including free-bound scattering</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="The free-bound and bound-free contributions only fulfill the detailed balance relation in the (..."><img alt="" src="../_images/sphx_glr_plot_k_dispersion_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/free_bound/plot_k_dispersion.html#sphx-glr-gen-examples-free-bound-plot-k-dispersion-py"><span class="std std-ref">k dispersion and free-bound scattering</span></a></p>
+  <div class="sphx-glr-thumbnail-title">k dispersion and free-bound scattering</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example shows how the frequency redistribution correction (:pyjaxrts.Setup.frc_exponent) i..."><img alt="" src="../_images/sphx_glr_plot_frequency_redistibution_correction_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/setup/plot_frequency_redistibution_correction.html#sphx-glr-gen-examples-setup-plot-frequency-redistibution-correction-py"><span class="std std-ref">Frequency redistribution correction</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Frequency redistribution correction</div>
+</div></div></section>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jaxrts.models.PaulingFormFactors.cite_keys.html" class="btn btn-neutral float-left" title="jaxrts.models.PaulingFormFactors.cite_keys" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.models.SchumacherImpulse.__init__.html" class="btn btn-neutral float-right" title="jaxrts.models.SchumacherImpulse.__init__" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

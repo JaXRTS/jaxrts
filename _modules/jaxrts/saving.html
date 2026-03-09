@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.saving &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.saving</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.saving</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module allows for saving and loading :py:class:`jaxrts.models.Model`,</span>
+<span class="sd">:py:class:`jaxrts.plasmastate.PlasmaState` and other objects introduced in</span>
+<span class="sd">jaxrts. Furthermore, this allows for serializing quantities from :py:mod:`jpu`,</span>
+<span class="sd">which was an issue when pickeling a PlasmaState.</span>
+
+<span class="sd">.. warning ::</span>
+
+<span class="sd">   Functions are pickled, and stored as a string. Hence, saving functions is</span>
+<span class="sd">   generally poorly supported and might be error prone. It might work on your</span>
+<span class="sd">   machine, but interoperability between different machines or module versions</span>
+<span class="sd">   is not to be expected. Furthermore, the method is **unsave**.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dill</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">onp</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.elements</span><span class="w"> </span><span class="kn">import</span> <span class="n">Element</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">partialclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.hnc_potentials</span><span class="w"> </span><span class="kn">import</span> <span class="n">HNCPotential</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plasmastate</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlasmaState</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.setup</span><span class="w"> </span><span class="kn">import</span> <span class="n">Setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_flatten_obj</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="n">children</span><span class="p">,</span> <span class="n">aux</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_tree_flatten</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_children_labels&quot;</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">l</span><span class="p">:</span> <span class="n">c</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_children_labels</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_aux_labels&quot;</span><span class="p">):</span>
+        <span class="n">aux</span> <span class="o">=</span> <span class="p">{</span><span class="n">l</span><span class="p">:</span> <span class="n">a</span> <span class="k">for</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_aux_labels</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)}</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_tree_save</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">aux</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    We do not unflatten, here, so allow in-place changes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_children_labels&quot;</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">children</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">_children_labels</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_aux_labels&quot;</span><span class="p">):</span>
+        <span class="n">aux</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">aux</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">_aux_labels</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="JaXRTSEncoder">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.saving.JaXRTSEncoder.html#jaxrts.saving.JaXRTSEncoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">JaXRTSEncoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encoder class, taking care of all classes that are defined here and might</span>
+<span class="sd">    be decoded.</span>
+
+<span class="sd">    See https://gist.github.com/simonw/7000493</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="JaXRTSEncoder.default">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.saving.JaXRTSEncoder.default.html#jaxrts.saving.JaXRTSEncoder.default">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">PlasmaState</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;_type&quot;</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">_flatten_obj</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Setup</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Setup&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">_flatten_obj</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">HNCPotential</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">_flatten_obj</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+            <span class="c1"># _transform_r is a huge burden on filesize. And for the</span>
+            <span class="c1"># FourierTransform in it&#39;s current implementation, it should be</span>
+            <span class="c1"># spaced equidistantly, anyways. Reduce it therefore.</span>
+            <span class="c1"># Get _transform_r. If it exists, it is the first entry in children</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_transform_r&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="n">_transform_r</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;_transform_r&quot;</span><span class="p">]</span>
+                    <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;_transform_r&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">_transform_r</span><span class="p">),</span>
+                            <span class="s2">&quot;stop&quot;</span><span class="p">:</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">_transform_r</span><span class="p">),</span>
+                            <span class="s2">&quot;num&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">_transform_r</span><span class="p">),</span>
+                        <span class="p">},</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">_transform_r</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="p">{</span>
+                                <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">_transform_r</span><span class="p">),</span>
+                                <span class="s2">&quot;stop&quot;</span><span class="p">:</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">_transform_r</span><span class="p">),</span>
+                                <span class="s2">&quot;num&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">_transform_r</span><span class="p">),</span>
+                            <span class="p">},</span>
+                            <span class="o">*</span><span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:],</span>
+                        <span class="p">),</span>
+                        <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;_type&quot;</span><span class="p">:</span> <span class="s2">&quot;HNCPotential&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">out</span><span class="p">)}</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Model&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">_flatten_obj</span><span class="p">(</span><span class="n">obj</span><span class="p">)),</span>
+            <span class="p">}</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Element</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Element&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Quantity&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_tuple</span><span class="p">()}</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">jax</span><span class="o">.</span><span class="n">Array</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Array&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">obj</span><span class="p">))}</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ndArray&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">int32</span> <span class="o">|</span> <span class="n">onp</span><span class="o">.</span><span class="n">int64</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">Partial</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;_type&quot;</span><span class="p">:</span> <span class="s2">&quot;jaxPartial&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="JaXRTSDecoder">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.saving.JaXRTSDecoder.html#jaxrts.saving.JaXRTSDecoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">JaXRTSDecoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecoder</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    .. warning ::</span>
+
+<span class="sd">       In the current implementation, you cannot easily restore custom models.</span>
+<span class="sd">       To restore them, you have to provide these in `additional_mappings`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="JaXRTSDecoder.__init__">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.saving.JaXRTSDecoder.__init__.html#jaxrts.saving.JaXRTSDecoder.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ureg</span><span class="p">,</span>
+        <span class="n">additional_mappings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Model</span> <span class="o">|</span> <span class="n">HNCPotential</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the JSON decoder.</span>
+
+<span class="sd">        Paramters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        ureg</span>
+<span class="sd">            The UnitRegistry that is used for decoding. Has to the same</span>
+<span class="sd">            instance which was used when setting up the objects that should be</span>
+<span class="sd">            decoded.</span>
+<span class="sd">        additional_mappings: dict[str: Model | HNCPotential], optional</span>
+<span class="sd">            Dict containing mappings so that custom models can be decoded, too.</span>
+<span class="sd">            See the test in tests/test_saving.py to see this in practice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">additional_mappings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">additional_mappings</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ureg</span> <span class="o">=</span> <span class="n">ureg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_mappings</span> <span class="o">=</span> <span class="n">additional_mappings</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">JSONDecoder</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">object_hook</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object_hook</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hnc_potentials</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">pot_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">hnc_potentials</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="ow">in</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">hnc_potentials</span><span class="o">.</span><span class="n">_all_hnc_potentals</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">pot_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_mappings</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pot_dict</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">model_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="ow">in</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">_all_models</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">model_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_mappings</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model_dict</span>
+
+<div class="viewcode-block" id="JaXRTSDecoder.object_hook">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.saving.JaXRTSDecoder.object_hook.html#jaxrts.saving.JaXRTSDecoder.object_hook">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;_type&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">obj</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="s2">&quot;_type&quot;</span><span class="p">]</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;jaxPartial&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;ndArray&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;Quantity&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ureg</span><span class="o">.</span><span class="n">Quantity</span><span class="o">.</span><span class="n">from_tuple</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;Array&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;Element&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Element</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;Model&quot;</span><span class="p">:</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">tree</span> <span class="o">=</span> <span class="n">val</span>
+
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+            <span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span> <span class="o">=</span> <span class="n">_parse_tree_save</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="o">*</span><span class="n">tree</span><span class="p">)</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">_tree_unflatten</span><span class="p">(</span><span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new</span>
+        <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;HNCPotential&quot;</span><span class="p">:</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">tree</span> <span class="o">=</span> <span class="n">val</span>
+
+            <span class="n">pot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hnc_potentials</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">pot</span><span class="p">)</span>
+            <span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span> <span class="o">=</span> <span class="n">_parse_tree_save</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="o">*</span><span class="n">tree</span><span class="p">)</span>
+
+            <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">_tree_unflatten</span><span class="p">(</span><span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+
+            <span class="c1"># Fix the transform_r</span>
+            <span class="c1"># This uses that _transform_r will always be the first entry of the</span>
+            <span class="c1"># children tuple.</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="s2">&quot;_transform_r&quot;</span><span class="p">):</span>
+                <span class="n">new</span><span class="o">.</span><span class="n">_transform_r</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">**</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">new</span>
+        <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">:</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">PlasmaState</span><span class="p">)</span>
+            <span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span> <span class="o">=</span> <span class="n">_parse_tree_save</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="o">*</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">_tree_unflatten</span><span class="p">(</span><span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new</span>
+        <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;Setup&quot;</span><span class="p">:</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">Setup</span><span class="p">)</span>
+            <span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span> <span class="o">=</span> <span class="n">_parse_tree_save</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="o">*</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">_tree_unflatten</span><span class="p">(</span><span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="dump">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.saving.dump.html#jaxrts.saving.dump">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dump</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save an object to file. Uses :py:func:`json.dump` under to hood, and</span>
+<span class="sd">    forwards args and kwargs to this function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    obj</span>
+<span class="sd">        The object to serialize</span>
+<span class="sd">    fp</span>
+<span class="sd">        The file where to save the data to</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; with open(&quot;element.json&quot;, &quot;w&quot;) as f:</span>
+<span class="sd">            dump(jaxrts.Element(&quot;C&quot;), f, intend=2)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;cls&quot;</span><span class="p">:</span> <span class="n">JaXRTSEncoder</span><span class="p">})</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="dumps">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.saving.dumps.html#jaxrts.saving.dumps">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dumps</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serialize an object. Uses :py:func:`json.dumps` under to hood, and</span>
+<span class="sd">    forwards args and kwargs to this function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    obj</span>
+<span class="sd">        The object to serialize</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Serialized string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;cls&quot;</span><span class="p">:</span> <span class="n">JaXRTSEncoder</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.saving.load.html#jaxrts.saving.load">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">unit_reg</span><span class="p">,</span> <span class="n">additional_mappings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load an object from file. Uses :py:func:`json.load` under to hood, and</span>
+<span class="sd">    forwards args and kwargs to this function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fp</span>
+<span class="sd">        The file to be loaded from.</span>
+<span class="sd">    unit_reg</span>
+<span class="sd">        The pint unit registry to use for loading.</span>
+<span class="sd">    additional_mappings: Optional</span>
+<span class="sd">        Additional models to be considered for loading. This is only relevant</span>
+<span class="sd">        when custom models were saved.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    The Deserialized object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; with open(&quot;state.json&quot;, &quot;w&quot;) as f:</span>
+<span class="sd">    &gt;&gt;&gt;     state = load(f, unit_reg = jaxrts.ureg)</span>
+
+<span class="sd">    Custom models have to be passed to :py:func:`~load` as shown bellow.</span>
+
+<span class="sd">    &gt;&gt;&gt; class AlwaysPiModel(jaxrts.models.Model):</span>
+<span class="sd">    &gt;&gt;&gt;     allowed_keys = [&quot;test&quot;]</span>
+<span class="sd">    &gt;&gt;&gt;     __name__ = &quot;AlwaysPiModel&quot;</span>
+<span class="sd">    &gt;&gt;&gt;     def evaluate(self, plasma_state, setup) -&gt; jnp.ndarray:</span>
+<span class="sd">    &gt;&gt;&gt;         return jnp.array([jnp.pi])</span>
+<span class="sd">    &gt;&gt;&gt; with open(&quot;file&quot;, &quot;r&quot;) as f:</span>
+<span class="sd">    &gt;&gt;&gt;     loaded_state = saving.load(</span>
+<span class="sd">    &gt;&gt;&gt;         f,</span>
+<span class="sd">    &gt;&gt;&gt;         jaxrts.ureg,</span>
+<span class="sd">    &gt;&gt;&gt;         additional_mappings={&quot;AlwaysPiModel&quot;: AlwaysPiModel},</span>
+<span class="sd">    &gt;&gt;&gt;     )</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">additional_mappings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">additional_mappings</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">dec</span> <span class="o">=</span> <span class="n">partialclass</span><span class="p">(</span>
+        <span class="n">JaXRTSDecoder</span><span class="p">,</span> <span class="n">ureg</span><span class="o">=</span><span class="n">unit_reg</span><span class="p">,</span> <span class="n">additional_mappings</span><span class="o">=</span><span class="n">additional_mappings</span>
+    <span class="p">)</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;cls&quot;</span><span class="p">:</span> <span class="n">dec</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.ion_feature &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.ion_feature</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.ion_feature</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This submodule is dedicated to the calculation of the ion-feature.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.free_free</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">dielectric_function_salpeter</span><span class="p">,</span>
+    <span class="n">noninteracting_susceptibility_Dandrea1986</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plasma_physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">coulomb_potential_fourier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.static_structure_factors</span><span class="w"> </span><span class="kn">import</span> <span class="n">S_ee_AD</span><span class="p">,</span> <span class="n">S_ei_AD</span><span class="p">,</span> <span class="n">S_ii_AD</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="q_Gregori2004">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ion_feature.q_Gregori2004.html#jaxrts.ion_feature.q_Gregori2004">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">q_Gregori2004</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">m_ion</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T_i</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the screening charge by the Function given by</span>
+<span class="sd">    :cite:`Gregori.2004`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k : Quantity</span>
+<span class="sd">        Length of the scattering number (given by the scattering angle and the</span>
+<span class="sd">        energies of the incident photons (unit: 1 / [length]).</span>
+<span class="sd">    m_ion : Quantity</span>
+<span class="sd">        The mass of the ion for which the ion feature is calculated.</span>
+<span class="sd">    n_e: Quantity</span>
+<span class="sd">        The electron number density.</span>
+<span class="sd">    T_e : Quantity</span>
+<span class="sd">        The electron temperature.</span>
+<span class="sd">    T_i : Quantity</span>
+<span class="sd">        The ion temperature.</span>
+<span class="sd">    Z_f : float</span>
+<span class="sd">        The number of electrons not tightly bound to the atom = valence</span>
+<span class="sd">        electrons</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    q(k):  Quantity</span>
+<span class="sd">        The screening charge.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Way to calculate it given by Gregori.2004:</span>
+    <span class="n">S_ei</span> <span class="o">=</span> <span class="n">S_ei_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_ion</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+    <span class="n">S_ee</span> <span class="o">=</span> <span class="n">S_ee_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_ion</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+    <span class="n">S_ii</span> <span class="o">=</span> <span class="n">S_ii_AD</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">T_i</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">m_ion</span><span class="p">,</span> <span class="n">Z_f</span><span class="p">)</span>
+
+    <span class="n">C_ei</span> <span class="o">=</span> <span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Z_f</span><span class="p">)</span> <span class="o">*</span> <span class="n">S_ei</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">S_ee</span> <span class="o">*</span> <span class="n">S_ii</span> <span class="o">-</span> <span class="n">S_ei</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># This would be the q given by Glenzer.2009, instead</span>
+    <span class="c1"># return jnpu.sqrt(Z_f) * S_ei / S_ii</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">C_ei</span>
+        <span class="o">/</span> <span class="p">(</span>
+            <span class="n">dielectric_function_salpeter</span><span class="p">(</span>
+                <span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="o">=</span><span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="q_Glenzer2009">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ion_feature.q_Glenzer2009.html#jaxrts.ion_feature.q_Glenzer2009">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">q_Glenzer2009</span><span class="p">(</span>
+    <span class="n">S_ei</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">S_ii</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the screening charge by the Function given by</span>
+<span class="sd">    :cite:`Glenzer.2009`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    S_ei : Quantity</span>
+<span class="sd">        The static electron-ion structure factor.</span>
+<span class="sd">    S_ii : Quantity</span>
+<span class="sd">        The static ion-ion structure factor.</span>
+<span class="sd">    Z_f : float</span>
+<span class="sd">        The number of electrons not tightly bound to the atom = valence</span>
+<span class="sd">        electrons</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    q(k):  Quantity</span>
+<span class="sd">        The screening charge.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Z_f</span><span class="p">)</span> <span class="o">*</span> <span class="n">S_ei</span> <span class="o">/</span> <span class="n">S_ii</span></div>
+
+
+
+<div class="viewcode-block" id="q_FiniteWLChapman2015">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ion_feature.q_FiniteWLChapman2015.html#jaxrts.ion_feature.q_FiniteWLChapman2015">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">q_FiniteWLChapman2015</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">V_ei</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">lfc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the Finite wavelength screening presented in</span>
+<span class="sd">    :cite:`Chapman.2015b`, eqn (3). This function relies on the Dandrea</span>
+<span class="sd">    interpolation fit of the non-interacting susceptibility for a faster</span>
+<span class="sd">    computation (see</span>
+<span class="sd">    :py:func:`jaxrts.free_free.noninteracting_susceptibility_Dandrea1986`).</span>
+
+<span class="sd">    We furthermore allow for a local field correction which might deviate from</span>
+<span class="sd">    the default of zero, which goes beyond the RPA.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k : Quantity</span>
+<span class="sd">        Length of the scattering number (given by the scattering angle and the</span>
+<span class="sd">        energies of the incident photons (unit: 1 / [length]).</span>
+<span class="sd">    V_ei : Quantity</span>
+<span class="sd">        The Potential between electrons and ions. Should have the the shape</span>
+<span class="sd">        ``(n, m)``, where n is the number of ion species considered, and ``m =</span>
+<span class="sd">        len(k)``.</span>
+<span class="sd">    T : Quantity</span>
+<span class="sd">        The electron temperature in units of [temperature].</span>
+<span class="sd">    n_e : Quantity</span>
+<span class="sd">        The electron number density in units of 1/[length]**3.</span>
+<span class="sd">    lfc: float</span>
+<span class="sd">        The local field correction.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    q(k):  Quantity</span>
+<span class="sd">        The screening charge. Has the shape ``(n, m)``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">():</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">chi0</span> <span class="o">=</span> <span class="n">noninteracting_susceptibility_Dandrea1986</span><span class="p">(</span>
+        <span class="n">k</span><span class="p">,</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span>
+    <span class="p">)</span>
+    <span class="n">V_ee</span> <span class="o">=</span> <span class="n">coulomb_potential_fourier</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="n">eps_ee</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">V_ee</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">lfc</span><span class="p">)</span> <span class="o">*</span> <span class="n">chi0</span>
+    <span class="k">return</span> <span class="n">chi0</span> <span class="o">*</span> <span class="n">V_ei</span> <span class="o">/</span> <span class="n">eps_ee</span></div>
+
+
+
+<div class="viewcode-block" id="q_DebyeHueckelChapman2015">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ion_feature.q_DebyeHueckelChapman2015.html#jaxrts.ion_feature.q_DebyeHueckelChapman2015">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">q_DebyeHueckelChapman2015</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">kappa</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">Z_f</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the Debye Hückel screening presented in :cite:`Chapman.2015b`,</span>
+<span class="sd">    eqn (5).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k : Quantity</span>
+<span class="sd">        Length of the scattering number (given by the scattering angle and the</span>
+<span class="sd">        energies of the incident photons (unit: 1 / [length]).</span>
+<span class="sd">    kappa : Quantity</span>
+<span class="sd">        The inverse sceening length, units of 1 / [length]</span>
+<span class="sd">    Z_f : Quantity, jnp.ndarray</span>
+<span class="sd">        The ionization / mean charge state of the ions. Should be one entry per</span>
+<span class="sd">        ion considered.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    q(k):  Quantity</span>
+<span class="sd">        The screening charge. Has the shape ``(n, m)``, where ``n = len(Z_f)``</span>
+<span class="sd">        is the number of ions, and ``m = len(k)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Z_f</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">kappa</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">kappa</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="free_electron_susceptilibily_RPA">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.ion_feature.free_electron_susceptilibily_RPA.html#jaxrts.ion_feature.free_electron_susceptilibily_RPA">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">free_electron_susceptilibily_RPA</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">kappa</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+    <span class="n">lfc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the free electron susceptilibily given by :cite:`Gericke.2010` eqn 4</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\xi_{ee}^\\text{RPA} =</span>
+<span class="sd">        \\frac{\\kappa^2 \\epsilon_0} {e^2 \\varepsilon^\\text{RPA}}</span>
+
+<span class="sd">    where :math:`\\varepsilon^\\text{RPA} = \\frac{k^2 + \\kappa^2}{k^2}`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    k : Quantity</span>
+<span class="sd">        Length of the scattering number (given by the scattering angle and the</span>
+<span class="sd">        energies of the incident photons (unit: 1 / [length]).</span>
+<span class="sd">    kappa : Quantity</span>
+<span class="sd">        Inverse screening length.</span>
+<span class="sd">    lfc: float</span>
+<span class="sd">        The local field correction.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    xi(k) : Quantity</span>
+<span class="sd">        The free electron susceptilibily.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xi0</span> <span class="o">=</span> <span class="n">kappa</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">V_ee</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">coulomb_potential_fourier</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="n">varepsilon</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">V_ee</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">lfc</span><span class="p">)</span> <span class="o">*</span> <span class="n">xi0</span>
+    <span class="k">return</span> <span class="n">xi0</span> <span class="o">/</span> <span class="n">varepsilon</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

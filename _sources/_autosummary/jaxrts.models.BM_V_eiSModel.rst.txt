@@ -1,0 +1,39 @@
+jaxrts.models.BM\_V\_eiSModel
+=============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: BM_V_eiSModel
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~BM_V_eiSModel.V
+      ~BM_V_eiSModel.__init__
+      ~BM_V_eiSModel.check
+      ~BM_V_eiSModel.citation
+      ~BM_V_eiSModel.evaluate
+      ~BM_V_eiSModel.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~BM_V_eiSModel.allowed_keys
+      ~BM_V_eiSModel.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.BM_V_eiSModel:
+
+   .. minigallery:: jaxrts.models.BM_V_eiSModel
+       :add-heading:

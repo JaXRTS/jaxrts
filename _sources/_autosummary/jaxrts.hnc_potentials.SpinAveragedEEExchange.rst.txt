@@ -1,0 +1,50 @@
+jaxrts.hnc\_potentials.SpinAveragedEEExchange
+=============================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: SpinAveragedEEExchange
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SpinAveragedEEExchange.T
+      ~SpinAveragedEEExchange.__init__
+      ~SpinAveragedEEExchange.alpha
+      ~SpinAveragedEEExchange.check
+      ~SpinAveragedEEExchange.citation
+      ~SpinAveragedEEExchange.full_k
+      ~SpinAveragedEEExchange.full_r
+      ~SpinAveragedEEExchange.lambda_ab
+      ~SpinAveragedEEExchange.long_k
+      ~SpinAveragedEEExchange.long_r
+      ~SpinAveragedEEExchange.mu
+      ~SpinAveragedEEExchange.prepare
+      ~SpinAveragedEEExchange.q2
+      ~SpinAveragedEEExchange.r_cut
+      ~SpinAveragedEEExchange.short_k
+      ~SpinAveragedEEExchange.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SpinAveragedEEExchange.allowed_keys
+      ~SpinAveragedEEExchange.cite_keys
+      ~SpinAveragedEEExchange.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.SpinAveragedEEExchange:
+
+   .. minigallery:: jaxrts.hnc_potentials.SpinAveragedEEExchange
+       :add-heading:

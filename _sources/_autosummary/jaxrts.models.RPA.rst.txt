@@ -1,0 +1,42 @@
+jaxrts.models.RPA
+=================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: RPA
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~RPA.__init__
+      ~RPA.check
+      ~RPA.citation
+      ~RPA.evaluate
+      ~RPA.evaluate_raw
+      ~RPA.prepare
+      ~RPA.sample_grid
+      ~RPA.susceptibility
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~RPA.allowed_keys
+      ~RPA.cite_keys
+      ~RPA.sample_points
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.RPA:
+
+   .. minigallery:: jaxrts.models.RPA
+       :add-heading:

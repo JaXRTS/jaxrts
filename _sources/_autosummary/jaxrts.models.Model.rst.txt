@@ -1,0 +1,38 @@
+jaxrts.models.Model
+===================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: Model
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Model.__init__
+      ~Model.check
+      ~Model.citation
+      ~Model.evaluate
+      ~Model.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Model.allowed_keys
+      ~Model.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.Model:
+
+   .. minigallery:: jaxrts.models.Model
+       :add-heading:

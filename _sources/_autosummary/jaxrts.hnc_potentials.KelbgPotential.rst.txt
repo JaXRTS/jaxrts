@@ -1,0 +1,50 @@
+jaxrts.hnc\_potentials.KelbgPotential
+=====================================
+
+.. currentmodule:: jaxrts.hnc_potentials
+
+.. autoclass:: KelbgPotential
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~KelbgPotential.T
+      ~KelbgPotential.__init__
+      ~KelbgPotential.alpha
+      ~KelbgPotential.check
+      ~KelbgPotential.citation
+      ~KelbgPotential.full_k
+      ~KelbgPotential.full_r
+      ~KelbgPotential.lambda_ab
+      ~KelbgPotential.long_k
+      ~KelbgPotential.long_r
+      ~KelbgPotential.mu
+      ~KelbgPotential.prepare
+      ~KelbgPotential.q2
+      ~KelbgPotential.r_cut
+      ~KelbgPotential.short_k
+      ~KelbgPotential.short_r
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~KelbgPotential.allowed_keys
+      ~KelbgPotential.cite_keys
+      ~KelbgPotential.include_electrons
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.hnc_potentials.KelbgPotential:
+
+   .. minigallery:: jaxrts.hnc_potentials.KelbgPotential
+       :add-heading:

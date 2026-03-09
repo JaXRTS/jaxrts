@@ -1,0 +1,43 @@
+jaxrts.static\_structure\_factors
+=================================
+
+.. automodule:: jaxrts.static_structure_factors
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      S_ee_AD
+      S_ee_CHS
+      S_ei_AD
+      S_ei_CHS
+      S_ii_AD
+      S_ii_CHS
+      T_Debye_Bohm_Staver
+      T_cf_Greg
+      T_i_eff_Greg
+      debyeWallerFactor
+      g_ee_ABD
+      g_ei_ABD
+      g_ii_ABD
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
