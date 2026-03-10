@@ -139,11 +139,12 @@ equation.</p>
 <li><p><strong>use_ipd</strong> (<em>bool</em>) – If true, the ipd correction of the plasma state is used to reduce the
 continuum. Note: the IPD can very much depend on the ionization state.
 this could result in some circular dependency.</p></li>
-<li><p><strong>use_chem_pot</strong> (<em>bool</em>) – If true, the chemical potential of the plasma state is used, instead of the
-non-degenerate limiting case.</p></li>
+<li><p><strong>use_chem_pot</strong> (<em>bool</em>) – If true, the chemical potential of the plasma state is used, instead of
+the non-degenerate limiting case.</p></li>
 <li><p><strong>use_distribution</strong> – If true, the ipd is evaluated for each ion species separately.</p></li>
-<li><p><strong>exclude_non_negative_energies</strong> (<em>bool</em><em>, </em><em>default = True</em>) – If true, bound states for which the ionization energy is pushed into the continuum are removed
-from the calculation and do not appear with their Boltzmann factors in the Saha equations.</p></li>
+<li><p><strong>exclude_non_negative_energies</strong> (<em>bool</em><em>, </em><em>default = True</em>) – If true, bound states for which the ionization energy is pushed into
+the continuum are removed from the calculation and do not appear with
+their Boltzmann factors in the Saha equations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

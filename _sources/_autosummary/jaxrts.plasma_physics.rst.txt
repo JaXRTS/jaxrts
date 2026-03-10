@@ -16,6 +16,7 @@ jaxrts.plasma\_physics
       :recursive:
    
       Debye_Hueckel_screening_length
+      calculate_mean_free_charge_more
       chem_pot_interpolationIchimaru
       chem_pot_sommerfeld_fermi_interpolation
       compton_energy

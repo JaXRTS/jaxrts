@@ -80,6 +80,7 @@
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.models.html">jaxrts.models</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">jaxrts.plasma_physics</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.Debye_Hueckel_screening_length.html">jaxrts.plasma_physics.Debye_Hueckel_screening_length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.calculate_mean_free_charge_more.html">jaxrts.plasma_physics.calculate_mean_free_charge_more</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.chem_pot_interpolationIchimaru.html">jaxrts.plasma_physics.chem_pot_interpolationIchimaru</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation.html">jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.plasma_physics.compton_energy.html">jaxrts.plasma_physics.compton_energy</a></li>
@@ -149,64 +150,67 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.Debye_Hueckel_screening_length.html#jaxrts.plasma_physics.Debye_Hueckel_screening_length" title="jaxrts.plasma_physics.Debye_Hueckel_screening_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Debye_Hueckel_screening_length</span></code></a>(n, T[, Z])</p></td>
 <td><p>Calculate the Debye-Hückel screening length.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.chem_pot_interpolationIchimaru.html#jaxrts.plasma_physics.chem_pot_interpolationIchimaru" title="jaxrts.plasma_physics.chem_pot_interpolationIchimaru"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chem_pot_interpolationIchimaru</span></code></a>(T, n_e)</p></td>
-<td><p>Interpolation function for the chemical potential between the classical and quantum region, originally from <span id="id1">[<a class="reference internal" href="../bibliography.html#id54" title="S. Ichimaru. Statistical Plasma Physics, Volume I: Basic Principles. Frontiers in Physics. CRC Press, 2018. ISBN 9780429965708.">Ichimaru, 2018</a>]</span>, eqn.(3.147).</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.calculate_mean_free_charge_more.html#jaxrts.plasma_physics.calculate_mean_free_charge_more" title="jaxrts.plasma_physics.calculate_mean_free_charge_more"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_mean_free_charge_more</span></code></a>(rho, m_A, ...)</p></td>
+<td><p>Finite Temperature Thomas Fermi Charge State using an analytical fit provided by <span id="id1">[<a class="reference internal" href="../bibliography.html#id72">More, 1985</a>]</span> p.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation.html#jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation" title="jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chem_pot_sommerfeld_fermi_interpolation</span></code></a>(T, n_e)</p></td>
-<td><p>Interpolation function for the chemical potential of a non-interacting (ideal) fermi gas given in the paper of <span id="id2">[<a class="reference internal" href="../bibliography.html#id18" title="Brian Cowan. On the chemical potential of ideal fermi and bose gases. Journal of Low Temperature Physics, 197(5-6):412–444, 2019. doi:10.1007/s10909-019-02228-0.">Cowan, 2019</a>]</span>.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.chem_pot_interpolationIchimaru.html#jaxrts.plasma_physics.chem_pot_interpolationIchimaru" title="jaxrts.plasma_physics.chem_pot_interpolationIchimaru"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chem_pot_interpolationIchimaru</span></code></a>(T, n_e)</p></td>
+<td><p>Interpolation function for the chemical potential between the classical and quantum region, originally from <span id="id2">[<a class="reference internal" href="../bibliography.html#id54" title="S. Ichimaru. Statistical Plasma Physics, Volume I: Basic Principles. Frontiers in Physics. CRC Press, 2018. ISBN 9780429965708.">Ichimaru, 2018</a>]</span>, eqn.(3.147).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.compton_energy.html#jaxrts.plasma_physics.compton_energy" title="jaxrts.plasma_physics.compton_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compton_energy</span></code></a>(probe_energy, scattering_angle)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation.html#jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation" title="jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chem_pot_sommerfeld_fermi_interpolation</span></code></a>(T, n_e)</p></td>
+<td><p>Interpolation function for the chemical potential of a non-interacting (ideal) fermi gas given in the paper of <span id="id3">[<a class="reference internal" href="../bibliography.html#id18" title="Brian Cowan. On the chemical potential of ideal fermi and bose gases. Journal of Low Temperature Physics, 197(5-6):412–444, 2019. doi:10.1007/s10909-019-02228-0.">Cowan, 2019</a>]</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.compton_energy.html#jaxrts.plasma_physics.compton_energy" title="jaxrts.plasma_physics.compton_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compton_energy</span></code></a>(probe_energy, scattering_angle)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.coulomb_potential_fourier.html#jaxrts.plasma_physics.coulomb_potential_fourier" title="jaxrts.plasma_physics.coulomb_potential_fourier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coulomb_potential_fourier</span></code></a>(Z1, Z2, k)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.coulomb_potential_fourier.html#jaxrts.plasma_physics.coulomb_potential_fourier" title="jaxrts.plasma_physics.coulomb_potential_fourier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coulomb_potential_fourier</span></code></a>(Z1, Z2, k)</p></td>
 <td><p>The Fourier transform of the Coloumb potential.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.coupling_param.html#jaxrts.plasma_physics.coupling_param" title="jaxrts.plasma_physics.coupling_param"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coupling_param</span></code></a>(Z1, Z2, n_e, T_e)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.coupling_param.html#jaxrts.plasma_physics.coupling_param" title="jaxrts.plasma_physics.coupling_param"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coupling_param</span></code></a>(Z1, Z2, n_e, T_e)</p></td>
 <td><p>Returns the degree of interparticle coupling with corresponding charge numbers Z1 and Z2 at temperature T_e and density n_e.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.degeneracy_param.html#jaxrts.plasma_physics.degeneracy_param" title="jaxrts.plasma_physics.degeneracy_param"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degeneracy_param</span></code></a>(n_e, T_e)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.degeneracy_param.html#jaxrts.plasma_physics.degeneracy_param" title="jaxrts.plasma_physics.degeneracy_param"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degeneracy_param</span></code></a>(n_e, T_e)</p></td>
 <td><p>Calculate the plasma degeneracy parameter.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.epsilon_from_susceptibility.html#jaxrts.plasma_physics.epsilon_from_susceptibility" title="jaxrts.plasma_physics.epsilon_from_susceptibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">epsilon_from_susceptibility</span></code></a>(xi, k)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.epsilon_from_susceptibility.html#jaxrts.plasma_physics.epsilon_from_susceptibility" title="jaxrts.plasma_physics.epsilon_from_susceptibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">epsilon_from_susceptibility</span></code></a>(xi, k)</p></td>
 <td><p>Calculate the dielectric function from a full susceptibility xi</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_dirac.html#jaxrts.plasma_physics.fermi_dirac" title="jaxrts.plasma_physics.fermi_dirac"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_dirac</span></code></a>(k, chem_pot, T)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_dirac.html#jaxrts.plasma_physics.fermi_dirac" title="jaxrts.plasma_physics.fermi_dirac"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_dirac</span></code></a>(k, chem_pot, T)</p></td>
 <td><p>Return the Fermi-Dirac distribution.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_energy.html#jaxrts.plasma_physics.fermi_energy" title="jaxrts.plasma_physics.fermi_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_energy</span></code></a>(n_e)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_energy.html#jaxrts.plasma_physics.fermi_energy" title="jaxrts.plasma_physics.fermi_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_energy</span></code></a>(n_e)</p></td>
 <td><p>Calculate the Fermi energy of an ideal fermi gas from a given electron density.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_temperature.html#jaxrts.plasma_physics.fermi_temperature" title="jaxrts.plasma_physics.fermi_temperature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_temperature</span></code></a>(n_e)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_temperature.html#jaxrts.plasma_physics.fermi_temperature" title="jaxrts.plasma_physics.fermi_temperature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_temperature</span></code></a>(n_e)</p></td>
 <td><p>Calculates the Fermi temperature of an ideal fermi gas from a given electron density.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_wavenumber.html#jaxrts.plasma_physics.fermi_wavenumber" title="jaxrts.plasma_physics.fermi_wavenumber"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_wavenumber</span></code></a>(n_e)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.fermi_wavenumber.html#jaxrts.plasma_physics.fermi_wavenumber" title="jaxrts.plasma_physics.fermi_wavenumber"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_wavenumber</span></code></a>(n_e)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.interparticle_spacing.html#jaxrts.plasma_physics.interparticle_spacing" title="jaxrts.plasma_physics.interparticle_spacing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interparticle_spacing</span></code></a>(Z1, Z2, n_e)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.interparticle_spacing.html#jaxrts.plasma_physics.interparticle_spacing" title="jaxrts.plasma_physics.interparticle_spacing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interparticle_spacing</span></code></a>(Z1, Z2, n_e)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.kin_energy.html#jaxrts.plasma_physics.kin_energy" title="jaxrts.plasma_physics.kin_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kin_energy</span></code></a>(k)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.kin_energy.html#jaxrts.plasma_physics.kin_energy" title="jaxrts.plasma_physics.kin_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kin_energy</span></code></a>(k)</p></td>
 <td><p>Kinetic energy of a free electron with wavevector <code class="docutils literal notranslate"><span class="pre">k</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA.html#jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA" title="jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noninteracting_susceptibility_from_eps_RPA</span></code></a>(...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA.html#jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA" title="jaxrts.plasma_physics.noninteracting_susceptibility_from_eps_RPA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noninteracting_susceptibility_from_eps_RPA</span></code></a>(...)</p></td>
 <td><p>Calculates the non-interacting susceptilibily from a given dielectric function epsilon in RPA.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.plasma_frequency.html#jaxrts.plasma_physics.plasma_frequency" title="jaxrts.plasma_physics.plasma_frequency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plasma_frequency</span></code></a>(electron_density)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.plasma_frequency.html#jaxrts.plasma_physics.plasma_frequency" title="jaxrts.plasma_physics.plasma_frequency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plasma_frequency</span></code></a>(electron_density)</p></td>
 <td><p>Calculate the plasma frequency <span class="math notranslate nohighlight">\(\omega_\text{pe}\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.susceptibility_from_epsilon.html#jaxrts.plasma_physics.susceptibility_from_epsilon" title="jaxrts.plasma_physics.susceptibility_from_epsilon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">susceptibility_from_epsilon</span></code></a>(epsilon, k)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.susceptibility_from_epsilon.html#jaxrts.plasma_physics.susceptibility_from_epsilon" title="jaxrts.plasma_physics.susceptibility_from_epsilon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">susceptibility_from_epsilon</span></code></a>(epsilon, k)</p></td>
 <td><p>Calculate the full susceptilibily from a given dielectric function epsilon by inverting</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.temperature_interpolation.html#jaxrts.plasma_physics.temperature_interpolation" title="jaxrts.plasma_physics.temperature_interpolation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">temperature_interpolation</span></code></a>(n_e, T_e[, power])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.temperature_interpolation.html#jaxrts.plasma_physics.temperature_interpolation" title="jaxrts.plasma_physics.temperature_interpolation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">temperature_interpolation</span></code></a>(n_e, T_e[, power])</p></td>
 <td><p>Interpolate between electron temperature and Fermi temperature.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.therm_de_broglie_wl.html#jaxrts.plasma_physics.therm_de_broglie_wl" title="jaxrts.plasma_physics.therm_de_broglie_wl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">therm_de_broglie_wl</span></code></a>(T)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.therm_de_broglie_wl.html#jaxrts.plasma_physics.therm_de_broglie_wl" title="jaxrts.plasma_physics.therm_de_broglie_wl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">therm_de_broglie_wl</span></code></a>(T)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.thomson_momentum_transfer.html#jaxrts.plasma_physics.thomson_momentum_transfer" title="jaxrts.plasma_physics.thomson_momentum_transfer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">thomson_momentum_transfer</span></code></a>(energy, angle)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.thomson_momentum_transfer.html#jaxrts.plasma_physics.thomson_momentum_transfer" title="jaxrts.plasma_physics.thomson_momentum_transfer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">thomson_momentum_transfer</span></code></a>(energy, angle)</p></td>
 <td><p>Momentum transfer <span class="math notranslate nohighlight">\(k = \mid\vec{k}\mid\)</span>, assuming that the absolute value of the momentum for incoming and scattered light is only slightly changed.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.plasma_physics.wiegner_seitz_radius.html#jaxrts.plasma_physics.wiegner_seitz_radius" title="jaxrts.plasma_physics.wiegner_seitz_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wiegner_seitz_radius</span></code></a>(n_e)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.plasma_physics.wiegner_seitz_radius.html#jaxrts.plasma_physics.wiegner_seitz_radius" title="jaxrts.plasma_physics.wiegner_seitz_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wiegner_seitz_radius</span></code></a>(n_e)</p></td>
 <td><p>Return the Wiegner Seitz Radius <span class="math notranslate nohighlight">\(r_s\)</span>.</p></td>
 </tr>
 </tbody>

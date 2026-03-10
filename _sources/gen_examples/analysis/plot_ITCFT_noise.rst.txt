@@ -24,7 +24,7 @@ ITCFT Impact of noise
 In this example, we apply the ITCFT to increasingly noisy data with different
 scattering angles.
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-120
+.. GENERATED FROM PYTHON SOURCE LINES 8-119
 
 
 
@@ -112,7 +112,6 @@ scattering angles.
         )
 
         for i, sigma in enumerate(sigma_rel[::-1]):
-
             noise_norm = jnpu.max(
                 state["free-free scattering"].evaluate_raw(state, setup)
             )
@@ -154,7 +153,7 @@ scattering angles.
 
         ax[1].set_ylabel("$k_B T$ [eV]")
         ax[0].set_ylabel(
-            f"$S_{{ee}}(k={setup.k.m_as(1/ureg.angstrom):.2f}/$\\AA$, \\omega)$ [s]"
+            f"$S_{{ee}}(k={setup.k.m_as(1 / ureg.angstrom):.2f}/$\\AA$, \\omega)$ [s]"  # noqa: E501
         )
         ax[1].set_xlabel("$x$ [eV]")
         ax[0].set_xlabel("$E$ [eV]")
@@ -167,7 +166,7 @@ scattering angles.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 31.379 seconds)
+   **Total running time of the script:** (0 minutes 31.683 seconds)
 
 
 .. _sphx_glr_download_gen_examples_analysis_plot_ITCFT_noise.py:

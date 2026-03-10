@@ -128,7 +128,7 @@ but different ionization numbers. The latter calculation will be more costly.
     plt.title(
         f"{state.ions[0].symbol}, "
         + f"$k_BT=${(1 * ureg.k_B * state.T_e).m_as(ureg.electron_volt):.0f}eV, "
-        + f"$\\rho=${state.mass_density[0].m_as(ureg.gram/ureg.centimeter**3):.2f}g/cc"
+        + f"$\\rho=${state.mass_density[0].m_as(ureg.gram / ureg.centimeter**3):.2f}g/cc"  # noqa: E501
     )
 
     plt.tight_layout()
@@ -138,7 +138,7 @@ but different ionization numbers. The latter calculation will be more costly.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 12.522 seconds)
+   **Total running time of the script:** (0 minutes 12.396 seconds)
 
 
 .. _sphx_glr_download_gen_examples_saha_plot_WR_expanded_ionization.py:

@@ -305,6 +305,100 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
 
 
+<div class="viewcode-block" id="NNSiiModel.S_ii">
+<a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.NNSiiModel.S_ii.html#jaxrts.experimental.SiiNN.NNSiiModel.S_ii">[docs]</a>
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">S_ii</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">plasma_state</span><span class="p">:</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">,</span>
+        <span class="n">setup</span><span class="p">:</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Setup</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+        <span class="c1"># This has to be done within a jax.jitted function.</span>
+        <span class="n">nn_model</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphdef</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_state</span><span class="p">)</span>
+
+        <span class="n">E_f</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">fermi_energy</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span><span class="p">)</span>
+        <span class="n">q_k</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span> <span class="o">*</span> <span class="n">E_f</span><span class="p">)</span>
+
+        <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">T_e</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">/</span> <span class="n">E_f</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+
+        <span class="c1"># Get the elements of the model and catch expanded ionization state</span>
+        <span class="c1"># with unique elements:</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_elements</span><span class="p">]</span>
+        <span class="n">unique_elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">elements</span><span class="p">))</span>
+
+        <span class="c1"># assign idices to later match order of elements in plasma state</span>
+        <span class="n">idx_arr</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">elem</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">unique_elements</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_elements</span><span class="p">)</span>
+
+        <span class="c1"># Norm the inputs to the NN</span>
+        <span class="n">Z_arr</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">n_arr</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">idx_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+
+                <span class="n">Z_arr</span> <span class="o">=</span> <span class="n">Z_arr</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                    <span class="n">plasma_state</span><span class="o">.</span><span class="n">number_fraction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                    <span class="o">*</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">n_arr</span> <span class="o">=</span> <span class="n">n_arr</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">number_fraction</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+
+            <span class="n">Z_arr</span> <span class="o">=</span> <span class="n">Z_arr</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">Z_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">n_arr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1"># create input array to the Neural Net</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">theta</span> <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_theta</span><span class="p">,</span>
+                <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="n">plasma_state</span><span class="o">.</span><span class="n">mass_density</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+                        <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_rho</span><span class="p">,</span>
+                <span class="o">*</span><span class="p">(</span><span class="n">Z_arr</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nn_model</span><span class="o">.</span><span class="n">norm_Z</span><span class="p">)),</span>
+                <span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span> <span class="o">/</span> <span class="n">q_k</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
+                <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_k_over_qk</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">Sii</span> <span class="o">=</span> <span class="n">nn_model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># Create output array, S_base, adaptive for N components</span>
+        <span class="c1"># for 4 components it looks like</span>
+        <span class="c1"># S_base = jnp.array(</span>
+        <span class="c1">#     [</span>
+        <span class="c1">#         [Sii[0], Sii[1], Sii[2], Sii[3]],</span>
+        <span class="c1">#         [Sii[1], Sii[4], Sii[5], Sii[6]],</span>
+        <span class="c1">#         [Sii[2], Sii[5], Sii[7], Sii[8]],</span>
+        <span class="c1">#         [Sii[3], Sii[6], Sii[8], Sii[9]],</span>
+        <span class="c1">#     ]</span>
+        <span class="c1"># )</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+        <span class="n">iu</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">S_base</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="n">m</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">Sii</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">S_base</span> <span class="o">=</span> <span class="n">S_base</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">iu</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">Sii</span><span class="p">)</span>
+        <span class="n">S_base</span> <span class="o">=</span> <span class="n">S_base</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">S_base</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># Determine permutation order based on ion order of plasma_state</span>
+        <span class="n">perm</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">idx_arr</span><span class="p">:</span>
+            <span class="n">perm</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">perm</span><span class="p">,</span> <span class="o">*</span><span class="n">entry</span><span class="p">]</span>
+        <span class="n">perm</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span>
+
+        <span class="c1"># Apply the permutation to S_base to capture wronge order of plasma</span>
+        <span class="c1"># state elements</span>
+        <span class="c1"># compared to order of elements used to train the NN,</span>
+        <span class="c1"># e.g. Plasma_state element list = [&quot;C&quot;,&quot;H&quot;] but NN element list</span>
+        <span class="c1"># =[&quot;H&quot;,&quot;C&quot;]</span>
+        <span class="c1"># would result in wrong Sii values set for the elements</span>
+        <span class="n">S_out</span> <span class="o">=</span> <span class="n">S_base</span><span class="p">[</span><span class="n">perm</span><span class="p">][:,</span> <span class="n">perm</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">S_out</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span></div>
+
+
     <span class="c1"># The following is required to jit a Model</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphdef</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_state</span><span class="p">)</span>
@@ -324,151 +418,7 @@
     <span class="k">return</span> <span class="n">ion</span><span class="o">.</span><span class="n">symbol</span>
 
 
-<div class="viewcode-block" id="OneComponentNNModel">
-<a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.OneComponentNNModel.html#jaxrts.experimental.SiiNN.OneComponentNNModel">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">OneComponentNNModel</span><span class="p">(</span><span class="n">NNSiiModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A :py:class:`~.NNSiiModel` for a :py:class:`jaxrts.plasmastate.PlasmaState`</span>
-<span class="sd">    with one component.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="OneComponentNNModel.S_ii">
-<a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.OneComponentNNModel.S_ii.html#jaxrts.experimental.SiiNN.OneComponentNNModel.S_ii">[docs]</a>
-    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">S_ii</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">plasma_state</span><span class="p">:</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">,</span>
-        <span class="n">setup</span><span class="p">:</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Setup</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-
-        <span class="c1"># This has to be done within a jax.jitted function.</span>
-        <span class="n">nn_model</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphdef</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_state</span><span class="p">)</span>
-
-        <span class="n">E_f</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">fermi_energy</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span><span class="p">)</span>
-        <span class="n">q_k</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span> <span class="o">*</span> <span class="n">E_f</span><span class="p">)</span>
-
-        <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">T_e</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">/</span> <span class="n">E_f</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
-
-        <span class="n">x</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_theta</span><span class="p">,</span>
-                <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                    <span class="n">plasma_state</span><span class="o">.</span><span class="n">mass_density</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
-                        <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-                <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_rho</span><span class="p">,</span>
-                <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">number_fraction</span> <span class="o">*</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span><span class="p">)</span>
-                <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_Z</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span> <span class="o">/</span> <span class="n">q_k</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
-                <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_k_over_qk</span><span class="p">,</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
-
-        <span class="n">Sii</span> <span class="o">=</span> <span class="n">nn_model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-        <span class="n">S_out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">nions</span><span class="p">)</span> <span class="o">*</span> <span class="n">Sii</span>
-        <span class="k">return</span> <span class="n">S_out</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span></div>
-</div>
-
-
-
-<div class="viewcode-block" id="TwoComponentNNModel">
-<a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.TwoComponentNNModel.html#jaxrts.experimental.SiiNN.TwoComponentNNModel">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">TwoComponentNNModel</span><span class="p">(</span><span class="n">NNSiiModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A :py:class:`~.NNSiiModel` for a :py:class:`jaxrts.plasmastate.PlasmaState`</span>
-<span class="sd">    with two components.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="TwoComponentNNModel.S_ii">
-<a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.TwoComponentNNModel.S_ii.html#jaxrts.experimental.SiiNN.TwoComponentNNModel.S_ii">[docs]</a>
-    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">S_ii</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">plasma_state</span><span class="p">:</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">,</span>
-        <span class="n">setup</span><span class="p">:</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Setup</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-
-        <span class="c1"># This has to be done within a jax.jitted function.</span>
-        <span class="n">nn_model</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphdef</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_state</span><span class="p">)</span>
-
-        <span class="n">E_f</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">fermi_energy</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span><span class="p">)</span>
-        <span class="n">q_k</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span> <span class="o">*</span> <span class="n">E_f</span><span class="p">)</span>
-
-        <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">T_e</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">/</span> <span class="n">E_f</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
-
-        <span class="c1"># Get the elements of the model:</span>
-        <span class="n">element0</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">element1</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_elements</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-
-        <span class="c1"># Catch an ionization_exanded plasma state:</span>
-        <span class="c1"># Re-calculate plasma_state mean ionization</span>
-        <span class="n">indices_element_0</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">element0</span>
-        <span class="p">]</span>
-        <span class="n">indices_element_1</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">element1</span>
-        <span class="p">]</span>
-        <span class="n">Z0</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="n">n0</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">indices_element_0</span><span class="p">:</span>
-            <span class="n">Z0</span> <span class="o">+=</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">number_fraction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-            <span class="n">n0</span> <span class="o">+=</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">number_fraction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-        <span class="n">Z0</span> <span class="o">/=</span> <span class="n">n0</span>
-
-        <span class="n">Z1</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">n1</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">indices_element_1</span><span class="p">:</span>
-            <span class="n">Z1</span> <span class="o">+=</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">number_fraction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-            <span class="n">n1</span> <span class="o">+=</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">number_fraction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-        <span class="n">Z1</span> <span class="o">/=</span> <span class="n">n1</span>
-
-        <span class="c1"># Norm the inputs to the NN</span>
-
-        <span class="n">x</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">theta</span> <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_theta</span><span class="p">,</span>
-                <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                    <span class="n">plasma_state</span><span class="o">.</span><span class="n">mass_density</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
-                        <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-                <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_rho</span><span class="p">,</span>
-                <span class="n">Z0</span> <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_Z</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="n">Z1</span> <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_Z</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                <span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span> <span class="o">/</span> <span class="n">q_k</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
-                <span class="o">/</span> <span class="n">nn_model</span><span class="o">.</span><span class="n">norm_k_over_qk</span><span class="p">,</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
-
-        <span class="n">Sii</span> <span class="o">=</span> <span class="n">nn_model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-        <span class="c1"># Work with several ions of the same species, allow for a mutation of</span>
-        <span class="c1"># ion species in the plasma_state.</span>
-        <span class="c1"># This is a somewhat complicated mapping for</span>
-        <span class="c1"># [[Sii[0], Sii[1]],[Sii[1], Sii[2]]].</span>
-        <span class="c1"># This is to make it work with expanded state (approximately)</span>
-
-        <span class="n">S_out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">nions</span><span class="p">,</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">nions</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">nions</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">==</span> <span class="n">element0</span><span class="p">:</span>
-                <span class="n">_Sii</span> <span class="o">=</span> <span class="n">Sii</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">elif</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">==</span> <span class="n">element1</span><span class="p">:</span>
-                <span class="n">_Sii</span> <span class="o">=</span> <span class="n">Sii</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="n">S_out</span> <span class="o">=</span> <span class="n">S_out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">_Sii</span><span class="p">)</span>
-
-        <span class="n">S_out</span> <span class="o">=</span> <span class="n">S_out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">Sii</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">S_out</span> <span class="o">=</span> <span class="n">S_out</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">Sii</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-
-        <span class="k">return</span> <span class="n">S_out</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span></div>
-</div>
-
-
-
-<span class="n">_models</span> <span class="o">=</span> <span class="p">[</span><span class="n">OneComponentNNModel</span><span class="p">,</span> <span class="n">TwoComponentNNModel</span><span class="p">]</span>
+<span class="n">_models</span> <span class="o">=</span> <span class="p">[</span><span class="n">NNSiiModel</span><span class="p">]</span>
 
 <span class="k">for</span> <span class="n">_m</span> <span class="ow">in</span> <span class="n">_models</span><span class="p">:</span>
     <span class="n">jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">register_pytree_node</span><span class="p">(</span>
