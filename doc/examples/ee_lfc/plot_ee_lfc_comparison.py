@@ -23,7 +23,7 @@ fitting their datapoints is provided in :cite:`Dornheim.2021`.
 import jax.numpy as jnp
 import jpu.numpy as jnpu
 import matplotlib.pyplot as plt
-import scienceplots
+import scienceplots  # noqa: F401
 
 import jaxrts
 
@@ -70,10 +70,8 @@ for T, axis in zip(temp, ax):
     )
     G_farid = jaxrts.ee_localfieldcorrections.eelfc_farid(k, T, n_e)
     G_utsumi = jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru(k, T, n_e)
-    G_fortmann = (
-        jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010(
-            k, T, n_e
-        )
+    G_fortmann = jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010(
+        k, T, n_e
     )
     axis.plot(
         (k / kf).m_as(ureg.dimensionless),

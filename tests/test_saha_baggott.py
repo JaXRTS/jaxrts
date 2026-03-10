@@ -128,7 +128,7 @@ def test_compare_hydrogen_baggott():
     for k, config in enumerate(configs):
         state["ipd"] = config[0]
         state["chemical potential"] = config[1]
-        exclude_non_negative_energies = config[2]
+        exclude_non_neg = config[2]
 
         for T_e in [2, 5, 15]:
             filename = data_dir / f"baggott{k + 1}_{int(T_e)}eV.csv"
@@ -156,7 +156,7 @@ def test_compare_hydrogen_baggott():
                     use_ipd=True,
                     use_chem_pot=True,
                     use_distribution=True,
-                    exclude_non_negative_energies=exclude_non_negative_energies,
+                    exclude_non_negative_energies=exclude_non_neg,
                 )
 
                 if len(Z_free) == 1:
@@ -220,7 +220,7 @@ def plot_hydrogen_baggott():
     for k, ax in enumerate(axs.flatten()):
         state["ipd"] = configs[k][0]
         state["chemical potential"] = configs[k][1]
-        exclude_non_negative_energies = configs[k][2]
+        exclude_non_neg = configs[k][2]
 
         densities = jnp.logspace(16, 26, 300)
 
@@ -245,7 +245,7 @@ def plot_hydrogen_baggott():
                     use_ipd=True,
                     use_chem_pot=True,
                     use_distribution=True,
-                    exclude_non_negative_energies=exclude_non_negative_energies,
+                    exclude_non_negative_energies=exclude_non_neg,
                 )
                 Zfree.append(Z_free)
 

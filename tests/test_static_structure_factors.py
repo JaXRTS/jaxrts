@@ -362,7 +362,6 @@ def test_CHS_Gregori2007_Fig3():
     T_D = jaxrts.static_structure_factors.T_Debye_Bohm_Staver(
         T_e_prime, n_e, m_i, Z_f
     )
-    k_De = jaxrts.static_structure_factors._k_D_AD(T_e_prime, n_e)
     k_f = jaxrts.plasma_physics.fermi_wavenumber(n_e)
 
     Sii_test_files = (
