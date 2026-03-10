@@ -4676,9 +4676,9 @@
             <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
             <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">KlimontovichKraeftPotential</span><span class="p">(),</span>
         <span class="p">)</span>
-        <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;SpinAveraged&quot;</span>
-        <span class="p">)</span></div>
+        <span class="n">plasma_state</span><span class="p">[</span>
+            <span class="s2">&quot;electron-ion Potential&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinAveraged&quot;</span></div>
 
 
 <div class="viewcode-block" id="LinearResponseScreeningGericke2010.evaluate">
@@ -4735,6 +4735,13 @@
     <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;screening&quot;</span><span class="p">]</span>
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;GregoriCHSScreening&quot;</span>
     <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Gregori.2006b&quot;</span><span class="p">,</span> <span class="s2">&quot;Gregori.2007&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="GregoriCHSScreening.prepare">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.GregoriCHSScreening.prepare.html#jaxrts.models.GregoriCHSScreening.prepare">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;Debye temperature&quot;</span><span class="p">,</span> <span class="n">BohmStaver</span><span class="p">())</span></div>
+
 
 <div class="viewcode-block" id="GregoriCHSScreening.evaluate">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.GregoriCHSScreening.evaluate.html#jaxrts.models.GregoriCHSScreening.evaluate">[docs]</a>
@@ -4830,9 +4837,9 @@
             <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
             <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">KlimontovichKraeftPotential</span><span class="p">(),</span>
         <span class="p">)</span>
-        <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;SpinAveraged&quot;</span>
-        <span class="p">)</span></div>
+        <span class="n">plasma_state</span><span class="p">[</span>
+            <span class="s2">&quot;electron-ion Potential&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinAveraged&quot;</span></div>
 
 
 <div class="viewcode-block" id="FiniteWavelengthScreening.evaluate">
@@ -4948,9 +4955,9 @@
             <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
             <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">KlimontovichKraeftPotential</span><span class="p">(),</span>
         <span class="p">)</span>
-        <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;SpinAveraged&quot;</span>
-        <span class="p">)</span>
+        <span class="n">plasma_state</span><span class="p">[</span>
+            <span class="s2">&quot;electron-ion Potential&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinAveraged&quot;</span>
         <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RPA_DandreaFit</span><span class="p">()</span></div>
 
 
