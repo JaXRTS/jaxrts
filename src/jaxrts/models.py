@@ -4100,9 +4100,9 @@ class LinearResponseScreeningGericke2010(Model):
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
         )
-        plasma_state["electron-ion Potential"].include_electrons = (
-            "SpinAveraged"
-        )
+        plasma_state[
+            "electron-ion Potential"
+        ].include_electrons = "SpinAveraged"
 
     @jax.jit
     def evaluate(
@@ -4152,6 +4152,10 @@ class GregoriCHSScreening(Model):
     allowed_keys = ["screening"]
     __name__ = "GregoriCHSScreening"
     cite_keys = ["Gregori.2006b", "Gregori.2007"]
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        super().prepare(plasma_state, key)
+        plasma_state.update_default_model("Debye temperature", BohmStaver())
 
     @jax.jit
     def evaluate(
@@ -4239,9 +4243,9 @@ class FiniteWavelengthScreening(Model):
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
         )
-        plasma_state["electron-ion Potential"].include_electrons = (
-            "SpinAveraged"
-        )
+        plasma_state[
+            "electron-ion Potential"
+        ].include_electrons = "SpinAveraged"
 
     @jax.jit
     def evaluate(
@@ -4342,9 +4346,9 @@ class LinearResponseScreening(Model):
             "electron-ion Potential",
             hnc_potentials.KlimontovichKraeftPotential(),
         )
-        plasma_state["electron-ion Potential"].include_electrons = (
-            "SpinAveraged"
-        )
+        plasma_state[
+            "electron-ion Potential"
+        ].include_electrons = "SpinAveraged"
         plasma_state["free-free scattering"] = RPA_DandreaFit()
 
     @jax.jit
