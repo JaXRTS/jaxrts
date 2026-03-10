@@ -174,7 +174,8 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
         ----------
         checkpoint_dir : Path
             The Path to the checkpoint directory.
-        """  # This requires that the network shape was saved in the checkpoint
+        """
+        # This requires that the network shape was saved in the checkpoint
         # directory. This is done in a slightly hacky way, see the train.py
         # file.
         with open(checkpoint_dir / "SHAPE") as f:
