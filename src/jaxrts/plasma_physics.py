@@ -462,8 +462,8 @@ def calculate_mean_free_charge_more(
     rho: Quantity, m_A: Quantity, Z_A: float, T_e: Quantity
 ) -> Quantity:
     """
-    Finite Temperature Thomas Fermi Charge State using an analytical fit provided by
-    :cite:`More.1985` p. 332 (Table IV).
+    Finite Temperature Thomas Fermi Charge State using an analytical fit
+    provided by :cite:`More.1985` p. 332 (Table IV).
 
     .. note::
 

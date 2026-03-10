@@ -3220,8 +3220,9 @@ class FormFactorLowering(Model):
 
 class IchimaruChemPotential(Model):
     """
-    A fitting formula for the chemical potential of an ideal electron gas between the
-    classical and the quantum regime, given by :cite:`Gregori.2003`.
+    A fitting formula for the chemical potential of an ideal electron gas
+    between the classical and the quantum regime, given by
+    :cite:`Gregori.2003`.
 
     See Also
     --------
@@ -3295,7 +3296,8 @@ class NonDegenerateElectronChemPotential(Model):
 
 class DegenerateElectronChemPotential(Model):
     """
-    Chemical Potential of a fully degenerate electron gas, given by the Fermi energy.
+    Chemical Potential of a fully degenerate electron gas, given by the Fermi
+    energy.
     """
 
     __name__ = "DegenerateElectronChemPotential"

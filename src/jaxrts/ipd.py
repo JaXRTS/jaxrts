@@ -15,7 +15,7 @@ from quadax import quadts as quad
 
 from .math import fermi_neg12_rational_approximation_antia
 from .plasma_physics import (
-    chem_pot_interpolationIchimaru as chem_pot_interpolation, fermi_energy
+    chem_pot_interpolationIchimaru as chem_pot_interpolation,
 )
 from .units import Quantity, ureg
 
