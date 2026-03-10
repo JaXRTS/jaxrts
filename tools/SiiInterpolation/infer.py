@@ -8,11 +8,14 @@ import pathlib
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import time
+from typing import Tuple
 
-from jaxrts.experimental.SiiNN import OneComponentNNModel, TwoComponentNNModel
-from generate_data import plasma_state
+from jaxrts.experimental.SiiNN import NNSiiModel
 
 ureg = jaxrts.ureg
+file_path = "train_data/Be_10000.json"
+with open(file_path, "r") as json_file:
+    plasma_state = jaxrts.saving.load(fp=json_file, unit_reg=ureg)
 
 
 @jax.jit
@@ -34,7 +37,7 @@ def calculate_WR(plasma_state, setup):
 @jax.jit
 def prep_state(
     state, setup, rho=None, temp=None, Z=None, k=None
-) -> (jaxrts.PlasmaState, jaxrts.Setup):
+) -> Tuple[jaxrts.PlasmaState, jaxrts.Setup]:
     if rho is not None:
         state.mass_density = (
             rho
@@ -70,15 +73,18 @@ setup = jaxrts.Setup(ureg("15°"), ureg("10keV"), None, lambda x: x)
 
 calculate_state = deepcopy(plasma_state)
 calculate_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(
-    mix=0.8
+    mix=0.25
 )
 predict_state = deepcopy(plasma_state)
-predict_state["ionic scattering"] = TwoComponentNNModel(
-    pathlib.Path(__file__).parent / "checkpoints/H2O/"
+predict_state["ionic scattering"] = NNSiiModel(
+    pathlib.Path(__file__).parent.parent / "trained_NNs/Be_e1000"
 )
+
 
 predict_state, setup = prep_state(predict_state, setup, temp=50)
 calculate_state, setup = prep_state(calculate_state, setup, temp=50)
+print(calculate_state.ions)
+print(predict_state.ions)
 t0 = time.time()
 net_out = onp.array(calculate(predict_state, setup))
 t1 = time.time()
@@ -114,12 +120,12 @@ print("======================")
 
 # Show the net prediction vs calculated data:
 
-rho1 = jnp.linspace(0.1, 10, 10)
-rho2 = jnp.linspace(0.1, 10, 200)
+rho1 = jnp.linspace(1, 10, 10)
+rho2 = jnp.linspace(1, 10, 100)
 scatv1 = jnp.linspace(0.1, 10, 10)
-scatv2 = jnp.linspace(0.1, 10, 200)
+scatv2 = jnp.linspace(0.1, 10, 100)
 temp1 = jnp.linspace(5, 100, 10)
-temp2 = jnp.linspace(5, 100, 200)
+temp2 = jnp.linspace(5, 100, 100)
 
 r1, t1 = jnpu.meshgrid(rho1, temp1)
 r2, t2 = jnpu.meshgrid(rho2, temp2)
