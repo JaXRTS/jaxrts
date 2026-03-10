@@ -13,7 +13,7 @@ from typing import Tuple
 from jaxrts.experimental.SiiNN import NNSiiModel
 
 ureg = jaxrts.ureg
-file_path = "train_data/Be_10000.json"
+file_path = "train_data/2.0H1.0O_10000.json"
 with open(file_path, "r") as json_file:
     plasma_state = jaxrts.saving.load(fp=json_file, unit_reg=ureg)
 
@@ -77,7 +77,7 @@ calculate_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(
 )
 predict_state = deepcopy(plasma_state)
 predict_state["ionic scattering"] = NNSiiModel(
-    pathlib.Path(__file__).parent.parent / "trained_NNs/Be_e1000"
+    pathlib.Path(__file__).parent.parent / "trained_NNs/H2O_e1000"
 )
 
 

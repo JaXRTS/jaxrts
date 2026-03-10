@@ -32,19 +32,19 @@ setup = jaxrts.Setup(ureg("45°"), ureg("10keV"), None, lambda x: x)
 # ions = [jaxrts.Element("C"), jaxrts.Element("H"), jaxrts.Element("O")]
 # number_fraction = jnp.array([0.3590, 0.4615, 0.1795])
 ions = [
-    jaxrts.Element("Be"),
-    # jaxrts.Element("H"),
-    # jaxrts.Element("O"),
+    # jaxrts.Element("Be"),
+    jaxrts.Element("H"),
+    jaxrts.Element("O"),
 ]
 # number_fraction = jnp.array([0.3376, 0.4242, 0.2150, 0.02])
 # number_fraction = jnp.array([0.3590, 0.4615, 0.1795])
-number_fraction = jnp.array([1.0])
+number_fraction = jnp.array([1 / 3, 2 / 3])
 # pet_number_fraction = [5 / 11, 4 / 11, 2 / 11]
 mass_fraction = jaxrts.helpers.mass_from_number_fraction(number_fraction, ions)
 
 plasma_state = jaxrts.PlasmaState(
     ions=ions,
-    Z_free=jnp.array([3.0]),
+    Z_free=jnp.array([0.5, 4.0]),
     mass_density=mass_fraction
     * jnp.array([1.0])
     * ureg.gram
@@ -189,8 +189,9 @@ if __name__ == "__main__":
     )
 
     element_string = ""
-    for ion in plasma_state.ions:
-        element_string += ion.symbol
+    for x, ion in zip(plasma_state.number_fraction, plasma_state.ions):
+        x /= jnp.min(plasma_state.number_fraction)
+        element_string += f"{x:.1f}{ion.symbol}"
 
     # saving file paths
     hdf5_file_path = f"train_data/{element_string}_{data_no}{expanded}.h5"

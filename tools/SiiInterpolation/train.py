@@ -64,23 +64,42 @@ def eval_step(model, metrics: nnx.MultiMetric, x, y):
     metrics.update(loss=loss, mse=mse)  # In-place updates.
 
 
+# def parse_data_path(path):
+#     """
+#     Extract information about the .h5 training data set to setup the training step
+#     """
+#     # get filename without extension
+#     name = os.path.splitext(os.path.basename(path))[0]
+
+#     # check expanded flag
+#     expanded_ionization = "expanded" in name
+
+#     # extract formula and datapoints
+#     match = re.match(r"([A-Za-z]+)_(\d+)", name)
+#     print(match)
+#     formula = match.group(1)
+#     datapoints = int(match.group(2))
+
+#     # split elements (C, H, O, Co, Be, etc.)
+#     elements = re.findall(r"[A-Z][a-z]?", formula)
+
+#     return expanded_ionization, elements, datapoints
+
+
 def parse_data_path(path):
-    """
-    Extract information about the .h5 training data set to setup the training step
-    """
-    # get filename without extension
+    # filename without directory or extension
     name = os.path.splitext(os.path.basename(path))[0]
 
-    # check expanded flag
+    # expanded flag
     expanded_ionization = "expanded" in name
 
-    # extract formula and datapoints
-    match = re.match(r"([A-Za-z]+)_(\d+)", name)
+    # split formula and datapoints
+    match = re.match(r"([A-Za-z0-9\.]+)_(\d+)", name)
     formula = match.group(1)
     datapoints = int(match.group(2))
 
-    # split elements (C, H, O, Co, Be, etc.)
-    elements = re.findall(r"[A-Z][a-z]?", formula)
+    # extract elements after numeric ratios
+    elements = re.findall(r"\d+\.\d+([A-Z][a-z]?)", formula)
 
     return expanded_ionization, elements, datapoints
 
@@ -627,11 +646,11 @@ def numpy_collate(batch):
 ########################### TRAIN SCRIPT START ###############################
 ##############################################################################
 
-data_filepath = f"train_data/Be_10000.h5"
+data_filepath = f"train_data/2.0H1.0O_10000.h5"
 expanded_ionization, Elements, number_points = parse_data_path(
     path=data_filepath
 )
-
+print(expanded_ionization, Elements, number_points)
 correction_value = 1
 if expanded_ionization:
     correction_value = 2
