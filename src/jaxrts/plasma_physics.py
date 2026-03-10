@@ -458,10 +458,33 @@ def noninteracting_susceptibility_from_eps_RPA(
 
 
 @jax.jit
-def mean_free_charge_more(Z_A : float, n_e : Quantity, T_e : Quantity) -> Quantity:
+def calculate_mean_free_charge_more(
+    rho: Quantity, m_A: Quantity, Z_A: float, T_e: Quantity
+) -> Quantity:
     """
     Finite Temperature Thomas Fermi Charge State using an analytical fit provided by
     :cite:`More.1985` p. 332 (Table IV).
+
+    .. note::
+
+        This fit is only applicable to a OCP.
+
+    Parameters
+    ----------
+    rho : Quantity
+        Mass density in [mass]/[length]**3
+    m_A: Quantity
+        Atomic mass
+    Z_A:
+        Atomic Charge number
+    T_e : Quantity
+        Electron temperature in [K]
+
+    Returns
+    -------
+    Z_f : Quantity
+        The mean free charge of the ions in the OCP
+
     """
 
     alpha = 14.3139
@@ -476,8 +499,7 @@ def mean_free_charge_more(Z_A : float, n_e : Quantity, T_e : Quantity) -> Quanti
     c1 = -0.366667
     c2 = 0.983333
 
-    convert = n_e.m_as(1 / ureg.cc) * 1.6726e-24
-    R = convert / Z_A
+    R = (rho.m_as(ureg.gram / ureg.cc) / m_A.m_as(ureg.u)) / Z_A
     T0 = T_e.m_as(ureg.eV / ureg.k_B) / Z_A ** (4.0 / 3.0)
     Tf = T0 / (1 + T0)
     A = a1 * T0**a2 + a3 * T0**a4
