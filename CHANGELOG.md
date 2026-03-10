@@ -1,5 +1,63 @@
 # Changelog
 
+## [0.6.0] - 2026-03-10
+
+This release abbreviates the LFC model names and rewrite NNSiiModels, neglects
+a free-bound contribution by default, adds the Charged Hard Sphere model for
+ionic scattering, and automatically deploys the documentation to
+https://jaxrts.github.io/jaxrts.
+
+### Breaking changes
+- [**breaking**] Rename LFC models([14264d0](14264d06eb76ae0bd22350b0aaedf9af2b21b508))
+- Set default free-bond model to Neglect([aeef1f4](aeef1f41d0ebe553b83ddfcde6f866190f4881ca))
+
+### Features
+
+- Add function to calculate density from electron-density for mixed systems (#53)([9db90df](9db90df5f656d8bc66430bf27101c3c72dfc0bd9))
+- Static structure factors in CHS from Gregori.2007([113ed42](113ed424b5d84b55282a214879e798280f1fa314))
+- Test LFC model validity([7939497](7939497b622811f8c24456b18dfe5d1dd1da5805))
+- Add Gregori2007 and Farid1993 sLFC models([5212cfa](5212cfad9fe5ae5204b4b00249cfd1e09f506b37))
+- Adding the analytical fit of More for Z_f in plasma_physics (#60)([43b224b](43b224b84ee59911f14e775bd16cc023b08552e3))
+- Gregori.2006b extension of Arkhipov models to multicomponent (#56)([1fded18](1fded1814ac8f4043a40f93f988e93deb90844c1))
+
+### Bug Fixes
+
+- Have all LFC functions return Quantities([d1d1213](d1d121393ccd6a34aa4a73020e9a3407122e6614))
+- `ConstantIPD` now works with multiple entries for different plasma constituents([9bfc5a2](9bfc5a27f06f4171ff5dbce36e529349ca1766a7)
+- Set `B` to unity in bound-free models (#54)([4ded46d](4ded46d045827e916ed29ab1288b6431530112ba))
+- Temperature average after calculation of effective temperature in `Gregori2006IonFeat` (#56)([93e5e78](93e5e78934f3c89135e586b8bb34b0770ac04925))
+
+### Refactor
+
+- [**breaking**] Unify NNSiiModel class (#62)([9230b75](9230b7566693d0eeb4924bde01d34d851c977032))
+
+### Documentation
+
+- Create workflow for automatically generating the documentation([bf8dda9](bf8dda9b622c85a0610e1c752120ea3262e83e78))
+- Better documentation of the LFC models currently implemented([530b762](530b762a32a3c044eb510f453aff3fa426af69af))
+- Improving docstring of SommerfeldChemPot Model([ad75381](ad7538127222c5956bae7c9465602fd254c72f8c))
+- Change citekeys in the documentation to author-year([3466c5c](3466c5c9b138b9d7ce3b6508dbd6cf54d8f5f353))
+
+### Performance
+
+- Extend upper bound of CHS root-finding([e948fa7](e948fa77965f5fbae53842070b732af8f09dfe02))
+
+### Testing
+
+- Test result of Dornheim interpolation([cac8d6a](cac8d6a013faa80668f8ba84526d0a5241eb022d))
+- Fix saved state, as the new default moved order of models([482c631](482c631f481c6467a2b7db97ca1caf478e6f4e52))
+- Fix data not found; fix spelling of author([bdfc12d](bdfc12d1256eba1f50a7855a45a38b658dbf51c5))
+
+### Miscellaneous Tasks
+
+- Variant of the logo with bright text([e72125f](e72125f1146d2d1751592e0dfe2ba53b9f6961a9))
+- Set ruff line-length to 79([a8bc5ea](a8bc5eaac21d2bd9d4c8208fc4033c0ab8a3c068))
+- Move bisection from saha to helpers([c48e93d](c48e93de682e29ce3c1c35aa587dd4f89f3e9d78))
+- Update dependencies([c631222](c63122231b3009eec01ee714eec2dd8bf9c85a2a))
+- Remove unnecessary .drone file([a211a21](a211a21d0e64e8a20f52b015ed09888ccc8d9176))
+
+**Full Changelog**: https://github.com/jaxrts/jaxrts/compare/0.5.0...0.6.0
+
 ## [0.5.0] - 2025-10-30
 
 ### Features

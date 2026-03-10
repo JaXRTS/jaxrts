@@ -24,7 +24,7 @@ The code was written by Samuel Schumacher and Julian Lütgert in the High Energy
 
 ## Documentation
 
-The documentation can be found in the `doc` directory. To generate it for yourself, just run
+The documentation can be found in the `doc` directory and [online](https://jaxrts.github.io/jaxrts). To generate it for yourself, just run
 
 ```bash
 poetry run make html
