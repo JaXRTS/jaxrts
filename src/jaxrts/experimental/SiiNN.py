@@ -153,8 +153,28 @@ def set_sharding(x: jax.ShapeDtypeStruct) -> jax.ShapeDtypeStruct:
 
 
 class NNSiiModel(jaxrts.models.IonFeatModel):
-    def __init__(self, checkpoint_dir):
-        # This requires that the network shape was saved in the checkpoint
+    """
+    A :py:class:`jaxrts.model.IonFeatModel` to use a neural network to obtain
+    ion-ion static structure factors.
+
+    .. note::
+
+       This is a parent class that, in itself, has no practical application, as
+       it defines no :py:meth:`jaxrts.models.IonFeatModel.S_ii` method.
+       This class only handles loading the neural network from an
+       :py:mod:`orbax` checkpoint.
+
+    """
+
+    def __init__(self, checkpoint_dir: Path):
+        """
+        Initialize the NNSiiModel.
+
+        Parameters
+        ----------
+        checkpoint_dir : Path
+            The Path to the checkpoint directory.
+        """  # This requires that the network shape was saved in the checkpoint
         # directory. This is done in a slightly hacky way, see the train.py
         # file.
         with open(checkpoint_dir / "SHAPE") as f:
