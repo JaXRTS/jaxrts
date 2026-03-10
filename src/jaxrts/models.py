@@ -4132,7 +4132,6 @@ class LinearResponseScreeningGericke2010(Model):
 
 class GregoriCHSScreening(Model):
     """
-
     Screening model to calculate the screening charge q
     based on expression for the static structure factors given
     in :cite:`Gregori.2007`. treating the ions as charged hard spheres (CHS).
@@ -4140,7 +4139,7 @@ class GregoriCHSScreening(Model):
 
     .. math::
 
-    \sqrt{Z_f}\,\frac{S_{ei}(k)}{S_{ii}(k)}
+    \\sqrt{Z_f}\\,\\frac{S_{ei}(k)}{S_{ii}(k)}
 
     See Also
     --------
@@ -4150,7 +4149,7 @@ class GregoriCHSScreening(Model):
 
     allowed_keys = ["screening"]
     __name__ = "GregoriCHSScreening"
-    cite_keys = ["Glenzer.2009", "Gregori.2007"]
+    cite_keys = ["Gregori.2006b", "Gregori.2007"]
 
     @jax.jit
     def evaluate(
@@ -4161,8 +4160,6 @@ class GregoriCHSScreening(Model):
         **kwargs,
     ) -> jnp.ndarray:
 
-        Z_ab = jnpu.outer(plasma_state.Z_free, plasma_state.Z_free)
-        n_ab = jnpu.outer(plasma_state.n_i, plasma_state.n_i)
         n = jnpu.sum(plasma_state.n_i)
         Z_f = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.Z_free)
         M = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.atomic_masses)

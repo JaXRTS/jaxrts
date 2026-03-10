@@ -262,7 +262,7 @@ def dump(obj, fp, *args, **kwargs):
     Examples
     --------
     >>> with open("element.json", "w") as f:
-            dump(jaxrts.Element("C"), f, intend=2)
+            dump(jaxrts.Element("C"), f, indent=2)
     """
     kwargs.update({"cls": JaXRTSEncoder})
     json.dump(obj, fp, *args, **kwargs)
