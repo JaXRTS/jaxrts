@@ -18,7 +18,7 @@ import orbax.checkpoint as ocp
 import jax
 import os
 import re
-from jaxrts.experimental.SiiNN import NNModel
+from jaxrts.experimental.SiiNN import NNModel, NNModelExpandedZ
 
 
 def l2_loss(x, alpha):
@@ -62,28 +62,6 @@ def train_step(
 def eval_step(model, metrics: nnx.MultiMetric, x, y):
     loss, mse = loss_fn(model, x, y)
     metrics.update(loss=loss, mse=mse)  # In-place updates.
-
-
-# def parse_data_path(path):
-#     """
-#     Extract information about the .h5 training data set to setup the training step
-#     """
-#     # get filename without extension
-#     name = os.path.splitext(os.path.basename(path))[0]
-
-#     # check expanded flag
-#     expanded_ionization = "expanded" in name
-
-#     # extract formula and datapoints
-#     match = re.match(r"([A-Za-z]+)_(\d+)", name)
-#     print(match)
-#     formula = match.group(1)
-#     datapoints = int(match.group(2))
-
-#     # split elements (C, H, O, Co, Be, etc.)
-#     elements = re.findall(r"[A-Z][a-z]?", formula)
-
-#     return expanded_ionization, elements, datapoints
 
 
 def parse_data_path(path):
@@ -646,11 +624,11 @@ def numpy_collate(batch):
 ########################### TRAIN SCRIPT START ###############################
 ##############################################################################
 
-data_filepath = f"train_data/2.0H1.0O_10000.h5"
+data_filepath = f"train_data/1.0Be_100000_expanded.h5"
 expanded_ionization, Elements, number_points = parse_data_path(
     path=data_filepath
 )
-print(expanded_ionization, Elements, number_points)
+
 correction_value = 1
 if expanded_ionization:
     correction_value = 2
@@ -663,29 +641,22 @@ if expanded_ionization:
             Elements.append(elem)
 
 nr_of_ions = len(Elements)
-
 if nr_of_ions == 1:
+    dataset = Dataset1C(data_filepath, *Elements)
+
+elif nr_of_ions == 2:
     if expanded_ionization:
         dataset = Dataset1C_expanded_ionization_state(data_filepath, *Elements)
     else:
-        dataset = Dataset1C(data_filepath, *Elements)
-elif nr_of_ions == 2:
-    if expanded_ionization:
-        dataset = Dataset2C_expanded_ionization_state(data_filepath, *Elements)
-    else:
         dataset = Dataset2C(data_filepath, *Elements)
+
 elif nr_of_ions == 3:
-    if expanded_ionization:
-        raise ValueError(
-            "There is no 3 Component expanded ionization class yet defined"
-        )
-    else:
-        dataset = Dataset3C(data_filepath, *Elements)
+    dataset = Dataset3C(data_filepath, *Elements)
+
 elif nr_of_ions == 4:
     if expanded_ionization:
-        raise ValueError(
-            "There is no 3 Component expanded ionization class yet defined"
-        )
+        print("I use Dataset2C_expanded")
+        dataset = Dataset2C_expanded_ionization_state(data_filepath, *Elements)
     else:
         dataset = Dataset4C(data_filepath, *Elements)
 else:
@@ -696,9 +667,10 @@ else:
 ### Define model shape depending on how many Elements are considered in plasmastate
 ### NNModel(intput_layer: Nr_ions + 3, [hidden layers], output_layer: Nr_of_unique Sii's: n(n+1) / 2,
 ### where n is the number of ions for non-expanded, and twice the number of ions for an expanded PlasmaState)
-model = NNModel(
+ApproriateModelClass = NNModelExpandedZ if expanded_ionization else NNModel
+model = ApproriateModelClass(
     int(nr_of_ions // correction_value + 3),
-    [64, 1024, 128],
+    [128, 1024, 512],
     nr_of_ions * (nr_of_ions + 1) // 2,
     nnx.Rngs(int(1e6 * time.time()) % 42),
 )
@@ -810,13 +782,14 @@ def train_model(model, train_loader, test_loader, metrics, num_epochs=250):
                     "dout": model.dout,
                     "no_of_atoms": len(model.norm_Z),
                     "elements": dataset.elements,
+                    "expanded": expanded_ionization,
                 }
                 json.dump(shape, f)
 
     return metrics_history
 
 
-metrics_hist = train_model(model, train_loader, test_loader, metrics, 1001)
+metrics_hist = train_model(model, train_loader, test_loader, metrics, 2001)
 
 fig, ax = plt.subplots(1)
 ax.plot(metrics_hist["train_loss"], label="train_loss")
