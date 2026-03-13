@@ -10,12 +10,19 @@ import matplotlib as mpl
 import time
 from typing import Tuple
 
-from jaxrts.experimental.SiiNN import NNSiiModel
+from jaxrts.experimental.SiiNN import NNSiiModel, NNModelExpandedZ
 
 ureg = jaxrts.ureg
-file_path = "train_data/2.0H1.0O_10000.json"
+file_path = "train_data/1.0Be_100000_expanded.json"
+expanded = True
+
 with open(file_path, "r") as json_file:
-    plasma_state = jaxrts.saving.load(fp=json_file, unit_reg=ureg)
+    plasma_state: jaxrts.PlasmaState = jaxrts.saving.load(
+        fp=json_file, unit_reg=ureg
+    )
+if expanded:
+    plasma_state.Z_free = jnp.array([3.1])
+    plasma_state = plasma_state.expand_integer_ionization_states()
 
 
 @jax.jit
@@ -70,14 +77,14 @@ def calc_Sii(plasma_state, setup, rho=None, temp=None, Z=None, k=None):
 
 setup = jaxrts.Setup(ureg("15°"), ureg("10keV"), None, lambda x: x)
 
-
 calculate_state = deepcopy(plasma_state)
 calculate_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(
     mix=0.25
 )
 predict_state = deepcopy(plasma_state)
 predict_state["ionic scattering"] = NNSiiModel(
-    pathlib.Path(__file__).parent.parent / "trained_NNs/H2O_e1000"
+    pathlib.Path(__file__).parent.parent
+    / "trained_NNs/Be_e2000_expanded_new_architecture"
 )
 
 
@@ -121,11 +128,11 @@ print("======================")
 # Show the net prediction vs calculated data:
 
 rho1 = jnp.linspace(1, 10, 10)
-rho2 = jnp.linspace(1, 10, 100)
+rho2 = jnp.linspace(1, 10, 50)
 scatv1 = jnp.linspace(0.1, 10, 10)
-scatv2 = jnp.linspace(0.1, 10, 100)
+scatv2 = jnp.linspace(0.1, 10, 50)
 temp1 = jnp.linspace(5, 100, 10)
-temp2 = jnp.linspace(5, 100, 100)
+temp2 = jnp.linspace(5, 100, 50)
 
 r1, t1 = jnpu.meshgrid(rho1, temp1)
 r2, t2 = jnpu.meshgrid(rho2, temp2)
@@ -200,7 +207,7 @@ for k in range(calculated_Sii.shape[1]):
 
 plt.legend()
 
-plt.savefig("rho-T.png")
+plt.savefig("rho-T.png", dpi=300)
 plt.close()
 
 
@@ -279,7 +286,7 @@ for k in range(calculated_Sii.shape[1]):
 
 plt.legend()
 
-plt.savefig("rho-k.png")
+plt.savefig("rho-k.png", dpi=300)
 plt.close()
 
 t1, k1 = jnpu.meshgrid(temp1, scatv1)
@@ -358,5 +365,5 @@ for k in range(calculated_Sii.shape[1]):
 
 plt.legend()
 
-plt.savefig("T-k.png")
+plt.savefig("T-k.png", dpi=300)
 plt.close()
