@@ -10,6 +10,7 @@ import matplotlib as mpl
 import time
 from typing import Tuple
 
+<<<<<<< HEAD
 from jaxrts.experimental.SiiNN import NNSiiModel, NNModelExpandedZ
 
 ureg = jaxrts.ureg
@@ -23,6 +24,14 @@ with open(file_path, "r") as json_file:
 if expanded:
     plasma_state.Z_free = jnp.array([3.1])
     plasma_state = plasma_state.expand_integer_ionization_states()
+=======
+from jaxrts.experimental.SiiNN import NNSiiModel
+
+ureg = jaxrts.ureg
+file_path = "train_data/2.0H1.0O_10000.json"
+with open(file_path, "r") as json_file:
+    plasma_state = jaxrts.saving.load(fp=json_file, unit_reg=ureg)
+>>>>>>> main
 
 
 @jax.jit
@@ -83,8 +92,12 @@ calculate_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(
 )
 predict_state = deepcopy(plasma_state)
 predict_state["ionic scattering"] = NNSiiModel(
+<<<<<<< HEAD
     pathlib.Path(__file__).parent.parent
     / "trained_NNs/Be_e2000_expanded_new_architecture"
+=======
+    pathlib.Path(__file__).parent.parent / "trained_NNs/H2O_e1000"
+>>>>>>> main
 )
 
 
@@ -128,11 +141,19 @@ print("======================")
 # Show the net prediction vs calculated data:
 
 rho1 = jnp.linspace(1, 10, 10)
+<<<<<<< HEAD
 rho2 = jnp.linspace(1, 10, 50)
 scatv1 = jnp.linspace(0.1, 10, 10)
 scatv2 = jnp.linspace(0.1, 10, 50)
 temp1 = jnp.linspace(5, 100, 10)
 temp2 = jnp.linspace(5, 100, 50)
+=======
+rho2 = jnp.linspace(1, 10, 100)
+scatv1 = jnp.linspace(0.1, 10, 10)
+scatv2 = jnp.linspace(0.1, 10, 100)
+temp1 = jnp.linspace(5, 100, 10)
+temp2 = jnp.linspace(5, 100, 100)
+>>>>>>> main
 
 r1, t1 = jnpu.meshgrid(rho1, temp1)
 r2, t2 = jnpu.meshgrid(rho2, temp2)

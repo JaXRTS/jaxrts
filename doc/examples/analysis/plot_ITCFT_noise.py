@@ -66,7 +66,6 @@ for angle, e_range in [[120, 600], [20, 200]]:
     )
 
     for i, sigma in enumerate(sigma_rel[::-1]):
-
         noise_norm = jnpu.max(
             state["free-free scattering"].evaluate_raw(state, setup)
         )
@@ -108,7 +107,7 @@ for angle, e_range in [[120, 600], [20, 200]]:
 
     ax[1].set_ylabel("$k_B T$ [eV]")
     ax[0].set_ylabel(
-        f"$S_{{ee}}(k={setup.k.m_as(1/ureg.angstrom):.2f}/$\\AA$, \\omega)$ [s]"
+        f"$S_{{ee}}(k={setup.k.m_as(1 / ureg.angstrom):.2f}/$\\AA$, \\omega)$ [s]"  # noqa: E501
     )
     ax[1].set_xlabel("$x$ [eV]")
     ax[0].set_xlabel("$E$ [eV]")

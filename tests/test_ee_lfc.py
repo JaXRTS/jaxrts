@@ -21,10 +21,8 @@ def test_staticInterp_Gregori2007_reproduction():
         kf = (3 * jnp.pi**2 * n_e) ** (1 / 3)
         k = k_over_kf * kf
 
-        G_calc = (
-            jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007(
-                k, T, n_e
-            )
+        G_calc = jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007(
+            k, T, n_e
         )
         assert jnp.max(jnp.abs(G - G_calc.m_as(ureg.dimensionless))) < 0.01
 
@@ -34,9 +32,11 @@ def test_Dornheim2021_interpolation_against_literature():
     theta = 2
     data_path = (
         pathlib.Path(__file__).parent
-        / f"data/Dornheim2021/Fig7G_rs2_theta2_FIT.csv"
+        / "data/Dornheim2021/Fig7G_rs2_theta2_FIT.csv"
     )
-    k_over_kf_lit, G_lit = onp.genfromtxt(data_path, unpack=True, delimiter=",")
+    k_over_kf_lit, G_lit = onp.genfromtxt(
+        data_path, unpack=True, delimiter=","
+    )
 
     assert (
         jnp.max(

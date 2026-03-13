@@ -387,7 +387,12 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
 
         theta = (plasma_state.T_e * ureg.k_B / E_f).m_as(ureg.dimensionless)
 
+<<<<<<< HEAD
         # Get the elements of the model and catch expanded ionization state with unique elements:
+=======
+        # Get the elements of the model and catch expanded ionization state
+        # with unique elements:
+>>>>>>> main
         elements = [jaxrts.Element(e.strip("+")) for e in self.model_elements]
         unique_elements = list(dict.fromkeys(elements))
 
@@ -453,9 +458,17 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
             perm = [*perm, *entry]
         perm = jnp.array(perm)
 
+<<<<<<< HEAD
         # Apply the permutation to S_base to capture wronge order of plasma state elements
         # compared to order of elements used to train the NN,
         # e.g. Plasma_state element list = ["C","H"] but NN element list =["H","C"]
+=======
+        # Apply the permutation to S_base to capture wronge order of plasma
+        # state elements
+        # compared to order of elements used to train the NN,
+        # e.g. Plasma_state element list = ["C","H"] but NN element list
+        # =["H","C"]
+>>>>>>> main
         # would result in wrong Sii values set for the elements
         S_out = S_base[perm][:, perm]
         return S_out * ureg.dimensionless

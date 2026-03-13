@@ -5,9 +5,9 @@ HNC-SVT: multi-component, multi-temperature (M-SVT)
 This example tests M-SVT model and reproduces Fig. 4.12 from
 :cite:`Wunsch.2011`.
 
-For the equilibrium case, the M-SVT method gives identical results as the Fig. 4.12
-from :cite:`Wunsch.2011`. And the results are also consistent with the results
-from plot_HNC_multicomponent.py.
+For the equilibrium case, the M-SVT method gives identical results as the Fig.
+4.12 from :cite:`Wunsch.2011`. And the results are also consistent with the
+results from plot_HNC_multicomponent.py.
 
 For non-equilibrium case, the M-SVT result is slightly different from
 :cite:`Bredow.2013`.

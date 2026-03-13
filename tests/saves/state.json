@@ -114,6 +114,18 @@
             ]
           ]
         },
+        "free-bound scattering": {
+          "_type": "Model",
+          "value": [
+            "Neglect",
+            [
+              [],
+              [
+                "free-bound scattering"
+              ]
+            ]
+          ]
+        },
         "screening": {
           "_type": "Model",
           "value": [
@@ -146,18 +158,6 @@
               [],
               [
                 "bound-free scattering"
-              ]
-            ]
-          ]
-        },
-        "free-bound scattering": {
-          "_type": "Model",
-          "value": [
-            "Neglect",
-            [
-              [],
-              [
-                "free-bound scattering"
               ]
             ]
           ]
