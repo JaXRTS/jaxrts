@@ -62,18 +62,19 @@ class NNModel(nnx.Module):
 
         self.no_of_atoms = no_of_atoms
 
-        self.linears = [nnx.Linear(din, dhid[0], rngs=rngs)]
+        linears = [nnx.Linear(din, dhid[0], rngs=rngs)]
         for i in range(len(dhid) - 1):
-            self.linears.append(nnx.Linear(dhid[i], dhid[i + 1], rngs=rngs))
-        self.linears.append(nnx.Linear(dhid[-1], dout, rngs=rngs))
+            linears.append(nnx.Linear(dhid[i], dhid[i + 1], rngs=rngs))
+        linears.append(nnx.Linear(dhid[-1], dout, rngs=rngs))
+        self.linears = nnx.List(linears)
 
         # These are the values with which we norm the quantities for the input
         # layer of the model.
         # We store them here to be able to obtain physical quantities from
         # scaled ones. For starters, set all values to unity. When the training
         # data is defined, replace these values.
-        #: Normalization for theta
-        self.norm_theta = nnx.Variable(1.0)
+        #: Normalization for T
+        self.norm_T = nnx.Variable(1.0)
         #: Normalization for rho.
         #: This is given as a float, as quantities would be in conflict with
         #: flax. The unit is g/cm³
@@ -81,27 +82,25 @@ class NNModel(nnx.Module):
         #: Normalization the ionization (this is an array with one entry for
         #: each component.
         self.norm_Z = nnx.Variable([1.0] * self.no_of_atoms)
-        #: Normalization for k_over_qk
-        self.norm_k_over_qk = nnx.Variable(1.0)
+        #: Normalization for k in units inverse angström
+        self.norm_k = nnx.Variable(1.0)
 
     @nnx.jit
     def __call__(self, x):
         for lin in self.linears[:-1]:
             x = lin(x)
-            x = nnx.relu(x)
+            x = nnx.silu(x)
         x = self.linears[-1](x)
         return x
 
-    def set_norms(
-        self, theta: float, rho: float, Z: list[float], k_over_qk: float
-    ):
+    def set_norms(self, T: float, rho: float, Z: list[float], k: float):
         """
         Set the normalization of the input layers.
         """
-        self.norm_theta = nnx.Variable(theta)
+        self.norm_T = nnx.Variable(T)
         self.norm_rho = nnx.Variable(rho)
         self.norm_Z = nnx.Variable(Z)
-        self.norm_k_over_qk = nnx.Variable(k_over_qk)
+        self.norm_k = nnx.Variable(k)
 
     @property
     def norms(self) -> dict[str, nnx.Variable]:
@@ -109,10 +108,10 @@ class NNModel(nnx.Module):
         Get the input layer normalizations as a dictionary.
         """
         return {
-            "theta": self.norm_theta,
+            "T": self.norm_T,
             "rho": self.norm_rho,
             "Z": self.norm_Z,
-            "k_over_qk": self.norm_k_over_qk,
+            "k": self.norm_k,
         }
 
     @property
@@ -374,10 +373,7 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
         # This has to be done within a jax.jitted function.
         nn_model = nnx.merge(self.graphdef, self.model_state)
 
-        E_f = jaxrts.plasma_physics.fermi_energy(plasma_state.n_e)
-        q_k = jnpu.sqrt(2 * ureg.electron_mass * E_f)
-
-        theta = (plasma_state.T_e * ureg.k_B / E_f).m_as(ureg.dimensionless)
+        T = (plasma_state.T_e * ureg.k_B).m_as(ureg.eV)
 
         # Get the elements of the model and catch expanded ionization state
         # with unique elements:
@@ -411,7 +407,7 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
         # create input array to the Neural Net
         x = jnp.array(
             [
-                theta / nn_model.norm_theta,
+                T / nn_model.norm_T,
                 jnp.sum(
                     plasma_state.mass_density.m_as(
                         ureg.gram / ureg.centimeter**3
@@ -419,8 +415,7 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
                 )
                 / nn_model.norm_rho,
                 *(Z_arr / jnp.array(nn_model.norm_Z)),
-                (setup.k * (1 * ureg.hbar) / q_k).m_as(ureg.dimensionless)
-                / nn_model.norm_k_over_qk,
+                (setup.k).m_as(1 / ureg.angstrom) / nn_model.norm_k,
             ]
         )
         Sii = nn_model(x)
