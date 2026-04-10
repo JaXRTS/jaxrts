@@ -887,7 +887,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         - an 'ion-ion Potential' The black entries in the picture below
           (defaults to :py:class:`~CoulombPotential`).
         - an 'electron-ion Potential' The orange entries in the picture below
-          (defaults to :py:class:`~KlimontovichKraeftPotential`).
+          (defaults to :py:class:`~CoulombPotential`).
         - an 'electron-electron Potential' The red entries in the picture below
           (defaults to :py:class:`~KelbgPotental`).
 
@@ -960,7 +960,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         )
         plasma_state.update_default_model(
             "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential(),
+            hnc_potentials.CoulombPotential(),
         )
         plasma_state.update_default_model(
             "electron-electron Potential",
@@ -4075,7 +4075,7 @@ class LinearResponseScreeningGericke2010(Model):
     used, and V_{ee} the Coulomb potential.
 
     Requires an 'electron-ion' potential. (defaults to
-    :py:class:`~KlimontovichKraeftPotential`).
+    :py:class:`~CoulombPotential`).
 
 
     .. note::
@@ -4098,7 +4098,7 @@ class LinearResponseScreeningGericke2010(Model):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential(),
+            hnc_potentials.CoulombPotential(),
         )
         plasma_state[
             "electron-ion Potential"
@@ -4241,7 +4241,7 @@ class FiniteWavelengthScreening(Model):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential(),
+            hnc_potentials.CoulombPotential(),
         )
         plasma_state[
             "electron-ion Potential"
@@ -4334,7 +4334,7 @@ class LinearResponseScreening(Model):
     :py:class:`~.RPA_DandreaFit`.
 
     Requires an 'electron-ion' potential. (defaults to
-    :py:class:`~KlimontovichKraeftPotential`).
+    :py:class:`~CoulombPotential`).
     """
 
     allowed_keys = ["screening"]
@@ -4344,7 +4344,7 @@ class LinearResponseScreening(Model):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential(),
+            hnc_potentials.CoulombPotential(),
         )
         plasma_state[
             "electron-ion Potential"
