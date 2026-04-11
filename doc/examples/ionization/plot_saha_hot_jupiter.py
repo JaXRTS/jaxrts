@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import jaxrts
-from jaxrts.saha import solve_saha
+from jaxrts.ionization import solve_saha
 from jaxrts.units import ureg
 
 if __name__ == "__main__":

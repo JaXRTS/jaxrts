@@ -10,7 +10,7 @@ from jaxrts.plasma_physics import (
     chem_pot_sommerfeld_fermi_interpolation,
     degeneracy_param,
 )
-from jaxrts.saha import (
+from jaxrts.ionization import (
     calculate_mean_free_charge_saha,
 )
 import jpu.numpy as jnpu
