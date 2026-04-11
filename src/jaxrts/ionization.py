@@ -1,5 +1,6 @@
 """
-Module containing functions to solve the
+Module to model the ionization state of a plasma.
+It contains functions to solve the
 `Saha-equation <https://en.wikipedia.org/wiki/Saha_ionization_equation>`_,
 linking the temperature of a plasma to it's ionization.
 """
@@ -11,6 +12,8 @@ import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
 
+import logging
+
 from .elements import Element
 from .plasma_physics import therm_de_broglie_wl
 from .units import Quantity, to_array, ureg
@@ -19,6 +22,8 @@ from .helpers import bisection
 h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
 m_e = 1 * ureg.electron_mass
+
+logger = logging.getLogger(__name__)
 
 
 @jax.jit
@@ -830,3 +835,60 @@ def calculate_mean_free_charge_saha(
             plasma_state.Z_free = jnp.array(Z_mean)
 
     return charge_distribution, Z_mean
+
+
+@jax.jit
+def calculate_mean_free_charge_more(plasma_state) -> Quantity:
+    """
+    Finite Temperature Thomas Fermi Charge State using an analytical fit
+    provided by :cite:`More.1985` p. 332 (Table IV).
+
+    .. note::
+
+        This fit is currently only applicable to a OCP.
+
+        Parameters
+    ----------
+    plasma_state : PlasmaState
+        The plasma state object.
+        
+    Returns
+    -------
+    Z_f : Quantity
+        The mean free charge of the ions in the OCP
+
+    """
+
+    rho = plasma_state.mass_density
+    m_A = plasma_state.atomic_masses
+
+    if len(m_A) > 1:
+        logger.warning(
+            f"Multiple ion species detected. More model currently supports one species and evaluates ionization per ion separately."  # noqa: E501
+        )
+    Z_A = plasma_state.Z_A
+    T_e = plasma_state.T_e
+
+    alpha = 14.3139
+    beta = 0.6624
+    a1 = 0.003323
+    a2 = 0.9718
+    a3 = 9.26148e-5
+    a4 = 3.10165
+    b0 = -1.7630
+    b1 = 1.43175
+    b2 = 0.31546
+    c1 = -0.366667
+    c2 = 0.983333
+
+    R = (rho.m_as(ureg.gram / ureg.cc) / m_A.m_as(ureg.u)) / Z_A
+    T0 = T_e.m_as(ureg.eV / ureg.k_B) / Z_A ** (4.0 / 3.0)
+    Tf = T0 / (1 + T0)
+    A = a1 * T0**a2 + a3 * T0**a4
+    B = -jnp.exp(b0 + b1 * Tf + b2 * Tf**7)
+    C = c1 * Tf + c2
+    Q1 = A * R**B
+    Q = (R**C + Q1**C) ** (1 / C)
+    x = alpha * Q**beta
+
+    return Z_A * x / (1 + x + jnp.sqrt(1 + 2.0 * x))
