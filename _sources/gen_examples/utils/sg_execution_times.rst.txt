@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:18.220** total execution time for 4 files **from gen_examples/utils**:
+**00:18.963** total execution time for 4 files **from gen_examples/utils**:
 
 .. container::
 
@@ -33,14 +33,14 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gen_examples_utils_plot_3D_fourier.py` (``plot_3D_fourier.py``)
-     - 00:06.524
+     - 00:06.858
      - 0.0
    * - :ref:`sphx_glr_gen_examples_utils_plot_instrument_function_models.py` (``plot_instrument_function_models.py``)
-     - 00:05.486
+     - 00:05.696
      - 0.0
    * - :ref:`sphx_glr_gen_examples_utils_plot_fermi_integral_inversion.py` (``plot_fermi_integral_inversion.py``)
-     - 00:03.677
+     - 00:03.763
      - 0.0
    * - :ref:`sphx_glr_gen_examples_utils_plot_ogata.py` (``plot_ogata.py``)
-     - 00:02.533
+     - 00:02.647
      - 0.0

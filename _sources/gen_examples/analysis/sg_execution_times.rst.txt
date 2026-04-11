@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**01:18.548** total execution time for 3 files **from gen_examples/analysis**:
+**01:26.617** total execution time for 3 files **from gen_examples/analysis**:
 
 .. container::
 
@@ -32,12 +32,12 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT_noise.py` (``plot_ITCFT_noise.py``)
-     - 00:32.178
-     - 0.0
    * - :ref:`sphx_glr_gen_examples_analysis_plot_f-sum-rule.py` (``plot_f-sum-rule.py``)
-     - 00:31.005
+     - 00:35.671
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT_noise.py` (``plot_ITCFT_noise.py``)
+     - 00:34.475
      - 0.0
    * - :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT.py` (``plot_ITCFT.py``)
-     - 00:15.365
+     - 00:16.471
      - 0.0

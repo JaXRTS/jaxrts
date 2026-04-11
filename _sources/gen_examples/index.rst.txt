@@ -734,8 +734,8 @@ Ionic scattering examples
 
     </div>
 
-Saha Examples
--------------
+Ionization examples
+-------------------
 
 
 
@@ -750,10 +750,10 @@ Saha Examples
 
 .. only:: html
 
-  .. image:: /gen_examples/saha/images/thumb/sphx_glr_plot_WR_expanded_ionization_thumb.svg
+  .. image:: /gen_examples/ionization/images/thumb/sphx_glr_plot_WR_expanded_ionization_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_saha_plot_WR_expanded_ionization.py`
+  :ref:`sphx_glr_gen_examples_ionization_plot_WR_expanded_ionization.py`
 
 .. raw:: html
 
@@ -767,10 +767,10 @@ Saha Examples
 
 .. only:: html
 
-  .. image:: /gen_examples/saha/images/thumb/sphx_glr_plot_saha_hot_jupiter_thumb.svg
+  .. image:: /gen_examples/ionization/images/thumb/sphx_glr_plot_saha_hot_jupiter_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_saha_plot_saha_hot_jupiter.py`
+  :ref:`sphx_glr_gen_examples_ionization_plot_saha_hot_jupiter.py`
 
 .. raw:: html
 
@@ -910,7 +910,7 @@ Utility tool examples
    /gen_examples/free_bound/index.rst
    /gen_examples/free_free/index.rst
    /gen_examples/ionic/index.rst
-   /gen_examples/saha/index.rst
+   /gen_examples/ionization/index.rst
    /gen_examples/setup/index.rst
    /gen_examples/utils/index.rst
 
