@@ -836,6 +836,7 @@ def calculate_mean_free_charge_saha(
 
     return charge_distribution, Z_mean
 
+
 @jax.jit
 def _calculate_single_species_ionization_more(rho, T_e, m_A, Z_A) -> Quantity:
 
@@ -873,15 +874,15 @@ def _calculate_mean_free_charge_more_single_species(plasma_state) -> Quantity:
     Finite Temperature Thomas Fermi Charge State using an analytical fit
     provided by :cite:`More.1985` p. 332 (Table IV).
 
-    .. note::
+    .. warning::
 
         This fit is currently only applicable to a OCP.
 
-        Parameters
+    Parameters
     ----------
     plasma_state : PlasmaState
         The plasma state object.
-        
+
     Returns
     -------
     Z_f : Quantity
@@ -889,14 +890,16 @@ def _calculate_mean_free_charge_more_single_species(plasma_state) -> Quantity:
 
     """
 
-    logger.warning("'_calculate_mean_free_charge_more_single_species' is deprecated, please use 'calculate_mean_free_charge_more' instead.")
+    logger.warning(
+        "'_calculate_mean_free_charge_more_single_species' is deprecated, please use 'calculate_mean_free_charge_more' instead."  # noqa: E501
+    )
 
     rho = plasma_state.mass_density
     m_A = plasma_state.atomic_masses
 
     if len(m_A) > 1:
         logger.warning(
-            f"Multiple ion species detected. '_calculate_mean_free_charge_more_single_species' supports only one species and evaluates ionization per ion independently."  # noqa: E501
+            "Multiple ion species detected. '_calculate_mean_free_charge_more_single_species' supports only one species and evaluates ionization per ion independently."  # noqa: E501
         )
 
     Z_A = plasma_state.Z_A
@@ -907,24 +910,24 @@ def _calculate_mean_free_charge_more_single_species(plasma_state) -> Quantity:
 
 @jax.jit
 def calculate_mean_free_charge_more(plasma_state) -> jnp.ndarray:
-
     """
-    
-    Uses the finite Temperature Thomas Fermi Charge State fits
-    provided by :cite:`More.1985` p. 332 (Table IV) using an Average-Atom model to calculate
-    the mean ionization state of each species at an effective density.
+
+    Uses the finite Temperature Thomas Fermi Charge State fits provided by
+    :cite:`More.1985` p. 332 (Table IV) using an Average-Atom model to
+    calculate the mean ionization state of each species at an effective
+    density.
 
     Based on the Multispecies TF-AA Ionization solver of M. Murillo et al.:
-    https://github.com/MurilloGroupMSU/Thomas-Fermi-Multispecies-Ionization/tree/master
+    https://github.com/MurilloGroupMSU/Thomas-Fermi-Multispecies-Ionization/
+    which is published in :cite:`Stanton.2017`.
 
 
-        Parameters
+    Parameters
     ----------
-
     plasma_state : PlasmaState
         The plasma state object.
 
-        Returns
+    Returns
     -------
     Z_f : Quantity
         The mean free charge of each ion in the plasma
@@ -938,8 +941,8 @@ def calculate_mean_free_charge_more(plasma_state) -> jnp.ndarray:
     # Initial guess
     Zbar = 0.5 * plasma_state.Z_A
 
-    max_iter=100
-    tol=1E-5
+    max_iter = 100
+    tol = 1e-5
 
     def body_fun(state):
         Zbar_old = state
@@ -962,7 +965,7 @@ def calculate_mean_free_charge_more(plasma_state) -> jnp.ndarray:
     def cond_fun(state):
         Zbar_old, Zbar_new, i = state
         err = jnp.max(jnp.abs(Zbar_new - Zbar_old))
-    
+
         return jnp.logical_and(err > tol, i < max_iter)
 
     def loop_body(state):
@@ -973,10 +976,6 @@ def calculate_mean_free_charge_more(plasma_state) -> jnp.ndarray:
     Zbar_new = body_fun(Zbar)
     state = (Zbar, Zbar_new, 0)
 
-    Zbar_old, Z_mean, _ = jax.lax.while_loop(
-        cond_fun,
-        loop_body,
-        state
-    )
+    Zbar_old, Z_mean, _ = jax.lax.while_loop(cond_fun, loop_body, state)
 
     return Z_mean
