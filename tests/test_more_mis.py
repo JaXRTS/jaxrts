@@ -3,7 +3,10 @@ import pathlib
 
 import jaxrts
 from jaxrts import ureg
-from jaxrts.ionization import calculate_mean_free_charge_more
+from jaxrts.ionization import (
+    calculate_mean_free_charge_more,
+    _calculate_mean_free_charge_more_single_species,
+)
 
 import numpy as np
 
@@ -85,3 +88,15 @@ def test_compare_stanton():
 
     assert np.max(errors) < TOLERANCE
 
+
+def test_compatibility_with_one_species_plasma():
+    state = jaxrts.PlasmaState(
+        ions=[jaxrts.Element("C")],
+        mass_density=[3 * ureg.gram / ureg.cc],
+        Z_free=[3],
+        T_e=16 * ureg.electron_volt / ureg.k_B,
+    )
+
+    Zbar_i = calculate_mean_free_charge_more(state)
+    Zbar_i_one_species = _calculate_mean_free_charge_more_single_species(state)
+    assert jnp.abs(Zbar_i - Zbar_i_one_species) < 1e-4
