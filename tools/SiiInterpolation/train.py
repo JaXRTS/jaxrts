@@ -631,6 +631,11 @@ def numpy_collate(batch):
 ## Set training data file on which the NN is trained
 data_filepath = f"train_data/1.0C1.0H_200000_expanded.h5"
 
+# Set NN training parameters
+hidden_layers = [64, 128, 128, 64]
+learning_rate = 1e-4
+nr_epoches = 2000
+
 # Determine needed information from file path
 expanded_ionization, Elements, number_points = parse_data_path(
     path=data_filepath
@@ -651,15 +656,19 @@ if expanded_ionization:
 ## Select Dataset for the training data
 nr_of_ions = len(Elements)
 if nr_of_ions == 1:
+    print("I use Dataset1C")
     dataset = Dataset1C(data_filepath, *Elements)
 
 elif nr_of_ions == 2:
     if expanded_ionization:
+        print("I use Dataset1C_expanded")
         dataset = Dataset1C_expanded_ionization_state(data_filepath, *Elements)
     else:
+        print("I use Dataset2C")
         dataset = Dataset2C(data_filepath, *Elements)
 
 elif nr_of_ions == 3:
+    print("I use Dataset3C")
     dataset = Dataset3C(data_filepath, *Elements)
 
 elif nr_of_ions == 4:
@@ -667,6 +676,7 @@ elif nr_of_ions == 4:
         print("I use Dataset2C_expanded")
         dataset = Dataset2C_expanded_ionization_state(data_filepath, *Elements)
     else:
+        print("I use Dataset4C")
         dataset = Dataset4C(data_filepath, *Elements)
 else:
     raise ValueError(
@@ -679,12 +689,14 @@ else:
 ApproriateModelClass = NNModelExpandedZ if expanded_ionization else NNModel
 model = ApproriateModelClass(
     int(nr_of_ions // correction_value + 3),
-    [64, 128, 128, 64],
+    hidden_layers,
     nr_of_ions * (nr_of_ions + 1) // 2,
     nnx.Rngs(int(1e6 * time.time()) % 42),
 )
 ## Select optimizer
-optimizer = nnx.ModelAndOptimizer(model, optax.adam(1e-3))
+optimizer = nnx.ModelAndOptimizer(
+    model, optax.adam(learning_rate=learning_rate)
+)
 
 ## Set norms for Z correctly according to how many elements are in your plasma state
 ## and whether the state is expanded
@@ -809,13 +821,13 @@ metrics_hist = train_model(
     train_loader=train_loader,
     test_loader=test_loader,
     metrics=metrics,
-    num_epochs=1001,
+    num_epochs=nr_epoches + 1,
 )
 
 fig, ax = plt.subplots(1)
-ax.plot(metrics_hist["train_loss"], label="train_loss")
-ax.plot(metrics_hist["train_accuracy"], label="train_accuracy")
-ax.plot(metrics_hist["test_accuracy"], label="test_accuracy")
+ax.plot(metrics_hist["train_loss"], alpha=0.8, label="train_loss")
+ax.plot(metrics_hist["train_accuracy"], alpha=0.8, label="train_accuracy")
+ax.plot(metrics_hist["test_accuracy"], alpha=0.8, label="test_accuracy")
 plt.yscale("log")
 plt.legend()
 plt.savefig("trained_NNs/loss.png", dpi=300)

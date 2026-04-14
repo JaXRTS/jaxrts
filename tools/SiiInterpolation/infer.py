@@ -21,9 +21,9 @@ The Name of the NN can be set to benchmark its performance.
 
 
 ureg = jaxrts.ureg
-file_path_plasma_state = "train_data/1.0C1.0H_200000.json"
+file_path_plasma_state = "train_data/1.0C_200000.json"
 expanded = False
-NN_Name = "CH_e800_64_128"
+NN_Name = "C_e700_64_128_128_64"
 
 with open(file_path_plasma_state, "r") as json_file:
     plasma_state: jaxrts.PlasmaState = jaxrts.saving.load(
@@ -31,7 +31,7 @@ with open(file_path_plasma_state, "r") as json_file:
     )
 
 
-plasma_state.Z_free = jnp.array([4.0, 1.0])
+plasma_state.Z_free = jnp.array([4.0])
 if expanded:
     plasma_state = plasma_state.expand_integer_ionization_states()
 

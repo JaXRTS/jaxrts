@@ -31,7 +31,7 @@ if the ionization state is expanded into integer values using the 'expanded' fla
 
 
 # number of Samples for training dataset.
-data_no: int = int(2e5)
+data_no: int = int(4e5)
 
 # Set limits of parameters k, rho and T that defines the parameter space
 k_lower: float = 0.1  # Units in 1 / Angström
@@ -47,15 +47,15 @@ rho_upper: float = 100  # Units in g/cm^3
 # Set plasmastate for which the trainingdata is generated
 ions = [
     jaxrts.Element("C"),
-    jaxrts.Element("H"),
+    # jaxrts.Element("H"),
     # jaxrts.Element("O"),
 ]
-number_fraction = jnp.array([1 / 2, 1 / 2])
-# number_fraction = jnp.array([1])
+# number_fraction = jnp.array([1 / 2, 1 / 2])
+number_fraction = jnp.array([1])
 # pet_number_fraction = [5 / 11, 4 / 11, 2 / 11]
 
 # Expand into integer ionization state or use average atom ionization
-expand_integer_ionization_state: bool = True
+expand_integer_ionization_state: bool = False
 
 
 setup = jaxrts.Setup(ureg("45°"), ureg("10keV"), None, lambda x: x)
