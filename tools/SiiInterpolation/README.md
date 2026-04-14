@@ -48,7 +48,7 @@ agreement seems reasonable compared to a direct calculation of Sii.
 14. Set the directory path for the safed NN which you just trained
 15. Hit enter and 3D plots are created that compare the output of the NN (plotted as orange grid) against the output of
     the HNC calculation (blue crosses)
-16. The infer_rayleigh_weight.py script allows to benchmark the NN against randomally drawn input parameters. A good
-    check to see its performance without any bias.
+16. The infer_Sii_error.py script allows to benchmark the NN against randomally drawn input parameters. It calculates
+    the mean squared error (MSE) for the NN compared to the HNC algorithm. A good check to see its performance without any bias.
 
 [Dornheim et al. (2019)]: T. Dornheim, J. Vorberger, S. Groth, N. Hoffmann, Zh. A. Moldabekov, M. Bonitz; The static local field correction of the warm dense electron gas: An ab initio path integral Monte Carlo study and machine learning representation. J. Chem. Phys. 21 November 2019; 151 (19): 194104. https://doi.org/10.1063/1.5123013
