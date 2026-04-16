@@ -36,10 +36,10 @@ jaxrts.experimental.SiiNN.NNModel
       ~NNModel.dout
       ~NNModel.norms
       ~NNModel.shape
-      ~NNModel.norm_theta
+      ~NNModel.norm_T
       ~NNModel.norm_rho
       ~NNModel.norm_Z
-      ~NNModel.norm_k_over_qk
+      ~NNModel.norm_k
    
    
 

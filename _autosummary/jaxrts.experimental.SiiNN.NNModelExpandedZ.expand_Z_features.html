@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jaxrts.experimental.SiiNN.NNModel.norm_k_over_qk &mdash; jaxrts  documentation</title>
+  <title>jaxrts.experimental.SiiNN.NNModelExpandedZ.expand_Z_features &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
@@ -23,11 +23,12 @@
         <script src="../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="jaxrts.experimental.SiiNN.NNSiiModel" href="jaxrts.experimental.SiiNN.NNSiiModel.html" />
-    <link rel="prev" title="jaxrts.experimental.SiiNN.NNModel.norm_Z" href="jaxrts.experimental.SiiNN.NNModel.norm_Z.html" /> 
+    <link rel="next" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.iter_children" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.iter_children.html" />
+    <link rel="prev" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.eval" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.eval.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -111,10 +112,10 @@
           <li class="breadcrumb-item"><a href="jaxrts.html">jaxrts</a></li>
           <li class="breadcrumb-item"><a href="jaxrts.experimental.html">jaxrts.experimental</a></li>
           <li class="breadcrumb-item"><a href="jaxrts.experimental.SiiNN.html">jaxrts.experimental.SiiNN</a></li>
-          <li class="breadcrumb-item"><a href="jaxrts.experimental.SiiNN.NNModel.html">jaxrts.experimental.SiiNN.NNModel</a></li>
-      <li class="breadcrumb-item active">jaxrts.experimental.SiiNN.NNModel.norm_k_over_qk</li>
+          <li class="breadcrumb-item"><a href="jaxrts.experimental.SiiNN.NNModelExpandedZ.html">jaxrts.experimental.SiiNN.NNModelExpandedZ</a></li>
+      <li class="breadcrumb-item active">jaxrts.experimental.SiiNN.NNModelExpandedZ.expand_Z_features</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/jaxrts.experimental.SiiNN.NNModel.norm_k_over_qk.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/jaxrts.experimental.SiiNN.NNModelExpandedZ.expand_Z_features.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -122,22 +123,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="jaxrts-experimental-siinn-nnmodel-norm-k-over-qk">
-<h1>jaxrts.experimental.SiiNN.NNModel.norm_k_over_qk<a class="headerlink" href="#jaxrts-experimental-siinn-nnmodel-norm-k-over-qk" title="Link to this heading"></a></h1>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="jaxrts.experimental.SiiNN.NNModel.norm_k_over_qk">
-<span class="sig-prename descclassname"><span class="pre">NNModel.</span></span><span class="sig-name descname"><span class="pre">norm_k_over_qk</span></span><a class="headerlink" href="#jaxrts.experimental.SiiNN.NNModel.norm_k_over_qk" title="Link to this definition"></a></dt>
-<dd><p>Normalization for k_over_qk</p>
+  <section id="jaxrts-experimental-siinn-nnmodelexpandedz-expand-z-features">
+<h1>jaxrts.experimental.SiiNN.NNModelExpandedZ.expand_Z_features<a class="headerlink" href="#jaxrts-experimental-siinn-nnmodelexpandedz-expand-z-features" title="Link to this heading"></a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="jaxrts.experimental.SiiNN.NNModelExpandedZ.expand_Z_features">
+<span class="sig-prename descclassname"><span class="pre">NNModelExpandedZ.</span></span><span class="sig-name descname"><span class="pre">expand_Z_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/experimental/SiiNN.html#NNModelExpandedZ.expand_Z_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.experimental.SiiNN.NNModelExpandedZ.expand_Z_features" title="Link to this definition"></a></dt>
+<dd><p>Expand the ionization features of the input tensor.</p>
+<p>Each normalized ionization value <code class="docutils literal notranslate"><span class="pre">Z_i</span></code> is transformed into two
+quantities representing the ionization stage and the local
+coordinate within that stage.</p>
+<p>The transformation is defined as</p>
+<div class="math notranslate nohighlight">
+\[Z_i^{phys} = Z_i \cdot \mathrm{norm\_Z}_i\]</div>
+<div class="math notranslate nohighlight">
+\[n_i = \lfloor Z_i^{phys} \rfloor\]</div>
+<div class="math notranslate nohighlight">
+\[\phi_i = Z_i^{phys} - n_i\]</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">norm_Z</span></code> denotes the normalization factor stored in the
+model.</p>
+<p>The returned feature vector replaces the original <code class="docutils literal notranslate"><span class="pre">Z_i</span></code> inputs
+with <code class="docutils literal notranslate"><span class="pre">(φ_i,</span> <span class="pre">n_i)</span></code> while leaving the remaining input parameters
+unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>jax.Array</em>) – Input tensor containing the normalized network inputs.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>jax.Array</em> – Transformed input tensor with expanded ionization features.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<span class="target" id="sphx-glr-backref-jaxrts-experimental-siinn-nnmodel-norm-k-over-qk"></span></section>
+<span class="target" id="sphx-glr-backref-jaxrts-experimental-siinn-nnmodelexpandedz-expand-z-features"></span></section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="jaxrts.experimental.SiiNN.NNModel.norm_Z.html" class="btn btn-neutral float-left" title="jaxrts.experimental.SiiNN.NNModel.norm_Z" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="jaxrts.experimental.SiiNN.NNSiiModel.html" class="btn btn-neutral float-right" title="jaxrts.experimental.SiiNN.NNSiiModel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="jaxrts.experimental.SiiNN.NNModelExpandedZ.eval.html" class="btn btn-neutral float-left" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.eval" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.experimental.SiiNN.NNModelExpandedZ.iter_children.html" class="btn btn-neutral float-right" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.iter_children" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

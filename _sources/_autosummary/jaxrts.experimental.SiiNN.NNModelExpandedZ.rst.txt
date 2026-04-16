@@ -1,0 +1,50 @@
+jaxrts.experimental.SiiNN.NNModelExpandedZ
+==========================================
+
+.. currentmodule:: jaxrts.experimental.SiiNN
+
+.. autoclass:: NNModelExpandedZ
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~NNModelExpandedZ.__init__
+      ~NNModelExpandedZ.eval
+      ~NNModelExpandedZ.expand_Z_features
+      ~NNModelExpandedZ.iter_children
+      ~NNModelExpandedZ.iter_modules
+      ~NNModelExpandedZ.perturb
+      ~NNModelExpandedZ.set_attributes
+      ~NNModelExpandedZ.set_norms
+      ~NNModelExpandedZ.sow
+      ~NNModelExpandedZ.train
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~NNModelExpandedZ.dhid
+      ~NNModelExpandedZ.din
+      ~NNModelExpandedZ.dout
+      ~NNModelExpandedZ.norms
+      ~NNModelExpandedZ.shape
+      ~NNModelExpandedZ.norm_T
+      ~NNModelExpandedZ.norm_rho
+      ~NNModelExpandedZ.norm_Z
+      ~NNModelExpandedZ.norm_k
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.experimental.SiiNN.NNModelExpandedZ:
+
+   .. minigallery:: jaxrts.experimental.SiiNN.NNModelExpandedZ
+       :add-heading:
