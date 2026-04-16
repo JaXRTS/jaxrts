@@ -9,10 +9,10 @@ authors = [
 ]
 readme = "README.md"
 dependencies = [
-  "pint (>=0.25.2)",
+  "pint (>=0.25.3)",
   "numpy (>=2.3.4,<2.4.0)",
   "matplotlib (>=3.10.8)",
-  "quadax (>=0.2.11)",
+  "quadax (>=0.2.12)",
   "jax (>=0.5.0,<0.9.0)",
   "jaxlib (>=0.5.0,<0.9.0)",
   "jpu (>=0.0.5)",
@@ -23,7 +23,7 @@ requires-python = ">=3.11,<3.15"
 
 [project.optional-dependencies]
 NN = [
-    "flax (>=0.12.4)",
+    "flax (>=0.12.6)",
     "orbax (>=0.1.9)",
 ]
 gui = [
@@ -40,7 +40,7 @@ poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.3.0"
 black = "^24.10.0"
-ipython = "^8.38.0"
+ipython = "^8.39.0"
 pytest = "^8.4.2"
 
 [tool.poetry.group.docs.dependencies]
