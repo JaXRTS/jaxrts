@@ -59,46 +59,48 @@ class NNModel(nnx.Module):
         """
         if no_of_atoms is None:
             no_of_atoms = din - 3
-        self.linears = [nnx.Linear(din, dhid[0], rngs=rngs)]
+
+        self.no_of_atoms = no_of_atoms
+
+        linears = [nnx.Linear(din, dhid[0], rngs=rngs)]
         for i in range(len(dhid) - 1):
-            self.linears.append(nnx.Linear(dhid[i], dhid[i + 1], rngs=rngs))
-        self.linears.append(nnx.Linear(dhid[-1], dout, rngs=rngs))
+            linears.append(nnx.Linear(dhid[i], dhid[i + 1], rngs=rngs))
+        linears.append(nnx.Linear(dhid[-1], dout, rngs=rngs))
+        self.linears = nnx.List(linears)
 
         # These are the values with which we norm the quantities for the input
         # layer of the model.
         # We store them here to be able to obtain physical quantities from
         # scaled ones. For starters, set all values to unity. When the training
         # data is defined, replace these values.
-        #: Normalization for theta
-        self.norm_theta = nnx.Variable(1.0)
+        #: Normalization for T
+        self.norm_T = nnx.Variable(1.0)
         #: Normalization for rho.
         #: This is given as a float, as quantities would be in conflict with
         #: flax. The unit is g/cm³
         self.norm_rho = nnx.Variable(1.0)
         #: Normalization the ionization (this is an array with one entry for
         #: each component.
-        self.norm_Z = nnx.Variable([1.0] * no_of_atoms)
-        #: Normalization for k_over_qk
-        self.norm_k_over_qk = nnx.Variable(1.0)
+        self.norm_Z = nnx.Variable([1.0] * self.no_of_atoms)
+        #: Normalization for k in units inverse angström
+        self.norm_k = nnx.Variable(1.0)
 
     @nnx.jit
     def __call__(self, x):
         for lin in self.linears[:-1]:
             x = lin(x)
-            x = nnx.relu(x)
+            x = nnx.silu(x)
         x = self.linears[-1](x)
         return x
 
-    def set_norms(
-        self, theta: float, rho: float, Z: list[float], k_over_qk: float
-    ):
+    def set_norms(self, T: float, rho: float, Z: list[float], k: float):
         """
         Set the normalization of the input layers.
         """
-        self.norm_theta = nnx.Variable(theta)
+        self.norm_T = nnx.Variable(T)
         self.norm_rho = nnx.Variable(rho)
         self.norm_Z = nnx.Variable(Z)
-        self.norm_k_over_qk = nnx.Variable(k_over_qk)
+        self.norm_k = nnx.Variable(k)
 
     @property
     def norms(self) -> dict[str, nnx.Variable]:
@@ -106,10 +108,10 @@ class NNModel(nnx.Module):
         Get the input layer normalizations as a dictionary.
         """
         return {
-            "theta": self.norm_theta,
+            "T": self.norm_T,
             "rho": self.norm_rho,
             "Z": self.norm_Z,
-            "k_over_qk": self.norm_k_over_qk,
+            "k": self.norm_k,
         }
 
     @property
@@ -141,6 +143,164 @@ class NNModel(nnx.Module):
         return self.din, self.dhid, self.dout
 
 
+class NNModelExpandedZ(NNModel):
+    """
+    Extension of :py:class:`NNModel` that augments the input representation of
+    the ionization state in order to better capture discontinuities occurring
+    at integer ionization values.
+
+    In expanded plasma states, the Sii output exhibits a discontinuity when the
+    ionization state approaches an integer value. Standard fully connected
+    networks struggle to approximate such behaviour because they implicitly
+    assume smooth mappings between inputs and outputs.
+
+    To mitigate this issue, the ionization input ``Z_i`` is transformed into two
+    components:
+
+    * the integer ionization stage
+      :math:`n_i = \\lfloor Z_i^{phys} \\rfloor`
+    * the fractional coordinate within that stage
+      :math:`\\phi_i = Z_i^{phys} - n_i`
+
+    where
+
+    .. math::
+
+        Z_i^{phys} = Z_i \\cdot \\mathrm{norm\\_Z}_i
+
+    is the ionization value in physical units.
+
+    This transformation allows the neural network to learn
+
+    * smooth behaviour within each ionization stage
+    * discontinuous transitions between stages
+
+    while keeping the underlying architecture identical to
+    :py:class:`NNModel`.
+
+    The behaviour of S_ab(k) for an expanded and non-expanded
+    carbon dataset is shown below, highlighting the dicontinuity
+    at integer ionization values.
+
+    .. image:: ../images/NN_comparison_expanded_vs_non_expanded_dataset.svg
+       :width: 600
+    """
+
+    def __init__(self, din, dhid, dout, rngs, no_of_atoms=None):
+        """
+        Construct an expanded neural network model.
+
+        The dimensionality of the first layer is increased because each
+        ionization variable ``Z_i`` is replaced by two features: its
+        integer ionization stage and its fractional coordinate within
+        that stage.
+
+        Parameters
+        ----------
+        din : int
+            Number of input nodes in the original model.
+        dhid : list[int]
+            List containing the number of neurons in each hidden layer.
+        dout : int
+            Number of output nodes.
+        rngs : nnx.Rngs
+            Random number generator used for parameter initialization.
+        no_of_atoms : int or None, optional
+            Number of ion species in the plasma. If not given, this
+            quantity is inferred from ``din`` as ``din - 3``.
+        """
+        super().__init__(din, dhid, dout, rngs, no_of_atoms)
+
+        # The first layer is inflated, because we split Z into two components,
+        # the integer part and the rest
+        transformed_din = din + self.no_of_atoms
+        self.linears[0] = nnx.Linear(transformed_din, dhid[0], rngs=rngs)
+
+    def expand_Z_features(self, x):
+        """
+        Expand the ionization features of the input tensor.
+
+        Each normalized ionization value ``Z_i`` is transformed into two
+        quantities representing the ionization stage and the local
+        coordinate within that stage.
+
+        The transformation is defined as
+
+        .. math::
+
+            Z_i^{phys} = Z_i \\cdot \\mathrm{norm\\_Z}_i
+
+        .. math::
+
+            n_i = \\lfloor Z_i^{phys} \\rfloor
+
+        .. math::
+
+            \\phi_i = Z_i^{phys} - n_i
+
+        where ``norm_Z`` denotes the normalization factor stored in the
+        model.
+
+        The returned feature vector replaces the original ``Z_i`` inputs
+        with ``(φ_i, n_i)`` while leaving the remaining input parameters
+        unchanged.
+
+        Parameters
+        ----------
+        x : jax.Array
+            Input tensor containing the normalized network inputs.
+
+        Returns
+        -------
+        jax.Array
+            Transformed input tensor with expanded ionization features.
+        """
+
+        # split input
+        smooth_left = x[..., :2]
+        Z = x[..., 2 : 2 + self.no_of_atoms]
+        smooth_right = x[..., 2 + self.no_of_atoms :]
+
+        norm_Z = jnp.array(self.norm_Z.value)
+
+        # convert to physical Z
+        Z_phys = Z * norm_Z
+
+        n = jnp.floor(Z_phys)
+        phi = Z_phys - n
+
+        # concatenate new features
+        x_new = jnp.concatenate(
+            [smooth_left, phi, n, smooth_right],
+            axis=-1,
+        )
+
+        return x_new
+
+    @nnx.jit
+    def __call__(self, x):
+        x = self.expand_Z_features(x)
+        return super().__call__(x)
+
+    @property
+    def din(self) -> int:
+        """
+        Effective input dimensionality of the original model.
+
+        Because the expanded representation replaces each ionization
+        variable with two derived features, the internal dimensionality
+        of the first layer is larger than the logical input dimension.
+        This property returns the original input size expected by the
+        user-facing interface.
+
+        Returns
+        -------
+        int
+            Number of logical input features before ionization expansion.
+        """
+        return self.linears[0].in_features - self.no_of_atoms
+
+
 sharding = jax.sharding.NamedSharding(
     jax.sharding.Mesh(jax.devices(), ("x",)),
     jax.sharding.PartitionSpec(),
@@ -156,14 +316,6 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
     """
     A :py:class:`jaxrts.model.IonFeatModel` to use a neural network to obtain
     ion-ion static structure factors.
-
-    .. note::
-
-       This is a parent class that, in itself, has no practical application, as
-       it defines no :py:meth:`jaxrts.models.IonFeatModel.S_ii` method.
-       This class only handles loading the neural network from an
-       :py:mod:`orbax` checkpoint.
-
     """
 
     def __init__(self, checkpoint_dir: Path):
@@ -182,7 +334,13 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
             shape = json.load(f)
         shape.update({"rngs": nnx.Rngs(0)})
         self.model_elements = shape.pop("elements")
-        model = NNModel(**shape)
+
+        expanded = shape.pop("expanded")
+        if expanded:
+            model = NNModelExpandedZ(**shape)
+        else:
+            model = NNModel(**shape)
+
         abstract_model = nnx.eval_shape(lambda: model)
 
         graphdef, abstract_state = nnx.split(
@@ -215,13 +373,11 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
         # This has to be done within a jax.jitted function.
         nn_model = nnx.merge(self.graphdef, self.model_state)
 
-        E_f = jaxrts.plasma_physics.fermi_energy(plasma_state.n_e)
-        q_k = jnpu.sqrt(2 * ureg.electron_mass * E_f)
-
-        theta = (plasma_state.T_e * ureg.k_B / E_f).m_as(ureg.dimensionless)
+        T = (plasma_state.T_e * ureg.k_B).m_as(ureg.eV)
 
         # Get the elements of the model and catch expanded ionization state
         # with unique elements:
+
         elements = [jaxrts.Element(e.strip("+")) for e in self.model_elements]
         unique_elements = list(dict.fromkeys(elements))
 
@@ -251,7 +407,7 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
         # create input array to the Neural Net
         x = jnp.array(
             [
-                theta / nn_model.norm_theta,
+                T / nn_model.norm_T,
                 jnp.sum(
                     plasma_state.mass_density.m_as(
                         ureg.gram / ureg.centimeter**3
@@ -259,8 +415,7 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
                 )
                 / nn_model.norm_rho,
                 *(Z_arr / jnp.array(nn_model.norm_Z)),
-                (setup.k * (1 * ureg.hbar) / q_k).m_as(ureg.dimensionless)
-                / nn_model.norm_k_over_qk,
+                (setup.k).m_as(1 / ureg.angstrom) / nn_model.norm_k,
             ]
         )
         Sii = nn_model(x)

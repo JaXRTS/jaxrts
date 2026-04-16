@@ -12,10 +12,29 @@ from typing import Tuple
 
 from jaxrts.experimental.SiiNN import NNSiiModel
 
+"""
+The infer script can be used to benchmark the NN performance against HNC results
+The comparison is made for a constant ionization state that can be set.
+Keep in mind that the number of ionization entries has to match the number of
+elements of the plasma state! The Name of the NN can be set to benchmark its
+performance.
+"""
+
+
 ureg = jaxrts.ureg
-file_path = "train_data/2.0H1.0O_10000.json"
-with open(file_path, "r") as json_file:
-    plasma_state = jaxrts.saving.load(fp=json_file, unit_reg=ureg)
+file_path_plasma_state = "train_data/1.0C_200000.json"
+expanded = False
+NN_Name = "C_e700_64_128_128_64"
+
+with open(file_path_plasma_state, "r") as json_file:
+    plasma_state: jaxrts.PlasmaState = jaxrts.saving.load(
+        fp=json_file, unit_reg=ureg
+    )
+
+
+plasma_state.Z_free = jnp.array([4.0])
+if expanded:
+    plasma_state = plasma_state.expand_integer_ionization_states()
 
 
 @jax.jit
@@ -38,6 +57,9 @@ def calculate_WR(plasma_state, setup):
 def prep_state(
     state, setup, rho=None, temp=None, Z=None, k=None
 ) -> Tuple[jaxrts.PlasmaState, jaxrts.Setup]:
+    """
+    Prepare the plasma state conditions before evaluating.
+    """
     if rho is not None:
         state.mass_density = (
             rho
@@ -61,6 +83,9 @@ def prep_state(
 
 @jax.jit
 def calc_Sii(plasma_state, setup, rho=None, temp=None, Z=None, k=None):
+    """
+    Calculate for a given set of plasma conditions the Sii'S with respect to the scattering vector.
+    """
     prepped_state, prepped_setup = prep_state(
         plasma_state, setup, rho=rho, temp=temp, Z=Z, k=k
     )
@@ -68,43 +93,52 @@ def calc_Sii(plasma_state, setup, rho=None, temp=None, Z=None, k=None):
     return out
 
 
+# One can change the scattering angle and probe energy if wanted (not necessary).
 setup = jaxrts.Setup(ureg("15°"), ureg("10keV"), None, lambda x: x)
+print(
+    "Scattering vecotr k is ", setup.k.m_as(1 / ureg.angstrom), "[1/Angström]"
+)
 
-
+# Setup the HNC plasmastate and the NN plasmastate
 calculate_state = deepcopy(plasma_state)
 calculate_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(
     mix=0.25
 )
 predict_state = deepcopy(plasma_state)
 predict_state["ionic scattering"] = NNSiiModel(
-    pathlib.Path(__file__).parent.parent / "trained_NNs/H2O_e1000"
+    pathlib.Path(__file__).parent / f"trained_NNs/{NN_Name}"
 )
 
+# prepare the plasma conditions to check speed of the calculations
+predict_state, setup = prep_state(predict_state, setup, temp=50)
+calculate_state, setup = prep_state(calculate_state, setup, temp=50)
+t0 = time.time()
+net_out = onp.array(calculate(predict_state, setup))
+t1 = time.time()
+calc_out = onp.array(calculate(calculate_state, setup))
+t2 = time.time()
+# print(net_out)
+# print(calc_out)
+# print(f"Net:  {net_out[0, 0]:.4f} ({t1-t0:.4f}s)")
+# print(f"Calc: {calc_out[0, 0]:.4f} ({t2-t1:.4f}s)")
+net_flat = net_out.flatten()
+calc_flat = calc_out.flatten()
+
+for k, (n, c) in enumerate(zip(net_flat, calc_flat)):
+    print(f"[{k}] Net: {n:.4f} ({t1-t0:.4f}s) | Calc: {c:.4f} ({t2-t1:.4f}s)")
+print("======================")
+
+t0 = time.time()
+net_out = onp.array(calculate(predict_state, setup))
+t1 = time.time()
+calc_out = onp.array(calculate(calculate_state, setup))
+t2 = time.time()
+print(f"Net:  {net_out[0, 0]:.4f} ({t1-t0:.4f}s)")
+print(f"Calc: {calc_out[0, 0]:.4f} ({t2-t1:.4f}s)")
+print("======================")
 
 predict_state, setup = prep_state(predict_state, setup, temp=50)
 calculate_state, setup = prep_state(calculate_state, setup, temp=50)
-print(calculate_state.ions)
-print(predict_state.ions)
-t0 = time.time()
-net_out = onp.array(calculate(predict_state, setup))
-t1 = time.time()
-calc_out = onp.array(calculate(calculate_state, setup))
-t2 = time.time()
-print(f"Net:  {net_out[0, 0]:.4f} ({t1-t0:.4f}s)")
-print(f"Calc: {calc_out[0, 0]:.4f} ({t2-t1:.4f}s)")
-print("======================")
-
-t0 = time.time()
-net_out = onp.array(calculate(predict_state, setup))
-t1 = time.time()
-calc_out = onp.array(calculate(calculate_state, setup))
-t2 = time.time()
-print(f"Net:  {net_out[0, 0]:.4f} ({t1-t0:.4f}s)")
-print(f"Calc: {calc_out[0, 0]:.4f} ({t2-t1:.4f}s)")
-print("======================")
-
-predict_state, setup = prep_state(predict_state, setup, temp=30)
-calculate_state, setup = prep_state(calculate_state, setup, temp=30)
 t0 = time.time()
 net_out = onp.array(calculate(predict_state, setup))
 t1 = time.time()
@@ -119,13 +153,18 @@ print(
 print("======================")
 
 # Show the net prediction vs calculated data:
+# prepare range of conditions that are beeing tested
+# variable1 correpsonds to HNC and variable2 to NN
 
-rho1 = jnp.linspace(1, 10, 10)
-rho2 = jnp.linspace(1, 10, 100)
-scatv1 = jnp.linspace(0.1, 10, 10)
-scatv2 = jnp.linspace(0.1, 10, 100)
-temp1 = jnp.linspace(5, 100, 10)
-temp2 = jnp.linspace(5, 100, 100)
+print(
+    "Started to calculate the HNC values to compare it to the NN... (can take some minutes)"
+)
+rho1 = jnp.linspace(1, 10, 5)
+rho2 = jnp.linspace(1, 10, 30)
+scatv1 = jnp.linspace(0.1, 10, 5)
+scatv2 = jnp.linspace(0.1, 10, 30)
+temp1 = jnp.linspace(5, 150, 5)
+temp2 = jnp.linspace(5, 150, 30)
 
 r1, t1 = jnpu.meshgrid(rho1, temp1)
 r2, t2 = jnpu.meshgrid(rho2, temp2)
@@ -151,6 +190,7 @@ predicted_Sii_small = onp.array(
         predict_state, setup, r1.flatten(), t1.flatten(), None, 1.5
     )
 )
+
 
 fig = plt.figure()
 no_of_Sii = int(plasma_state.nions * (plasma_state.nions + 1) / 2)
@@ -200,7 +240,7 @@ for k in range(calculated_Sii.shape[1]):
 
 plt.legend()
 
-plt.savefig("rho-T.png")
+plt.savefig(f"trained_NNs/{NN_Name}/rho-T.png", dpi=300)
 plt.close()
 
 
@@ -279,7 +319,7 @@ for k in range(calculated_Sii.shape[1]):
 
 plt.legend()
 
-plt.savefig("rho-k.png")
+plt.savefig(f"trained_NNs/{NN_Name}/rho-k.png", dpi=300)
 plt.close()
 
 t1, k1 = jnpu.meshgrid(temp1, scatv1)
@@ -358,5 +398,5 @@ for k in range(calculated_Sii.shape[1]):
 
 plt.legend()
 
-plt.savefig("T-k.png")
+plt.savefig(f"trained_NNs/{NN_Name}/T-k.png", dpi=300)
 plt.close()
