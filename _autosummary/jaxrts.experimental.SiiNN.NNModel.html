@@ -160,16 +160,16 @@ explicitly, it is calculated from <a class="reference internal" href="jaxrts.exp
 <td><p>Warning: this method is method is deprecated; use <a class="reference internal" href="jaxrts.experimental.SiiNN.NNModel.iter_modules.html#jaxrts.experimental.SiiNN.NNModel.iter_modules" title="jaxrts.experimental.SiiNN.NNModel.iter_modules"><code class="xref py py-func docutils literal notranslate"><span class="pre">iter_modules()</span></code></a> instead.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModel.perturb.html#jaxrts.experimental.SiiNN.NNModel.perturb" title="jaxrts.experimental.SiiNN.NNModel.perturb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">perturb</span></code></a>(name, value[, variable_type])</p></td>
-<td><p>Add an zero-value variable (&quot;perturbation&quot;) to the intermediate value.</p></td>
+<td><p>Extract gradients of intermediate values during training.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModel.set_attributes.html#jaxrts.experimental.SiiNN.NNModel.set_attributes" title="jaxrts.experimental.SiiNN.NNModel.set_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_attributes</span></code></a>(*filters[, raise_if_not_found])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModel.set_attributes.html#jaxrts.experimental.SiiNN.NNModel.set_attributes" title="jaxrts.experimental.SiiNN.NNModel.set_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_attributes</span></code></a>(*filters[, ...])</p></td>
 <td><p>Sets the attributes of nested Modules including the current Module.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModel.set_norms.html#jaxrts.experimental.SiiNN.NNModel.set_norms" title="jaxrts.experimental.SiiNN.NNModel.set_norms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_norms</span></code></a>(T, rho, Z, k)</p></td>
 <td><p>Set the normalization of the input layers.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModel.sow.html#jaxrts.experimental.SiiNN.NNModel.sow" title="jaxrts.experimental.SiiNN.NNModel.sow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sow</span></code></a>(variable_type, name, value[, reduce_fn, ...])</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">sow()</span></code> can be used to collect intermediate values without the overhead of explicitly passing a container through each Module call.</p></td>
+<td><p>Store intermediate values during module execution for later extraction.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModel.train.html#jaxrts.experimental.SiiNN.NNModel.train" title="jaxrts.experimental.SiiNN.NNModel.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(**attributes)</p></td>
 <td><p>Sets the Module to training mode.</p></td>

@@ -127,18 +127,18 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="jaxrts.experimental.SiiNN.NNModel.perturb">
 <span class="sig-prename descclassname"><span class="pre">NNModel.</span></span><span class="sig-name descname"><span class="pre">perturb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value:</span> <span class="pre">~typing.Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_type:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">type[~flax.nnx.variablelib.Variable[~typing.Any]]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'flax.nnx.variablelib.Perturbation'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jaxrts.experimental.SiiNN.NNModel.perturb" title="Link to this definition"></a></dt>
-<dd><p>Add an zero-value variable (“perturbation”) to the intermediate value.</p>
-<p>The gradient of <code class="docutils literal notranslate"><span class="pre">value</span></code> would be the same as the gradient of this
-perturbation variable. Therefore, if you define your loss function with
-both params and perturbations as standalone arguments, you can get the
-intermediate gradients of <code class="docutils literal notranslate"><span class="pre">value</span></code> by running <code class="docutils literal notranslate"><span class="pre">jax.grad</span></code> on the
-perturbation variable.</p>
-<p>Since the shape of the perturbation value depends on the shape of the input,
-a perturbation variable is only created after you run a sample input through
-the model once.</p>
+<dd><p>Extract gradients of intermediate values during training.</p>
+<p>Used with <code class="xref py py-func docutils literal notranslate"><span class="pre">nnx.capture()</span></code> to record intermediate values in the forward pass
+and their gradients in the backward pass. Returns the value plus whatever perturbation
+is stored under <code class="docutils literal notranslate"><span class="pre">name</span></code> in the current capture context, allowing gradient computation via <code class="docutils literal notranslate"><span class="pre">nnx.grad</span></code>.</p>
+<p>The workflow has four steps:
+1. Initialize perturbations with <code class="docutils literal notranslate"><span class="pre">nnx.capture(model,</span> <span class="pre">nnx.Perturbation)</span></code>
+2. Run model with <code class="docutils literal notranslate"><span class="pre">nnx.capture(model,</span> <span class="pre">nnx.Intermediate,</span> <span class="pre">init=perturbations)</span></code>
+3. Take gradients with respect to perturbations using <code class="docutils literal notranslate"><span class="pre">nnx.grad</span></code>
+4. Combine results with <code class="docutils literal notranslate"><span class="pre">nnx.merge_state(perturb_grads,</span> <span class="pre">intermediates)</span></code></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This creates extra dummy variables of the same size as <code class="docutils literal notranslate"><span class="pre">value</span></code>, thus
+<p>This creates extra variables of the same size as <code class="docutils literal notranslate"><span class="pre">value</span></code>, thus
 occupies more memory. Use it only to debug gradients in training.</p>
 </div>
 <p>Example usage:</p>
@@ -146,44 +146,38 @@ occupies more memory. Use it only to debug gradients in training.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">nnx</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rngs</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">rngs</span><span class="o">=</span><span class="n">rngs</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">linear2</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">rngs</span><span class="o">=</span><span class="n">rngs</span><span class="p">)</span>
 <span class="gp">... </span>  <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perturb</span><span class="p">(</span><span class="s1">&#39;xgrad&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span>
+<span class="gp">... </span>    <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perturb</span><span class="p">(</span><span class="s1">&#39;grad_of_x&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">x2</span>
 
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">rngs</span><span class="o">=</span><span class="n">nnx</span><span class="o">.</span><span class="n">Rngs</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;xgrad&#39;</span><span class="p">)</span>  <span class="c1"># perturbation requires a sample input run</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">xgrad</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>   <span class="c1"># same as the intermediate value</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">graphdef</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">perturbations</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Param</span><span class="p">,</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Perturbation</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="mf">1.0</span>
 
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Take gradients on the Param and Perturbation variables</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nd">@nnx</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">grad_loss</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">perturbations</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">model</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">graphdef</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">perturbations</span><span class="p">)</span>
-<span class="gp">... </span>  <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">model</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="o">-</span> <span class="n">targets</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Step 1: Initialize perturbations</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">forward</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">capture</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Perturbation</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span><span class="p">,</span> <span class="n">perturbations</span> <span class="o">=</span> <span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">perturbations</span><span class="p">)</span> <span class="o">=</span> <span class="n">grad_loss</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">perturbations</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># `perturbations.xgrad[...]` is the intermediate gradient</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="ow">not</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">perturbations</span><span class="o">.</span><span class="n">xgrad</span><span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Steps 2-4: Capture gradients</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">perturbations</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">def</span><span class="w"> </span><span class="nf">loss</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">perturbations</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">nnx</span><span class="o">.</span><span class="n">capture</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Intermediate</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">perturbations</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">perturb_grads</span><span class="p">),</span> <span class="n">sowed</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">has_aux</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">perturbations</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="k">return</span> <span class="n">nnx</span><span class="o">.</span><span class="n">merge_state</span><span class="p">(</span><span class="n">perturb_grads</span><span class="p">,</span> <span class="n">sowed</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metrics</span> <span class="o">=</span> <span class="n">train_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">perturbations</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># metrics contains gradients of intermediate values</span>
 </pre></div>
 </div>
 <dl>
-<dt>Args:</dt><dd><dl class="simple">
-<dt>name: A string denoting the <code class="docutils literal notranslate"><span class="pre">Module</span></code> attribute name for the</dt><dd><p>perturbation value.</p>
+<dt>Args:</dt><dd><p>name: A string key for storing the perturbation value.
+value: The intermediate value to capture gradients for. You must use</p>
+<blockquote>
+<div><p>the returned value (not the original) for gradient capturing to work.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>variable_type: The <code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code> type for the stored perturbation.</dt><dd><p>Default is <code class="xref py py-class docutils literal notranslate"><span class="pre">nnx.Perturbation</span></code>.</p>
 </dd>
 </dl>
-<p>value: The value to take intermediate gradient.
-variable_type: The <code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code> type for the stored perturbation.</p>
-<blockquote>
-<div><p>Defaulted at <code class="xref py py-class docutils literal notranslate"><span class="pre">nnx.Perturbation</span></code>.</p>
-</div></blockquote>
 </dd>
 </dl>
 </dd></dl>
