@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.7.0] - 2026-04-16
+
+This release brings smaller changes, including a renaming of the `saha` submodule to `ionization`, and a more natural default e-i Potential (now just a Coulomb potential). Further, it introduces a more stable interpolation of Sii with neural networks, a multi-species ionization solver in the TF model.
+
+### Features
+
+- Multi-species TF-AA ionization solver (#69)([4e4f90f](https://github.com/JaXRTS/jaxrts/commit/4e4f90fec13b021890628d602e1a941eb89718b6))
+
+### Bug Fixes
+
+- SiiNN interpolation works more robust with expanded integer ionization state (#66)([dd7fe0f](https://github.com/JaXRTS/jaxrts/commit/dd7fe0f84db16328a1d9c017c213d0d6635ff6f1))
+
+### Refactor
+
+- [**breaking**] Renaming saha.py to ionization.py (#68)([7c34f3e](https://github.com/JaXRTS/jaxrts/commit/7c34f3e5a04a270f7efdb13d7fe70d1f0c7de1da))
+- [**breaking**] Changing the default electron-ion Potential to CoulombPotential([df6a494](https://github.com/JaXRTS/jaxrts/commit/df6a494e6aad97962378bed8fd3932518c29f188)
+
+### Miscellaneous Tasks
+
+- Update dependencies([3dcb429](https://github.com/JaXRTS/jaxrts/commit/3dcb429a22cd0751249f10197d11464d2f5bb832), [0c93035](https://github.com/JaXRTS/jaxrts/commit/0c93035cf60adc9459a1716deddfc7074dc53880), [5a3478c](https://github.com/JaXRTS/jaxrts/commit/5a3478ca46fd1b5a1973aee48a3e39ac3bc1b020))
+
+**Full Changelog**: https://github.com/jaxrts/jaxrts/compare/0.6.0...0.7.0
+
 ## [0.6.0] - 2026-03-10
 
 This release abbreviates the LFC model names and rewrite NNSiiModels, neglects
