@@ -1089,7 +1089,7 @@
 <span class="sd">        - an &#39;ion-ion Potential&#39; The black entries in the picture below</span>
 <span class="sd">          (defaults to :py:class:`~CoulombPotential`).</span>
 <span class="sd">        - an &#39;electron-ion Potential&#39; The orange entries in the picture below</span>
-<span class="sd">          (defaults to :py:class:`~KlimontovichKraeftPotential`).</span>
+<span class="sd">          (defaults to :py:class:`~CoulombPotential`).</span>
 <span class="sd">        - an &#39;electron-electron Potential&#39; The red entries in the picture below</span>
 <span class="sd">          (defaults to :py:class:`~KelbgPotental`).</span>
 
@@ -1167,7 +1167,7 @@
         <span class="p">)</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span>
             <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
-            <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">KlimontovichKraeftPotential</span><span class="p">(),</span>
+            <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">CoulombPotential</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span>
             <span class="s2">&quot;electron-electron Potential&quot;</span><span class="p">,</span>
@@ -4649,7 +4649,7 @@
 <span class="sd">    used, and V_{ee} the Coulomb potential.</span>
 
 <span class="sd">    Requires an &#39;electron-ion&#39; potential. (defaults to</span>
-<span class="sd">    :py:class:`~KlimontovichKraeftPotential`).</span>
+<span class="sd">    :py:class:`~CoulombPotential`).</span>
 
 
 <span class="sd">    .. note::</span>
@@ -4674,7 +4674,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span>
             <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
-            <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">KlimontovichKraeftPotential</span><span class="p">(),</span>
+            <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">CoulombPotential</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="n">plasma_state</span><span class="p">[</span>
             <span class="s2">&quot;electron-ion Potential&quot;</span>
@@ -4835,7 +4835,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span>
             <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
-            <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">KlimontovichKraeftPotential</span><span class="p">(),</span>
+            <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">CoulombPotential</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="n">plasma_state</span><span class="p">[</span>
             <span class="s2">&quot;electron-ion Potential&quot;</span>
@@ -4941,7 +4941,7 @@
 <span class="sd">    :py:class:`~.RPA_DandreaFit`.</span>
 
 <span class="sd">    Requires an &#39;electron-ion&#39; potential. (defaults to</span>
-<span class="sd">    :py:class:`~KlimontovichKraeftPotential`).</span>
+<span class="sd">    :py:class:`~CoulombPotential`).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;screening&quot;</span><span class="p">]</span>
@@ -4953,7 +4953,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span>
             <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
-            <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">KlimontovichKraeftPotential</span><span class="p">(),</span>
+            <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">CoulombPotential</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="n">plasma_state</span><span class="p">[</span>
             <span class="s2">&quot;electron-ion Potential&quot;</span>
