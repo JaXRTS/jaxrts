@@ -1,4 +1,19 @@
+"""
+Script to compare the performance of the NN to HNC for randomally drawn Samples
+within the set range of the input parameters. Make sure the NN is trained for
+the same parameter size or a larger one -- extrapolations typically dont work
+out well! Usually 2000 samples are sufficient to test out if a NN is good at
+interpolating the HNC outputs --> smaller errors. The script starts the
+calculation of num_compares on several CPU cores. The metric to determine how
+well the NN interpolates the Sii's from HNC is the mean squared error (MSE).
+"""
+
 import multiprocessing as mp
+
+if __name__ == "__main__":
+    # mp.freeze_support()
+    mp.set_start_method("spawn")
+
 from copy import deepcopy
 import jaxrts
 import jax
@@ -11,14 +26,6 @@ import tqdm
 import json
 from jaxrts.experimental.SiiNN import NNSiiModel
 import time
-
-"""
-Script to compare the performance of the NN to HNC for randomally drawn Samples within the set range of the input parameters.
-Make sure the NN is trained for the same parameter size or a larger one -- extrapolations typically dont work out well!
-Usually 2000 samples are sufficient to test out if a NN is good at interpolating the HNC outputs --> smaller errors.
-The script starts the calculation of num_compares on several CPU cores. The metric to determine how well the NN interpolates
-the Sii's from HNC is the mean squared error (MSE).
-"""
 
 ureg = jaxrts.ureg
 # Set filepath to PlasmaState json file
@@ -63,13 +70,15 @@ T_upper: float = 300.0  # Units in eV
 rho_lower: float = 0.01  # Units in g/cm^3
 rho_upper: float = 100  # Units in g/cm^3
 
-# Print out plasma conditions for which the squared error is greater than given value
+# Print out plasma conditions for which the squared error is greater than given
+# value
 print_out_error_threshold: float | None = None
 print(f"Printout error threshold is set to {print_out_error_threshold}!")
 
 num_cores: int = mp.cpu_count() - 2
 
-# Want to show all individual plots, set to True, figures are always saved in "trained_NNs/<NN name>/"
+# Want to show all individual plots, set to True, figures are always saved in
+# "trained_NNs/<NN name>/"
 show_figures: bool = False
 
 with open(file_path, "r") as json_file:
@@ -82,7 +91,7 @@ state_hnc["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(mix=0.25)
 
 state_net = deepcopy(plasma_state)
 state_net["ionic scattering"] = NNSiiModel(
-    pathlib.Path(__file__).parent.parent / f"trained_NNs/{NN_names[0]}"
+    pathlib.Path(__file__).parent / f"trained_NNs/{NN_names[0]}"
 )
 
 setup_start = jaxrts.Setup(ureg("15°"), ureg("10keV"), None, lambda x: x)
@@ -230,7 +239,7 @@ if __name__ == "__main__":
     for NN_name in NN_names:
         print(f"--- Calculating the Output for NN: {NN_name} the output ---")
         state_net["ionic scattering"] = NNSiiModel(
-            pathlib.Path(__file__).parent.parent / f"trained_NNs/{NN_name}"
+            pathlib.Path(__file__).parent / f"trained_NNs/{NN_name}"
         )
         Sii_error_net = jnp.zeros(num_compares)
         Sii_error_dict: dict = {}
@@ -254,7 +263,7 @@ if __name__ == "__main__":
             if print_out_error_threshold is not None:
                 if squared_error >= print_out_error_threshold:
                     print(
-                        f"Condition {i}: Z = {ioni}, T = {temp:.3f} eV, k = {scat_vec:.3f} inv. Angström, rho = {dens:.3f} g/cc"
+                        f"Condition {i}: Z = {ioni}, T = {temp:.3f} eV, k = {scat_vec:.3f} inv. Angström, rho = {dens:.3f} g/cc"  # noqa: E501
                     )
                     print(f"     Squared error = {squared_error:.3e}")
 

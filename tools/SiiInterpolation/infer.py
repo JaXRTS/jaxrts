@@ -15,8 +15,9 @@ from jaxrts.experimental.SiiNN import NNSiiModel
 """
 The infer script can be used to benchmark the NN performance against HNC results
 The comparison is made for a constant ionization state that can be set.
-Keep in mind that the number of ionization entries has to match the number of elements of the plasma state!
-The Name of the NN can be set to benchmark its performance.
+Keep in mind that the number of ionization entries has to match the number of
+elements of the plasma state! The Name of the NN can be set to benchmark its
+performance.
 """
 
 
@@ -105,7 +106,7 @@ calculate_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat(
 )
 predict_state = deepcopy(plasma_state)
 predict_state["ionic scattering"] = NNSiiModel(
-    pathlib.Path(__file__).parent.parent / f"trained_NNs/{NN_Name}"
+    pathlib.Path(__file__).parent / f"trained_NNs/{NN_Name}"
 )
 
 # prepare the plasma conditions to check speed of the calculations

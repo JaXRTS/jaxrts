@@ -1,13 +1,10 @@
-import os
-
-# Allow jax to use 4 CPUs, see
-# https://astralord.github.io/posts/exploring-parallel-strategies-with-jax/
-os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=8"
 if __name__ == "__main__":
     import multiprocessing as mp
 
-    mp.freeze_support()
+    # mp.freeze_support()
     mp.set_start_method("spawn")
+
+import os
 
 import multiprocessing
 from functools import partial
@@ -151,12 +148,12 @@ def compute_S_values(i, T, Z, rho, k, expanded: bool):
     return Sii_out
 
 
-def parallel_computation(data_no, T, Z, rho, k, expanded: bool):
+def parallel_computation(data_no, T, Z, rho, k, expanded: bool, cpu_count: int):
     """
     Start Multiprocessing to generate HNC output.
     """
     with multiprocessing.Pool(
-        processes=multiprocessing.cpu_count() - 2
+        processes=cpu_count
     ) as pool:
         func = partial(
             compute_S_values,
@@ -176,9 +173,8 @@ def parallel_computation(data_no, T, Z, rho, k, expanded: bool):
 
 
 if __name__ == "__main__":
-    print(
-        f"Im using {multiprocessing.cpu_count()-2} cpu cores for this process!"
-    )
+    cpu_count = multiprocessing.cpu_count() - 2
+    print(f"I am using {cpu_count} cpu cores for this process!")
 
     expanded = ""
     if expand_integer_ionization_state:
@@ -237,6 +233,7 @@ if __name__ == "__main__":
         rho,
         k,
         expand_integer_ionization_state,
+        cpu_count
     )
 
     # Create the element string for labelling the saved dataset
@@ -246,6 +243,9 @@ if __name__ == "__main__":
         element_string += f"{x:.1f}{ion.symbol}"
 
     # saving file paths
+    if not os.path.exists("train_data"):
+        os.makedirs("train_data")
+
     hdf5_file_path = f"train_data/{element_string}_{data_no}{expanded}.h5"
     plasma_state_file_path = (
         f"train_data/{element_string}_{data_no}{expanded}.json"

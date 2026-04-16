@@ -4,8 +4,8 @@ https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/JAX/tutoria
 and the FLAX examples.
 
 Script to train a NN on the training data.
-The only input needed is to set the file path to the .h5 file containing the training data
-The trained NN's are safed in the directory /tmp/checkpoints/
+The only input needed is to set the file path to the .h5 file containing the
+training data The trained NN's are safed in the directory /tmp/checkpoints/
 """
 
 import json
@@ -830,4 +830,7 @@ ax.plot(metrics_hist["train_accuracy"], alpha=0.8, label="train_accuracy")
 ax.plot(metrics_hist["test_accuracy"], alpha=0.8, label="test_accuracy")
 plt.yscale("log")
 plt.legend()
+
+if not os.path.exists("trained_NNs"):
+    os.makedirs("trained_NNs")
 plt.savefig("trained_NNs/loss.png", dpi=300)
