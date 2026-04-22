@@ -3,8 +3,19 @@ Module to model the ionization state of a plasma.
 It contains functions to solve the
 `Saha-equation <https://en.wikipedia.org/wiki/Saha_ionization_equation>`_,
 linking the temperature of a plasma to its ionization.
+
+The central solver is :py:func:`solve_ionization`, which accepts a
+*balance term* -- an object that supplies per-transition coefficients and the
+corresponding "still-bound" mask.  Two concrete balance terms are provided:
+
+* :py:class:`SahaBalanceTerm` -- classic / generalised Saha (the generalised
+  form reduces to the classic one when ``n_e = 0`` and ``chem_pot = 0``).
+* :py:class:`BUBalanceTerm` -- Bethe-Uhlenbeck, using Planck-Larkin
+  partition sums instead of bare statistical weights.
 """
 
+from typing import NamedTuple
+import logging
 from functools import partial
 
 import jax
@@ -13,12 +24,10 @@ import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
 
-import logging
-
 from .elements import Element
 from .plasma_physics import therm_de_broglie_wl
 from .units import Quantity, to_array, ureg
-from .helpers import bisection
+from .helpers import bisection, read_nist_file
 
 h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
@@ -27,7 +36,83 @@ m_e = 1 * ureg.electron_mass
 logger = logging.getLogger(__name__)
 
 
-# Balance relations
+# Partition sums.
+
+
+@jax.jit
+def planck_larkin_partition_sum(
+    g: jnp.ndarray,
+    E: Quantity,
+    T: Quantity,
+) -> jnp.ndarray:
+    """
+    Planck-Larkin partition sum with a cutoff for negative energies.
+
+    .. math::
+
+        u_i = \\sum_s g_s
+              \\left(e^{-E_s / k_B T} - 1 + \\frac{E_s}{k_B T}\\right)
+              \\Theta(E_s)
+
+    See :cite:`Kremp.2005` eqn 6.182.
+
+    Parameters
+    ----------
+    g : jnp.ndarray
+        Degeneracy of each level.
+    E : Quantity
+        Energy of each level relative to the ionization threshold.
+    T : Quantity
+        Temperature.
+
+    Returns
+    -------
+    jnp.ndarray
+        Scalar partition-sum value.
+    """
+    ratio = (E / (T * ureg.boltzmann_constant)).m_as(ureg.dimensionless)
+    return jnp.sum(
+        g * (jnp.exp(-ratio) - 1 + ratio) * jnp.heaviside(E.m_as(ureg.eV), 0)
+    )
+
+
+# Low-level balance equations
+
+
+@jax.jit
+def saha_equation(
+    gi: float,
+    gj: float,
+    T_e: Quantity,
+    energy_diff: Quantity,
+) -> Quantity:
+    """
+    Classic (non-degenerate) Saha balance relation.
+
+    Returns :math:`n_{i+1} n_e / n_i`:
+
+    .. math::
+
+       \\frac{n_{i+1}n_e}{n_i} =
+       2\\frac{g_j}{g_i}
+       \\frac{(2\\pi m_e k_B T_e)^{3/2}}{h^3}
+       \\exp\\!\\left(\\frac{-\\Delta E}{k_B T_e}\\right)
+
+    Parameters
+    ----------
+    gi, gj : float
+        Statistical weights of the lower and upper states.
+    T_e : Quantity
+        Electron temperature.
+    energy_diff : Quantity
+        Ionization energy :math:`\\Delta E`.
+    """
+    return (
+        (gj / gi)
+        * 2
+        / therm_de_broglie_wl(T_e) ** 3
+        * jnpu.exp((-energy_diff) / (k_B * T_e))
+    )
 
 
 @jax.jit
@@ -86,31 +171,35 @@ def gen_saha_equation(
 
 
 @jax.jit
-def saha_equation(
-    gi: float, gj: float, T_e: Quantity, energy_diff: Quantity
+def gen_balance_equation(
+    part_i: float | jnp.ndarray,
+    part_j: float | jnp.ndarray,
+    T_e: Quantity,
+    n_e: Quantity,
+    chem_pot: Quantity,
 ) -> Quantity:
     """
-    Calculate the Saha equation for a given set of statistical weights,
-    temperatures and energy-differences.
+    Generic balance relation expressed in terms of partition functions.
 
-    Returns the value n_j / n_i * n_e
+    The energy dependence is already folded into ``part_i`` and ``part_j``
+    (e.g. Planck-Larkin sums), so no explicit Boltzmann factor for
+    :math:`\\Delta E` appears here:
 
     .. math::
 
-       \\frac{n_{i+1}n_e}{n_i} =
-       2\\frac{g_j}{g_i} \\frac{\\left(2\\pi m_e k_B T_e\\right)^{1.5}}{h^3}
-       \\exp\\left({\\frac{-\\Delta E}{k_B T_e}}\\right)
+       \\frac{n_{i+1}n_e}{n_i}
+       = \\frac{u_{i+1}}{u_i} n_e \\exp(-\\mu / k_B T_e})
 
     Parameters
     ----------
-    gi: float
-        The statistical weight of the lower-energy state.
-    gj: float
-        The statistical weight of the upper-energy state, often g_{i+1}.
-    T_e: Quantity
-        The electron temperature.
-    energy_diff
-        The difference in energy levels.
+    part_i, part_j : array-like
+        Partition functions of adjacent charge states.
+    T_e : Quantity
+        Electron temperature.
+    n_e : Quantity
+        Free-electron density.
+    chem_pot : Quantity
+        Electron chemical potential :math:`\\mu`.
 
     Returns
     -------
@@ -118,191 +207,275 @@ def saha_equation(
         The ratio of the population of the two states, multiplied with the
         free-electron density.
     """
-
-    return (
-        (gj / gi)
-        * 2
-        / therm_de_broglie_wl(T_e) ** 3
-        * (jnpu.exp((-energy_diff) / (1 * k_B * T_e)))
-    )
+    return (part_j / part_i) * n_e * jnpu.exp(-chem_pot / (1 * k_B * T_e))
 
 
-# Solver
+class BalanceTerm(NamedTuple):
+    """
+    Per-element data produced by a balance-term factory.
+
+    Attributes
+    ----------
+    coeff : Quantity
+        Dimensioned ratio :math:`n_{i+1} n_e / n_i` (units: 1/volume) for each
+        transition (length ``element.Z``).  The solver divides by ``ne_scale``.
+    mask : jnp.ndarray
+        1.0 where state i is still bound, 0.0 where pressure-ionised (length
+        ``element.Z``).  Used both to set the diagonal sign and to gate the
+        :math:`n_e` sub-diagonal.
+    """
+
+    coeff: jnp.ndarray  # shape (Z,)  units: 1/volume
+    mask: jnp.ndarray  # shape (Z,)  values in {0.0, 1.0}
+
+
+# balance-term factories
 
 
 @partial(
-    jax.jit, static_argnames=["element_list", "exclude_non_negative_energies"]
+    jax.jit,
+    static_argnames=["element"],
 )
-def solve_ionization(
-    element_list: list[Element],
+def saha_balance_term(
+    element: Element,
+    ipd: Quantity,
     T_e: Quantity,
-    ion_number_densities: Quantity,
-    balance_fn: Partial,
-    continuum_lowering: Quantity | None = None,
-    exclude_non_negative_energies: bool = True,
-) -> tuple[Quantity, Quantity, Quantity]:
+) -> BalanceTerm:
     """
-    Solve for the ionization state of a plasma given an arbitrary balance
-    relation.
-
-    The matrix structure and bisection root-find are the same regardless of
-    which balance relation is used.  The only changes between the classic Saha
-    case and, e.g., the generalised (degenerate) Saha case is how the ratio
-    :math:`n_{i+1} n_e / n_i` is computed from the level energies and
-    statistical weights.  This function therefore accepts a ``balance_fn`` that
-    encapsulates that computation.
-
-    ``balance_fn`` must have the signature::
-
-        balance_fn(gi, gj, Eb_quantity) -> Quantity   [units: 1/volume]
-
-    where ``Eb_quantity`` is the ionization energy of the transition as a
-    :py:class:`~jaxrts.units.Quantity`.  Any additional physical parameters
-    (temperature, chemical potential, ...) should be bound in advance via
-    :py:func:`jax.tree_util.Partial`
-
-    Built-in balance relations
-    --------------------------
-    * :py:func:`saha_balance` — classic non-degenerate Saha equation.
-    * :py:func:`gen_saha_balance` — generalised (degenerate) Saha equation.
-
-    Algorithm
-    ---------
-    This function uses a similar approach to solve the set of equations as
-    Jamal El Kuweiss' `many-ion-saha-equation tool
-    <https://github.com/jelkuweiss/many-ion-saha-equation>`_
-    by
-
-    #. Creating an abstract matrix which for each element consists of
-
-        #. `Z + 1` rows of which have the solution of the Saha equation as
-           diagonal entries, multiplied by -i and the free electron density
-           `n_e` on the first off-diagonal element. These rows reflect that
-           every neighboring number densities `n_{i+1}` and `n_i` fulfill
-           the Saha equation
-
-        #. A row with `Z + 1` entries of 1, ending with the diagonal entry,
-           and the ion number density as last entry of the row. This guarantees
-           that the individual ionization number densities add up to the full
-           ion number density.
-
-       And additionally a final row, which contains the possible charge
-       states for all ions, respectively, and, finally, the free electron
-       number density n_e.
-       For all not-specified entries, this matrix is sparse:
-
-       .. image:: ../images/SahaMatrix.svg
-
-       Throughout the functions, densities are converted to non-dimensional
-       quantities. The scale has impact in numerical stability.
-
-    #. Finding the correct free electron density, which is given by the root
-       of the determinant of the matrix.
-
-    #. Building a concrete matrix by inserting the free electron density
-
-    #. Finding the number densities for all ionization levels by solving the
-       remaining set of equations by stripping the last row and column of the
-       matrix, where the latter is the in-homogeneity of the set of
-       equations.
-
-    The ionization energies are taken from the provided
-    :py:class:`jaxrts.element.Element`, but we allow for a modification in form
-    of continuum_lowering, which is an optional parameter.
-
+    Classic (non-degenerate) Saha balance term.
 
     Parameters
     ----------
-    element_list : list[Element]
-        Ion species to include.
+    element : Element
+    ipd : Quantity
+        Continuum-lowering / IPD correction (subtracted from binding energies).
     T_e : Quantity
         Electron temperature.
-    ion_number_densities : Quantity
-        Total number density of each species (same order as ``element_list``).
-    balance_fn : jax.tree_util.Partial
-        ``(gi, gj, Eb_quantity) -> Quantity`` — the ionization balance
-        relation.  Bind extra parameters (T_e, n_e, μ, ...) before passing.
-    continuum_lowering : Quantity or None, default None
-        Per-level energy shift (IPD) subtracted from binding energies.
-        Defaults to zero for all levels.
-    exclude_non_negative_energies : bool, default True
-        When ``True``, levels whose shifted binding energy ≤ 0 are excluded
-        from the balance equations (pressure ionization).
+    """
+    g = element.ionization.statistical_weights
+    Eb = (jnpu.sort(element.ionization.energies) + ipd).m_as(
+        ureg.electron_volt
+    )
+    coeff = saha_equation(g[:-1], g[1:], T_e, Eb * ureg.electron_volt)
+    mask = jnp.heaviside(Eb, 0)
+    return BalanceTerm(coeff=coeff, mask=mask)
+
+
+def gen_saha_balance_term(
+    element: Element,
+    ipd: Quantity,
+    T_e: Quantity,
+    n_e: Quantity,
+    chem_pot: Quantity,
+) -> BalanceTerm:
+    """
+    Generalised (degenerate) Saha balance term.
+
+    Parameters
+    ----------
+    element : Element
+    ipd : Quantity
+        Continuum-lowering correction.
+    T_e : Quantity
+        Electron temperature.
+    n_e : Quantity
+        Free-electron density (supplied externally; iterated to
+        self-consistency by the caller).
+    chem_pot : Quantity
+        Electron chemical potential :math:`\\mu`.
+    """
+    g = element.ionization.statistical_weights
+    Eb = (jnpu.sort(element.ionization.energies) + ipd).m_as(
+        ureg.electron_volt
+    )
+    coeff = gen_saha_equation(
+        g[:-1], g[1:], T_e, n_e, Eb * ureg.electron_volt, chem_pot
+    )
+    mask = jnp.heaviside(Eb, 0)
+    return BalanceTerm(coeff=coeff, mask=mask)
+
+
+def bu_balance_term(
+    element: Element,
+    ipd: Quantity,
+    T_e: Quantity,
+    n_e: Quantity,
+    chem_pot: Quantity,
+) -> BalanceTerm:
+    """
+    Bethe-Uhlenbeck balance term using Planck-Larkin partition sums.
+
+    Instead of bare statistical weights the partition sums
+
+    .. math::
+
+        u_i = \\sum_s g_s
+              \\left(e^{-E_s/k_BT} - 1 + \\frac{E_s}{k_BT}\\right)\\Theta(E_s)
+
+    are used.  The energy dependence is absorbed into the partition functions,
+    so the balance equation reduces to :py:func:`gen_balance_equation`.
+
+    Parameters
+    ----------
+    element : Element
+    ipd : Quantity
+        Continuum-lowering correction (subtracted from binding energies
+        before computing partition sums).
+    T_e : Quantity
+        Electron temperature.
+    n_e : Quantity
+        Free-electron density.
+    chem_pot : Quantity
+        Electron chemical potential :math:`\\mu`.
 
     Returns
     -------
-    ionised_number_densities : Quantity
-        Per-level number densities ordered as
-        ``[n(Ion0, 0+), n(Ion0, 1+), ..., n(Ion1, 0+), ...]``.
-    n_e : Quantity
-        Self-consistent free-electron number density.
-    Z_mean : Quantity
-        Mean ionization charge of each species.
+    BalanceTerm
     """
+    Ebs = jnpu.sort(element.ionization.energies) + ipd
 
-    Z = [ion.Z for ion in element_list]
+    pls = []
+    for charge, Eb in zip(range(element.Z), Ebs):
+        g, E = read_nist_file(f"{element.symbol}{charge}")
+        pls.append(planck_larkin_partition_sum(g, Eb - E, T_e))
+    pls.append(1.0)  # fully-stripped ion has partition function 1
+    part_func = jnp.array(pls)
 
-    if continuum_lowering is None:
-        continuum_lowering = [
-            jnp.zeros(ion.Z) * ureg.electron_volt for ion in element_list
-        ]
-
-    # Binding energies (shifted by continuum lowering / IPD)
-    Ebs = [
-        (jnpu.sort(element.ionization.energies) + ipd).m_as(ureg.electron_volt)
-        for element, ipd in zip(element_list, continuum_lowering, strict=True)
-    ]
-
-    max_ne = jnpu.sum(jnp.array(Z) * ion_number_densities)
-
-    all_binding_energies = jnp.concatenate(Ebs)
-    ratio = jnp.sum(
-        jnp.heaviside(all_binding_energies, 0) / len(all_binding_energies)
+    coeff = gen_balance_equation(
+        part_func[:-1], part_func[1:], T_e, n_e, chem_pot
     )
+    mask = jnp.heaviside(part_func[:-1], 0)
+    return BalanceTerm(coeff=coeff, mask=mask)
+
+
+@partial(
+    jax.jit,
+    static_argnames=["element_list"],
+)
+def _ne_scale(
+    element_list: list[Element],
+    ion_number_densities: Quantity,
+    T_e: Quantity,
+    masks: list[jnp.ndarray],
+) -> Quantity:
+    """
+    Numerical density scale used to non-dimensionalise the matrix.
+
+    The scale is interpolated between a small value (for low-T, mostly
+    pressure-ionised plasmas) and the fully-ionised maximum, improving
+    matrix conditioning across a wide temperature range.
+
+    Parameters
+    ----------
+    element_list, ion_number_densities, T_e
+        As in :py:func:`solve_ionization`.
+    masks : list[jnp.ndarray]
+        Per-element bound-state masks (used to estimate the pressure-ionised
+        fraction and shift the lower bound of the scale accordingly).
+
+    Returns
+    -------
+    Quantity:
+        n_e scale in units of 1/volume.
+    """
+    Z = [ion.Z for ion in element_list]
+    max_ne = jnpu.sum(jnp.array(Z) * ion_number_densities)
+    all_masks = jnp.concatenate(masks)
+    ratio = jnp.sum(all_masks) / len(all_masks)
     _ne_range = jnp.array(
         [
-            max_ne.m_as(1 / ureg.m**3) * (1 - ratio) + 1,
+            jnp.max(
+                jnp.array([max_ne.m_as(1 / ureg.m**3) * (1 - ratio), 1e-6])
+            ),
             max_ne.m_as(1 / ureg.m**3),
         ]
     )
-    ne_scale = jnp.interp(
+    return jnp.interp(
         (T_e * k_B).m_as(ureg.electron_volt),
-        jnp.array([1, 1000]),
+        jnp.array([1.0, 1000.0]),
         _ne_range,
         left=_ne_range[0],
         right=_ne_range[-1],
     ) * (1 / ureg.m**3)
 
-    # Build the abstract matrix (without n_e on the off-diagonal)
+
+# Core solver
+
+
+@partial(
+    jax.jit,
+    static_argnames=["element_list"],
+)
+def solve_ionization(
+    element_list: list[Element],
+    T_e: Quantity,
+    ion_number_densities: Quantity,
+    balance_terms: list[BalanceTerm],
+    ne_scale: Quantity,
+) -> tuple[Quantity, Quantity, Quantity]:
+    """
+    Solve for the ionization state of a plasma given pre-computed balance
+    terms.
+
+    This is the inner workhorse.  Callers should normally use one of the
+    convenience wrappers (:py:func:`solve_saha`, :py:func:`solve_gen_saha`,
+    :py:func:`solve_BU`) which construct ``balance_terms`` and ``ne_scale``
+    automatically.
+
+    The algorithm mirrors the `many-ion-saha-equation
+    <https://github.com/jelkuweiss/many-ion-saha-equation>`_ approach:
+
+    1. Build a sparse matrix whose diagonal encodes the balance relation and
+       whose last row/column encodes number conservation.
+    2. Find :math:`n_e` as the root of :math:`\\det(M)=0` via bisection.
+    3. Solve the resulting linear system for per-level number densities.
+
+    Parameters
+    ----------
+    element_list : list[Element]
+        Ion species.
+    T_e : Quantity
+        Electron temperature.
+    ion_number_densities : Quantity
+        Total number density per species.
+    balance_terms : list[BalanceTerm]
+        One :py:class:`BalanceTerm` per element (same order as
+        ``element_list``).  Each term supplies a ``coeff`` array (the ratio
+        :math:`n_{i+1} n_e / n_i`) and a boolean ``mask`` array indicating
+        which transitions are still bound.
+    ne_scale : Quantity
+        Numerical scale used to non-dimensionalise :math:`n_e`.
+
+    Returns
+    -------
+    ionised_number_densities : Quantity
+        Per-level densities ordered as
+        ``[n(Ion0,0+), n(Ion0,1+), ..., n(Ion1,0+), ...]``.
+    n_e : Quantity
+        Self-consistent free-electron density.
+    Z_mean : Quantity
+        Mean ionization of each species.
+    """
+    Z = [ion.Z for ion in element_list]
+
     size = len(element_list) + int(onp.sum(Z)) + 1
     M = jnp.zeros((size, size))
+    max_ne = jnpu.sum(jnp.array(Z) * ion_number_densities)
 
     skip = 0
     ionization_states = []
 
-    for ion_dens, element, Eb in zip(
-        ion_number_densities, element_list, Ebs, strict=True
+    for ion_dens, element, bt in zip(
+        ion_number_densities, element_list, balance_terms, strict=True
     ):
-        stat_weight = element.ionization.statistical_weights
+        coeff = (bt.coeff / ne_scale).m_as(ureg.dimensionless)
 
-        # Call the pluggable balance relation
-        coeff = (
-            balance_fn(
-                stat_weight[:-1],
-                stat_weight[1:],
-                Eb * ureg.electron_volt,
-            )
-            / ne_scale
-        ).m_as(ureg.dimensionless)
-
-        if exclude_non_negative_energies:
-            diag = jnp.diag(jnp.where(Eb > 0, (-1) * coeff, 1))
-        else:
-            diag = jnp.diag(-coeff)
-
+        # Diagonal: -coeff where state is still bound, 1 where state is
+        # pressure-ionized, i.e., does not exist, anymore.
+        diag = jnp.diag(jnp.where(bt.mask > 0, -coeff, 1.0))
         dens_row = jnp.ones(element.Z + 1)
 
-        # Set the diagonal for the Saha-rows
+        # Set the diagonal for the balance-rows
         M = M.at[skip : skip + element.Z, skip : skip + element.Z].set(diag)
         # Create ones for the density row.
         M = M.at[skip : skip + element.Z + 1, skip + element.Z].set(dens_row)
@@ -321,27 +494,18 @@ def solve_ionization(
     # Set the row for all ionization states.
     M = M.at[:-1, -1].set(jnp.array(ionization_states))
 
+    ne_mask = jnp.zeros(len(element_list) + int(onp.sum(Z)))
+    skip = -1
+    for element, bt in zip(element_list, balance_terms, strict=True):
+        ne_mask = ne_mask.at[skip + 1 : skip + element.Z + 1].set(bt.mask)
+        # density rows stay zero (already zero from initialization)
+        skip += element.Z + 1
+
     def insert_ne(M, ne):
-        """
-        Add n_e to the off-diagonal end the last entry (last row and column).
-        """
-
-        ne_line = jnp.ones(len(element_list) + int(onp.sum(Z))) * ne
-
-        skip = -1
-        for element, Eb in zip(element_list, Ebs, strict=True):
-            # Not the full off-diagonal equals n_e: The density rows don't
-            # contain it!
-            ne_line = ne_line.at[skip + 1 : skip + element.Z + 1].multiply(
-                jnp.heaviside(Eb, 0) if exclude_non_negative_energies else 1
-            )
-            ne_line = ne_line.at[skip + element.Z + 1].set(0.0)
-            skip += element.Z + 1
-
+        # ne_mask is captured from outer scope
+        ne_line = ne_mask * ne
         _diag = jnp.diag(ne_line, -1)
-        out = M + _diag
-        out = out.at[-1, -1].set(ne)
-        # Transpose
+        out = (M + _diag).at[-1, -1].set(ne)
         return out.T
 
     # Bisection: find n_e such that det(M) = 0
@@ -406,34 +570,53 @@ def solve_saha(
     element_list: list[Element],
     T_e: Quantity,
     ion_number_densities: Quantity,
-    continuum_lowering: Quantity | None = None,
+    continuum_lowering: list[Quantity] | None = None,
     exclude_non_negative_energies: bool = True,
 ) -> tuple[Quantity, Quantity, Quantity]:
     """
     Solve the classic (non-degenerate) Saha equation.
 
-    Thin wrapper around :py:func:`~.solve_ionization` using
-    :py:func:`~.saha_equation` as the balance relation.
+    Thin wrapper around :py:func:`solve_ionization` using
+    :py:func:`saha_balance_term` to build the balance terms.
 
     Parameters
     ----------
-    element_list, T_e, ion_number_densities, continuum_lowering,
-    exclude_non_negative_energies
-        See :py:func:`solve_ionization`.
+    element_list : list[Element]
+    T_e : Quantity
+        Electron temperature.
+    ion_number_densities : Quantity
+        Total number density per species.
+    continuum_lowering : list[Quantity] or None
+        Per-species IPD shift (default: zero for all levels).
+    exclude_non_negative_energies : bool
+        If ``True`` (default), pressure-ionised levels (shifted
+        :math:`E_b \\leq 0`) are excluded from the balance equations.
 
     Returns
     -------
     ionised_number_densities, n_e, Z_mean
         See :py:func:`solve_ionization`.
     """
-    balance_fn = Partial(lambda gi, gj, E: saha_equation(gi, gj, T_e, E))
+    if continuum_lowering is None:
+        continuum_lowering = [
+            jnp.zeros(ion.Z) * ureg.electron_volt for ion in element_list
+        ]
+
+    bts = [
+        saha_balance_term(el, ipd, T_e)
+        for el, ipd in zip(element_list, continuum_lowering, strict=True)
+    ]
+    if not exclude_non_negative_energies:
+        bts = [
+            BalanceTerm(coeff=bt.coeff, mask=jnp.ones_like(bt.mask))
+            for bt in bts
+        ]
+
+    scale = _ne_scale(
+        element_list, ion_number_densities, T_e, [bt.mask for bt in bts]
+    )
     return solve_ionization(
-        element_list,
-        T_e,
-        ion_number_densities,
-        balance_fn=balance_fn,
-        continuum_lowering=continuum_lowering,
-        exclude_non_negative_energies=exclude_non_negative_energies,
+        element_list, T_e, ion_number_densities, bts, scale
     )
 
 
@@ -446,49 +629,122 @@ def solve_gen_saha(
     T_e: Quantity,
     n_e: Quantity,
     ion_number_densities: Quantity,
-    continuum_lowering: Quantity = 0 * ureg.electron_volt,
+    continuum_lowering: list[Quantity] | None = None,
     chem_pot_ideal: Quantity = 0 * ureg.electron_volt,
     exclude_non_negative_energies: bool = True,
 ) -> tuple[Quantity, Quantity, Quantity]:
     """
     Solve the generalised (degenerate) Saha equation.
 
-    Thin wrapper around :py:func:`~.solve_ionization` using
-    :py:func:`~.gen_saha_equation` as the balance relation.
+    Thin wrapper around :py:func:`solve_ionization` using
+    :py:func:`gen_saha_balance_term`.
 
     Parameters
     ----------
-    element_list, T_e, n_e, ion_number_densities, continuum_lowering,
-    chem_pot_ideal, exclude_non_negative_energies
-        See :py:func:`solve_ionization` and :py:func:`gen_saha_balance`.
+    element_list : list[Element]
+    T_e : Quantity
+        Electron temperature.
+    n_e : Quantity
+        Free-electron density (initial estimate; caller should iterate for
+        self-consistency, e.g. via :py:func:`calculate_mean_free_charge_saha`).
+    ion_number_densities : Quantity
+    continuum_lowering : list[Quantity] or None
+    chem_pot_ideal : Quantity
+        Electron chemical potential :math:`\\mu` (default 0 eV).
+    exclude_non_negative_energies : bool
 
     Returns
     -------
     ionised_number_densities, n_e, Z_mean
         See :py:func:`solve_ionization`.
     """
-    balance_fn = Partial(
-        lambda gi, gj, E: gen_saha_equation(
-            gi, gj, T_e, n_e, E, chem_pot_ideal
-        )
+    if continuum_lowering is None:
+        continuum_lowering = [
+            jnp.zeros(ion.Z) * ureg.electron_volt for ion in element_list
+        ]
+
+    bts = [
+        gen_saha_balance_term(el, ipd, T_e, n_e, chem_pot_ideal)
+        for el, ipd in zip(element_list, continuum_lowering, strict=True)
+    ]
+    if not exclude_non_negative_energies:
+        bts = [
+            BalanceTerm(coeff=bt.coeff, mask=jnp.ones_like(bt.mask))
+            for bt in bts
+        ]
+
+    scale = _ne_scale(
+        element_list,
+        ion_number_densities,
+        T_e,
+        [bt.mask for bt in bts],
     )
     return solve_ionization(
+        element_list, T_e, ion_number_densities, bts, scale
+    )
+
+
+def solve_BU(
+    element_list: list[Element],
+    T_e: Quantity,
+    n_e: Quantity,
+    ion_number_densities: Quantity,
+    continuum_lowering: list[Quantity] | None = None,
+    chem_pot_ideal: Quantity = 0 * ureg.electron_volt,
+) -> tuple[Quantity, Quantity, Quantity]:
+    """
+    Solve the Bethe-Uhlenbeck equation using Planck-Larkin partition sums.
+
+    Thin wrapper around :py:func:`solve_ionization` using
+    :py:func:`bu_balance_term`.
+
+    Parameters
+    ----------
+    element_list : list[Element]
+    T_e : Quantity
+    n_e : Quantity
+    ion_number_densities : Quantity
+    continuum_lowering : list[Quantity] or None
+    chem_pot_ideal : Quantity
+
+    Returns
+    -------
+    ionised_number_densities, n_e, Z_mean
+        See :py:func:`solve_ionization`.
+
+    See Also
+    --------
+    jaxrts.ionization.planck_larkin_partition_sum
+    jaxrts.ionization.gen_balance_equation
+    """
+    if continuum_lowering is None:
+        continuum_lowering = [
+            jnp.zeros(ion.Z) * ureg.electron_volt for ion in element_list
+        ]
+
+    bts = [
+        bu_balance_term(el, ipd, T_e, n_e, chem_pot_ideal)
+        for el, ipd in zip(element_list, continuum_lowering, strict=True)
+    ]
+
+    scale = _ne_scale(
         element_list,
-        T_e,
         ion_number_densities,
-        balance_fn=balance_fn,
-        continuum_lowering=continuum_lowering,
-        exclude_non_negative_energies=exclude_non_negative_energies,
+        T_e,
+        [bt.mask for bt in bts],
+    )
+    return solve_ionization(
+        element_list, T_e, ion_number_densities, bts, scale
     )
 
 
 # Higher-level helpers
 
 
-def calculate_charge_state_distribution(plasma_state):
+def calculate_charge_state_distribution_saha(plasma_state):
     """
-    Calculates the charge state distribution in fractions using the
-    Saha-Boltzmann equation assuming thermal equilibrium.
+    Charge-state distribution as fractions, assuming thermal equilibrium
+    (classic Saha + IPD).
 
     Parameters
     ----------
@@ -521,37 +777,35 @@ def calculate_mean_free_charge_saha(
     exclude_non_negative_energies: bool = True,
 ):
     """
-    Calculates the mean charge of each ion in a plasma using the Saha-Boltzmann
-    equation.
+    Mean ionization charge per species via Saha-Boltzmann.
+
+    Iterates up to 6 times for self-consistency between the ionization state
+    and the IPD / chemical potential.
 
     Parameters
     ----------
     plasma_state : PlasmaState
-        The plasma state object.
     use_ipd : bool
-        If true, the ipd correction of the plasma state is used to reduce the
-        continuum. Note: the IPD can very much depend on the ionization state.
-        this could result in some circular dependency.
+        Apply IPD continuum-lowering.  Note: the IPD often depends on the
+        ionization state, creating a circular dependency that the iteration
+        resolves.
     use_chem_pot : bool
-        If true, the chemical potential of the plasma state is used, instead of
-        the non-degenerate limiting case.
-    use_distribution:
-        If true, the ipd is evaluated for each ion species separately.
-    exclude_non_negative_energies : bool, default = True
-        If true, bound states for which the ionization energy is pushed into
-        the continuum are removed from the calculation and do not appear with
-        their Boltzmann factors in the Saha equations.
+        Use the generalised Saha equation with chemical potential.
+    use_distribution : bool
+        Evaluate IPD per-species rather than from the mean state.
+    exclude_non_negative_energies : bool
+        Exclude pressure-ionised bound states.
 
     Returns
     -------
-    jnp.ndarray
+    charge_distribution : jnp.ndarray
         The charge state distribution in fractions.
-    jnp.ndarray
+    Z_mean : jnp.ndarray
         An array containing the mean charge of each ion in the plasma.
 
     See Also
     --------
-    jaxrts.saha.solve_saha
+    jaxrts.ionization.solve_saha
         Function used to solve the saha equation
     """
 
@@ -621,25 +875,91 @@ def calculate_mean_free_charge_saha(
             )
 
             plasma_state.Z_free = jnp.array(Z_mean)
+    return charge_distribution, Z_mean
+
+
+def calculate_mean_free_charge_BU(
+    plasma_state,
+    use_ipd: bool = False,
+    use_distribution: bool = False,
+):
+    """
+    Mean ionization charge per species via the Bethe-Uhlenbeck equation.
+
+    Parameters
+    ----------
+    plasma_state : PlasmaState
+    use_ipd : bool
+        Apply IPD continuum-lowering.
+    use_distribution : bool
+        Evaluate IPD per-species rather than from the mean state.
+
+    Returns
+    -------
+    charge_distribution : jnp.ndarray
+    Z_mean : jnp.ndarray
+
+    See Also
+    --------
+    jaxrts.saha.solve_BU
+    """
+    _ions = tuple(plasma_state.ions)
+    _n_ions = plasma_state.mass_density / plasma_state.atomic_masses
+
+    plasma_state.Z_free = jnp.array(
+        jnp.max(jnp.array([i.Z for i in plasma_state.ions]))
+    )
+
+    def _get_cl(charge_distribution):
+        if use_ipd:
+            return plasma_state["ipd"].all_element_states(
+                plasma_state,
+                charge_distribution if use_distribution else None,
+            )
+        return [
+            jnp.zeros(ion.Z) * ureg.electron_volt for ion in plasma_state.ions
+        ]
+
+    chem_pot = plasma_state["chemical potential"].evaluate(plasma_state, None)
+    cl = [jnp.zeros(ion.Z) * ureg.electron_volt for ion in plasma_state.ions]
+
+    charge_distribution, _ne, Z_mean = solve_BU(
+        _ions,
+        plasma_state.T_e,
+        plasma_state.n_e,
+        _n_ions,
+        continuum_lowering=cl,
+        chem_pot_ideal=chem_pot,
+    )
+
+    for _ in range(6):
+        chem_pot = plasma_state["chemical potential"].evaluate(
+            plasma_state, None
+        )
+        cl = _get_cl(charge_distribution)
+        charge_distribution, _ne, Z_mean = solve_BU(
+            _ions,
+            plasma_state.T_e,
+            plasma_state.n_e,
+            _n_ions,
+            continuum_lowering=cl,
+            chem_pot_ideal=chem_pot,
+        )
+        plasma_state.Z_free = jnp.array(Z_mean)
 
     return charge_distribution, Z_mean
 
 
 # Thomas-Fermi / More fits
 
+
 @jax.jit
 def _calculate_single_species_ionization_more(rho, T_e, m_A, Z_A) -> Quantity:
     alpha = 14.3139
     beta = 0.6624
-    a1 = 0.003323
-    a2 = 0.9718
-    a3 = 9.26148e-5
-    a4 = 3.10165
-    b0 = -1.7630
-    b1 = 1.43175
-    b2 = 0.31546
-    c1 = -0.366667
-    c2 = 0.983333
+    a1, a2, a3, a4 = 0.003323, 0.9718, 9.26148e-5, 3.10165
+    b0, b1, b2 = -1.7630, 1.43175, 0.31546
+    c1, c2 = -0.366667, 0.983333
 
     R = (rho.m_as(ureg.gram / ureg.cc) / m_A.m_as(ureg.u)) / Z_A
     T0 = T_e.m_as(ureg.eV / ureg.k_B) / Z_A ** (4.0 / 3.0)
