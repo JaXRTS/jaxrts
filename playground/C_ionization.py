@@ -20,17 +20,17 @@ for dens in jnp.logspace(-1, 3, 350):
     state["chemical potential"] = jaxrts.models.IchimaruChemPotential()
     n_e.append(state.n_e.m_as(ureg.centimeter ** (-3)))
 
-    charge_distribution, Z_mean = jaxrts.saha.calculate_mean_free_charge_saha(
+    charge_distribution, Z_mean = jaxrts.ionization.calculate_mean_free_charge_saha(
         state, True
     )
     Z_saha.append(Z_mean)
 
-    charge_distribution, Z_mean = jaxrts.saha.calculate_mean_free_charge_saha(
+    charge_distribution, Z_mean = jaxrts.ionization.calculate_mean_free_charge_saha(
         state, True, True
     )
     Z_gen_saha.append(Z_mean)
 
-    charge_distribution, Z_mean = jaxrts.saha.calculate_mean_free_charge_BU(
+    charge_distribution, Z_mean = jaxrts.ionization.calculate_mean_free_charge_BU(
         state,
         True,
     )
