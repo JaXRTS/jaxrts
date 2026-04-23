@@ -5,13 +5,12 @@ It contains functions to solve the
 linking the temperature of a plasma to its ionization.
 
 The central solver is :py:func:`solve_ionization`, which accepts a
-*balance term* -- an object that supplies per-transition coefficients and the
-corresponding "still-bound" mask.  Two concrete balance terms are provided:
+:py:class:`~.BalanceTerm` -- an object that supplies per-transition
+coefficients and the corresponding "still-bound" mask.
 
-* :py:class:`SahaBalanceTerm` -- classic / generalised Saha (the generalised
-  form reduces to the classic one when ``n_e = 0`` and ``chem_pot = 0``).
-* :py:class:`BUBalanceTerm` -- Bethe-Uhlenbeck, using Planck-Larkin
-  partition sums instead of bare statistical weights.
+:py:class:`~.BalanceTerm` s can be created with the factories provided, e.g.
+:py:class:`~.saha_balance_term`, :py:class:`~.gen_balance_term`, or
+:py:class:`bu_balance_term`.
 """
 
 from typing import NamedTuple
@@ -22,7 +21,6 @@ import jax
 from jax.tree_util import Partial
 import jax.numpy as jnp
 import jpu.numpy as jnpu
-import numpy as onp
 
 from .elements import Element
 from .plasma_physics import therm_de_broglie_wl
@@ -218,7 +216,7 @@ class BalanceTerm(NamedTuple):
     ----------
     coeff : Quantity
         Dimensioned ratio :math:`n_{i+1} n_e / n_i` (units: 1/volume) for each
-        transition (length ``element.Z``).  The solver divides by ``ne_scale``.
+        transition (length ``element.Z``).
     mask : jnp.ndarray
         1.0 where state i is still bound, 0.0 where pressure-ionised (length
         ``element.Z``).  Used both to set the diagonal sign and to gate the
@@ -348,58 +346,48 @@ def bu_balance_term(
     return BalanceTerm(coeff=coeff, mask=mask)
 
 
-@partial(
-    jax.jit,
-    static_argnames=["element_list"],
-)
-def _ne_scale(
-    element_list: list[Element],
-    ion_number_densities: Quantity,
-    T_e: Quantity,
-    masks: list[jnp.ndarray],
-) -> Quantity:
-    """
-    Numerical density scale used to non-dimensionalise the matrix.
-
-    The scale is interpolated between a small value (for low-T, mostly
-    pressure-ionised plasmas) and the fully-ionised maximum, improving
-    matrix conditioning across a wide temperature range.
-
-    Parameters
-    ----------
-    element_list, ion_number_densities, T_e
-        As in :py:func:`solve_ionization`.
-    masks : list[jnp.ndarray]
-        Per-element bound-state masks (used to estimate the pressure-ionised
-        fraction and shift the lower bound of the scale accordingly).
-
-    Returns
-    -------
-    Quantity:
-        n_e scale in units of 1/volume.
-    """
-    Z = [ion.Z for ion in element_list]
-    max_ne = jnpu.sum(jnp.array(Z) * ion_number_densities)
-    all_masks = jnp.concatenate(masks)
-    ratio = jnp.sum(all_masks) / len(all_masks)
-    _ne_range = jnp.array(
-        [
-            jnp.max(
-                jnp.array([max_ne.m_as(1 / ureg.m**3) * (1 - ratio), 1e-6])
-            ),
-            max_ne.m_as(1 / ureg.m**3),
-        ]
-    )
-    return jnp.interp(
-        (T_e * k_B).m_as(ureg.electron_volt),
-        jnp.array([1.0, 1000.0]),
-        _ne_range,
-        left=_ne_range[0],
-        right=_ne_range[-1],
-    ) * (1 / ureg.m**3)
-
-
 # Core solver
+
+
+def _log_partition_products(
+    log_coeffs: jnp.ndarray,
+    mask: jnp.ndarray,
+    log_ne: float,
+) -> jnp.ndarray:
+    """
+    mask[k] = 1 means charge state k exists as a bound state.
+    mask[k] = 0 means charge state k is pressure-ionized (does not exist).
+    State Z (fully stripped) always exists.
+    """
+    # Zero out pressure-ionized states in log_ratios so cumsum is unaffected by
+    # them. They will be masked to -inf afterwards anyway (in hte log!).
+    log_ratios = log_coeffs - log_ne  # shape (Z,)
+    log_ratios_clean = jnp.where(mask > 0, log_ratios, 0.0)
+
+    log_P_raw = jnp.concatenate([
+        jnp.zeros(1),
+        jnp.cumsum(log_ratios_clean),
+    ])
+
+    # Extend mask to cover the fully-stripped state (always exists)
+    mask_ext = jnp.concatenate([mask, jnp.ones(1)])
+
+    # vanished states get -inf, others states keep the cumsum value
+    return jnp.where(mask_ext > 0, log_P_raw, -jnp.inf)
+
+
+def _zbar_and_weights(log_P: jnp.ndarray) -> tuple[float, jnp.ndarray]:
+    """
+    Stable mean charge and fractional populations from log partition products.
+    Handles -inf entries (states pushed to the continuum) and large positive
+    entries.
+    """
+    charges = jnp.arange(len(log_P), dtype=float)
+
+    # Clip before softmax to prevent exp(inf-inf)=NaN in fully-ionized limit.
+    log_P_clipped = jnp.clip(log_P, min=-500.0, max=500.0)
+    weights = jax.nn.softmax(log_P_clipped)
+    return jnp.sum(charges * weights), weights
 
 
 @partial(
@@ -407,28 +395,18 @@ def _ne_scale(
     static_argnames=["element_list"],
 )
 def solve_ionization(
-    element_list: list[Element],
-    T_e: Quantity,
-    ion_number_densities: Quantity,
-    balance_terms: list[BalanceTerm],
-    ne_scale: Quantity,
-) -> tuple[Quantity, Quantity, Quantity]:
+    element_list,
+    T_e,
+    ion_number_densities,
+    balance_terms,
+):
     """
     Solve for the ionization state of a plasma given pre-computed balance
     terms.
 
-    This is the inner workhorse.  Callers should normally use one of the
-    convenience wrappers (:py:func:`solve_saha`, :py:func:`solve_gen_saha`,
-    :py:func:`solve_BU`) which construct ``balance_terms`` and ``ne_scale``
-    automatically.
-
-    The algorithm mirrors the `many-ion-saha-equation
-    <https://github.com/jelkuweiss/many-ion-saha-equation>`_ approach:
-
-    1. Build a sparse matrix whose diagonal encodes the balance relation and
-       whose last row/column encodes number conservation.
-    2. Find :math:`n_e` as the root of :math:`\\det(M)=0` via bisection.
-    3. Solve the resulting linear system for per-level number densities.
+    Callers should normally use one of the convenience wrappers
+    (:py:func:`solve_saha`, :py:func:`solve_gen_saha`, :py:func:`solve_BU`)
+    which construct ``balance_terms`` automatically.
 
     Parameters
     ----------
@@ -443,8 +421,6 @@ def solve_ionization(
         ``element_list``).  Each term supplies a ``coeff`` array (the ratio
         :math:`n_{i+1} n_e / n_i`) and a boolean ``mask`` array indicating
         which transitions are still bound.
-    ne_scale : Quantity
-        Numerical scale used to non-dimensionalise :math:`n_e`.
 
     Returns
     -------
@@ -456,110 +432,61 @@ def solve_ionization(
     Z_mean : Quantity
         Mean ionization of each species.
     """
-    Z = [ion.Z for ion in element_list]
+    Z = [el.Z for el in element_list]
+    N_i_arr = ion_number_densities.m_as(
+        1 / ureg.m**3
+    )  # strip units for arithmetic
+    max_ne = sum(z * n for z, n in zip(Z, N_i_arr))
 
-    size = len(element_list) + int(onp.sum(Z)) + 1
-    M = jnp.zeros((size, size))
-    max_ne = jnpu.sum(jnp.array(Z) * ion_number_densities)
+    # Precompute log coefficients
+    log_coeffs_list = []
+    for bt in balance_terms:
+        coeff_vals = bt.coeff.m_as(1 / ureg.m**3)
+        # Maybe clip here, if required
+        # coeff_vals = jnp.clip(coeff_vals, min=1e-300, max=1e300)
+        log_coeffs_list.append(jnp.log(coeff_vals))
 
-    skip = 0
-    ionization_states = []
-
-    for ion_dens, element, bt in zip(
-        ion_number_densities, element_list, balance_terms, strict=True
-    ):
-        coeff = (bt.coeff / ne_scale).m_as(ureg.dimensionless)
-
-        # Diagonal: -coeff where state is still bound, 1 where state is
-        # pressure-ionized, i.e., does not exist, anymore.
-        diag = jnp.diag(jnp.where(bt.mask > 0, -coeff, 1.0))
-        dens_row = jnp.ones(element.Z + 1)
-
-        # Set the diagonal for the balance-rows
-        M = M.at[skip : skip + element.Z, skip : skip + element.Z].set(diag)
-        # Create ones for the density row.
-        M = M.at[skip : skip + element.Z + 1, skip + element.Z].set(dens_row)
-        # Set the last element of the density row to the ion number density
-        M = M.at[-1, skip + element.Z].set(
-            (ion_dens / ne_scale).m_as(ureg.dimensionless)
+    def residual(log_ne):
+        total_charge = sum(
+            N_i
+            * _zbar_and_weights(_log_partition_products(lc, bt.mask, log_ne))[
+                0
+            ]
+            for lc, bt, N_i in zip(log_coeffs_list, balance_terms, N_i_arr)
         )
+        return jnp.exp(log_ne) - total_charge
 
-        # Each element requires a block of Z+1 size.
-        skip += element.Z + 1
+    log_ne_lo = jnp.log(jnp.array(1e-8))
+    log_ne_hi = jnp.log(jnp.array(max_ne))
 
-        # This is for the final row, which lists all ionization states for the
-        # elements
-        ionization_states += list(jnp.arange(element.Z + 1))
-
-    # Set the row for all ionization states.
-    M = M.at[:-1, -1].set(jnp.array(ionization_states))
-
-    ne_mask = jnp.zeros(len(element_list) + int(onp.sum(Z)))
-    skip = -1
-    for element, bt in zip(element_list, balance_terms, strict=True):
-        ne_mask = ne_mask.at[skip + 1 : skip + element.Z + 1].set(bt.mask)
-        # density rows stay zero (already zero from initialization)
-        skip += element.Z + 1
-
-    def insert_ne(M, ne):
-        # ne_mask is captured from outer scope
-        ne_line = ne_mask * ne
-        _diag = jnp.diag(ne_line, -1)
-        out = (M + _diag).at[-1, -1].set(ne)
-        return out.T
-
-    # Bisection: find n_e such that det(M) = 0
-    def det_M_func(ne):
-        return jnp.linalg.det(insert_ne(M, ne))
-
-    # Find n_e by finding the root where the determinant of M is 0
-    # Use the bisection method, boundaries are fixed by max_ne and 0.
-    sol_ne, iterations = bisection(
-        Partial(det_M_func),
-        0,
-        (max_ne / ne_scale).m_as(ureg.dimensionless),
-        tolerance=1e-5,
-        max_iter=1e4,
-        min_iter=40,
+    sol_log_ne, _ = bisection(
+        Partial(residual),
+        log_ne_lo,
+        log_ne_hi,
+        tolerance=1e-8,
+        max_iter=1000,
+        min_iter=1,
     )
 
-    # Create the matrix that describes the linear system of equations we solve.
-    # Insert n_e.
-    concrete_M = insert_ne(M, sol_ne)
+    sol_ne = jnp.exp(sol_log_ne)
 
-    # Strip the last row and column. Use the latter as inhomogeneity.
-    M1 = concrete_M[:-1, :-1]
-    M2 = concrete_M[:-1, -1]
-
-    # Get the solution of the set of linear equations of the form
-    # (nIon0_0+,nIon0_1+, ..., nIon1_0+,nIon1_1+, ...)
-    ionised_number_densities = jnp.linalg.solve(M1, M2)
-
-    # Rescale the dimensionless number densities so that units are
-    # 1/[length]**3.
-    res = jnpu.multiply(ionised_number_densities, ne_scale)
-
-    # Mean ionization per species
-    skip = 0
+    # Recover populations
+    all_densities = []
     Z_mean = []
-    for element in element_list:
-        Z_mean.append(
-            jnpu.sum(
-                res[skip : skip + element.Z + 1]
-                * jnp.arange(element.Z + 1)
-                / jnpu.sum(res[skip : skip + element.Z + 1])
-            )
-        )
-        skip += element.Z + 1
+    for bt, N, lc in zip(balance_terms, N_i_arr, log_coeffs_list):
+        log_P = _log_partition_products(lc, bt.mask, sol_log_ne)
+        zbar, weights = _zbar_and_weights(log_P)
+        all_densities.append(N * weights / (1 * ureg.m**3))
+        Z_mean.append(zbar)
 
     return (
-        to_array(res),
-        sol_ne * ne_scale,
-        to_array(Z_mean).m_as(ureg.dimensionless),
+        to_array(
+            jnp.concatenate([d.m_as(1 / ureg.m**3) for d in all_densities])
+            / (1 * ureg.m**3)
+        ),
+        sol_ne / (1 * ureg.m**3),
+        jnp.array(Z_mean),
     )
-
-
-# Wrapper for certain balance equations
 
 
 @partial(
@@ -612,11 +539,8 @@ def solve_saha(
             for bt in bts
         ]
 
-    scale = _ne_scale(
-        element_list, ion_number_densities, T_e, [bt.mask for bt in bts]
-    )
     return solve_ionization(
-        element_list, T_e, ion_number_densities, bts, scale
+        element_list, T_e, ion_number_densities, bts
     )
 
 
@@ -673,14 +597,8 @@ def solve_gen_saha(
             for bt in bts
         ]
 
-    scale = _ne_scale(
-        element_list,
-        ion_number_densities,
-        T_e,
-        [bt.mask for bt in bts],
-    )
     return solve_ionization(
-        element_list, T_e, ion_number_densities, bts, scale
+        element_list, T_e, ion_number_densities, bts
     )
 
 
@@ -727,14 +645,8 @@ def solve_BU(
         for el, ipd in zip(element_list, continuum_lowering, strict=True)
     ]
 
-    scale = _ne_scale(
-        element_list,
-        ion_number_densities,
-        T_e,
-        [bt.mask for bt in bts],
-    )
     return solve_ionization(
-        element_list, T_e, ion_number_densities, bts, scale
+        element_list, T_e, ion_number_densities, bts
     )
 
 
