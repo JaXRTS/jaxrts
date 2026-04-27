@@ -37,6 +37,11 @@ High Energy Density Group of Dominik Kraus at the University of Rostock.
 `See here <https://github.com/JaXRTS/jaxrts/graphs/contributors>`__ for a list
 of contributors to the software.
 
+The theoretical framework and implementation of ``jaxrts`` are detailed in our
+`Computer Physics Communications <https://www.sciencedirect.com/science/article/pii/S0010465526001554>`_ paper.
+This publication introduces the underlying XRTS theory, describes the individual
+software modules, and serves as a user guide.
+
 .. warning::
 
    This code is still under active development, so are it's dependencies. While
