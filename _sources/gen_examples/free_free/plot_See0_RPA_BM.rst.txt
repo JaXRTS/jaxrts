@@ -50,18 +50,18 @@ module.
 
  .. code-block:: none
 
-    RPA: 1.248971939086914
-    BMA: 6.586587905883789
-    BMA Chapman Interp: 8.84324598312378
-    RPA With damping: 1.4716877937316895
-    RPA: 0.0004436969757080078
-    BMA: 5.1969828605651855
-    BMA Chapman Interp: 6.448235750198364
-    RPA With damping: 0.0006330013275146484
-    RPA: 0.0004017353057861328
-    BMA: 5.4220871925354
-    BMA Chapman Interp: 6.515304088592529
-    RPA With damping: 0.0005743503570556641
+    RPA: 1.2318153381347656
+    BMA: 6.108699560165405
+    BMA Chapman Interp: 8.63963770866394
+    RPA With damping: 1.4133408069610596
+    RPA: 0.00044536590576171875
+    BMA: 5.0717453956604
+    BMA Chapman Interp: 6.068786859512329
+    RPA With damping: 0.0005600452423095703
+    RPA: 0.00041961669921875
+    BMA: 5.141414642333984
+    BMA Chapman Interp: 6.101670026779175
+    RPA With damping: 0.0005979537963867188
 
 
 
@@ -248,7 +248,7 @@ module.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 44.785 seconds)
+   **Total running time of the script:** (0 minutes 42.794 seconds)
 
 
 .. _sphx_glr_download_gen_examples_free_free_plot_See0_RPA_BM.py:

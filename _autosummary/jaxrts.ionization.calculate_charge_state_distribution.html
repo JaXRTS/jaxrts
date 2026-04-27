@@ -26,8 +26,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="jaxrts.ionization.calculate_mean_free_charge_more" href="jaxrts.ionization.calculate_mean_free_charge_more.html" />
-    <link rel="prev" title="jaxrts.ionization" href="jaxrts.ionization.html" /> 
+    <link rel="next" title="jaxrts.ionization.calculate_mean_free_charge_BU" href="jaxrts.ionization.calculate_mean_free_charge_BU.html" />
+    <link rel="prev" title="jaxrts.ionization.bu_balance_term" href="jaxrts.ionization.bu_balance_term.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -74,13 +74,22 @@
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.instrument_function.html">jaxrts.instrument_function</a></li>
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.ion_feature.html">jaxrts.ion_feature</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="jaxrts.ionization.html">jaxrts.ionization</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.bu_balance_term.html">jaxrts.ionization.bu_balance_term</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">jaxrts.ionization.calculate_charge_state_distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.calculate_mean_free_charge_BU.html">jaxrts.ionization.calculate_mean_free_charge_BU</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.calculate_mean_free_charge_more.html">jaxrts.ionization.calculate_mean_free_charge_more</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.calculate_mean_free_charge_saha.html">jaxrts.ionization.calculate_mean_free_charge_saha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.gen_balance_equation.html">jaxrts.ionization.gen_balance_equation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.gen_saha_balance_term.html">jaxrts.ionization.gen_saha_balance_term</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.gen_saha_equation.html">jaxrts.ionization.gen_saha_equation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.planck_larkin_partition_sum.html">jaxrts.ionization.planck_larkin_partition_sum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.saha_balance_term.html">jaxrts.ionization.saha_balance_term</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.saha_equation.html">jaxrts.ionization.saha_equation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.solve_BU.html">jaxrts.ionization.solve_BU</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.solve_gen_saha.html">jaxrts.ionization.solve_gen_saha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.solve_ionization.html">jaxrts.ionization.solve_ionization</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.solve_saha.html">jaxrts.ionization.solve_saha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.ionization.BalanceTerm.html">jaxrts.ionization.BalanceTerm</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.ipd.html">jaxrts.ipd</a></li>
@@ -130,7 +139,7 @@
 <h1>jaxrts.ionization.calculate_charge_state_distribution<a class="headerlink" href="#jaxrts-ionization-calculate-charge-state-distribution" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="jaxrts.ionization.calculate_charge_state_distribution">
-<span class="sig-prename descclassname"><span class="pre">jaxrts.ionization.</span></span><span class="sig-name descname"><span class="pre">calculate_charge_state_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plasma_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/ionization.html#calculate_charge_state_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.ionization.calculate_charge_state_distribution" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">jaxrts.ionization.</span></span><span class="sig-name descname"><span class="pre">calculate_charge_state_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plasma_state</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Array</span></span></span><a class="reference internal" href="../_modules/jaxrts/ionization.html#calculate_charge_state_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.ionization.calculate_charge_state_distribution" title="Link to this definition"></a></dt>
 <dd><p>Calculates the charge state distribution in fractions using the
 Saha-Boltzmann equation assuming thermal equilibrium.</p>
 <dl class="field-list simple">
@@ -138,11 +147,7 @@ Saha-Boltzmann equation assuming thermal equilibrium.</p>
 <dd class="field-odd"><p><strong>plasma_state</strong> (<a class="reference internal" href="jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><em>PlasmaState</em></a>) – The plasma state object.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><em>jnp.ndarray</em></p></li>
-<li><p><em>The charge state distribution in fractions.</em></p></li>
-</ul>
-</p>
+<dd class="field-even"><p><em>jnp.ndarray</em> – The charge state distribution in fractions.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -153,8 +158,8 @@ Saha-Boltzmann equation assuming thermal equilibrium.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="jaxrts.ionization.html" class="btn btn-neutral float-left" title="jaxrts.ionization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="jaxrts.ionization.calculate_mean_free_charge_more.html" class="btn btn-neutral float-right" title="jaxrts.ionization.calculate_mean_free_charge_more" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="jaxrts.ionization.bu_balance_term.html" class="btn btn-neutral float-left" title="jaxrts.ionization.bu_balance_term" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.ionization.calculate_mean_free_charge_BU.html" class="btn btn-neutral float-right" title="jaxrts.ionization.calculate_mean_free_charge_BU" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

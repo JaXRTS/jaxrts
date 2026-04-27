@@ -39,18 +39,18 @@ Ogata Fourier transform
       f = lambda r: 1 / r * (np.exp(-r))  # noqa: E731
     /home/runner/work/jaxrts/jaxrts/doc/examples/utils/plot_ogata.py:84: RuntimeWarning: invalid value encountered in multiply
       r, fvals * np.sqrt(rvals), bounds_error=False, fill_value=(np.nan, 0.0)
-    t= 1.0869250297546387 s
+    t= 1.0449049472808838 s
     /home/runner/work/jaxrts/jaxrts/doc/examples/utils/plot_ogata.py:101: RuntimeWarning: divide by zero encountered in divide
       f = lambda r: 1 / r * (np.exp(-r))  # noqa: E731
-    t= 0.006685495376586914 s
-    t= 0.0060558319091796875 s
-    t= 0.00618743896484375 s
-    t= 0.0060329437255859375 s
-    t= 0.006195545196533203 s
-    t= 0.006067037582397461 s
-    t= 0.0060956478118896484 s
-    t= 0.0061550140380859375 s
-    t= 0.006054878234863281 s
+    t= 0.007667064666748047 s
+    t= 0.007051229476928711 s
+    t= 0.006801605224609375 s
+    t= 0.006468772888183594 s
+    t= 0.006543874740600586 s
+    t= 0.006891012191772461 s
+    t= 0.0062143802642822266 s
+    t= 0.0058519840240478516 s
+    t= 0.005897998809814453 s
 
 
 
@@ -224,7 +224,7 @@ Ogata Fourier transform
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.527 seconds)
+   **Total running time of the script:** (0 minutes 2.423 seconds)
 
 
 .. _sphx_glr_download_gen_examples_utils_plot_ogata.py:

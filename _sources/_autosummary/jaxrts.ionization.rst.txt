@@ -15,17 +15,33 @@ jaxrts.ionization
       :toctree:
       :recursive:
    
+      bu_balance_term
       calculate_charge_state_distribution
+      calculate_mean_free_charge_BU
       calculate_mean_free_charge_more
       calculate_mean_free_charge_saha
+      gen_balance_equation
+      gen_saha_balance_term
       gen_saha_equation
+      planck_larkin_partition_sum
+      saha_balance_term
       saha_equation
+      solve_BU
       solve_gen_saha
+      solve_ionization
       solve_saha
    
    
 
    
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      BalanceTerm
    
    
 

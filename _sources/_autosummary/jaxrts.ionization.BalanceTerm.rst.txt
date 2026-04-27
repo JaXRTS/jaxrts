@@ -1,0 +1,36 @@
+jaxrts.ionization.BalanceTerm
+=============================
+
+.. currentmodule:: jaxrts.ionization
+
+.. autoclass:: BalanceTerm
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~BalanceTerm.__init__
+      ~BalanceTerm.count
+      ~BalanceTerm.index
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~BalanceTerm.coeff
+      ~BalanceTerm.mask
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.ionization.BalanceTerm:
+
+   .. minigallery:: jaxrts.ionization.BalanceTerm
+       :add-heading:

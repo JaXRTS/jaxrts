@@ -24,11 +24,14 @@ jaxrts.helpers
       :recursive:
    
       bisection
+      download_from_nist
+      get_cache_dir
       invert_dict
       mass_density_from_electron_density
       mass_from_number_fraction
       orbital_array
       partialclass
+      read_nist_file
       secant_extrema_finding
       timer
    

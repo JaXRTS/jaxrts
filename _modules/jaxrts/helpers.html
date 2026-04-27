@@ -85,9 +85,15 @@
 <span class="sd">Miscellaneous helper functions.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partialmethod</span><span class="p">,</span> <span class="n">wraps</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">platformdirs</span><span class="w"> </span><span class="kn">import</span> <span class="n">user_cache_dir</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">onp</span>
+
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
@@ -486,6 +492,65 @@
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">final_state</span><span class="p">,</span> <span class="n">iterations</span></div>
+
+
+
+<div class="viewcode-block" id="get_cache_dir">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.helpers.get_cache_dir.html#jaxrts.helpers.get_cache_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cache_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">user_cache_dir</span><span class="p">(</span><span class="s2">&quot;jaxrts&quot;</span><span class="p">,</span> <span class="s2">&quot;jaxrts&quot;</span><span class="p">))</span>
+    <span class="n">cache_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cache_dir</span></div>
+
+
+
+<div class="viewcode-block" id="download_from_nist">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.helpers.download_from_nist.html#jaxrts.helpers.download_from_nist">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_from_nist</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_cache_dir</span><span class="p">()</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;https://physics.nist.gov/cgi-bin/ASD/energy1.pl?de=0&amp;spectrum=</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">&amp;units=1&amp;format=2&amp;output=0&amp;page_size=15&amp;multiplet_ordered=0&amp;average_out=1&amp;conf_out=on&amp;term_out=on&amp;level_out=on&amp;g_out=on&amp;biblio=on&amp;temp=&amp;submit=Retrieve+Data&quot;</span>  <span class="c1"># noqa: E501</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="s2">&quot;Failed to download file from the NIST database&quot;</span>
+            <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="read_nist_file">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.helpers.read_nist_file.html#jaxrts.helpers.read_nist_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_nist_file</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read in a nist file for excited states that was downloaded by</span>
+<span class="sd">    :py:func:`download_from_nist`. Extracts multiplicities and energy levels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_cache_dir</span><span class="p">()</span>
+    <span class="n">nist_file</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nist_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        ,term,                               # Literal text “,term,”</span>
+<span class="sd">        (?P&lt;g&gt;\d+)                           #  &quot;g&quot;</span>
+<span class="sd">        ,&quot;=&quot;&quot;(?P&lt;energy&gt;\d+(?:\.\d+)?)&quot;&quot;&quot;    # energy in = and &quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span><span class="p">,</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">)))</span>
+            <span class="n">E</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;energy&quot;</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">g</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span></div>
 
 
 
