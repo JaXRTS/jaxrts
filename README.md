@@ -22,6 +22,30 @@ The code was written by Samuel Schumacher and Julian Lütgert in the High Energy
 </p>
 <h5 align="center">An example result</h5>
 
+## How to cite
+
+`jaxrts` is now published in [Computer Physics Communications](https://www.sciencedirect.com/science/article/pii/S0010465526001554).  
+If you make use of this code in a scientific publication, please cite the following paper:
+
+J. Lütgert, S. Schumacher, J. Rips, C. Qu, T. Döppner, and D. Kraus, “*jaxrts: A Python package for simulating X-ray Thomson scattering spectra from dense plasmas using jax*,” Computer Physics Communications, p. 110173, Apr. 2026, doi: [10.1016/j.cpc.2026.110173](https://www.sciencedirect.com/science/article/pii/S0010465526001554). 
+
+<details>
+<summary>BibTeX</summary>
+
+```bibtex
+@article{jaxrts2026,
+  title   = {jaxrts: A Python package for simulating X-ray Thomson scattering spectra from dense plasmas using jax},
+  author  = {Lütgert, J. and Schumacher, S. and Rips, J. and Qu, C. and Döppner, T. and Kraus, D.},
+  journal = {Computer Physics Communications},
+  pages   = {110173},
+  year    = {2026},
+  issn    = {0010-4655},
+  doi     = {10.1016/j.cpc.2026.110173},
+  url     = {[https://doi.org/10.1016/j.cpc.2026.110173](https://doi.org/10.1016/j.cpc.2026.110173)}
+}
+```
+</details>
+
 ## Documentation
 
 The documentation can be found in the `doc` directory and [online](https://jaxrts.github.io/jaxrts). To generate it for yourself, just run
