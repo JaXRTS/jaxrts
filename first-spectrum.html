@@ -145,7 +145,26 @@ electron temperatures as a default.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>Now, we also have to define a <a class="reference internal" href="_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.setup.Setup"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.setup.Setup</span></code></a>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">jpu</span></code>
+<p>We can investigate the generated plasma state:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>ions                     :      Be
+mass densities (g/cc)    :    1.00
+ionization               :    2.00
+ion temperatures (eV)    :     2.0
+e- temperature (eV)      :     2.0
+
+Models attached
+===============
+screening length         : DebyeHueckelScreeningLength
+ee-lfc                   : LFCConstant
+free-bound scattering    : Neglect
+</pre></div>
+</div>
+<p>As we can see we have set densities, ionization, and temperature, as well as
+some default models.</p>
+<p>Next, we also have to define a <a class="reference internal" href="_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.setup.Setup"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.setup.Setup</span></code></a>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">jpu</span></code>
 also allows to convert string to quantities with units, as you can see below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">setup</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span>
     <span class="n">scattering_angle</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;60°&quot;</span><span class="p">),</span>
