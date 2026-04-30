@@ -148,13 +148,13 @@ def compute_S_values(i, T, Z, rho, k, expanded: bool):
     return Sii_out
 
 
-def parallel_computation(data_no, T, Z, rho, k, expanded: bool, cpu_count: int):
+def parallel_computation(
+    data_no, T, Z, rho, k, expanded: bool, cpu_count: int
+):
     """
     Start Multiprocessing to generate HNC output.
     """
-    with multiprocessing.Pool(
-        processes=cpu_count
-    ) as pool:
+    with multiprocessing.Pool(processes=cpu_count) as pool:
         func = partial(
             compute_S_values,
             T=T,
@@ -227,13 +227,7 @@ if __name__ == "__main__":
 
     # start parallel computation of Sii's using the HNC algorithm
     Sii = parallel_computation(
-        data_no,
-        T,
-        Z,
-        rho,
-        k,
-        expand_integer_ionization_state,
-        cpu_count
+        data_no, T, Z, rho, k, expand_integer_ionization_state, cpu_count
     )
 
     # Create the element string for labelling the saved dataset
@@ -250,6 +244,13 @@ if __name__ == "__main__":
     plasma_state_file_path = (
         f"train_data/{element_string}_{data_no}{expanded}.json"
     )
+
+    # Save the jaxrts version used to generate the data to file
+    with open(
+        f"train_data/{element_string}_{data_no}{expanded}.jaxrts_version", "w"
+    ) as f:
+        f.write(jaxrts.__version__)
+
     # save plasma state used for creating HNC output
     with open(plasma_state_file_path, "w") as f:
         jaxrts.saving.dump(plasma_state, f, indent=2)
