@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:14.859** total execution time for 2 files **from gen_examples/bound_free**:
+**00:14.090** total execution time for 2 files **from gen_examples/bound_free**:
 
 .. container::
 
@@ -33,8 +33,8 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gen_examples_bound_free_plot_ipd.py` (``plot_ipd.py``)
-     - 00:07.700
+     - 00:07.403
      - 0.0
    * - :ref:`sphx_glr_gen_examples_bound_free_plot_moving_edges_vs_cold.py` (``plot_moving_edges_vs_cold.py``)
-     - 00:07.159
+     - 00:06.687
      - 0.0
