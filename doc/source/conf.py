@@ -21,6 +21,8 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinxcontrib.bibtex",
     "sphinx_toolbox.collapse",
+    "sphinx_toolbox.sidebar_links",
+    "sphinx_toolbox.github",
     "sphinx_gallery.gen_gallery",
     "sphinx.ext.viewcode",
 ]
@@ -46,6 +48,11 @@ napoleon_use_rtype = False
 templates_path = ["_templates"]
 exclude_patterns = []
 
+
+# sidebar-links settings
+
+github_username = "jaxrts"
+github_repository = "jaxrts"
 
 # Sphinx gallery
 from sphinx_gallery.scrapers import matplotlib_scraper

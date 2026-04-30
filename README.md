@@ -34,14 +34,19 @@ J. Lütgert, S. Schumacher, J. Rips, C. Qu, T. Döppner, and D. Kraus, “*jaxrt
 
 ```bibtex
 @article{jaxrts2026,
-  title   = {jaxrts: A Python package for simulating X-ray Thomson scattering spectra from dense plasmas using jax},
-  author  = {Lütgert, J. and Schumacher, S. and Rips, J. and Qu, C. and Döppner, T. and Kraus, D.},
-  journal = {Computer Physics Communications},
-  pages   = {110173},
-  year    = {2026},
-  issn    = {0010-4655},
-  doi     = {10.1016/j.cpc.2026.110173},
-  url     = {[https://doi.org/10.1016/j.cpc.2026.110173](https://doi.org/10.1016/j.cpc.2026.110173)}
+    title         = {
+        jaxrts: A {Python} package for simulating {X-ray} {Thomson} scattering
+        spectra from dense plasmas using jax
+    },
+    author        = {
+        L\"{u}tgert, J. and Schumacher, S. and Rips, J. and Qu, C. and
+        D\"{o}ppner, T. and Kraus, D.
+    },
+    journal       = {Computer Physics Communications},
+    pages         = 110173,
+    year          = 2026,
+    issn          = {0010-4655},
+    doi           = {10.1016/j.cpc.2026.110173},
 }
 ```
 </details>
