@@ -22,7 +22,7 @@ ureg = jaxrts.ureg
 """
 This code will generate data_no amount of training data used to train a neural net using the train.oy script later on.
 The train data is saved in the train_data directory, alongside the plasmastate used to generate the data.
-The notation reeals the relative abundance of the elements in the plasma state, the data_no and 
+The notation reeals the relative abundance of the elements in the plasma state, the data_no and
 if the ionization state is expanded into integer values using the 'expanded' flag, e.g. 1.0C1.0H_100000_expanded.h5
 """
 
@@ -247,9 +247,18 @@ if __name__ == "__main__":
 
     # Save the jaxrts version used to generate the data to file
     with open(
-        f"train_data/{element_string}_{data_no}{expanded}.jaxrts_version", "w"
+        f"train_data/{element_string}_{data_no}{expanded}.info", "w"
     ) as f:
-        f.write(jaxrts.__version__)
+        f.write(f"k_lower: {k_lower}    # 1 / Angstrom\n")
+        f.write(f"k_upper: {k_upper}    # 1 / Angstrom\n")
+        f.write("\n")
+        f.write(f"T_lower: {T_lower}    # eV / k_B\n")
+        f.write(f"T_upper: {T_upper}    # eV / k_B\n")
+        f.write("\n")
+        f.write(f"rho_lower: {rho_lower}  # g / cc\n")
+        f.write(f"rho_upper: {rho_upper}  # g / cc\n")
+        f.write("\n")
+        f.write(jaxrts.__version__ + "\n")
 
     # save plasma state used for creating HNC output
     with open(plasma_state_file_path, "w") as f:
