@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:16.879** total execution time for 5 files **from gen_examples/form_factors**:
+**00:16.821** total execution time for 5 files **from gen_examples/form_factors**:
 
 .. container::
 
@@ -33,17 +33,17 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_zero_IPD_limit.py` (``plot_ffl_zero_IPD_limit.py``)
-     - 00:05.167
+     - 00:05.108
      - 0.0
    * - :ref:`sphx_glr_gen_examples_form_factors_plot_pauling_full_scattering_factors.py` (``plot_pauling_full_scattering_factors.py``)
-     - 00:04.322
+     - 00:04.258
      - 0.0
    * - :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_H_He-like.py` (``plot_ffl_H_He-like.py``)
-     - 00:02.591
+     - 00:02.587
      - 0.0
    * - :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_beryllium.py` (``plot_ffl_beryllium.py``)
-     - 00:02.447
+     - 00:02.489
      - 0.0
    * - :ref:`sphx_glr_gen_examples_form_factors_plot_atomic_form_factors_carbon.py` (``plot_atomic_form_factors_carbon.py``)
-     - 00:02.352
+     - 00:02.378
      - 0.0
