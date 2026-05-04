@@ -50,7 +50,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installing.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Usage</a><ul class="current">
@@ -86,6 +86,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../first_model.html">Creating your own model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../save-and-load.html">Saving and loading objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../implementation-details.html">Implementation details</a></li>
 </ul>
 </li>
@@ -132,12 +133,12 @@
 <dt class="sig sig-object py" id="jaxrts.models.BornMermin_Full">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jaxrts.models.</span></span><span class="sig-name descname"><span class="pre">BornMermin_Full</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">RPA_rewrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KKT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/models.html#BornMermin_Full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.BornMermin_Full" title="Link to this definition"></a></dt>
 <dd><p>Model for the free-free scattering, based on the Born Mermin Approximation
-(<span id="id1">[<a class="reference internal" href="../bibliography.html#id72" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).
+(<span id="id1">[<a class="reference internal" href="../bibliography.html#id75" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).
 Does not use the interpolation of the collision frequencies, and rather
 calculates them for every energy transfer measured.</p>
 <p>Has the optional argument <code class="docutils literal notranslate"><span class="pre">RPA_rewrite</span></code>, which defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>. If
 <code class="docutils literal notranslate"><span class="pre">True</span></code>, we solve the RPA integral as formulated by <span id="id2">[<a class="reference internal" href="../bibliography.html#id12" title="David Alan Chapman. Probing the dynamic response of dense matter with x-ray Thomson scattering. PhD thesis, The University of, Warwick, 2015.">Chapman, 2015</a>]</span>
-Otherwise, use the formulas that are found, e.g., in <span id="id3">[<a class="reference internal" href="../bibliography.html#id86" title="Maximilian Schörner, Mandy Bethkenhagen, Tilo Döppner, Dominik Kraus, Luke B. Fletcher, Siegfried H. Glenzer, and Ronald Redmer. X-ray thomson scattering spectra from density functional theory molecular dynamics simulations based on a modified chihara formula. Physical Review E, 6 2023. doi:10.1103/physreve.107.065207.">Schörner et al., 2023</a>]</span>.
+Otherwise, use the formulas that are found, e.g., in <span id="id3">[<a class="reference internal" href="../bibliography.html#id89" title="Maximilian Schörner, Mandy Bethkenhagen, Tilo Döppner, Dominik Kraus, Luke B. Fletcher, Siegfried H. Glenzer, and Ronald Redmer. X-ray thomson scattering spectra from density functional theory molecular dynamics simulations based on a modified chihara formula. Physical Review E, 6 2023. doi:10.1103/physreve.107.065207.">Schörner et al., 2023</a>]</span>.
 The former implementation yields more stable results, most of the time.</p>
 <p>The model has the optional attribute <code class="docutils literal notranslate"><span class="pre">KKT</span></code>, defaulting to <code class="docutils literal notranslate"><span class="pre">False</span></code>,
 using <a class="reference internal" href="jaxrts.free_free.KramersKronigTransform.html#jaxrts.free_free.KramersKronigTransform" title="jaxrts.free_free.KramersKronigTransform"><code class="xref py py-func docutils literal notranslate"><span class="pre">jaxrts.free_free.KramersKronigTransform()</span></code></a>, for the imaginary

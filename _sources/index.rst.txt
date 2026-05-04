@@ -86,7 +86,7 @@ software modules, and serves as a user guide.
 
 .. toctree::
    :maxdepth: 3
-   :caption: Contents:
+   :caption: Contents
 
    installing.rst
    usage.rst

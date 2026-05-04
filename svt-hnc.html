@@ -50,7 +50,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installing.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="usage.html">Usage</a><ul class="current">
@@ -58,6 +58,7 @@
 <li class="toctree-l2"><a class="reference internal" href="first-spectrum.html">Generating a first spectrum</a></li>
 <li class="toctree-l2"><a class="reference internal" href="models.html">Models implemented</a></li>
 <li class="toctree-l2"><a class="reference internal" href="first_model.html">Creating your own model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="save-and-load.html">Saving and loading objects</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="implementation-details.html">Implementation details</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="hnc.html">Hypernetted Chain</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">SVT–OZ and notation</a><ul>
@@ -109,7 +110,7 @@
   <section id="svtoz-and-notation">
 <h1>SVT–OZ and notation<a class="headerlink" href="#svtoz-and-notation" title="Link to this heading"></a></h1>
 <p>We derive the linear-algebra form of the SVT–OZ relation
-<span id="id1">[<a class="reference internal" href="bibliography.html#id91" title="P. Seuferling, J. Vogel, and C. Toepffer. Correlations in a two-temperature plasma. Physical review. A, General physics, 40(1):323–329, 1989. doi:10.1103/physreva.40.323.">Seuferling et al., 1989</a>, <a class="reference internal" href="bibliography.html#id92" title="Nathaniel R. Shaffer, Sanat Kumar Tiwari, and Scott D. Baalrud. Pair correlation functions of strongly coupled two-temperature plasma. Physics of Plasmas, 2017. doi:10.1063/1.4999185.">Shaffer et al., 2017</a>]</span> for a general <span class="math notranslate nohighlight">\(M\)</span>-component,
+<span id="id1">[<a class="reference internal" href="bibliography.html#id94" title="P. Seuferling, J. Vogel, and C. Toepffer. Correlations in a two-temperature plasma. Physical review. A, General physics, 40(1):323–329, 1989. doi:10.1103/physreva.40.323.">Seuferling et al., 1989</a>, <a class="reference internal" href="bibliography.html#id95" title="Nathaniel R. Shaffer, Sanat Kumar Tiwari, and Scott D. Baalrud. Pair correlation functions of strongly coupled two-temperature plasma. Physics of Plasmas, 2017. doi:10.1063/1.4999185.">Shaffer et al., 2017</a>]</span> for a general <span class="math notranslate nohighlight">\(M\)</span>-component,
 <span class="math notranslate nohighlight">\(M\)</span>-temperature plasma. First, we use the explicit <span class="math notranslate nohighlight">\(M=2\)</span> case as a
 warm-up, then we extend this to the full formula for the <span class="math notranslate nohighlight">\(M^2 \times M^2\)</span>
 matrix entries.</p>
@@ -117,7 +118,7 @@ matrix entries.</p>
 calculation, this means: M-1 ions plus electron) with number densities
 <span class="math notranslate nohighlight">\(\{n_a\}\)</span>, masses <span class="math notranslate nohighlight">\(\{m_a\}\)</span>, and temperatures <span class="math notranslate nohighlight">\(\{T_a\}\)</span>
 (<span class="math notranslate nohighlight">\(a=1,\dots,M\)</span>). In <span class="math notranslate nohighlight">\(k\)</span>-space, the multi-component SVT–OZ relation
-can be obtained by extending the work of <span id="id2">[<a class="reference internal" href="bibliography.html#id92" title="Nathaniel R. Shaffer, Sanat Kumar Tiwari, and Scott D. Baalrud. Pair correlation functions of strongly coupled two-temperature plasma. Physics of Plasmas, 2017. doi:10.1063/1.4999185.">Shaffer et al., 2017</a>]</span> through summation
+can be obtained by extending the work of <span id="id2">[<a class="reference internal" href="bibliography.html#id95" title="Nathaniel R. Shaffer, Sanat Kumar Tiwari, and Scott D. Baalrud. Pair correlation functions of strongly coupled two-temperature plasma. Physics of Plasmas, 2017. doi:10.1063/1.4999185.">Shaffer et al., 2017</a>]</span> through summation
 over all species, yielding</p>
 <div class="math notranslate nohighlight">
 \[\hat h_{ab}
