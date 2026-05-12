@@ -3415,7 +3415,9 @@ class BohmStaver(Model):
 class IPDModel(Model):
     """
     A subset of :py:class:`Model`'s, to model the effect of ionization
-    potential depression.
+    potential depression. These models have to implement a
+    :py:meth:`~.all_element_states` method, returning the appropriate IPD for
+    all ionization states of the constituents.
     """
 
     allowed_keys = ["ipd"]
@@ -3425,9 +3427,9 @@ class IPDModel(Model):
         self, plasma_state: "PlasmaState", ion_population=None
     ) -> list[jnp.ndarray]:
         """
-        Return the IPD for each possible ionization state for the consituents
+        Return the IPD for each possible ionization state for the constituents
         of the plasma, assuming the average plasma conditions are given by the
-        passed ``plasma_state``. Can optinally be handed the argument
+        passed ``plasma_state``. Can optionally be handed the argument
         ``ion_population`` to not only operate on average quantities, but over
         the whole distribution of elements.
 
