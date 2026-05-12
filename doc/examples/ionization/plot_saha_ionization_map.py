@@ -8,12 +8,13 @@ from scipy.interpolate import RectBivariateSpline
 ureg = jaxrts.ureg
 
 plt.rcParams.update({"font.size": 15})
+
+# Set colormap and norms
 cmap = "turbo"
-### Start plotting
 norm_C = mpl.colors.Normalize(vmin=0, vmax=6)
 norm_H = mpl.colors.Normalize(vmin=0, vmax=1)
 
-
+# Init PlasmaState
 rho_init: float = 25.0  # g/cm^3
 T_e_init: float = 80.0  # eV
 Z_C_init: float = 4.0  # unitless
@@ -23,32 +24,32 @@ list_ions = [jaxrts.Element("C"), jaxrts.Element("H")]
 number_fraction = jnp.array([0.5, 0.5])
 Z_free = jnp.array([Z_C_init, Z_H_init])
 
-# Set ions in plasma and their relative number fractions
 ions = list_ions
 mass_fraction = jaxrts.helpers.mass_from_number_fraction(
     number_fractions=number_fraction, elements=ions
 )
 
-# Initialize a plasma state with has different temperatures for the electrons
 plasmastate = jaxrts.PlasmaState(
     ions=ions,
     Z_free=Z_free,
     mass_density=rho_init * mass_fraction * ureg.gram / ureg.cm**3,
     T_e=T_e_init * ureg.electron_volt / ureg.k_B,
 )
-### Set IPD model
+
+# Set IPD model
 plasmastate["ipd"] = jaxrts.models.StewartPyattIPD()
 # plasmastate["ipd"] = jaxrts.models.DebyeHueckelIPD()
 
 plasmastate["chemical potential"] = jaxrts.models.IchimaruChemPotential()
 
-
+# Set nrpoints_per_row for resolution and provide T and rho range
 nr_points_per_row = 50
 temperature_range = jnp.logspace(0, 3, nr_points_per_row)
 mass_density_range = jnp.logspace(-2, 3, nr_points_per_row)
 ionization_C = jnp.zeros((temperature_range.size, mass_density_range.size))
 ionization_H = jnp.zeros_like(ionization_C)
 
+# Iterate troguh all (T,rho) combinations
 for i, temp in tqdm(enumerate(temperature_range)):
     for j, rho in enumerate(mass_density_range):
         plasmastate.T_e = temp * (ureg.electron_volt / ureg.k_B)
@@ -63,6 +64,7 @@ for i, temp in tqdm(enumerate(temperature_range)):
         ionization_H = ionization_H.at[i, j].set(Z_H)
 
 
+# Inteprolate result for a bit smoother colorplot
 interp_temp = jnp.logspace(0, 3, 1000)
 interp_rho = jnp.logspace(-2, 3, 1000)
 interp_C = RectBivariateSpline(
@@ -75,6 +77,7 @@ interp_H = RectBivariateSpline(
 ioni_C = interp_C(interp_rho, interp_temp)
 ioni_H = interp_H(interp_rho, interp_temp)
 
+# Plotting
 fig, (ax, ax1) = plt.subplots(1, 2, figsize=(15, 7), sharey=True)
 pcm_C = ax.pcolormesh(
     interp_rho,
