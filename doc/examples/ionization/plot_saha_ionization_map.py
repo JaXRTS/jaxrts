@@ -42,14 +42,14 @@ plasmastate["ipd"] = jaxrts.models.StewartPyattIPD()
 
 plasmastate["chemical potential"] = jaxrts.models.IchimaruChemPotential()
 
-# Set nrpoints_per_row for resolution and provide T and rho range
+# Set nr_points_per_row for resolution and provide T and rho range
 nr_points_per_row = 50
 temperature_range = jnp.logspace(0, 3, nr_points_per_row)
 mass_density_range = jnp.logspace(-2, 3, nr_points_per_row)
 ionization_C = jnp.zeros((temperature_range.size, mass_density_range.size))
 ionization_H = jnp.zeros_like(ionization_C)
 
-# Iterate troguh all (T,rho) combinations
+# Iterate trough all (T,rho) combinations
 for i, temp in tqdm(enumerate(temperature_range)):
     for j, rho in enumerate(mass_density_range):
         plasmastate.T_e = temp * (ureg.electron_volt / ureg.k_B)
@@ -64,7 +64,7 @@ for i, temp in tqdm(enumerate(temperature_range)):
         ionization_H = ionization_H.at[i, j].set(Z_H)
 
 
-# Inteprolate result for a bit smoother colorplot
+# Interpolate result for a smoother colorplot
 interp_temp = jnp.logspace(0, 3, 1000)
 interp_rho = jnp.logspace(-2, 3, 1000)
 interp_C = RectBivariateSpline(
