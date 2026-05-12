@@ -47,6 +47,13 @@ def additional_model_parameters(
         return (
             jnp.ones((no_of_ions, no_of_ions)) * 1.23 * ureg.dimensionless,
         )
+    if model == jaxrts.models.IPDSum:
+        return (
+            [
+                jaxrts.models.StewartPyattIPD(),
+                jaxrts.models.ConstantIPD(ureg("3eV")),
+            ],
+        )
 
     if model == jaxrts.models.PeakCollection:
         return (

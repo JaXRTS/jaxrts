@@ -3412,12 +3412,65 @@ class BohmStaver(Model):
 # ======================================
 
 
-class ConstantIPD(Model):
+class IPDModel(Model):
+    """
+    A subset of :py:class:`Model`'s, to model the effect of ionization
+    potential depression. These models have to implement a
+    :py:meth:`~.all_element_states` method, returning the appropriate IPD for
+    all ionization states of the constituents.
+    """
+
+    allowed_keys = ["ipd"]
+
+    @abc.abstractmethod
+    def all_element_states(
+        self, plasma_state: "PlasmaState", ion_population=None
+    ) -> list[jnp.ndarray]:
+        """
+        Return the IPD for each possible ionization state for the constituents
+        of the plasma, assuming the average plasma conditions are given by the
+        passed ``plasma_state``. Can optionally be handed the argument
+        ``ion_population`` to not only operate on average quantities, but over
+        the whole distribution of elements.
+
+        Parameters
+        ----------
+        plasma_state: PlasmaState
+            The plasma state containing the average plasma properties
+        ion_population, optional
+
+        Returns
+        -------
+        list[jnp.ndarray]
+            A list with an entry for each element in
+            :py:attr:`jaxrts.plasmastate.PlasmaState.ions`. The entry contains
+            the IPD for each possible ionization process of the ion, starting
+            by 0 to :py:attr:`jaxrts.elements.Element.Z` - 1.
+        """
+        ...
+
+    def __add__(self, other) -> "IPDSum":
+        if not isinstance(other, IPDModel):
+            raise NotImplementedError(
+                "You can only add other IPDModel to an IPDModel."
+                + f"Other is type {type(other)}."
+            )
+        if isinstance(self, IPDSum):
+            list_of_ipds = self.list_of_ipds
+        else:
+            list_of_ipds = [self]
+        if isinstance(other, IPDSum):
+            list_of_ipds = [*list_of_ipds, *other.list_of_ipds]
+        else:
+            list_of_ipds.append(other)
+        return IPDSum(list_of_ipds)
+
+
+class ConstantIPD(IPDModel):
     """
     A model that returns a constant value for the IPD, set by the user.
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "ConstantIPD"
 
     def __init__(self, value):
@@ -3462,7 +3515,7 @@ class ConstantIPD(Model):
         return out
 
 
-class DebyeHueckelIPD(Model):
+class DebyeHueckelIPD(IPDModel):
     """
     Debye-Hückel IPD Model :cite:`Debye.1923`.
     The Debye-Hückel Model is applicable for low-density and high-temperature
@@ -3478,7 +3531,6 @@ class DebyeHueckelIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "DebyeHueckel"
     cite_keys = ["Debye.1923", "Crowley.2014"]
 
@@ -3535,7 +3587,7 @@ class DebyeHueckelIPD(Model):
         return obj
 
 
-class StewartPyattPrestonIPD(Model):
+class StewartPyattPrestonIPD(IPDModel):
     """
     Stewart Pyatt IPD Model :cite:`Stewart.1966`.
     The Stewart–Pyatt model interpolates between the
@@ -3561,7 +3613,6 @@ class StewartPyattPrestonIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "StewartPyatt"
     cite_keys = ["Stewart.1966", "Preston.2013", "Crowley.2014"]
 
@@ -3624,7 +3675,7 @@ class StewartPyattPrestonIPD(Model):
         return out
 
 
-class StewartPyattIPD(Model):
+class StewartPyattIPD(IPDModel):
     """
     Stewart Pyatt IPD Model :cite:`Stewart.1966`.
     The Stewart–Pyatt model interpolates between the Debye–Hückel
@@ -3641,7 +3692,6 @@ class StewartPyattIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "StewartPyatt"
     cite_keys = ["Stewart.1966", "Ropke.2019", "Calisti.2015"]
 
@@ -3698,7 +3748,7 @@ class StewartPyattIPD(Model):
         return obj
 
 
-class IonSphereIPD(Model):
+class IonSphereIPD(IPDModel):
     """
     Ion Sphere IPD Model :cite:`Rozsnyai.1972`.
 
@@ -3722,7 +3772,6 @@ class IonSphereIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "IonSphere"
     cite_keys = ["Rozsnyai.1972", "Zimmermann.1980", "Crowley.2014"]
 
@@ -3779,7 +3828,7 @@ class IonSphereIPD(Model):
         return obj
 
 
-class EckerKroellIPD(Model):
+class EckerKroellIPD(IPDModel):
     """
     Ecker-Kröll IPD Model::cite:`EckerKroell.1963`.
 
@@ -3807,7 +3856,6 @@ class EckerKroellIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "EckerKroell"
     cite_keys = [
         "EckerKroell.1963",
@@ -3879,7 +3927,7 @@ class EckerKroellIPD(Model):
         return obj
 
 
-class PauliBlockingIPD(Model):
+class PauliBlockingIPD(IPDModel):
     """
     Pauli Blocking IPD Model :cite:`Ropke.2019`.
 
@@ -3895,7 +3943,6 @@ class PauliBlockingIPD(Model):
         Function used to calculate the IPD
     """
 
-    allowed_keys = ["ipd"]
     __name__ = "PauliBlocking"
     cite_keys = ["Ropke.2019"]
 
@@ -3931,6 +3978,65 @@ class PauliBlockingIPD(Model):
                 * ureg.electron_volt
             )
         return out
+
+
+class IPDSum(IPDModel):
+    """
+    A sum of several ipd :py:class:`~.Model` s. Can be used e.g., to combine
+    :py:class:`~.PauliBlockingIPD` with another IPD model.
+    """
+
+    __name__ = "IPDSum"
+
+    def __init__(self, list_of_ipds: list[Model]) -> None:
+        """
+        Parameters
+        ----------
+
+        list_of_ipds: list[Model]
+           A list of the IPD :py:class:`~.Model` to be added up.
+        """
+        self.list_of_ipds = list_of_ipds
+        super().__init__()
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        out = 0 * ureg.electron_volt
+        for ipd_model in self.list_of_ipds:
+            out += ipd_model.evaluate(plasma_state, setup)
+        return out
+
+    @jax.jit
+    def all_element_states(
+        self,
+        plasma_state: "PlasmaState",
+        ion_population=None,
+    ) -> list[jnp.ndarray]:
+        individual_ipd_output = []
+        for ipd_model in self.list_of_ipds:
+            individual_ipd_output.append(
+                ipd_model.all_element_states(plasma_state, ion_population)
+            )
+        out = individual_ipd_output[0]
+        for j in range(len(out)):
+            for i in range(len(individual_ipd_output) - 1):
+                out[j] += individual_ipd_output[i + 1][j]
+        return out
+
+    def _tree_flatten(self):
+        children = (self.list_of_ipds,)
+        aux_data = (self.model_key,)  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.model_key,) = aux_data
+        (obj.list_of_ipds,) = children
+
+        return obj
 
 
 # Screening Length Models
@@ -5093,6 +5199,7 @@ _all_models = [
     GregoriCHSScreening,
     Gregori2006IonFeat,
     IchimaruChemPotential,
+    IPDSum,
     IonSphereIPD,
     LinearResponseScreening,
     LinearResponseScreeningGericke2010,
