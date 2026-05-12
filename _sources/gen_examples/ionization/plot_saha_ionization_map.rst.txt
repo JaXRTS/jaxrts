@@ -23,7 +23,7 @@ Saha Ionization Map
 
 This example plots the ionization state of a CH plasma as a two-dimensional
 quantity over temperature and density. Different selections for the IPD model
-(here, :py:class:`jaxrts.model.StewartPyattIPD`) can be used for the
+(here, :py:class:`jaxrts.models.StewartPyattIPD`) can be used for the
 calculation, moving the ionization considerably.
 
 .. GENERATED FROM PYTHON SOURCE LINES 10-128
@@ -163,7 +163,7 @@ calculation, moving the ionization considerably.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 25.743 seconds)
+   **Total running time of the script:** (0 minutes 25.633 seconds)
 
 
 .. _sphx_glr_download_gen_examples_ionization_plot_saha_ionization_map.py:
