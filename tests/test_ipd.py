@@ -151,17 +151,20 @@ def test_ipd_valid_for_Z_f_equals_0():
         else:
             args = ()
         Zf_0_state["ipd"] = model(*args)
-        assert jnpu.isfinite(
-            Zf_0_state.evaluate("ipd", None)
-        ), f"{model.__name__} did not yield a finite result for Z=0"
+        assert jnpu.isfinite(Zf_0_state.evaluate("ipd", None)), (
+            f"{model.__name__} did not yield a finite result for Z=0"
+        )
 
 
 def test_ipd_sum_model():
-    energy = ureg("4eV")
+    energy = jnp.array([4, 4]) * ureg.electron_volt
     model1 = jaxrts.models.ConstantIPD(energy)
 
     model = jaxrts.models.IPDSum([model1, model1, model1])
-    assert model.evaluate(None, None) == 3 * energy
+    assert jnp.all(
+        model.evaluate(None, None).m_as(ureg.electron_volt)
+        == 3 * energy.m_as(ureg.electron_volt)
+    )
 
     carbon_H_state = jaxrts.PlasmaState(
         ions=[jaxrts.Element("C"), jaxrts.Element("H")],
@@ -172,9 +175,21 @@ def test_ipd_sum_model():
     assert len(model.all_element_states(carbon_H_state)) == 2
     assert jnp.all(
         model.all_element_states(carbon_H_state)[0].m_as(ureg.electron_volt)
-        == jnp.ones(6) * 3 * energy.m_as(ureg.electron_volt)
+        == jnp.ones(6) * 3 * energy[0].m_as(ureg.electron_volt)
     )
     assert jnp.all(
         model.all_element_states(carbon_H_state)[1].m_as(ureg.electron_volt)
-        == jnp.ones(1) * 3 * energy.m_as(ureg.electron_volt)
+        == jnp.ones(1) * 3 * energy[1].m_as(ureg.electron_volt)
+    )
+
+
+def test_ipd_sum_operator():
+    energy = jnp.array([4]) * ureg.electron_volt
+    model1 = jaxrts.models.ConstantIPD(energy)
+    model2 = model1 + model1
+    model3 = model2 + model1
+    assert isinstance(model3, jaxrts.models.IPDSum)
+    assert jnp.all(
+        model3.evaluate(None, None).m_as(ureg.electron_volt)
+        == 3 * energy.m_as(ureg.electron_volt)
     )

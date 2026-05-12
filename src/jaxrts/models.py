@@ -3411,13 +3411,14 @@ class BohmStaver(Model):
 # Ionization Potential Depression Models
 # ======================================
 
+
 class IPDModel(Model):
     """
     A subset of :py:class:`Model`'s, to model the effect of ionization
     potential depression.
     """
 
-    allowed_keys = ["idp"]
+    allowed_keys = ["ipd"]
 
     @abc.abstractmethod
     def all_element_states(
@@ -3442,9 +3443,26 @@ class IPDModel(Model):
             A list with an entry for each element in
             :py:attr:`jaxrts.plasmastate.PlasmaState.ions`. The entry contains
             the IPD for each possible ionization process of the ion, starting
-            by 0 to :py:attr:`jaxrts.elements.Element.Z` - 1. 
+            by 0 to :py:attr:`jaxrts.elements.Element.Z` - 1.
         """
         ...
+
+    def __add__(self, other) -> "IPDSum":
+        if not isinstance(other, IPDModel):
+            raise NotImplementedError(
+                "You can only add other IPDModel to an IPDModel."
+                + f"Other is type {type(other)}."
+            )
+        if isinstance(self, IPDSum):
+            list_of_ipds = self.list_of_ipds
+        else:
+            list_of_ipds = [self]
+        if isinstance(other, IPDSum):
+            list_of_ipds = [*list_of_ipds, *other.list_of_ipds]
+        else:
+            list_of_ipds.append(other)
+        return IPDSum(list_of_ipds)
+
 
 class ConstantIPD(IPDModel):
     """
