@@ -4,7 +4,7 @@ Saha Ionization Map
 
 This example plots the ionization state of a CH plasma as a two-dimensional
 quantity over temperature and density. Different selections for the IPD model
-(here, :py:class:`jaxrts.model.StewartPyattIPD`) can be used for the
+(here, :py:class:`jaxrts.models.StewartPyattIPD`) can be used for the
 calculation, moving the ionization considerably.
 """
 
