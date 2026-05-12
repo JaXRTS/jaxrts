@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import jax.numpy as jnp
 import jaxrts
-from tqdm import tqdm
 from scipy.interpolate import RectBivariateSpline
 
 ureg = jaxrts.ureg
@@ -60,7 +59,7 @@ ionization_C = jnp.zeros((temperature_range.size, mass_density_range.size))
 ionization_H = jnp.zeros_like(ionization_C)
 
 # Iterate trough all (T,rho) combinations
-for i, temp in tqdm(enumerate(temperature_range)):
+for i, temp in enumerate(temperature_range):
     for j, rho in enumerate(mass_density_range):
         plasmastate.T_e = temp * (ureg.electron_volt / ureg.k_B)
         plasmastate.mass_density = rho * mass_fraction * ureg.gram / ureg.cm**3
