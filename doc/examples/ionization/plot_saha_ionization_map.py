@@ -95,6 +95,7 @@ pcm_C = ax.pcolormesh(
     cmap=cmap,
     norm=norm_C,
     shading="auto",
+    rasterized=True,
 )
 pcm_H = ax1.pcolormesh(
     interp_rho,
@@ -103,6 +104,7 @@ pcm_H = ax1.pcolormesh(
     cmap=cmap,
     norm=norm_H,
     shading="auto",
+    rasterized=True,
 )
 
 
