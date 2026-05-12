@@ -72,7 +72,7 @@ ax_inset1.set_xlim(8300, 8550)
 ax_inset1.set_ylim(ymin=0.3e-18, ymax=3e-18)
 ax[1].set_xlabel("Probed Energy [eV]")
 ax[0].set_ylabel(
-    "$S_{ee}^{tot}$ or\n class. diff. crosssection or\n quantum diff. crosssection [s]"
+    "$S_{ee}^{tot}$ or\n class. diff. crosssection or\n quantum diff. crosssection [s]"  # noqa: E501
 )
 ax[1].set_ylabel("FRC")
 ax[1].legend()

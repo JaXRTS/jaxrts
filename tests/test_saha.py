@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import numpy as onp
 
 import jaxrts
-from jaxrts.saha import solve_saha
+from jaxrts.ionization import solve_saha
 from jaxrts.units import ureg
 
 

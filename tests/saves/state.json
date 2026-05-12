@@ -103,13 +103,25 @@
         "ee-lfc": {
           "_type": "Model",
           "value": [
-            "ElectronicLFCConstant",
+            "LFCConstant",
             [
               [
                 0.0
               ],
               [
                 "ee-lfc"
+              ]
+            ]
+          ]
+        },
+        "free-bound scattering": {
+          "_type": "Model",
+          "value": [
+            "Neglect",
+            [
+              [],
+              [
+                "free-bound scattering"
               ]
             ]
           ]
@@ -146,18 +158,6 @@
               [],
               [
                 "bound-free scattering"
-              ]
-            ]
-          ]
-        },
-        "free-bound scattering": {
-          "_type": "Model",
-          "value": [
-            "Neglect",
-            [
-              [],
-              [
-                "free-bound scattering"
               ]
             ]
           ]

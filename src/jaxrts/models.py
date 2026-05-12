@@ -29,7 +29,11 @@ from . import (
 )
 from .analysis import ITCF_fsum
 from .elements import MixElement, electron_distribution_ionized_state
-from .plasma_physics import noninteracting_susceptibility_from_eps_RPA
+from .plasma_physics import (
+    noninteracting_susceptibility_from_eps_RPA,
+    fermi_energy,
+    wiegner_seitz_radius,
+)
 from .setup import (
     Setup,
     convolve_stucture_factor_with_instrument,
@@ -450,6 +454,16 @@ class ArkhipovIonFeat(IonFeatModel):
     :py:class:`~PaulingFormFactors`) and a 'screening' model (defaults to
     :py:class:`Gregori2004Screening`).
 
+    Extension to multicomponent plasmas is taken from :cite:`Gregori.2006b`:
+
+    .. math  ::
+
+       S_{a b}(k)=\\delta_{a b}+\\frac{\\sqrt{n_{a}n_{b}}}{n}
+       \\frac{Z_{a}Z_{b}}{\\bar{Z}^{2}}\\left[S_{i i}^\\text{Avg}(k)-1\\right]
+
+    It is only valid in RPA, see, e.g., :cite:`Wunsch.2011b`.
+
+
     See Also
     --------
 
@@ -461,32 +475,37 @@ class ArkhipovIonFeat(IonFeatModel):
     """
 
     __name__ = "ArkhipovIonFeat"
-    cite_keys = ["Arkhipov.1998", "Arkhipov.2000"]
+    cite_keys = ["Arkhipov.1998", "Arkhipov.2000", "Gregori.2006b"]
 
     def check(self, plasma_state: "PlasmaState") -> None:
-        if plasma_state.T_e != plasma_state.T_i:
-            logger.warning(
-                "'ArkhipovIonFeat' can only handle plasmas with T_e == T_i."
-                + " The calculation will only consider the electron temperature."  # noqa: E501
-                + " Choose another model if ion and electron temperature models should be treated individually."  # noqa: E501
-            )
-        if len(plasma_state) > 1:
-            logger.critical(
-                "'ArkhipovIonFeat' is only implemented for a one-component plasma"  # noqa: E501
-            )
+        for T_i in plasma_state.T_i:
+            if plasma_state.T_e != T_i:
+                logger.warning(
+                    "'ArkhipovIonFeat' can only handle plasmas with T_e == T_i."  # noqa: E501
+                    + " The calculation will only consider the electron temperature."  # noqa: E501
+                    + " Choose another model if ion and electron temperature models should be treated individually."  # noqa: E501
+                )
 
     @jax.jit
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+        Z_ab = jnpu.outer(plasma_state.Z_free, plasma_state.Z_free)
+        n_ab = jnpu.outer(plasma_state.n_i, plasma_state.n_i)
+        n = jnpu.sum(plasma_state.n_i)
+        Z_f = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.Z_free)
+        M = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.atomic_masses)
         S_ii = static_structure_factors.S_ii_AD(
             setup.k,
             plasma_state.T_e,
             plasma_state.T_e,
             plasma_state.n_e,
-            plasma_state.atomic_masses,
-            plasma_state.Z_free,
+            M,
+            Z_f,
         )
-        # Add a dimension, so that the shape is (1x1)
-        return S_ii[:, jnp.newaxis]
+        return (
+            jnp.eye(len(plasma_state))
+            + (jnpu.sqrt(n_ab) / n * Z_ab / Z_f**2 * (S_ii - 1))
+            * ureg.dimensionless
+        )
 
 
 class Gregori2003IonFeat(IonFeatModel):
@@ -497,25 +516,38 @@ class Gregori2003IonFeat(IonFeatModel):
     This model is identical to :py:class:`~ArkhipovIonFeat` but uses an
     effective temperature ~:py:func:`jaxrts.static_structure_factors.T_cf_Greg`
     rather than the electron temperature throughout the calculation.
+
+    Extension to multicomponent plasmas is taken from :cite:`Gregori.2006b`:
+
+    .. math  ::
+
+       S_{a b}(k)=\\delta_{a b}+\\frac{\\sqrt{n_{a}n_{b}}}{n}
+       \\frac{Z_{a}Z_{b}}{\\bar{Z}^{2}}\\left[S_{i i}^\\text{Avg}(k)-1\\right]
+
+    It is only valid in RPA, see, e.g., :cite:`Wunsch.2011b`.
     """
 
     __name__ = "Gregori2003IonFeat"
-    cite_keys = ["Gregori.2003"]
+    cite_keys = ["Gregori.2003", "Gregori.2006b"]
 
     def check(self, plasma_state: "PlasmaState") -> None:
-        if plasma_state.T_e != plasma_state.T_i:
-            logger.warning(
-                "'Gregori2003IonFeat' can only handle plasmas with T_e == T_i."
-                + " The calculation will only consider the electron temperature."  # noqa: E501
-                + " Choose another model if ion and electron temperature models should be treated individually."  # noqa: E501
-            )
-        if len(plasma_state) > 1:
-            logger.critical(
-                "'Gregori2003IonFeat' is only implemented for a one-component plasma"  # noqa: E501
-            )
+        for T_i in plasma_state.T_i:
+            if plasma_state.T_e != T_i:
+                logger.warning(
+                    "'Gregori2003IonFeat' can only handle plasmas with T_e == T_i."  # noqa: E501
+                    + " The calculation will only consider the electron temperature."  # noqa: E501
+                    + " Choose another model if ion and electron temperature models should be treated individually."  # noqa: E501
+                )
 
     @jax.jit
-    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> Quantity:
+        # See eqn. 4, Gergori.2006b
+        Z_ab = jnpu.outer(plasma_state.Z_free, plasma_state.Z_free)
+        n_ab = jnpu.outer(plasma_state.n_i, plasma_state.n_i)
+        n = jnpu.sum(plasma_state.n_i)
+        Z_f = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.Z_free)
+        M = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.atomic_masses)
+
         T_eff = static_structure_factors.T_cf_Greg(
             plasma_state.T_e, plasma_state.n_e
         )
@@ -524,11 +556,14 @@ class Gregori2003IonFeat(IonFeatModel):
             T_eff,
             T_eff,
             plasma_state.n_e,
-            plasma_state.atomic_masses,
-            plasma_state.Z_free,
+            M,
+            Z_f,
         )
-        # Add a dimension, so that the shape is (1x1)
-        return S_ii[:, jnp.newaxis]
+        return (
+            jnp.eye(len(plasma_state))
+            + (jnpu.sqrt(n_ab) / n * Z_ab / Z_f**2 * (S_ii - 1))
+            * ureg.dimensionless
+        )
 
 
 class Gregori2006IonFeat(IonFeatModel):
@@ -550,39 +585,119 @@ class Gregori2006IonFeat(IonFeatModel):
        model.
 
     Requires a 'Debye temperature' model (defaults to :py:class:`~BohmStaver`).
+
+    Extension to multicomponent plasmas is taken from :cite:`Gregori.2006b`:
+
+    .. math  ::
+
+       S_{a b}(k)=\\delta_{a b}+\\frac{\\sqrt{n_{a}n_{b}}}{n}
+       \\frac{Z_{a}Z_{b}}{\\bar{Z}^{2}}\\left[S_{i i}^\\text{Avg}(k)-1\\right]
+
+    It is only valid in RPA, see, e.g., :cite:`Wunsch.2011b`.
     """
 
     __name__ = "Gregori2006IonFeat"
-    cite_keys = ["Gregori.2006"]
+    cite_keys = ["Gregori.2006", "Gregori.2006b"]
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         super().prepare(plasma_state, key)
         plasma_state.update_default_model("Debye temperature", BohmStaver())
 
-    def check(self, plasma_state: "PlasmaState") -> None:
-        if len(plasma_state) > 1:
-            logger.critical(
-                "'Gregori2006IonFeat' is only implemented for a one-component plasma"  # noqa: E501
-            )
-
     @jax.jit
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+        Z_ab = jnpu.outer(plasma_state.Z_free, plasma_state.Z_free)
+        n_ab = jnpu.outer(plasma_state.n_i, plasma_state.n_i)
+        n = jnpu.sum(plasma_state.n_i)
+        Z_f = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.Z_free)
+        M = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.atomic_masses)
+
         T_D = plasma_state["Debye temperature"].evaluate(plasma_state, setup)
 
         T_e_eff = static_structure_factors.T_cf_Greg(
             plasma_state.T_e, plasma_state.n_e
         )
         T_i_eff = static_structure_factors.T_i_eff_Greg(plasma_state.T_i, T_D)
+        T_i_eff = 1 / n * jnpu.sum(plasma_state.n_i * T_i_eff)
+
         S_ii = ion_feature.S_ii_AD(
             setup.k,
             T_e_eff,
             T_i_eff,
             plasma_state.n_e,
-            plasma_state.atomic_masses,
-            plasma_state.Z_free,
+            M,
+            Z_f,
         )
-        # Add a dimension, so that the shape is (1x1)
-        return S_ii[:, jnp.newaxis]
+        return (
+            jnp.eye(len(plasma_state))
+            + (jnpu.sqrt(n_ab) / n * Z_ab / Z_f**2 * (S_ii - 1))
+            * ureg.dimensionless
+        )
+
+
+class CHSIonFeat(IonFeatModel):
+    """
+    Model for the ion feature of the scattering, presented in
+    :cite:`Gregori.2007`. Treating the ions as charged hard spheres (CHS).
+
+    .. note::
+
+       :cite:`Gregori.2006` uses effective temperatures for the ion and
+       electron temperatures to obtain sane limits to :math:`T\\rightarrow 0`.
+       This is done by calling
+       :py:func:`jaxrts.static_structure_factors.T_cf_Greg` for the electron
+       temperature and :py:func:`jaxrts.static_structure_factors.T_i_eff_Greg`,
+       for the ionic temperatures. The latter requires a 'Debye temperature'
+       model.
+
+    Requires a 'Debye temperature' model (defaults to :py:class:`~BohmStaver`).
+
+    Extension to multicomponent plasmas is taken from :cite:`Gregori.2006b`:
+
+    .. math  ::
+
+       S_{a b}(k)=\\delta_{a b}+\\frac{\\sqrt{n_{a}n_{b}}}{n}
+       \\frac{Z_{a}Z_{b}}{\\bar{Z}^{2}}\\left[S_{i i}^\\text{Avg}(k)-1\\right]
+
+    It is only valid in RPA, see, e.g., :cite:`Wunsch.2011b`.
+    """
+
+    __name__ = "CHSIonFeat"
+    cite_keys = [
+        (["Gregori.2007", "Singh.1983"], "Formulation of model"),
+        ("Gregori.2006", "Effective temperatures"),
+        ("Gregori.2006b", "Extension to multicomponent system"),
+    ]
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        super().prepare(plasma_state, key)
+        plasma_state.update_default_model("Debye temperature", BohmStaver())
+
+    @jax.jit
+    def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+        Z_ab = jnpu.outer(plasma_state.Z_free, plasma_state.Z_free)
+        n_ab = jnpu.outer(plasma_state.n_i, plasma_state.n_i)
+        n = jnpu.sum(plasma_state.n_i)
+        Z_f = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.Z_free)
+        M = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.atomic_masses)
+        N = 1 / n * jnpu.sum(plasma_state.n_i**2)
+
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        T_D = plasma_state["Debye temperature"].evaluate(plasma_state, setup)
+
+        T_e_eff = static_structure_factors.T_cf_Greg(
+            plasma_state.T_e, plasma_state.n_e
+        )
+        T_i_eff = static_structure_factors.T_i_eff_Greg(plasma_state.T_i, T_D)
+        T_i_eff = 1 / n * jnpu.sum(plasma_state.n_i * T_i_eff)
+
+        S_ii = static_structure_factors.S_ii_CHS(
+            setup.k, T_e_eff, T_i_eff, plasma_state.n_e, M, Z_f, N, lfc
+        )
+        return (
+            jnp.eye(len(plasma_state))
+            + (jnpu.sqrt(n_ab) / n * Z_ab / Z_f**2 * (S_ii - 1))
+            * ureg.dimensionless
+        )
 
 
 class FixedSii(IonFeatModel):
@@ -772,7 +887,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         - an 'ion-ion Potential' The black entries in the picture below
           (defaults to :py:class:`~CoulombPotential`).
         - an 'electron-ion Potential' The orange entries in the picture below
-          (defaults to :py:class:`~KlimontovichKraeftPotential`).
+          (defaults to :py:class:`~CoulombPotential`).
         - an 'electron-electron Potential' The red entries in the picture below
           (defaults to :py:class:`~KelbgPotental`).
 
@@ -845,7 +960,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         )
         plasma_state.update_default_model(
             "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential(),
+            hnc_potentials.CoulombPotential(),
         )
         plasma_state.update_default_model(
             "electron-electron Potential",
@@ -1518,7 +1633,6 @@ class BornMermin_Full(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
@@ -1566,7 +1680,6 @@ class BornMermin_Full(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
@@ -1783,7 +1896,6 @@ class BornMermin(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
@@ -1834,7 +1946,6 @@ class BornMermin(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
@@ -2070,7 +2181,6 @@ class BornMermin_Fit(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
@@ -2121,7 +2231,6 @@ class BornMermin_Fit(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
@@ -2358,7 +2467,6 @@ class BornMermin_Fortmann(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
@@ -2409,7 +2517,6 @@ class BornMermin_Fortmann(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         @jax.tree_util.Partial
         def S_ii(k):
             probe_setup = get_probe_setup(k, setup)
@@ -2590,9 +2697,10 @@ class SchumacherImpulse(ScatteringModel):
                     return r_k
 
                 r_k = jax.lax.cond(self.r_k < 0, rk_on, rk_off, self.r_k)
-                B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (
-                    2 * ureg.electron_mass
-                )
+                # B as in [Gregori.2004], eqn. 22 is applied as
+                # frc_exponent in the Setup class.
+                # Hence set it to unity, here
+                B = 1 * ureg.dimensionless
                 factor = r_k / (Z_core * B**3).m_as(ureg.dimensionless)
                 sbe = factor * bound_free.J_impulse_approx(
                     omega, k, population, Zeff, E_b
@@ -2764,9 +2872,10 @@ class SchumacherImpulseColdEdges(ScatteringModel):
                 return r_k
 
             r_k = jax.lax.cond(self.r_k < 0, rk_on, rk_off, self.r_k)
-            B = 1 + 1 / omega_0 * (ureg.hbar * k**2) / (2 * ureg.electron_mass)
-            # B should be close to unity
-            # B = 1 * ureg.dimensionless
+            # B as in [Gregori.2004], eqn. 22 is applied as
+            # frc_exponent in the Setup class.
+            # Hence set it to unity, here
+            B = 1 * ureg.dimensionless
             factor = r_k / (Z_c * B**3).m_as(ureg.dimensionless)
             sbe = factor * bound_free.J_impulse_approx(
                 omega, k, population, Zeff, E_b
@@ -2841,7 +2950,6 @@ class SchumacherImpulseFitRk(ScatteringModel):
         plasma_state: "PlasmaState",
         setup: Setup,
     ) -> jnp.ndarray:
-
         # Calculate r_k through f-sum rule
 
         fsum_theory = -1 * ureg.hbar**2 * setup.k**2 / (2 * ureg.electron_mass)
@@ -3112,8 +3220,9 @@ class FormFactorLowering(Model):
 
 class IchimaruChemPotential(Model):
     """
-    A fitting formula for the chemical potential of a plasma between the
-    classical and the quantum regime, given by :cite:`Gregori.2003`.
+    A fitting formula for the chemical potential of an ideal electron gas
+    between the classical and the quantum regime, given by
+    :cite:`Gregori.2003`.
 
     See Also
     --------
@@ -3136,8 +3245,9 @@ class IchimaruChemPotential(Model):
 
 class SommerfeldChemPotential(Model):
     """
-    Interpolation function for the chemical potential of a non-interacting
-    (ideal) fermi gas given in the paper of Cowan :cite:`Cowan.2019`.
+    Interpolation function between the low and high temperature limit
+    for the chemical potential of a non-interacting (ideal) fermi gas given
+    in the paper of Cowan :cite:`Cowan.2019`.
 
     See Also
     --------
@@ -3156,6 +3266,49 @@ class SommerfeldChemPotential(Model):
         return plasma_physics.chem_pot_sommerfeld_fermi_interpolation(
             plasma_state.T_e, plasma_state.n_e
         )
+
+
+class NonDegenerateElectronChemPotential(Model):
+    """
+    Chemical Potential of a non-degenerate electron gas.
+    """
+
+    __name__ = "NonDegenerateElectronChemPotential"
+    allowed_keys = ["chemical potential"]
+    cite_keys = []
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        return (
+            1
+            * ureg.boltzmann_constant
+            * plasma_state.T_e
+            * jnpu.log(
+                plasma_physics.degeneracy_param(
+                    plasma_state.n_e, plasma_state.T_e
+                )
+                / 2
+            )
+        )
+
+
+class DegenerateElectronChemPotential(Model):
+    """
+    Chemical Potential of a fully degenerate electron gas, given by the Fermi
+    energy.
+    """
+
+    __name__ = "DegenerateElectronChemPotential"
+    allowed_keys = ["chemical potential"]
+    cite_keys = []
+
+    @jax.jit
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup
+    ) -> jnp.ndarray:
+        return plasma_physics.fermi_energy(plasma_state.n_e)
 
 
 class ConstantChemPotential(Model):
@@ -3329,11 +3482,11 @@ class ConstantIPD(IPDModel):
         self, plasma_state: "PlasmaState", ion_population=None
     ) -> list[jnp.ndarray]:
         out = []
-        for _, element in enumerate(plasma_state.ions):
+        for idx, element in enumerate(plasma_state.ions):
             out.append(
                 jnp.array(
                     [
-                        self.value.m_as(ureg.electron_volt)
+                        self.value[idx].m_as(ureg.electron_volt)
                         for Z in jnp.arange(element.Z)
                     ]
                 )
@@ -4008,7 +4161,7 @@ class LinearResponseScreeningGericke2010(Model):
     used, and V_{ee} the Coulomb potential.
 
     Requires an 'electron-ion' potential. (defaults to
-    :py:class:`~KlimontovichKraeftPotential`).
+    :py:class:`~CoulombPotential`).
 
 
     .. note::
@@ -4031,11 +4184,11 @@ class LinearResponseScreeningGericke2010(Model):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential(),
+            hnc_potentials.CoulombPotential(),
         )
-        plasma_state["electron-ion Potential"].include_electrons = (
-            "SpinAveraged"
-        )
+        plasma_state[
+            "electron-ion Potential"
+        ].include_electrons = "SpinAveraged"
 
     @jax.jit
     def evaluate(
@@ -4045,7 +4198,6 @@ class LinearResponseScreeningGericke2010(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         # Use the Debye screening length for the screening cloud.
         kappa = 1 / plasma_state.screening_length
         lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
@@ -4057,10 +4209,79 @@ class LinearResponseScreeningGericke2010(Model):
         # Screening vanishes if there are no free electrons
         q = jax.lax.cond(
             jnp.sum(plasma_state.Z_free) == 0,
-            lambda: jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis]
-            * ureg.dimensionless,
+            lambda: (
+                jnp.zeros(len(plasma_state.n_i))[:, jnp.newaxis]
+                * ureg.dimensionless
+            ),
             lambda: q,
         )
+        return q
+
+
+class GregoriCHSScreening(Model):
+    """
+    Screening model to calculate the screening charge q
+    based on expression for the static structure factors given
+    in :cite:`Gregori.2007`. treating the ions as charged hard spheres (CHS).
+    The screening charge is calculated using
+
+    .. math::
+
+    \\sqrt{Z_f}\\,\\frac{S_{ei}(k)}{S_{ii}(k)}
+
+    See Also
+    --------
+    jaxrts.ion_feature.q_Glenzer2009
+        The function used to calculate ``q``.
+    """
+
+    allowed_keys = ["screening"]
+    __name__ = "GregoriCHSScreening"
+    cite_keys = ["Gregori.2006b", "Gregori.2007"]
+
+    def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
+        super().prepare(plasma_state, key)
+        plasma_state.update_default_model("Debye temperature", BohmStaver())
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+
+        n = jnpu.sum(plasma_state.n_i)
+        Z_f = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.Z_free)
+        M = 1 / n * jnpu.sum(plasma_state.n_i * plasma_state.atomic_masses)
+        N = 1 / n * jnpu.sum(plasma_state.n_i**2)
+
+        lfc = plasma_state["ee-lfc"].evaluate(plasma_state, setup)
+        T_D = plasma_state["Debye temperature"].evaluate(plasma_state, setup)
+
+        T_e_eff = static_structure_factors.T_cf_Greg(
+            plasma_state.T_e, plasma_state.n_e
+        )
+        T_i_eff = static_structure_factors.T_i_eff_Greg(plasma_state.T_i, T_D)
+        T_i_eff = 1 / n * jnpu.sum(plasma_state.n_i * T_i_eff)
+
+        S_ii = static_structure_factors.S_ii_CHS(
+            setup.k, T_e_eff, T_i_eff, plasma_state.n_e, M, Z_f, N, lfc
+        )
+        S_ei = static_structure_factors.S_ei_CHS(
+            setup.k, T_e_eff, T_i_eff, plasma_state.n_e, M, Z_f, N, lfc
+        )
+
+        q = ion_feature.q_Glenzer2009(
+            S_ei,
+            S_ii,
+            plasma_state.Z_free,
+        )[:, jnp.newaxis]
+        q = jnp.real(q.m_as(ureg.dimensionless))
+
+        # Screening vanishes if there are no free electrons
+        q = jnpu.where(plasma_state.Z_free == 0, 0, q[:, 0])[:, jnp.newaxis]
         return q
 
 
@@ -4106,11 +4327,11 @@ class FiniteWavelengthScreening(Model):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential(),
+            hnc_potentials.CoulombPotential(),
         )
-        plasma_state["electron-ion Potential"].include_electrons = (
-            "SpinAveraged"
-        )
+        plasma_state[
+            "electron-ion Potential"
+        ].include_electrons = "SpinAveraged"
 
     @jax.jit
     def evaluate(
@@ -4120,7 +4341,6 @@ class FiniteWavelengthScreening(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         Vei = plasma_state["electron-ion Potential"].full_k(
             plasma_state, to_array(setup.k)[jnp.newaxis]
         )[-1, :-1]
@@ -4171,7 +4391,6 @@ class DebyeHueckelScreening(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         kappa = 1 / plasma_state.screening_length
         q = ion_feature.q_DebyeHueckelChapman2015(
             setup.k[jnp.newaxis],
@@ -4201,7 +4420,7 @@ class LinearResponseScreening(Model):
     :py:class:`~.RPA_DandreaFit`.
 
     Requires an 'electron-ion' potential. (defaults to
-    :py:class:`~KlimontovichKraeftPotential`).
+    :py:class:`~CoulombPotential`).
     """
 
     allowed_keys = ["screening"]
@@ -4211,11 +4430,11 @@ class LinearResponseScreening(Model):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model(
             "electron-ion Potential",
-            hnc_potentials.KlimontovichKraeftPotential(),
+            hnc_potentials.CoulombPotential(),
         )
-        plasma_state["electron-ion Potential"].include_electrons = (
-            "SpinAveraged"
-        )
+        plasma_state[
+            "electron-ion Potential"
+        ].include_electrons = "SpinAveraged"
         plasma_state["free-free scattering"] = RPA_DandreaFit()
 
     @jax.jit
@@ -4226,7 +4445,6 @@ class LinearResponseScreening(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-
         xi = plasma_state["free-free scattering"].susceptibility(
             plasma_state, setup, 0 * ureg.electron_volt
         )
@@ -4286,10 +4504,12 @@ class Gregori2004Screening(Model):
 #
 
 
-class ElectronicLFCGeldartVosko(Model):
+class SLFCGeldart1966(Model):
     """
     Static local field correction model by Geldart and Vosko
-    :cite:`Geldart.1966`
+    :cite:`Geldart.1966`. This LFC should provide reasonable results in the
+    limit of high temperatures, but will not exhibit a resonance around twice
+    the Fermi wavenumber, as it is espected for low :math:`T`.
 
     See Also
     --------
@@ -4298,7 +4518,7 @@ class ElectronicLFCGeldartVosko(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "GeldartVosko Static LFC"
+    __name__ = "SLFCGeldart1966"
     cite_keys = ["Geldart.1966"]
 
     @jax.jit
@@ -4327,10 +4547,11 @@ class ElectronicLFCGeldartVosko(Model):
         )
 
 
-class ElectronicLFCUtsumiIchimaru(Model):
+class SLFCUtsumi1982(Model):
     """
     Static local field correction model by Utsumi and Ichimaru
-    :cite:`UtsumiIchimaru.1982`.
+    :cite:`UtsumiIchimaru.1982`. This LFC is only valid for zero temperature,
+    and does not include any temperature dependence.
 
     See Also
     --------
@@ -4339,8 +4560,18 @@ class ElectronicLFCUtsumiIchimaru(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "UtsumiIchimaru Static LFC"
+    __name__ = "SLFCUtsumi1982"
     cite_keys = ["UtsumiIchimaru.1982"]
+
+    def check(self, plasma_state: "PlasmaState") -> None:
+        Theta = (
+            plasma_state.T_e
+            / (fermi_energy(plasma_state.n_e) / (1 * ureg.boltzmann_constant))
+        ).m_as(ureg.dimensionless)
+        if Theta > 0.1:
+            logger.warning(
+                f"Theta is {Theta}, but the applied model {self.__name__} is only valid as a zero temperature result."  # noqa: E501
+            )
 
     @jax.jit
     def evaluate(
@@ -4368,11 +4599,64 @@ class ElectronicLFCUtsumiIchimaru(Model):
         )
 
 
-class ElectronicLFCDornheimAnalyticalInterp(Model):
+class SLFCFarid1993(Model):
     """
-    Static local field correction model by Dornheim et al.
-    :cite:`Dornheim.2021`. Their model is an analytical interpolation of
-    ab-initio PIMC simulations.
+    Static local field correction model by Farid at al. :cite:`Farid.1993`.
+    This LFC is only valid for zero temperature, and does not include any
+    temperature dependence.
+
+    See Also
+    --------
+    jaxrts.ee_localfieldcorrections.eelfc_farid
+        Function used to calculate the LFC.
+    """
+
+    allowed_keys = ["ee-lfc"]
+    __name__ = "SLFCFarid1993"
+    cite_keys = ["Farid.1993"]
+
+    def check(self, plasma_state: "PlasmaState") -> None:
+        Theta = (
+            plasma_state.T_e
+            / (fermi_energy(plasma_state.n_e) / (1 * ureg.boltzmann_constant))
+        ).m_as(ureg.dimensionless)
+        if Theta > 0.1:
+            logger.warning(
+                f"Theta is {Theta}, but the applied model {self.__name__} is only valid as a zero temperature result."  # noqa: E501
+            )
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_farid(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_farid(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
+
+class ESLFCDornheim2021(Model):
+    """
+    Effective static approximation (ESA) of the local field correction model by
+    Dornheim et al. :cite:`Dornheim.2021`. Their model is an analytical
+    interpolation of the ESA, obtained by comparison to ab-initio PIMC
+    simulations and asymptotic limits.
 
     See Also
     --------
@@ -4381,8 +4665,25 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "ElectronicLFCDornheimAnalyticalInterp"
+    __name__ = "ESLFCDornheim2021"
     cite_keys = ["Dornheim.2021"]
+
+    def check(self, plasma_state: "PlasmaState") -> None:
+        Theta = (
+            plasma_state.T_e
+            / (fermi_energy(plasma_state.n_e) / (1 * ureg.boltzmann_constant))
+        ).m_as(ureg.dimensionless)
+        rs = (wiegner_seitz_radius(plasma_state.n_e) / (1 * ureg.a0)).m_as(
+            ureg.dimensionless
+        )
+        if Theta > 4:
+            logger.warning(
+                f"Theta is {Theta}, which is bigger than 4. The fit in Dornheim.2021 is outside of the validity region."  # noqa:E501
+            )
+        if (rs > 20) or (rs < 0.7):
+            logger.warning(
+                f"rs is {rs}, which is outside of [0.7, 20]. The fit in Dornheim.2021 is outside of the validity region."  # noqa:E501
+            )
 
     @jax.jit
     def evaluate(
@@ -4411,20 +4712,21 @@ class ElectronicLFCDornheimAnalyticalInterp(Model):
         )(k, plasma_state.T_e, plasma_state.n_e)
 
 
-class ElectronicLFCStaticInterpolation(Model):
+class SLFCInterpFortmann2010(Model):
     """
-    Static local field correction model that interpolates between the
-    high-degeneracy result by Farid :cite:`Farid.1993` and the Geldart result
-    :cite:`Geldart.1966`. See, e.g., :cite:`Fortmann.2010`.
+    Static local field correction model that interpolates between the zero
+    temperature result by Farid :cite:`Farid.1993` and the Geldart result
+    :cite:`Geldart.1966` for high temperatures. See, e.g.,
+    :cite:`Fortmann.2010`.
 
     See Also
     --------
-    jaxrts.ee_localfieldcorrections.eelfc_interpolationgregori_farid
+    jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010
         Function used to calculate the LFC.
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "Static Interpolation"
+    __name__ = "SLFCInterpFortmann2010"
     cite_keys = [
         ("Fortmann.2010", "Interpolation."),
         (["Farid.1993", "Geldart.1966"], "Limits."),
@@ -4438,7 +4740,7 @@ class ElectronicLFCStaticInterpolation(Model):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+        return ee_localfieldcorrections.eelfc_interp_fortmann2010(
             setup.k, plasma_state.T_e, plasma_state.n_e
         )
 
@@ -4451,18 +4753,64 @@ class ElectronicLFCStaticInterpolation(Model):
         **kwargs,
     ) -> jnp.ndarray:
         k = setup.dispersion_corrected_k(plasma_state.n_e)
-        return ee_localfieldcorrections.eelfc_interpolationgregori_farid(
+        return ee_localfieldcorrections.eelfc_interp_fortmann2010(
             k, plasma_state.T_e, plasma_state.n_e
         )
 
 
-class ElectronicLFCConstant(Model):
+class SLFCInterpGregori2007(Model):
+    """
+    Static local field correction model that interpolates between the zero
+    temperature result by Utsumi and Ichimaru :cite:`UtsumiIchimaru.1982`
+    and the Geldart result :cite:`Geldart.1966` for high temperatures. See,
+    e.g., :cite:`Gregori.2007`.
+
+    See Also
+    --------
+    jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007
+        Function used to calculate the LFC.
+    """
+
+    allowed_keys = ["ee-lfc"]
+    __name__ = "SLFCInterpGregori2007"
+    cite_keys = [
+        ("Gregori.2007", "Interpolation."),
+        (["UtsumiIchimaru.1982", "Geldart.1966"], "Limits."),
+    ]
+
+    @jax.jit
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        return ee_localfieldcorrections.eelfc_interp_gregori2007(
+            setup.k, plasma_state.T_e, plasma_state.n_e
+        )
+
+    @jax.jit
+    def evaluate_fullk(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ) -> jnp.ndarray:
+        k = setup.dispersion_corrected_k(plasma_state.n_e)
+        return ee_localfieldcorrections.eelfc_interp_gregori2007(
+            k, plasma_state.T_e, plasma_state.n_e
+        )
+
+
+class LFCConstant(Model):
     """
     A constant local field correction which can be defined by the user.
     """
 
     allowed_keys = ["ee-lfc"]
-    __name__ = "ElectronicLFCConstant"
+    __name__ = "LFCConstant"
 
     def __init__(self, value):
         self.value = value
@@ -4552,7 +4900,6 @@ class Sum_Sii(Model):
         *args,
         **kwargs,
     ):
-
         S_ab = plasma_state["ionic scattering"].S_ii(plasma_state, setup)
         x = plasma_state.number_fraction
         # Add the contributions from all pairs
@@ -4803,6 +5150,7 @@ _all_models = [
     BornMermin_Full,
     BornMermin_Fit,
     BornMermin_Fortmann,
+    CHSIonFeat,
     ConstantChemPotential,
     ConstantDebyeTemp,
     ConstantIPD,
@@ -4814,11 +5162,13 @@ _all_models = [
     DebyeWallerSolid,
     DetailedBalance,
     EckerKroellIPD,
-    ElectronicLFCConstant,
-    ElectronicLFCDornheimAnalyticalInterp,
-    ElectronicLFCGeldartVosko,
-    ElectronicLFCStaticInterpolation,
-    ElectronicLFCUtsumiIchimaru,
+    LFCConstant,
+    ESLFCDornheim2021,
+    SLFCGeldart1966,
+    SLFCInterpFortmann2010,
+    SLFCInterpGregori2007,
+    SLFCUtsumi1982,
+    SLFCFarid1993,
     FiniteWavelengthScreening,
     FiniteWavelength_BM_V,
     FixedSii,
@@ -4826,6 +5176,7 @@ _all_models = [
     Gericke2010ScreeningLength,
     Gregori2003IonFeat,
     Gregori2004Screening,
+    GregoriCHSScreening,
     Gregori2006IonFeat,
     IchimaruChemPotential,
     IPDSum,
@@ -4849,6 +5200,8 @@ _all_models = [
     StewartPyattIPD,
     StewartPyattPrestonIPD,
     SommerfeldChemPotential,
+    NonDegenerateElectronChemPotential,
+    DegenerateElectronChemPotential,
     ThreePotentialHNCIonFeat,
 ]
 

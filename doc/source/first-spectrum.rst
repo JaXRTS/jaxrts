@@ -63,7 +63,30 @@ electron temperatures as a default.
         T_e=2 * ureg.electron_volt / ureg.k_B,  # T_e is the electron temperature.
     )
 
-Now, we also have to define a :py:class:`jaxrts.setup.Setup`. :py:mod:`jpu`
+We can investigate the generated plasma state:
+
+.. code:: python
+
+   print(state)
+
+.. code:: none
+
+    ions                     :      Be
+    mass densities (g/cc)    :    1.00
+    ionization               :    2.00
+    ion temperatures (eV)    :     2.0
+    e- temperature (eV)      :     2.0
+
+    Models attached
+    ===============
+    screening length         : DebyeHueckelScreeningLength
+    ee-lfc                   : LFCConstant
+    free-bound scattering    : Neglect
+
+As we can see we have set densities, ionization, and temperature, as well as
+some default models.
+
+Next, we also have to define a :py:class:`jaxrts.setup.Setup`. :py:mod:`jpu`
 also allows to convert string to quantities with units, as you can see below.
 
 .. code:: python

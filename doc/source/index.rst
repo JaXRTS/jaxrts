@@ -37,6 +37,30 @@ High Energy Density Group of Dominik Kraus at the University of Rostock.
 `See here <https://github.com/JaXRTS/jaxrts/graphs/contributors>`__ for a list
 of contributors to the software.
 
+Citing
+------
+
+The theoretical framework and implementation of ``jaxrts`` are detailed in our
+`Computer Physics Communications <https://www.sciencedirect.com/science/article/pii/S0010465526001554>`_ paper.
+This publication introduces the underlying XRTS theory, describes the individual
+software modules, and serves as a user guide.
+
+.. collapse:: Bibtex entry
+
+   .. code:: bibtex
+
+      @article{jaxrts2026,
+        title   = {jaxrts: A {Python} package for simulating {X-ray} {Thomson} scattering spectra from dense plasmas using jax},
+        author  = {L\"{u}tgert, J. and Schumacher, S. and Rips, J. and Qu, C. and D\"{o}ppner, T. and Kraus, D.},
+        journal = {Computer Physics Communications},
+        pages   = {110173},
+        year    = {2026},
+        issn    = {0010-4655},
+        doi     = {10.1016/j.cpc.2026.110173},
+        url     = {https://doi.org/10.1016/j.cpc.2026.110173}
+       }
+
+
 .. warning::
 
    This code is still under active development, so are it's dependencies. While
@@ -62,7 +86,7 @@ of contributors to the software.
 
 .. toctree::
    :maxdepth: 3
-   :caption: Contents:
+   :caption: Contents
 
    installing.rst
    usage.rst
@@ -71,6 +95,10 @@ of contributors to the software.
    bibliography
    module_overview
 
+.. sidebar-links::
+   :github:
+
+   The Paper <https://doi.org/10.1016/j.cpc.2026.110173>
 
 Indices and tables
 ==================

@@ -2,12 +2,20 @@
 Miscellaneous helper functions.
 """
 
+import re
 import logging
 from functools import partialmethod, wraps
 from time import time
+from platformdirs import user_cache_dir
+import requests
+from pathlib import Path
+import numpy as onp
 
+
+import jaxrts
 import jax
 from jax import numpy as jnp
+import jpu.numpy as jnpu
 
 from .units import Quantity, ureg
 
@@ -107,7 +115,7 @@ def timer(func, custom_prefix=None, loglevel=logging.INFO):
         result = func(*args, **kwargs)
         t2 = time()
         print(f"Executed {func.__name__!r} ...", end="")
-        print(f"in {(t2-t1):.4f} s\n")
+        print(f"in {(t2 - t1):.4f} s\n")
 
         return result
 
@@ -157,6 +165,73 @@ def mass_from_number_fraction(number_fractions, elements):
     mass_fractions = (number_fractions * masses) / total_mass
 
     return mass_fractions
+
+
+def mass_density_from_electron_density(
+    n_e, Z, number_fractions, elements, partial=False
+):
+    """
+    Calculate the mass density of a mixture from electron density.
+
+    Parameters
+    ----------
+    n_e (electron density): scalar
+        electron density of mixture
+    Z (charge): array_like
+        The charge of each chemical element in the plasma.
+    number_fractions : array_like
+        The number fractions of each chemical element.
+    elements : list
+        The masses of the respective chemical elements.
+    partial: boolean
+        default false = density of mixture, if true: density vector splitted
+        for mixture is returned.
+    Returns
+    -------
+    array_like
+        The mass density of the mixture.
+        When partial=True: density is splitted up in mixture-componentes by
+        multiply with :py:func:`~.mass_from_number_fraction`.
+
+    Raises
+    ------
+    ValueError
+        If the lengths of `Z`, `number_fractions` and `elements` are not the
+        same.
+
+    Examples
+    --------
+    >>> n_e = 0.8e24 / ureg.cm**3
+    >>> number_fractions = jnp.array([1/2, 1/2])
+    >>> elements = [jaxrts.Element("C"), jaxrts.Element("H")]
+    >>> Z_free = jnp.array([4.0, 1.0])
+    >>> mass_density_from_electron_density(
+    >>>     n_e, Z_free, number_fractions, elements
+    >>> )
+    <Quantity(3.4589693021231165, 'gram / centimeter ** 3')>
+    >>> mass_density_from_electron_density(
+    >>>     n_e, Z_free, number_fractions, elements, partial=True
+    >>> )
+    <Quantity([3.19115756 0.26781174], 'gram / centimeter ** 3')>
+    """
+
+    if not (len(number_fractions) == len(Z) == len(elements)):
+        raise ValueError(
+            "Z, number_fractions and elements must have the same length"
+        )
+
+    # model average atom in the mixture
+    m = jaxrts.units.to_array([x.atomic_mass for x in elements])
+    nom = jnpu.sum(m * number_fractions)
+    denom = jnpu.sum(Z * number_fractions)
+
+    rho = n_e * nom / denom
+
+    if partial:
+        mass_fraction = mass_from_number_fraction(number_fractions, elements)
+        rho = mass_fraction * rho
+
+    return rho.to(ureg.gram / ureg.cm**3)
 
 
 class JittableDict(dict):
@@ -250,6 +325,114 @@ def partialclass(cls, *args, **kwds):
         __init__ = partialmethod(cls.__init__, *args, **kwds)
 
     return NewCls
+
+
+@jax.jit
+def bisection(
+    func, a, b, tolerance=1e-4, max_iter: int = 1e4, min_iter: int = 1e2
+):
+    """
+    Find the root of a function ``func`` between the points ``a`` and ``b`` by
+    bisection.
+
+    This is a simple implementation, without any checks guaranteeing that the
+    root is found.
+
+    Parameters
+    ----------
+    func
+        The function of which a root should be found.
+    a
+        Lower end of the interval within which the root should be searched.
+    b
+        Upper limit of the interval within which the root should be searched.
+    tolerance
+        Tolerance that sets the condition to stop the iterative search. Applies
+        to both the absolute value of the function, and the absolute distance
+        between two consecutive candidates.
+    max_iter : int
+        Maximal number of steps before the loop aborts.
+    min_iter : int
+        Minimal number of steps the algorithm has to run before a value is
+        returned.
+
+    Returns
+    -------
+    One of the function ``func``.
+    """
+
+    def condition(state):
+        prev_x, next_x, count = state
+
+        return (
+            (count < max_iter)
+            & (jnp.abs(func(next_x)) > tolerance)
+            & (jnp.abs(prev_x - next_x) > tolerance)
+        ) | (count < min_iter)
+
+    def body(state):
+        a, b, i = state
+        c = (a + b) / 2  # middlepoint
+        bound = jnp.where(jnp.sign(func(c)) == jnp.sign(func(b)), a, b)
+        return bound, c, i + 1
+
+    initial_state = (a, b, 0)
+
+    _, final_state, iterations = jax.lax.while_loop(
+        condition, body, initial_state
+    )
+
+    return final_state, iterations
+
+
+def get_cache_dir() -> Path:
+    cache_dir = Path(user_cache_dir("jaxrts", "jaxrts"))
+    cache_dir.mkdir(exist_ok=True)
+    return cache_dir
+
+
+def download_from_nist(config) -> None:
+    cache_dir = get_cache_dir()
+    file = cache_dir / f"{config}.csv"
+    if not file.exists():
+        r = requests.get(
+            f"https://physics.nist.gov/cgi-bin/ASD/energy1.pl?de=0&spectrum={config}&units=1&format=2&output=0&page_size=15&multiplet_ordered=0&average_out=1&conf_out=on&term_out=on&level_out=on&g_out=on&biblio=on&temp=&submit=Retrieve+Data"  # noqa: E501
+        )
+        if r.status_code == 200:
+            with open(file, "w") as f:
+                f.write(r.text)
+        else:
+            raise FileNotFoundError(
+                "Failed to download file from the NIST database"
+            )
+
+
+def read_nist_file(config) -> (jnp.ndarray, Quantity):
+    """
+    Read in a nist file for excited states that was downloaded by
+    :py:func:`download_from_nist`. Extracts multiplicities and energy levels.
+    """
+    cache_dir = get_cache_dir()
+    nist_file = cache_dir / f"{config}.csv"
+    with open(nist_file) as f:
+        lines = f.readlines()
+
+    pattern = re.compile(
+        r'''
+        ,term,                               # Literal text “,term,”
+        (?P<g>\d+)                           #  "g"
+        ,"=""(?P<energy>\d+(?:\.\d+)?)"""    # energy in = and "
+    ''',
+        re.VERBOSE,
+    )
+    g = []
+    E = []
+    for line in lines:
+        match = pattern.search(line)
+        if match:
+            g.append(int(match.group("g")))
+            E.append(float(match.group("energy")))
+    return jnp.array(g), jnp.array(E) * ureg.electron_volt
 
 
 jax.tree_util.register_pytree_node(

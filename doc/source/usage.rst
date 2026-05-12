@@ -19,4 +19,5 @@ From there on, we provide a extensive list of example uses in the next section
    first-spectrum.rst
    models.rst
    first_model.rst
+   save-and-load.rst
    implementation-details.rst

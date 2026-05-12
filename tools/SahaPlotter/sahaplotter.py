@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from jaxrts.units import ureg
-from jaxrts.saha import calculate_mean_free_charge_saha
+from jaxrts.ionization import calculate_mean_free_charge_saha
 from jaxrts.plasmastate import PlasmaState
 import jaxrts.elements
 

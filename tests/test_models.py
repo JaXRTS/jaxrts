@@ -14,11 +14,7 @@ ureg = jaxrts.ureg
 
 all_models = get_all_models()
 available_model_keys = all_models.keys()
-invalid_multicomponent = [
-    jaxrts.models.ArkhipovIonFeat,
-    jaxrts.models.Gregori2003IonFeat,
-    jaxrts.models.Gregori2006IonFeat,
-]
+invalid_multicomponent = []
 
 
 def _peak_function(x):
@@ -45,7 +41,7 @@ def additional_model_parameters(
         return (12.1 * ureg.angstrom,)
     if model == jaxrts.models.ConstantIPD:
         return (23.42 * ureg.electron_volt,)
-    if model == jaxrts.models.ElectronicLFCConstant:
+    if model == jaxrts.models.LFCConstant:
         return (1.2,)
     if model == jaxrts.models.FixedSii:
         return (

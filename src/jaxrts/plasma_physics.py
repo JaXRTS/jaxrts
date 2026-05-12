@@ -37,8 +37,7 @@ def plasma_frequency(electron_density: Quantity) -> Quantity:
     ).to(ureg.Hz)
 
 
-def thomson_momentum_transfer(energy: Quantity, angle: Quantity
-) -> Quantity:
+def thomson_momentum_transfer(energy: Quantity, angle: Quantity) -> Quantity:
     """
     Momentum transfer :math:`k = \\mid\\vec{k}\\mid`, assuming that the
     absolute value of the momentum for incoming and scattered light is only
@@ -456,3 +455,4 @@ def noninteracting_susceptibility_from_eps_RPA(
     """
     Vee = coulomb_potential_fourier(-1, -1, k)
     return (1 - epsilon) / Vee
+

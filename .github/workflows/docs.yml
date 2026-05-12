@@ -1,0 +1,50 @@
+name: Build and Deploy Docs
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+        # LaTex is required for the matplotlib figures
+        # in the docs
+      - name: Install LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            dvipng \
+            cm-super
+
+      - name: Install Poetry
+        # the v1 does **not** fix the poetry version
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
+        run: poetry install --with docs --extras NN
+
+      - name: Build docs
+        run: |
+          cd doc
+          poetry run make html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./doc/build/html

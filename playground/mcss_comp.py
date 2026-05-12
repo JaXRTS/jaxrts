@@ -138,7 +138,7 @@ def plot_mcss_comparison(mcss_file):
     state["chemical potential"] = jaxrts.models.IchimaruChemPotential()
 
     if lfc.lower() == "static_interp":
-        state["ee-lfc"] = jaxrts.models.ElectronicLFCStaticInterpolation()
+        state["ee-lfc"] = jaxrts.models.SLFCInterpFortmann2010()
     state["ipd"] = jaxrts.models.Neglect()
     state["screening length"] = (
         jaxrts.models.ArbitraryDegeneracyScreeningLength()

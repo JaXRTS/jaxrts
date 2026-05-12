@@ -94,7 +94,7 @@ plt.legend()
 plt.title(
     f"{state.ions[0].symbol}, "
     + f"$k_BT=${(1 * ureg.k_B * state.T_e).m_as(ureg.electron_volt):.0f}eV, "
-    + f"$\\rho=${state.mass_density[0].m_as(ureg.gram/ureg.centimeter**3):.2f}g/cc"
+    + f"$\\rho=${state.mass_density[0].m_as(ureg.gram / ureg.centimeter**3):.2f}g/cc"  # noqa: E501
 )
 
 plt.tight_layout()
