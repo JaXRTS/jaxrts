@@ -1,0 +1,39 @@
+jaxrts.models.IPDSum
+====================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: IPDSum
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~IPDSum.__init__
+      ~IPDSum.all_element_states
+      ~IPDSum.check
+      ~IPDSum.citation
+      ~IPDSum.evaluate
+      ~IPDSum.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~IPDSum.allowed_keys
+      ~IPDSum.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.IPDSum:
+
+   .. minigallery:: jaxrts.models.IPDSum
+       :add-heading:

@@ -3881,14 +3881,73 @@
 <span class="c1"># ======================================</span>
 
 
+<div class="viewcode-block" id="IPDModel">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.IPDModel.html#jaxrts.models.IPDModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPDModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A subset of :py:class:`Model`&#39;s, to model the effect of ionization</span>
+<span class="sd">    potential depression. These models have to implement a</span>
+<span class="sd">    :py:meth:`~.all_element_states` method, returning the appropriate IPD for</span>
+<span class="sd">    all ionization states of the constituents.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="IPDModel.all_element_states">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.IPDModel.all_element_states.html#jaxrts.models.IPDModel.all_element_states">[docs]</a>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">all_element_states</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">ion_population</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the IPD for each possible ionization state for the constituents</span>
+<span class="sd">        of the plasma, assuming the average plasma conditions are given by the</span>
+<span class="sd">        passed ``plasma_state``. Can optionally be handed the argument</span>
+<span class="sd">        ``ion_population`` to not only operate on average quantities, but over</span>
+<span class="sd">        the whole distribution of elements.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        plasma_state: PlasmaState</span>
+<span class="sd">            The plasma state containing the average plasma properties</span>
+<span class="sd">        ion_population, optional</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[jnp.ndarray]</span>
+<span class="sd">            A list with an entry for each element in</span>
+<span class="sd">            :py:attr:`jaxrts.plasmastate.PlasmaState.ions`. The entry contains</span>
+<span class="sd">            the IPD for each possible ionization process of the ion, starting</span>
+<span class="sd">            by 0 to :py:attr:`jaxrts.elements.Element.Z` - 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IPDSum&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">IPDModel</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;You can only add other IPDModel to an IPDModel.&quot;</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Other is type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">IPDSum</span><span class="p">):</span>
+            <span class="n">list_of_ipds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_ipds</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">list_of_ipds</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">IPDSum</span><span class="p">):</span>
+            <span class="n">list_of_ipds</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">list_of_ipds</span><span class="p">,</span> <span class="o">*</span><span class="n">other</span><span class="o">.</span><span class="n">list_of_ipds</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">list_of_ipds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">IPDSum</span><span class="p">(</span><span class="n">list_of_ipds</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="ConstantIPD">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.ConstantIPD.html#jaxrts.models.ConstantIPD">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ConstantIPD</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConstantIPD</span><span class="p">(</span><span class="n">IPDModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A model that returns a constant value for the IPD, set by the user.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span>
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;ConstantIPD&quot;</span>
 
 <div class="viewcode-block" id="ConstantIPD.__init__">
@@ -3945,7 +4004,7 @@
 
 <div class="viewcode-block" id="DebyeHueckelIPD">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.DebyeHueckelIPD.html#jaxrts.models.DebyeHueckelIPD">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DebyeHueckelIPD</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DebyeHueckelIPD</span><span class="p">(</span><span class="n">IPDModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Debye-Hückel IPD Model :cite:`Debye.1923`.</span>
 <span class="sd">    The Debye-Hückel Model is applicable for low-density and high-temperature</span>
@@ -3961,7 +4020,6 @@
 <span class="sd">        Function used to calculate the IPD</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span>
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;DebyeHueckel&quot;</span>
     <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Debye.1923&quot;</span><span class="p">,</span> <span class="s2">&quot;Crowley.2014&quot;</span><span class="p">]</span>
 
@@ -4030,7 +4088,7 @@
 
 <div class="viewcode-block" id="StewartPyattPrestonIPD">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.StewartPyattPrestonIPD.html#jaxrts.models.StewartPyattPrestonIPD">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">StewartPyattPrestonIPD</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StewartPyattPrestonIPD</span><span class="p">(</span><span class="n">IPDModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Stewart Pyatt IPD Model :cite:`Stewart.1966`.</span>
 <span class="sd">    The Stewart–Pyatt model interpolates between the</span>
@@ -4056,7 +4114,6 @@
 <span class="sd">        Function used to calculate the IPD</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span>
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;StewartPyatt&quot;</span>
     <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Stewart.1966&quot;</span><span class="p">,</span> <span class="s2">&quot;Preston.2013&quot;</span><span class="p">,</span> <span class="s2">&quot;Crowley.2014&quot;</span><span class="p">]</span>
 
@@ -4131,7 +4188,7 @@
 
 <div class="viewcode-block" id="StewartPyattIPD">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.StewartPyattIPD.html#jaxrts.models.StewartPyattIPD">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">StewartPyattIPD</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StewartPyattIPD</span><span class="p">(</span><span class="n">IPDModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Stewart Pyatt IPD Model :cite:`Stewart.1966`.</span>
 <span class="sd">    The Stewart–Pyatt model interpolates between the Debye–Hückel</span>
@@ -4148,7 +4205,6 @@
 <span class="sd">        Function used to calculate the IPD</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span>
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;StewartPyatt&quot;</span>
     <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Stewart.1966&quot;</span><span class="p">,</span> <span class="s2">&quot;Ropke.2019&quot;</span><span class="p">,</span> <span class="s2">&quot;Calisti.2015&quot;</span><span class="p">]</span>
 
@@ -4217,7 +4273,7 @@
 
 <div class="viewcode-block" id="IonSphereIPD">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.IonSphereIPD.html#jaxrts.models.IonSphereIPD">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">IonSphereIPD</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IonSphereIPD</span><span class="p">(</span><span class="n">IPDModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ion Sphere IPD Model :cite:`Rozsnyai.1972`.</span>
 
@@ -4241,7 +4297,6 @@
 <span class="sd">        Function used to calculate the IPD</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span>
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;IonSphere&quot;</span>
     <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Rozsnyai.1972&quot;</span><span class="p">,</span> <span class="s2">&quot;Zimmermann.1980&quot;</span><span class="p">,</span> <span class="s2">&quot;Crowley.2014&quot;</span><span class="p">]</span>
 
@@ -4310,7 +4365,7 @@
 
 <div class="viewcode-block" id="EckerKroellIPD">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.EckerKroellIPD.html#jaxrts.models.EckerKroellIPD">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">EckerKroellIPD</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EckerKroellIPD</span><span class="p">(</span><span class="n">IPDModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ecker-Kröll IPD Model::cite:`EckerKroell.1963`.</span>
 
@@ -4338,7 +4393,6 @@
 <span class="sd">        Function used to calculate the IPD</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span>
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;EckerKroell&quot;</span>
     <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;EckerKroell.1963&quot;</span><span class="p">,</span>
@@ -4422,7 +4476,7 @@
 
 <div class="viewcode-block" id="PauliBlockingIPD">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.PauliBlockingIPD.html#jaxrts.models.PauliBlockingIPD">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PauliBlockingIPD</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PauliBlockingIPD</span><span class="p">(</span><span class="n">IPDModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pauli Blocking IPD Model :cite:`Ropke.2019`.</span>
 
@@ -4438,7 +4492,6 @@
 <span class="sd">        Function used to calculate the IPD</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span>
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;PauliBlocking&quot;</span>
     <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Ropke.2019&quot;</span><span class="p">]</span>
 
@@ -4480,6 +4533,77 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span></div>
 </div>
+
+
+
+<div class="viewcode-block" id="IPDSum">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.IPDSum.html#jaxrts.models.IPDSum">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPDSum</span><span class="p">(</span><span class="n">IPDModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A sum of several ipd :py:class:`~.Model` s. Can be used e.g., to combine</span>
+<span class="sd">    :py:class:`~.PauliBlockingIPD` with another IPD model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;IPDSum&quot;</span>
+
+<div class="viewcode-block" id="IPDSum.__init__">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.IPDSum.__init__.html#jaxrts.models.IPDSum.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_of_ipds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Model</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        list_of_ipds: list[Model]</span>
+<span class="sd">           A list of the IPD :py:class:`~.Model` to be added up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_of_ipds</span> <span class="o">=</span> <span class="n">list_of_ipds</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="IPDSum.evaluate">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.IPDSum.evaluate.html#jaxrts.models.IPDSum.evaluate">[docs]</a>
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
+        <span class="k">for</span> <span class="n">ipd_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_ipds</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="n">ipd_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="IPDSum.all_element_states">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.IPDSum.all_element_states.html#jaxrts.models.IPDSum.all_element_states">[docs]</a>
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">all_element_states</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span>
+        <span class="n">ion_population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="n">individual_ipd_output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ipd_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_ipds</span><span class="p">:</span>
+            <span class="n">individual_ipd_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">ipd_model</span><span class="o">.</span><span class="n">all_element_states</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="n">ion_population</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">individual_ipd_output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">individual_ipd_output</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">individual_ipd_output</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_ipds</span><span class="p">,)</span>
+        <span class="n">aux_data</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,)</span>  <span class="c1"># static values</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">model_key</span><span class="p">,)</span> <span class="o">=</span> <span class="n">aux_data</span>
+        <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">list_of_ipds</span><span class="p">,)</span> <span class="o">=</span> <span class="n">children</span>
+
+        <span class="k">return</span> <span class="n">obj</span></div>
 
 
 
@@ -5838,6 +5962,7 @@
     <span class="n">GregoriCHSScreening</span><span class="p">,</span>
     <span class="n">Gregori2006IonFeat</span><span class="p">,</span>
     <span class="n">IchimaruChemPotential</span><span class="p">,</span>
+    <span class="n">IPDSum</span><span class="p">,</span>
     <span class="n">IonSphereIPD</span><span class="p">,</span>
     <span class="n">LinearResponseScreening</span><span class="p">,</span>
     <span class="n">LinearResponseScreeningGericke2010</span><span class="p">,</span>

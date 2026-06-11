@@ -57,7 +57,10 @@
 <li class="toctree-l2"><a class="reference internal" href="physics.html">Physics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="first-spectrum.html">Generating a first spectrum</a></li>
 <li class="toctree-l2"><a class="reference internal" href="models.html">Models implemented</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Creating your own model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Creating your own model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subclasses-of-model">Subclasses of Model</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="save-and-load.html">Saving and loading objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="implementation-details.html">Implementation details</a></li>
 </ul>
@@ -103,14 +106,14 @@
 <p>In jaxrts, we strongly encourage community-driven collaboration.
 Users are welcome to create, implement, or contribute new models to the codebase, targeting specific components of the simulation.
 This section provides a brief overview of how to implement a new model within the framework.</p>
-<p>To showcase this, we’ll demonstrate how to create a simple, hypothetical model for <strong>Ionization Potential Depression</strong> (IPD) that always returns <span class="math notranslate nohighlight">\(\pi\)</span>, measured in electron volts, for any plasma conditions.</p>
+<p>To showcase this, we’ll demonstrate how to create a simple, hypothetical model for the <strong>Local Field correction</strong> (LFC) that always returns <span class="math notranslate nohighlight">\(\pi\)</span>, for any plasma conditions.</p>
 <p>First, create a low-level function that calculates the respective quantity from a set of parameters</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
 <span class="o">...</span>
 
 
-   <span class="k">def</span><span class="w"> </span><span class="nf">ipd_pi</span><span class="p">(</span>
+   <span class="k">def</span><span class="w"> </span><span class="nf">lfc_pi</span><span class="p">(</span>
       <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
       <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
       <span class="n">ni</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -119,7 +122,7 @@ This section provides a brief overview of how to implement a new model within th
       <span class="n">Zbar</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
 
-   <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
+   <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span>
 </pre></div>
 </div>
 <p>Next, create the corresponding <a class="reference internal" href="_autosummary/jaxrts.models.Model.html#jaxrts.models.Model" title="jaxrts.models.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.Model</span></code></a> class. Use the existing implementations for the same model
@@ -129,19 +132,14 @@ type as a reference for structure and style.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jaxrts.setup</span><span class="w"> </span><span class="kn">import</span> <span class="n">Setup</span>
 <span class="o">...</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">PiIPD</span><span class="p">(</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PiLFC</span><span class="p">(</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">   </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">   Hypothetical IPD Model, in which the IPD is always Pi, measured in electron volts.</span>
-
-<span class="sd">   See Also</span>
-<span class="sd">   --------</span>
-<span class="sd">   jaxrts.ipd.ipd_pi</span>
-<span class="sd">      Function used to calculate the IPD</span>
+<span class="sd">   Hypothetical LFC Model, in which the LFC is always pi.</span>
 <span class="sd">   &quot;&quot;&quot;</span>
 
    <span class="c1"># The allowed model keys for a plasma state.</span>
-   <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span>
-   <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;PiIPD&quot;</span>
+   <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ee-lfc&quot;</span><span class="p">]</span>
+   <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;PiLFC&quot;</span>
 
    <span class="c1"># Citations keys for reference</span>
    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;JohnDoe.2025&quot;</span><span class="p">]</span>
@@ -152,7 +150,7 @@ type as a reference for structure and style.</p>
    <span class="c1"># This function is required by every model.</span>
    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">ipd</span><span class="o">.</span><span class="n">ipd_pi</span><span class="p">(</span>
+      <span class="k">return</span> <span class="n">lfc_pi</span><span class="p">(</span>
             <span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span><span class="p">,</span>
             <span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span><span class="p">,</span>
             <span class="n">plasma_state</span><span class="o">.</span><span class="n">n_i</span><span class="p">,</span>
@@ -160,31 +158,6 @@ type as a reference for structure and style.</p>
             <span class="n">plasma_state</span><span class="o">.</span><span class="n">T_i</span><span class="p">,</span>
             <span class="n">Zbar</span><span class="o">=</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span>
       <span class="p">)</span>
-
-   <span class="c1"># This is important for IPD models only.</span>
-   <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
-   <span class="k">def</span><span class="w"> </span><span class="nf">all_element_states</span><span class="p">(</span>
-      <span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">ion_population</span><span class="o">=</span><span class="kc">None</span>
-   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-      <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">):</span>
-            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-               <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                  <span class="p">[</span>
-                        <span class="n">ipd</span><span class="o">.</span><span class="n">ipd_debye_hueckel</span><span class="p">(</span>
-                           <span class="n">Z</span><span class="p">,</span>
-                           <span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span><span class="p">,</span>
-                           <span class="n">plasma_state</span><span class="o">.</span><span class="n">n_i</span><span class="p">,</span>
-                           <span class="n">plasma_state</span><span class="o">.</span><span class="n">T_e</span><span class="p">,</span>
-                           <span class="n">plasma_state</span><span class="o">.</span><span class="n">T_i</span><span class="p">,</span>
-                           <span class="n">Zbar</span><span class="o">=</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span><span class="p">,</span>
-                        <span class="p">)[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">Z</span> <span class="ow">in</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span>
-                  <span class="p">]</span>
-               <span class="p">)</span>
-               <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
-            <span class="p">)</span>
-      <span class="k">return</span> <span class="n">out</span>
 
    <span class="c1"># The following is required to jit a Model</span>
    <span class="c1"># Here, &#39;children&#39; are attributes of the class that can be traced</span>
@@ -203,17 +176,36 @@ type as a reference for structure and style.</p>
 </div>
 <p>Finally, register your new model by calling</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">register_pytree_node</span><span class="p">(</span>
-  <span class="n">PiModel</span><span class="p">,</span>
-  <span class="n">PiModel</span><span class="o">.</span><span class="n">_tree_flatten</span><span class="p">,</span>
-  <span class="n">PiModel</span><span class="o">.</span><span class="n">_tree_unflatten</span><span class="p">,</span>
+    <span class="n">PiLFC</span><span class="p">,</span>
+    <span class="n">PiLFC</span><span class="o">.</span><span class="n">_tree_flatten</span><span class="p">,</span>
+    <span class="n">PiLFC</span><span class="o">.</span><span class="n">_tree_unflatten</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>Congratulations—you’ve successfully created your own model!</p>
+<p>Congratulations – you’ve successfully created your own model! You can add it to a <a class="reference internal" href="_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.plasmastate.PlasmaState</span></code></a> by assigning it to the <code class="docutils literal notranslate"><span class="pre">&quot;ee-lfc&quot;</span></code> key:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;ee-lfc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PiLFC</span><span class="p">()</span>
+</pre></div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>A <a class="reference internal" href="_autosummary/jaxrts.models.Model.html#jaxrts.models.Model" title="jaxrts.models.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.Model</span></code></a> provides the <a class="reference internal" href="_autosummary/jaxrts.models.Model.check.html#jaxrts.models.Model.check" title="jaxrts.models.Model.check"><code class="xref py py-meth docutils literal notranslate"><span class="pre">jaxrts.models.Model.check()</span></code></a> and <a class="reference internal" href="_autosummary/jaxrts.models.Model.prepare.html#jaxrts.models.Model.prepare" title="jaxrts.models.Model.prepare"><code class="xref py py-meth docutils literal notranslate"><span class="pre">jaxrts.models.Model.prepare()</span></code></a> methods. The former should be used to raise errors e.g., if the model is only applicable to one component systems. The other can be used in order to modify the passed <a class="reference internal" href="_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.plasmastate.PlasmaState</span></code></a>, e.g., to set sane defaults for other, subsequent Models using <a class="reference internal" href="_autosummary/jaxrts.plasmastate.PlasmaState.update_default_model.html#jaxrts.plasmastate.PlasmaState.update_default_model" title="jaxrts.plasmastate.PlasmaState.update_default_model"><code class="xref py py-meth docutils literal notranslate"><span class="pre">jaxrts.plasmastate.PlasmaState.update_default_model()</span></code></a>.</p>
 </div>
+<section id="subclasses-of-model">
+<h2>Subclasses of Model<a class="headerlink" href="#subclasses-of-model" title="Link to this heading"></a></h2>
+<p>As some <a class="reference internal" href="_autosummary/jaxrts.models.Model.html#jaxrts.models.Model" title="jaxrts.models.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.Model</span></code></a> types require further methods, <a class="reference internal" href="_autosummary/jaxrts.models.html#module-jaxrts.models" title="jaxrts.models"><code class="xref py py-mod docutils literal notranslate"><span class="pre">jaxrts.models</span></code></a> provides subclasses for specific keys / models. Find a list bellow:</p>
+<ul>
+<li><p><a class="reference internal" href="_autosummary/jaxrts.models.ScatteringModel.html#jaxrts.models.ScatteringModel" title="jaxrts.models.ScatteringModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.ScatteringModel</span></code></a>, the class for inelastic scattering models. These models have to implement an <a class="reference internal" href="_autosummary/jaxrts.models.ScatteringModel.evaluate_raw.html#jaxrts.models.ScatteringModel.evaluate_raw" title="jaxrts.models.ScatteringModel.evaluate_raw"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate_raw()</span></code></a> model over <a class="reference internal" href="_autosummary/jaxrts.models.ScatteringModel.evaluate.html#jaxrts.models.ScatteringModel.evaluate" title="jaxrts.models.ScatteringModel.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code></a>. The former should implement a dynamic structure factor. Convolution with the SIF (<a class="reference internal" href="_autosummary/jaxrts.setup.Setup.instrument.html#jaxrts.setup.Setup.instrument" title="jaxrts.setup.Setup.instrument"><code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.setup.Setup.instrument</span></code></a>) is then handled automatically when <a class="reference internal" href="_autosummary/jaxrts.models.ScatteringModel.evaluate.html#jaxrts.models.ScatteringModel.evaluate" title="jaxrts.models.ScatteringModel.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code></a> is called.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="_autosummary/jaxrts.models.FreeFreeModel.html#jaxrts.models.FreeFreeModel" title="jaxrts.models.FreeFreeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.FreeFreeModel</span></code></a> further subclassing <a class="reference internal" href="_autosummary/jaxrts.models.ScatteringModel.html#jaxrts.models.ScatteringModel" title="jaxrts.models.ScatteringModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.ScatteringModel</span></code></a>, these models additionally have to provide a <a class="reference internal" href="_autosummary/jaxrts.models.FreeFreeModel.susceptibility.html#jaxrts.models.FreeFreeModel.susceptibility" title="jaxrts.models.FreeFreeModel.susceptibility"><code class="xref py py-meth docutils literal notranslate"><span class="pre">susceptibility()</span></code></a> method to expose to other models.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><a class="reference internal" href="_autosummary/jaxrts.models.IonFeatModel.html#jaxrts.models.IonFeatModel" title="jaxrts.models.IonFeatModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.IonFeatModel</span></code></a>, the class for ion feature / elastic scattering models. These models have to implement an <a class="reference internal" href="_autosummary/jaxrts.models.IonFeatModel.S_ii.html#jaxrts.models.IonFeatModel.S_ii" title="jaxrts.models.IonFeatModel.S_ii"><code class="xref py py-meth docutils literal notranslate"><span class="pre">S_ii()</span></code></a> model over <a class="reference internal" href="_autosummary/jaxrts.models.IonFeatModel.evaluate.html#jaxrts.models.IonFeatModel.evaluate" title="jaxrts.models.IonFeatModel.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code></a>. The former should implement a static structure factor for the ions. Convolution with the SIF (<a class="reference internal" href="_autosummary/jaxrts.setup.Setup.instrument.html#jaxrts.setup.Setup.instrument" title="jaxrts.setup.Setup.instrument"><code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.setup.Setup.instrument</span></code></a>) and calculation of the <a class="reference internal" href="_autosummary/jaxrts.models.IonFeatModel.Rayleigh_weight.html#jaxrts.models.IonFeatModel.Rayleigh_weight" title="jaxrts.models.IonFeatModel.Rayleigh_weight"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Rayleigh_weight()</span></code></a> is then handled automatically when <a class="reference internal" href="_autosummary/jaxrts.models.IonFeatModel.evaluate.html#jaxrts.models.IonFeatModel.evaluate" title="jaxrts.models.IonFeatModel.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code></a> is called.</p></li>
+<li><p><a class="reference internal" href="_autosummary/jaxrts.models.IPDModel.html#jaxrts.models.IPDModel" title="jaxrts.models.IPDModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.IPDModel</span></code></a>, for models for the ionization potentials depression (key <code class="docutils literal notranslate"><span class="pre">&quot;idp&quot;</span></code>). Allows to add Models to a <a class="reference internal" href="_autosummary/jaxrts.models.IPDSum.html#jaxrts.models.IPDSum" title="jaxrts.models.IPDSum"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.IPDSum</span></code></a>. These models have to provide the <a class="reference internal" href="_autosummary/jaxrts.models.IPDModel.all_element_states.html#jaxrts.models.IPDModel.all_element_states" title="jaxrts.models.IPDModel.all_element_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">all_element_states()</span></code></a> method, returning the value of the IPD for all possible ionization states of the plasma constitutes.</p></li>
+<li><p><a class="reference internal" href="_autosummary/jaxrts.models.BM_V_eiSModel.html#jaxrts.models.BM_V_eiSModel" title="jaxrts.models.BM_V_eiSModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.BM_V_eiSModel</span></code></a>, for the electron-ion potentials evaluated when considering Born-Mermin style Models. Should implement a <a class="reference internal" href="_autosummary/jaxrts.models.BM_V_eiSModel.V.html#jaxrts.models.BM_V_eiSModel.V" title="jaxrts.models.BM_V_eiSModel.V"><code class="xref py py-meth docutils literal notranslate"><span class="pre">V()</span></code></a> method over <a class="reference internal" href="_autosummary/jaxrts.models.BM_V_eiSModel.evaluate.html#jaxrts.models.BM_V_eiSModel.evaluate" title="jaxrts.models.BM_V_eiSModel.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code></a></p></li>
+</ul>
+</section>
 </section>
 
 

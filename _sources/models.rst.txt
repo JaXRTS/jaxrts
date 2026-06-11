@@ -147,6 +147,7 @@ ipd
     jaxrts.models.ConstantIPD
     jaxrts.models.DebyeHueckelIPD
     jaxrts.models.EckerKroellIPD
+    jaxrts.models.IPDSum
     jaxrts.models.IonSphereIPD
     jaxrts.models.Neglect
     jaxrts.models.PauliBlockingIPD

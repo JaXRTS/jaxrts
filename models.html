@@ -110,6 +110,7 @@
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/jaxrts.models.ConstantIPD.html">jaxrts.models.ConstantIPD</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/jaxrts.models.DebyeHueckelIPD.html">jaxrts.models.DebyeHueckelIPD</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/jaxrts.models.EckerKroellIPD.html">jaxrts.models.EckerKroellIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/jaxrts.models.IPDSum.html">jaxrts.models.IPDSum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/jaxrts.models.IonSphereIPD.html">jaxrts.models.IonSphereIPD</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/jaxrts.models.Neglect.html">jaxrts.models.Neglect</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/jaxrts.models.PauliBlockingIPD.html">jaxrts.models.PauliBlockingIPD</a></li>
@@ -429,19 +430,22 @@ You can easily obtain the bibliographic information by using the
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.EckerKroellIPD.html#jaxrts.models.EckerKroellIPD" title="jaxrts.models.EckerKroellIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.EckerKroellIPD</span></code></a>([C, arb_deg])</p></td>
 <td><p>Ecker-Kröll IPD Model:<span id="id17">[<a class="reference internal" href="bibliography.html#id34" title="G. Ecker and W. Kröll. Lowering of the Ionization Energy for a Plasma in Thermodynamic Equilibrium. The Physics of Fluids, 6(1):62–69, 01 1963. doi:10.1063/1.1724509.">Ecker and Kröll, 1963</a>]</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.IonSphereIPD.html#jaxrts.models.IonSphereIPD" title="jaxrts.models.IonSphereIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.IonSphereIPD</span></code></a>([C, arb_deg])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.IPDSum.html#jaxrts.models.IPDSum" title="jaxrts.models.IPDSum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.IPDSum</span></code></a>(list_of_ipds)</p></td>
+<td><p>A sum of several ipd <a class="reference internal" href="_autosummary/jaxrts.models.Model.html#jaxrts.models.Model" title="jaxrts.models.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> s.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.IonSphereIPD.html#jaxrts.models.IonSphereIPD" title="jaxrts.models.IonSphereIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.IonSphereIPD</span></code></a>([C, arb_deg])</p></td>
 <td><p>Ion Sphere IPD Model <span id="id18">[<a class="reference internal" href="bibliography.html#id86" title="B. F. Rozsnyai. Relativistic hartree-fock-slater calculations for arbitrary temperature and matter density. Physical Review A, 5:1137–1149, 1972. doi:10.1103/PhysRevA.5.1137.">Rozsnyai, 1972</a>]</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.Neglect.html#jaxrts.models.Neglect" title="jaxrts.models.Neglect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.Neglect</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.Neglect.html#jaxrts.models.Neglect" title="jaxrts.models.Neglect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.Neglect</span></code></a>()</p></td>
 <td><p>Universal model to neglect a contribution and set it to zero.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.PauliBlockingIPD.html#jaxrts.models.PauliBlockingIPD" title="jaxrts.models.PauliBlockingIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.PauliBlockingIPD</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.PauliBlockingIPD.html#jaxrts.models.PauliBlockingIPD" title="jaxrts.models.PauliBlockingIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.PauliBlockingIPD</span></code></a>()</p></td>
 <td><p>Pauli Blocking IPD Model <span id="id19">[<a class="reference internal" href="bibliography.html#id85" title="Gerd Röpke, David Blaschke, Tilo Döppner, Chengliang Lin, Wolf-Dietrich Kraeft, Ronald Redmer, and Heidi Reinholz. Ionization potential depression and pauli blocking in degenerate plasmas at extreme densities. Phys. Rev. E, 99:033201, Mar 2019. doi:10.1103/PhysRevE.99.033201.">Röpke et al., 2019</a>]</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.StewartPyattIPD.html#jaxrts.models.StewartPyattIPD" title="jaxrts.models.StewartPyattIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.StewartPyattIPD</span></code></a>([arb_deg])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.StewartPyattIPD.html#jaxrts.models.StewartPyattIPD" title="jaxrts.models.StewartPyattIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.StewartPyattIPD</span></code></a>([arb_deg])</p></td>
 <td><p>Stewart Pyatt IPD Model <span id="id20">[<a class="reference internal" href="bibliography.html#id98" title="J. C. Stewart and Jr Pyatt, K. D. Lowering of ionization potentials in plasmas. Astrophysical Journal, 144:1203–1211, 1966.">Stewart and Pyatt, 1966</a>]</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.StewartPyattPrestonIPD.html#jaxrts.models.StewartPyattPrestonIPD" title="jaxrts.models.StewartPyattPrestonIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.StewartPyattPrestonIPD</span></code></a>([...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.StewartPyattPrestonIPD.html#jaxrts.models.StewartPyattPrestonIPD" title="jaxrts.models.StewartPyattPrestonIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.StewartPyattPrestonIPD</span></code></a>([...])</p></td>
 <td><p>Stewart Pyatt IPD Model <span id="id21">[<a class="reference internal" href="bibliography.html#id98" title="J. C. Stewart and Jr Pyatt, K. D. Lowering of ionization potentials in plasmas. Astrophysical Journal, 144:1203–1211, 1966.">Stewart and Pyatt, 1966</a>]</span>.</p></td>
 </tr>
 </tbody>

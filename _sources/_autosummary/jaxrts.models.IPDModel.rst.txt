@@ -1,0 +1,39 @@
+jaxrts.models.IPDModel
+======================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: IPDModel
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~IPDModel.__init__
+      ~IPDModel.all_element_states
+      ~IPDModel.check
+      ~IPDModel.citation
+      ~IPDModel.evaluate
+      ~IPDModel.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~IPDModel.allowed_keys
+      ~IPDModel.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.IPDModel:
+
+   .. minigallery:: jaxrts.models.IPDModel
+       :add-heading:
