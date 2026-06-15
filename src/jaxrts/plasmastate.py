@@ -489,7 +489,7 @@ Models attached
 
         return ionic + free_free + bound_free + free_bound
 
-    def evaluate(self, key: str, setup: Setup) -> Quantity:
+    def evaluate(self, key: str, setup: Setup, *args, **kwargs) -> Quantity:
         """
         Evaluate an individual :py:class:~`jaxrts.models.Model`, attached to
         this :py:class`~.PlasmaState` with the modelkey ``key``.
@@ -501,7 +501,7 @@ Models attached
         setup: Setup
             Geometry under which the model should be evaluated.
         """
-        return self[key].evaluate(self, setup)
+        return self[key].evaluate(self, setup, *args, **kwargs)
 
     # Set labels for a save state that is better readable by humans
     _children_labels = (

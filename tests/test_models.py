@@ -155,7 +155,12 @@ def test_all_models_can_be_evaluated_one_component():
                 one_comp_test_state[key] = model(
                     *additional_model_parameters(model, 1)
                 )
-                out = one_comp_test_state.evaluate(key, test_setup)
+                if key == "bf edge":
+                    out = one_comp_test_state.evaluate(
+                        key, test_setup, ureg("10eV")
+                    )
+                else:
+                    out = one_comp_test_state.evaluate(key, test_setup)
                 assert out is not None
             except Exception as exc:
                 raise AssertionError(
@@ -182,7 +187,12 @@ def test_all_models_can_be_evaluated_two_component():
                 two_comp_test_state[key] = model(
                     *additional_model_parameters(model, 2)
                 )
-                out = two_comp_test_state.evaluate(key, test_setup)
+                if key == "bf edge":
+                    out = two_comp_test_state.evaluate(
+                        key, test_setup, ureg("10eV")
+                    )
+                else:
+                    out = two_comp_test_state.evaluate(key, test_setup)
                 assert out is not None
             except Exception as exc:
                 raise AssertionError(

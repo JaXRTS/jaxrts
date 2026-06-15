@@ -38,9 +38,16 @@ def test_literature_chapman2015():
         Zeff = 6 - jaxrts.form_factors.pauling_size_screening_constants(Z_b)
         population = jaxrts.elements.electron_distribution_ionized_state(Z_b)
 
-        S_bf = jaxrts.bound_free.J_impulse_approx(
-            omega, k, population, Zeff, E_b
+        intensity = jaxrts.bound_free.J_impulse_approx(
+            omega, k, population, Zeff
         )
+        edge = jnp.heaviside(
+            (omega[jnp.newaxis, :] * ureg.hbar - E_b[:, jnp.newaxis]).m_as(
+                ureg.electron_volt
+            ),
+            0.5,
+        )
+        S_bf = jnpu.sum(intensity * edge, axis=0)
 
         assert (
             jnpu.quantile(
@@ -82,9 +89,16 @@ def test_modified_literature_chapman2015():
             population = [2, 2, (Z_b - 4), 0, 0, 0, 0, 0, 0, 0]
         population = jnp.array(population)
 
-        S_bf = jaxrts.bound_free.J_impulse_approx(
-            omega, k, population, Zeff, E_b
+        intensity = jaxrts.bound_free.J_impulse_approx(
+            omega, k, population, Zeff
         )
+        edge = jnp.heaviside(
+            (omega[jnp.newaxis, :] * ureg.hbar - E_b[:, jnp.newaxis]).m_as(
+                ureg.electron_volt
+            ),
+            0.5,
+        )
+        S_bf = jnpu.sum(intensity * edge, axis=0)
 
         assert (
             jnpu.quantile(
