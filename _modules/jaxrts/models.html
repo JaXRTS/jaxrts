@@ -3004,7 +3004,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;form-factors&quot;</span><span class="p">,</span> <span class="n">PaulingFormFactors</span><span class="p">())</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;ipd&quot;</span><span class="p">,</span> <span class="n">Neglect</span><span class="p">())</span>
-        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">Fermi</span><span class="p">())</span></div>
+        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">Heaviside</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="SchumacherImpulse.evaluate_raw">
@@ -3207,7 +3207,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;form-factors&quot;</span><span class="p">,</span> <span class="n">PaulingFormFactors</span><span class="p">())</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;ipd&quot;</span><span class="p">,</span> <span class="n">Neglect</span><span class="p">())</span>
-        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">Fermi</span><span class="p">())</span></div>
+        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">Heaviside</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="SchumacherImpulseColdEdges.evaluate_raw">
@@ -3341,7 +3341,7 @@
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span>
             <span class="s2">&quot;free-free scattering&quot;</span><span class="p">,</span> <span class="n">RPA_DandreaFit</span><span class="p">()</span>
         <span class="p">)</span>
-        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">Fermi</span><span class="p">())</span></div>
+        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">Heaviside</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="SchumacherImpulseFitRk.r_k">
