@@ -1,0 +1,38 @@
+jaxrts.models.EdgeModel
+=======================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: EdgeModel
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~EdgeModel.__init__
+      ~EdgeModel.check
+      ~EdgeModel.citation
+      ~EdgeModel.evaluate
+      ~EdgeModel.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~EdgeModel.allowed_keys
+      ~EdgeModel.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.EdgeModel:
+
+   .. minigallery:: jaxrts.models.EdgeModel
+       :add-heading:

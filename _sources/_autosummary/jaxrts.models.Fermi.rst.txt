@@ -1,0 +1,38 @@
+jaxrts.models.Fermi
+===================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: Fermi
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Fermi.__init__
+      ~Fermi.check
+      ~Fermi.citation
+      ~Fermi.evaluate
+      ~Fermi.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Fermi.allowed_keys
+      ~Fermi.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.Fermi:
+
+   .. minigallery:: jaxrts.models.Fermi
+       :add-heading:

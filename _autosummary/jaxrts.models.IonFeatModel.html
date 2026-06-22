@@ -103,6 +103,8 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DetailedBalance.html">jaxrts.models.DetailedBalance</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ESLFCDornheim2021.html">jaxrts.models.ESLFCDornheim2021</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.EckerKroellIPD.html">jaxrts.models.EckerKroellIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.EdgeModel.html">jaxrts.models.EdgeModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Fermi.html">jaxrts.models.Fermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FiniteWavelengthScreening.html">jaxrts.models.FiniteWavelengthScreening</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FiniteWavelength_BM_V.html">jaxrts.models.FiniteWavelength_BM_V</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FixedSii.html">jaxrts.models.FixedSii</a></li>
@@ -113,6 +115,7 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2004Screening.html">jaxrts.models.Gregori2004Screening</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2006IonFeat.html">jaxrts.models.Gregori2006IonFeat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.GregoriCHSScreening.html">jaxrts.models.GregoriCHSScreening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Heaviside.html">jaxrts.models.Heaviside</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IPDModel.html">jaxrts.models.IPDModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IPDSum.html">jaxrts.models.IPDSum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IchimaruChemPotential.html">jaxrts.models.IchimaruChemPotential</a></li>
@@ -123,7 +126,9 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.LinearResponseScreeningGericke2010.html">jaxrts.models.LinearResponseScreeningGericke2010</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Model.html">jaxrts.models.Model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Neglect.html">jaxrts.models.Neglect</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NoEdge.html">jaxrts.models.NoEdge</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NonDegenerateElectronChemPotential.html">jaxrts.models.NonDegenerateElectronChemPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NonNegative.html">jaxrts.models.NonNegative</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.OnePotentialHNCIonFeat.html">jaxrts.models.OnePotentialHNCIonFeat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PauliBlockingIPD.html">jaxrts.models.PauliBlockingIPD</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PaulingFormFactors.html">jaxrts.models.PaulingFormFactors</a></li>
@@ -206,7 +211,7 @@ structure factor. This quantity is used to calculate the
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.IonFeatModel.Rayleigh_weight.html#jaxrts.models.IonFeatModel.Rayleigh_weight" title="jaxrts.models.IonFeatModel.Rayleigh_weight"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Rayleigh_weight</span></code></a>(plasma_state, setup)</p></td>
-<td><p>This is the result from Wünsch <span id="id1">[<a class="reference internal" href="../bibliography.html#id104" title="Kathrin Wünsch. Theory of X-ray Thomson scattering in warm dense matter. PhD thesis, University of Warwick, Warwick, 2011.">Wünsch, 2011</a>]</span>, to calculate the Rayleigh weight for a plasma from multiple species.</p></td>
+<td><p>This is the result from Wünsch <span id="id1">[<a class="reference internal" href="../bibliography.html#id105" title="Kathrin Wünsch. Theory of X-ray Thomson scattering in warm dense matter. PhD thesis, University of Warwick, Warwick, 2011.">Wünsch, 2011</a>]</span>, to calculate the Rayleigh weight for a plasma from multiple species.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.IonFeatModel.S_ii.html#jaxrts.models.IonFeatModel.S_ii" title="jaxrts.models.IonFeatModel.S_ii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S_ii</span></code></a>(plasma_state, setup)</p></td>
 <td><p>Calculate the ion-ion static structure factor in the given <a class="reference internal" href="#jaxrts.models.IonFeatModel" title="jaxrts.models.IonFeatModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">IonFeatModel</span></code></a>.</p></td>

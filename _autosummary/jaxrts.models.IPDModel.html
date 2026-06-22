@@ -102,6 +102,8 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DetailedBalance.html">jaxrts.models.DetailedBalance</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ESLFCDornheim2021.html">jaxrts.models.ESLFCDornheim2021</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.EckerKroellIPD.html">jaxrts.models.EckerKroellIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.EdgeModel.html">jaxrts.models.EdgeModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Fermi.html">jaxrts.models.Fermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FiniteWavelengthScreening.html">jaxrts.models.FiniteWavelengthScreening</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FiniteWavelength_BM_V.html">jaxrts.models.FiniteWavelength_BM_V</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FixedSii.html">jaxrts.models.FixedSii</a></li>
@@ -112,6 +114,7 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2004Screening.html">jaxrts.models.Gregori2004Screening</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2006IonFeat.html">jaxrts.models.Gregori2006IonFeat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.GregoriCHSScreening.html">jaxrts.models.GregoriCHSScreening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Heaviside.html">jaxrts.models.Heaviside</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">jaxrts.models.IPDModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IPDSum.html">jaxrts.models.IPDSum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IchimaruChemPotential.html">jaxrts.models.IchimaruChemPotential</a></li>
@@ -122,7 +125,9 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.LinearResponseScreeningGericke2010.html">jaxrts.models.LinearResponseScreeningGericke2010</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Model.html">jaxrts.models.Model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Neglect.html">jaxrts.models.Neglect</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NoEdge.html">jaxrts.models.NoEdge</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NonDegenerateElectronChemPotential.html">jaxrts.models.NonDegenerateElectronChemPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NonNegative.html">jaxrts.models.NonNegative</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.OnePotentialHNCIonFeat.html">jaxrts.models.OnePotentialHNCIonFeat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PauliBlockingIPD.html">jaxrts.models.PauliBlockingIPD</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PaulingFormFactors.html">jaxrts.models.PaulingFormFactors</a></li>
@@ -214,7 +219,7 @@ all ionization states of the constituents.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.IPDModel.citation.html#jaxrts.models.IPDModel.citation" title="jaxrts.models.IPDModel.citation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></a>([style, comment])</p></td>
 <td><p>Return bibliographic information for the Model used.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.IPDModel.evaluate.html#jaxrts.models.IPDModel.evaluate" title="jaxrts.models.IPDModel.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a>(plasma_state, setup)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.IPDModel.evaluate.html#jaxrts.models.IPDModel.evaluate" title="jaxrts.models.IPDModel.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a>(plasma_state, setup, *args)</p></td>
 <td><p>Return the result of the model given a <a class="reference internal" href="jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlasmaState</span></code></a> and a <code class="xref py py-class docutils literal notranslate"><span class="pre">Setup</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.IPDModel.prepare.html#jaxrts.models.IPDModel.prepare" title="jaxrts.models.IPDModel.prepare"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare</span></code></a>(plasma_state, key)</p></td>

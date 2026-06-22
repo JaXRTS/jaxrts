@@ -50,6 +50,8 @@ jaxrts.models
       DetailedBalance
       ESLFCDornheim2021
       EckerKroellIPD
+      EdgeModel
+      Fermi
       FiniteWavelengthScreening
       FiniteWavelength_BM_V
       FixedSii
@@ -60,6 +62,7 @@ jaxrts.models
       Gregori2004Screening
       Gregori2006IonFeat
       GregoriCHSScreening
+      Heaviside
       IPDModel
       IPDSum
       IchimaruChemPotential
@@ -70,7 +73,9 @@ jaxrts.models
       LinearResponseScreeningGericke2010
       Model
       Neglect
+      NoEdge
       NonDegenerateElectronChemPotential
+      NonNegative
       OnePotentialHNCIonFeat
       PauliBlockingIPD
       PaulingFormFactors

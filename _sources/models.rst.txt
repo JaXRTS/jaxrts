@@ -10,7 +10,7 @@ Models implemented
         The following keys are available to add to
         :py:class:`jaxrts.plasmastate.PlasmaState`:
 
-        ``screening length``, ``ionic scattering``, ``BM S_ii``, ``Debye temperature``, ``free-free scattering``, ``chemical potential``, ``ipd``, ``screening``, ``BM V_eiS``, ``free-bound scattering``, ``ee-lfc``, ``form-factors``, ``bound-free scattering``, ``ion-ion Potential``, ``electron-ion Potential``, ``electron-electron Potential``
+        ``screening length``, ``ionic scattering``, ``BM S_ii``, ``Debye temperature``, ``free-free scattering``, ``chemical potential``, ``ipd``, ``screening``, ``BM V_eiS``, ``free-bound scattering``, ``ee-lfc``, ``bf edge``, ``form-factors``, ``bound-free scattering``, ``ion-ion Potential``, ``electron-ion Potential``, ``electron-electron Potential``
 
         To set a specific model, add it to a
         :py:class:`jaxrts.plasmastate.PlasmaState`,
@@ -230,6 +230,18 @@ Currently, only static and effective static approximations of the local field co
     jaxrts.models.SLFCInterpFortmann2010
     jaxrts.models.SLFCInterpGregori2007
     jaxrts.models.SLFCUtsumi1982
+
+
+bf edge
+-------
+.. autosummary::
+    :toctree: _autosummary
+    :recursive:
+
+    jaxrts.models.Fermi
+    jaxrts.models.Heaviside
+    jaxrts.models.NoEdge
+    jaxrts.models.NonNegative
 
 
 form-factors

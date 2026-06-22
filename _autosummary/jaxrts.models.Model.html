@@ -102,6 +102,8 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DetailedBalance.html">jaxrts.models.DetailedBalance</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ESLFCDornheim2021.html">jaxrts.models.ESLFCDornheim2021</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.EckerKroellIPD.html">jaxrts.models.EckerKroellIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.EdgeModel.html">jaxrts.models.EdgeModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Fermi.html">jaxrts.models.Fermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FiniteWavelengthScreening.html">jaxrts.models.FiniteWavelengthScreening</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FiniteWavelength_BM_V.html">jaxrts.models.FiniteWavelength_BM_V</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FixedSii.html">jaxrts.models.FixedSii</a></li>
@@ -112,6 +114,7 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2004Screening.html">jaxrts.models.Gregori2004Screening</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2006IonFeat.html">jaxrts.models.Gregori2006IonFeat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.GregoriCHSScreening.html">jaxrts.models.GregoriCHSScreening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Heaviside.html">jaxrts.models.Heaviside</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IPDModel.html">jaxrts.models.IPDModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IPDSum.html">jaxrts.models.IPDSum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IchimaruChemPotential.html">jaxrts.models.IchimaruChemPotential</a></li>
@@ -122,7 +125,9 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.LinearResponseScreeningGericke2010.html">jaxrts.models.LinearResponseScreeningGericke2010</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">jaxrts.models.Model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Neglect.html">jaxrts.models.Neglect</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NoEdge.html">jaxrts.models.NoEdge</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NonDegenerateElectronChemPotential.html">jaxrts.models.NonDegenerateElectronChemPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NonNegative.html">jaxrts.models.NonNegative</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.OnePotentialHNCIonFeat.html">jaxrts.models.OnePotentialHNCIonFeat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PauliBlockingIPD.html">jaxrts.models.PauliBlockingIPD</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PaulingFormFactors.html">jaxrts.models.PaulingFormFactors</a></li>
@@ -210,7 +215,7 @@ method.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.Model.citation.html#jaxrts.models.Model.citation" title="jaxrts.models.Model.citation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></a>([style, comment])</p></td>
 <td><p>Return bibliographic information for the Model used.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.Model.evaluate.html#jaxrts.models.Model.evaluate" title="jaxrts.models.Model.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a>(plasma_state, setup)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.Model.evaluate.html#jaxrts.models.Model.evaluate" title="jaxrts.models.Model.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a>(plasma_state, setup, *args)</p></td>
 <td><p>Return the result of the model given a <a class="reference internal" href="jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlasmaState</span></code></a> and a <code class="xref py py-class docutils literal notranslate"><span class="pre">Setup</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.Model.prepare.html#jaxrts.models.Model.prepare" title="jaxrts.models.Model.prepare"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare</span></code></a>(plasma_state, key)</p></td>
@@ -252,6 +257,9 @@ method.</p>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example shows different IPD models implemented in the code for Carbon at 100 eV and for va..."><img alt="" src="../_images/sphx_glr_plot_ipd_thumb.svg" />
 <p><a class="reference internal" href="../gen_examples/bound_free/plot_ipd.html#sphx-glr-gen-examples-bound-free-plot-ipd-py"><span class="std std-ref">Compare IPD Models</span></a></p>
   <div class="sphx-glr-thumbnail-title">Compare IPD Models</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example showcases different edge-models that can be used in the bound free scattering feat..."><img alt="" src="../_images/sphx_glr_plot_edge_models_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/bound_free/plot_edge_models.html#sphx-glr-gen-examples-bound-free-plot-edge-models-py"><span class="std std-ref">Comparison of different edge models</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Comparison of different edge models</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This script is used to test the bound-free edges using ionization energies from FAC code calcul..."><img alt="" src="../_images/sphx_glr_plot_moving_edges_vs_cold_thumb.svg" />
 <p><a class="reference internal" href="../gen_examples/bound_free/plot_moving_edges_vs_cold.html#sphx-glr-gen-examples-bound-free-plot-moving-edges-vs-cold-py"><span class="std std-ref">Moving edges vs cold ionoization edges</span></a></p>
   <div class="sphx-glr-thumbnail-title">Moving edges vs cold ionoization edges</div>

@@ -1,0 +1,38 @@
+jaxrts.models.NonNegative
+=========================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: NonNegative
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~NonNegative.__init__
+      ~NonNegative.check
+      ~NonNegative.citation
+      ~NonNegative.evaluate
+      ~NonNegative.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~NonNegative.allowed_keys
+      ~NonNegative.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.NonNegative:
+
+   .. minigallery:: jaxrts.models.NonNegative
+       :add-heading:

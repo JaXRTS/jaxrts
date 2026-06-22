@@ -1,0 +1,38 @@
+jaxrts.models.NoEdge
+====================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: NoEdge
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~NoEdge.__init__
+      ~NoEdge.check
+      ~NoEdge.citation
+      ~NoEdge.evaluate
+      ~NoEdge.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~NoEdge.allowed_keys
+      ~NoEdge.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.NoEdge:
+
+   .. minigallery:: jaxrts.models.NoEdge
+       :add-heading:

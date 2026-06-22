@@ -102,6 +102,8 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.DetailedBalance.html">jaxrts.models.DetailedBalance</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.ESLFCDornheim2021.html">jaxrts.models.ESLFCDornheim2021</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.EckerKroellIPD.html">jaxrts.models.EckerKroellIPD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.EdgeModel.html">jaxrts.models.EdgeModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Fermi.html">jaxrts.models.Fermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FiniteWavelengthScreening.html">jaxrts.models.FiniteWavelengthScreening</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FiniteWavelength_BM_V.html">jaxrts.models.FiniteWavelength_BM_V</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FixedSii.html">jaxrts.models.FixedSii</a></li>
@@ -112,6 +114,7 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2004Screening.html">jaxrts.models.Gregori2004Screening</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2006IonFeat.html">jaxrts.models.Gregori2006IonFeat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.GregoriCHSScreening.html">jaxrts.models.GregoriCHSScreening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Heaviside.html">jaxrts.models.Heaviside</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IPDModel.html">jaxrts.models.IPDModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IPDSum.html">jaxrts.models.IPDSum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.IchimaruChemPotential.html">jaxrts.models.IchimaruChemPotential</a></li>
@@ -122,7 +125,9 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.LinearResponseScreeningGericke2010.html">jaxrts.models.LinearResponseScreeningGericke2010</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="jaxrts.models.Model.html">jaxrts.models.Model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Neglect.html">jaxrts.models.Neglect</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NoEdge.html">jaxrts.models.NoEdge</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NonDegenerateElectronChemPotential.html">jaxrts.models.NonDegenerateElectronChemPotential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.NonNegative.html">jaxrts.models.NonNegative</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.OnePotentialHNCIonFeat.html">jaxrts.models.OnePotentialHNCIonFeat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PauliBlockingIPD.html">jaxrts.models.PauliBlockingIPD</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PaulingFormFactors.html">jaxrts.models.PaulingFormFactors</a></li>
@@ -195,7 +200,7 @@
 <h1>jaxrts.models.Model.evaluate<a class="headerlink" href="#jaxrts-models-model-evaluate" title="Link to this heading"></a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="jaxrts.models.Model.evaluate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Model.</span></span><span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plasma_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><span class="pre">PlasmaState</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.setup.Setup"><span class="pre">Setup</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Array</span></span></span><a class="reference internal" href="../_modules/jaxrts/models.html#Model.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.Model.evaluate" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Model.</span></span><span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plasma_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><span class="pre">PlasmaState</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.setup.Setup"><span class="pre">Setup</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Array</span></span></span><a class="reference internal" href="../_modules/jaxrts/models.html#Model.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.Model.evaluate" title="Link to this definition"></a></dt>
 <dd><p>Return the result of the model given a <a class="reference internal" href="jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlasmaState</span></code></a> and a
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Setup</span></code>.</p>
 </dd></dl>

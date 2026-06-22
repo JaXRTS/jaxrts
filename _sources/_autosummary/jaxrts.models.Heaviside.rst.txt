@@ -1,0 +1,38 @@
+jaxrts.models.Heaviside
+=======================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: Heaviside
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Heaviside.__init__
+      ~Heaviside.check
+      ~Heaviside.citation
+      ~Heaviside.evaluate
+      ~Heaviside.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Heaviside.allowed_keys
+      ~Heaviside.cite_keys
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.Heaviside:
+
+   .. minigallery:: jaxrts.models.Heaviside
+       :add-heading:

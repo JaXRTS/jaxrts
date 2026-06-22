@@ -68,6 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../models.html#bm-v-eis">BM V_eiS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../models.html#free-bound-scattering">free-bound scattering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../models.html#ee-lfc">ee-lfc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models.html#bf-edge">bf edge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../models.html#form-factors">form-factors</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="../models.html#bound-free-scattering">bound-free scattering</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Neglect.html">jaxrts.models.Neglect</a></li>
@@ -129,7 +130,7 @@
 <dt class="sig sig-object py" id="jaxrts.models.SchumacherImpulse">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jaxrts.models.</span></span><span class="sig-name descname"><span class="pre">SchumacherImpulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/models.html#SchumacherImpulse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.SchumacherImpulse" title="Link to this definition"></a></dt>
 <dd><p>Bound-free scattering based on the Schumacher Impulse Approximation
-<span id="id1">[<a class="reference internal" href="../bibliography.html#id90" title="M Schumacher, F Smend, and I Borchert. Incoherent scattering of gamma rays by inner-shell electrons. Journal of Physics B: Atomic and Molecular Physics, 8:1428–1439, 6 1975. doi:10.1088/0022-3700/8/9/010.">Schumacher et al., 1975</a>]</span>. The implementation considers the first order
+<span id="id1">[<a class="reference internal" href="../bibliography.html#id91" title="M Schumacher, F Smend, and I Borchert. Incoherent scattering of gamma rays by inner-shell electrons. Journal of Physics B: Atomic and Molecular Physics, 8:1428–1439, 6 1975. doi:10.1088/0022-3700/8/9/010.">Schumacher et al., 1975</a>]</span>. The implementation considers the first order
 asymmetric correction to the impulse approximation, as given in the
 aforementioned paper.</p>
 <p>Should yield similar results as
@@ -204,6 +205,9 @@ user.</p>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example showcases how apply the analysis functions to get temperatures from the Laplace tr..."><img alt="" src="../_images/sphx_glr_plot_ITCFT_thumb.svg" />
 <p><a class="reference internal" href="../gen_examples/analysis/plot_ITCFT.html#sphx-glr-gen-examples-analysis-plot-itcft-py"><span class="std std-ref">Imaginary time correlation function thermometry</span></a></p>
   <div class="sphx-glr-thumbnail-title">Imaginary time correlation function thermometry</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example showcases different edge-models that can be used in the bound free scattering feat..."><img alt="" src="../_images/sphx_glr_plot_edge_models_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/bound_free/plot_edge_models.html#sphx-glr-gen-examples-bound-free-plot-edge-models-py"><span class="std std-ref">Comparison of different edge models</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Comparison of different edge models</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This script is used to test the bound-free edges using ionization energies from FAC code calcul..."><img alt="" src="../_images/sphx_glr_plot_moving_edges_vs_cold_thumb.svg" />
 <p><a class="reference internal" href="../gen_examples/bound_free/plot_moving_edges_vs_cold.html#sphx-glr-gen-examples-bound-free-plot-moving-edges-vs-cold-py"><span class="std std-ref">Moving edges vs cold ionoization edges</span></a></p>
   <div class="sphx-glr-thumbnail-title">Moving edges vs cold ionoization edges</div>

@@ -166,7 +166,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.Model.evaluate.html#jaxrts.models.Model.evaluate">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the result of the model given a :py:class:`~.PlasmaState` and a</span>
@@ -3003,7 +3003,8 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.SchumacherImpulse.prepare.html#jaxrts.models.SchumacherImpulse.prepare">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;form-factors&quot;</span><span class="p">,</span> <span class="n">PaulingFormFactors</span><span class="p">())</span>
-        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;ipd&quot;</span><span class="p">,</span> <span class="n">Neglect</span><span class="p">())</span></div>
+        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;ipd&quot;</span><span class="p">,</span> <span class="n">Neglect</span><span class="p">())</span>
+        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">Fermi</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="SchumacherImpulse.evaluate_raw">
@@ -3067,9 +3068,14 @@
                 <span class="c1"># Hence set it to unity, here</span>
                 <span class="n">B</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
                 <span class="n">factor</span> <span class="o">=</span> <span class="n">r_k</span> <span class="o">/</span> <span class="p">(</span><span class="n">Z_core</span> <span class="o">*</span> <span class="n">B</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
-                <span class="n">sbe</span> <span class="o">=</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">bound_free</span><span class="o">.</span><span class="n">J_impulse_approx</span><span class="p">(</span>
-                    <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">population</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">E_b</span>
+
+                <span class="n">impuse_approx</span> <span class="o">=</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">bound_free</span><span class="o">.</span><span class="n">J_impulse_approx</span><span class="p">(</span>
+                    <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">population</span><span class="p">,</span> <span class="n">Zeff</span>
                 <span class="p">)</span>
+                <span class="n">edge</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">E</span><span class="p">:</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">E</span><span class="p">)</span>
+                <span class="p">)(</span><span class="n">E_b</span><span class="p">)</span>
+                <span class="n">sbe</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">impuse_approx</span> <span class="o">*</span> <span class="n">edge</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="n">sbe</span> <span class="o">*</span> <span class="n">Z_core</span>
                 <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
                     <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)),</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">,</span> <span class="n">val</span>
@@ -3200,7 +3206,8 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.models.SchumacherImpulseColdEdges.prepare.html#jaxrts.models.SchumacherImpulseColdEdges.prepare">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;form-factors&quot;</span><span class="p">,</span> <span class="n">PaulingFormFactors</span><span class="p">())</span>
-        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;ipd&quot;</span><span class="p">,</span> <span class="n">Neglect</span><span class="p">())</span></div>
+        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;ipd&quot;</span><span class="p">,</span> <span class="n">Neglect</span><span class="p">())</span>
+        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">Fermi</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="SchumacherImpulseColdEdges.evaluate_raw">
@@ -3254,9 +3261,14 @@
             <span class="c1"># Hence set it to unity, here</span>
             <span class="n">B</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
             <span class="n">factor</span> <span class="o">=</span> <span class="n">r_k</span> <span class="o">/</span> <span class="p">(</span><span class="n">Z_c</span> <span class="o">*</span> <span class="n">B</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
-            <span class="n">sbe</span> <span class="o">=</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">bound_free</span><span class="o">.</span><span class="n">J_impulse_approx</span><span class="p">(</span>
-                <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">population</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">E_b</span>
+            <span class="n">impuse_approx</span> <span class="o">=</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">bound_free</span><span class="o">.</span><span class="n">J_impulse_approx</span><span class="p">(</span>
+                <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">population</span><span class="p">,</span> <span class="n">Zeff</span>
             <span class="p">)</span>
+            <span class="n">edge</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">E</span><span class="p">:</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">E</span><span class="p">)</span>
+            <span class="p">)(</span><span class="n">E_b</span><span class="p">)</span>
+
+            <span class="n">sbe</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">impuse_approx</span> <span class="o">*</span> <span class="n">edge</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">sbe</span> <span class="o">*</span> <span class="n">Z_c</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
             <span class="n">out</span> <span class="o">+=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
                 <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)),</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">,</span> <span class="n">val</span>
@@ -3328,7 +3340,8 @@
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;ipd&quot;</span><span class="p">,</span> <span class="n">Neglect</span><span class="p">())</span>
         <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span>
             <span class="s2">&quot;free-free scattering&quot;</span><span class="p">,</span> <span class="n">RPA_DandreaFit</span><span class="p">()</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+        <span class="n">plasma_state</span><span class="o">.</span><span class="n">update_default_model</span><span class="p">(</span><span class="s2">&quot;bf edge&quot;</span><span class="p">,</span> <span class="n">Fermi</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="SchumacherImpulseFitRk.r_k">
@@ -5924,15 +5937,148 @@
 
 
 
+<span class="c1"># Edge Models</span>
+<span class="c1"># ===========</span>
+
+
+<div class="viewcode-block" id="EdgeModel">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.EdgeModel.html#jaxrts.models.EdgeModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EdgeModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Model class for edges as they appear, e.g., in the bound-free DSF.</span>
+<span class="sd">    Edges are implemented as multiplicative, unit-free factors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bf edge&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="EdgeModel.evaluate">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.EdgeModel.evaluate.html#jaxrts.models.EdgeModel.evaluate">[docs]</a>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span> <span class="n">edge_energy</span><span class="p">:</span> <span class="n">Quantity</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the result of the model given a :py:class:`~.PlasmaState` and a</span>
+<span class="sd">        :py:class:`Setup`.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">           Compared to the generic :py:meth:`~.Model.evaluate` this method</span>
+<span class="sd">           requires an additional argument, the energy of the edge.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="NoEdge">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.NoEdge.html#jaxrts.models.NoEdge">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NoEdge</span><span class="p">(</span><span class="n">EdgeModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    No edge, returns always one.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;NoEdge&quot;</span>
+
+<div class="viewcode-block" id="NoEdge.evaluate">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.NoEdge.evaluate.html#jaxrts.models.NoEdge.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span> <span class="n">edge_energy</span><span class="p">:</span> <span class="n">Quantity</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span>
+            <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="NonNegative">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.NonNegative.html#jaxrts.models.NonNegative">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NonNegative</span><span class="p">(</span><span class="n">EdgeModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cuts at :py:attr:`jaxrts.setup.Setup.measured_energy` ``= 0 eV``,</span>
+<span class="sd">    independently of the ``edge_energy`` given, so that only energy transfer to</span>
+<span class="sd">    the electrons (down-shifted photon energies) are permitted.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;NonNegative&quot;</span>
+
+<div class="viewcode-block" id="NonNegative.evaluate">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.NonNegative.evaluate.html#jaxrts.models.NonNegative.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span> <span class="n">edge_energy</span><span class="p">:</span> <span class="n">Quantity</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">heaviside</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">energy</span> <span class="o">-</span> <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
+            <span class="mf">0.5</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Heaviside">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.Heaviside.html#jaxrts.models.Heaviside">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Heaviside</span><span class="p">(</span><span class="n">EdgeModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Hard cut of the edge at the binding energy, using a Heaviside function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;Heaviside&quot;</span>
+
+<div class="viewcode-block" id="Heaviside.evaluate">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.Heaviside.evaluate.html#jaxrts.models.Heaviside.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span> <span class="n">edge_energy</span><span class="p">:</span> <span class="n">Quantity</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">heaviside</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">energy</span> <span class="o">-</span> <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span> <span class="o">-</span> <span class="n">edge_energy</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+                <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
+            <span class="p">),</span>
+            <span class="mf">0.5</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Fermi">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.Fermi.html#jaxrts.models.Fermi">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Fermi</span><span class="p">(</span><span class="n">EdgeModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Temperature dependent edge, where the edge is given by a Fermi-Dirac</span>
+<span class="sd">    distribution with a slope dependent on the system&#39;s electron temperature:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       1-\\frac{1}{e^{\\frac{(\\hbar\\omega-E_{B})}{k_BT_e}}+1}</span>
+
+<span class="sd">    See :cite:`Mattern.2013`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;Fermi&quot;</span>
+
+    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Mattern.2013&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Fermi.evaluate">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.models.Fermi.evaluate.html#jaxrts.models.Fermi.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span> <span class="n">edge_energy</span><span class="p">:</span> <span class="n">Quantity</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">energy_transfer</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">energy</span> <span class="o">-</span> <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">T_e</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">energy_transfer</span> <span class="o">-</span> <span class="n">edge_energy</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+</div>
+
+
+
 <span class="n">_all_models</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">ArbitraryDegeneracyScreeningLength</span><span class="p">,</span>
     <span class="n">ArkhipovIonFeat</span><span class="p">,</span>
     <span class="n">AverageAtom_Sii</span><span class="p">,</span>
     <span class="n">BohmStaver</span><span class="p">,</span>
     <span class="n">BornMermin</span><span class="p">,</span>
-    <span class="n">BornMermin_Full</span><span class="p">,</span>
     <span class="n">BornMermin_Fit</span><span class="p">,</span>
     <span class="n">BornMermin_Fortmann</span><span class="p">,</span>
+    <span class="n">BornMermin_Full</span><span class="p">,</span>
     <span class="n">CHSIonFeat</span><span class="p">,</span>
     <span class="n">ConstantChemPotential</span><span class="p">,</span>
     <span class="n">ConstantDebyeTemp</span><span class="p">,</span>
@@ -5943,15 +6089,11 @@
     <span class="n">DebyeHueckelScreeningLength</span><span class="p">,</span>
     <span class="n">DebyeHueckel_BM_V</span><span class="p">,</span>
     <span class="n">DebyeWallerSolid</span><span class="p">,</span>
+    <span class="n">DegenerateElectronChemPotential</span><span class="p">,</span>
     <span class="n">DetailedBalance</span><span class="p">,</span>
-    <span class="n">EckerKroellIPD</span><span class="p">,</span>
-    <span class="n">LFCConstant</span><span class="p">,</span>
     <span class="n">ESLFCDornheim2021</span><span class="p">,</span>
-    <span class="n">SLFCGeldart1966</span><span class="p">,</span>
-    <span class="n">SLFCInterpFortmann2010</span><span class="p">,</span>
-    <span class="n">SLFCInterpGregori2007</span><span class="p">,</span>
-    <span class="n">SLFCUtsumi1982</span><span class="p">,</span>
-    <span class="n">SLFCFarid1993</span><span class="p">,</span>
+    <span class="n">EckerKroellIPD</span><span class="p">,</span>
+    <span class="n">Fermi</span><span class="p">,</span>
     <span class="n">FiniteWavelengthScreening</span><span class="p">,</span>
     <span class="n">FiniteWavelength_BM_V</span><span class="p">,</span>
     <span class="n">FixedSii</span><span class="p">,</span>
@@ -5959,32 +6101,40 @@
     <span class="n">Gericke2010ScreeningLength</span><span class="p">,</span>
     <span class="n">Gregori2003IonFeat</span><span class="p">,</span>
     <span class="n">Gregori2004Screening</span><span class="p">,</span>
-    <span class="n">GregoriCHSScreening</span><span class="p">,</span>
     <span class="n">Gregori2006IonFeat</span><span class="p">,</span>
-    <span class="n">IchimaruChemPotential</span><span class="p">,</span>
+    <span class="n">GregoriCHSScreening</span><span class="p">,</span>
+    <span class="n">Heaviside</span><span class="p">,</span>
     <span class="n">IPDSum</span><span class="p">,</span>
+    <span class="n">IchimaruChemPotential</span><span class="p">,</span>
     <span class="n">IonSphereIPD</span><span class="p">,</span>
+    <span class="n">LFCConstant</span><span class="p">,</span>
     <span class="n">LinearResponseScreening</span><span class="p">,</span>
     <span class="n">LinearResponseScreeningGericke2010</span><span class="p">,</span>
     <span class="n">Model</span><span class="p">,</span>
     <span class="n">Neglect</span><span class="p">,</span>
+    <span class="n">NoEdge</span><span class="p">,</span>
+    <span class="n">NonDegenerateElectronChemPotential</span><span class="p">,</span>
+    <span class="n">NonNegative</span><span class="p">,</span>
     <span class="n">OnePotentialHNCIonFeat</span><span class="p">,</span>
     <span class="n">PauliBlockingIPD</span><span class="p">,</span>
     <span class="n">PaulingFormFactors</span><span class="p">,</span>
     <span class="n">PeakCollection</span><span class="p">,</span>
     <span class="n">QCSalpeterApproximation</span><span class="p">,</span>
-    <span class="n">RPA_DandreaFit</span><span class="p">,</span>
     <span class="n">RPA</span><span class="p">,</span>
+    <span class="n">RPA_DandreaFit</span><span class="p">,</span>
+    <span class="n">SLFCFarid1993</span><span class="p">,</span>
+    <span class="n">SLFCGeldart1966</span><span class="p">,</span>
+    <span class="n">SLFCInterpFortmann2010</span><span class="p">,</span>
+    <span class="n">SLFCInterpGregori2007</span><span class="p">,</span>
+    <span class="n">SLFCUtsumi1982</span><span class="p">,</span>
     <span class="n">ScatteringModel</span><span class="p">,</span>
     <span class="n">SchumacherImpulse</span><span class="p">,</span>
     <span class="n">SchumacherImpulseColdEdges</span><span class="p">,</span>
     <span class="n">SchumacherImpulseFitRk</span><span class="p">,</span>
-    <span class="n">Sum_Sii</span><span class="p">,</span>
+    <span class="n">SommerfeldChemPotential</span><span class="p">,</span>
     <span class="n">StewartPyattIPD</span><span class="p">,</span>
     <span class="n">StewartPyattPrestonIPD</span><span class="p">,</span>
-    <span class="n">SommerfeldChemPotential</span><span class="p">,</span>
-    <span class="n">NonDegenerateElectronChemPotential</span><span class="p">,</span>
-    <span class="n">DegenerateElectronChemPotential</span><span class="p">,</span>
+    <span class="n">Sum_Sii</span><span class="p">,</span>
     <span class="n">ThreePotentialHNCIonFeat</span><span class="p">,</span>
 <span class="p">]</span>
 
