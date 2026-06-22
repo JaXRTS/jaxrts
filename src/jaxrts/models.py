@@ -71,7 +71,7 @@ class Model(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def evaluate(
-        self, plasma_state: "PlasmaState", setup: Setup
+        self, plasma_state: "PlasmaState", setup: Setup, *args
     ) -> jnp.ndarray:
         """
         Return the result of the model given a :py:class:`~.PlasmaState` and a
@@ -2642,6 +2642,7 @@ class SchumacherImpulse(ScatteringModel):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
+        plasma_state.update_default_model("bf edge", Fermi())
 
     @jax.jit
     def evaluate_raw(
@@ -2702,9 +2703,14 @@ class SchumacherImpulse(ScatteringModel):
                 # Hence set it to unity, here
                 B = 1 * ureg.dimensionless
                 factor = r_k / (Z_core * B**3).m_as(ureg.dimensionless)
-                sbe = factor * bound_free.J_impulse_approx(
-                    omega, k, population, Zeff, E_b
+
+                impuse_approx = factor * bound_free.J_impulse_approx(
+                    omega, k, population, Zeff
                 )
+                edge = jax.vmap(
+                    lambda E: plasma_state.evaluate("bf edge", setup, E)
+                )(E_b)
+                sbe = jnpu.sum(impuse_approx * edge, axis=0)
                 val = sbe * Z_core
                 return jnpu.where(
                     jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
@@ -2827,6 +2833,7 @@ class SchumacherImpulseColdEdges(ScatteringModel):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
+        plasma_state.update_default_model("bf edge", Fermi())
 
     @jax.jit
     def evaluate_raw(
@@ -2877,9 +2884,14 @@ class SchumacherImpulseColdEdges(ScatteringModel):
             # Hence set it to unity, here
             B = 1 * ureg.dimensionless
             factor = r_k / (Z_c * B**3).m_as(ureg.dimensionless)
-            sbe = factor * bound_free.J_impulse_approx(
-                omega, k, population, Zeff, E_b
+            impuse_approx = factor * bound_free.J_impulse_approx(
+                omega, k, population, Zeff
             )
+            edge = jax.vmap(
+                lambda E: plasma_state.evaluate("bf edge", setup, E)
+            )(E_b)
+
+            sbe = jnpu.sum(impuse_approx * edge, axis=0)
             val = sbe * Z_c * x[idx]
             out += jnpu.where(
                 jnp.isnan(val.m_as(ureg.second)), 0 * ureg.second, val
@@ -2943,6 +2955,7 @@ class SchumacherImpulseFitRk(ScatteringModel):
         plasma_state.update_default_model(
             "free-free scattering", RPA_DandreaFit()
         )
+        plasma_state.update_default_model("bf edge", Fermi())
 
     @jax.jit
     def r_k(
@@ -5161,15 +5174,118 @@ class FiniteWavelength_BM_V(BM_V_eiSModel):
         return V / eps0
 
 
+# Edge Models
+# ===========
+
+
+class EdgeModel(Model):
+    """
+    Model class for edges as they appear, e.g., in the bound-free DSF.
+    Edges are implemented as multiplicative, unit-free factors.
+    """
+
+    allowed_keys = ["bf edge"]
+
+    @abc.abstractmethod
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup, edge_energy: Quantity
+    ) -> jnp.ndarray:
+        """
+        Return the result of the model given a :py:class:`~.PlasmaState` and a
+        :py:class:`Setup`.
+
+        .. note::
+
+           Compared to the generic :py:meth:`~.Model.evaluate` this method
+           requires an additional argument, the energy of the edge.
+        """
+        ...
+
+
+class NoEdge(EdgeModel):
+    """
+    No edge, returns always one.
+    """
+
+    __name__ = "NoEdge"
+
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup, edge_energy: Quantity
+    ) -> jnp.ndarray:
+        return jnp.ones_like(
+            setup.measured_energy.m_as(ureg.electron_volt)
+        ) * (1 * ureg.dimensionless)
+
+
+class NonNegative(EdgeModel):
+    """
+    Cuts at :py:attr:`jaxrts.setup.Setup.measured_energy` ``= 0 eV``,
+    independently of the ``edge_energy`` given, so that only energy transfer to
+    the electrons (down-shifted photon energies) are permitted.
+    """
+
+    __name__ = "NonNegative"
+
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup, edge_energy: Quantity
+    ) -> jnp.ndarray:
+        return jnp.heaviside(
+            (setup.energy - setup.measured_energy).m_as(ureg.electron_volt),
+            0.5,
+        ) * (1 * ureg.dimensionless)
+
+
+class Heaviside(EdgeModel):
+    """
+    Hard cut of the edge at the binding energy, using a Heaviside function.
+    """
+
+    __name__ = "Heaviside"
+
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup, edge_energy: Quantity
+    ) -> jnp.ndarray:
+        return jnp.heaviside(
+            (setup.energy - setup.measured_energy - edge_energy).m_as(
+                ureg.electron_volt
+            ),
+            0.5,
+        ) * (1 * ureg.dimensionless)
+
+
+class Fermi(EdgeModel):
+    """
+    Temperature dependent edge, where the edge is given by a Fermi-Dirac
+    distribution with a slope dependent on the system's electron temperature:
+
+    .. math::
+
+       1-\\frac{1}{e^{\\frac{(\\hbar\\omega-E_{B})}{k_BT_e}}+1}
+
+    See :cite:`Mattern.2013`.
+    """
+
+    __name__ = "Fermi"
+
+    cite_keys = ["Mattern.2013"]
+
+    def evaluate(
+        self, plasma_state: "PlasmaState", setup: Setup, edge_energy: Quantity
+    ) -> jnp.ndarray:
+        energy_transfer = setup.energy - setup.measured_energy
+        beta = 1 / (plasma_state.T_e * ureg.boltzmann_constant)
+        return 1 - 1 / (jnpu.exp(beta * (energy_transfer - edge_energy)) + 1)
+
+
 _all_models = [
     ArbitraryDegeneracyScreeningLength,
     ArkhipovIonFeat,
     AverageAtom_Sii,
     BohmStaver,
     BornMermin,
-    BornMermin_Full,
     BornMermin_Fit,
     BornMermin_Fortmann,
+    BornMermin_Full,
     CHSIonFeat,
     ConstantChemPotential,
     ConstantDebyeTemp,
@@ -5180,15 +5296,11 @@ _all_models = [
     DebyeHueckelScreeningLength,
     DebyeHueckel_BM_V,
     DebyeWallerSolid,
+    DegenerateElectronChemPotential,
     DetailedBalance,
-    EckerKroellIPD,
-    LFCConstant,
     ESLFCDornheim2021,
-    SLFCGeldart1966,
-    SLFCInterpFortmann2010,
-    SLFCInterpGregori2007,
-    SLFCUtsumi1982,
-    SLFCFarid1993,
+    EckerKroellIPD,
+    Fermi,
     FiniteWavelengthScreening,
     FiniteWavelength_BM_V,
     FixedSii,
@@ -5196,32 +5308,40 @@ _all_models = [
     Gericke2010ScreeningLength,
     Gregori2003IonFeat,
     Gregori2004Screening,
-    GregoriCHSScreening,
     Gregori2006IonFeat,
-    IchimaruChemPotential,
+    GregoriCHSScreening,
+    Heaviside,
     IPDSum,
+    IchimaruChemPotential,
     IonSphereIPD,
+    LFCConstant,
     LinearResponseScreening,
     LinearResponseScreeningGericke2010,
     Model,
     Neglect,
+    NoEdge,
+    NonDegenerateElectronChemPotential,
+    NonNegative,
     OnePotentialHNCIonFeat,
     PauliBlockingIPD,
     PaulingFormFactors,
     PeakCollection,
     QCSalpeterApproximation,
-    RPA_DandreaFit,
     RPA,
+    RPA_DandreaFit,
+    SLFCFarid1993,
+    SLFCGeldart1966,
+    SLFCInterpFortmann2010,
+    SLFCInterpGregori2007,
+    SLFCUtsumi1982,
     ScatteringModel,
     SchumacherImpulse,
     SchumacherImpulseColdEdges,
     SchumacherImpulseFitRk,
-    Sum_Sii,
+    SommerfeldChemPotential,
     StewartPyattIPD,
     StewartPyattPrestonIPD,
-    SommerfeldChemPotential,
-    NonDegenerateElectronChemPotential,
-    DegenerateElectronChemPotential,
+    Sum_Sii,
     ThreePotentialHNCIonFeat,
 ]
 

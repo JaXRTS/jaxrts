@@ -537,7 +537,6 @@ def J_BM_HR_approx(
     k: Quantity,
     pop: jnp.ndarray,
     Zeff: jnp.ndarray,
-    E_b: Quantity,
 ) -> Quantity:
 
     intensity = (
@@ -546,14 +545,8 @@ def J_BM_HR_approx(
             all_J_BM(omega, k, Zeff[:, jnp.newaxis])
             + all_J_HR(omega, k, Zeff[:, jnp.newaxis])
         )
-        * jnp.heaviside(
-            (omega[jnp.newaxis, :] * ureg.hbar - E_b[:, jnp.newaxis]).m_as(
-                ureg.electron_volt
-            ),
-            0.5,
-        )
     ) / (1 * ureg.c * k)
-    return jnpu.sum(intensity, axis=0)
+    return intensity
 
 
 def J_BM_approx(
@@ -561,20 +554,12 @@ def J_BM_approx(
     k: Quantity,
     pop: jnp.ndarray,
     Zeff: jnp.ndarray,
-    E_b: Quantity,
 ) -> Quantity:
 
     intensity = (
-        pop[:, jnp.newaxis]
-        * (all_J_BM(omega, k, Zeff[:, jnp.newaxis]))
-        * jnp.heaviside(
-            (omega[jnp.newaxis, :] * ureg.hbar - E_b[:, jnp.newaxis]).m_as(
-                ureg.electron_volt
-            ),
-            0.5,
-        )
+        pop[:, jnp.newaxis] * (all_J_BM(omega, k, Zeff[:, jnp.newaxis]))
     ) / (1 * ureg.c * k)
-    return jnpu.sum(intensity, axis=0)
+    return intensity
 
 
 def J_impulse_approx(
@@ -582,7 +567,6 @@ def J_impulse_approx(
     k: Quantity,
     pop: jnp.ndarray,
     Zeff: jnp.ndarray,
-    E_b: Quantity,
 ) -> Quantity:
 
     intensity = (
@@ -591,12 +575,6 @@ def J_impulse_approx(
             all_J_Schum75(omega, k, Zeff[:, jnp.newaxis])
             + all_J_HR(omega, k, Zeff[:, jnp.newaxis])
         )
-        * jnp.heaviside(
-            (omega[jnp.newaxis, :] * ureg.hbar - E_b[:, jnp.newaxis]).m_as(
-                ureg.electron_volt
-            ),
-            0.5,
-        )
     ) / (1 * ureg.c * k)
 
-    return jnpu.sum(intensity, axis=0)
+    return intensity
