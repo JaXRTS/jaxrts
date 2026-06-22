@@ -11,11 +11,13 @@ from functools import partial
 import jax
 from jax import numpy as jnp
 from jpu import numpy as jnpu
-from quadax import quadts as quad
+from quadax import quadgk, quadts
 
 from .math import fermi_neg12_rational_approximation_antia
 from .plasma_physics import (
     chem_pot_interpolationIchimaru as chem_pot_interpolation,
+    fermi_wavenumber,
+    wiegner_seitz_radius,
 )
 from .units import Quantity, ureg
 
@@ -547,7 +549,7 @@ def ipd_pauli_blocking(
 
         return res.m_as(1 / ureg.angstrom**2)
 
-    integral, errl = quad(
+    integral, errl = quadts(
         integrand, jnp.array([0, jnp.inf]), epsabs=1e-15, epsrel=1e-15
     )
     integral /= 1 * ureg.angstrom**3
@@ -561,4 +563,83 @@ def ipd_pauli_blocking(
         * integral
     )
 
+    return ipd_shift.to(ureg.electron_volt)
+
+
+def _lin_F(Gamma_i):
+    """
+    An approximation for for the function F, that produces the correct limits,
+    see eqn. (17) in :cite:`Lin.2017`.
+    """
+    return 3 * Gamma_i / jnpu.sqrt((9 * jnp.pi / 4) ** (2 / 3) + 3 * Gamma_i)
+
+
+@jax.jit
+def ipd_lin(
+    Zi: float,
+    ni: Quantity,
+    Ti: Quantity,
+    S_iiZZ: jax.tree_util.Partial,
+    Zbar: float | None = None,
+) -> Quantity:
+    """
+    The IPD given by :cite:`Lin.2017`. Requires passing `S_iiZZ` a callable
+    with one argument, k.`S_iiZZ` is defined as follows:
+
+    .. math::
+
+       S_\\text{ii}^{ZZ}(k) = \\left(1 - \\frac{q_\\text{sc}(k)}{Z_i}\\right)^2
+                              S_\\text{ii}(k)
+
+    Parameters
+    ----------
+    Zi
+        The charge state of the atom (note that this is the state before the
+        ionization)
+    ni
+        Ion density. Units of 1/[length]**3.
+    Ti
+        The ion temperature.
+    S_iiZZ
+        The function calculating the contribution to the DFS from the ions and
+        screening due to slowly moving electrons.
+
+    Returns
+    -------
+    Quantity
+        The ipd shift in units of electronvolt.
+    """
+    if Zbar is None:
+        Zbar = Zi
+
+    k_Fi = fermi_wavenumber(ni)
+    # :cite:`Lin.2017` seems not concerned with the classical Wiegner seitz
+    # radius but rather the ionic equivalent.
+    r_WS = wiegner_seitz_radius(ni)
+    Gamma_i = (Zi**2 * ureg.elementary_charge**2) / (
+        4 * jnp.pi * ureg.epsilon_0 * ureg.k_B * Ti * r_WS
+    )
+    F = _lin_F(Gamma_i)
+
+    def integrand(k0):
+        integ = S_iiZZ(k0 * k_Fi) / k0**2
+        # For k0 == 0, the integrad diverges. However, S_iiZZ falls faster than
+        # 1/k0**2 rises (this has been identified from plotting S_iiZZ).
+        return jnp.where(k0 == 0, 0, integ)
+
+    # Splitting the integral makes the integration more stable
+    splitting_edge = 50.0
+    integral, err = quadgk(integrand, jnp.array([0.0, splitting_edge]))
+    # Assume far out, S_ii approx 1 and q approx 0, i.e, the error is just the
+    # remainder of 1/x^2 from the splitting edge to infinity (and can be
+    # solved, analytically)
+    integral2 = 1 / splitting_edge
+    ipd_shift = (
+        (
+            -((Zi + 1) * ureg.elementary_charge**2)
+            / (2 * jnp.pi**2 * ureg.epsilon_0 * r_WS)
+        )
+        * F
+        * (integral + integral2)
+    )
     return ipd_shift.to(ureg.electron_volt)
