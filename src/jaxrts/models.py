@@ -2642,7 +2642,7 @@ class SchumacherImpulse(ScatteringModel):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
-        plasma_state.update_default_model("bf edge", Fermi())
+        plasma_state.update_default_model("bf edge", Heaviside())
 
     @jax.jit
     def evaluate_raw(
@@ -2833,7 +2833,7 @@ class SchumacherImpulseColdEdges(ScatteringModel):
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("ipd", Neglect())
-        plasma_state.update_default_model("bf edge", Fermi())
+        plasma_state.update_default_model("bf edge", Heaviside())
 
     @jax.jit
     def evaluate_raw(
@@ -2955,7 +2955,7 @@ class SchumacherImpulseFitRk(ScatteringModel):
         plasma_state.update_default_model(
             "free-free scattering", RPA_DandreaFit()
         )
-        plasma_state.update_default_model("bf edge", Fermi())
+        plasma_state.update_default_model("bf edge", Heaviside())
 
     @jax.jit
     def r_k(
