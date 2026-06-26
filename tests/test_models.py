@@ -11,7 +11,7 @@ from jaxrts.collections import get_all_models
 ureg = jaxrts.ureg
 
 
-all_models = get_all_models()
+all_models = get_all_models("models")
 available_model_keys = all_models.keys()
 invalid_multicomponent = []
 

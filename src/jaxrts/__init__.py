@@ -33,7 +33,7 @@ from .plasmastate import PlasmaState
 from .setup import Setup
 from .units import ureg
 
-from .collections import get_all_models
+from .collections import get_all_models, get_all_models_list
 
 __all__ = [
     "Element",
@@ -47,6 +47,7 @@ __all__ = [
     "free_bound",
     "free_free",
     "get_all_models",
+    "get_all_models_list",
     "helpers",
     "hnc_potentials",
     "hypernetted_chain",
@@ -63,3 +64,17 @@ __all__ = [
     "units",
     "ureg",
 ]
+
+
+# Register all models
+
+import jax
+
+_all_models = get_all_models_list()
+
+for _model in _all_models:
+    jax.tree_util.register_pytree_node(
+        _model,
+        _model._tree_flatten,
+        _model._tree_unflatten,
+    )

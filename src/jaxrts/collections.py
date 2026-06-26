@@ -76,3 +76,28 @@ def get_all_models(
                         else:
                             all_models[k].append(obj)
     return all_models
+
+
+@overload
+def get_all_models_list(
+    types: list[Literal["models", "hnc_potentials"]],
+    names_only: Literal[False] = False,
+) -> list[models.Model | hnc_potentials.HNCPotential]: ...
+@overload
+def get_all_models_list(
+    types: list[Literal["models", "hnc_potentials"]],
+    names_only: Literal[True],
+) -> list[str]: ...
+def get_all_models_list(
+    types: list[Literal["models", "hnc_potentials"]] = [
+        "models",
+        "hnc_potentials",
+    ],
+    names_only: bool = False,
+) -> list[models.Model | hnc_potentials.HNCPotential | str]:
+    models = get_all_models().values()
+    _list = []
+    for m in models:
+        _list += m
+    # Filter out unique entries
+    return list(set(_list))
