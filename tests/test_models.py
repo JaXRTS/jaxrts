@@ -6,8 +6,7 @@ import pytest
 from jax import numpy as jnp
 
 import jaxrts
-
-from .helpers import get_all_models
+from jaxrts.collections import get_all_models
 
 ureg = jaxrts.ureg
 

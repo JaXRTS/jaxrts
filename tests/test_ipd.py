@@ -13,7 +13,7 @@ from jaxrts.ipd import (
 )
 from jaxrts.units import to_array
 
-from .helpers import get_all_models
+from jaxrts.collections import get_all_models
 
 all_ipd_models = get_all_models()["ipd"]
 

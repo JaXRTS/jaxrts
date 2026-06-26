@@ -9,6 +9,7 @@ __version_tuple__ = (0, 0, 0)
 from . import (
     analysis,
     bound_free,
+    collections,
     elements,
     form_factors,
     free_bound,
@@ -32,26 +33,30 @@ from .plasmastate import PlasmaState
 from .setup import Setup
 from .units import ureg
 
+from .collections import get_all_models
+
 __all__ = [
     "Element",
     "PlasmaState",
     "Setup",
     "analysis",
     "bound_free",
+    "collections",
     "elements",
     "form_factors",
     "free_bound",
     "free_free",
+    "get_all_models",
     "helpers",
     "hnc_potentials",
     "hypernetted_chain",
     "instrument_function",
     "ion_feature",
+    "ionization",
     "math",
     "models",
     "plasma_physics",
     "plasmastate",
-    "ionization",
     "saving",
     "setup",
     "static_structure_factors",
