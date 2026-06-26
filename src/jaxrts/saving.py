@@ -22,8 +22,7 @@ import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
 
-import jaxrts
-
+from .collections import get_all_models_list
 from .elements import Element
 from .helpers import partialclass
 from .hnc_potentials import HNCPotential
@@ -176,22 +175,15 @@ class JaXRTSDecoder(json.JSONDecoder):
 
     @property
     def hnc_potentials(self) -> dict:
-        pot_dict = {
-            key: value
-            for (key, value) in jaxrts.hnc_potentials.__dict__.items()
-            if (value in jaxrts.hnc_potentials._all_hnc_potentals)
-            and not key.startswith("_")
-        }
+        pot_list = get_all_models_list("hnc_potentials")
+        pot_dict = {p.__name__: p for p in pot_list}
         pot_dict.update(self.additional_mappings)
         return pot_dict
 
     @property
     def models(self) -> dict:
-        model_dict = {
-            key: value
-            for (key, value) in jaxrts.models.__dict__.items()
-            if (value in jaxrts.models._all_models) and not key.startswith("_")
-        }
+        model_list = get_all_models_list("models")
+        model_dict = {m.__name__: m for m in model_list}
         model_dict.update(self.additional_mappings)
         return model_dict
 
