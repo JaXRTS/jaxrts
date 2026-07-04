@@ -95,7 +95,7 @@ def fourier_transform_sine(k, rvals, fvals):
     arg = rvals * fvals
     units = arg.units
     dr = rvals[1] - rvals[0]
-    res = zaf_dst(arg.m_as(units), 4) * units * (4 * jnp.pi) / k * dr
+    res = dst4(arg.m_as(units)) * units * (4 * jnp.pi) / k * dr
     return res
 
 
@@ -206,7 +206,6 @@ def realfft(y, isign=1):
         wi = wi * wpr + wtemp * wpi + wi
 
     if isign == 1:
-
         h1r = y[0]
         y = y.at[0].set(h1r + y[1])
         y = y.at[1].set(h1r - y[1])
@@ -263,72 +262,23 @@ def sinft(y):
     return y
 
 
-@partial(jax.jit, static_argnames=["dst_type"])
-def zaf_dst(f, dst_type):
+@partial(jax.jit)
+def dst4(f):
     """
     Compute the discrete sine transform (DST) using the fast Fourier transform
-    (FFT).
-
-    Taken from `Zaf Python
-    <https://github.com/zafarrafii/Zaf-Python/tree/master>`_
+    (FFT). This is DST type 4. See
+    https://en.wikipedia.org/wiki/Discrete_sine_transform
     """
     window_length = len(f)
+    M = 4 * window_length
+    g = jnp.zeros(M)
+    g = g.at[1 : 2 * window_length : 2].set(f)
+    g = g.at[2 * window_length + 1 : M : 2].set(f[window_length - 1 :: -1])
 
-    if dst_type == 1:
-        # Compute the DST-I using the FFT
-        out = jnp.zeros(2 * window_length + 2)
-        out = out.at[1 : window_length + 1].set(f)
-        out = out.at[window_length + 2 :].set(-f[::-1])
-        out = jnp.fft.rfft(out)
-        out = -jnp.imag(out[1 : window_length + 1]) / 2
-        return out
-
-    elif dst_type == 2:
-        # Compute the DST-II using the FFT
-        out = jnp.zeros(4 * window_length)
-        out = out.at[1 : 2 * window_length : 2].set(f)
-        out = out.at[2 * window_length + 1 : 4 * window_length : 2].set(
-            -f[-1::-1]
-        )
-        out = jnp.fft.rfft(out)
-        out = -jnp.imag(out[1 : window_length + 1]) / 2
-        return out
-
-    elif dst_type == 3:
-        # Pre-process the signal to make the DST-III matrix orthogonal
-        # (copy the signal to avoid modifying it outside of the function)
-        f_copy = f.copy()
-        f_copy = f_copy.at[-1].set(f_copy[-1] * jnp.sqrt(2))
-
-        # Compute the DST-III using the FFT
-        out = jnp.zeros(4 * window_length)
-        out = out.at[1 : window_length + 1].set(f_copy)
-        out = out.at[window_length + 1 : 2 * window_length].set(f_copy[-2::-1])
-        out = out.at[2 * window_length + 1 : 3 * window_length + 1].set(
-            -f_copy
-        )
-        out = out.at[3 * window_length + 1 : 4 * window_length].set(
-            -f_copy[-2::-1]
-        )
-        out = jnp.fft.rfft(out)
-        out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
-        return out
-
-    elif dst_type == 4:
-        out = jnp.zeros(8 * window_length)
-
-        # Compute the DST-IV using the FFT
-        out = out.at[1 : 2 * window_length : 2].set(f)
-        out = out.at[2 * window_length + 1 : 4 * window_length : 2].set(
-            f[window_length - 1 :: -1]
-        )
-        out = out.at[4 * window_length + 1 : 6 * window_length : 2].set(-f)
-        out = out.at[6 * window_length + 1 : 8 * window_length : 2].set(
-            -f[window_length - 1 :: -1]
-        )
-        out = jnp.fft.rfft(out)
-        out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
-        return out
+    n = jnp.arange(M)
+    h = g * jnp.exp(-1j * jnp.pi * n / M)
+    H = jnp.fft.fft(h)
+    return -jnp.imag(H[:window_length]) / 2
 
 
 _3Dfour_sine = jax.vmap(
@@ -410,7 +360,6 @@ def pair_distribution_function_SVT_HNC(
         return coeff1, coeff2
 
     for titer, mult in enumerate(tmult):
-
         beta = 1 / (ureg.boltzmann_constant * mult * T_ab)
 
         v_s = beta * V_s
