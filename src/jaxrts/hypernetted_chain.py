@@ -386,38 +386,27 @@ def pair_distribution_function_SVT_HNC(
             """
             The modified Ornstein-Zernicke Relation
             """
-
             M = c_k.shape[0]
-            ar = jnp.arange(M)
 
-            # index grids
-            a = ar[:, jnp.newaxis, jnp.newaxis]  # shape (M,1,1)
-            b = ar[jnp.newaxis, :, jnp.newaxis]  # shape (1,M,1)
-            s = ar[jnp.newaxis, jnp.newaxis, :]  # shape (1,1,M)
+            term1 = coeff_1 * c_k[:, jnp.newaxis, :]
+            term2 = coeff_2 * c_k.T[jnp.newaxis, :, :]
 
-            # broadcast to full (M,M,M) so every (a,b,s) is explicit
-            a3 = jnp.broadcast_to(a, (M, M, M))
-            b3 = jnp.broadcast_to(b, (M, M, M))
-            s3 = jnp.broadcast_to(s, (M, M, M))
+            vals1 = -term1.m_as(ureg.dimensionless)
+            vals2 = -term2.m_as(ureg.dimensionless)
 
-            # flattened row & column indices in the big matrix A
-            p_idx = (a3 * M + b3).reshape(-1).astype(jnp.int32)  # (M^3,)
-            q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)  # idx(s,b)
-            q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)  # idx(a,s)
+            eye_M = jnp.eye(M, dtype=c_k.dtype)
+            # vals1[a,b,s] belongs at A[(a,b),(s,b)]
+            A1 = (
+                vals1[:, :, :, jnp.newaxis]
+                * eye_M[jnp.newaxis, :, jnp.newaxis, :]
+            ).reshape(M * M, M * M)
+            # vals2[a,b,s] belongs at A[(a,b),(a,s)]
+            A2 = (
+                vals2[:, :, jnp.newaxis, :]
+                * eye_M[:, jnp.newaxis, :, jnp.newaxis]
+            ).reshape(M * M, M * M)
 
-            # values to scatter:
-            # -alpha[a,b,s] * C[a,s] and -beta[a,b,s] * C[s,b]
-            vals1 = (
-                -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)
-            )
-            vals2 = (
-                -(coeff_2 * c_k[s3, b3]).reshape(-1).m_as(ureg.dimensionless)
-            )
-
-            # Build A = I + scattered contributions
-            A = jnp.eye(M**2, dtype=c_k.dtype)
-            A = A.at[p_idx, q1_idx].add(vals1)
-            A = A.at[p_idx, q2_idx].add(vals2)
+            A = jnp.eye(M**2, dtype=c_k.dtype) + A1 + A2
 
             units = c_k.units
             rhs = c_k.reshape(-1).m_as(units)
