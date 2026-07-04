@@ -279,7 +279,7 @@ def zaf_dst(f, dst_type):
         out = jnp.zeros(2 * window_length + 2)
         out = out.at[1 : window_length + 1].set(f)
         out = out.at[window_length + 2 :].set(-f[::-1])
-        out = jnp.fft.fft(out)
+        out = jnp.fft.rfft(out)
         out = -jnp.imag(out[1 : window_length + 1]) / 2
         return out
 
@@ -290,7 +290,7 @@ def zaf_dst(f, dst_type):
         out = out.at[2 * window_length + 1 : 4 * window_length : 2].set(
             -f[-1::-1]
         )
-        out = jnp.fft.fft(out)
+        out = jnp.fft.rfft(out)
         out = -jnp.imag(out[1 : window_length + 1]) / 2
         return out
 
@@ -310,7 +310,7 @@ def zaf_dst(f, dst_type):
         out = out.at[3 * window_length + 1 : 4 * window_length].set(
             -f_copy[-2::-1]
         )
-        out = jnp.fft.fft(out)
+        out = jnp.fft.rfft(out)
         out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
         return out
 
@@ -326,7 +326,7 @@ def zaf_dst(f, dst_type):
         out = out.at[6 * window_length + 1 : 8 * window_length : 2].set(
             -f[window_length - 1 :: -1]
         )
-        out = jnp.fft.fft(out)
+        out = jnp.fft.rfft(out)
         out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
         return out
 
