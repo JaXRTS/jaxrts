@@ -458,9 +458,9 @@ def pair_distribution_function_SVT_HNC(
             A = A.at[p_idx, q1_idx].add(vals1)
             A = A.at[p_idx, q2_idx].add(vals2)
 
-            # RHS is vec(C) with mapping p = a*M + b matching reshape order
-            rhs = c_k.reshape(-1)
-            H_flat = jnpu.matmul(jnp.linalg.inv(A), rhs)
+            units = c_k.units
+            rhs = c_k.reshape(-1).m_as(units)
+            H_flat = jnp.linalg.solve(A, rhs) * units
 
             return H_flat.reshape((M, M))
 
@@ -572,14 +572,13 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=None):
         """
         Ornstein-Zernicke Relation
         """
-        return jnpu.matmul(
-            jnp.linalg.inv(
-                (jnp.eye(ni.shape[0]) - jnpu.matmul(input_vec, d)).m_as(
-                    ureg.dimensionless
-                )
-            ),
-            input_vec,
+        A = (jnp.eye(ni.shape[0]) - jnpu.matmul(input_vec, d)).m_as(
+            ureg.dimensionless
         )
+        units = input_vec.units
+        rhs = input_vec.m_as(units)
+        H = jnp.linalg.solve(A, rhs)
+        return H * units
 
     def condition(val):
         """
