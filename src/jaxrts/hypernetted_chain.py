@@ -10,7 +10,8 @@ import jax.interpreters
 import jpu.numpy as jnpu
 from jax import numpy as jnp
 
-from jaxrts.units import Quantity, ureg
+from .units import Quantity, ureg
+from .helpers import cramer_solve
 
 
 # Helper functions.
@@ -306,9 +307,17 @@ _3Dfour_ogata = jax.vmap(
 _3Dfour = _3Dfour_sine
 
 
-@jax.jit
+@partial(jax.jit, static_argnames=["cramer_solve_max_size"])
 def pair_distribution_function_SVT_HNC(
-    V_s, V_l_k, r, T_ab, n, m, mix=0.0, tmult=None
+    V_s,
+    V_l_k,
+    r,
+    T_ab,
+    n,
+    m,
+    mix=0.0,
+    tmult=None,
+    cramer_solve_max_size: int = 4,
 ):
     """
     Multi-component, multi-temperature version of the SVT-OZ-HNC, by extending
@@ -332,7 +341,10 @@ def pair_distribution_function_SVT_HNC(
 
     @jax.jit
     def build_coeffs(
-        n: jnp.ndarray, T: jnp.ndarray, m: jnp.ndarray, mab: jnp.ndarray
+        n: jnp.ndarray,
+        T: jnp.ndarray,
+        m: jnp.ndarray,
+        mab: jnp.ndarray,
     ) -> tuple[jnp.ndarray, jnp.ndarray]:
         """
         n: (M,), T: (M,M) pairwise array, m: (M,)
@@ -409,7 +421,7 @@ def pair_distribution_function_SVT_HNC(
 
             units = c_k.units
             rhs = c_k.reshape(-1).m_as(units)
-            H_flat = jnp.linalg.solve(A, rhs) * units
+            H_flat = cramer_solve(A, rhs, cramer_solve_max_size) * units
 
             return H_flat.reshape((M, M))
 
@@ -481,8 +493,10 @@ def pair_distribution_function_SVT_HNC(
     return jnpu.exp(log_g_r), niter
 
 
-@jax.jit
-def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=None):
+@partial(jax.jit, static_argnames=["cramer_solve_max_size"])
+def pair_distribution_function_HNC(
+    V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=None, cramer_solve_max_size=4
+):
     """
     Calculate the Pair distribution function in the Hypernetted Chain approach,
     as it was published by :cite:`Wunsch.2011`.
@@ -526,7 +540,7 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=None):
         )
         units = input_vec.units
         rhs = input_vec.m_as(units)
-        H = jnp.linalg.solve(A, rhs)
+        H = cramer_solve(A, rhs, cramer_solve_max_size)
         return H * units
 
     def condition(val):
