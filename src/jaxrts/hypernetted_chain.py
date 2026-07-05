@@ -270,16 +270,17 @@ def dst4(f):
     (FFT). This is DST type 4. See
     https://en.wikipedia.org/wiki/Discrete_sine_transform
     """
-    window_length = len(f)
-    M = 4 * window_length
-    g = jnp.zeros(M)
-    g = g.at[1 : 2 * window_length : 2].set(f)
-    g = g.at[2 * window_length + 1 : M : 2].set(f[window_length - 1 :: -1])
+    window_length = f.shape[-1]
+    M = 2 * window_length
 
-    n = jnp.arange(M)
-    h = g * jnp.exp(-1j * jnp.pi * n / M)
+    g = jnp.concatenate([f, f[..., ::-1]], axis=-1)
+    m = jnp.arange(M)
+    h = g * jnp.exp(-1j * jnp.pi * m / M)
     H = jnp.fft.fft(h)
-    return -jnp.imag(H[:window_length]) / 2
+
+    j = jnp.arange(window_length)
+    phase = jnp.exp(-1j * jnp.pi * (2 * j + 1) / (2 * M))
+    return -jnp.imag(phase * H[..., :window_length]) / 2
 
 
 _3Dfour_sine = jax.vmap(
