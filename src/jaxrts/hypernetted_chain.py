@@ -269,18 +269,41 @@ def dst4(f):
     Compute the discrete sine transform (DST) using the fast Fourier transform
     (FFT). This is DST type 4. See
     https://en.wikipedia.org/wiki/Discrete_sine_transform
+
+    .. warning::
+
+       Only works if ``len(f)`` is divisible by 2.
+
+    See this blogpost for the discrete cosine transform
+    https://www.appletonaudio.com/blog/2013/derivation-of-fast-dct-4-algorithm-based-on-dft/
+    To go from the cosine to sine transform, reverse the intputs and flip the
+    sign of every other output
+    https://en.wikipedia.org/wiki/Discrete_sine_transform
     """
-    window_length = f.shape[-1]
-    M = 2 * window_length
+    N = f.shape[-1]
+    M = N // 2
 
-    g = jnp.concatenate([f, f[..., ::-1]], axis=-1)
-    m = jnp.arange(M)
-    h = g * jnp.exp(-1j * jnp.pi * m / M)
-    H = jnp.fft.fft(h)
+    # Flip the input
+    c = f[..., ::-1]
+    i_arr = jnp.arange(M)
+    fac = jnp.exp(-1j * jnp.pi * (i_arr + 1 / 8) / N)
 
-    j = jnp.arange(window_length)
-    phase = jnp.exp(-1j * jnp.pi * (2 * j + 1) / (2 * M))
-    return -jnp.imag(phase * H[..., :window_length]) / 2
+    y = (c[..., 2 * i_arr] + 1j * c[..., N - 1 - 2 * i_arr]) * fac
+    Y = jnp.fft.fft(y)
+
+    Y *= fac
+
+    ic = M - 1 - i_arr
+    even = Y[..., i_arr].real
+    odd = -Y[..., ic].imag
+
+    out = jnp.zeros(f.shape)
+    out = out.at[..., 2 * i_arr].set(even)
+    out = out.at[..., 2 * i_arr + 1].set(odd)
+
+    # Flip the sign every other output
+    out = out.at[..., 1::2].multiply(-1)
+    return out
 
 
 _3Dfour_sine = jax.vmap(
