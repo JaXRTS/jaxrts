@@ -186,6 +186,7 @@ def mass_density_from_electron_density(
     partial: boolean
         default false = density of mixture, if true: density vector splitted
         for mixture is returned.
+
     Returns
     -------
     array_like
@@ -465,8 +466,8 @@ def cramer_solve(A, b, N_max=4):
         be performed. If the size is bigger than `N_max`, fall back to
         ``jax.linalg.solve``.
 
-    Returns:
-    --------
+    Returns
+    -------
     x: jnp.narray
         Shape (..., N), so that :math:`A x = b`
     """

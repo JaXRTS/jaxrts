@@ -274,9 +274,16 @@ def dst4(f):
 
        Only works if ``len(f)`` is divisible by 2.
 
+
+    .. note::
+
+       Up to a factor of 2, this implementation yields results in agreement
+       with ``scipy.fft.dst(type=4, norm="backward")``
+
+
     See this blogpost for the discrete cosine transform
     https://www.appletonaudio.com/blog/2013/derivation-of-fast-dct-4-algorithm-based-on-dft/
-    To go from the cosine to sine transform, reverse the intputs and flip the
+    To go from the cosine to sine transform, reverse the inputs and flip the
     sign of every other output
     https://en.wikipedia.org/wiki/Discrete_sine_transform
     """
