@@ -10,7 +10,8 @@ import jax.interpreters
 import jpu.numpy as jnpu
 from jax import numpy as jnp
 
-from jaxrts.units import Quantity, ureg
+from .units import Quantity, ureg
+from .helpers import cramer_solve
 
 
 # Helper functions.
@@ -95,7 +96,7 @@ def fourier_transform_sine(k, rvals, fvals):
     arg = rvals * fvals
     units = arg.units
     dr = rvals[1] - rvals[0]
-    res = zaf_dst(arg.m_as(units), 4) * units * (4 * jnp.pi) / k * dr
+    res = dst4(arg.m_as(units)) * units * (4 * jnp.pi) / k * dr
     return res
 
 
@@ -206,7 +207,6 @@ def realfft(y, isign=1):
         wi = wi * wpr + wtemp * wpi + wi
 
     if isign == 1:
-
         h1r = y[0]
         y = y.at[0].set(h1r + y[1])
         y = y.at[1].set(h1r - y[1])
@@ -263,72 +263,54 @@ def sinft(y):
     return y
 
 
-@partial(jax.jit, static_argnames=["dst_type"])
-def zaf_dst(f, dst_type):
+@partial(jax.jit)
+def dst4(f):
     """
     Compute the discrete sine transform (DST) using the fast Fourier transform
-    (FFT).
+    (FFT). This is DST type 4. See
+    https://en.wikipedia.org/wiki/Discrete_sine_transform
 
-    Taken from `Zaf Python
-    <https://github.com/zafarrafii/Zaf-Python/tree/master>`_
+    .. warning::
+
+       Only works if ``len(f)`` is divisible by 2.
+
+
+    .. note::
+
+       Up to a factor of 2, this implementation yields results in agreement
+       with ``scipy.fft.dst(type=4, norm="backward")``
+
+
+    See this blogpost for the discrete cosine transform
+    https://www.appletonaudio.com/blog/2013/derivation-of-fast-dct-4-algorithm-based-on-dft/
+    To go from the cosine to sine transform, reverse the inputs and flip the
+    sign of every other output
+    https://en.wikipedia.org/wiki/Discrete_sine_transform
     """
-    window_length = len(f)
+    N = f.shape[-1]
+    M = N // 2
 
-    if dst_type == 1:
-        # Compute the DST-I using the FFT
-        out = jnp.zeros(2 * window_length + 2)
-        out = out.at[1 : window_length + 1].set(f)
-        out = out.at[window_length + 2 :].set(-f[::-1])
-        out = jnp.fft.fft(out)
-        out = -jnp.imag(out[1 : window_length + 1]) / 2
-        return out
+    # Flip the input
+    c = f[..., ::-1]
+    i_arr = jnp.arange(M)
+    fac = jnp.exp(-1j * jnp.pi * (i_arr + 1 / 8) / N)
 
-    elif dst_type == 2:
-        # Compute the DST-II using the FFT
-        out = jnp.zeros(4 * window_length)
-        out = out.at[1 : 2 * window_length : 2].set(f)
-        out = out.at[2 * window_length + 1 : 4 * window_length : 2].set(
-            -f[-1::-1]
-        )
-        out = jnp.fft.fft(out)
-        out = -jnp.imag(out[1 : window_length + 1]) / 2
-        return out
+    y = (c[..., 2 * i_arr] + 1j * c[..., N - 1 - 2 * i_arr]) * fac
+    Y = jnp.fft.fft(y)
 
-    elif dst_type == 3:
-        # Pre-process the signal to make the DST-III matrix orthogonal
-        # (copy the signal to avoid modifying it outside of the function)
-        f_copy = f.copy()
-        f_copy = f_copy.at[-1].set(f_copy[-1] * jnp.sqrt(2))
+    Y *= fac
 
-        # Compute the DST-III using the FFT
-        out = jnp.zeros(4 * window_length)
-        out = out.at[1 : window_length + 1].set(f_copy)
-        out = out.at[window_length + 1 : 2 * window_length].set(f_copy[-2::-1])
-        out = out.at[2 * window_length + 1 : 3 * window_length + 1].set(
-            -f_copy
-        )
-        out = out.at[3 * window_length + 1 : 4 * window_length].set(
-            -f_copy[-2::-1]
-        )
-        out = jnp.fft.fft(out)
-        out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
-        return out
+    ic = M - 1 - i_arr
+    even = Y[..., i_arr].real
+    odd = -Y[..., ic].imag
 
-    elif dst_type == 4:
-        out = jnp.zeros(8 * window_length)
+    out = jnp.zeros(f.shape)
+    out = out.at[..., 2 * i_arr].set(even)
+    out = out.at[..., 2 * i_arr + 1].set(odd)
 
-        # Compute the DST-IV using the FFT
-        out = out.at[1 : 2 * window_length : 2].set(f)
-        out = out.at[2 * window_length + 1 : 4 * window_length : 2].set(
-            f[window_length - 1 :: -1]
-        )
-        out = out.at[4 * window_length + 1 : 6 * window_length : 2].set(-f)
-        out = out.at[6 * window_length + 1 : 8 * window_length : 2].set(
-            -f[window_length - 1 :: -1]
-        )
-        out = jnp.fft.fft(out)
-        out = -jnp.imag(out[1 : 2 * window_length : 2]) / 4
-        return out
+    # Flip the sign every other output
+    out = out.at[..., 1::2].multiply(-1)
+    return out
 
 
 _3Dfour_sine = jax.vmap(
@@ -356,9 +338,17 @@ _3Dfour_ogata = jax.vmap(
 _3Dfour = _3Dfour_sine
 
 
-@jax.jit
+@partial(jax.jit, static_argnames=["cramer_solve_max_size"])
 def pair_distribution_function_SVT_HNC(
-    V_s, V_l_k, r, T_ab, n, m, mix=0.0, tmult=None
+    V_s,
+    V_l_k,
+    r,
+    T_ab,
+    n,
+    m,
+    mix=0.0,
+    tmult=None,
+    cramer_solve_max_size: int = 4,
 ):
     """
     Multi-component, multi-temperature version of the SVT-OZ-HNC, by extending
@@ -382,7 +372,10 @@ def pair_distribution_function_SVT_HNC(
 
     @jax.jit
     def build_coeffs(
-        n: jnp.ndarray, T: jnp.ndarray, m: jnp.ndarray, mab: jnp.ndarray
+        n: jnp.ndarray,
+        T: jnp.ndarray,
+        m: jnp.ndarray,
+        mab: jnp.ndarray,
     ) -> tuple[jnp.ndarray, jnp.ndarray]:
         """
         n: (M,), T: (M,M) pairwise array, m: (M,)
@@ -410,7 +403,6 @@ def pair_distribution_function_SVT_HNC(
         return coeff1, coeff2
 
     for titer, mult in enumerate(tmult):
-
         beta = 1 / (ureg.boltzmann_constant * mult * T_ab)
 
         v_s = beta * V_s
@@ -425,42 +417,31 @@ def pair_distribution_function_SVT_HNC(
             """
             The modified Ornstein-Zernicke Relation
             """
-
             M = c_k.shape[0]
-            ar = jnp.arange(M)
 
-            # index grids
-            a = ar[:, jnp.newaxis, jnp.newaxis]  # shape (M,1,1)
-            b = ar[jnp.newaxis, :, jnp.newaxis]  # shape (1,M,1)
-            s = ar[jnp.newaxis, jnp.newaxis, :]  # shape (1,1,M)
+            term1 = coeff_1 * c_k[:, jnp.newaxis, :]
+            term2 = coeff_2 * c_k.T[jnp.newaxis, :, :]
 
-            # broadcast to full (M,M,M) so every (a,b,s) is explicit
-            a3 = jnp.broadcast_to(a, (M, M, M))
-            b3 = jnp.broadcast_to(b, (M, M, M))
-            s3 = jnp.broadcast_to(s, (M, M, M))
+            vals1 = -term1.m_as(ureg.dimensionless)
+            vals2 = -term2.m_as(ureg.dimensionless)
 
-            # flattened row & column indices in the big matrix A
-            p_idx = (a3 * M + b3).reshape(-1).astype(jnp.int32)  # (M^3,)
-            q1_idx = (s3 * M + b3).reshape(-1).astype(jnp.int32)  # idx(s,b)
-            q2_idx = (a3 * M + s3).reshape(-1).astype(jnp.int32)  # idx(a,s)
+            eye_M = jnp.eye(M, dtype=c_k.dtype)
+            # vals1[a,b,s] belongs at A[(a,b),(s,b)]
+            A1 = (
+                vals1[:, :, :, jnp.newaxis]
+                * eye_M[jnp.newaxis, :, jnp.newaxis, :]
+            ).reshape(M * M, M * M)
+            # vals2[a,b,s] belongs at A[(a,b),(a,s)]
+            A2 = (
+                vals2[:, :, jnp.newaxis, :]
+                * eye_M[:, jnp.newaxis, :, jnp.newaxis]
+            ).reshape(M * M, M * M)
 
-            # values to scatter:
-            # -alpha[a,b,s] * C[a,s] and -beta[a,b,s] * C[s,b]
-            vals1 = (
-                -(coeff_1 * c_k[a3, s3]).reshape(-1).m_as(ureg.dimensionless)
-            )
-            vals2 = (
-                -(coeff_2 * c_k[s3, b3]).reshape(-1).m_as(ureg.dimensionless)
-            )
+            A = jnp.eye(M**2, dtype=c_k.dtype) + A1 + A2
 
-            # Build A = I + scattered contributions
-            A = jnp.eye(M**2, dtype=c_k.dtype)
-            A = A.at[p_idx, q1_idx].add(vals1)
-            A = A.at[p_idx, q2_idx].add(vals2)
-
-            # RHS is vec(C) with mapping p = a*M + b matching reshape order
-            rhs = c_k.reshape(-1)
-            H_flat = jnpu.matmul(jnp.linalg.inv(A), rhs)
+            units = c_k.units
+            rhs = c_k.reshape(-1).m_as(units)
+            H_flat = cramer_solve(A, rhs, cramer_solve_max_size) * units
 
             return H_flat.reshape((M, M))
 
@@ -532,8 +513,10 @@ def pair_distribution_function_SVT_HNC(
     return jnpu.exp(log_g_r), niter
 
 
-@jax.jit
-def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=None):
+@partial(jax.jit, static_argnames=["cramer_solve_max_size"])
+def pair_distribution_function_HNC(
+    V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=None, cramer_solve_max_size=4
+):
     """
     Calculate the Pair distribution function in the Hypernetted Chain approach,
     as it was published by :cite:`Wunsch.2011`.
@@ -572,14 +555,13 @@ def pair_distribution_function_HNC(V_s, V_l_k, r, Ti, ni, mix=0.0, tmult=None):
         """
         Ornstein-Zernicke Relation
         """
-        return jnpu.matmul(
-            jnp.linalg.inv(
-                (jnp.eye(ni.shape[0]) - jnpu.matmul(input_vec, d)).m_as(
-                    ureg.dimensionless
-                )
-            ),
-            input_vec,
+        A = (jnp.eye(ni.shape[0]) - jnpu.matmul(input_vec, d)).m_as(
+            ureg.dimensionless
         )
+        units = input_vec.units
+        rhs = input_vec.m_as(units)
+        H = cramer_solve(A, rhs, cramer_solve_max_size)
+        return H * units
 
     def condition(val):
         """

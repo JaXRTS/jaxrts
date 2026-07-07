@@ -793,6 +793,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         SVT: bool = False,
         mix: float = 0.0,
         tmult: list[float] = None,
+        cramer_solve_max_size: int = 4,
     ) -> None:
         #: The minimal radius for evaluating the potentials.
         if tmult is None:
@@ -821,6 +822,10 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         #: See also
         #: :py:func:`jaxrts.hypernetted_chain.pair_distribution_function_HNC`.
         self.tmult: list[float] = tmult
+        #: The maximum matrix size for which the direct matrix inverison sould
+        #: be used over `jnp.linalg.solve` in the SVT algorighm. See also
+        #: `:py:func:`jaxrts.helpers.cramer_solve`.
+        self.cramer_solve_max_size: int = cramer_solve_max_size
         super().__init__()
 
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
@@ -864,11 +869,26 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         if self.SVT:
             masses = to_array([ion.atomic_mass for ion in plasma_state.ions])
             g, niter = hypernetted_chain.pair_distribution_function_SVT_HNC(
-                V_s_r, V_l_k, self.r, T, n, masses, self.mix, self.tmult
+                V_s_r,
+                V_l_k,
+                self.r,
+                T,
+                n,
+                masses,
+                self.mix,
+                self.tmult,
+                self.cramer_solve_max_size,
             )
         else:
             g, niter = hypernetted_chain.pair_distribution_function_HNC(
-                V_s_r, V_l_k, self.r, T, n, self.mix, self.tmult
+                V_s_r,
+                V_l_k,
+                self.r,
+                T,
+                n,
+                self.mix,
+                self.tmult,
+                self.cramer_solve_max_size,
             )
         logger.debug(
             f"{niter} Iterations of the HNC algorithm were required to reach the solution"  # noqa: E501
@@ -885,13 +905,14 @@ class OnePotentialHNCIonFeat(IonFeatModel):
             self.model_key,
             self.pot,
             self.SVT,
+            self.cramer_solve_max_size,
         )  # static values
         return (children, aux_data)
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
         obj = object.__new__(cls)
-        obj.model_key, obj.pot, obj.SVT = aux_data
+        obj.model_key, obj.pot, obj.SVT, obj.cramer_solve_max_size = aux_data
         obj.r_min, obj.r_max, obj.mix, obj.tmult = children
 
         return obj
