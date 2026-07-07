@@ -346,9 +346,37 @@ class IonFeatModel(Model):
     #: A list of keywords where this model is adequate for
     allowed_keys: list[str] = ["ionic scattering"]
 
+    #: HNC type models calculate the SSF on a k grid, and then interpolate to
+    #: the scattering vector of the setup class. For these models, provide a
+    #: Sii_on_grid method which returns the HNC result. This way, subsequent
+    #: calculation, e.g., for BornMermin models are notably faster.
+    #: This boolean flag should indicate if such a method is implemented for
+    #: a given Model.
+    supports_S_ii_grid: bool = False
+
+    def check_supports_S_ii_grid(self, plasma_state: "PlasmaState") -> bool:
+        """
+        Whether :py:meth:`S_ii_on_grid` can be used for this model, given the
+        current plasma_state. This allows derived models (e.g., `Sum_Sii`) to
+        delegate the check to the wrapped ionic_scattering model.
+        """
+        return self.supports_S_ii_grid
+
     def prepare(self, plasma_state: "PlasmaState", key: str) -> None:
         plasma_state.update_default_model("form-factors", PaulingFormFactors())
         plasma_state.update_default_model("screening", Gregori2004Screening())
+
+    def S_ii_on_grid(self, plasma_state: "PlasmaState"):
+        """
+        For `py:class:jaxrts.models.IonFeatModel` that internally calculate
+        S_ii a k-grid independently of the probe setup (e.g. HNC-based models)
+        this method should return (k_grid, S_ab_grid). Such models should
+        advertise `:py:attr:`~.supports_S_ii_grid` as ``False``.
+        This allows for BornMermin type models to not re-run the full HNC loops
+        on every point of the integration for the collision frequency, and
+        gives users quick access to S_ii(k).
+        """
+        raise NotImplementedError
 
     @abc.abstractmethod
     def S_ii(
@@ -755,6 +783,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
     cite_keys = [
         ("Wunsch.2011", "Basis for the implementation of the HNC scheme.")
     ]
+    supports_S_ii_grid = True
 
     def __init__(
         self,
@@ -814,6 +843,13 @@ class OnePotentialHNCIonFeat(IonFeatModel):
 
     @jax.jit
     def S_ii(self, plasma_state: "PlasmaState", setup: Setup) -> jnp.ndarray:
+        k_grid, S_ab_grid = self.S_ii_on_grid(plasma_state)
+        return hypernetted_chain.hnc_interp(setup.k, k_grid, S_ab_grid)
+
+    @jax.jit
+    def S_ii_on_grid(
+        self, plasma_state: "PlasmaState"
+    ) -> (jnp.ndarray, jnp.ndarray):
         # Prepare the Potentials
         # ----------------------
 
@@ -840,12 +876,7 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
         S_ab_HNC = hypernetted_chain.S_ii_HNC(self.k, g, n, self.r)
-
-        # Interpolate this to the k given by the setup
-
-        S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
-
-        return S_ab
+        return self.k, S_ab_HNC
 
     # The following is required to jit a Model
     def _tree_flatten(self):
@@ -912,6 +943,7 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         ),
         ("Wunsch.2011", "Basis for the implementation of the HNC scheme."),
     ]
+    supports_S_ii_grid = True
 
     def __init__(
         self,
@@ -988,6 +1020,13 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
     def _S_ii_with_electrons(
         self, plasma_state: "PlasmaState", setup: Setup
     ) -> jnp.ndarray:
+        k_grid, S_ab_grid = self._S_ii_with_electrons_on_grid(plasma_state)
+        return hypernetted_chain.hnc_interp(setup.k, k_grid, S_ab_grid)
+
+    @jax.jit
+    def _S_ii_with_electrons_on_grid(
+        self, plasma_state: "PlasmaState"
+    ) -> (jnp.ndarray, jnp.ndarray):
         # Prepare the Potentials
         # ----------------------
 
@@ -1064,11 +1103,14 @@ class ThreePotentialHNCIonFeat(IonFeatModel):
         # Calculate S_ab by Fourier-transforming g_ab
         # ---------------------------------------------
         S_ab_HNC = hypernetted_chain.S_ii_HNC(self.k, g, n, self.r)
+        return self.k, S_ab_HNC
 
-        # Interpolate this to the k given by the setup
-
-        S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
-        return S_ab
+    @jax.jit
+    def S_ii_on_grid(
+        self, plasma_state: "PlasmaState"
+    ) -> (jnp.ndarray, jnp.ndarray):
+        k, S_ab = self._S_ii_with_electrons_on_grid(plasma_state)
+        return k, S_ab[:-1, :-1]
 
     def S_ii(self, plasma_state, setup):
         S_ab = self._S_ii_with_electrons(plasma_state, setup)
@@ -1633,19 +1675,7 @@ class BornMermin_Full(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        @jax.tree_util.Partial
-        def S_ii(k):
-            probe_setup = get_probe_setup(k, setup)
-            return plasma_state.evaluate("BM S_ii", probe_setup)
-
-        @jax.tree_util.Partial
-        def V_eiS(k):
-            return plasma_state["BM V_eiS"].V(plasma_state, k)
-
-        mean_Z_free = jnpu.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
-        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        S_ii, V_eiS, mean_Z_free, mu = _prepare_BM(plasma_state, setup)
         k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA(
             k,
@@ -1680,20 +1710,8 @@ class BornMermin_Full(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        @jax.tree_util.Partial
-        def S_ii(k):
-            probe_setup = get_probe_setup(k, setup)
-            return plasma_state.evaluate("BM S_ii", probe_setup)
-
-        @jax.tree_util.Partial
-        def V_eiS(k):
-            return plasma_state["BM V_eiS"].V(plasma_state, k)
-
-        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        S_ii, V_eiS, mean_Z_free, mu = _prepare_BM(plasma_state, setup)
         k = setup.k
-        mean_Z_free = jnpu.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
 
         def chi(energy):
             eps = free_free.dielectric_function_BMA_full(
@@ -1740,6 +1758,51 @@ class BornMermin_Full(FreeFreeModel):
         obj.model_key, obj.sample_points, obj.RPA_rewrite, obj.KKT = aux_data
 
         return obj
+
+
+def _build_cached_S_ii(plasma_state, setup):
+    """
+    If the ionic scattering model supports an Sii_grid calculation, run the
+    expensive part of 'BM S_ii' once and return a cheap S_ii(k) closure.
+    Otherwise, evaluate the static structure factor anew, each time.
+    """
+    bm_sii_model = plasma_state["BM S_ii"]
+    if bm_sii_model.check_supports_S_ii_grid(plasma_state):
+        k_grid, S_ab_grid = bm_sii_model.S_ii_on_grid(plasma_state)
+
+        @jax.tree_util.Partial
+        def S_ii(k):
+            return (
+                jnp.interp(
+                    k.m_as(1 / ureg.angstrom),
+                    k_grid.m_as(1 / ureg.angstrom),
+                    S_ab_grid[0, 0, :],
+                )
+                * ureg.dimensionless
+            )
+    else:
+
+        @jax.tree_util.Partial
+        def S_ii(k):
+            probe_setup = get_probe_setup(k, setup)
+            return plasma_state.evaluate("BM S_ii", probe_setup)
+
+    return S_ii
+
+
+def _prepare_BM(plasma_state, setup):
+    """
+    Generate inputs required for all BM models
+    """
+    S_ii = _build_cached_S_ii(plasma_state, setup)
+
+    @jax.tree_util.Partial
+    def V_eiS(k):
+        return plasma_state["BM V_eiS"].V(plasma_state, k)
+
+    mean_Z_free = jnpu.sum(plasma_state.Z_free * plasma_state.number_fraction)
+    mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+    return S_ii, V_eiS, mean_Z_free, mu
 
 
 class BornMermin(FreeFreeModel):
@@ -1896,19 +1959,7 @@ class BornMermin(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        @jax.tree_util.Partial
-        def S_ii(k):
-            probe_setup = get_probe_setup(k, setup)
-            return plasma_state.evaluate("BM S_ii", probe_setup)
-
-        @jax.tree_util.Partial
-        def V_eiS(k):
-            return plasma_state["BM V_eiS"].V(plasma_state, k)
-
-        mean_Z_free = jnpu.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
-        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        S_ii, V_eiS, mean_Z_free, mu = _prepare_BM(plasma_state, setup)
         k = setup.dispersion_corrected_k(plasma_state.n_e)
         See_0 = free_free.S0_ee_BMA_chapman_interp(
             k,
@@ -1946,20 +1997,7 @@ class BornMermin(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        @jax.tree_util.Partial
-        def S_ii(k):
-            probe_setup = get_probe_setup(k, setup)
-            return plasma_state.evaluate("BM S_ii", probe_setup)
-
-        @jax.tree_util.Partial
-        def V_eiS(k):
-            probe_setup = get_probe_setup(k, setup)
-            return plasma_state["BM V_eiS"].evaluate(plasma_state, probe_setup)
-
-        mean_Z_free = jnpu.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
-        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        S_ii, V_eiS, mean_Z_free, mu = _prepare_BM(plasma_state, setup)
         k = setup.k
 
         def chi(energy):
@@ -2181,20 +2219,9 @@ class BornMermin_Fit(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        @jax.tree_util.Partial
-        def S_ii(k):
-            probe_setup = get_probe_setup(k, setup)
-            return plasma_state.evaluate("BM S_ii", probe_setup)
-
-        @jax.tree_util.Partial
-        def V_eiS(k):
-            return plasma_state["BM V_eiS"].V(plasma_state, k)
-
-        mean_Z_free = jnpu.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
-        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        S_ii, V_eiS, mean_Z_free, mu = _prepare_BM(plasma_state, setup)
         k = setup.dispersion_corrected_k(plasma_state.n_e)
+
         See_0 = free_free.S0_ee_BMA_chapman_interpFit(
             k,
             plasma_state.T_e,
@@ -2231,19 +2258,7 @@ class BornMermin_Fit(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        @jax.tree_util.Partial
-        def S_ii(k):
-            probe_setup = get_probe_setup(k, setup)
-            return plasma_state.evaluate("BM S_ii", probe_setup)
-
-        @jax.tree_util.Partial
-        def V_eiS(k):
-            return plasma_state["BM V_eiS"].V(plasma_state, k)
-
-        mean_Z_free = jnpu.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
-        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        S_ii, V_eiS, mean_Z_free, mu = _prepare_BM(plasma_state, setup)
         k = setup.k
 
         def chi(energy):
@@ -2467,20 +2482,8 @@ class BornMermin_Fortmann(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        @jax.tree_util.Partial
-        def S_ii(k):
-            probe_setup = get_probe_setup(k, setup)
-            return plasma_state.evaluate("BM S_ii", probe_setup)
-
-        @jax.tree_util.Partial
-        def V_eiS(k):
-            return plasma_state["BM V_eiS"].V(plasma_state, k)
-
-        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        S_ii, V_eiS, mean_Z_free, mu = _prepare_BM(plasma_state, setup)
         k = setup.dispersion_corrected_k(plasma_state.n_e)
-        mean_Z_free = jnpu.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
         See_0 = free_free.S0_ee_BMA_Fortmann(
             k,
             plasma_state.T_e,
@@ -2517,21 +2520,8 @@ class BornMermin_Fortmann(FreeFreeModel):
         *args,
         **kwargs,
     ) -> jnp.ndarray:
-        @jax.tree_util.Partial
-        def S_ii(k):
-            probe_setup = get_probe_setup(k, setup)
-            return plasma_state.evaluate("BM S_ii", probe_setup)
-
-        @jax.tree_util.Partial
-        def V_eiS(k):
-            return plasma_state["BM V_eiS"].V(plasma_state, k)
-
-        mu = plasma_state["chemical potential"].evaluate(plasma_state, setup)
+        S_ii, V_eiS, mean_Z_free, mu = _prepare_BM(plasma_state, setup)
         k = setup.k
-
-        mean_Z_free = jnpu.sum(
-            plasma_state.Z_free * plasma_state.number_fraction
-        )
         xi = free_free.susceptibility_BMA_Fortmann(
             k,
             E,
@@ -4926,6 +4916,27 @@ class Sum_Sii(Model):
             "ionic scattering", OnePotentialHNCIonFeat()
         )
 
+    def check_supports_S_ii_grid(self, plasma_state: "PlasmaState") -> bool:
+        return plasma_state["ionic scattering"].check_supports_S_ii_grid(
+            plasma_state
+        )
+
+    def S_ii_on_grid(self, plasma_state: "PlasmaState"):
+        # Only ever called after check_supports_S_ii_grid() returned True,
+        # so this is safe.
+        k_grid, S_ab_grid = plasma_state["ionic scattering"].S_ii_on_grid(
+            plasma_state
+        )
+        x = plasma_state.number_fraction
+        S_ii_grid = sum(
+            (jnpu.sqrt(x[a] * x[b]) * S_ab_grid[a, b]).m_as(
+                ureg.dimensionless
+            )[jnp.newaxis]
+            for a in range(plasma_state.nions)
+            for b in range(plasma_state.nions)
+        )
+        return k_grid, S_ii_grid[jnp.newaxis, :, :]
+
     def evaluate(
         self,
         plasma_state: "PlasmaState",
@@ -4933,26 +4944,8 @@ class Sum_Sii(Model):
         *args,
         **kwargs,
     ):
-        S_ab = plasma_state["ionic scattering"].S_ii(plasma_state, setup)
-        x = plasma_state.number_fraction
-        # Add the contributions from all pairs
-        S_ii = 0
-
-        def add_Sii(a, b):
-            return (jnpu.sqrt(x[a] * x[b]) * S_ab[a, b]).m_as(
-                ureg.dimensionless
-            )[jnp.newaxis]
-
-        # The W_R is calculated as a sum over all combinations of a_b
-        ion_spec1, ion_spec2 = jnp.meshgrid(
-            jnp.arange(plasma_state.nions),
-            jnp.arange(plasma_state.nions),
-        )
-        for a, b in zip(
-            ion_spec1.flatten(), ion_spec2.flatten(), strict=False
-        ):
-            S_ii += add_Sii(a, b)
-        return S_ii
+        k_grid, S_ab_grid = self.S_ii_on_grid(plasma_state)
+        return hypernetted_chain.hnc_interp(setup.k, k_grid, S_ab_grid)[0, 0]
 
 
 class AverageAtom_Sii(Model):
@@ -4967,6 +4960,7 @@ class AverageAtom_Sii(Model):
     cite_keys = [
         ("Wunsch.2011", "Basis for the implementation of the HNC scheme.")
     ]
+    supports_S_ii_grid = True
 
     def __init__(
         self,
@@ -5012,6 +5006,14 @@ class AverageAtom_Sii(Model):
             "ionic scattering", OnePotentialHNCIonFeat()
         )
 
+    def check_supports_S_ii_grid(self, plasma_state: "PlasmaState") -> bool:
+        """
+        Whether :py:meth:`S_ii_on_grid` can be used for this model, given the
+        current plasma_state. This allows derived models (e.g., `Sum_Sii`) to
+        delegate the check to the wrapped ionic_scattering model.
+        """
+        return self.supports_S_ii_grid
+
     @property
     def r(self):
         return jnpu.linspace(self.r_min, self.r_max, 2**self.pot)
@@ -5024,9 +5026,7 @@ class AverageAtom_Sii(Model):
         return jnp.pi / r[-1] + jnp.arange(len(r)) * dk
 
     @jax.jit
-    def evaluate(
-        self, plasma_state: "PlasmaState", setup: Setup
-    ) -> jnp.ndarray:
+    def S_ii_on_grid(self, plasma_state: "PlasmaState") -> jnp.ndarray:
         # Average the Plasma State
         aaState = averagePlasmaState(plasma_state)
 
@@ -5051,11 +5051,17 @@ class AverageAtom_Sii(Model):
         # ---------------------------------------------
         S_ab_HNC = hypernetted_chain.S_ii_HNC(self.k, g, n, self.r)
 
-        # Interpolate this to the k given by the setup
+        return self.k, S_ab_HNC.m_as(ureg.dimensionless)
 
-        S_ab = hypernetted_chain.hnc_interp(setup.k, self.k, S_ab_HNC)
-        # Return the Sii with the correct shape
-        return S_ab[0, 0]
+    def evaluate(
+        self,
+        plasma_state: "PlasmaState",
+        setup: Setup,
+        *args,
+        **kwargs,
+    ):
+        k_grid, S_ab_grid = self.S_ii_on_grid(plasma_state)
+        return hypernetted_chain.hnc_interp(setup.k, k_grid, S_ab_grid)[0, 0]
 
     # The following is required to jit a Model
     def _tree_flatten(self):
