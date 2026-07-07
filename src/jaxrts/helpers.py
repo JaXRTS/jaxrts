@@ -9,15 +9,12 @@ from time import time
 from platformdirs import user_cache_dir
 import requests
 from pathlib import Path
-import numpy as onp
 
-
-import jaxrts
 import jax
 from jax import numpy as jnp
 import jpu.numpy as jnpu
 
-from .units import Quantity, ureg
+from .units import Quantity, ureg, to_array
 
 #: Typically, we return quantities that differ per orbital in an
 #: :py:class:`jax.numpy.ndarray` with 10 entries, the orbitals with n<=4.
@@ -222,7 +219,7 @@ def mass_density_from_electron_density(
         )
 
     # model average atom in the mixture
-    m = jaxrts.units.to_array([x.atomic_mass for x in elements])
+    m = to_array([x.atomic_mass for x in elements])
     nom = jnpu.sum(m * number_fractions)
     denom = jnpu.sum(Z * number_fractions)
 

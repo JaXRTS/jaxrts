@@ -8,21 +8,13 @@ all_models = defaultdict(list)
 
 def generate_available_model_overview_page():
     # for name in list(models.keys()):
-    for module in [jaxrts.models, jaxrts.hnc_potentials]:
-        for obj_name in dir(module):
-            if "__class__" in dir(obj_name):
-                attributes = getattr(module, obj_name)
-                if "allowed_keys" in dir(attributes):
-                    keys = attributes.allowed_keys
-                    if (
-                        ("Model" not in obj_name)
-                        & ("model" not in obj_name)
-                        & (not obj_name.startswith("_"))
-                    ):
-                        for k in keys:
-                            all_models[k].append(
-                                f"{module.__name__}.{obj_name}"
-                            )
+    for module in ["models", "hnc_potentials"]:
+        objs = jaxrts.get_all_models(module, names_only=True)
+        for key, model_list in objs.items():
+            for model_name in model_list:
+                all_models[key].append(
+                    f"jaxrts.{module}.{model_name}"
+                )
 
     with open(pathlib.Path(__file__).parent / "models.rst", "w") as f:
         f.write("Models implemented\n")

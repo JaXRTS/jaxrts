@@ -1750,27 +1750,3 @@ def transformPotential(V, r) -> Quantity:
         V,
     )
     return V_k, k
-
-
-_all_hnc_potentals = [
-    CoulombPotential,
-    DebyeHueckelPotential,
-    DeutschPotential,
-    EmptyCorePotential,
-    KelbgPotential,
-    KlimontovichKraeftPotential,
-    PotentialSum,
-    ScaledPotential,
-    SoftCorePotential,
-    SpinAveragedEEExchange,
-    PauliClassicalMap,
-    SpinSeparatedEEExchange,
-    YukawaShortRangeRepulsion,
-]
-
-for _pot in _all_hnc_potentals:
-    jax.tree_util.register_pytree_node(
-        _pot,
-        _pot._tree_flatten,
-        _pot._tree_unflatten,
-    )
