@@ -4942,20 +4942,29 @@ class Sum_Sii(Model):
             plasma_state
         )
 
+    def _combine_S_ab(self, plasma_state: "PlasmaState", S_ab) -> jnp.ndarray:
+        """
+        Number-fraction-weighted sum of per-species-pair static structure
+        factor S_ab (shape (nions, nions, ...)) into a single combined S_ii.
+        Shared by both grid and direct evaluation.
+        """
+        x = plasma_state.number_fraction
+        S_ii = sum(
+            (jnpu.sqrt(x[a] * x[b]) * S_ab[a, b]).m_as(ureg.dimensionless)[
+                jnp.newaxis
+            ]
+            for a in range(plasma_state.nions)
+            for b in range(plasma_state.nions)
+        )
+        return S_ii
+
     def S_ii_on_grid(self, plasma_state: "PlasmaState"):
         # Only ever called after check_supports_S_ii_grid() returned True,
         # so this is safe.
         k_grid, S_ab_grid = plasma_state["ionic scattering"].S_ii_on_grid(
             plasma_state
         )
-        x = plasma_state.number_fraction
-        S_ii_grid = sum(
-            (jnpu.sqrt(x[a] * x[b]) * S_ab_grid[a, b]).m_as(
-                ureg.dimensionless
-            )[jnp.newaxis]
-            for a in range(plasma_state.nions)
-            for b in range(plasma_state.nions)
-        )
+        S_ii_grid = self._combine_S_ab(plasma_state, S_ab_grid)
         return k_grid, S_ii_grid[jnp.newaxis, :, :]
 
     def evaluate(
@@ -4965,8 +4974,9 @@ class Sum_Sii(Model):
         *args,
         **kwargs,
     ):
-        k_grid, S_ab_grid = self.S_ii_on_grid(plasma_state)
-        return hypernetted_chain.hnc_interp(setup.k, k_grid, S_ab_grid)[0, 0]
+        S_ab = plasma_state["ionic scattering"].S_ii(plasma_state, setup)
+        S_ii = self._combine_S_ab(plasma_state, S_ab)
+        return S_ii
 
 
 class AverageAtom_Sii(Model):
