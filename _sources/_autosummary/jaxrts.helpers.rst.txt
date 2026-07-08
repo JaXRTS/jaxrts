@@ -24,6 +24,7 @@ jaxrts.helpers
       :recursive:
    
       bisection
+      cramer_solve
       download_from_nist
       get_cache_dir
       invert_dict

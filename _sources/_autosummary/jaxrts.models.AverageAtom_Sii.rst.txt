@@ -12,8 +12,10 @@ jaxrts.models.AverageAtom\_Sii
    .. autosummary::
       :toctree:
    
+      ~AverageAtom_Sii.S_ii_on_grid
       ~AverageAtom_Sii.__init__
       ~AverageAtom_Sii.check
+      ~AverageAtom_Sii.check_supports_S_ii_grid
       ~AverageAtom_Sii.citation
       ~AverageAtom_Sii.evaluate
       ~AverageAtom_Sii.prepare
@@ -31,6 +33,7 @@ jaxrts.models.AverageAtom\_Sii
       ~AverageAtom_Sii.cite_keys
       ~AverageAtom_Sii.k
       ~AverageAtom_Sii.r
+      ~AverageAtom_Sii.supports_S_ii_grid
       ~AverageAtom_Sii.r_max
       ~AverageAtom_Sii.pot
       ~AverageAtom_Sii.mix

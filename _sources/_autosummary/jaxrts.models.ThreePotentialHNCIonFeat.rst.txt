@@ -14,8 +14,10 @@ jaxrts.models.ThreePotentialHNCIonFeat
    
       ~ThreePotentialHNCIonFeat.Rayleigh_weight
       ~ThreePotentialHNCIonFeat.S_ii
+      ~ThreePotentialHNCIonFeat.S_ii_on_grid
       ~ThreePotentialHNCIonFeat.__init__
       ~ThreePotentialHNCIonFeat.check
+      ~ThreePotentialHNCIonFeat.check_supports_S_ii_grid
       ~ThreePotentialHNCIonFeat.citation
       ~ThreePotentialHNCIonFeat.evaluate
       ~ThreePotentialHNCIonFeat.prepare
@@ -33,6 +35,7 @@ jaxrts.models.ThreePotentialHNCIonFeat
       ~ThreePotentialHNCIonFeat.cite_keys
       ~ThreePotentialHNCIonFeat.k
       ~ThreePotentialHNCIonFeat.r
+      ~ThreePotentialHNCIonFeat.supports_S_ii_grid
       ~ThreePotentialHNCIonFeat.r_max
       ~ThreePotentialHNCIonFeat.pot
       ~ThreePotentialHNCIonFeat.mix

@@ -287,7 +287,6 @@ The potential modelling the interaction between two ions.
     jaxrts.hnc_potentials.CoulombPotential
     jaxrts.hnc_potentials.DebyeHueckelPotential
     jaxrts.hnc_potentials.DeutschPotential
-    jaxrts.hnc_potentials.HNCPotential
     jaxrts.hnc_potentials.KelbgPotential
     jaxrts.hnc_potentials.PauliClassicalMap
     jaxrts.hnc_potentials.PotentialSum
@@ -311,7 +310,6 @@ The potential modelling the interaction between electrons and ions.
     jaxrts.hnc_potentials.DebyeHueckelPotential
     jaxrts.hnc_potentials.DeutschPotential
     jaxrts.hnc_potentials.EmptyCorePotential
-    jaxrts.hnc_potentials.HNCPotential
     jaxrts.hnc_potentials.KelbgPotential
     jaxrts.hnc_potentials.KlimontovichKraeftPotential
     jaxrts.hnc_potentials.PauliClassicalMap
@@ -336,7 +334,6 @@ The potential modelling the interaction between two electrons.
     jaxrts.hnc_potentials.CoulombPotential
     jaxrts.hnc_potentials.DebyeHueckelPotential
     jaxrts.hnc_potentials.DeutschPotential
-    jaxrts.hnc_potentials.HNCPotential
     jaxrts.hnc_potentials.KelbgPotential
     jaxrts.hnc_potentials.PauliClassicalMap
     jaxrts.hnc_potentials.PotentialSum

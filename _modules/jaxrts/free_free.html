@@ -183,8 +183,8 @@
         <span class="n">integral</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
             <span class="n">integrand</span><span class="p">,</span>
             <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">xi</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)]),</span>
-            <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
-            <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
+            <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
+            <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">integral</span>
 
@@ -576,8 +576,8 @@
     <span class="n">integral</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
         <span class="n">integrand</span><span class="p">,</span>
         <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span>
-        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
-        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
+        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
+        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
         <span class="n">max_ninter</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">integral</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">unit</span><span class="o">**</span><span class="mi">2</span>
@@ -650,14 +650,14 @@
     <span class="n">integral1</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
         <span class="n">integrand</span><span class="p">,</span>
         <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span>
-        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span>
-        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span>
+        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
+        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">integral2</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
         <span class="n">integrand</span><span class="p">,</span>
         <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span>
-        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span>
-        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span>
+        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
+        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">integral</span> <span class="o">=</span> <span class="n">integral1</span> <span class="o">+</span> <span class="n">integral2</span>
     <span class="n">integral</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">unit</span>
@@ -729,14 +729,14 @@
     <span class="n">integral1</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
         <span class="n">integrand</span><span class="p">,</span>
         <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span>
-        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span>
-        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span>
+        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
+        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">integral2</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
         <span class="n">integrand</span><span class="p">,</span>
         <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span>
-        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span>
-        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span>
+        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
+        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">integral</span> <span class="o">=</span> <span class="n">integral1</span> <span class="o">+</span> <span class="n">integral2</span>
     <span class="n">integral</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">unit</span>
@@ -812,8 +812,8 @@
     <span class="n">integral</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
         <span class="n">integrand</span><span class="p">,</span>
         <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span>
-        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
-        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
+        <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
+        <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
         <span class="n">max_ninter</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">integral</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">unit</span><span class="o">**</span><span class="mi">2</span>
@@ -896,15 +896,15 @@
         <span class="n">integral1</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
             <span class="n">integrand</span><span class="p">,</span>
             <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
-            <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
-            <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
+            <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
+            <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
             <span class="n">max_ninter</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">integral2</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
             <span class="n">integrand</span><span class="p">,</span>
             <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span>
-            <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
-            <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
+            <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
+            <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">integral</span> <span class="o">=</span> <span class="n">integral1</span> <span class="o">+</span> <span class="n">integral2</span>
 
@@ -934,8 +934,8 @@
         <span class="n">integral</span><span class="p">,</span> <span class="n">errl</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
             <span class="n">integrand</span><span class="p">,</span>
             <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span>
-            <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
-            <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span>
+            <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
+            <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
             <span class="n">max_ninter</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -1405,7 +1405,7 @@
         <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
 
     <span class="n">integral_debye</span><span class="p">,</span> <span class="n">errl_debye</span> <span class="o">=</span> <span class="n">quadgk</span><span class="p">(</span>
-        <span class="n">integrand_debye</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span> <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span> <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-20</span>
+        <span class="n">integrand_debye</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">inf</span><span class="p">]),</span> <span class="n">epsabs</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span> <span class="n">epsrel</span><span class="o">=</span><span class="mf">1e-12</span>
     <span class="p">)</span>
     <span class="n">integral_debye</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
 

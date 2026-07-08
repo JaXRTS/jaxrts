@@ -165,11 +165,17 @@ take into account both quantum and collective effects.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.S_ii.html#jaxrts.models.ArkhipovIonFeat.S_ii" title="jaxrts.models.ArkhipovIonFeat.S_ii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S_ii</span></code></a>(plasma_state, setup)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.__init__.html#jaxrts.models.ArkhipovIonFeat.__init__" title="jaxrts.models.ArkhipovIonFeat.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.S_ii_on_grid.html#jaxrts.models.ArkhipovIonFeat.S_ii_on_grid" title="jaxrts.models.ArkhipovIonFeat.S_ii_on_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S_ii_on_grid</span></code></a>(plasma_state)</p></td>
+<td><p>For <cite>py:class:jaxrts.models.IonFeatModel</cite> that internally calculate S_ii a k-grid independently of the probe setup (e.g. HNC-based models) this method should return (k_grid, S_ab_grid).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.__init__.html#jaxrts.models.ArkhipovIonFeat.__init__" title="jaxrts.models.ArkhipovIonFeat.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.check.html#jaxrts.models.ArkhipovIonFeat.check" title="jaxrts.models.ArkhipovIonFeat.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(plasma_state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.check.html#jaxrts.models.ArkhipovIonFeat.check" title="jaxrts.models.ArkhipovIonFeat.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(plasma_state)</p></td>
 <td><p>Test if the model is applicable to the PlasmaState.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.check_supports_S_ii_grid.html#jaxrts.models.ArkhipovIonFeat.check_supports_S_ii_grid" title="jaxrts.models.ArkhipovIonFeat.check_supports_S_ii_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_supports_S_ii_grid</span></code></a>(plasma_state)</p></td>
+<td><p>Whether <a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.S_ii_on_grid.html#jaxrts.models.ArkhipovIonFeat.S_ii_on_grid" title="jaxrts.models.ArkhipovIonFeat.S_ii_on_grid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">S_ii_on_grid()</span></code></a> can be used for this model, given the current plasma_state.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.citation.html#jaxrts.models.ArkhipovIonFeat.citation" title="jaxrts.models.ArkhipovIonFeat.citation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></a>([style, comment])</p></td>
 <td><p>Return bibliographic information for the Model used.</p></td>
@@ -190,6 +196,9 @@ take into account both quantum and collective effects.</p>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.cite_keys.html#jaxrts.models.ArkhipovIonFeat.cite_keys" title="jaxrts.models.ArkhipovIonFeat.cite_keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cite_keys</span></code></a></p></td>
 <td><p>A list of bibtex keys.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.supports_S_ii_grid.html#jaxrts.models.ArkhipovIonFeat.supports_S_ii_grid" title="jaxrts.models.ArkhipovIonFeat.supports_S_ii_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">supports_S_ii_grid</span></code></a></p></td>
+<td><p>HNC type models calculate the SSF on a k grid, and then interpolate to the scattering vector of the setup class.</p></td>
 </tr>
 </tbody>
 </table>

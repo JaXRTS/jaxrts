@@ -2120,30 +2120,6 @@
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">V_k</span><span class="p">,</span> <span class="n">k</span></div>
 
-
-
-<span class="n">_all_hnc_potentals</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">CoulombPotential</span><span class="p">,</span>
-    <span class="n">DebyeHueckelPotential</span><span class="p">,</span>
-    <span class="n">DeutschPotential</span><span class="p">,</span>
-    <span class="n">EmptyCorePotential</span><span class="p">,</span>
-    <span class="n">KelbgPotential</span><span class="p">,</span>
-    <span class="n">KlimontovichKraeftPotential</span><span class="p">,</span>
-    <span class="n">PotentialSum</span><span class="p">,</span>
-    <span class="n">ScaledPotential</span><span class="p">,</span>
-    <span class="n">SoftCorePotential</span><span class="p">,</span>
-    <span class="n">SpinAveragedEEExchange</span><span class="p">,</span>
-    <span class="n">PauliClassicalMap</span><span class="p">,</span>
-    <span class="n">SpinSeparatedEEExchange</span><span class="p">,</span>
-    <span class="n">YukawaShortRangeRepulsion</span><span class="p">,</span>
-<span class="p">]</span>
-
-<span class="k">for</span> <span class="n">_pot</span> <span class="ow">in</span> <span class="n">_all_hnc_potentals</span><span class="p">:</span>
-    <span class="n">jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">register_pytree_node</span><span class="p">(</span>
-        <span class="n">_pot</span><span class="p">,</span>
-        <span class="n">_pot</span><span class="o">.</span><span class="n">_tree_flatten</span><span class="p">,</span>
-        <span class="n">_pot</span><span class="o">.</span><span class="n">_tree_unflatten</span><span class="p">,</span>
-    <span class="p">)</span>
 </pre></div>
 
            </div>

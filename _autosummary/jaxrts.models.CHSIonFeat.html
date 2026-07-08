@@ -28,7 +28,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="jaxrts.models.CHSIonFeat.Rayleigh_weight" href="jaxrts.models.CHSIonFeat.Rayleigh_weight.html" />
-    <link rel="prev" title="jaxrts.models.ArkhipovIonFeat.cite_keys" href="jaxrts.models.ArkhipovIonFeat.cite_keys.html" /> 
+    <link rel="prev" title="jaxrts.models.ArkhipovIonFeat.supports_S_ii_grid" href="jaxrts.models.ArkhipovIonFeat.supports_S_ii_grid.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -159,11 +159,17 @@ model.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.S_ii.html#jaxrts.models.CHSIonFeat.S_ii" title="jaxrts.models.CHSIonFeat.S_ii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S_ii</span></code></a>(plasma_state, setup)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.__init__.html#jaxrts.models.CHSIonFeat.__init__" title="jaxrts.models.CHSIonFeat.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.S_ii_on_grid.html#jaxrts.models.CHSIonFeat.S_ii_on_grid" title="jaxrts.models.CHSIonFeat.S_ii_on_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S_ii_on_grid</span></code></a>(plasma_state)</p></td>
+<td><p>For <cite>py:class:jaxrts.models.IonFeatModel</cite> that internally calculate S_ii a k-grid independently of the probe setup (e.g. HNC-based models) this method should return (k_grid, S_ab_grid).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.__init__.html#jaxrts.models.CHSIonFeat.__init__" title="jaxrts.models.CHSIonFeat.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.check.html#jaxrts.models.CHSIonFeat.check" title="jaxrts.models.CHSIonFeat.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(plasma_state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.check.html#jaxrts.models.CHSIonFeat.check" title="jaxrts.models.CHSIonFeat.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(plasma_state)</p></td>
 <td><p>Test if the model is applicable to the PlasmaState.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.check_supports_S_ii_grid.html#jaxrts.models.CHSIonFeat.check_supports_S_ii_grid" title="jaxrts.models.CHSIonFeat.check_supports_S_ii_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_supports_S_ii_grid</span></code></a>(plasma_state)</p></td>
+<td><p>Whether <a class="reference internal" href="jaxrts.models.CHSIonFeat.S_ii_on_grid.html#jaxrts.models.CHSIonFeat.S_ii_on_grid" title="jaxrts.models.CHSIonFeat.S_ii_on_grid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">S_ii_on_grid()</span></code></a> can be used for this model, given the current plasma_state.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.citation.html#jaxrts.models.CHSIonFeat.citation" title="jaxrts.models.CHSIonFeat.citation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></a>([style, comment])</p></td>
 <td><p>Return bibliographic information for the Model used.</p></td>
@@ -185,6 +191,9 @@ model.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.cite_keys.html#jaxrts.models.CHSIonFeat.cite_keys" title="jaxrts.models.CHSIonFeat.cite_keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cite_keys</span></code></a></p></td>
 <td><p>A list of bibtex keys.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.CHSIonFeat.supports_S_ii_grid.html#jaxrts.models.CHSIonFeat.supports_S_ii_grid" title="jaxrts.models.CHSIonFeat.supports_S_ii_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">supports_S_ii_grid</span></code></a></p></td>
+<td><p>HNC type models calculate the SSF on a k grid, and then interpolate to the scattering vector of the setup class.</p></td>
+</tr>
 </tbody>
 </table>
 <span class="target" id="sphx-glr-backref-jaxrts-models-chsionfeat"></span></dd></dl>
@@ -195,7 +204,7 @@ model.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="jaxrts.models.ArkhipovIonFeat.cite_keys.html" class="btn btn-neutral float-left" title="jaxrts.models.ArkhipovIonFeat.cite_keys" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.models.ArkhipovIonFeat.supports_S_ii_grid.html" class="btn btn-neutral float-left" title="jaxrts.models.ArkhipovIonFeat.supports_S_ii_grid" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="jaxrts.models.CHSIonFeat.Rayleigh_weight.html" class="btn btn-neutral float-right" title="jaxrts.models.CHSIonFeat.Rayleigh_weight" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

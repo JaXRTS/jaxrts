@@ -14,8 +14,10 @@ jaxrts.experimental.SiiNN.NNSiiModel
    
       ~NNSiiModel.Rayleigh_weight
       ~NNSiiModel.S_ii
+      ~NNSiiModel.S_ii_on_grid
       ~NNSiiModel.__init__
       ~NNSiiModel.check
+      ~NNSiiModel.check_supports_S_ii_grid
       ~NNSiiModel.citation
       ~NNSiiModel.evaluate
       ~NNSiiModel.prepare
@@ -31,6 +33,7 @@ jaxrts.experimental.SiiNN.NNSiiModel
    
       ~NNSiiModel.allowed_keys
       ~NNSiiModel.cite_keys
+      ~NNSiiModel.supports_S_ii_grid
    
    
 

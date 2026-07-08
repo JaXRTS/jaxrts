@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:47.363** total execution time for 3 files **from gen_examples/ionization**:
+**00:38.483** total execution time for 3 files **from gen_examples/ionization**:
 
 .. container::
 
@@ -33,11 +33,11 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gen_examples_ionization_plot_saha_ionization_map.py` (``plot_saha_ionization_map.py``)
-     - 00:25.154
+     - 00:20.952
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionization_plot_WR_expanded_ionization.py` (``plot_WR_expanded_ionization.py``)
-     - 00:12.763
+     - 00:10.727
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionization_plot_saha_hot_jupiter.py` (``plot_saha_hot_jupiter.py``)
-     - 00:09.445
+     - 00:06.804
      - 0.0

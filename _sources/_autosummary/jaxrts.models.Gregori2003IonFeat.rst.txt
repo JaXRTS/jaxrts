@@ -14,8 +14,10 @@ jaxrts.models.Gregori2003IonFeat
    
       ~Gregori2003IonFeat.Rayleigh_weight
       ~Gregori2003IonFeat.S_ii
+      ~Gregori2003IonFeat.S_ii_on_grid
       ~Gregori2003IonFeat.__init__
       ~Gregori2003IonFeat.check
+      ~Gregori2003IonFeat.check_supports_S_ii_grid
       ~Gregori2003IonFeat.citation
       ~Gregori2003IonFeat.evaluate
       ~Gregori2003IonFeat.prepare
@@ -31,6 +33,7 @@ jaxrts.models.Gregori2003IonFeat
    
       ~Gregori2003IonFeat.allowed_keys
       ~Gregori2003IonFeat.cite_keys
+      ~Gregori2003IonFeat.supports_S_ii_grid
    
    
 

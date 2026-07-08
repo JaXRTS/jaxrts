@@ -12,8 +12,10 @@ jaxrts.models.Sum\_Sii
    .. autosummary::
       :toctree:
    
+      ~Sum_Sii.S_ii_on_grid
       ~Sum_Sii.__init__
       ~Sum_Sii.check
+      ~Sum_Sii.check_supports_S_ii_grid
       ~Sum_Sii.citation
       ~Sum_Sii.evaluate
       ~Sum_Sii.prepare

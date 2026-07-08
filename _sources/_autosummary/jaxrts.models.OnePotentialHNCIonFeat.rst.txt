@@ -14,8 +14,10 @@ jaxrts.models.OnePotentialHNCIonFeat
    
       ~OnePotentialHNCIonFeat.Rayleigh_weight
       ~OnePotentialHNCIonFeat.S_ii
+      ~OnePotentialHNCIonFeat.S_ii_on_grid
       ~OnePotentialHNCIonFeat.__init__
       ~OnePotentialHNCIonFeat.check
+      ~OnePotentialHNCIonFeat.check_supports_S_ii_grid
       ~OnePotentialHNCIonFeat.citation
       ~OnePotentialHNCIonFeat.evaluate
       ~OnePotentialHNCIonFeat.prepare
@@ -33,11 +35,13 @@ jaxrts.models.OnePotentialHNCIonFeat
       ~OnePotentialHNCIonFeat.cite_keys
       ~OnePotentialHNCIonFeat.k
       ~OnePotentialHNCIonFeat.r
+      ~OnePotentialHNCIonFeat.supports_S_ii_grid
       ~OnePotentialHNCIonFeat.r_max
       ~OnePotentialHNCIonFeat.SVT
       ~OnePotentialHNCIonFeat.pot
       ~OnePotentialHNCIonFeat.mix
       ~OnePotentialHNCIonFeat.tmult
+      ~OnePotentialHNCIonFeat.cramer_solve_max_size
    
    
 

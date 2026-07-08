@@ -14,8 +14,10 @@ jaxrts.models.FixedSii
    
       ~FixedSii.Rayleigh_weight
       ~FixedSii.S_ii
+      ~FixedSii.S_ii_on_grid
       ~FixedSii.__init__
       ~FixedSii.check
+      ~FixedSii.check_supports_S_ii_grid
       ~FixedSii.citation
       ~FixedSii.evaluate
       ~FixedSii.prepare
@@ -31,6 +33,7 @@ jaxrts.models.FixedSii
    
       ~FixedSii.allowed_keys
       ~FixedSii.cite_keys
+      ~FixedSii.supports_S_ii_grid
    
    
 

@@ -14,8 +14,10 @@ jaxrts.models.IonFeatModel
    
       ~IonFeatModel.Rayleigh_weight
       ~IonFeatModel.S_ii
+      ~IonFeatModel.S_ii_on_grid
       ~IonFeatModel.__init__
       ~IonFeatModel.check
+      ~IonFeatModel.check_supports_S_ii_grid
       ~IonFeatModel.citation
       ~IonFeatModel.evaluate
       ~IonFeatModel.prepare
@@ -31,6 +33,7 @@ jaxrts.models.IonFeatModel
    
       ~IonFeatModel.allowed_keys
       ~IonFeatModel.cite_keys
+      ~IonFeatModel.supports_S_ii_grid
    
    
 

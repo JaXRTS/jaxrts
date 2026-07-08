@@ -28,7 +28,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="jaxrts.models.ThreePotentialHNCIonFeat.Rayleigh_weight" href="jaxrts.models.ThreePotentialHNCIonFeat.Rayleigh_weight.html" />
-    <link rel="prev" title="jaxrts.models.PeakCollection.cite_keys" href="jaxrts.models.PeakCollection.cite_keys.html" /> 
+    <link rel="prev" title="jaxrts.models.PeakCollection.supports_S_ii_grid" href="jaxrts.models.PeakCollection.supports_S_ii_grid.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -176,11 +176,17 @@ Fourier transforms).</p>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.S_ii.html#jaxrts.models.ThreePotentialHNCIonFeat.S_ii" title="jaxrts.models.ThreePotentialHNCIonFeat.S_ii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S_ii</span></code></a>(plasma_state, setup)</p></td>
 <td><p>Calculate the ion-ion static structure factor in the given <a class="reference internal" href="jaxrts.models.IonFeatModel.html#jaxrts.models.IonFeatModel" title="jaxrts.models.IonFeatModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">IonFeatModel</span></code></a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.__init__.html#jaxrts.models.ThreePotentialHNCIonFeat.__init__" title="jaxrts.models.ThreePotentialHNCIonFeat.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([rmin, rmax, pot, SVT, mix, tmult])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.S_ii_on_grid.html#jaxrts.models.ThreePotentialHNCIonFeat.S_ii_on_grid" title="jaxrts.models.ThreePotentialHNCIonFeat.S_ii_on_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S_ii_on_grid</span></code></a>(plasma_state)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.check.html#jaxrts.models.ThreePotentialHNCIonFeat.check" title="jaxrts.models.ThreePotentialHNCIonFeat.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(plasma_state)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.__init__.html#jaxrts.models.ThreePotentialHNCIonFeat.__init__" title="jaxrts.models.ThreePotentialHNCIonFeat.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([rmin, rmax, pot, SVT, mix, tmult])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.check.html#jaxrts.models.ThreePotentialHNCIonFeat.check" title="jaxrts.models.ThreePotentialHNCIonFeat.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(plasma_state)</p></td>
 <td><p>Test if the model is applicable to the PlasmaState.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.check_supports_S_ii_grid.html#jaxrts.models.ThreePotentialHNCIonFeat.check_supports_S_ii_grid" title="jaxrts.models.ThreePotentialHNCIonFeat.check_supports_S_ii_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_supports_S_ii_grid</span></code></a>(plasma_state)</p></td>
+<td><p>Whether <a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.S_ii_on_grid.html#jaxrts.models.ThreePotentialHNCIonFeat.S_ii_on_grid" title="jaxrts.models.ThreePotentialHNCIonFeat.S_ii_on_grid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">S_ii_on_grid()</span></code></a> can be used for this model, given the current plasma_state.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.citation.html#jaxrts.models.ThreePotentialHNCIonFeat.citation" title="jaxrts.models.ThreePotentialHNCIonFeat.citation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></a>([style, comment])</p></td>
 <td><p>Return bibliographic information for the Model used.</p></td>
@@ -208,19 +214,22 @@ Fourier transforms).</p>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.r.html#jaxrts.models.ThreePotentialHNCIonFeat.r" title="jaxrts.models.ThreePotentialHNCIonFeat.r"><code class="xref py py-obj docutils literal notranslate"><span class="pre">r</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.r_max.html#jaxrts.models.ThreePotentialHNCIonFeat.r_max" title="jaxrts.models.ThreePotentialHNCIonFeat.r_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">r_max</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.supports_S_ii_grid.html#jaxrts.models.ThreePotentialHNCIonFeat.supports_S_ii_grid" title="jaxrts.models.ThreePotentialHNCIonFeat.supports_S_ii_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">supports_S_ii_grid</span></code></a></p></td>
+<td><p>HNC type models calculate the SSF on a k grid, and then interpolate to the scattering vector of the setup class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.r_max.html#jaxrts.models.ThreePotentialHNCIonFeat.r_max" title="jaxrts.models.ThreePotentialHNCIonFeat.r_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">r_max</span></code></a></p></td>
 <td><p>The maximal radius for evaluating the potentials.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.pot.html#jaxrts.models.ThreePotentialHNCIonFeat.pot" title="jaxrts.models.ThreePotentialHNCIonFeat.pot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pot</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.pot.html#jaxrts.models.ThreePotentialHNCIonFeat.pot" title="jaxrts.models.ThreePotentialHNCIonFeat.pot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pot</span></code></a></p></td>
 <td><p>The exponent (<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">pot</span></code>), setting the number of points in <code class="docutils literal notranslate"><span class="pre">r</span></code> or <code class="docutils literal notranslate"><span class="pre">k</span></code> to evaluate.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.mix.html#jaxrts.models.ThreePotentialHNCIonFeat.mix" title="jaxrts.models.ThreePotentialHNCIonFeat.mix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mix</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.mix.html#jaxrts.models.ThreePotentialHNCIonFeat.mix" title="jaxrts.models.ThreePotentialHNCIonFeat.mix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mix</span></code></a></p></td>
 <td><p>Value in [0, 1); describes how much of the last iterations' nodal correction term should be added to the newly obtained <cite>N_ab</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.SVT.html#jaxrts.models.ThreePotentialHNCIonFeat.SVT" title="jaxrts.models.ThreePotentialHNCIonFeat.SVT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SVT</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.SVT.html#jaxrts.models.ThreePotentialHNCIonFeat.SVT" title="jaxrts.models.ThreePotentialHNCIonFeat.SVT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SVT</span></code></a></p></td>
 <td><p>if <code class="docutils literal notranslate"><span class="pre">True</span></code> use the SVT formulation to extend the HNC scheme to different temperatures between the components.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.tmult.html#jaxrts.models.ThreePotentialHNCIonFeat.tmult" title="jaxrts.models.ThreePotentialHNCIonFeat.tmult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tmult</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.tmult.html#jaxrts.models.ThreePotentialHNCIonFeat.tmult" title="jaxrts.models.ThreePotentialHNCIonFeat.tmult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tmult</span></code></a></p></td>
 <td><p>List of temperature multipliers used in auxiliary HNC calculations.</p></td>
 </tr>
 </tbody>
@@ -233,7 +242,7 @@ Fourier transforms).</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="jaxrts.models.PeakCollection.cite_keys.html" class="btn btn-neutral float-left" title="jaxrts.models.PeakCollection.cite_keys" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.models.PeakCollection.supports_S_ii_grid.html" class="btn btn-neutral float-left" title="jaxrts.models.PeakCollection.supports_S_ii_grid" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="jaxrts.models.ThreePotentialHNCIonFeat.Rayleigh_weight.html" class="btn btn-neutral float-right" title="jaxrts.models.ThreePotentialHNCIonFeat.Rayleigh_weight" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

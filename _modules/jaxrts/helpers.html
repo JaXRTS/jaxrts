@@ -97,15 +97,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">platformdirs</span><span class="w"> </span><span class="kn">import</span> <span class="n">user_cache_dir</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">onp</span>
 
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span><span class="p">,</span> <span class="n">to_array</span>
 
 <span class="c1">#: Typically, we return quantities that differ per orbital in an</span>
 <span class="c1">#: :py:class:`jax.numpy.ndarray` with 10 entries, the orbitals with n&lt;=4.</span>
@@ -288,6 +285,7 @@
 <span class="sd">    partial: boolean</span>
 <span class="sd">        default false = density of mixture, if true: density vector splitted</span>
 <span class="sd">        for mixture is returned.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    array_like</span>
@@ -323,7 +321,7 @@
         <span class="p">)</span>
 
     <span class="c1"># model average atom in the mixture</span>
-    <span class="n">m</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">to_array</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">atomic_mass</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">])</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">atomic_mass</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">])</span>
     <span class="n">nom</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="n">number_fractions</span><span class="p">)</span>
     <span class="n">denom</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Z</span> <span class="o">*</span> <span class="n">number_fractions</span><span class="p">)</span>
 
@@ -556,6 +554,319 @@
             <span class="n">g</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">)))</span>
             <span class="n">E</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;energy&quot;</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">g</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span></div>
+
+
+
+<div class="viewcode-block" id="cramer_solve">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.helpers.cramer_solve.html#jaxrts.helpers.cramer_solve">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cramer_solve</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">N_max</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solve A x = b via Cramer&#39;s rule for small, fixed system sizes, avoiding the</span>
+<span class="sd">    fixed dispatch overhead of a batched jnp.linalg.solve. Falls back to</span>
+<span class="sd">    jnp.linalg.solve for sizes not hand-coded below.</span>
+<span class="sd">    For small matrices, e.g., 2 component HNC, this does serve as a notable</span>
+<span class="sd">    speedup.</span>
+
+<span class="sd">    .. warning::</span>
+
+<span class="sd">       Using this function if a tradeoff of speed (for small systems) over</span>
+<span class="sd">       numerical stability. We found that for the application in HNC with few</span>
+<span class="sd">       components, this works reasonably well. Setting ``M_max`` to 0 allows to</span>
+<span class="sd">       bypass explicit calculation, if required.</span>
+
+<span class="sd">    A: (..., N, N), b: (..., N). N must be static (known at trace time).</span>
+<span class="sd">    Works either called directly on a batched array, or from inside a</span>
+<span class="sd">    vmap-mapped function (where A, b appear unbatched, shape (N,N) &amp; (N,)).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A: jnp.ndarray</span>
+<span class="sd">        Shape (..., N, N) matrix to be inverted</span>
+<span class="sd">    b: jnp.ndarray</span>
+<span class="sd">        Shape (..., N) array of solutions</span>
+<span class="sd">    N_max: int</span>
+<span class="sd">        Maximal size of the matrix for which the hand-written inversion should</span>
+<span class="sd">        be performed. If the size is bigger than `N_max`, fall back to</span>
+<span class="sd">        ``jax.linalg.solve``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x: jnp.narray</span>
+<span class="sd">        Shape (..., N), so that :math:`A x = b`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># Directly return the linalg solve based</span>
+    <span class="k">if</span> <span class="n">N</span> <span class="o">&gt;</span> <span class="n">N_max</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">b</span> <span class="o">/</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">][</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">a00</span><span class="p">,</span> <span class="n">a01</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">a10</span><span class="p">,</span> <span class="n">a11</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">b0</span><span class="p">,</span> <span class="n">b1</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">det</span> <span class="o">=</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">a11</span> <span class="o">-</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">a10</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="p">(</span><span class="n">a11</span> <span class="o">*</span> <span class="n">b0</span> <span class="o">-</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">b1</span><span class="p">)</span> <span class="o">/</span> <span class="n">det</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">a10</span> <span class="o">*</span> <span class="n">b0</span> <span class="o">+</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">b1</span><span class="p">)</span> <span class="o">/</span> <span class="n">det</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">a00</span><span class="p">,</span> <span class="n">a01</span><span class="p">,</span> <span class="n">a02</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">a10</span><span class="p">,</span> <span class="n">a11</span><span class="p">,</span> <span class="n">a12</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">a20</span><span class="p">,</span> <span class="n">a21</span><span class="p">,</span> <span class="n">a22</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">b0</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">c00</span> <span class="o">=</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">a22</span> <span class="o">-</span> <span class="n">a12</span> <span class="o">*</span> <span class="n">a21</span>
+        <span class="n">c01</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">a10</span> <span class="o">*</span> <span class="n">a22</span> <span class="o">-</span> <span class="n">a12</span> <span class="o">*</span> <span class="n">a20</span><span class="p">)</span>
+        <span class="n">c02</span> <span class="o">=</span> <span class="n">a10</span> <span class="o">*</span> <span class="n">a21</span> <span class="o">-</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">a20</span>
+        <span class="n">c10</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">a01</span> <span class="o">*</span> <span class="n">a22</span> <span class="o">-</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">a21</span><span class="p">)</span>
+        <span class="n">c11</span> <span class="o">=</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">a22</span> <span class="o">-</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">a20</span>
+        <span class="n">c12</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">a00</span> <span class="o">*</span> <span class="n">a21</span> <span class="o">-</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">a20</span><span class="p">)</span>
+        <span class="n">c20</span> <span class="o">=</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">a12</span> <span class="o">-</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">a11</span>
+        <span class="n">c21</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">a00</span> <span class="o">*</span> <span class="n">a12</span> <span class="o">-</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">a10</span><span class="p">)</span>
+        <span class="n">c22</span> <span class="o">=</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">a11</span> <span class="o">-</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">a10</span>
+
+        <span class="n">det</span> <span class="o">=</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">c00</span> <span class="o">+</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">c01</span> <span class="o">+</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">c02</span>
+
+        <span class="n">x0</span> <span class="o">=</span> <span class="p">(</span><span class="n">c00</span> <span class="o">*</span> <span class="n">b0</span> <span class="o">+</span> <span class="n">c10</span> <span class="o">*</span> <span class="n">b1</span> <span class="o">+</span> <span class="n">c20</span> <span class="o">*</span> <span class="n">b2</span><span class="p">)</span> <span class="o">/</span> <span class="n">det</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="p">(</span><span class="n">c01</span> <span class="o">*</span> <span class="n">b0</span> <span class="o">+</span> <span class="n">c11</span> <span class="o">*</span> <span class="n">b1</span> <span class="o">+</span> <span class="n">c21</span> <span class="o">*</span> <span class="n">b2</span><span class="p">)</span> <span class="o">/</span> <span class="n">det</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="p">(</span><span class="n">c02</span> <span class="o">*</span> <span class="n">b0</span> <span class="o">+</span> <span class="n">c12</span> <span class="o">*</span> <span class="n">b1</span> <span class="o">+</span> <span class="n">c22</span> <span class="o">*</span> <span class="n">b2</span><span class="p">)</span> <span class="o">/</span> <span class="n">det</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">a00</span><span class="p">,</span> <span class="n">a01</span><span class="p">,</span> <span class="n">a02</span><span class="p">,</span> <span class="n">a03</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">a10</span><span class="p">,</span> <span class="n">a11</span><span class="p">,</span> <span class="n">a12</span><span class="p">,</span> <span class="n">a13</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">a20</span><span class="p">,</span> <span class="n">a21</span><span class="p">,</span> <span class="n">a22</span><span class="p">,</span> <span class="n">a23</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">a30</span><span class="p">,</span> <span class="n">a31</span><span class="p">,</span> <span class="n">a32</span><span class="p">,</span> <span class="n">a33</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="n">A</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">b0</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">b3</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">a10</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">a20</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">a03</span> <span class="o">*</span> <span class="n">a30</span>
+        <span class="n">t3</span> <span class="o">=</span> <span class="n">a23</span> <span class="o">*</span> <span class="n">a32</span>
+        <span class="n">t4</span> <span class="o">=</span> <span class="n">a22</span> <span class="o">+</span> <span class="n">a33</span>
+        <span class="n">t5</span> <span class="o">=</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">a33</span>
+        <span class="n">t6</span> <span class="o">=</span> <span class="n">a12</span> <span class="o">*</span> <span class="n">a21</span>
+        <span class="n">t7</span> <span class="o">=</span> <span class="n">a13</span> <span class="o">*</span> <span class="n">a31</span>
+        <span class="n">t8</span> <span class="o">=</span> <span class="n">t6</span> <span class="o">+</span> <span class="n">t7</span>
+        <span class="n">t9</span> <span class="o">=</span> <span class="n">a12</span> <span class="o">*</span> <span class="n">a20</span>
+        <span class="n">t10</span> <span class="o">=</span> <span class="n">a13</span> <span class="o">*</span> <span class="n">a30</span>
+        <span class="n">t11</span> <span class="o">=</span> <span class="n">a10</span> <span class="o">*</span> <span class="n">a11</span> <span class="o">+</span> <span class="n">t10</span> <span class="o">+</span> <span class="n">t9</span>
+        <span class="n">t12</span> <span class="o">=</span> <span class="n">a10</span> <span class="o">*</span> <span class="n">a21</span>
+        <span class="n">t13</span> <span class="o">=</span> <span class="n">a23</span> <span class="o">*</span> <span class="n">a30</span>
+        <span class="n">t14</span> <span class="o">=</span> <span class="n">a20</span> <span class="o">*</span> <span class="n">a22</span> <span class="o">+</span> <span class="n">t12</span> <span class="o">+</span> <span class="n">t13</span>
+        <span class="n">t15</span> <span class="o">=</span> <span class="n">a10</span> <span class="o">*</span> <span class="n">a31</span>
+        <span class="n">t16</span> <span class="o">=</span> <span class="n">a20</span> <span class="o">*</span> <span class="n">a32</span>
+        <span class="n">t17</span> <span class="o">=</span> <span class="n">a30</span> <span class="o">*</span> <span class="n">a33</span> <span class="o">+</span> <span class="n">t15</span> <span class="o">+</span> <span class="n">t16</span>
+        <span class="n">t18</span> <span class="o">=</span> <span class="n">a23</span> <span class="o">*</span> <span class="n">a31</span>
+        <span class="n">t19</span> <span class="o">=</span> <span class="n">a21</span> <span class="o">*</span> <span class="n">a32</span>
+        <span class="n">t20</span> <span class="o">=</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">a12</span>
+        <span class="n">t21</span> <span class="o">=</span> <span class="n">a03</span> <span class="o">*</span> <span class="n">a11</span>
+        <span class="n">t22</span> <span class="o">=</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">a13</span>
+        <span class="n">t23</span> <span class="o">=</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">a33</span>
+        <span class="n">t24</span> <span class="o">=</span> <span class="n">a03</span> <span class="o">*</span> <span class="n">a31</span>
+        <span class="n">t25</span> <span class="o">=</span> <span class="n">a13</span> <span class="o">*</span> <span class="n">a21</span>
+        <span class="n">t26</span> <span class="o">=</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">a23</span>
+        <span class="n">t27</span> <span class="o">=</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">a12</span>
+        <span class="n">t28</span> <span class="o">=</span> <span class="n">a03</span> <span class="o">*</span> <span class="n">a10</span>
+        <span class="n">t29</span> <span class="o">=</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">a13</span>
+        <span class="n">t30</span> <span class="o">=</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">a33</span>
+        <span class="n">t31</span> <span class="o">=</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">a11</span>
+        <span class="n">t32</span> <span class="o">=</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">a30</span>
+        <span class="n">t33</span> <span class="o">=</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">a30</span>
+
+        <span class="n">det</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">a00</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">a11</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">t3</span> <span class="o">+</span> <span class="n">t5</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">a12</span> <span class="o">*</span> <span class="p">(</span><span class="n">a21</span> <span class="o">*</span> <span class="n">a22</span> <span class="o">+</span> <span class="n">t18</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">a13</span> <span class="o">*</span> <span class="p">(</span><span class="n">a31</span> <span class="o">*</span> <span class="n">a33</span> <span class="o">+</span> <span class="n">t19</span><span class="p">)</span>
+                <span class="o">-</span> <span class="n">t4</span> <span class="o">*</span> <span class="n">t8</span>
+            <span class="p">)</span>
+            <span class="o">-</span> <span class="n">a01</span> <span class="o">*</span> <span class="p">(</span><span class="n">a11</span> <span class="o">*</span> <span class="n">t11</span> <span class="o">+</span> <span class="n">a12</span> <span class="o">*</span> <span class="n">t14</span> <span class="o">+</span> <span class="n">a13</span> <span class="o">*</span> <span class="n">t17</span><span class="p">)</span>
+            <span class="o">-</span> <span class="n">a02</span> <span class="o">*</span> <span class="p">(</span><span class="n">a21</span> <span class="o">*</span> <span class="n">t11</span> <span class="o">+</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t14</span> <span class="o">+</span> <span class="n">a23</span> <span class="o">*</span> <span class="n">t17</span><span class="p">)</span>
+            <span class="o">-</span> <span class="n">a03</span> <span class="o">*</span> <span class="p">(</span><span class="n">a31</span> <span class="o">*</span> <span class="n">t11</span> <span class="o">+</span> <span class="n">a32</span> <span class="o">*</span> <span class="n">t14</span> <span class="o">+</span> <span class="n">a33</span> <span class="o">*</span> <span class="n">t17</span><span class="p">)</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">a11</span> <span class="o">+</span> <span class="n">t4</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">a01</span> <span class="o">*</span> <span class="n">t11</span> <span class="o">+</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">t14</span> <span class="o">+</span> <span class="n">a03</span> <span class="o">*</span> <span class="n">t17</span><span class="p">)</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">t0</span> <span class="o">+</span> <span class="n">t1</span> <span class="o">+</span> <span class="n">t2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">a11</span> <span class="o">*</span> <span class="n">t4</span> <span class="o">+</span> <span class="n">t3</span> <span class="o">-</span> <span class="n">t5</span> <span class="o">+</span> <span class="n">t8</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">num0</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">b0</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">a11</span> <span class="o">*</span> <span class="n">t3</span>
+                <span class="o">+</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">t5</span>
+                <span class="o">+</span> <span class="n">a12</span> <span class="o">*</span> <span class="n">t18</span>
+                <span class="o">+</span> <span class="n">a13</span> <span class="o">*</span> <span class="n">t19</span>
+                <span class="o">-</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t7</span>
+                <span class="o">-</span> <span class="n">a33</span> <span class="o">*</span> <span class="n">t6</span>
+            <span class="p">)</span>
+            <span class="o">-</span> <span class="n">b1</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">a01</span> <span class="o">*</span> <span class="n">t3</span>
+                <span class="o">+</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">t5</span>
+                <span class="o">+</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">t18</span>
+                <span class="o">+</span> <span class="n">a03</span> <span class="o">*</span> <span class="n">t19</span>
+                <span class="o">-</span> <span class="n">a21</span> <span class="o">*</span> <span class="n">t23</span>
+                <span class="o">-</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t24</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="n">b2</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">a02</span> <span class="o">*</span> <span class="n">t7</span>
+                <span class="o">-</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">t23</span>
+                <span class="o">-</span> <span class="n">a12</span> <span class="o">*</span> <span class="n">t24</span>
+                <span class="o">+</span> <span class="n">a32</span> <span class="o">*</span> <span class="n">t21</span>
+                <span class="o">-</span> <span class="n">a32</span> <span class="o">*</span> <span class="n">t22</span>
+                <span class="o">+</span> <span class="n">a33</span> <span class="o">*</span> <span class="n">t20</span>
+            <span class="p">)</span>
+            <span class="o">-</span> <span class="n">b3</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">a02</span> <span class="o">*</span> <span class="n">t25</span>
+                <span class="o">-</span> <span class="n">a03</span> <span class="o">*</span> <span class="n">t6</span>
+                <span class="o">-</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">t26</span>
+                <span class="o">+</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t21</span>
+                <span class="o">-</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t22</span>
+                <span class="o">+</span> <span class="n">a23</span> <span class="o">*</span> <span class="n">t20</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">num1</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="n">b0</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">a10</span> <span class="o">*</span> <span class="n">t3</span>
+                <span class="o">+</span> <span class="n">a10</span> <span class="o">*</span> <span class="n">t5</span>
+                <span class="o">+</span> <span class="n">a12</span> <span class="o">*</span> <span class="n">t13</span>
+                <span class="o">+</span> <span class="n">a13</span> <span class="o">*</span> <span class="n">t16</span>
+                <span class="o">-</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t10</span>
+                <span class="o">-</span> <span class="n">a33</span> <span class="o">*</span> <span class="n">t9</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="n">b1</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">a00</span> <span class="o">*</span> <span class="n">t3</span>
+                <span class="o">+</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">t5</span>
+                <span class="o">+</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">t13</span>
+                <span class="o">+</span> <span class="n">a03</span> <span class="o">*</span> <span class="n">t16</span>
+                <span class="o">-</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t2</span>
+                <span class="o">-</span> <span class="n">a33</span> <span class="o">*</span> <span class="n">t1</span>
+            <span class="p">)</span>
+            <span class="o">-</span> <span class="n">b2</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">a02</span> <span class="o">*</span> <span class="n">t10</span>
+                <span class="o">-</span> <span class="n">a10</span> <span class="o">*</span> <span class="n">t23</span>
+                <span class="o">-</span> <span class="n">a12</span> <span class="o">*</span> <span class="n">t2</span>
+                <span class="o">+</span> <span class="n">a32</span> <span class="o">*</span> <span class="n">t28</span>
+                <span class="o">-</span> <span class="n">a32</span> <span class="o">*</span> <span class="n">t29</span>
+                <span class="o">+</span> <span class="n">a33</span> <span class="o">*</span> <span class="n">t27</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="n">b3</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">a03</span> <span class="o">*</span> <span class="n">t9</span>
+                <span class="o">-</span> <span class="n">a10</span> <span class="o">*</span> <span class="n">t26</span>
+                <span class="o">+</span> <span class="n">a13</span> <span class="o">*</span> <span class="n">t1</span>
+                <span class="o">+</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t28</span>
+                <span class="o">-</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t29</span>
+                <span class="o">+</span> <span class="n">a23</span> <span class="o">*</span> <span class="n">t27</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">num2</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">b0</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">a10</span> <span class="o">*</span> <span class="n">t18</span>
+                <span class="o">+</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">t13</span>
+                <span class="o">-</span> <span class="n">a20</span> <span class="o">*</span> <span class="n">t30</span>
+                <span class="o">+</span> <span class="n">a20</span> <span class="o">*</span> <span class="n">t7</span>
+                <span class="o">-</span> <span class="n">a21</span> <span class="o">*</span> <span class="n">t10</span>
+                <span class="o">+</span> <span class="n">a33</span> <span class="o">*</span> <span class="n">t12</span>
+            <span class="p">)</span>
+            <span class="o">-</span> <span class="n">b1</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">a00</span> <span class="o">*</span> <span class="n">a21</span> <span class="o">*</span> <span class="n">a33</span>
+                <span class="o">-</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">t18</span>
+                <span class="o">-</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">a20</span> <span class="o">*</span> <span class="n">a33</span>
+                <span class="o">+</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">t13</span>
+                <span class="o">+</span> <span class="n">a20</span> <span class="o">*</span> <span class="n">t24</span>
+                <span class="o">-</span> <span class="n">a21</span> <span class="o">*</span> <span class="n">t2</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="n">b2</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">a00</span> <span class="o">*</span> <span class="n">t30</span>
+                <span class="o">-</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">t7</span>
+                <span class="o">+</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">t10</span>
+                <span class="o">+</span> <span class="n">a03</span> <span class="o">*</span> <span class="n">t15</span>
+                <span class="o">-</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">t2</span>
+                <span class="o">-</span> <span class="n">a33</span> <span class="o">*</span> <span class="n">t0</span>
+            <span class="p">)</span>
+            <span class="o">-</span> <span class="n">b3</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">a00</span> <span class="o">*</span> <span class="n">t25</span>
+                <span class="o">+</span> <span class="n">a03</span> <span class="o">*</span> <span class="n">t12</span>
+                <span class="o">-</span> <span class="n">a20</span> <span class="o">*</span> <span class="n">t21</span>
+                <span class="o">+</span> <span class="n">a20</span> <span class="o">*</span> <span class="n">t22</span>
+                <span class="o">-</span> <span class="n">a23</span> <span class="o">*</span> <span class="n">t0</span>
+                <span class="o">+</span> <span class="n">a23</span> <span class="o">*</span> <span class="n">t31</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">num3</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="n">b0</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">a10</span> <span class="o">*</span> <span class="n">t19</span>
+                <span class="o">-</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">t16</span>
+                <span class="o">+</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">t32</span>
+                <span class="o">-</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t15</span>
+                <span class="o">-</span> <span class="n">a30</span> <span class="o">*</span> <span class="n">t6</span>
+                <span class="o">+</span> <span class="n">a31</span> <span class="o">*</span> <span class="n">t9</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="n">b1</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">a00</span> <span class="o">*</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">a31</span>
+                <span class="o">+</span> <span class="n">a00</span> <span class="o">*</span> <span class="n">t19</span>
+                <span class="o">-</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">t16</span>
+                <span class="o">+</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">t32</span>
+                <span class="o">-</span> <span class="n">a21</span> <span class="o">*</span> <span class="n">t33</span>
+                <span class="o">+</span> <span class="n">a31</span> <span class="o">*</span> <span class="n">t1</span>
+            <span class="p">)</span>
+            <span class="o">-</span> <span class="n">b2</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">a02</span> <span class="o">*</span> <span class="n">t15</span>
+                <span class="o">-</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">t33</span>
+                <span class="o">+</span> <span class="n">a30</span> <span class="o">*</span> <span class="n">t20</span>
+                <span class="o">-</span> <span class="n">a31</span> <span class="o">*</span> <span class="n">t27</span>
+                <span class="o">-</span> <span class="n">a32</span> <span class="o">*</span> <span class="n">t0</span>
+                <span class="o">+</span> <span class="n">a32</span> <span class="o">*</span> <span class="n">t31</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="n">b3</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">a00</span> <span class="o">*</span> <span class="n">t6</span>
+                <span class="o">+</span> <span class="n">a01</span> <span class="o">*</span> <span class="n">t9</span>
+                <span class="o">+</span> <span class="n">a02</span> <span class="o">*</span> <span class="n">t12</span>
+                <span class="o">-</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">t1</span>
+                <span class="o">-</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t0</span>
+                <span class="o">+</span> <span class="n">a22</span> <span class="o">*</span> <span class="n">t31</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">num0</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">,</span> <span class="n">num3</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">det</span>
+
+    <span class="c1"># Fallback for any size not hand-coded.</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span></div>
 
 
 

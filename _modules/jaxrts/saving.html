@@ -110,8 +110,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">onp</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_all_models_list</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.elements</span><span class="w"> </span><span class="kn">import</span> <span class="n">Element</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">partialclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.hnc_potentials</span><span class="w"> </span><span class="kn">import</span> <span class="n">HNCPotential</span>
@@ -275,22 +274,15 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">hnc_potentials</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="n">pot_dict</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
-            <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">hnc_potentials</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="ow">in</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">hnc_potentials</span><span class="o">.</span><span class="n">_all_hnc_potentals</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
-        <span class="p">}</span>
+        <span class="n">pot_list</span> <span class="o">=</span> <span class="n">get_all_models_list</span><span class="p">(</span><span class="s2">&quot;hnc_potentials&quot;</span><span class="p">)</span>
+        <span class="n">pot_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span> <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pot_list</span><span class="p">}</span>
         <span class="n">pot_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_mappings</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pot_dict</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="n">model_dict</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
-            <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="ow">in</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">_all_models</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
-        <span class="p">}</span>
+        <span class="n">model_list</span> <span class="o">=</span> <span class="n">get_all_models_list</span><span class="p">(</span><span class="s2">&quot;models&quot;</span><span class="p">)</span>
+        <span class="n">model_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">m</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span> <span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">model_list</span><span class="p">}</span>
         <span class="n">model_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_mappings</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">model_dict</span>
 

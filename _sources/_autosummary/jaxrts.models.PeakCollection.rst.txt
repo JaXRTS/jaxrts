@@ -14,8 +14,10 @@ jaxrts.models.PeakCollection
    
       ~PeakCollection.Rayleigh_weight
       ~PeakCollection.S_ii
+      ~PeakCollection.S_ii_on_grid
       ~PeakCollection.__init__
       ~PeakCollection.check
+      ~PeakCollection.check_supports_S_ii_grid
       ~PeakCollection.citation
       ~PeakCollection.evaluate
       ~PeakCollection.prepare
@@ -31,6 +33,7 @@ jaxrts.models.PeakCollection
    
       ~PeakCollection.allowed_keys
       ~PeakCollection.cite_keys
+      ~PeakCollection.supports_S_ii_grid
    
    
 

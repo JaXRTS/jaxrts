@@ -26,7 +26,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="jaxrts.models.AverageAtom_Sii.__init__" href="jaxrts.models.AverageAtom_Sii.__init__.html" />
+    <link rel="next" title="jaxrts.models.AverageAtom_Sii.S_ii_on_grid" href="jaxrts.models.AverageAtom_Sii.S_ii_on_grid.html" />
     <link rel="prev" title="jaxrts.models.ThreePotentialHNCIonFeat.tmult" href="jaxrts.models.ThreePotentialHNCIonFeat.tmult.html" /> 
 </head>
 
@@ -132,17 +132,23 @@ this is not tested and takes some computation time.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.__init__.html#jaxrts.models.AverageAtom_Sii.__init__" title="jaxrts.models.AverageAtom_Sii.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([rmin, rmax, pot, mix, tmult])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.S_ii_on_grid.html#jaxrts.models.AverageAtom_Sii.S_ii_on_grid" title="jaxrts.models.AverageAtom_Sii.S_ii_on_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S_ii_on_grid</span></code></a>(plasma_state)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.check.html#jaxrts.models.AverageAtom_Sii.check" title="jaxrts.models.AverageAtom_Sii.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(plasma_state)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.__init__.html#jaxrts.models.AverageAtom_Sii.__init__" title="jaxrts.models.AverageAtom_Sii.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([rmin, rmax, pot, mix, tmult])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.check.html#jaxrts.models.AverageAtom_Sii.check" title="jaxrts.models.AverageAtom_Sii.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(plasma_state)</p></td>
 <td><p>Test if the model is applicable to the PlasmaState.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.check_supports_S_ii_grid.html#jaxrts.models.AverageAtom_Sii.check_supports_S_ii_grid" title="jaxrts.models.AverageAtom_Sii.check_supports_S_ii_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_supports_S_ii_grid</span></code></a>(plasma_state)</p></td>
+<td><p>Whether <a class="reference internal" href="jaxrts.models.AverageAtom_Sii.S_ii_on_grid.html#jaxrts.models.AverageAtom_Sii.S_ii_on_grid" title="jaxrts.models.AverageAtom_Sii.S_ii_on_grid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">S_ii_on_grid()</span></code></a> can be used for this model, given the current plasma_state.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.citation.html#jaxrts.models.AverageAtom_Sii.citation" title="jaxrts.models.AverageAtom_Sii.citation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></a>([style, comment])</p></td>
 <td><p>Return bibliographic information for the Model used.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.evaluate.html#jaxrts.models.AverageAtom_Sii.evaluate" title="jaxrts.models.AverageAtom_Sii.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a>(plasma_state, setup)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.evaluate.html#jaxrts.models.AverageAtom_Sii.evaluate" title="jaxrts.models.AverageAtom_Sii.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a>(plasma_state, setup, *args, **kwargs)</p></td>
+<td><p>Return the result of the model given a <a class="reference internal" href="jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlasmaState</span></code></a> and a <code class="xref py py-class docutils literal notranslate"><span class="pre">Setup</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.prepare.html#jaxrts.models.AverageAtom_Sii.prepare" title="jaxrts.models.AverageAtom_Sii.prepare"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare</span></code></a>(plasma_state, key)</p></td>
 <td><p>Modify the plasma_state in place.</p></td>
@@ -164,16 +170,19 @@ this is not tested and takes some computation time.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.r.html#jaxrts.models.AverageAtom_Sii.r" title="jaxrts.models.AverageAtom_Sii.r"><code class="xref py py-obj docutils literal notranslate"><span class="pre">r</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.r_max.html#jaxrts.models.AverageAtom_Sii.r_max" title="jaxrts.models.AverageAtom_Sii.r_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">r_max</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.supports_S_ii_grid.html#jaxrts.models.AverageAtom_Sii.supports_S_ii_grid" title="jaxrts.models.AverageAtom_Sii.supports_S_ii_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">supports_S_ii_grid</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.r_max.html#jaxrts.models.AverageAtom_Sii.r_max" title="jaxrts.models.AverageAtom_Sii.r_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">r_max</span></code></a></p></td>
 <td><p>The maximal radius for evaluating the potentials.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.pot.html#jaxrts.models.AverageAtom_Sii.pot" title="jaxrts.models.AverageAtom_Sii.pot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pot</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.pot.html#jaxrts.models.AverageAtom_Sii.pot" title="jaxrts.models.AverageAtom_Sii.pot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pot</span></code></a></p></td>
 <td><p>The exponent (<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">pot</span></code>), setting the number of points in <code class="docutils literal notranslate"><span class="pre">r</span></code> or <code class="docutils literal notranslate"><span class="pre">k</span></code> to evaluate.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.mix.html#jaxrts.models.AverageAtom_Sii.mix" title="jaxrts.models.AverageAtom_Sii.mix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mix</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.mix.html#jaxrts.models.AverageAtom_Sii.mix" title="jaxrts.models.AverageAtom_Sii.mix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mix</span></code></a></p></td>
 <td><p>Value in [0, 1); describes how much of the last iterations' nodal correction term should be added to the newly obtained <cite>N_ab</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.tmult.html#jaxrts.models.AverageAtom_Sii.tmult" title="jaxrts.models.AverageAtom_Sii.tmult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tmult</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.tmult.html#jaxrts.models.AverageAtom_Sii.tmult" title="jaxrts.models.AverageAtom_Sii.tmult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tmult</span></code></a></p></td>
 <td><p>List of temperature multipliers used in auxiliary HNC calculations.</p></td>
 </tr>
 </tbody>
@@ -187,7 +196,7 @@ this is not tested and takes some computation time.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="jaxrts.models.ThreePotentialHNCIonFeat.tmult.html" class="btn btn-neutral float-left" title="jaxrts.models.ThreePotentialHNCIonFeat.tmult" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="jaxrts.models.AverageAtom_Sii.__init__.html" class="btn btn-neutral float-right" title="jaxrts.models.AverageAtom_Sii.__init__" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="jaxrts.models.AverageAtom_Sii.S_ii_on_grid.html" class="btn btn-neutral float-right" title="jaxrts.models.AverageAtom_Sii.S_ii_on_grid" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

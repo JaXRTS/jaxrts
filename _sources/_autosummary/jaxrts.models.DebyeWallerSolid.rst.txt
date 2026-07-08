@@ -14,8 +14,10 @@ jaxrts.models.DebyeWallerSolid
    
       ~DebyeWallerSolid.Rayleigh_weight
       ~DebyeWallerSolid.S_ii
+      ~DebyeWallerSolid.S_ii_on_grid
       ~DebyeWallerSolid.__init__
       ~DebyeWallerSolid.check
+      ~DebyeWallerSolid.check_supports_S_ii_grid
       ~DebyeWallerSolid.citation
       ~DebyeWallerSolid.evaluate
       ~DebyeWallerSolid.prepare
@@ -31,6 +33,7 @@ jaxrts.models.DebyeWallerSolid
    
       ~DebyeWallerSolid.allowed_keys
       ~DebyeWallerSolid.cite_keys
+      ~DebyeWallerSolid.supports_S_ii_grid
    
    
 

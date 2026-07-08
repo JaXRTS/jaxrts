@@ -14,8 +14,10 @@ jaxrts.models.ArkhipovIonFeat
    
       ~ArkhipovIonFeat.Rayleigh_weight
       ~ArkhipovIonFeat.S_ii
+      ~ArkhipovIonFeat.S_ii_on_grid
       ~ArkhipovIonFeat.__init__
       ~ArkhipovIonFeat.check
+      ~ArkhipovIonFeat.check_supports_S_ii_grid
       ~ArkhipovIonFeat.citation
       ~ArkhipovIonFeat.evaluate
       ~ArkhipovIonFeat.prepare
@@ -31,6 +33,7 @@ jaxrts.models.ArkhipovIonFeat
    
       ~ArkhipovIonFeat.allowed_keys
       ~ArkhipovIonFeat.cite_keys
+      ~ArkhipovIonFeat.supports_S_ii_grid
    
    
 

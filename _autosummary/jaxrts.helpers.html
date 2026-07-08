@@ -23,6 +23,7 @@
         <script src="../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -61,6 +62,7 @@
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.absorption_edges_ionized_ions_data.html">jaxrts.absorption_edges_ionized_ions_data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.analysis.html">jaxrts.analysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.bound_free.html">jaxrts.bound_free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jaxrts.collections.html">jaxrts.collections</a></li>
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections.html">jaxrts.ee_localfieldcorrections</a></li>
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.ee_localfieldcorrections_dornheim_2021.html">jaxrts.ee_localfieldcorrections_dornheim_2021</a></li>
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.elements.html">jaxrts.elements</a></li>
@@ -71,6 +73,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">jaxrts.helpers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.helpers.orbital_map.html">jaxrts.helpers.orbital_map</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.helpers.bisection.html">jaxrts.helpers.bisection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.helpers.cramer_solve.html">jaxrts.helpers.cramer_solve</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.helpers.download_from_nist.html">jaxrts.helpers.download_from_nist</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.helpers.get_cache_dir.html">jaxrts.helpers.get_cache_dir</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.helpers.invert_dict.html">jaxrts.helpers.invert_dict</a></li>
@@ -153,34 +156,37 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.bisection.html#jaxrts.helpers.bisection" title="jaxrts.helpers.bisection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bisection</span></code></a>(func, a, b[, tolerance, max_iter, ...])</p></td>
 <td><p>Find the root of a function <code class="docutils literal notranslate"><span class="pre">func</span></code> between the points <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code> by bisection.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.download_from_nist.html#jaxrts.helpers.download_from_nist" title="jaxrts.helpers.download_from_nist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_from_nist</span></code></a>(config)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.cramer_solve.html#jaxrts.helpers.cramer_solve" title="jaxrts.helpers.cramer_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cramer_solve</span></code></a>(A, b[, N_max])</p></td>
+<td><p>Solve A x = b via Cramer's rule for small, fixed system sizes, avoiding the fixed dispatch overhead of a batched jnp.linalg.solve.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.download_from_nist.html#jaxrts.helpers.download_from_nist" title="jaxrts.helpers.download_from_nist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_from_nist</span></code></a>(config)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.get_cache_dir.html#jaxrts.helpers.get_cache_dir" title="jaxrts.helpers.get_cache_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_cache_dir</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.get_cache_dir.html#jaxrts.helpers.get_cache_dir" title="jaxrts.helpers.get_cache_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_cache_dir</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.invert_dict.html#jaxrts.helpers.invert_dict" title="jaxrts.helpers.invert_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">invert_dict</span></code></a>(dictionary)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.invert_dict.html#jaxrts.helpers.invert_dict" title="jaxrts.helpers.invert_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">invert_dict</span></code></a>(dictionary)</p></td>
 <td><p>Invert a dictionary, so that it's keys become values, and the values are the keys of the returned dict.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.mass_density_from_electron_density.html#jaxrts.helpers.mass_density_from_electron_density" title="jaxrts.helpers.mass_density_from_electron_density"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mass_density_from_electron_density</span></code></a>(n_e, Z, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.mass_density_from_electron_density.html#jaxrts.helpers.mass_density_from_electron_density" title="jaxrts.helpers.mass_density_from_electron_density"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mass_density_from_electron_density</span></code></a>(n_e, Z, ...)</p></td>
 <td><p>Calculate the mass density of a mixture from electron density.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.mass_from_number_fraction.html#jaxrts.helpers.mass_from_number_fraction" title="jaxrts.helpers.mass_from_number_fraction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mass_from_number_fraction</span></code></a>(number_fractions, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.mass_from_number_fraction.html#jaxrts.helpers.mass_from_number_fraction" title="jaxrts.helpers.mass_from_number_fraction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mass_from_number_fraction</span></code></a>(number_fractions, ...)</p></td>
 <td><p>Calculate the mass fraction of a mixture.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.orbital_array.html#jaxrts.helpers.orbital_array" title="jaxrts.helpers.orbital_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">orbital_array</span></code></a>([n1s, n2s, n2p, n3s, n3p, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.orbital_array.html#jaxrts.helpers.orbital_array" title="jaxrts.helpers.orbital_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">orbital_array</span></code></a>([n1s, n2s, n2p, n3s, n3p, ...])</p></td>
 <td><p>Create an array with entries for each orbital.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.partialclass.html#jaxrts.helpers.partialclass" title="jaxrts.helpers.partialclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">partialclass</span></code></a>(cls, *args, **kwds)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.partialclass.html#jaxrts.helpers.partialclass" title="jaxrts.helpers.partialclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">partialclass</span></code></a>(cls, *args, **kwds)</p></td>
 <td><p>This is an equivalent to functools.partial, but for Classes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.read_nist_file.html#jaxrts.helpers.read_nist_file" title="jaxrts.helpers.read_nist_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_nist_file</span></code></a>(config)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.read_nist_file.html#jaxrts.helpers.read_nist_file" title="jaxrts.helpers.read_nist_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_nist_file</span></code></a>(config)</p></td>
 <td><p>Read in a nist file for excited states that was downloaded by <a class="reference internal" href="jaxrts.helpers.download_from_nist.html#jaxrts.helpers.download_from_nist" title="jaxrts.helpers.download_from_nist"><code class="xref py py-func docutils literal notranslate"><span class="pre">download_from_nist()</span></code></a>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.secant_extrema_finding.html#jaxrts.helpers.secant_extrema_finding" title="jaxrts.helpers.secant_extrema_finding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">secant_extrema_finding</span></code></a>(func, xmin, xmax[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.secant_extrema_finding.html#jaxrts.helpers.secant_extrema_finding" title="jaxrts.helpers.secant_extrema_finding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">secant_extrema_finding</span></code></a>(func, xmin, xmax[, ...])</p></td>
 <td><p>Use the secant method to find the extrema of a function within specified bounds.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.helpers.timer.html#jaxrts.helpers.timer" title="jaxrts.helpers.timer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timer</span></code></a>(func[, custom_prefix, loglevel])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.helpers.timer.html#jaxrts.helpers.timer" title="jaxrts.helpers.timer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timer</span></code></a>(func[, custom_prefix, loglevel])</p></td>
 <td><p>Simple timer wrapper.</p></td>
 </tr>
 </tbody>
