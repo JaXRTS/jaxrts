@@ -4,6 +4,7 @@ functions.
 """
 
 import abc
+import functools
 
 import logging
 from collections.abc import Callable
@@ -181,31 +182,63 @@ class Lorentzian(InstrumentFunction):
 
 
 class FromCallable(InstrumentFunction):
-    def __init__(self, function: callable):
+    def __init__(self, function):
         """
         Create an :py:class`~.InstrumentFunction` from a callable.
+
+        If ``function`` is a ``functools.partial``, its bound positional and
+        keyword arguments are unpacked and re-flattened as genuine pytree
+        leaves.
         """
-        self.function = jax.tree_util.Partial(function)
+        if isinstance(function, functools.partial):
+            self.function = function.func
+            self.partial_args = function.args
+            self.partial_kwargs = function.keywords
+        else:
+            self.function = function
+            self.partial_args = ()
+            self.partial_kwargs = {}
 
     def __call__(self, omega):
-        return self.function(omega)
+        # Bound positional args come before the call-time argument.
+        return self.function(*self.partial_args, omega, **self.partial_kwargs)
 
     def _tree_flatten(self):
-        children = ()
-        aux_data = (self.function,)  # static values
-        return (children, aux_data)
+        args_leaves, args_treedef = jax.tree_util.tree_flatten(
+            self.partial_args
+        )
+        kwargs_leaves, kwargs_treedef = jax.tree_util.tree_flatten(
+            self.partial_kwargs
+        )
+        children = tuple(args_leaves) + tuple(kwargs_leaves)
+        aux_data = (
+            self.function,
+            len(args_leaves),
+            args_treedef,
+            kwargs_treedef,
+        )
+        return children, aux_data
 
     @classmethod
     def _tree_unflatten(cls, aux_data, children):
+        func, n_args_leaves, args_treedef, kwargs_treedef = aux_data
+        args_leaves = children[:n_args_leaves]
+        kwargs_leaves = children[n_args_leaves:]
         obj = object.__new__(cls)
-        (obj.function,) = aux_data
+        obj.function = func
+        obj.partial_args = jax.tree_util.tree_unflatten(
+            args_treedef, args_leaves
+        )
+        obj.partial_kwargs = jax.tree_util.tree_unflatten(
+            kwargs_treedef, kwargs_leaves
+        )
         return obj
 
 
 class FromArray(InstrumentFunction):
     def __init__(self, x, ints):
         """
-        Set instrument function from an array input.
+        Generate an InstrumentFunction from an array input.
         The intensities ``I`` have to have the same length as the energy shift
         ``x``.
 
