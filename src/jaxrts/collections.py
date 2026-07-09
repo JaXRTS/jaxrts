@@ -8,7 +8,7 @@ This is a submodule of its own to avoid circular imports.
 from collections import defaultdict
 from typing import overload, Dict, Literal
 import inspect
-from . import hnc_potentials, models
+from . import hnc_potentials, models, instrument_function
 
 
 @overload
@@ -76,6 +76,52 @@ def get_all_models(
                         else:
                             all_models[k].append(obj)
     return all_models
+
+
+@overload
+def get_all_instrument_functions(
+    names_only: Literal[False] = False,
+) -> list[instrument_function.InstrumentFunction]: ...
+@overload
+def get_all_instrument_functions(
+    names_only: Literal[True],
+) -> list[str]: ...
+def get_all_instrument_functions(
+    names_only: bool = False,
+) -> list[instrument_function.InstrumentFunction | str]:
+    """
+    Get a list of all :py:class:`jaxrts.instrument_function.InstrumentFunction`
+    defined within jaxrts.
+
+    Parameters
+    ----------
+    names_only: bool, default False
+        If ``true``, the values of the returned dict are a list of
+        :py:class:`jaxrts.models.Model` object. If false, the values are rather
+        list of strings with of the name of the models.
+
+    Returns
+    -------
+    List of all instrument functions available in jaxrts.
+    """
+    all_inst_funcs = []
+    for instrument_name in dir(instrument_function):
+        if "__class__" in dir(instrument_name):
+            obj = getattr(instrument_function, instrument_name)
+            # The model must be concrete (cannot be abstract), has to
+            # advertise allowed keys, and cannot have a private name that
+            # starts with ``_``.
+            if (
+                not inspect.isabstract(obj)
+                and inspect.isclass(obj)
+                and issubclass(obj, instrument_function.InstrumentFunction)
+                and not instrument_name.startswith("_")
+            ):
+                if names_only:
+                    all_inst_funcs.append(instrument_name)
+                else:
+                    all_inst_funcs.append(obj)
+    return all_inst_funcs
 
 
 @overload
