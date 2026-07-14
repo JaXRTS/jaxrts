@@ -30,7 +30,7 @@ Or, just run
 
 .. code:: bash
 
-   python -m pip install it+https://github.com/jaxrts/jaxrts
+   python -m pip install git+https://github.com/jaxrts/jaxrts
 
 Installing additional features
 ------------------------------

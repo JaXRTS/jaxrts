@@ -50,16 +50,16 @@ to be higher for comparable quality of the result, when using ``KKT``.
 
  .. code-block:: none
 
-    Full BMA: 2.817784547805786s
-    2 interp points: 0.10518813133239746s       Mean deviation from full RPA:  -6.417660823980601e-20 Max deviation from full RPA:  3.326929539366055e-18
-    4 interp points: 0.11651349067687988s       Mean deviation from full RPA:  5.842183121456002e-20 Max deviation from full RPA:  1.1313588478530012e-18
-    20 interp points: 0.16080999374389648s       Mean deviation from full RPA:  -2.829842445178059e-20 Max deviation from full RPA:  4.21721788892628e-20
-    100 interp points: 0.2851219177246094s       Mean deviation from full RPA:  -3.2770861468005803e-20 Max deviation from full RPA:  2.1372152736136487e-20
-    2 interp points: 0.1127469539642334s       Mean deviation from full RPA:  2.200651985657627e-19 Max deviation from full RPA:  2.9810113837173384e-18
-    4 interp points: 0.12182402610778809s       Mean deviation from full RPA:  1.184491860272195e-19 Max deviation from full RPA:  1.0306087226561055e-18
-    20 interp points: 0.15956687927246094s       Mean deviation from full RPA:  2.2786269411516506e-20 Max deviation from full RPA:  1.2710680433702378e-18
-    100 interp points: 0.2909989356994629s       Mean deviation from full RPA:  2.066979348859162e-20 Max deviation from full RPA:  1.2838363702499555e-18
-    RPA: 0.04992389678955078s
+    Full BMA: 2.5816166400909424s
+    2 interp points: 0.10531449317932129s       Mean deviation from full RPA:  -6.417660823980601e-20 Max deviation from full RPA:  3.326929539366055e-18
+    4 interp points: 0.11473464965820312s       Mean deviation from full RPA:  5.842183121456002e-20 Max deviation from full RPA:  1.1313588478530012e-18
+    20 interp points: 0.16203689575195312s       Mean deviation from full RPA:  -2.829842445178059e-20 Max deviation from full RPA:  4.21721788892628e-20
+    100 interp points: 0.2931551933288574s       Mean deviation from full RPA:  -3.2770861468005803e-20 Max deviation from full RPA:  2.1372152736136487e-20
+    2 interp points: 0.11732721328735352s       Mean deviation from full RPA:  2.200651985657627e-19 Max deviation from full RPA:  2.9810113837173384e-18
+    4 interp points: 0.11990094184875488s       Mean deviation from full RPA:  1.184491860272195e-19 Max deviation from full RPA:  1.0306087226561055e-18
+    20 interp points: 0.16452693939208984s       Mean deviation from full RPA:  2.2786269411516506e-20 Max deviation from full RPA:  1.2710680433702378e-18
+    100 interp points: 0.2947196960449219s       Mean deviation from full RPA:  2.066979348859162e-20 Max deviation from full RPA:  1.2838363702499555e-18
+    RPA: 0.05053257942199707s
 
 
 
@@ -184,7 +184,7 @@ to be higher for comparable quality of the result, when using ``KKT``.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 14.198 seconds)
+   **Total running time of the script:** (1 minutes 9.114 seconds)
 
 
 .. _sphx_glr_download_gen_examples_free_free_plot_BM_ChapmanInterp.py:
