@@ -14,6 +14,7 @@ which was an issue when pickeling a PlasmaState.
 """
 
 import base64
+import inspect
 import json
 
 import dill as pickle
@@ -140,6 +141,16 @@ class JaXRTSEncoder(json.JSONEncoder):
                 "_type": "jaxPartial",
                 "value": base64.b64encode(pickle.dumps(obj)).decode("utf-8"),
             }
+        elif inspect.isfunction(obj):
+            return {
+                "_type": "function",
+                "value": base64.b64encode(pickle.dumps(obj)).decode("utf-8"),
+            }
+        elif isinstance(obj, jax.tree_util.PyTreeDef):
+            return {
+                "_type": "jaxPyTreeDef",
+                "value": base64.b64encode(pickle.dumps(obj)).decode("utf-8"),
+            }
         return super().default(obj)
 
 
@@ -206,6 +217,10 @@ class JaXRTSDecoder(json.JSONDecoder):
         _type = obj["_type"]
         val = obj["value"]
         if _type == "jaxPartial":
+            return pickle.loads(base64.b64decode(val))
+        if _type == "jaxPyTreeDef":
+            return pickle.loads(base64.b64decode(val))
+        if _type == "function":
             return pickle.loads(base64.b64decode(val))
         if _type == "ndArray":
             return onp.array(val)
