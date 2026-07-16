@@ -204,15 +204,21 @@ class Lorentzian(InstrumentFunction):
 
 
 class FromCallable(InstrumentFunction):
-    def __init__(self, function):
+    def __init__(self, function, disable_partial_unwrapping: bool = False):
         """
         Create an :py:class`~.InstrumentFunction` from a callable.
 
         If ``function`` is a ``functools.partial``, its bound positional and
         keyword arguments are unpacked and re-flattened as genuine pytree
-        leaves.
+        leaves. This requires that tracing though all positional and keyword
+        arguments is possible. If this is not the case, define a new function
+        where this is the case, or set the flag
+        "disable_partial_unwrapping==True".
         """
-        if isinstance(function, functools.partial):
+        if (
+            isinstance(function, functools.partial)
+            and not disable_partial_unwrapping
+        ):
             _check_callable_for_deprication(function.func)
             self.function = function.func
             self.partial_args = function.args
