@@ -149,7 +149,7 @@ class SuperGaussian(InstrumentFunction):
         return self.sigma * (2 * jnp.sqrt(2 * jnp.log(2)))
 
     def __call__(self, omega):
-        return instrument_supergaussian(omega, self.power, self.sigma)
+        return instrument_supergaussian(omega, self.sigma, self.power)
 
     _children_labels = ("sigma", "power")
 
