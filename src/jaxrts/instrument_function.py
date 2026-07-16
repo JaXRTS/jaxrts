@@ -9,6 +9,7 @@ import functools
 import logging
 from collections.abc import Callable
 from pathlib import Path
+import warnings
 
 import jax
 import jax.numpy as jnp
@@ -18,6 +19,27 @@ import numpy as onp
 from .units import Quantity, Unit, ureg
 
 logger = logging.getLogger(__name__)
+
+
+def _check_callable_for_deprication(func: Callable) -> None:
+    """
+    Issue deprecation warnings if old functions are used in
+    :py:class:`~.FromCallable`.
+    """
+    alternatives = {
+        "instrument_gaussian": "Gaussian",
+        "instrument_supergaussian": "SuperGaussian",
+        "instrument_lorentzian": "Lorentzian",
+    }
+    if func.__name__ in alternatives.keys():
+        warnings.warn(
+            f"Passing ``{func.__name__}`` as an instrument function "
+            "to ``FromCallable`` is deprecated. Instead "
+            f"jaxrts.instrument_function.{alternatives[func.__name__]}() "
+            "should be used.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
 
 
 class InstrumentFunction(metaclass=abc.ABCMeta):
@@ -191,10 +213,12 @@ class FromCallable(InstrumentFunction):
         leaves.
         """
         if isinstance(function, functools.partial):
+            _check_callable_for_deprication(function.func)
             self.function = function.func
             self.partial_args = function.args
             self.partial_kwargs = function.keywords
         else:
+            _check_callable_for_deprication(function)
             self.function = function
             self.partial_args = ()
             self.partial_kwargs = {}
