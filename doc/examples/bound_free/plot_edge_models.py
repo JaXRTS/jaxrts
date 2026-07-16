@@ -6,8 +6,6 @@ This example showcases different edge-models that can be used in the bound free
 scattering features.
 """
 
-from functools import partial
-
 import matplotlib.pyplot as plt
 
 # jax provides a submodule which can be (mostly) used as a drop-in replacement
@@ -41,10 +39,7 @@ setup = jaxrts.Setup(
     energy=ureg("8700 eV"),
     measured_energy=ureg("8700 eV")
     + jnp.linspace(-550, 40, 500) * ureg.electron_volt,
-    instrument=partial(
-        jaxrts.instrument_function.instrument_gaussian,
-        sigma=ureg("5.0eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-    ),
+    instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("5.0eV")),
 )
 
 

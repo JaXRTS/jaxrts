@@ -8,8 +8,6 @@ However, we used simpler for the relevant scattering processes, just to show
 the usage of :py:class:`jaxrts.models.DetailedBalace`.
 """
 
-from functools import partial
-
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 
@@ -23,10 +21,7 @@ setup = jaxrts.setup.Setup(
     ureg("120°"),
     energy=ureg("9keV"),
     measured_energy=jnp.linspace(8, 9.5, 300) * ureg.kiloelectron_volt,
-    instrument=partial(
-        jaxrts.instrument_function.instrument_gaussian,
-        sigma=(30.0 * ureg.electron_volt) / ureg.hbar,
-    ),
+    instrument=jaxrts.instrument_function.Gaussian(sigma=ureg("30.0eV")),
 )
 state = jaxrts.PlasmaState(
     [jaxrts.Element("Be")],

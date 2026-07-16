@@ -3,9 +3,13 @@ This submodule is dedicated to the modelling and handling of instrument
 functions.
 """
 
+import abc
+import functools
+
 import logging
 from collections.abc import Callable
 from pathlib import Path
+import warnings
 
 import jax
 import jax.numpy as jnp
@@ -15,6 +19,298 @@ import numpy as onp
 from .units import Quantity, Unit, ureg
 
 logger = logging.getLogger(__name__)
+
+
+def _check_callable_for_deprication(func: Callable) -> None:
+    """
+    Issue deprecation warnings if old functions are used in
+    :py:class:`~.FromCallable`.
+    """
+    alternatives = {
+        "instrument_gaussian": "Gaussian",
+        "instrument_supergaussian": "SuperGaussian",
+        "instrument_lorentzian": "Lorentzian",
+    }
+    if func.__name__ in alternatives.keys():
+        warnings.warn(
+            f"Passing ``{func.__name__}`` as an instrument function "
+            "to ``FromCallable`` is deprecated. Instead "
+            f"jaxrts.instrument_function.{alternatives[func.__name__]}() "
+            "should be used.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+
+
+class InstrumentFunction(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def __call__(self, omega: Quantity) -> Quantity: ...
+
+
+class Gaussian(InstrumentFunction):
+    def __init__(
+        self, sigma: Quantity | None = None, fwhm: Quantity | None = None
+    ):
+        """
+        Gaussian instrument function
+
+        .. math::
+
+           \\frac{1}{\\sigma \\sqrt{2\\pi}}
+           \\exp\\left(-\\frac{x^2}{{2\\sigma}^2}\\right)
+
+
+        Parameters
+        ----------
+        sigma: Quantity, optional
+            The parameter sigma, the standard deviation of the gaussian. must
+            be given in units of energy or frequency.
+        fwhm: Quantity, optional
+            The full width half maximum of the distribution.
+
+        Raises
+        ------
+        TypeError if neither ``sigma`` nor ``fwhm`` are given.
+        """
+        if sigma is None and fwhm is None:
+            raise TypeError("Either sigma or fwhm have to be supplied.")
+        if fwhm is not None:
+            sigma = fwhm / (2 * jnp.sqrt(2 * jnp.log(2)))
+        if sigma.check("[energy]"):
+            sigma = sigma / (1 * ureg.hbar)
+        self.sigma = sigma
+
+    @property
+    def fwhm(self):
+        return self.sigma * (2 * jnp.sqrt(2 * jnp.log(2)))
+
+    def __call__(self, omega):
+        return instrument_gaussian(omega, self.sigma)
+
+    _children_labels = ("sigma",)
+
+    def _tree_flatten(self):
+        children = (self.sigma,)
+        aux_data = ()  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.sigma,) = children
+
+        return obj
+
+
+class SuperGaussian(InstrumentFunction):
+    def __init__(
+        self,
+        power,
+        sigma: Quantity | None = None,
+        fwhm: Quantity | None = None,
+    ):
+        """
+        Supergaussian instrument function
+
+        .. math::
+
+           \\exp\\left(-\\left(\\frac{x^2}{2\\sigma^2}\\right)^p\\right)
+
+        .. note::
+
+           The function is normalized by numerical integration
+
+        Parameters
+        ----------
+        power: float
+            The exponent p in above equation.
+        sigma: Quantity, optional
+            The parameter sigma (must be given in units of energy or
+            frequency.
+        fwhm: Quantity, optional
+            The full width half maximum of the distribution.
+
+        Raises
+        ------
+        TypeError if neither ``sigma`` nor ``fwhm`` are given.
+
+        """
+        if sigma is None and fwhm is None:
+            raise TypeError("Either sigma or fwhm have to be supplied.")
+        if fwhm is not None:
+            sigma = fwhm / (2 * jnp.sqrt(2 * jnp.log(2)))
+        if sigma.check("[energy]"):
+            sigma = sigma / (1 * ureg.hbar)
+        self.sigma = sigma
+        self.power = power
+
+    @property
+    def fwhm(self):
+        return self.sigma * (2 * jnp.sqrt(2 * jnp.log(2)))
+
+    def __call__(self, omega):
+        return instrument_supergaussian(omega, self.sigma, self.power)
+
+    _children_labels = ("sigma", "power")
+
+    def _tree_flatten(self):
+        children = self.sigma, self.power
+        aux_data = ()  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.sigma, obj.power) = children
+        return obj
+
+
+class Lorentzian(InstrumentFunction):
+    def __init__(self, gamma):
+        """
+        Lorentzian model for the instrument function.
+
+        .. math::
+
+           \\frac{1}{\\pi}
+           \\frac{1}
+           {\\gamma \\left(1+\\left(\\frac{x}{\\gamma}\\right)^2\\right)}
+
+
+        Parameters
+        ----------
+        gamma: Quantity
+            The scale parameter of the lorentzian.
+        """
+        if gamma.check("[energy]"):
+            gamma = gamma / (1 * ureg.hbar)
+        self.gamma = gamma
+
+    def __call__(self, omega):
+        return instrument_lorentzian(omega, self.gamma)
+
+    def _tree_flatten(self):
+        children = (self.gamma,)
+        aux_data = ()  # static values
+        return (children, aux_data)
+
+    _children_labels = ("gamma",)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.gamma,) = children
+        return obj
+
+
+class FromCallable(InstrumentFunction):
+    def __init__(self, function, disable_partial_unwrapping: bool = False):
+        """
+        Create an :py:class`~.InstrumentFunction` from a callable.
+
+        If ``function`` is a ``functools.partial``, its bound positional and
+        keyword arguments are unpacked and re-flattened as genuine pytree
+        leaves. This requires that tracing though all positional and keyword
+        arguments is possible. If this is not the case, define a new function
+        where this is the case, or set the flag
+        "disable_partial_unwrapping==True".
+        """
+        if (
+            isinstance(function, functools.partial)
+            and not disable_partial_unwrapping
+        ):
+            _check_callable_for_deprication(function.func)
+            self.function = function.func
+            self.partial_args = function.args
+            self.partial_kwargs = function.keywords
+        else:
+            _check_callable_for_deprication(function)
+            self.function = function
+            self.partial_args = ()
+            self.partial_kwargs = {}
+
+    def __call__(self, omega):
+        # Bound positional args come before the call-time argument.
+        return self.function(*self.partial_args, omega, **self.partial_kwargs)
+
+    def _tree_flatten(self):
+        args_leaves, args_treedef = jax.tree_util.tree_flatten(
+            self.partial_args
+        )
+        kwargs_leaves, kwargs_treedef = jax.tree_util.tree_flatten(
+            self.partial_kwargs
+        )
+        children = tuple(args_leaves) + tuple(kwargs_leaves)
+        aux_data = (
+            self.function,
+            len(args_leaves),
+            args_treedef,
+            kwargs_treedef,
+        )
+        return children, aux_data
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        func, n_args_leaves, args_treedef, kwargs_treedef = aux_data
+        args_leaves = children[:n_args_leaves]
+        kwargs_leaves = children[n_args_leaves:]
+        obj = object.__new__(cls)
+        obj.function = func
+        obj.partial_args = jax.tree_util.tree_unflatten(
+            args_treedef, args_leaves
+        )
+        obj.partial_kwargs = jax.tree_util.tree_unflatten(
+            kwargs_treedef, kwargs_leaves
+        )
+        return obj
+
+
+class FromArray(InstrumentFunction):
+    def __init__(self, x, ints):
+        """
+        Generate an InstrumentFunction from an array input.
+        The intensities ``I`` have to have the same length as the energy shift
+        ``x``.
+
+        Parameters
+        ----------
+        x: Quantity
+            :math:`\\omega` or energy shift. Should be given in units of 1/time
+            or in energy units.
+        ints: jnp.ndarray | float | Quantity
+            Intensity values of Instrument function.
+        """
+        if x.check("[energy]"):
+            x = x / (1 * ureg.hbar)
+        self.omega = x
+        w = x.m_as(ureg.electron_volt / ureg.hbar)
+        if isinstance(ints, Quantity):
+            ints = ints.to_base_units().magnitude
+
+        # Assert normalization
+        ints /= jnp.trapezoid(y=ints, x=w)
+        self.ints = ints * (1 * ureg.hbar / ureg.electron_volt)
+
+    @jax.jit
+    def __call__(self, omega):
+        omega_mag = omega.m_as(ureg.electron_volt / ureg.hbar)
+        x_mag = self.omega.m_as(ureg.electron_volt / ureg.hbar)
+        ints_mag = self.ints.m_as(ureg.hbar / ureg.electron_volt)
+        ints_func = jnp.interp(omega_mag, x_mag, ints_mag, left=0, right=0)
+        return ints_func * (1 * ureg.hbar / ureg.electron_volt)
+
+    _children_labels = ("omega", "intensity")
+
+    def _tree_flatten(self):
+        children = (self.omega, self.ints)
+        aux_data = ()  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (obj.omega, obj.ints) = children
+        return obj
 
 
 @jax.jit
@@ -87,7 +383,7 @@ def instrument_supergaussian(
     norm = jax.scipy.integrate.trapezoid(_y, _x)
 
     return jnp.exp(
-        -(0.5 * x**2 / sigma**2).m_as(ureg.dimensionless) ** power
+        -((0.5 * x**2 / sigma**2).m_as(ureg.dimensionless) ** power)
     ) / (norm * sigma)
 
 
@@ -139,65 +435,9 @@ def instrument_from_file(
         frequency shift), and returns the weight of this shift. The function is
         normalized to one.
     """
-
     data = onp.genfromtxt(filename, delimiter=",", skip_header=0)
 
     x, ints = data[:, 0], data[:, 1]
     x *= xunit
 
-    if x.check("[energy]"):
-        x = x / (1 * ureg.hbar)
-
-    w = x.m_as(ureg.electron_volt / ureg.hbar)
-
-    ints /= jnp.trapezoid(y=ints, x=w)
-
-    def inst_func_fxrts(_w):
-        w_mag = _w.m_as(ureg.electron_volt / ureg.hbar)
-        ints_func = jnp.interp(w_mag, w, ints, left=0, right=0)
-        return ints_func * (1 * ureg.hbar / ureg.electron_volt)
-
-    return jax.tree_util.Partial(inst_func_fxrts)
-
-
-def instrument_from_array(
-    x: Quantity, ints: jnp.ndarray | Quantity
-) -> Callable[[Quantity], Quantity]:
-    """
-    Set instrument function from an array input.
-    The intensities have to have the same length as the energy shift.
-
-    Parameters
-    ----------
-    x: Quantity
-        :math:`\\omega` or energy shift. Should be given in units of 1/time or
-        in energy units.
-    ints: jnp.ndarray | float | Quantity
-        Intensity values of Instrument function.
-
-    Returns
-    -------
-    Callable
-        The instrument function, which takes one singular argument (the
-        frequency shift), and returns the weight of this shift. The function is
-        normalized to one.
-    """
-    # Handle units
-
-    # if x is given in energy units, convert to 1/time
-    if x.check("[energy]"):
-        x = x / (1 * ureg.hbar)
-    w = x.m_as(ureg.electron_volt / ureg.hbar)
-    if isinstance(ints, Quantity):
-        ints = ints.to_base_units().magnitude
-
-    # Assert normalization
-    ints /= jnp.trapezoid(y=ints, x=w)
-
-    @jax.jit
-    def inst_func_fxrts(_w):
-        w_mag = _w.m_as(ureg.electron_volt / ureg.hbar)
-        ints_func = jnp.interp(w_mag, w, ints, left=0, right=0)
-        return ints_func * (1 * ureg.hbar / ureg.electron_volt)
-
-    return jax.tree_util.Partial(inst_func_fxrts)
+    return FromArray(x, ints)

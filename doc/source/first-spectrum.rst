@@ -24,7 +24,6 @@ First, import the relevant packages:
 
 .. code:: python
 
-    from functools import partial
     import matplotlib.pyplot as plt
     from jax import numpy as jnp
     import jaxrts
@@ -47,7 +46,7 @@ instance; its application should be clear after reading this example.
 We rely on `jpu <https://github.com/dfm/jpu>`_, a port of `pint
 <https://pint.readthedocs.io>`_ to the jax ecosystem.
 
-With this out of the way, we lets the define a two-times ionized beryllium
+With this out of the way, let's define a two-times ionized beryllium
 plasma at :math:`\rho=1\text{g/cc}` and an electron temperature :math:`k_BT_e =
 1\text{eV}`.
 
@@ -87,7 +86,7 @@ As we can see we have set densities, ionization, and temperature, as well as
 some default models.
 
 Next, we also have to define a :py:class:`jaxrts.setup.Setup`. :py:mod:`jpu`
-also allows to convert string to quantities with units, as you can see below.
+also allows converting string to quantities with units, as you can see below.
 
 .. code:: python
 
@@ -96,10 +95,7 @@ also allows to convert string to quantities with units, as you can see below.
         energy=ureg("4700 eV"),
         measured_energy=ureg("4700 eV")
         + jnp.linspace(-100, 40, 500) * ureg.electron_volt,
-        instrument=partial(
-            jaxrts.instrument_function.instrument_gaussian,
-            sigma=ureg("5.0eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-        ),
+        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("5.0eV")),
     )
 
 
