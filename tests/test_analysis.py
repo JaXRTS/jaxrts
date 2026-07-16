@@ -3,8 +3,6 @@ These tests investigate that certain properties of a generated spectrum hold
 true.
 """
 
-from functools import partial
-
 import pytest
 from jax import numpy as jnp
 from jpu import numpy as jnpu
@@ -26,10 +24,7 @@ class TestITCFInstance:
         energy=ureg("6900 eV"),
         measured_energy=ureg("6900 eV")
         + jnp.linspace(-120, 120, 1000) * ureg.electron_volt,
-        instrument=partial(
-            jaxrts.instrument_function.instrument_gaussian,
-            sigma=ureg("1.0eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-        ),
+        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("1.0eV")),
     )
 
     test_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
@@ -83,10 +78,7 @@ class TestSSFInstance:
         energy=ureg("70 keV"),
         measured_energy=ureg("70 keV")
         + jnp.linspace(-15, 15, 6000) * ureg.kiloelectron_volt,
-        instrument=partial(
-            jaxrts.instrument_function.instrument_gaussian,
-            sigma=ureg("50eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-        ),
+        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("50.0eV")),
     )
     test_setup.correct_k_dispersion = False
 
@@ -143,10 +135,7 @@ class TestFsumRuleInstance:
         energy=ureg("7.5 keV"),
         measured_energy=ureg("7.5 keV")
         + jnp.linspace(-2, 2, 5000) * ureg.kiloelectron_volt,
-        instrument=partial(
-            jaxrts.instrument_function.instrument_gaussian,
-            sigma=ureg("40eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-        ),
+        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("40.0eV")),
     )
 
     test_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()

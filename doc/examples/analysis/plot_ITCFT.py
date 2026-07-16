@@ -7,8 +7,6 @@ from the Laplace transform of the structure, as proposed by
 :cite:`Dornheim.2022`.
 """
 
-from functools import partial
-
 import jax
 import matplotlib.pyplot as plt
 from jax import numpy as jnp
@@ -31,10 +29,7 @@ setup = jaxrts.Setup(
     energy=ureg("9000 eV"),
     measured_energy=ureg("9000 eV")
     + jnp.linspace(-200, 200, 500) * ureg.electron_volt,
-    instrument=partial(
-        jaxrts.instrument_function.instrument_gaussian,
-        sigma=ureg("3eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-    ),
+    instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("3.0eV")),
 )
 
 # Turn off the dispersion correction

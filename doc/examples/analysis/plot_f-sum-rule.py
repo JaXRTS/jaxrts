@@ -13,8 +13,6 @@ could leverage this to fix a value for
 fulfilled.
 """
 
-from functools import partial
-
 import jax
 import matplotlib.pyplot as plt
 from jax import numpy as jnp
@@ -36,10 +34,7 @@ setup = jaxrts.Setup(
     energy=ureg("9 keV"),
     measured_energy=ureg("9 keV")
     + jnp.linspace(-2000, 2000, 5000) * ureg.electron_volt,
-    instrument=partial(
-        jaxrts.instrument_function.instrument_gaussian,
-        sigma=ureg("5eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-    ),
+    instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("5.0eV")),
 )
 
 # Turn off the dispersion correction

@@ -27,19 +27,17 @@ width = 20 * ureg.electron_volt / ureg.hbar
 
 plt.plot(
     E.m_as(ureg.electron_volt),
-    ifs.instrument_gaussian(w, width).m_as(ureg.hbar / ureg.electron_volt),
+    ifs.Gaussian(width)(w).m_as(ureg.hbar / ureg.electron_volt),
     label="Gaussian Model",
 )
 plt.plot(
     E.m_as(ureg.electron_volt),
-    ifs.instrument_supergaussian(w, width, 2).m_as(
-        ureg.hbar / ureg.electron_volt
-    ),
+    ifs.SuperGaussian(2, width)(w).m_as(ureg.hbar / ureg.electron_volt),
     label="Super-Gaussian Model (p=2)",
 )
 plt.plot(
     E.m_as(ureg.electron_volt),
-    ifs.instrument_lorentzian(w, width).m_as(ureg.hbar / ureg.electron_volt),
+    ifs.Lorentzian(width)(w).m_as(ureg.hbar / ureg.electron_volt),
     label="Lorentzian Model",
 )
 
