@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:45.074** total execution time for 3 files **from gen_examples/free_bound**:
+**00:45.160** total execution time for 3 files **from gen_examples/free_bound**:
 
 .. container::
 
@@ -33,11 +33,11 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gen_examples_free_bound_plot_free_bound_scattering.py` (``plot_free_bound_scattering.py``)
-     - 00:21.478
+     - 00:21.410
      - 0.0
    * - :ref:`sphx_glr_gen_examples_free_bound_plot_bohme_kraus_relevance_of_bound_free.py` (``plot_bohme_kraus_relevance_of_bound_free.py``)
-     - 00:12.385
+     - 00:12.331
      - 0.0
    * - :ref:`sphx_glr_gen_examples_free_bound_plot_k_dispersion.py` (``plot_k_dispersion.py``)
-     - 00:11.212
+     - 00:11.419
      - 0.0
