@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-type: article
+title: "jaxrts: A Python package for simulating X-ray Thomson scattering spectra from dense plasmas using jax"
 authors:
 - family-names: "Lütgert"
   given-names: "Julian"
@@ -14,16 +14,34 @@ authors:
 - family-names: "Qu"
   given-names: "Chongbing"
   orcid: "https://orcid.org/0000-0002-4890-7440"
-- family-names: "Döppner"
-  given-names: "Tilo"
-  orcid: "https://orcid.org/0000-0002-5703-7125"
-- family-names: "Kraus"
-  given-names: "Dominik"
-  orcid: "https://orcid.org/0000-0002-6350-4180"
-doi: "10.1016/j.cpc.2026.110173"
-journal: Computer Physics Communications
-month: 4
-start: 110173
-title: "jaxrts: A Python package for simulating X-ray Thomson scattering spectra from dense plasmas using jax"
-volume: 325
-year: 2026
+license: BSD-3-Clause
+url: https://jaxrts.github.io
+repository-code: https://github.com/jaxrts/jaxrts/
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Lütgert"
+    given-names: "Julian"
+    orcid: "https://orcid.org/0000-0002-2593-573X"
+  - family-names: "Schumacher"
+    given-names: "Samuel"
+    orcid: "https://orcid.org/0000-0002-1846-0000"
+  - family-names: "Rips"
+    given-names: "Johannes"
+    orcid: "https://orcid.org/0009-0002-4764-5618"
+  - family-names: "Qu"
+    given-names: "Chongbing"
+    orcid: "https://orcid.org/0000-0002-4890-7440"
+  - family-names: "Döppner"
+    given-names: "Tilo"
+    orcid: "https://orcid.org/0000-0002-5703-7125"
+  - family-names: "Kraus"
+    given-names: "Dominik"
+    orcid: "https://orcid.org/0000-0002-6350-4180"
+  doi: "10.1016/j.cpc.2026.110173"
+  journal: Computer Physics Communications
+  month: 4
+  start: 110173
+  title: "jaxrts: A Python package for simulating X-ray Thomson scattering spectra from dense plasmas using jax"
+  volume: 325
+  year: 2026
