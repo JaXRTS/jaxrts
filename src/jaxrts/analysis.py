@@ -36,7 +36,26 @@ def twoSidedLaplace(
 
     # Sort energy and intensity for the integration
     inten_sorted = intensity[jnpu.argsort(E_shift)]
-    E_sorted = E_shift[jnpu.argsort(E_shift)]
+    _E_sorted = E_shift[jnpu.argsort(E_shift)]
+
+    # Assert that values just around E_min and E_max are in E_sorted, so that
+    # the integral is less error-prone to not being symmetric around 0.
+
+    small = 1e-8
+    E_sorted = (
+        jnp.array(
+            [
+                *_E_sorted.m_as(ureg.electron_volt),
+                E_min.m_as(ureg.electron_volt) - small,
+                E_min.m_as(ureg.electron_volt) + small,
+                E_max.m_as(ureg.electron_volt) + small,
+                E_max.m_as(ureg.electron_volt) - small,
+            ]
+        )
+        * ureg.electron_volt
+    )
+    E_sorted = jnpu.sort(E_sorted)
+    inten_sorted = jnpu.interp(E_sorted, _E_sorted, inten_sorted)
 
     # Integrate in energy space (this way, the integral is numerically more
     # stable compared to omega_space. This results in a dimensionless result,
