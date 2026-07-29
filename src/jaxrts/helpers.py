@@ -7,7 +7,6 @@ import logging
 from functools import partialmethod, wraps
 from time import time
 from platformdirs import user_cache_dir
-import requests
 from pathlib import Path
 
 import jax
@@ -390,6 +389,14 @@ def get_cache_dir() -> Path:
 
 
 def download_from_nist(config) -> None:
+    try:
+        import requests
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            "Module 'requests' not found. "
+            "Please install jaxrts with the 'download_data' extras."
+        )
+
     cache_dir = get_cache_dir()
     file = cache_dir / f"{config}.csv"
     if not file.exists():

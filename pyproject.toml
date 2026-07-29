@@ -26,6 +26,9 @@ NN = [
     "flax (>=0.12.6)",
     "orbax (>=0.1.9)",
 ]
+download_data = [
+  "requests (>=2.34.2,<3.0.0)",
+]
 gui = [
     "PyQt5"
 ]
