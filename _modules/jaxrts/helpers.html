@@ -95,7 +95,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partialmethod</span><span class="p">,</span> <span class="n">wraps</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">platformdirs</span><span class="w"> </span><span class="kn">import</span> <span class="n">user_cache_dir</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
@@ -510,6 +509,14 @@
 <div class="viewcode-block" id="download_from_nist">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.helpers.download_from_nist.html#jaxrts.helpers.download_from_nist">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">download_from_nist</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+    <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span>
+            <span class="s2">&quot;Module &#39;requests&#39; not found. &quot;</span>
+            <span class="s2">&quot;Please install jaxrts with the &#39;download_data&#39; extras.&quot;</span>
+        <span class="p">)</span>
+
     <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_cache_dir</span><span class="p">()</span>
     <span class="n">file</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">.csv&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>

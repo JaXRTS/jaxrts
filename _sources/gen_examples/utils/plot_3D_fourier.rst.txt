@@ -39,12 +39,12 @@ transform.
 
  .. code-block:: none
 
-    Time for sine: 0.0024s.
-    Time for ogata: 0.0056s. (2.3x sinetime).
-    Time for sine: 0.0033s.
-    Time for ogata: 0.0045s. (1.4x sinetime).
-    Time for sine: 0.1758s.
-    Time for ogata: 0.3239s. (1.8x sinetime).
+    Time for sine: 0.0026s.
+    Time for ogata: 0.0040s. (1.5x sinetime).
+    Time for sine: 0.0029s.
+    Time for ogata: 0.0034s. (1.2x sinetime).
+    Time for sine: 0.1726s.
+    Time for ogata: 0.3307s. (1.9x sinetime).
 
 
 
@@ -183,7 +183,7 @@ transform.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 6.465 seconds)
+   **Total running time of the script:** (0 minutes 6.464 seconds)
 
 
 .. _sphx_glr_download_gen_examples_utils_plot_3D_fourier.py:
