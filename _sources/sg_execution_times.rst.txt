@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**09:48.851** total execution time for 45 files **from all galleries**:
+**09:13.237** total execution time for 45 files **from all galleries**:
 
 .. container::
 
@@ -33,137 +33,137 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gen_examples_free_free_plot_BM_ChapmanInterp.py` (``../examples/free_free/plot_BM_ChapmanInterp.py``)
-     - 01:22.371
+     - 01:18.858
      - 0.0
    * - :ref:`sphx_glr_gen_examples_free_free_plot_See0_RPA_BM.py` (``../examples/free_free/plot_See0_RPA_BM.py``)
-     - 00:51.883
+     - 00:47.898
      - 0.0
    * - :ref:`sphx_glr_gen_examples_analysis_plot_f-sum-rule.py` (``../examples/analysis/plot_f-sum-rule.py``)
-     - 00:37.014
+     - 00:34.622
      - 0.0
    * - :ref:`sphx_glr_gen_examples_free_free_plot_Fortmann_BMA.py` (``../examples/free_free/plot_Fortmann_BMA.py``)
-     - 00:33.481
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_bound_free_plot_edge_models.py` (``../examples/bound_free/plot_edge_models.py``)
-     - 00:31.910
+     - 00:32.177
      - 0.0
    * - :ref:`sphx_glr_gen_examples_plot_reproduce_Gregori2003_fig6.py` (``../examples/plot_reproduce_Gregori2003_fig6.py``)
-     - 00:31.393
+     - 00:30.182
      - 0.0
-   * - :ref:`sphx_glr_gen_examples_ionization_plot_saha_ionization_map.py` (``../examples/ionization/plot_saha_ionization_map.py``)
-     - 00:27.049
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT_noise.py` (``../examples/analysis/plot_ITCFT_noise.py``)
-     - 00:22.932
+   * - :ref:`sphx_glr_gen_examples_bound_free_plot_edge_models.py` (``../examples/bound_free/plot_edge_models.py``)
+     - 00:26.711
      - 0.0
    * - :ref:`sphx_glr_gen_examples_free_bound_plot_free_bound_scattering.py` (``../examples/free_bound/plot_free_bound_scattering.py``)
-     - 00:22.705
+     - 00:22.707
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT_noise.py` (``../examples/analysis/plot_ITCFT_noise.py``)
+     - 00:22.568
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_ionization_plot_saha_ionization_map.py` (``../examples/ionization/plot_saha_ionization_map.py``)
+     - 00:21.641
      - 0.0
    * - :ref:`sphx_glr_gen_examples_plot_multi_component.py` (``../examples/plot_multi_component.py``)
-     - 00:19.338
+     - 00:18.188
      - 0.0
    * - :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT.py` (``../examples/analysis/plot_ITCFT.py``)
-     - 00:16.744
+     - 00:15.549
      - 0.0
    * - :ref:`sphx_glr_gen_examples_free_free_plot_BornCollision_Frequency.py` (``../examples/free_free/plot_BornCollision_Frequency.py``)
-     - 00:13.759
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_ee_lfc_plot_ee_lfc_comparison.py` (``../examples/ee_lfc/plot_ee_lfc_comparison.py``)
-     - 00:12.736
+     - 00:13.129
      - 0.0
    * - :ref:`sphx_glr_gen_examples_free_bound_plot_bohme_kraus_relevance_of_bound_free.py` (``../examples/free_bound/plot_bohme_kraus_relevance_of_bound_free.py``)
-     - 00:12.653
+     - 00:12.226
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_ThreePotential_Wuensch.py` (``../examples/ionic/plot_HNC_ThreePotential_Wuensch.py``)
-     - 00:12.363
+     - 00:11.972
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_ee_lfc_plot_ee_lfc_comparison.py` (``../examples/ee_lfc/plot_ee_lfc_comparison.py``)
+     - 00:11.505
      - 0.0
    * - :ref:`sphx_glr_gen_examples_free_bound_plot_k_dispersion.py` (``../examples/free_bound/plot_k_dispersion.py``)
-     - 00:11.493
+     - 00:11.119
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionization_plot_WR_expanded_ionization.py` (``../examples/ionization/plot_WR_expanded_ionization.py``)
-     - 00:11.007
+     - 00:10.443
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_exchange.py` (``../examples/ionic/plot_HNC_exchange.py``)
-     - 00:09.824
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_ionization_plot_saha_hot_jupiter.py` (``../examples/ionization/plot_saha_hot_jupiter.py``)
-     - 00:09.513
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_plot_getting_started.py` (``../examples/plot_getting_started.py``)
-     - 00:09.123
+     - 00:09.783
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_electron_ion_potentials_II.py` (``../examples/ionic/plot_HNC_electron_ion_potentials_II.py``)
-     - 00:09.031
+     - 00:08.977
      - 0.0
-   * - :ref:`sphx_glr_gen_examples_ionic_plot_LatticeDebyeModel.py` (``../examples/ionic/plot_LatticeDebyeModel.py``)
-     - 00:08.264
+   * - :ref:`sphx_glr_gen_examples_plot_getting_started.py` (``../examples/plot_getting_started.py``)
+     - 00:08.666
      - 0.0
    * - :ref:`sphx_glr_gen_examples_bound_free_plot_ipd.py` (``../examples/bound_free/plot_ipd.py``)
-     - 00:07.730
+     - 00:07.438
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_ionic_plot_LatticeDebyeModel.py` (``../examples/ionic/plot_LatticeDebyeModel.py``)
+     - 00:07.423
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_ionization_plot_saha_hot_jupiter.py` (``../examples/ionization/plot_saha_hot_jupiter.py``)
+     - 00:06.648
      - 0.0
    * - :ref:`sphx_glr_gen_examples_bound_free_plot_moving_edges_vs_cold.py` (``../examples/bound_free/plot_moving_edges_vs_cold.py``)
-     - 00:07.017
+     - 00:06.587
      - 0.0
    * - :ref:`sphx_glr_gen_examples_utils_plot_3D_fourier.py` (``../examples/utils/plot_3D_fourier.py``)
-     - 00:06.477
+     - 00:06.307
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_pair_correlation_functions.py` (``../examples/ionic/plot_HNC_pair_correlation_functions.py``)
-     - 00:06.143
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Gregori2006.py` (``../examples/ionic/plot_static_structure_factors_Gregori2006.py``)
-     - 00:05.796
+     - 00:06.008
      - 0.0
    * - :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_zero_IPD_limit.py` (``../examples/form_factors/plot_ffl_zero_IPD_limit.py``)
-     - 00:05.640
+     - 00:05.710
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Gregori2006.py` (``../examples/ionic/plot_static_structure_factors_Gregori2006.py``)
+     - 00:05.575
      - 0.0
    * - :ref:`sphx_glr_gen_examples_utils_plot_instrument_function_models.py` (``../examples/utils/plot_instrument_function_models.py``)
-     - 00:05.382
+     - 00:05.538
      - 0.0
    * - :ref:`sphx_glr_gen_examples_form_factors_plot_pauling_full_scattering_factors.py` (``../examples/form_factors/plot_pauling_full_scattering_factors.py``)
-     - 00:05.189
+     - 00:05.003
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_Gregori_Comparison.py` (``../examples/ionic/plot_HNC_Gregori_Comparison.py``)
-     - 00:03.988
+     - 00:03.893
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_multicomponent.py` (``../examples/ionic/plot_HNC_multicomponent.py``)
-     - 00:03.903
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_ionic_plot_SVT_HNC_multicomponent.py` (``../examples/ionic/plot_SVT_HNC_multicomponent.py``)
-     - 00:03.870
+     - 00:03.836
      - 0.0
    * - :ref:`sphx_glr_gen_examples_free_free_plot_See0_QCSA.py` (``../examples/free_free/plot_See0_QCSA.py``)
-     - 00:03.846
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_utils_plot_fermi_integral_inversion.py` (``../examples/utils/plot_fermi_integral_inversion.py``)
-     - 00:03.570
+     - 00:03.816
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_potentials.py` (``../examples/ionic/plot_HNC_potentials.py``)
-     - 00:03.534
+     - 00:03.547
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_utils_plot_fermi_integral_inversion.py` (``../examples/utils/plot_fermi_integral_inversion.py``)
+     - 00:03.526
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_ionic_plot_SVT_HNC_multicomponent.py` (``../examples/ionic/plot_SVT_HNC_multicomponent.py``)
+     - 00:03.446
      - 0.0
    * - :ref:`sphx_glr_gen_examples_free_free_plot_See0_RPA.py` (``../examples/free_free/plot_See0_RPA.py``)
-     - 00:02.891
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Gregori2007.py` (``../examples/ionic/plot_static_structure_factors_Gregori2007.py``)
-     - 00:02.888
+     - 00:02.842
      - 0.0
    * - :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_H_He-like.py` (``../examples/form_factors/plot_ffl_H_He-like.py``)
+     - 00:02.703
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Gregori2007.py` (``../examples/ionic/plot_static_structure_factors_Gregori2007.py``)
      - 00:02.645
      - 0.0
    * - :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_beryllium.py` (``../examples/form_factors/plot_ffl_beryllium.py``)
-     - 00:02.568
+     - 00:02.631
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_electron_ion_potential.py` (``../examples/ionic/plot_HNC_electron_ion_potential.py``)
-     - 00:02.537
+     - 00:02.556
      - 0.0
    * - :ref:`sphx_glr_gen_examples_form_factors_plot_atomic_form_factors_carbon.py` (``../examples/form_factors/plot_atomic_form_factors_carbon.py``)
-     - 00:02.450
+     - 00:02.521
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Arkhipov_Devletov.py` (``../examples/ionic/plot_static_structure_factors_Arkhipov_Devletov.py``)
-     - 00:02.047
+     - 00:02.067
      - 0.0
    * - :ref:`sphx_glr_gen_examples_utils_plot_ogata.py` (``../examples/utils/plot_ogata.py``)
-     - 00:01.931
+     - 00:01.848
      - 0.0
    * - :ref:`sphx_glr_gen_examples_setup_plot_frequency_redistibution_correction.py` (``../examples/setup/plot_frequency_redistibution_correction.py``)
-     - 00:00.222
+     - 00:00.203
      - 0.0
