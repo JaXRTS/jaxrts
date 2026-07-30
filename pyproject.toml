@@ -1,6 +1,6 @@
 [project]
 name = "jaxrts"
-dynamic = ["version"]
+dynamic = []
 
 description = ""
 authors = [
@@ -11,19 +11,20 @@ readme = "README.md"
 dependencies = [
   "pint (>=0.25.3)",
   "numpy (>=2.3.4,<2.4.0)",
-  "matplotlib (>=3.10.8)",
-  "quadax (>=0.2.12)",
-  "jax (>=0.5.0,<0.9.0)",
-  "jaxlib (>=0.5.0,<0.9.0)",
-  "jpu (>=0.0.5)",
+  "matplotlib (>=3.11.1)",
+  "quadax (>=0.2.13)",
+  "jax (>=0.5.0, <0.11.0)",
+  "jaxlib (>=0.5.0, <0.11.0)",
+  "jpu @ git+https://github.com/jluetgert/jpu/",
   "dill (>=0.4.0,<0.5.0)",
   "pybtex @ git+https://codeberg.org/pybtex/pybtex/",
 ]
-requires-python = ">=3.11,<3.15"
+requires-python = ">=3.12,<3.16"
+version = "0.7.0.post68.dev0+378223ba"
 
 [project.optional-dependencies]
 NN = [
-    "flax (>=0.12.6)",
+    "flax (>=0.12.8)",
     "orbax (>=0.1.9)",
 ]
 download_data = [
@@ -35,7 +36,6 @@ gui = [
 
 [tool.poetry]
 packages = [{ include = "jaxrts", from = "src" }]
-version = "0.0.0"
 
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
@@ -51,8 +51,8 @@ sphinx = "^7.4.7"
 sphinx-rtd-theme = "^2.0.0"
 sphinx-gallery = "^0.15.0"
 sphinx-toolbox = "^3.10.0"
-sphinxcontrib-bibtex = "^2.6.5"
-scienceplots = "^2.2.1"
+sphinxcontrib-bibtex = "^2.7.0"
+scienceplots = "^2.2.2"
 hankel = "^1.2.2"
 
 [build-system]
@@ -64,7 +64,7 @@ line-length = 79
 target-version = ['py312']
 
 [tool.poetry-dynamic-versioning]
-enable = true
+enable = false
 pattern = '(?P<base>\d+\.\d+\.\d+)'
 
 [tool.poetry-dynamic-versioning.substitution]
