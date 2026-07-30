@@ -83,10 +83,13 @@ This `-e` flag installs the module in 'edit' mode, i.e., changes you made are av
 
 ## Getting started
 
+For just getting started, we provide a jupyter notebook that you can ![open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jaxrts/jaxrts/blob/main/notebooks/00-jaxrts_intro.ipynb).
+
 The `jaxrts` module provides a user with two classes, a `Setup` and a `PlasmaState`.
 While the former specifies the probing energy and measurement grid, scattering angle and instrument function, the latter defines the state to be probed, and allows for adding `Models` as keys to the plasma state.
 To calculate a spectrum, use the `PlasmaState.probe()` method.
 
 A simple example (which generated the figure above) can be found at `doc/examples/plot_getting_started.py`. More examples can be found in the `doc/example` directory.
+We also encourage you to view the [example gallery](https://jaxrts.github.io/jaxrts/gen_examples/index.html) online.
 
-To get an overview over all the models available, we recommend building the documentation and opening `doc/build/html/models.html`. This page should list all the available model keys and the models which are allowed. 
+To get an overview over all the models available, we recommend our [module overview page](https://jaxrts.github.io/jaxrts/models.html), or building the documentation ourself and opening `doc/build/html/models.html`.
