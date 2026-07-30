@@ -1,0 +1,33 @@
+jaxrts.instrument\_function.Gaussian
+====================================
+
+.. currentmodule:: jaxrts.instrument_function
+
+.. autoclass:: Gaussian
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Gaussian.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~Gaussian.fwhm
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.instrument_function.Gaussian:
+
+   .. minigallery:: jaxrts.instrument_function.Gaussian
+       :add-heading:

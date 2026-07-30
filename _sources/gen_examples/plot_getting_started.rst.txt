@@ -24,7 +24,7 @@ Getting Started
 This example showcases a simple, one-component plasma, and might be a good
 starting point.
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-79
+.. GENERATED FROM PYTHON SOURCE LINES 8-74
 
 
 
@@ -39,8 +39,6 @@ starting point.
 
 .. code-block:: Python
 
-
-    from functools import partial
 
     import matplotlib.pyplot as plt
 
@@ -72,10 +70,7 @@ starting point.
         energy=ureg("4700 eV"),
         measured_energy=ureg("4700 eV")
         + jnp.linspace(-100, 40, 500) * ureg.electron_volt,
-        instrument=partial(
-            jaxrts.instrument_function.instrument_gaussian,
-            sigma=ureg("5.0eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-        ),
+        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("5.0eV")),
     )
 
     # Add Models. In the typical way, we use the Chihara decomposition in the code,
@@ -114,7 +109,7 @@ starting point.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 8.028 seconds)
+   **Total running time of the script:** (0 minutes 7.979 seconds)
 
 
 .. _sphx_glr_download_gen_examples_plot_getting_started.py:

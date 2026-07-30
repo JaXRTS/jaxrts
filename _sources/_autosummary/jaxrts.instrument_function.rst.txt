@@ -15,7 +15,6 @@ jaxrts.instrument\_function
       :toctree:
       :recursive:
    
-      instrument_from_array
       instrument_from_file
       instrument_gaussian
       instrument_lorentzian
@@ -24,6 +23,19 @@ jaxrts.instrument\_function
    
 
    
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :recursive:
+   
+      FromArray
+      FromCallable
+      Gaussian
+      InstrumentFunction
+      Lorentzian
+      SuperGaussian
    
    
 

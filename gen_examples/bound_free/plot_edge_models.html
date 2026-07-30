@@ -131,9 +131,7 @@ to download the full example code</p>
 <span id="sphx-glr-gen-examples-bound-free-plot-edge-models-py"></span><h1>Comparison of different edge models<a class="headerlink" href="#comparison-of-different-edge-models" title="Link to this heading"></a></h1>
 <p>This example showcases different edge-models that can be used in the bound free
 scattering features.</p>
-<img src="../../_images/sphx_glr_plot_edge_models_001.svg" srcset="../../_images/sphx_glr_plot_edge_models_001.svg" alt="CH plasma at T=2eV, Z=[3.5 1. ]" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<img src="../../_images/sphx_glr_plot_edge_models_001.svg" srcset="../../_images/sphx_glr_plot_edge_models_001.svg" alt="CH plasma at T=2eV, Z=[3.5 1. ]" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
 <span class="c1"># jax provides a submodule which can be (mostly) used as a drop-in replacement</span>
 <span class="c1"># for numpy. We use jnp to avoid confusion.</span>
@@ -166,10 +164,7 @@ scattering features.</p>
     <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;8700 eV&quot;</span><span class="p">),</span>
     <span class="n">measured_energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;8700 eV&quot;</span><span class="p">)</span>
     <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">550</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">,</span>
-    <span class="n">instrument</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span>
-        <a href="../../_autosummary/jaxrts.instrument_function.instrument_gaussian.html#jaxrts.instrument_function.instrument_gaussian" title="jaxrts.instrument_function.instrument_gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">instrument_gaussian</span></a><span class="p">,</span>
-        <span class="n">sigma</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;5.0eV&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))),</span>
-    <span class="p">),</span>
+    <span class="n">instrument</span><span class="o">=</span><a href="../../_autosummary/jaxrts.instrument_function.Gaussian.html#jaxrts.instrument_function.Gaussian" title="jaxrts.instrument_function.Gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">Gaussian</span></a><span class="p">(</span><span class="n">fwhm</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;5.0eV&quot;</span><span class="p">)),</span>
 <span class="p">)</span>
 
 
@@ -202,7 +197,7 @@ scattering features.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 27.068 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 26.982 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-bound-free-plot-edge-models-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/48291b465ba29069ad2adef442e9ea3d/plot_edge_models.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_edge_models.ipynb</span></code></a></p>

@@ -1,0 +1,33 @@
+jaxrts.instrument\_function.SuperGaussian
+=========================================
+
+.. currentmodule:: jaxrts.instrument_function
+
+.. autoclass:: SuperGaussian
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~SuperGaussian.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~SuperGaussian.fwhm
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.instrument_function.SuperGaussian:
+
+   .. minigallery:: jaxrts.instrument_function.SuperGaussian
+       :add-heading:

@@ -26,7 +26,7 @@ example is one of the dataset revisited by cite:`Bohme.2023`.
 However, we used simpler for the relevant scattering processes, just to show
 the usage of :py:class:`jaxrts.models.DetailedBalace`.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-73
+.. GENERATED FROM PYTHON SOURCE LINES 10-68
 
 
 
@@ -42,8 +42,6 @@ the usage of :py:class:`jaxrts.models.DetailedBalace`.
 .. code-block:: Python
 
 
-    from functools import partial
-
     import jax.numpy as jnp
     import matplotlib.pyplot as plt
 
@@ -57,10 +55,7 @@ the usage of :py:class:`jaxrts.models.DetailedBalace`.
         ureg("120°"),
         energy=ureg("9keV"),
         measured_energy=jnp.linspace(8, 9.5, 300) * ureg.kiloelectron_volt,
-        instrument=partial(
-            jaxrts.instrument_function.instrument_gaussian,
-            sigma=(30.0 * ureg.electron_volt) / ureg.hbar,
-        ),
+        instrument=jaxrts.instrument_function.Gaussian(sigma=ureg("30.0eV")),
     )
     state = jaxrts.PlasmaState(
         [jaxrts.Element("Be")],
@@ -108,7 +103,7 @@ the usage of :py:class:`jaxrts.models.DetailedBalace`.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 21.796 seconds)
+   **Total running time of the script:** (0 minutes 22.327 seconds)
 
 
 .. _sphx_glr_download_gen_examples_free_bound_plot_free_bound_scattering.py:

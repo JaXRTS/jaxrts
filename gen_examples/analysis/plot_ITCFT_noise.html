@@ -135,9 +135,7 @@ scattering angles.</p>
 <li><img src="../../_images/sphx_glr_plot_ITCFT_noise_001.svg" srcset="../../_images/sphx_glr_plot_ITCFT_noise_001.svg" alt="Scattering angle = $120^\circ$" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_ITCFT_noise_002.svg" srcset="../../_images/sphx_glr_plot_ITCFT_noise_002.svg" alt="Scattering angle = $20^\circ$" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scienceplots</span>  <span class="c1"># noqa: F401</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
@@ -170,10 +168,7 @@ scattering angles.</p>
         <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;9000 eV&quot;</span><span class="p">),</span>
         <span class="n">measured_energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;9000 eV&quot;</span><span class="p">)</span>
         <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">e_range</span><span class="p">,</span> <span class="n">e_range</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">,</span>
-        <span class="n">instrument</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span>
-            <a href="../../_autosummary/jaxrts.instrument_function.instrument_gaussian.html#jaxrts.instrument_function.instrument_gaussian" title="jaxrts.instrument_function.instrument_gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">instrument_gaussian</span></a><span class="p">,</span>
-            <span class="n">sigma</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;3eV&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))),</span>
-        <span class="p">),</span>
+        <span class="n">instrument</span><span class="o">=</span><a href="../../_autosummary/jaxrts.instrument_function.Gaussian.html#jaxrts.instrument_function.Gaussian" title="jaxrts.instrument_function.Gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">Gaussian</span></a><span class="p">(</span><span class="n">fwhm</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;3.0eV&quot;</span><span class="p">)),</span>
     <span class="p">)</span>
 
     <span class="c1"># Turn off the dispersion correction</span>
@@ -247,7 +242,7 @@ scattering angles.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 24.061 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 18.618 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-analysis-plot-itcft-noise-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e6e86e3e5325fd168b15f087d325dfb0/plot_ITCFT_noise.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_ITCFT_noise.ipynb</span></code></a></p>

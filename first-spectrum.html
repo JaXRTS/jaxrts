@@ -118,8 +118,7 @@ A model should at least contain a <a class="reference internal" href="_autosumma
 which takes a <code class="docutils literal notranslate"><span class="pre">PlasmaState</span></code> and a <code class="docutils literal notranslate"><span class="pre">Setup</span></code> as argument, and computes the relevant quantities.</p></li>
 </ul>
 <p>First, import the relevant packages:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
 
@@ -138,7 +137,7 @@ jax on potential pitfalls</a>.</p>
 <p>Secondly, we utilize units, throughout. This is achieved with the <code class="docutils literal notranslate"><span class="pre">ureg</span></code>
 instance; its application should be clear after reading this example.
 We rely on <a class="reference external" href="https://github.com/dfm/jpu">jpu</a>, a port of <a class="reference external" href="https://pint.readthedocs.io">pint</a> to the jax ecosystem.</p>
-<p>With this out of the way, we lets the define a two-times ionized beryllium
+<p>With this out of the way, let’s define a two-times ionized beryllium
 plasma at <span class="math notranslate nohighlight">\(\rho=1\text{g/cc}\)</span> and an electron temperature <span class="math notranslate nohighlight">\(k_BT_e =
 1\text{eV}\)</span>.</p>
 <p>If no ion temperature is given explicitly, we assume equilibrium of ion and
@@ -171,16 +170,13 @@ free-bound scattering    : Neglect
 <p>As we can see we have set densities, ionization, and temperature, as well as
 some default models.</p>
 <p>Next, we also have to define a <a class="reference internal" href="_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.setup.Setup"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.setup.Setup</span></code></a>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">jpu</span></code>
-also allows to convert string to quantities with units, as you can see below.</p>
+also allows converting string to quantities with units, as you can see below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">setup</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span>
     <span class="n">scattering_angle</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;60°&quot;</span><span class="p">),</span>
     <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;4700 eV&quot;</span><span class="p">),</span>
     <span class="n">measured_energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;4700 eV&quot;</span><span class="p">)</span>
     <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">,</span>
-    <span class="n">instrument</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span>
-        <span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">instrument_gaussian</span><span class="p">,</span>
-        <span class="n">sigma</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;5.0eV&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))),</span>
-    <span class="p">),</span>
+    <span class="n">instrument</span><span class="o">=</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">fwhm</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;5.0eV&quot;</span><span class="p">)),</span>
 <span class="p">)</span>
 </pre></div>
 </div>

@@ -21,7 +21,6 @@ to be higher for comparable quality of the result, when using ``KKT``.
 
 import os
 import time
-from functools import partial
 
 import jax
 import jax.numpy as jnp
@@ -44,10 +43,7 @@ setup = jaxrts.setup.Setup(
     ureg("60°"),
     energy=ureg("300eV"),
     measured_energy=measured_energy,
-    instrument=partial(
-        jaxrts.instrument_function.instrument_gaussian,
-        sigma=(0.01 * ureg.electron_volt) / ureg.hbar,
-    ),
+    instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("0.01eV")),
 )
 state = jaxrts.PlasmaState(
     [jaxrts.Element("H")],

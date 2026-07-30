@@ -96,7 +96,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">overload</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">hnc_potentials</span><span class="p">,</span> <span class="n">models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">hnc_potentials</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">instrument_function</span>
 
 
 <span class="nd">@overload</span>
@@ -166,6 +166,55 @@
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">all_models</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">all_models</span></div>
+
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_all_instrument_functions</span><span class="p">(</span>
+    <span class="n">names_only</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">InstrumentFunction</span><span class="p">]:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_all_instrument_functions</span><span class="p">(</span>
+    <span class="n">names_only</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span> <span class="o">...</span>
+<div class="viewcode-block" id="get_all_instrument_functions">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.collections.get_all_instrument_functions.html#jaxrts.collections.get_all_instrument_functions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_all_instrument_functions</span><span class="p">(</span>
+    <span class="n">names_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">InstrumentFunction</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a list of all :py:class:`jaxrts.instrument_function.InstrumentFunction`</span>
+<span class="sd">    defined within jaxrts.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    names_only: bool, default False</span>
+<span class="sd">        If ``true``, the values of the returned dict are a list of</span>
+<span class="sd">        :py:class:`jaxrts.models.Model` object. If false, the values are rather</span>
+<span class="sd">        list of strings with of the name of the models.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    List of all instrument functions available in jaxrts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">all_inst_funcs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">instrument_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">instrument_function</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;__class__&quot;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">instrument_name</span><span class="p">):</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instrument_function</span><span class="p">,</span> <span class="n">instrument_name</span><span class="p">)</span>
+            <span class="c1"># The model must be concrete (cannot be abstract), has to</span>
+            <span class="c1"># advertise allowed keys, and cannot have a private name that</span>
+            <span class="c1"># starts with ``_``.</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isabstract</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">instrument_function</span><span class="o">.</span><span class="n">InstrumentFunction</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">instrument_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="n">names_only</span><span class="p">:</span>
+                    <span class="n">all_inst_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">instrument_name</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">all_inst_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">all_inst_funcs</span></div>
 
 
 

@@ -145,16 +145,16 @@ to be higher for comparable quality of the result, when using <code class="docut
 <p>The time printed in this script is the time after the first compilation
 (which normally takes a notable time).</p>
 </div>
-<img src="../../_images/sphx_glr_plot_BM_ChapmanInterp_001.svg" srcset="../../_images/sphx_glr_plot_BM_ChapmanInterp_001.svg" alt="plot BM ChapmanInterp" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Full BMA: 2.5877163410186768s
-2 interp points: 0.10890460014343262s       Mean deviation from full RPA:  -6.417660823980601e-20 Max deviation from full RPA:  3.326929539366055e-18
-4 interp points: 0.11512970924377441s       Mean deviation from full RPA:  5.842183121456002e-20 Max deviation from full RPA:  1.1313588478530012e-18
-20 interp points: 0.1583552360534668s       Mean deviation from full RPA:  -2.829842445178059e-20 Max deviation from full RPA:  4.21721788892628e-20
-100 interp points: 0.28717637062072754s       Mean deviation from full RPA:  -3.2770861468005803e-20 Max deviation from full RPA:  2.1372152736136487e-20
-2 interp points: 0.11242008209228516s       Mean deviation from full RPA:  2.200651985657627e-19 Max deviation from full RPA:  2.9810113837173384e-18
-4 interp points: 0.11917543411254883s       Mean deviation from full RPA:  1.184491860272195e-19 Max deviation from full RPA:  1.0306087226561055e-18
-20 interp points: 0.16121172904968262s       Mean deviation from full RPA:  2.2786269411516506e-20 Max deviation from full RPA:  1.2710680433702378e-18
-100 interp points: 0.28949522972106934s       Mean deviation from full RPA:  2.066979348859162e-20 Max deviation from full RPA:  1.2838363702499555e-18
-RPA: 0.04972338676452637s
+<img src="../../_images/sphx_glr_plot_BM_ChapmanInterp_001.svg" srcset="../../_images/sphx_glr_plot_BM_ChapmanInterp_001.svg" alt="plot BM ChapmanInterp" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Full BMA: 2.677556037902832s
+2 interp points: 0.10688948631286621s       Mean deviation from full RPA:  -1.5000691310844925e-19 Max deviation from full RPA:  7.777071612105038e-18
+4 interp points: 0.11666131019592285s       Mean deviation from full RPA:  1.3655565090503568e-19 Max deviation from full RPA:  2.644598508912018e-18
+20 interp points: 0.16366910934448242s       Mean deviation from full RPA:  -6.614496195286428e-20 Max deviation from full RPA:  9.881216098903113e-20
+100 interp points: 0.2865457534790039s       Mean deviation from full RPA:  -7.6598871374255e-20 Max deviation from full RPA:  5.0066158035516396e-20
+2 interp points: 0.11600112915039062s       Mean deviation from full RPA:  5.143830909969489e-19 Max deviation from full RPA:  6.968157303475795e-18
+4 interp points: 0.1172037124633789s       Mean deviation from full RPA:  2.768649748287551e-19 Max deviation from full RPA:  2.409728053209083e-18
+20 interp points: 0.16520047187805176s       Mean deviation from full RPA:  5.326170877592994e-20 Max deviation from full RPA:  2.9712188653023918e-18
+100 interp points: 0.2970600128173828s       Mean deviation from full RPA:  4.831464095725955e-20 Max deviation from full RPA:  3.0010922932210185e-18
+RPA: 0.05128645896911621s
 </pre></div>
 </div>
 <div class="line-block">
@@ -162,7 +162,6 @@ RPA: 0.04972338676452637s
 </div>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
@@ -185,10 +184,7 @@ RPA: 0.04972338676452637s
     <span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;60°&quot;</span><span class="p">),</span>
     <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;300eV&quot;</span><span class="p">),</span>
     <span class="n">measured_energy</span><span class="o">=</span><span class="n">measured_energy</span><span class="p">,</span>
-    <span class="n">instrument</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span>
-        <a href="../../_autosummary/jaxrts.instrument_function.instrument_gaussian.html#jaxrts.instrument_function.instrument_gaussian" title="jaxrts.instrument_function.instrument_gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">instrument_gaussian</span></a><span class="p">,</span>
-        <span class="n">sigma</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">,</span>
-    <span class="p">),</span>
+    <span class="n">instrument</span><span class="o">=</span><a href="../../_autosummary/jaxrts.instrument_function.Gaussian.html#jaxrts.instrument_function.Gaussian" title="jaxrts.instrument_function.Gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">Gaussian</span></a><span class="p">(</span><span class="n">fwhm</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;0.01eV&quot;</span><span class="p">)),</span>
 <span class="p">)</span>
 <span class="n">state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">(</span>
     <span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">)],</span>
@@ -271,7 +267,7 @@ RPA: 0.04972338676452637s
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 8.502 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 10.318 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-free-free-plot-bm-chapmaninterp-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/afa8a7543d9f49503e73dc08337fcbe1/plot_BM_ChapmanInterp.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_BM_ChapmanInterp.ipynb</span></code></a></p>

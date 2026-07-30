@@ -133,9 +133,7 @@ to download the full example code</p>
 example is one of the dataset revisited by cite:<cite>Bohme.2023</cite>.
 However, we used simpler for the relevant scattering processes, just to show
 the usage of <code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.DetailedBalace</span></code>.</p>
-<img src="../../_images/sphx_glr_plot_free_bound_scattering_001.svg" srcset="../../_images/sphx_glr_plot_free_bound_scattering_001.svg" alt="plot free bound scattering" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<img src="../../_images/sphx_glr_plot_free_bound_scattering_001.svg" srcset="../../_images/sphx_glr_plot_free_bound_scattering_001.svg" alt="plot free bound scattering" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
@@ -148,10 +146,7 @@ the usage of <code class="xref py py-class docutils literal notranslate"><span c
     <span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;120°&quot;</span><span class="p">),</span>
     <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;9keV&quot;</span><span class="p">),</span>
     <span class="n">measured_energy</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mf">9.5</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kiloelectron_volt</span><span class="p">,</span>
-    <span class="n">instrument</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span>
-        <a href="../../_autosummary/jaxrts.instrument_function.instrument_gaussian.html#jaxrts.instrument_function.instrument_gaussian" title="jaxrts.instrument_function.instrument_gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">instrument_gaussian</span></a><span class="p">,</span>
-        <span class="n">sigma</span><span class="o">=</span><span class="p">(</span><span class="mf">30.0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">,</span>
-    <span class="p">),</span>
+    <span class="n">instrument</span><span class="o">=</span><a href="../../_autosummary/jaxrts.instrument_function.Gaussian.html#jaxrts.instrument_function.Gaussian" title="jaxrts.instrument_function.Gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">Gaussian</span></a><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;30.0eV&quot;</span><span class="p">)),</span>
 <span class="p">)</span>
 <span class="n">state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">(</span>
     <span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;Be&quot;</span><span class="p">)],</span>
@@ -197,7 +192,7 @@ the usage of <code class="xref py py-class docutils literal notranslate"><span c
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 21.796 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 22.327 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-free-bound-plot-free-bound-scattering-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/7ac54a2c41d54db5804cc347f799caee/plot_free_bound_scattering.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_free_bound_scattering.ipynb</span></code></a></p>

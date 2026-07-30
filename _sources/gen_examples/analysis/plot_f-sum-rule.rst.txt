@@ -31,7 +31,7 @@ could leverage this to fix a value for
 :py:attr:`jaxrts.models.SchumacherImpulse.r_k`, so that the f-sum rule would be
 fulfilled.
 
-.. GENERATED FROM PYTHON SOURCE LINES 15-94
+.. GENERATED FROM PYTHON SOURCE LINES 15-89
 
 
 
@@ -46,8 +46,6 @@ fulfilled.
 
 .. code-block:: Python
 
-
-    from functools import partial
 
     import jax
     import matplotlib.pyplot as plt
@@ -70,10 +68,7 @@ fulfilled.
         energy=ureg("9 keV"),
         measured_energy=ureg("9 keV")
         + jnp.linspace(-2000, 2000, 5000) * ureg.electron_volt,
-        instrument=partial(
-            jaxrts.instrument_function.instrument_gaussian,
-            sigma=ureg("5eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-        ),
+        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("5.0eV")),
     )
 
     # Turn off the dispersion correction
@@ -129,7 +124,7 @@ fulfilled.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 22.591 seconds)
+   **Total running time of the script:** (0 minutes 23.170 seconds)
 
 
 .. _sphx_glr_download_gen_examples_analysis_plot_f-sum-rule.py:

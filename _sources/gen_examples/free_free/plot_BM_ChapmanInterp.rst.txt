@@ -36,7 +36,7 @@ to be higher for comparable quality of the result, when using ``KKT``.
     The time printed in this script is the time after the first compilation
     (which normally takes a notable time).
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-131
+.. GENERATED FROM PYTHON SOURCE LINES 21-127
 
 
 
@@ -50,16 +50,16 @@ to be higher for comparable quality of the result, when using ``KKT``.
 
  .. code-block:: none
 
-    Full BMA: 2.5877163410186768s
-    2 interp points: 0.10890460014343262s       Mean deviation from full RPA:  -6.417660823980601e-20 Max deviation from full RPA:  3.326929539366055e-18
-    4 interp points: 0.11512970924377441s       Mean deviation from full RPA:  5.842183121456002e-20 Max deviation from full RPA:  1.1313588478530012e-18
-    20 interp points: 0.1583552360534668s       Mean deviation from full RPA:  -2.829842445178059e-20 Max deviation from full RPA:  4.21721788892628e-20
-    100 interp points: 0.28717637062072754s       Mean deviation from full RPA:  -3.2770861468005803e-20 Max deviation from full RPA:  2.1372152736136487e-20
-    2 interp points: 0.11242008209228516s       Mean deviation from full RPA:  2.200651985657627e-19 Max deviation from full RPA:  2.9810113837173384e-18
-    4 interp points: 0.11917543411254883s       Mean deviation from full RPA:  1.184491860272195e-19 Max deviation from full RPA:  1.0306087226561055e-18
-    20 interp points: 0.16121172904968262s       Mean deviation from full RPA:  2.2786269411516506e-20 Max deviation from full RPA:  1.2710680433702378e-18
-    100 interp points: 0.28949522972106934s       Mean deviation from full RPA:  2.066979348859162e-20 Max deviation from full RPA:  1.2838363702499555e-18
-    RPA: 0.04972338676452637s
+    Full BMA: 2.677556037902832s
+    2 interp points: 0.10688948631286621s       Mean deviation from full RPA:  -1.5000691310844925e-19 Max deviation from full RPA:  7.777071612105038e-18
+    4 interp points: 0.11666131019592285s       Mean deviation from full RPA:  1.3655565090503568e-19 Max deviation from full RPA:  2.644598508912018e-18
+    20 interp points: 0.16366910934448242s       Mean deviation from full RPA:  -6.614496195286428e-20 Max deviation from full RPA:  9.881216098903113e-20
+    100 interp points: 0.2865457534790039s       Mean deviation from full RPA:  -7.6598871374255e-20 Max deviation from full RPA:  5.0066158035516396e-20
+    2 interp points: 0.11600112915039062s       Mean deviation from full RPA:  5.143830909969489e-19 Max deviation from full RPA:  6.968157303475795e-18
+    4 interp points: 0.1172037124633789s       Mean deviation from full RPA:  2.768649748287551e-19 Max deviation from full RPA:  2.409728053209083e-18
+    20 interp points: 0.16520047187805176s       Mean deviation from full RPA:  5.326170877592994e-20 Max deviation from full RPA:  2.9712188653023918e-18
+    100 interp points: 0.2970600128173828s       Mean deviation from full RPA:  4.831464095725955e-20 Max deviation from full RPA:  3.0010922932210185e-18
+    RPA: 0.05128645896911621s
 
 
 
@@ -73,7 +73,6 @@ to be higher for comparable quality of the result, when using ``KKT``.
 
     import os
     import time
-    from functools import partial
 
     import jax
     import jax.numpy as jnp
@@ -96,10 +95,7 @@ to be higher for comparable quality of the result, when using ``KKT``.
         ureg("60°"),
         energy=ureg("300eV"),
         measured_energy=measured_energy,
-        instrument=partial(
-            jaxrts.instrument_function.instrument_gaussian,
-            sigma=(0.01 * ureg.electron_volt) / ureg.hbar,
-        ),
+        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("0.01eV")),
     )
     state = jaxrts.PlasmaState(
         [jaxrts.Element("H")],
@@ -184,7 +180,7 @@ to be higher for comparable quality of the result, when using ``KKT``.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 8.502 seconds)
+   **Total running time of the script:** (1 minutes 10.318 seconds)
 
 
 .. _sphx_glr_download_gen_examples_free_free_plot_BM_ChapmanInterp.py:
