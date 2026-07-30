@@ -126,7 +126,26 @@
 
     <span class="c1"># Sort energy and intensity for the integration</span>
     <span class="n">inten_sorted</span> <span class="o">=</span> <span class="n">intensity</span><span class="p">[</span><span class="n">jnpu</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">E_shift</span><span class="p">)]</span>
-    <span class="n">E_sorted</span> <span class="o">=</span> <span class="n">E_shift</span><span class="p">[</span><span class="n">jnpu</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">E_shift</span><span class="p">)]</span>
+    <span class="n">_E_sorted</span> <span class="o">=</span> <span class="n">E_shift</span><span class="p">[</span><span class="n">jnpu</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">E_shift</span><span class="p">)]</span>
+
+    <span class="c1"># Assert that values just around E_min and E_max are in E_sorted, so that</span>
+    <span class="c1"># the integral is less error-prone to not being symmetric around 0.</span>
+
+    <span class="n">small</span> <span class="o">=</span> <span class="mf">1e-8</span>
+    <span class="n">E_sorted</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="o">*</span><span class="n">_E_sorted</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
+                <span class="n">E_min</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span> <span class="o">-</span> <span class="n">small</span><span class="p">,</span>
+                <span class="n">E_min</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span> <span class="o">+</span> <span class="n">small</span><span class="p">,</span>
+                <span class="n">E_max</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span> <span class="o">+</span> <span class="n">small</span><span class="p">,</span>
+                <span class="n">E_max</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span> <span class="o">-</span> <span class="n">small</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
+    <span class="p">)</span>
+    <span class="n">E_sorted</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">E_sorted</span><span class="p">)</span>
+    <span class="n">inten_sorted</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">E_sorted</span><span class="p">,</span> <span class="n">_E_sorted</span><span class="p">,</span> <span class="n">inten_sorted</span><span class="p">)</span>
 
     <span class="c1"># Integrate in energy space (this way, the integral is numerically more</span>
     <span class="c1"># stable compared to omega_space. This results in a dimensionless result,</span>

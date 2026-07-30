@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**01:14.391** total execution time for 13 files **from gen_examples/ionic**:
+**01:12.623** total execution time for 13 files **from gen_examples/ionic**:
 
 .. container::
 
@@ -33,41 +33,41 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_ThreePotential_Wuensch.py` (``plot_HNC_ThreePotential_Wuensch.py``)
-     - 00:12.630
+     - 00:12.242
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_exchange.py` (``plot_HNC_exchange.py``)
-     - 00:09.414
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_ionic_plot_LatticeDebyeModel.py` (``plot_LatticeDebyeModel.py``)
-     - 00:08.851
+     - 00:09.175
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_electron_ion_potentials_II.py` (``plot_HNC_electron_ion_potentials_II.py``)
-     - 00:08.747
+     - 00:08.694
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_ionic_plot_LatticeDebyeModel.py` (``plot_LatticeDebyeModel.py``)
+     - 00:08.488
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_pair_correlation_functions.py` (``plot_HNC_pair_correlation_functions.py``)
-     - 00:06.121
+     - 00:06.056
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Gregori2006.py` (``plot_static_structure_factors_Gregori2006.py``)
-     - 00:05.883
+     - 00:05.671
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_SVT_HNC_multicomponent.py` (``plot_SVT_HNC_multicomponent.py``)
-     - 00:04.122
-     - 0.0
-   * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_Gregori_Comparison.py` (``plot_HNC_Gregori_Comparison.py``)
-     - 00:03.953
+     - 00:04.048
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_multicomponent.py` (``plot_HNC_multicomponent.py``)
-     - 00:03.873
+     - 00:03.772
+     - 0.0
+   * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_Gregori_Comparison.py` (``plot_HNC_Gregori_Comparison.py``)
+     - 00:03.766
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_potentials.py` (``plot_HNC_potentials.py``)
-     - 00:03.494
+     - 00:03.465
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Gregori2007.py` (``plot_static_structure_factors_Gregori2007.py``)
-     - 00:02.931
+     - 00:02.845
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_HNC_electron_ion_potential.py` (``plot_HNC_electron_ion_potential.py``)
-     - 00:02.413
+     - 00:02.389
      - 0.0
    * - :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Arkhipov_Devletov.py` (``plot_static_structure_factors_Arkhipov_Devletov.py``)
-     - 00:01.958
+     - 00:02.013
      - 0.0
