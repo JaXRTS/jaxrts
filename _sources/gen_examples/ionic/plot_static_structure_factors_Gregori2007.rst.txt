@@ -40,11 +40,7 @@ models at similar conditions.
 
  .. code-block:: none
 
-    /home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1044: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
-      x = np.asanyarray(x)
-    /home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1044: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
-      x = np.asanyarray(x)
-    /home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1044: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
+    /home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1096: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
       x = np.asanyarray(x)
     /home/runner/work/jaxrts/jaxrts/doc/examples/ionic/plot_static_structure_factors_Gregori2007.py:116: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
       ax[1, 1].legend(loc="upper right")
@@ -173,7 +169,7 @@ models at similar conditions.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.845 seconds)
+   **Total running time of the script:** (0 minutes 2.612 seconds)
 
 
 .. _sphx_glr_download_gen_examples_ionic_plot_static_structure_factors_Gregori2007.py:

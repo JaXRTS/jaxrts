@@ -35,14 +35,8 @@ HNC: Potentials
 
  .. code-block:: none
 
-    /home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1355: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
-      return np.asarray(x, float)
-    /home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1355: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
-      return np.asarray(x, float)
-    /home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1355: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
-      return np.asarray(x, float)
-    /home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1355: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
-      return np.asarray(x, float)
+    /home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1407: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
+      return np.asanyarray(x, float)
 
 
 
@@ -138,7 +132,7 @@ HNC: Potentials
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.465 seconds)
+   **Total running time of the script:** (0 minutes 3.590 seconds)
 
 
 .. _sphx_glr_download_gen_examples_ionic_plot_HNC_potentials.py:
