@@ -9,8 +9,6 @@ This example shows how the frequency redistribution correction
 For a discussion, see :cite:`Crowley.2013`.
 """
 
-from functools import partial
-
 import matplotlib.pyplot as plt
 from jax import numpy as jnp
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
@@ -31,10 +29,7 @@ setup = jaxrts.Setup(
     energy=ureg("8700 eV"),
     measured_energy=ureg("8700 eV")
     + jnp.linspace(-666, 100, 500) * ureg.electron_volt,
-    instrument=partial(
-        jaxrts.instrument_function.instrument_gaussian,
-        sigma=ureg("5.0eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-    ),
+    instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("5.0eV")),
 )
 
 state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()

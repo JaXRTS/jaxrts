@@ -6,8 +6,6 @@ In this example, we apply the ITCFT to increasingly noisy data with different
 scattering angles.
 """
 
-from functools import partial
-
 import jax
 import matplotlib.pyplot as plt
 import scienceplots  # noqa: F401
@@ -41,10 +39,7 @@ for angle, e_range in [[120, 600], [20, 200]]:
         energy=ureg("9000 eV"),
         measured_energy=ureg("9000 eV")
         + jnp.linspace(-e_range, e_range, 1000) * ureg.electron_volt,
-        instrument=partial(
-            jaxrts.instrument_function.instrument_gaussian,
-            sigma=ureg("3eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-        ),
+        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("3.0eV")),
     )
 
     # Turn off the dispersion correction

@@ -14,6 +14,7 @@ which was an issue when pickeling a PlasmaState.
 """
 
 import base64
+import inspect
 import json
 
 import dill as pickle
@@ -22,7 +23,7 @@ import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
 
-from .collections import get_all_models_list
+from .collections import get_all_models_list, get_all_instrument_functions
 from .elements import Element
 from .helpers import partialclass
 from .hnc_potentials import HNCPotential
@@ -30,6 +31,7 @@ from .models import Model
 from .plasmastate import PlasmaState
 from .setup import Setup
 from .units import Quantity
+from .instrument_function import InstrumentFunction
 
 
 def _flatten_obj(obj):
@@ -110,6 +112,11 @@ class JaXRTSEncoder(json.JSONEncoder):
                 "_type": "Model",
                 "value": (obj.__name__, _flatten_obj(obj)),
             }
+        elif isinstance(obj, InstrumentFunction):
+            return {
+                "_type": "InstrumentFunction",
+                "value": (obj.__class__.__name__, _flatten_obj(obj)),
+            }
         elif isinstance(obj, Element):
             return {
                 "_type": "Element",
@@ -132,6 +139,16 @@ class JaXRTSEncoder(json.JSONEncoder):
         elif isinstance(obj, jax.tree_util.Partial):
             return {
                 "_type": "jaxPartial",
+                "value": base64.b64encode(pickle.dumps(obj)).decode("utf-8"),
+            }
+        elif inspect.isfunction(obj):
+            return {
+                "_type": "function",
+                "value": base64.b64encode(pickle.dumps(obj)).decode("utf-8"),
+            }
+        elif isinstance(obj, jax.tree_util.PyTreeDef):
+            return {
+                "_type": "jaxPyTreeDef",
                 "value": base64.b64encode(pickle.dumps(obj)).decode("utf-8"),
             }
         return super().default(obj)
@@ -187,12 +204,23 @@ class JaXRTSDecoder(json.JSONDecoder):
         model_dict.update(self.additional_mappings)
         return model_dict
 
+    @property
+    def instrument_functions(self) -> dict:
+        ifunc_list = get_all_instrument_functions()
+        ifunc_dict = {ifnc.__name__: ifnc for ifnc in ifunc_list}
+        ifunc_dict.update(self.additional_mappings)
+        return ifunc_dict
+
     def object_hook(self, obj):
         if "_type" not in obj:
             return obj
         _type = obj["_type"]
         val = obj["value"]
         if _type == "jaxPartial":
+            return pickle.loads(base64.b64decode(val))
+        if _type == "jaxPyTreeDef":
+            return pickle.loads(base64.b64decode(val))
+        if _type == "function":
             return pickle.loads(base64.b64decode(val))
         if _type == "ndArray":
             return onp.array(val)
@@ -207,6 +235,15 @@ class JaXRTSDecoder(json.JSONDecoder):
 
             model = self.models[name]
             new = object.__new__(model)
+
+            children, aux_data = _parse_tree_save(new, *tree)
+            new = new._tree_unflatten(aux_data, children)
+            return new
+        elif _type == "InstrumentFunction":
+            name, tree = val
+
+            inst_fnc = self.instrument_functions[name]
+            new = object.__new__(inst_fnc)
 
             children, aux_data = _parse_tree_save(new, *tree)
             new = new._tree_unflatten(aux_data, children)

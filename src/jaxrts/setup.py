@@ -11,6 +11,7 @@ from jpu import numpy as jnpu
 
 from .plasma_physics import plasma_frequency
 from .units import Quantity, ureg
+from .instrument_function import InstrumentFunction, FromCallable
 
 
 class Setup:
@@ -25,10 +26,13 @@ class Setup:
         scattering_angle: Quantity,
         energy: Quantity,
         measured_energy: Quantity,
-        instrument: Callable,
+        instrument: Callable | InstrumentFunction,
         correct_k_dispersion: bool = True,
         frc_exponent: float = 0.0,
     ):
+
+        if not isinstance(instrument, InstrumentFunction):
+            instrument = FromCallable(instrument)
 
         #: The scattering angle of the experiment
         self.scattering_angle: Quantity = scattering_angle
@@ -38,10 +42,11 @@ class Setup:
         #: The energies at which the scattering is recorded. This is an array
         #: of absolute energies and not an energy shift.
         self.measured_energy: Quantity = measured_energy
-        #: A callable function over energy shifts that gives the total
-        #: instrument spread. The curve should be normed so that the integral
-        #: from `-inf` to `inf` should be one.
-        self.instrument: Callable = jax.tree_util.Partial(instrument)
+        #: A :py:class:jaxrts.instrument_function.InstrumentFunction`,
+        #: basically a callable function over energy shifts that gives the
+        #: total instrument spread. The curve should be normed so that the
+        #: integral from `-inf` to `inf` should be one.
+        self.instrument: InstrumentFunction = instrument
         #: In an experiment, the value of k is dependent on the measured energy
         #: at this position on the detector. When including this effect, the
         #: returned spectrum will, however, violate detailed balance. It might
@@ -79,7 +84,7 @@ class Setup:
 
     def __repr__(self) -> str:
         E = f"{self.energy.m_as(ureg.electron_volt):.1f}"
-        k = f"{self.k.m_as(1/ureg.angstrom):.3f}"
+        k = f"{self.k.m_as(1 / ureg.angstrom):.3f}"
         theta = f"{self.scattering_angle.m_as(ureg.degree):1f}"
         out = f"Setup probing with {E} eV at {theta} deg (k = {k}/angstrom)."
         if self.frc_exponent > 0:

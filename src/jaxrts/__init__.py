@@ -33,7 +33,11 @@ from .plasmastate import PlasmaState
 from .setup import Setup
 from .units import ureg
 
-from .collections import get_all_models, get_all_models_list
+from .collections import (
+    get_all_models,
+    get_all_models_list,
+    get_all_instrument_functions,
+)
 
 __all__ = [
     "Element",
@@ -71,10 +75,11 @@ __all__ = [
 import jax
 
 _all_models = get_all_models_list()
+_all_instrument_functions = get_all_instrument_functions()
 
-for _model in _all_models:
+for _obj in [*_all_models, *_all_instrument_functions]:
     jax.tree_util.register_pytree_node(
-        _model,
-        _model._tree_flatten,
-        _model._tree_unflatten,
+        _obj,
+        _obj._tree_flatten,
+        _obj._tree_unflatten,
     )

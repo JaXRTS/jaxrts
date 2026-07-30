@@ -81,11 +81,8 @@ setup = jaxrts.Setup(
     scattering_angle=ureg(f"{scattering_angle} deg"),  # Explicit units
     energy=ureg(f"{photon_energy} keV"),
     measured_energy=measured_energy,
-    instrument=partial(
-        jaxrts.instrument_function.instrument_gaussian,
-        sigma=ureg(f"{source_fwhm}eV")
-        / ureg.hbar
-        / (2 * jnp.sqrt(2 * jnp.log(2))),
+    instrument=jaxrts.instrument_function.Gaussian(
+        fwhm=ureg(f"{source_fwhm}eV")
     ),
 )
 state["ipd"] = jaxrts.models.StewartPyattIPD()
