@@ -32,13 +32,13 @@ class TestITCFInstance:
     test_state["bound-free scattering"] = jaxrts.models.SchumacherImpulse()
     test_state["free-bound scattering"] = jaxrts.models.DetailedBalance()
 
-    def get_T(self, raw):
+    def get_T(self, raw=False, x=ureg("100eV")):
         S_ee = self.test_state.probe(self.test_setup)
         T = jaxrts.analysis.ITCFT(
             S_ee,
             ureg("60/keV"),
             self.test_setup,
-            ureg("100eV"),
+            x,
             raw=raw,
         )
         return T
@@ -54,6 +54,22 @@ class TestITCFInstance:
         assert jnpu.absolute(
             self.get_T(raw=False) - self.test_state.T_e
         ) < ureg("2e3K")
+
+    def test_ITCFT_stable_against_moving_energy_grid(self):
+        # We require small values for x. For big x, convergence should always
+        # reach the correct value
+        _x = jnp.array([10, 15, 20]) * ureg.electron_volt
+        self.test_setup.correct_k_dispersion = False
+        T1 = (
+            jnp.array([self.get_T(x=x).m_as(ureg.kelvin) for x in _x])
+            * ureg.kelvin
+        )
+        self.test_setup.measured_energy += 0.1 * ureg.electron_volt
+        T2 = (
+            jnp.array([self.get_T(x=x).m_as(ureg.kelvin) for x in _x])
+            * ureg.kelvin
+        )
+        assert jnpu.max(jnpu.absolute(T1 - T2)) < ureg("1e3K")
 
     @pytest.mark.xfail(
         reason="The k-dispersion should violate detailed balance"
