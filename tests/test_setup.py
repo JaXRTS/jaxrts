@@ -68,17 +68,13 @@ def test_instrumentfunction_from_array() -> None:
     intensities = psf(w) * 42
 
     # with units on intensities
-    array_psf_1 = jaxrts.instrument_function.instrument_from_array(
-        w, intensities
-    )
+    array_psf_1 = jaxrts.instrument_function.FromArray(w, intensities)
     # without units on intensities
-    array_psf_2 = jaxrts.instrument_function.instrument_from_array(
+    array_psf_2 = jaxrts.instrument_function.FromArray(
         w, intensities.m_as(ureg.picosecond)
     )
     # define the PSF over the energy and not frequencies
-    array_psf_3 = jaxrts.instrument_function.instrument_from_array(
-        E, intensities
-    )
+    array_psf_3 = jaxrts.instrument_function.FromArray(E, intensities)
 
     assert jnp.all(jnpu.isclose(psf(w), array_psf_1(w)))
     assert jnp.all(jnpu.isclose(psf(w), array_psf_2(w)))

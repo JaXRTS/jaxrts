@@ -5,8 +5,6 @@ Multi-Species Plasmas
 This example calculates a synthetic spectrum of a CHO plasma.
 """
 
-from functools import partial
-
 import matplotlib.pyplot as plt
 from jax import numpy as jnp
 
@@ -36,10 +34,7 @@ setup = jaxrts.Setup(
     scattering_angle=ureg("150°"),
     energy=ureg("8 keV"),
     measured_energy=jnp.linspace(7.4, 8.2, 500) * ureg.kiloelectron_volt,
-    instrument=partial(
-        jaxrts.instrument_function.instrument_gaussian,
-        sigma=ureg("7.0eV") / ureg.hbar / (2 * jnp.sqrt(2 * jnp.log(2))),
-    ),
+    instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("7.0eV")),
 )
 
 # Add the required models
