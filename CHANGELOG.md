@@ -1,5 +1,68 @@
 # Changelog
 
+## [0.8.0] - 2026-07-31
+
+This release most notably brings performance improvements for HNC and Born-Mermin ff calculations. This is achieved by using a better FFT implementation and using hard-coded algorithms to invert small matrices.
+Further, we introduce a new way of defining instrument functions. While the old code is still working, the new `InstrumentFunction` class allows more transparent saving and can be extended easily.
+We allow for summing of IPD models, and different shapes of bound-free (and free-bound) edges.
+
+The ionization solver has been rewritten, removing code duplication, improving both performance and maintainability.
+
+We also have created a quick-start jupyter notebook, that you can use online (with colab) to get stated without the need of installing anything on your machine.
+
+### Features
+
+- Create intro notebook([fdeaf6f](https://github.com/JaXRTS/jaxrts/commit/fdeaf6f7269e6b248f10ee805f9c2669411dae1a))
+- IPDSum model([03cdef6](https://github.com/JaXRTS/jaxrts/commit/03cdef603a7e619824c76d0cb39c4e45bc40f229))
+- Functions for getting all models, potentials and instrument functions([8055ff1a](https://github.com/JaXRTS/jaxrts/commit/8055ff1a08e0a9e0fe15463962ea2fcac23ea8ff))
+- Models for the shape of bound-free edges([41e6b1](https://github.com/JaXRTS/jaxrts/commit/41e6b1670e676e9b5045fe778cb8c90092aa66fb))
+- add BU solver([b5c7f4](https://github.com/JaXRTS/jaxrts/commit/b5c7f46e8b53955318761f1ff1caa38ef0fa772d))
+
+### Bug Fixes
+
+- Stabilize ITCFT against shifting of the energy grid([613daa3](https://github.com/JaXRTS/jaxrts/commit/613daa3ffd96a9a5cf745e3444d56e090de48ada))
+
+### Other
+
+- SiiNN save jaxrts version to .info file. Include sampling boundaries([eb43ef0](https://github.com/JaXRTS/jaxrts/commit/eb43ef0742d73266a6e60eed5eb1f2d40bf436dc),[20a8c2c](https://github.com/JaXRTS/jaxrts/commit/20a8c2c3703851d9c60de9e0a684629f85cb7ce9))
+
+### Refactor
+
+- Remove extensive code duplication in balance solver([0a9d6c0](https://github.com/JaXRTS/jaxrts/commit/0a9d6c0c641d94a9761492663e8b9f649ec686d3))
+- Use IPDModel to collect models for IPDs([856f062](https://github.com/JaXRTS/jaxrts/commit/856f062c6df4b75e41c81d69eb5b47da0e66a67d))
+- Create classes for InstrumentFunctions([67d3f6b](https://github.com/JaXRTS/jaxrts/commit/67d3f6b6f403b2ffb70141ef03d9eff01c0175b5))
+
+### Documentation
+
+- Show printing example, literature fixes([7a40aee](https://github.com/JaXRTS/jaxrts/commit/7a40aee7a74010948995ee89628f41d3ada6e10e))
+- Add links to sidebar, provide better bibtex for paper([be79e12](https://github.com/JaXRTS/jaxrts/commit/be79e12156906db728296dd18a1047b0d664e2c4))
+- Add info about loading and saving from disk([9e46ff2](https://github.com/JaXRTS/jaxrts/commit/9e46ff2763bd6798c98b8fddbba332f868725de4))
+- New example: saha ionization map for CH plasma (#71)([c882388](https://github.com/JaXRTS/jaxrts/commit/c8823886564e84b9cb65f481fa87aeccc7aad1e1))
+- Correct pip install command([94684fa](https://github.com/JaXRTS/jaxrts/commit/94684faaca63d344697e8e4ca45f3a79a71ba5ec), [510dcc8](https://github.com/JaXRTS/jaxrts/commit/510dcc8b4764beeed94efc888d333c5c61721ef7))
+- Mention notebook in readme([00a9ad8](https://github.com/JaXRTS/jaxrts/commit/00a9ad8d19cae2e51097ccee7d6a1487b5039476))
+- Improved docstrings([48a20fc](https://github.com/JaXRTS/jaxrts/commit/48a20fccb7995db38ad11ef0c55ea89386261fd1), [14a33d4](https://github.com/JaXRTS/jaxrts/commit/14a33d4b687a3b8f7bc580c2004c23dcddce15ad))
+
+### Performance
+
+- Shorter DST4, remove unused DST types([8d3ae96](https://github.com/JaXRTS/jaxrts/commit/8d3ae96133c86124f603befb848a615d1f060c90),[6dca5e7](https://github.com/JaXRTS/jaxrts/commit/6dca5e787d6052f2aeb5707642c0b01907c8baea),[5112ee6](https://github.com/JaXRTS/jaxrts/commit/5112ee69064d7c45b1a7a6573e7d6b656d4145f7))
+- Don't re-iterate HNC per integration point in BM nu([3bdf9c7](https://github.com/JaXRTS/jaxrts/commit/3bdf9c7bfa09a6dc126518e662069f7273efc793))
+- Hardcoded matrix inversion for low-size matrices([3938db1](https://github.com/JaXRTS/jaxrts/commit/3938db1d66a27306a45345207f9c8b64dbe5b0d8))
+- Use solve over inv([af985ea](https://github.com/JaXRTS/jaxrts/commit/af985ea722ea29b82ad348e288b15a5c1a84d864))
+- Simplify HNC matrix construction([90b07c5](https://github.com/JaXRTS/jaxrts/commit/90b07c5316872f69784ff39038a4ce63f60d61a4))
+
+### Testing
+- Unit tests for testing jax cache size([bbb6769](https://github.com/JaXRTS/jaxrts/commit/bb676929c3a3abadd5016ff784dc5030f6458a62)
+
+### Miscellaneous Tasks
+
+- Add requests to download_data extras([033af49](https://github.com/JaXRTS/jaxrts/commit/033af492cc7e1a74a829872e57e404e16cd421ab))
+- Add citation file([2c7224](https://github.com/JaXRTS/jaxrts/commit/2c722479a9ec50220cc0d1d90f4272dbbe396156))
+- Dependency upgrade (includes jax 0.10)([1210e9d](https://github.com/JaXRTS/jaxrts/commit/1210e9d96900f0209032b4c0d93dbc62926577a0))
+
+
+**Full Changelog**: https://github.com/jaxrts/jaxrts/compare/0.7.0...0.8.0
+
+
 ## [0.7.0] - 2026-04-16
 
 This release brings smaller changes, including a renaming of the `saha` submodule to `ionization`, and a more natural default e-i Potential (now just a Coulomb potential). Further, it introduces a more stable interpolation of Sii with neural networks, a multi-species ionization solver in the TF model.
