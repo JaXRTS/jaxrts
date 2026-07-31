@@ -23,15 +23,15 @@ import jax.numpy as jnp
 import jpu.numpy as jnpu
 import numpy as onp
 
-from .collections import get_all_models_list, get_all_instrument_functions
+from .collections import get_all_instrument_functions, get_all_models_list
 from .elements import Element
 from .helpers import partialclass
 from .hnc_potentials import HNCPotential
+from .instrument_function import InstrumentFunction
 from .models import Model
 from .plasmastate import PlasmaState
 from .setup import Setup
 from .units import Quantity
-from .instrument_function import InstrumentFunction
 
 
 def _flatten_obj(obj):

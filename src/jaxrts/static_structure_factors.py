@@ -11,12 +11,11 @@ from jax import numpy as jnp
 from jpu import numpy as jnpu
 from quadax import quadts as quad
 
+from .helpers import bisection
 from .plasma_physics import (
-    coulomb_potential_fourier,
     fermi_energy,
     wiegner_seitz_radius,
 )
-from .helpers import bisection
 from .units import Quantity, ureg
 
 jax.config.update("jax_enable_x64", True)
@@ -167,9 +166,7 @@ def _Delta_AD(
             1.0 / ((1 + k**2 * lamee**2) * (1 + k**2 * lamii**2))
             - 1 / (1 + k**2 * lamei**2) ** 2
         )
-        + A
-        * k**2
-        * k_De**2
+        + A * k**2 * k_De**2
         # The original paper :cite:`Arkhipov.1998` differs in the following
         # line. This has been rectified by the authors their paper from 2000.
         * (k**2 + k_Di**2 / (1 + k**2 * lamii**2))

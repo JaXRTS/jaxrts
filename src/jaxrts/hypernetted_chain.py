@@ -10,8 +10,8 @@ import jax.interpreters
 import jpu.numpy as jnpu
 from jax import numpy as jnp
 
-from .units import Quantity, ureg
 from .helpers import cramer_solve
+from .units import Quantity, ureg
 
 
 # Helper functions.

@@ -5,11 +5,10 @@ functions.
 
 import abc
 import functools
-
 import logging
+import warnings
 from collections.abc import Callable
 from pathlib import Path
-import warnings
 
 import jax
 import jax.numpy as jnp
@@ -31,7 +30,7 @@ def _check_callable_for_deprication(func: Callable) -> None:
         "instrument_supergaussian": "SuperGaussian",
         "instrument_lorentzian": "Lorentzian",
     }
-    if func.__name__ in alternatives.keys():
+    if func.__name__ in alternatives:
         warnings.warn(
             f"Passing ``{func.__name__}`` as an instrument function "
             "to ``FromCallable`` is deprecated. Instead "

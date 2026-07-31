@@ -455,4 +455,3 @@ def noninteracting_susceptibility_from_eps_RPA(
     """
     Vee = coulomb_potential_fourier(-1, -1, k)
     return (1 - epsilon) / Vee
-

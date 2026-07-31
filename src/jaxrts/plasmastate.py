@@ -70,9 +70,9 @@ class PlasmaState:
             len(ions) == len(mass_density)
         ), "WARNING: Input parameters should be the same shape as <ions>!"
         if T_i is not None:
-            assert len(ions) == len(T_i), (
-                "WARNING: Input parameters should be the same shape as <ions>!"
-            )
+            assert len(ions) == len(
+                T_i
+            ), "WARNING: Input parameters should be the same shape as <ions>!"
 
         #: A list of :py:class:`jaxrts.elements.Element` objects that define
         #: the constituents of the plasma.
@@ -431,9 +431,9 @@ Models attached
         if isinstance(kind, str):
             kind = [kind]
         for par in kind:
-            assert (par == "e-") or (par in self.ions), (
-                "Kind must be one of the ion species or an electron (e-)!"
-            )
+            assert (par == "e-") or (
+                par in self.ions
+            ), "Kind must be one of the ion species or an electron (e-)!"
             if par == "e-":
                 wavelengths.append(
                     (

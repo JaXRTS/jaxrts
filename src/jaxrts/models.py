@@ -30,8 +30,8 @@ from . import (
 from .analysis import ITCF_fsum
 from .elements import MixElement, electron_distribution_ionized_state
 from .plasma_physics import (
-    noninteracting_susceptibility_from_eps_RPA,
     fermi_energy,
+    noninteracting_susceptibility_from_eps_RPA,
     wiegner_seitz_radius,
 )
 from .setup import (
@@ -1801,6 +1801,7 @@ def _build_cached_S_ii(plasma_state, setup):
                 )
                 * ureg.dimensionless
             )
+
     else:
 
         @jax.tree_util.Partial
@@ -4230,9 +4231,9 @@ class LinearResponseScreeningGericke2010(Model):
             "electron-ion Potential",
             hnc_potentials.CoulombPotential(),
         )
-        plasma_state[
-            "electron-ion Potential"
-        ].include_electrons = "SpinAveraged"
+        plasma_state["electron-ion Potential"].include_electrons = (
+            "SpinAveraged"
+        )
 
     @jax.jit
     def evaluate(
@@ -4373,9 +4374,9 @@ class FiniteWavelengthScreening(Model):
             "electron-ion Potential",
             hnc_potentials.CoulombPotential(),
         )
-        plasma_state[
-            "electron-ion Potential"
-        ].include_electrons = "SpinAveraged"
+        plasma_state["electron-ion Potential"].include_electrons = (
+            "SpinAveraged"
+        )
 
     @jax.jit
     def evaluate(
@@ -4476,9 +4477,9 @@ class LinearResponseScreening(Model):
             "electron-ion Potential",
             hnc_potentials.CoulombPotential(),
         )
-        plasma_state[
-            "electron-ion Potential"
-        ].include_electrons = "SpinAveraged"
+        plasma_state["electron-ion Potential"].include_electrons = (
+            "SpinAveraged"
+        )
         plasma_state["free-free scattering"] = RPA_DandreaFit()
 
     @jax.jit

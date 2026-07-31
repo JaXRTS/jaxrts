@@ -2,18 +2,18 @@
 Miscellaneous helper functions.
 """
 
-import re
 import logging
+import re
 from functools import partialmethod, wraps
-from time import time
-from platformdirs import user_cache_dir
 from pathlib import Path
+from time import time
 
 import jax
-from jax import numpy as jnp
 import jpu.numpy as jnpu
+from jax import numpy as jnp
+from platformdirs import user_cache_dir
 
-from .units import Quantity, ureg, to_array
+from .units import Quantity, to_array, ureg
 
 #: Typically, we return quantities that differ per orbital in an
 #: :py:class:`jax.numpy.ndarray` with 10 entries, the orbitals with n<=4.
@@ -477,7 +477,7 @@ def cramer_solve(A, b, N_max=4):
     """
     N = A.shape[-1]
     # Directly return the linalg solve based
-    if N > N_max:
+    if N_max < N:
         return jnp.linalg.solve(A, b)
 
     if N == 1:

@@ -5,29 +5,34 @@ Convenience functions collecting all available
 This is a submodule of its own to avoid circular imports.
 """
 
-from collections import defaultdict
-from typing import overload, Dict, Literal
 import inspect
-from . import hnc_potentials, models, instrument_function
+from collections import defaultdict
+from typing import Literal, overload
+
+from . import hnc_potentials, instrument_function, models
 
 
 @overload
 def get_all_models(
     types: list[Literal["models", "hnc_potentials"]],
     names_only: Literal[False] = False,
-) -> Dict[str, list[models.Model | hnc_potentials.HNCPotential]]: ...
+) -> dict[str, list[models.Model | hnc_potentials.HNCPotential]]: ...
+
+
 @overload
 def get_all_models(
     types: list[Literal["models", "hnc_potentials"]],
     names_only: Literal[True],
-) -> Dict[str, list[str]]: ...
+) -> dict[str, list[str]]: ...
+
+
 def get_all_models(
     types: list[Literal["models", "hnc_potentials"]] = [
         "models",
         "hnc_potentials",
     ],
     names_only: bool = False,
-) -> Dict[str, list[models.Model | hnc_potentials.HNCPotential | str]]:
+) -> dict[str, list[models.Model | hnc_potentials.HNCPotential | str]]:
     """
     Get a dictionary of all :py:class:`jaxrts.models.Model` defined within
     jaxrts that are valid to attach to a
@@ -82,10 +87,14 @@ def get_all_models(
 def get_all_instrument_functions(
     names_only: Literal[False] = False,
 ) -> list[instrument_function.InstrumentFunction]: ...
+
+
 @overload
 def get_all_instrument_functions(
     names_only: Literal[True],
 ) -> list[str]: ...
+
+
 def get_all_instrument_functions(
     names_only: bool = False,
 ) -> list[instrument_function.InstrumentFunction | str]:
@@ -129,11 +138,15 @@ def get_all_models_list(
     types: list[Literal["models", "hnc_potentials"]],
     names_only: Literal[False] = False,
 ) -> list[models.Model | hnc_potentials.HNCPotential]: ...
+
+
 @overload
 def get_all_models_list(
     types: list[Literal["models", "hnc_potentials"]],
     names_only: Literal[True],
 ) -> list[str]: ...
+
+
 def get_all_models_list(
     types: list[Literal["models", "hnc_potentials"]] = [
         "models",

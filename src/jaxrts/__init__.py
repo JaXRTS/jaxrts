@@ -18,26 +18,25 @@ from . import (
     hnc_potentials,
     instrument_function,
     ion_feature,
+    ionization,
     math,
     models,
     plasma_physics,
     plasmastate,
-    ionization,
     saving,
     setup,
     static_structure_factors,
     units,
 )
+from .collections import (
+    get_all_instrument_functions,
+    get_all_models,
+    get_all_models_list,
+)
 from .elements import Element
 from .plasmastate import PlasmaState
 from .setup import Setup
 from .units import ureg
-
-from .collections import (
-    get_all_models,
-    get_all_models_list,
-    get_all_instrument_functions,
-)
 
 __all__ = [
     "Element",

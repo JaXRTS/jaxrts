@@ -14,7 +14,6 @@ from pathlib import Path
 
 import jax
 import jax.numpy as jnp
-import jpu.numpy as jnpu
 import orbax.checkpoint as ocp
 from flax import nnx
 
@@ -154,8 +153,8 @@ class NNModelExpandedZ(NNModel):
     networks struggle to approximate such behaviour because they implicitly
     assume smooth mappings between inputs and outputs.
 
-    To mitigate this issue, the ionization input ``Z_i`` is transformed into two
-    components:
+    To mitigate this issue, the ionization input ``Z_i`` is transformed into
+    two components:
 
     * the integer ionization stage
       :math:`n_i = \\lfloor Z_i^{phys} \\rfloor`
@@ -395,7 +394,6 @@ class NNSiiModel(jaxrts.models.IonFeatModel):
         n_arr = jnp.zeros(n)
         for i in range(n):
             for idx in idx_arr[i]:
-
                 Z_arr = Z_arr.at[i].add(
                     plasma_state.number_fraction[idx]
                     * plasma_state.Z_free[idx]

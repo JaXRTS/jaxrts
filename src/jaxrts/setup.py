@@ -9,9 +9,9 @@ import jax
 import jax.numpy as jnp
 from jpu import numpy as jnpu
 
+from .instrument_function import FromCallable, InstrumentFunction
 from .plasma_physics import plasma_frequency
 from .units import Quantity, ureg
-from .instrument_function import InstrumentFunction, FromCallable
 
 
 class Setup:

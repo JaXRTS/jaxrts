@@ -13,19 +13,19 @@ coefficients and the corresponding "still-bound" mask.
 :py:func:`bu_balance_term`.
 """
 
-from typing import NamedTuple
 import logging
 from functools import partial
+from typing import NamedTuple
 
 import jax
-from jax.tree_util import Partial
 import jax.numpy as jnp
 import jpu.numpy as jnpu
+from jax.tree_util import Partial
 
 from .elements import Element
+from .helpers import bisection, read_nist_file
 from .plasma_physics import therm_de_broglie_wl
 from .units import Quantity, to_array, ureg
-from .helpers import bisection, read_nist_file
 
 h = 1 * ureg.planck_constant
 k_B = 1 * ureg.boltzmann_constant
