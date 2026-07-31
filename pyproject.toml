@@ -20,7 +20,7 @@ dependencies = [
   "pybtex @ git+https://codeberg.org/pybtex/pybtex/",
 ]
 requires-python = ">=3.12,<3.16"
-version = "0.7.0.post68.dev0+378223ba"
+version = "0.8.0"
 
 [project.optional-dependencies]
 NN = [
