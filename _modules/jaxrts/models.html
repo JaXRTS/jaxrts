@@ -118,8 +118,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">ITCF_fsum</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.elements</span><span class="w"> </span><span class="kn">import</span> <span class="n">MixElement</span><span class="p">,</span> <span class="n">electron_distribution_ionized_state</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.plasma_physics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">noninteracting_susceptibility_from_eps_RPA</span><span class="p">,</span>
     <span class="n">fermi_energy</span><span class="p">,</span>
+    <span class="n">noninteracting_susceptibility_from_eps_RPA</span><span class="p">,</span>
     <span class="n">wiegner_seitz_radius</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.setup</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -2105,6 +2105,7 @@
                 <span class="p">)</span>
                 <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
             <span class="p">)</span>
+
     <span class="k">else</span><span class="p">:</span>
 
         <span class="nd">@jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">Partial</span>
@@ -4841,9 +4842,9 @@
             <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
             <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">CoulombPotential</span><span class="p">(),</span>
         <span class="p">)</span>
-        <span class="n">plasma_state</span><span class="p">[</span>
-            <span class="s2">&quot;electron-ion Potential&quot;</span>
-        <span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinAveraged&quot;</span></div>
+        <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;SpinAveraged&quot;</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="LinearResponseScreeningGericke2010.evaluate">
@@ -5002,9 +5003,9 @@
             <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
             <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">CoulombPotential</span><span class="p">(),</span>
         <span class="p">)</span>
-        <span class="n">plasma_state</span><span class="p">[</span>
-            <span class="s2">&quot;electron-ion Potential&quot;</span>
-        <span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinAveraged&quot;</span></div>
+        <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;SpinAveraged&quot;</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FiniteWavelengthScreening.evaluate">
@@ -5120,9 +5121,9 @@
             <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
             <span class="n">hnc_potentials</span><span class="o">.</span><span class="n">CoulombPotential</span><span class="p">(),</span>
         <span class="p">)</span>
-        <span class="n">plasma_state</span><span class="p">[</span>
-            <span class="s2">&quot;electron-ion Potential&quot;</span>
-        <span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinAveraged&quot;</span>
+        <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;SpinAveraged&quot;</span>
+        <span class="p">)</span>
         <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RPA_DandreaFit</span><span class="p">()</span></div>
 
 

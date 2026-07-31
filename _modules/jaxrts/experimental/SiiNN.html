@@ -102,7 +102,6 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">orbax.checkpoint</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ocp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">flax</span><span class="w"> </span><span class="kn">import</span> <span class="n">nnx</span>
 
@@ -253,8 +252,8 @@
 <span class="sd">    networks struggle to approximate such behaviour because they implicitly</span>
 <span class="sd">    assume smooth mappings between inputs and outputs.</span>
 
-<span class="sd">    To mitigate this issue, the ionization input ``Z_i`` is transformed into two</span>
-<span class="sd">    components:</span>
+<span class="sd">    To mitigate this issue, the ionization input ``Z_i`` is transformed into</span>
+<span class="sd">    two components:</span>
 
 <span class="sd">    * the integer ionization stage</span>
 <span class="sd">      :math:`n_i = \\lfloor Z_i^{phys} \\rfloor`</span>
@@ -511,7 +510,6 @@
         <span class="n">n_arr</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">idx_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-
                 <span class="n">Z_arr</span> <span class="o">=</span> <span class="n">Z_arr</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
                     <span class="n">plasma_state</span><span class="o">.</span><span class="n">number_fraction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
                     <span class="o">*</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>

@@ -99,12 +99,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">jpu</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnpu</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">quadax</span><span class="w"> </span><span class="kn">import</span> <span class="n">quadts</span> <span class="k">as</span> <span class="n">quad</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">bisection</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.plasma_physics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">coulomb_potential_fourier</span><span class="p">,</span>
     <span class="n">fermi_energy</span><span class="p">,</span>
     <span class="n">wiegner_seitz_radius</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">bisection</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
 
 <span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
@@ -264,9 +263,7 @@
             <span class="mf">1.0</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamee</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamii</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
             <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamei</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="p">)</span>
-        <span class="o">+</span> <span class="n">A</span>
-        <span class="o">*</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span>
-        <span class="o">*</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">+</span> <span class="n">A</span> <span class="o">*</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k_De</span><span class="o">**</span><span class="mi">2</span>
         <span class="c1"># The original paper :cite:`Arkhipov.1998` differs in the following</span>
         <span class="c1"># line. This has been rectified by the authors their paper from 2000.</span>
         <span class="o">*</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_Di</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamii</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
