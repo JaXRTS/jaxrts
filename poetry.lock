@@ -2207,18 +2207,14 @@ description = "A BibTeX-compatible bibliography processor in Python"
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "docs"]
-files = []
-develop = false
+files = [
+    {file = "pybtex-0.26.1-py3-none-any.whl", hash = "sha256:e26c0412cc54f5f21b2a6d9d175762a2d2af9ccf3a8f651cdb89ec035db77aa1"},
+    {file = "pybtex-0.26.1.tar.gz", hash = "sha256:2e5543bea424e60e9e42eef70bff597be48649d8f68ba061a7a092b2477d5464"},
+]
 
 [package.dependencies]
 latexcodec = ">=1.0.4"
-PyYAML = ">=3.1"
-
-[package.source]
-type = "git"
-url = "https://codeberg.org/pybtex/pybtex/"
-reference = "HEAD"
-resolved_reference = "025447974f9be184b957175d4ef3aff59c26bb54"
+pyyaml = ">=3.1"
 
 [[package]]
 name = "pybtex-docutils"
@@ -3420,4 +3416,4 @@ nn = ["flax", "orbax"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.16"
-content-hash = "665fa736a15f437352a51b94c1238f9d87b6fb2958768642dd2c768cadd68b16"
+content-hash = "bce625862811a6693eb9fd36a6426fb4c819e1bd6e46a8a4b7d546591455ee39"

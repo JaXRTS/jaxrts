@@ -17,7 +17,7 @@ dependencies = [
   "jaxlib (>=0.5.0, <0.11.0)",
   "jpu @ git+https://github.com/jluetgert/jpu/",
   "dill (>=0.4.0,<0.5.0)",
-  "pybtex @ git+https://codeberg.org/pybtex/pybtex/",
+  "pybtex (>=0.26.1,<0.27.0)",
 ]
 requires-python = ">=3.12,<3.16"
 version = "0.8.0"
