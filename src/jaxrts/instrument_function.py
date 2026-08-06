@@ -101,6 +101,83 @@ class Gaussian(InstrumentFunction):
         return obj
 
 
+class TwinGaussian(InstrumentFunction):
+    def __init__(
+        self,
+        sigma1: Quantity | None = None,
+        sigma2: Quantity | None = None,
+        fwhm1: Quantity | None = None,
+        fwhm2: Quantity | None = None,
+    ):
+        """
+        An instrument function of two Gaussians with different width for
+        frequency shifts below and above zero.
+
+
+        Parameters
+        ----------
+        sigma1: Quantity, optional
+            The parameter sigma, the standard deviation of the gaussian for
+            frequency shifts below 0 Hz. Must be given in units of energy or
+            frequency.
+        fwhm1: Quantity, optional
+            The full width half maximum of the distribution for frequency
+            shifts below 0 Hz.
+        sigma2: Quantity, optional
+            The parameter sigma, the standard deviation of the gaussian for
+            frequency shifts above 0 Hz. Must be given in units of energy or
+            frequency.
+        fwhm2: Quantity, optional
+            The full width half maximum of the distribution for frequency
+            shifts above 0 Hz.
+
+        Raises
+        ------
+        TypeError if neither ``sigma1`` nor ``fwhm1`` are given.
+        TypeError if neither ``sigma2`` nor ``fwhm2`` are given.
+        """
+        if sigma1 is None and fwhm1 is None:
+            raise TypeError("Either sigma1 or fwhm1 have to be supplied.")
+        if fwhm1 is not None:
+            sigma1 = fwhm1 / (2 * jnp.sqrt(2 * jnp.log(2)))
+        if sigma2 is None and fwhm2 is None:
+            raise TypeError("Either sigma2 or fwhm2 have to be supplied.")
+        if fwhm2 is not None:
+            sigma2 = fwhm2 / (2 * jnp.sqrt(2 * jnp.log(2)))
+        if sigma1.check("[energy]"):
+            sigma1 = sigma1 / (1 * ureg.hbar)
+        if sigma2.check("[energy]"):
+            sigma2 = sigma2 / (1 * ureg.hbar)
+        self.sigma1 = sigma1
+        self.sigma2 = sigma2
+
+    def __call__(self, omega):
+        gaussian1 = instrument_gaussian(omega, self.sigma1)
+        norm1 = jnpu.sqrt(2 * jnp.pi * self.sigma1**2)
+        gaussian2 = instrument_gaussian(omega, self.sigma2)
+        norm2 = jnpu.sqrt(2 * jnp.pi * self.sigma2**2)
+        return jnpu.where(omega < 0, gaussian1 * norm1, gaussian2 * norm2) / (
+            0.5 * norm1 + 0.5 * norm2
+        )
+
+    _children_labels = ("sigma1", "sigma2")
+
+    def _tree_flatten(self):
+        children = (self.sigma1, self.sigma2)
+        aux_data = ()  # static values
+        return (children, aux_data)
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = object.__new__(cls)
+        (
+            obj.sigma1,
+            obj.sigma2,
+        ) = children
+
+        return obj
+
+
 class SuperGaussian(InstrumentFunction):
     def __init__(
         self,
