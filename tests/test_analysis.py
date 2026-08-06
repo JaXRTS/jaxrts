@@ -12,25 +12,35 @@ import jaxrts
 ureg = jaxrts.ureg
 
 
-class TestITCFInstance:
-    test_state = jaxrts.PlasmaState(
-        ions=[jaxrts.Element("Be")],
-        Z_free=jnp.array([2]),
-        mass_density=jnp.array([3]) * ureg.gram / ureg.centimeter**3,
-        T_e=60 * ureg.electron_volt / ureg.k_B,
-    )
-    test_setup = jaxrts.Setup(
-        scattering_angle=ureg("30°"),
-        energy=ureg("6900 eV"),
-        measured_energy=ureg("6900 eV")
-        + jnp.linspace(-120, 120, 1000) * ureg.electron_volt,
-        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("1.0eV")),
-    )
+class ITCFInstance:
+    def __init__(self):
+        self.test_state = jaxrts.PlasmaState(
+            ions=[jaxrts.Element("Be")],
+            Z_free=jnp.array([2]),
+            mass_density=jnp.array([3]) * ureg.gram / ureg.centimeter**3,
+            T_e=60 * ureg.electron_volt / ureg.k_B,
+        )
+        self.test_setup = jaxrts.Setup(
+            scattering_angle=ureg("30°"),
+            energy=ureg("6900 eV"),
+            measured_energy=ureg("6900 eV")
+            + jnp.linspace(-120, 120, 1000) * ureg.electron_volt,
+            instrument=jaxrts.instrument_function.Gaussian(ureg("1eV")),
+        )
 
-    test_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
-    test_state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
-    test_state["bound-free scattering"] = jaxrts.models.SchumacherImpulse()
-    test_state["free-bound scattering"] = jaxrts.models.DetailedBalance()
+        self.test_setup.correct_k_dispersion = False
+        self.test_state["ionic scattering"] = (
+            jaxrts.models.OnePotentialHNCIonFeat()
+        )
+        self.test_state["free-free scattering"] = (
+            jaxrts.models.RPA_DandreaFit()
+        )
+        self.test_state["bound-free scattering"] = (
+            jaxrts.models.SchumacherImpulse()
+        )
+        self.test_state["free-bound scattering"] = (
+            jaxrts.models.DetailedBalance()
+        )
 
     def get_T(self, raw=False, x=ureg("100eV")):
         S_ee = self.test_state.probe(self.test_setup)
@@ -43,121 +53,156 @@ class TestITCFInstance:
         )
         return T
 
-    def test_ITCFT_without_instument_function(self):
+
+@pytest.fixture
+def itcf():
+    return ITCFInstance()
+
+
+def test_ITCFT_without_instument_function(itcf):
+    """
+    This only works with a very narrow and syummetric instrument function. This
+    is expected.
+    """
+    assert jnpu.absolute(itcf.get_T(raw=True) - itcf.test_state.T_e) < ureg(
+        "2e3K"
+    )
+
+
+def test_ITCFT_with_instument_function(itcf):
+    assert jnpu.absolute(itcf.get_T(raw=False) - itcf.test_state.T_e) < ureg(
+        "2e3K"
+    )
+
+
+def test_ITCFT_stable_against_moving_energy_grid(itcf):
+    # We require small values for x. For big x, convergence should always
+    # reach the correct value
+    _x = jnp.array([10, 15, 20]) * ureg.electron_volt
+    T1 = (
+        jnp.array([itcf.get_T(x=x).m_as(ureg.kelvin) for x in _x])
+        * ureg.kelvin
+    )
+    itcf.test_setup.measured_energy += 0.1 * ureg.electron_volt
+    T2 = (
+        jnp.array([itcf.get_T(x=x).m_as(ureg.kelvin) for x in _x])
+        * ureg.kelvin
+    )
+    assert jnpu.max(jnpu.absolute(T1 - T2)) < ureg("1e3K")
+
+
+@pytest.mark.xfail(reason="The k-dispersion should violate detailed balance")
+def test_k_dispersion_conflicts_with_detailed_balance(itcf):
+    itcf.test_setup.correct_k_dispersion = True
+    assert jnpu.absolute(itcf.get_T(raw=True) - itcf.test_state.T_e) < ureg(
+        "2e3K"
+    )
+
+
+class SSFInstance:
+    def __init__(self):
+        self.test_state = jaxrts.PlasmaState(
+            ions=[jaxrts.Element("C")],
+            Z_free=jnp.array([3.65]),
+            mass_density=jnp.array([0.3]) * ureg.gram / ureg.centimeter**3,
+            T_e=100 * ureg.electron_volt / ureg.k_B,
+        )
+        self.test_setup = jaxrts.Setup(
+            scattering_angle=ureg("60°"),
+            energy=ureg("70 keV"),
+            measured_energy=ureg("70 keV")
+            + jnp.linspace(-15, 15, 6000) * ureg.kiloelectron_volt,
+            instrument=jaxrts.instrument_function.Gaussian(
+                fwhm=ureg("50eV")
+            ),
+        )
         self.test_setup.correct_k_dispersion = False
-        assert jnpu.absolute(
-            self.get_T(raw=True) - self.test_state.T_e
-        ) < ureg("2e3K")
 
-    def test_ITCFT_with_instument_function(self):
+        self.test_state["ion-ion Potential"] = (
+            jaxrts.hnc_potentials.DebyeHueckelPotential()
+        )
+        self.test_state["ionic scattering"] = (
+            jaxrts.models.OnePotentialHNCIonFeat()
+        )
+        self.test_state["free-free scattering"] = (
+            jaxrts.models.RPA_DandreaFit()
+        )
+        self.test_state["bound-free scattering"] = (
+            jaxrts.models.SchumacherImpulseFitRk()
+        )
+        self.test_state["free-bound scattering"] = (
+            jaxrts.models.DetailedBalance()
+        )
+
+
+@pytest.fixture
+def ssf():
+    return SSFInstance()
+
+
+def test_sff_to_unity_fully_ionized(ssf):
+    ssf.test_state.Z_free = ssf.test_state.Z_A
+    S_ee = ssf.test_state.probe(ssf.test_setup)
+    ssf_raw = jaxrts.analysis.ITCF_ssf(
+        S_ee, ssf.test_setup, ureg("14.8keV"), raw=True
+    )
+    ssf = jaxrts.analysis.ITCF_ssf(
+        S_ee, ssf.test_setup, ureg("14.8keV"), raw=False
+    )
+    assert jnpu.absolute(ssf_raw - 1) < 0.02
+    assert jnpu.absolute(ssf - 1) < 0.02
+
+
+def test_sff_to_unity_with_bound_free_contrib(ssf):
+    """
+    The SchumacherRkFit is using the fsum rule. Check that if that is
+    fulfilled, we reach the correct SFF limit.
+    """
+    ssf.test_state.Z_free = (
+        ssf.test_state.Z_A - jnp.ones(len(ssf.test_state.ions)) * 2
+    )
+    S_ee = ssf.test_state.probe(ssf.test_setup)
+    ssf_raw = jaxrts.analysis.ITCF_ssf(
+        S_ee, ssf.test_setup, ureg("14.8keV"), raw=True
+    )
+    ssf = jaxrts.analysis.ITCF_ssf(
+        S_ee, ssf.test_setup, ureg("14.8keV"), raw=False
+    )
+    assert jnpu.absolute(ssf_raw - 1) < 0.02
+    assert jnpu.absolute(ssf - 1) < 0.02
+
+
+class FsumRuleInstance:
+    def __init__(self):
+        self.test_state = jaxrts.PlasmaState(
+            ions=[jaxrts.Element("O")],
+            Z_free=jnp.array([4]),
+            mass_density=jnp.array([5]) * ureg.gram / ureg.centimeter**3,
+            T_e=60 * ureg.electron_volt / ureg.k_B,
+        )
+        self.test_setup = jaxrts.Setup(
+            scattering_angle=ureg("40°"),
+            energy=ureg("7.5 keV"),
+            measured_energy=ureg("7.5 keV")
+            + jnp.linspace(-2, 2, 5000) * ureg.kiloelectron_volt,
+            instrument=jaxrts.instrument_function.Gaussian(
+                fwhm=ureg("40eV")
+            ),
+        )
         self.test_setup.correct_k_dispersion = False
-        assert jnpu.absolute(
-            self.get_T(raw=False) - self.test_state.T_e
-        ) < ureg("2e3K")
 
-    def test_ITCFT_stable_against_moving_energy_grid(self):
-        # We require small values for x. For big x, convergence should always
-        # reach the correct value
-        _x = jnp.array([10, 15, 20]) * ureg.electron_volt
-        self.test_setup.correct_k_dispersion = False
-        T1 = (
-            jnp.array([self.get_T(x=x).m_as(ureg.kelvin) for x in _x])
-            * ureg.kelvin
+        self.test_state["ionic scattering"] = (
+            jaxrts.models.OnePotentialHNCIonFeat()
         )
-        self.test_setup.measured_energy += 0.1 * ureg.electron_volt
-        T2 = (
-            jnp.array([self.get_T(x=x).m_as(ureg.kelvin) for x in _x])
-            * ureg.kelvin
+        self.test_state["free-free scattering"] = (
+            jaxrts.models.RPA_DandreaFit()
         )
-        assert jnpu.max(jnpu.absolute(T1 - T2)) < ureg("1e3K")
-
-    @pytest.mark.xfail(
-        reason="The k-dispersion should violate detailed balance"
-    )
-    def test_k_dispersion_conflicts_with_detailed_balance(self):
-        self.test_setup.correct_k_dispersion = True
-        assert jnpu.absolute(
-            self.get_T(raw=True) - self.test_state.T_e
-        ) < ureg("2e3K")
-
-
-class TestSSFInstance:
-    # We use a fully ionized state, so that bound-free is not contributing
-    test_state = jaxrts.PlasmaState(
-        ions=[jaxrts.Element("C")],
-        Z_free=jnp.array([6]),
-        mass_density=jnp.array([0.3]) * ureg.gram / ureg.centimeter**3,
-        T_e=100 * ureg.electron_volt / ureg.k_B,
-    )
-    test_setup = jaxrts.Setup(
-        scattering_angle=ureg("60°"),
-        energy=ureg("70 keV"),
-        measured_energy=ureg("70 keV")
-        + jnp.linspace(-15, 15, 6000) * ureg.kiloelectron_volt,
-        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("50.0eV")),
-    )
-    test_setup.correct_k_dispersion = False
-
-    test_state["ion-ion Potential"] = (
-        jaxrts.hnc_potentials.DebyeHueckelPotential()
-    )
-    test_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
-    test_state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
-    test_state["bound-free scattering"] = (
-        jaxrts.models.SchumacherImpulseFitRk()
-    )
-    test_state["free-bound scattering"] = jaxrts.models.DetailedBalance()
-
-    def test_sff_to_unity_fully_ionized(self):
-        self.test_state.Z_free = self.test_state.Z_A
-        S_ee = self.test_state.probe(self.test_setup)
-        ssf_raw = jaxrts.analysis.ITCF_ssf(
-            S_ee, self.test_setup, ureg("14.8keV"), raw=True
+        self.test_state["bound-free scattering"] = (
+            jaxrts.models.SchumacherImpulse()
         )
-        ssf = jaxrts.analysis.ITCF_ssf(
-            S_ee, self.test_setup, ureg("14.8keV"), raw=False
+        self.test_state["free-bound scattering"] = (
+            jaxrts.models.DetailedBalance()
         )
-        assert jnpu.absolute(ssf_raw - 1) < 0.02
-        assert jnpu.absolute(ssf - 1) < 0.02
-
-    def test_sff_to_unity_with_bound_free_contrib(self):
-        """
-        The SchumacherRkFit is using the fsum rule. Check that if that is
-        fulfilled, we reach the correct SFF limit.
-        """
-        self.test_state.Z_free = (
-            self.test_state.Z_A - jnp.ones(len(self.test_state.ions)) * 2
-        )
-        S_ee = self.test_state.probe(self.test_setup)
-        ssf_raw = jaxrts.analysis.ITCF_ssf(
-            S_ee, self.test_setup, ureg("14.8keV"), raw=True
-        )
-        ssf = jaxrts.analysis.ITCF_ssf(
-            S_ee, self.test_setup, ureg("14.8keV"), raw=False
-        )
-        assert jnpu.absolute(ssf_raw - 1) < 0.02
-        assert jnpu.absolute(ssf - 1) < 0.02
-
-
-class TestFsumRuleInstance:
-    test_state = jaxrts.PlasmaState(
-        ions=[jaxrts.Element("O")],
-        Z_free=jnp.array([4]),
-        mass_density=jnp.array([5]) * ureg.gram / ureg.centimeter**3,
-        T_e=60 * ureg.electron_volt / ureg.k_B,
-    )
-    test_setup = jaxrts.Setup(
-        scattering_angle=ureg("40°"),
-        energy=ureg("7.5 keV"),
-        measured_energy=ureg("7.5 keV")
-        + jnp.linspace(-2, 2, 5000) * ureg.kiloelectron_volt,
-        instrument=jaxrts.instrument_function.Gaussian(fwhm=ureg("40.0eV")),
-    )
-
-    test_state["ionic scattering"] = jaxrts.models.OnePotentialHNCIonFeat()
-    test_state["free-free scattering"] = jaxrts.models.RPA_DandreaFit()
-    test_state["bound-free scattering"] = jaxrts.models.SchumacherImpulse()
-    test_state["free-bound scattering"] = jaxrts.models.DetailedBalance()
 
     def fsum(self, raw):
         S_ee = self.test_state.probe(self.test_setup)
@@ -175,29 +220,34 @@ class TestFsumRuleInstance:
             2 * ureg.electron_mass
         )
 
-    def test_fsum_rule_fully_ionized(self):
-        self.test_setup.correct_k_dispersion = False
-        # Set to fully ionized
-        self.test_state.Z_free = self.test_state.Z_A
-        assert (
-            jnpu.absolute(
-                (self.fsum(raw=False) - self.fsum_value) / self.fsum_value
-            )
-            < 0.005
-        )
 
-    @pytest.mark.xfail(
-        reason="The current implementation of bound-free scattering breaks the f-sum rule the fitting r_k is not provided"  # noqa: E501
+@pytest.fixture()
+def fsum():
+    return FsumRuleInstance()
+
+
+def test_fsum_rule_fully_ionized(fsum):
+    # Set to fully ionized
+    fsum.test_state.Z_free = fsum.test_state.Z_A
+    assert (
+        jnpu.absolute(
+            (fsum.fsum(raw=False) - fsum.fsum_value) / fsum.fsum_value
+        )
+        < 0.005
     )
-    def test_bound_free_breaks_fsum_rule(self):
-        self.test_setup.correct_k_dispersion = False
-        # Allow some bound-free contribution
-        self.test_state.Z_free = self.test_state.Z_A - jnp.ones(
-            len(self.test_state.ions)
+
+
+@pytest.mark.xfail(
+    reason="The current implementation of bound-free scattering breaks the f-sum rule the fitting r_k is not provided"  # noqa: E501
+)
+def test_bound_free_breaks_fsum_rule(fsum):
+    # Allow some bound-free contribution
+    fsum.test_state.Z_free = fsum.test_state.Z_A - jnp.ones(
+        len(fsum.test_state.ions)
+    )
+    assert (
+        jnpu.absolute(
+            (fsum.fsum(raw=False) - fsum.fsum_value) / fsum.fsum_value
         )
-        assert (
-            jnpu.absolute(
-                (self.fsum(raw=False) - self.fsum_value) / self.fsum_value
-            )
-            < 0.005
-        )
+        < 0.005
+    )
