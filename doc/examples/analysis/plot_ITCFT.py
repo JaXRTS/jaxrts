@@ -92,7 +92,7 @@ fig.tight_layout()
 fig, ax = plt.subplots()
 
 E_shift = -(setup.measured_energy - setup.energy)
-instrument = setup.instrument(E_shift / (1 * ureg.hbar))
+instrument = setup.instrument(-E_shift / (1 * ureg.hbar))
 for i, x in enumerate([20, 40, 80, 120]):
     minimizer = jaxrts.analysis.ITCF(
         S_ee, E_shift, instrument, E_shift, ureg(f"{x}eV"), raw=False

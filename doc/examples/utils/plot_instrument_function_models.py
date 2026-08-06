@@ -37,6 +37,13 @@ plt.plot(
 )
 plt.plot(
     E.m_as(ureg.electron_volt),
+    ifs.TwinGaussian(width / 2, width * 2)(w).m_as(
+        ureg.hbar / ureg.electron_volt
+    ),
+    label="TwinGaussian (w1 = w/2, w2 = 2w)",
+)
+plt.plot(
+    E.m_as(ureg.electron_volt),
     ifs.Lorentzian(width)(w).m_as(ureg.hbar / ureg.electron_volt),
     label="Lorentzian Model",
 )
