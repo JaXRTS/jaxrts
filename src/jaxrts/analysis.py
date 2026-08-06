@@ -244,7 +244,7 @@ def ITCFT_grid(
     # Note the sign, here! Lower energy in a spectrum is a positive energy
     # shift.
     E_shift = -(setup.measured_energy - setup.energy)
-    instrument = setup.instrument(E_shift / (1 * ureg.hbar))
+    instrument = setup.instrument(-E_shift / (1 * ureg.hbar))
     return _ITCFT_grid(S_ee_conv, tau, E_shift, instrument, E_shift, E_cut)
 
 
@@ -264,7 +264,7 @@ def ITCF_from_setup(
     # Note the sign, here! Lower energy in a spectrum is a positive energy
     # shift.
     E_shift = -(setup.measured_energy - setup.energy)
-    instrument = setup.instrument(E_shift / (1 * ureg.hbar))
+    instrument = setup.instrument(-E_shift / (1 * ureg.hbar))
     return ITCF(S_ee_conv, E_shift, instrument, E_shift, E_cut, raw)
 
 

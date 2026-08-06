@@ -24,8 +24,10 @@ class ITCFInstance:
             scattering_angle=ureg("30°"),
             energy=ureg("6900 eV"),
             measured_energy=ureg("6900 eV")
-            + jnp.linspace(-120, 120, 1000) * ureg.electron_volt,
-            instrument=jaxrts.instrument_function.Gaussian(ureg("1eV")),
+            + jnp.linspace(-170, 170, 1000) * ureg.electron_volt,
+            instrument=jaxrts.instrument_function.TwinGaussian(
+                fwhm1=ureg("2eV"), fwhm2=ureg("4eV")
+            ),
         )
 
         self.test_setup.correct_k_dispersion = False
@@ -42,7 +44,7 @@ class ITCFInstance:
             jaxrts.models.DetailedBalance()
         )
 
-    def get_T(self, raw=False, x=ureg("100eV")):
+    def get_T(self, raw=False, x=ureg("150eV")):
         S_ee = self.test_state.probe(self.test_setup)
         T = jaxrts.analysis.ITCFT(
             S_ee,
@@ -64,6 +66,9 @@ def test_ITCFT_without_instument_function(itcf):
     This only works with a very narrow and syummetric instrument function. This
     is expected.
     """
+    itcf.test_setup.instrument = jaxrts.instrument_function.Gaussian(
+        ureg("1eV")
+    )
     assert jnpu.absolute(itcf.get_T(raw=True) - itcf.test_state.T_e) < ureg(
         "2e3K"
     )
@@ -112,8 +117,8 @@ class SSFInstance:
             energy=ureg("70 keV"),
             measured_energy=ureg("70 keV")
             + jnp.linspace(-15, 15, 6000) * ureg.kiloelectron_volt,
-            instrument=jaxrts.instrument_function.Gaussian(
-                fwhm=ureg("50eV")
+            instrument=jaxrts.instrument_function.TwinGaussian(
+                fwhm1=ureg("40eV"), fwhm2=ureg("60eV")
             ),
         )
         self.test_setup.correct_k_dispersion = False
@@ -185,8 +190,8 @@ class FsumRuleInstance:
             energy=ureg("7.5 keV"),
             measured_energy=ureg("7.5 keV")
             + jnp.linspace(-2, 2, 5000) * ureg.kiloelectron_volt,
-            instrument=jaxrts.instrument_function.Gaussian(
-                fwhm=ureg("40eV")
+            instrument=jaxrts.instrument_function.TwinGaussian(
+                fwhm1=ureg("30eV"), fwhm2=ureg("50eV")
             ),
         )
         self.test_setup.correct_k_dispersion = False
