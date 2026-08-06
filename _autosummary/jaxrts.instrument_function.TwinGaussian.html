@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jaxrts.instrument_function.InstrumentFunction.__init__ &mdash; jaxrts  documentation</title>
+  <title>jaxrts.instrument_function.TwinGaussian &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
@@ -26,8 +26,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="jaxrts.instrument_function.Lorentzian" href="jaxrts.instrument_function.Lorentzian.html" />
-    <link rel="prev" title="jaxrts.instrument_function.InstrumentFunction" href="jaxrts.instrument_function.InstrumentFunction.html" /> 
+    <link rel="next" title="jaxrts.instrument_function.TwinGaussian.__init__" href="jaxrts.instrument_function.TwinGaussian.__init__.html" />
+    <link rel="prev" title="jaxrts.instrument_function.SuperGaussian.fwhm" href="jaxrts.instrument_function.SuperGaussian.fwhm.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -80,10 +80,10 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.instrument_function.FromArray.html">jaxrts.instrument_function.FromArray</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.instrument_function.FromCallable.html">jaxrts.instrument_function.FromCallable</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.instrument_function.Gaussian.html">jaxrts.instrument_function.Gaussian</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="jaxrts.instrument_function.InstrumentFunction.html">jaxrts.instrument_function.InstrumentFunction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.instrument_function.InstrumentFunction.html">jaxrts.instrument_function.InstrumentFunction</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.instrument_function.Lorentzian.html">jaxrts.instrument_function.Lorentzian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.instrument_function.SuperGaussian.html">jaxrts.instrument_function.SuperGaussian</a></li>
-<li class="toctree-l4"><a class="reference internal" href="jaxrts.instrument_function.TwinGaussian.html">jaxrts.instrument_function.TwinGaussian</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">jaxrts.instrument_function.TwinGaussian</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="jaxrts.ion_feature.html">jaxrts.ion_feature</a></li>
@@ -126,10 +126,9 @@
           <li class="breadcrumb-item"><a href="../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
           <li class="breadcrumb-item"><a href="jaxrts.html">jaxrts</a></li>
           <li class="breadcrumb-item"><a href="jaxrts.instrument_function.html">jaxrts.instrument_function</a></li>
-          <li class="breadcrumb-item"><a href="jaxrts.instrument_function.InstrumentFunction.html">jaxrts.instrument_function.InstrumentFunction</a></li>
-      <li class="breadcrumb-item active">jaxrts.instrument_function.InstrumentFunction.__init__</li>
+      <li class="breadcrumb-item active">jaxrts.instrument_function.TwinGaussian</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/jaxrts.instrument_function.InstrumentFunction.__init__.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/jaxrts.instrument_function.TwinGaussian.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -137,21 +136,59 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="jaxrts-instrument-function-instrumentfunction-init">
-<h1>jaxrts.instrument_function.InstrumentFunction.__init__<a class="headerlink" href="#jaxrts-instrument-function-instrumentfunction-init" title="Link to this heading"></a></h1>
-<dl class="py method">
-<dt class="sig sig-object py" id="jaxrts.instrument_function.InstrumentFunction.__init__">
-<span class="sig-prename descclassname"><span class="pre">InstrumentFunction.</span></span><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#jaxrts.instrument_function.InstrumentFunction.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+  <section id="jaxrts-instrument-function-twingaussian">
+<h1>jaxrts.instrument_function.TwinGaussian<a class="headerlink" href="#jaxrts-instrument-function-twingaussian" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="jaxrts.instrument_function.TwinGaussian">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jaxrts.instrument_function.</span></span><span class="sig-name descname"><span class="pre">TwinGaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/instrument_function.html#TwinGaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.instrument_function.TwinGaussian" title="Link to this definition"></a></dt>
+<dd><p>An instrument function of two Gaussians with different width for
+frequency shifts below and above zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sigma1</strong> (<em>Quantity</em><em>, </em><em>optional</em>) – The parameter sigma, the standard deviation of the gaussian for
+frequency shifts below 0 Hz. Must be given in units of energy or
+frequency.</p></li>
+<li><p><strong>fwhm1</strong> (<em>Quantity</em><em>, </em><em>optional</em>) – The full width half maximum of the distribution for frequency
+shifts below 0 Hz.</p></li>
+<li><p><strong>sigma2</strong> (<em>Quantity</em><em>, </em><em>optional</em>) – The parameter sigma, the standard deviation of the gaussian for
+frequency shifts above 0 Hz. Must be given in units of energy or
+frequency.</p></li>
+<li><p><strong>fwhm2</strong> (<em>Quantity</em><em>, </em><em>optional</em>) – The full width half maximum of the distribution for frequency
+shifts above 0 Hz.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError if neither sigma1 nor fwhm1 are given.</strong> – </p></li>
+<li><p><strong>TypeError if neither sigma2 nor fwhm2 are given.</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.instrument_function.TwinGaussian.__init__.html#jaxrts.instrument_function.TwinGaussian.__init__" title="jaxrts.instrument_function.TwinGaussian.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([sigma1, sigma2, fwhm1, fwhm2])</p></td>
+<td><p>An instrument function of two Gaussians with different width for frequency shifts below and above zero.</p></td>
+</tr>
+</tbody>
+</table>
+<section id="examples-using-jaxrts-instrument-function-twingaussian">
+<span id="sphx-glr-backref-jaxrts-instrument-function-twingaussian"></span><h2>Examples using <code class="docutils literal notranslate"><span class="pre">jaxrts.instrument_function.TwinGaussian</span></code><a class="headerlink" href="#examples-using-jaxrts-instrument-function-twingaussian" title="Link to this heading"></a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="To include an instrument function in a :pyjaxrts.Setup, we require it to be Callable that takes..."><img alt="" src="../_images/sphx_glr_plot_instrument_function_models_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/utils/plot_instrument_function_models.html#sphx-glr-gen-examples-utils-plot-instrument-function-models-py"><span class="std std-ref">All available instrument function models.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">All available instrument function models.</div>
+</div></div></section>
+</dd></dl>
 
-<span class="target" id="sphx-glr-backref-jaxrts-instrument-function-instrumentfunction-init"></span></section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="jaxrts.instrument_function.InstrumentFunction.html" class="btn btn-neutral float-left" title="jaxrts.instrument_function.InstrumentFunction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="jaxrts.instrument_function.Lorentzian.html" class="btn btn-neutral float-right" title="jaxrts.instrument_function.Lorentzian" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="jaxrts.instrument_function.SuperGaussian.fwhm.html" class="btn btn-neutral float-left" title="jaxrts.instrument_function.SuperGaussian.fwhm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jaxrts.instrument_function.TwinGaussian.__init__.html" class="btn btn-neutral float-right" title="jaxrts.instrument_function.TwinGaussian.__init__" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -163,6 +163,13 @@ function has to be normalized to unify from -infinity to +infinity.</p>
 <span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
     <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
+    <a href="../../_autosummary/jaxrts.instrument_function.TwinGaussian.html#jaxrts.instrument_function.TwinGaussian" title="jaxrts.instrument_function.TwinGaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">ifs</span><span class="o">.</span><span class="n">TwinGaussian</span></a><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">width</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
+        <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
+    <span class="p">),</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;TwinGaussian (w1 = w/2, w2 = 2w)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
     <a href="../../_autosummary/jaxrts.instrument_function.Lorentzian.html#jaxrts.instrument_function.Lorentzian" title="jaxrts.instrument_function.Lorentzian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">ifs</span><span class="o">.</span><span class="n">Lorentzian</span></a><span class="p">(</span><span class="n">width</span><span class="p">)(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Lorentzian Model&quot;</span><span class="p">,</span>
 <span class="p">)</span>
@@ -175,7 +182,7 @@ function has to be normalized to unify from -infinity to +infinity.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.293 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.638 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-utils-plot-instrument-function-models-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/dcfe643dc76f75fe7002c290840f9d24/plot_instrument_function_models.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_instrument_function_models.ipynb</span></code></a></p>

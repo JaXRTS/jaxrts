@@ -352,7 +352,7 @@
     <span class="c1"># Note the sign, here! Lower energy in a spectrum is a positive energy</span>
     <span class="c1"># shift.</span>
     <span class="n">E_shift</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span> <span class="o">-</span> <span class="n">setup</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span>
-    <span class="n">instrument</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">instrument</span><span class="p">(</span><span class="n">E_shift</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">))</span>
+    <span class="n">instrument</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">instrument</span><span class="p">(</span><span class="o">-</span><span class="n">E_shift</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">_ITCFT_grid</span><span class="p">(</span><span class="n">S_ee_conv</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">E_shift</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> <span class="n">E_shift</span><span class="p">,</span> <span class="n">E_cut</span><span class="p">)</span></div>
 
 
@@ -375,7 +375,7 @@
     <span class="c1"># Note the sign, here! Lower energy in a spectrum is a positive energy</span>
     <span class="c1"># shift.</span>
     <span class="n">E_shift</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span> <span class="o">-</span> <span class="n">setup</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span>
-    <span class="n">instrument</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">instrument</span><span class="p">(</span><span class="n">E_shift</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">))</span>
+    <span class="n">instrument</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">instrument</span><span class="p">(</span><span class="o">-</span><span class="n">E_shift</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">ITCF</span><span class="p">(</span><span class="n">S_ee_conv</span><span class="p">,</span> <span class="n">E_shift</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> <span class="n">E_shift</span><span class="p">,</span> <span class="n">E_cut</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span></div>
 
 

@@ -198,6 +198,89 @@
 
 
 
+<div class="viewcode-block" id="TwinGaussian">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.instrument_function.TwinGaussian.html#jaxrts.instrument_function.TwinGaussian">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TwinGaussian</span><span class="p">(</span><span class="n">InstrumentFunction</span><span class="p">):</span>
+<div class="viewcode-block" id="TwinGaussian.__init__">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.instrument_function.TwinGaussian.__init__.html#jaxrts.instrument_function.TwinGaussian.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">sigma1</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sigma2</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fwhm1</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fwhm2</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        An instrument function of two Gaussians with different width for</span>
+<span class="sd">        frequency shifts below and above zero.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sigma1: Quantity, optional</span>
+<span class="sd">            The parameter sigma, the standard deviation of the gaussian for</span>
+<span class="sd">            frequency shifts below 0 Hz. Must be given in units of energy or</span>
+<span class="sd">            frequency.</span>
+<span class="sd">        fwhm1: Quantity, optional</span>
+<span class="sd">            The full width half maximum of the distribution for frequency</span>
+<span class="sd">            shifts below 0 Hz.</span>
+<span class="sd">        sigma2: Quantity, optional</span>
+<span class="sd">            The parameter sigma, the standard deviation of the gaussian for</span>
+<span class="sd">            frequency shifts above 0 Hz. Must be given in units of energy or</span>
+<span class="sd">            frequency.</span>
+<span class="sd">        fwhm2: Quantity, optional</span>
+<span class="sd">            The full width half maximum of the distribution for frequency</span>
+<span class="sd">            shifts above 0 Hz.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError if neither ``sigma1`` nor ``fwhm1`` are given.</span>
+<span class="sd">        TypeError if neither ``sigma2`` nor ``fwhm2`` are given.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sigma1</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fwhm1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Either sigma1 or fwhm1 have to be supplied.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fwhm1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sigma1</span> <span class="o">=</span> <span class="n">fwhm1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">sigma2</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fwhm2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Either sigma2 or fwhm2 have to be supplied.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fwhm2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sigma2</span> <span class="o">=</span> <span class="n">fwhm2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">sigma1</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s2">&quot;[energy]&quot;</span><span class="p">):</span>
+            <span class="n">sigma1</span> <span class="o">=</span> <span class="n">sigma1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sigma2</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s2">&quot;[energy]&quot;</span><span class="p">):</span>
+            <span class="n">sigma2</span> <span class="o">=</span> <span class="n">sigma2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma1</span> <span class="o">=</span> <span class="n">sigma1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma2</span> <span class="o">=</span> <span class="n">sigma2</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
+        <span class="n">gaussian1</span> <span class="o">=</span> <span class="n">instrument_gaussian</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma1</span><span class="p">)</span>
+        <span class="n">norm1</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">gaussian2</span> <span class="o">=</span> <span class="n">instrument_gaussian</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma2</span><span class="p">)</span>
+        <span class="n">norm2</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">omega</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">gaussian1</span> <span class="o">*</span> <span class="n">norm1</span><span class="p">,</span> <span class="n">gaussian2</span> <span class="o">*</span> <span class="n">norm2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="mf">0.5</span> <span class="o">*</span> <span class="n">norm1</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">norm2</span>
+        <span class="p">)</span>
+
+    <span class="n">_children_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;sigma1&quot;</span><span class="p">,</span> <span class="s2">&quot;sigma2&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma2</span><span class="p">)</span>
+        <span class="n">aux_data</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># static values</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="p">(</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">sigma1</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">sigma2</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">children</span>
+
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
+
 <div class="viewcode-block" id="SuperGaussian">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.instrument_function.SuperGaussian.html#jaxrts.instrument_function.SuperGaussian">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SuperGaussian</span><span class="p">(</span><span class="n">InstrumentFunction</span><span class="p">):</span>

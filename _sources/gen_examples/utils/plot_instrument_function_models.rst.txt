@@ -25,7 +25,7 @@ To include an instrument function in a :py:class:`jaxrts.Setup`, we require it
 to be Callable that takes only one argument, the shift in frequency space. The
 function has to be normalized to unify from -infinity to +infinity.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-50
+.. GENERATED FROM PYTHON SOURCE LINES 9-57
 
 
 
@@ -71,6 +71,13 @@ function has to be normalized to unify from -infinity to +infinity.
     )
     plt.plot(
         E.m_as(ureg.electron_volt),
+        ifs.TwinGaussian(width / 2, width * 2)(w).m_as(
+            ureg.hbar / ureg.electron_volt
+        ),
+        label="TwinGaussian (w1 = w/2, w2 = 2w)",
+    )
+    plt.plot(
+        E.m_as(ureg.electron_volt),
         ifs.Lorentzian(width)(w).m_as(ureg.hbar / ureg.electron_volt),
         label="Lorentzian Model",
     )
@@ -85,7 +92,7 @@ function has to be normalized to unify from -infinity to +infinity.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 5.293 seconds)
+   **Total running time of the script:** (0 minutes 5.638 seconds)
 
 
 .. _sphx_glr_download_gen_examples_utils_plot_instrument_function_models.py:
