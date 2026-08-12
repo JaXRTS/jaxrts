@@ -83,7 +83,7 @@ This `-e` flag installs the module in 'edit' mode, i.e., changes you made are av
 
 ## Getting started
 
-For just getting started, we provide a jupyter notebook that you can [![open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jaxrts/jaxrts/blob/main/notebooks/00-jaxrts_intro.ipynb).
+For just getting started, we provide a jupyter notebook that you can [![open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jaxrts/jaxrts/blob/main/notebooks/00-jaxrts_intro.ipynb) or [![open in Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jaxrts/jaxrts/HEAD?urlpath=%2Fdoc%2Ftree%2Fnotebooks%2F00-jaxrts_intro.ipynb).
 
 The `jaxrts` module provides a user with two classes, a `Setup` and a `PlasmaState`.
 While the former specifies the probing energy and measurement grid, scattering angle and instrument function, the latter defines the state to be probed, and allows for adding `Models` as keys to the plasma state.
