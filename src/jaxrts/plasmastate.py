@@ -70,9 +70,9 @@ class PlasmaState:
             len(ions) == len(mass_density)
         ), "WARNING: Input parameters should be the same shape as <ions>!"
         if T_i is not None:
-            assert len(ions) == len(
-                T_i
-            ), "WARNING: Input parameters should be the same shape as <ions>!"
+            assert len(ions) == len(T_i), (
+                "WARNING: Input parameters should be the same shape as <ions>!"
+            )
 
         #: A list of :py:class:`jaxrts.elements.Element` objects that define
         #: the constituents of the plasma.
@@ -322,6 +322,13 @@ Models attached
         ) * (1 * ureg.atomic_mass_constant)
 
     @property
+    def T_ratio(self) -> Quantity:
+        """
+        Ratio of ion- to electron temperature
+        """
+        return self.T_i / self.T_i
+
+    @property
     def n_i(self):
         """The ion number density."""
         return (self.mass_density / self.atomic_masses).to_base_units()
@@ -431,9 +438,9 @@ Models attached
         if isinstance(kind, str):
             kind = [kind]
         for par in kind:
-            assert (par == "e-") or (
-                par in self.ions
-            ), "Kind must be one of the ion species or an electron (e-)!"
+            assert (par == "e-") or (par in self.ions), (
+                "Kind must be one of the ion species or an electron (e-)!"
+            )
             if par == "e-":
                 wavelengths.append(
                     (

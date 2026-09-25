@@ -27,6 +27,7 @@ from . import (
     setup,
     static_structure_factors,
     units,
+    weissker_interpolator,
 )
 from .collections import (
     get_all_instrument_functions,
@@ -66,6 +67,7 @@ __all__ = [
     "static_structure_factors",
     "units",
     "ureg",
+    "weissker_interpolator",
 ]
 
 
