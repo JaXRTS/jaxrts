@@ -31,6 +31,7 @@ jaxrts.plasmastate.PlasmaState
       :toctree: 
    
       ~PlasmaState.T_F
+      ~PlasmaState.T_ratio
       ~PlasmaState.Teff_e
       ~PlasmaState.Z_A
       ~PlasmaState.Z_core

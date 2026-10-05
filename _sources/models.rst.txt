@@ -64,6 +64,7 @@ The ionic (elastic) scattering component, :math:`S_{ee}^{\text{el}}(k, \omega)`,
     jaxrts.models.FixedSii
     jaxrts.models.Gregori2003IonFeat
     jaxrts.models.Gregori2006IonFeat
+    jaxrts.models.GridInterpolationSii
     jaxrts.models.Neglect
     jaxrts.models.OnePotentialHNCIonFeat
     jaxrts.models.PeakCollection
@@ -169,6 +170,7 @@ Screening refers to the reduction of the effective interaction between charged p
     jaxrts.models.FiniteWavelengthScreening
     jaxrts.models.Gregori2004Screening
     jaxrts.models.GregoriCHSScreening
+    jaxrts.models.GridInterpolation
     jaxrts.models.LinearResponseScreening
     jaxrts.models.LinearResponseScreeningGericke2010
 
@@ -255,6 +257,7 @@ Form factors describe how the spatial distribution of charge within an atom or i
     :recursive:
 
     jaxrts.models.FormFactorLowering
+    jaxrts.models.GridInterpolation
     jaxrts.models.PaulingFormFactors
 
 

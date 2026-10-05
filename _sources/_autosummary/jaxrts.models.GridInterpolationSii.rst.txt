@@ -1,0 +1,46 @@
+jaxrts.models.GridInterpolationSii
+==================================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: GridInterpolationSii
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~GridInterpolationSii.Rayleigh_weight
+      ~GridInterpolationSii.S_ii
+      ~GridInterpolationSii.S_ii_on_grid
+      ~GridInterpolationSii.__init__
+      ~GridInterpolationSii.check
+      ~GridInterpolationSii.check_supports_S_ii_grid
+      ~GridInterpolationSii.citation
+      ~GridInterpolationSii.evaluate
+      ~GridInterpolationSii.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~GridInterpolationSii.allowed_keys
+      ~GridInterpolationSii.cite_keys
+      ~GridInterpolationSii.k
+      ~GridInterpolationSii.supports_S_ii_grid
+      ~GridInterpolationSii.interpolator
+      ~GridInterpolationSii.variable_names
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.GridInterpolationSii:
+
+   .. minigallery:: jaxrts.models.GridInterpolationSii
+       :add-heading:

@@ -39,16 +39,16 @@ Ogata Fourier transform
       f = lambda r: 1 / r * (np.exp(-r))  # noqa: E731
     /home/runner/work/jaxrts/jaxrts/doc/examples/utils/plot_ogata.py:84: RuntimeWarning: invalid value encountered in multiply
       r, fvals * np.sqrt(rvals), bounds_error=False, fill_value=(np.nan, 0.0)
-    t= 1.1238501071929932 s
-    t= 0.0068318843841552734 s
-    t= 0.006035804748535156 s
-    t= 0.005898714065551758 s
-    t= 0.005898237228393555 s
-    t= 0.00570368766784668 s
-    t= 0.0055963993072509766 s
-    t= 0.005535125732421875 s
-    t= 0.005560636520385742 s
-    t= 0.005555152893066406 s
+    t= 1.0822112560272217 s
+    t= 0.006898164749145508 s
+    t= 0.005897998809814453 s
+    t= 0.0053882598876953125 s
+    t= 0.0054743289947509766 s
+    t= 0.00523686408996582 s
+    t= 0.005577802658081055 s
+    t= 0.005486011505126953 s
+    t= 0.005785465240478516 s
+    t= 0.005853891372680664 s
 
 
 
@@ -222,7 +222,7 @@ Ogata Fourier transform
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.958 seconds)
+   **Total running time of the script:** (0 minutes 1.822 seconds)
 
 
 .. _sphx_glr_download_gen_examples_utils_plot_ogata.py:

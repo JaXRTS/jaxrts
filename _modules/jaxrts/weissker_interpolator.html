@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jaxrts.weissker_interpolator &mdash; jaxrts  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            jaxrts
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installing.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gen_examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development and Poetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_overview.html">The <code class="docutils literal notranslate"><span class="pre">jaxrts</span></code> module</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/jaxrts/jaxrts">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://doi.org/10.1016/j.cpc.2026.110173">The Paper</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jaxrts</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jaxrts.weissker_interpolator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jaxrts.weissker_interpolator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Interpolator, according to :cite:`Weissker.2009`, currently targeted at S_ii.</span>
+
+<span class="sd">Since S_ii does not obey a sum-rule, the save the integral for each grid point</span>
+<span class="sd">and interpolate to the overall signal strength.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">quadax</span><span class="w"> </span><span class="kn">import</span> <span class="n">cumulative_trapezoid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
+
+
+<div class="viewcode-block" id="AutoNormInterpolator">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.weissker_interpolator.AutoNormInterpolator.html#jaxrts.weissker_interpolator.AutoNormInterpolator">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">register_pytree_node_class</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AutoNormInterpolator</span><span class="p">:</span>
+<div class="viewcode-block" id="AutoNormInterpolator.__init__">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.weissker_interpolator.AutoNormInterpolator.__init__.html#jaxrts.weissker_interpolator.AutoNormInterpolator.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">array</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">free_variables</span><span class="p">,</span>
+        <span class="n">grid_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates over a grid with the following shape</span>
+<span class="sd">        [*vectorized_axis, k, *interpolation_variables]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># define some shapes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_shape</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">free_variables</span><span class="p">)]</span>
+        <span class="n">free_axis</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">free_variables</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">units</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables_units</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">units</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">free_variables</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">v</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">free_variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables_units</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minima</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">min</span><span class="p">(</span>
+            <span class="n">array</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_vec_axis</span><span class="p">)</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_vec_axis</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">array</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minima</span><span class="p">[</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_vec_axis</span> <span class="o">*</span> <span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">s_</span><span class="p">[:]],</span> <span class="o">*</span><span class="n">free_axis</span> <span class="o">*</span> <span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="p">]</span>
+
+        <span class="n">integral</span> <span class="o">=</span> <span class="n">cumulative_trapezoid</span><span class="p">(</span>
+            <span class="n">array</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k_axis</span><span class="p">,</span>
+            <span class="n">initial</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">integral</span><span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_vec_axis</span> <span class="o">*</span> <span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">s_</span><span class="p">[:]],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">integral</span> <span class="o">/=</span> <span class="n">norm</span><span class="p">[</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_vec_axis</span> <span class="o">*</span> <span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">s_</span><span class="p">[:]],</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:</span>
+        <span class="p">]</span>
+
+        <span class="n">flipped_integral</span> <span class="o">=</span> <span class="n">_invert_k_axis</span><span class="p">(</span>
+            <span class="n">integral</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">grid_length</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_axis</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span> <span class="o">=</span> <span class="n">VRegularGridLinearInterpolator</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="n">flipped_integral</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_interpolator</span> <span class="o">=</span> <span class="n">VRegularGridLinearInterpolator</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="n">norm</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">number_of_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">number_of_vec_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">k_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="n">_point</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables_units</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">flipped_interpolation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span><span class="p">(</span><span class="n">_point</span><span class="p">)</span>
+        <span class="n">interpolation</span> <span class="o">=</span> <span class="n">_invert_k_axis</span><span class="p">(</span>
+            <span class="n">flipped_interpolation</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">,</span>
+            <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flipped_interpolation</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">k_axis</span><span class="p">]),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k_axis</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_interpolator</span><span class="p">(</span><span class="n">_point</span><span class="p">)</span>
+        <span class="n">interp</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">interpolation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k_axis</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">interp</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">norm</span>
+                <span class="o">/</span> <span class="n">interpolation</span><span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_vec_axis</span> <span class="o">*</span> <span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">s_</span><span class="p">[:]],</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_vec_axis</span> <span class="o">*</span> <span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">s_</span><span class="p">[:]],</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="c1"># Constant values would result in nan. Fix this here.</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">norm</span><span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_vec_axis</span> <span class="o">*</span> <span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">s_</span><span class="p">[:]],</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">out</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minima</span><span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_vec_axis</span> <span class="o">*</span> <span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">s_</span><span class="p">[:]],</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+<div class="viewcode-block" id="AutoNormInterpolator.tree_flatten">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.weissker_interpolator.AutoNormInterpolator.tree_flatten.html#jaxrts.weissker_interpolator.AutoNormInterpolator.tree_flatten">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">minima</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm_interpolator</span><span class="p">,</span>
+        <span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables_units</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AutoNormInterpolator.tree_unflatten">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.weissker_interpolator.AutoNormInterpolator.tree_unflatten.html#jaxrts.weissker_interpolator.AutoNormInterpolator.tree_unflatten">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="p">(</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">k</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">minima</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">interpolator</span><span class="p">,</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">norm_interpolator</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">children</span>
+        <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">variables_units</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span> <span class="o">=</span> <span class="n">aux_data</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VRegularGridLinearInterpolator">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.weissker_interpolator.VRegularGridLinearInterpolator.html#jaxrts.weissker_interpolator.VRegularGridLinearInterpolator">[docs]</a>
+<span class="nd">@jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">register_pytree_node_class</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">VRegularGridLinearInterpolator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vectorized RegularGridInterpolator, with a linear interpolation:</span>
+<span class="sd">    Interpolated linarly over the last indices of `values`, i.e.,</span>
+<span class="sd">    `values.shape` should be `[*vectorized_dims.shape, *points.shape]`, and the</span>
+<span class="sd">    output of a call will be of shape vectorized_dims.shape.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VRegularGridLinearInterpolator.__init__">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.weissker_interpolator.VRegularGridLinearInterpolator.__init__.html#jaxrts.weissker_interpolator.VRegularGridLinearInterpolator.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span></div>
+
+
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">lead</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="n">ndim</span>  <span class="c1"># number of vectorized channel axes</span>
+
+        <span class="c1"># type casting is required to ensure cube only gets the same type</span>
+        <span class="n">lo</span><span class="p">,</span> <span class="n">w_vecs</span><span class="p">,</span> <span class="n">sizes</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># static (Python int), safe to branch on</span>
+            <span class="c1"># If there is only one grid point per dimension, return only this</span>
+            <span class="c1"># function.</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                    <span class="n">jnp</span><span class="o">.</span><span class="n">int32</span>
+                <span class="p">)</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="mi">1</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">])</span>
+                <span class="n">sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">lo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">w_vecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">w_vecs</span>
+        <span class="p">)</span>
+
+        <span class="n">zeros</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">lead</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">zeros</span><span class="p">)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">lo</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="n">lead</span><span class="p">]</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span>
+        <span class="n">cube</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">ndim</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VRegularGridLinearInterpolator.tree_flatten">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.weissker_interpolator.VRegularGridLinearInterpolator.tree_flatten.html#jaxrts.weissker_interpolator.VRegularGridLinearInterpolator.tree_flatten">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="VRegularGridLinearInterpolator.tree_unflatten">
+<a class="viewcode-back" href="../../_autosummary/jaxrts.weissker_interpolator.VRegularGridLinearInterpolator.tree_unflatten.html#jaxrts.weissker_interpolator.VRegularGridLinearInterpolator.tree_unflatten">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">children</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_invert_k_axis</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Invert the array along the axis by interpolating to the values x onto grid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Move the axis to invert to the end</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">inverse_interp</span><span class="p">(</span><span class="n">y_curve</span><span class="p">):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">y_curve</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">y_curve</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">y_curve</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">y_curve</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">x0</span> <span class="o">+</span> <span class="p">(</span><span class="n">grid</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span><span class="n">inverse_interp</span><span class="p">)(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="c1"># Restore original order</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2025, J. Lütgert, S. Schumacher, and the jaxrts contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

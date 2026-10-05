@@ -1,0 +1,42 @@
+jaxrts.models.GridInterpolation
+===============================
+
+.. currentmodule:: jaxrts.models
+
+.. autoclass:: GridInterpolation
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~GridInterpolation.__init__
+      ~GridInterpolation.check
+      ~GridInterpolation.citation
+      ~GridInterpolation.evaluate
+      ~GridInterpolation.interpolate_to_grid
+      ~GridInterpolation.prepare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~GridInterpolation.allowed_keys
+      ~GridInterpolation.cite_keys
+      ~GridInterpolation.k
+      ~GridInterpolation.interpolator
+      ~GridInterpolation.variable_names
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.models.GridInterpolation:
+
+   .. minigallery:: jaxrts.models.GridInterpolation
+       :add-heading:

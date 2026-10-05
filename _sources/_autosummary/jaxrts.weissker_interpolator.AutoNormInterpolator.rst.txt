@@ -1,0 +1,37 @@
+jaxrts.weissker\_interpolator.AutoNormInterpolator
+==================================================
+
+.. currentmodule:: jaxrts.weissker_interpolator
+
+.. autoclass:: AutoNormInterpolator
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~AutoNormInterpolator.__init__
+      ~AutoNormInterpolator.tree_flatten
+      ~AutoNormInterpolator.tree_unflatten
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: 
+   
+      ~AutoNormInterpolator.k_axis
+      ~AutoNormInterpolator.number_of_variables
+      ~AutoNormInterpolator.number_of_vec_axis
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.weissker_interpolator.AutoNormInterpolator:
+
+   .. minigallery:: jaxrts.weissker_interpolator.AutoNormInterpolator
+       :add-heading:

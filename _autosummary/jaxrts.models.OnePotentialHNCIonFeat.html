@@ -65,6 +65,7 @@
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.FixedSii.html">jaxrts.models.FixedSii</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2003IonFeat.html">jaxrts.models.Gregori2003IonFeat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Gregori2006IonFeat.html">jaxrts.models.Gregori2006IonFeat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jaxrts.models.GridInterpolationSii.html">jaxrts.models.GridInterpolationSii</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.Neglect.html">jaxrts.models.Neglect</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">jaxrts.models.OnePotentialHNCIonFeat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jaxrts.models.PeakCollection.html">jaxrts.models.PeakCollection</a></li>
@@ -142,7 +143,7 @@ electron-contributions. Hence, screening is not included, automatically,
 but has to be provided as an additional <cite>screening</cite>. For reasonable
 results, the ‘ion-ion Potential’ should account for the fact that the
 electrons are not included in the HNC scheme. See, e.g.,
-<span class="bibtex-citation" id="id1">[<a class="reference internal" href="../bibliography.html#id103" title="K. Wünsch, P. Hilse, M. Schlanges, and D. O. Gericke. Structure of strongly coupled multicomponent plasmas. Physical Review E, 5 2008. doi:10.1103/physreve.77.056404.">Wünsch et al., 2008</a>]</span>.</p>
+<span class="bibtex-citation" id="id1">[<a class="reference internal" href="../bibliography.html#id104" title="K. Wünsch, P. Hilse, M. Schlanges, and D. O. Gericke. Structure of strongly coupled multicomponent plasmas. Physical Review E, 5 2008. doi:10.1103/physreve.77.056404.">Wünsch et al., 2008</a>]</span>.</p>
 <p>Requires an ‘ion-ion Potential’ (defaults to
 <code class="xref py py-class docutils literal notranslate"><span class="pre">DebyeHueckelPotential</span></code>) and a <cite>screening</cite> model (default:
 :py:<a class="reference internal" href="jaxrts.models.LinearResponseScreeningGericke2010.html#jaxrts.models.LinearResponseScreeningGericke2010" title="jaxrts.models.LinearResponseScreeningGericke2010"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearResponseScreeningGericke2010</span></code></a>. Further requires a
@@ -151,7 +152,7 @@ electrons are not included in the HNC scheme. See, e.g.,
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.OnePotentialHNCIonFeat.Rayleigh_weight.html#jaxrts.models.OnePotentialHNCIonFeat.Rayleigh_weight" title="jaxrts.models.OnePotentialHNCIonFeat.Rayleigh_weight"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Rayleigh_weight</span></code></a>(plasma_state, setup)</p></td>
-<td><p>This is the result from Wünsch <span class="bibtex-citation" id="id2">[<a class="reference internal" href="../bibliography.html#id105" title="Kathrin Wünsch. Theory of X-ray Thomson scattering in warm dense matter. PhD thesis, University of Warwick, Warwick, 2011.">Wünsch, 2011</a>]</span>, to calculate the Rayleigh weight for a plasma from multiple species.</p></td>
+<td><p>This is the result from Wünsch <span class="bibtex-citation" id="id2">[<a class="reference internal" href="../bibliography.html#id106" title="Kathrin Wünsch. Theory of X-ray Thomson scattering in warm dense matter. PhD thesis, University of Warwick, Warwick, 2011.">Wünsch, 2011</a>]</span>, to calculate the Rayleigh weight for a plasma from multiple species.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.OnePotentialHNCIonFeat.S_ii.html#jaxrts.models.OnePotentialHNCIonFeat.S_ii" title="jaxrts.models.OnePotentialHNCIonFeat.S_ii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S_ii</span></code></a>(plasma_state, setup)</p></td>
 <td><p></p></td>
@@ -240,6 +241,9 @@ electrons are not included in the HNC scheme. See, e.g.,
 </div><div class="sphx-glr-thumbcontainer" tooltip="The free-bound and bound-free contributions only fulfill the detailed balance relation in the (..."><img alt="" src="../_images/sphx_glr_plot_k_dispersion_thumb.svg" />
 <p><a class="reference internal" href="../gen_examples/free_bound/plot_k_dispersion.html#sphx-glr-gen-examples-free-bound-plot-k-dispersion-py"><span class="std std-ref">k dispersion and free-bound scattering</span></a></p>
   <div class="sphx-glr-thumbnail-title">k dispersion and free-bound scattering</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="More expensive calculation methods like DFT-MD or Average Atom can yield more accurate calculat..."><img alt="" src="../_images/sphx_glr_plot_Sii_grid_interpolation_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/ionic/plot_Sii_grid_interpolation.html#sphx-glr-gen-examples-ionic-plot-sii-grid-interpolation-py"><span class="std std-ref">S_ii grid interpolation</span></a></p>
+  <div class="sphx-glr-thumbnail-title">S_ii grid interpolation</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example compares the Rayleigh weights for a carbon plasma when a fractional ionization sta..."><img alt="" src="../_images/sphx_glr_plot_WR_expanded_ionization_thumb.svg" />
 <p><a class="reference internal" href="../gen_examples/ionization/plot_WR_expanded_ionization.html#sphx-glr-gen-examples-ionization-plot-wr-expanded-ionization-py"><span class="std std-ref">Rayleigh weights for integer expanded ionization states</span></a></p>
   <div class="sphx-glr-thumbnail-title">Rayleigh weights for integer expanded ionization states</div>

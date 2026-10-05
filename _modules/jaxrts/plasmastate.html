@@ -162,9 +162,9 @@
             <span class="nb">len</span><span class="p">(</span><span class="n">ions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">mass_density</span><span class="p">)</span>
         <span class="p">),</span> <span class="s2">&quot;WARNING: Input parameters should be the same shape as &lt;ions&gt;!&quot;</span>
         <span class="k">if</span> <span class="n">T_i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">ions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
-                <span class="n">T_i</span>
-            <span class="p">),</span> <span class="s2">&quot;WARNING: Input parameters should be the same shape as &lt;ions&gt;!&quot;</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">ions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">T_i</span><span class="p">),</span> <span class="p">(</span>
+                <span class="s2">&quot;WARNING: Input parameters should be the same shape as &lt;ions&gt;!&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1">#: A list of :py:class:`jaxrts.elements.Element` objects that define</span>
         <span class="c1">#: the constituents of the plasma.</span>
@@ -427,6 +427,13 @@
         <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">atomic_mass_constant</span><span class="p">)</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">T_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ratio of ion- to electron temperature</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">T_i</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T_i</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">n_i</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The ion number density.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass_density</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_masses</span><span class="p">)</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
@@ -538,9 +545,9 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="p">[</span><span class="n">kind</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">kind</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="p">(</span><span class="n">par</span> <span class="o">==</span> <span class="s2">&quot;e-&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
-                <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span>
-            <span class="p">),</span> <span class="s2">&quot;Kind must be one of the ion species or an electron (e-)!&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">par</span> <span class="o">==</span> <span class="s2">&quot;e-&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="p">),</span> <span class="p">(</span>
+                <span class="s2">&quot;Kind must be one of the ion species or an electron (e-)!&quot;</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">par</span> <span class="o">==</span> <span class="s2">&quot;e-&quot;</span><span class="p">:</span>
                 <span class="n">wavelengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">(</span>

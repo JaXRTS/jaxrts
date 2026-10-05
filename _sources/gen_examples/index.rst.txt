@@ -664,6 +664,23 @@ Ionic scattering examples
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="More expensive calculation methods like DFT-MD or Average Atom can yield more accurate calculat...">
+
+.. only:: html
+
+  .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_Sii_grid_interpolation_thumb.svg
+    :alt:
+
+  :ref:`sphx_glr_gen_examples_ionic_plot_Sii_grid_interpolation.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">S_ii grid interpolation</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Fig. 4.12 from Wunsch.2011, and shows how to use the HNC approximation ...">
 
 .. only:: html

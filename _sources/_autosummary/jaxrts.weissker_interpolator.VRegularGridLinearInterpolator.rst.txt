@@ -1,0 +1,28 @@
+jaxrts.weissker\_interpolator.VRegularGridLinearInterpolator
+============================================================
+
+.. currentmodule:: jaxrts.weissker_interpolator
+
+.. autoclass:: VRegularGridLinearInterpolator
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~VRegularGridLinearInterpolator.__init__
+      ~VRegularGridLinearInterpolator.tree_flatten
+      ~VRegularGridLinearInterpolator.tree_unflatten
+   
+   
+
+   
+   
+   
+
+   .. _sphx_glr_backref_jaxrts.weissker_interpolator.VRegularGridLinearInterpolator:
+
+   .. minigallery:: jaxrts.weissker_interpolator.VRegularGridLinearInterpolator
+       :add-heading:
