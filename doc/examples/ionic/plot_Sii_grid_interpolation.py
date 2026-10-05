@@ -18,13 +18,9 @@ import jaxrts
 from jaxrts.weissker_interpolator import AutoNormInterpolator
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
-import pathlib
 from copy import deepcopy
 
-cwd = pathlib.Path(__file__).parent
-
 ureg = jaxrts.ureg
-
 
 state = jaxrts.PlasmaState(
     ions=[jaxrts.Element("Al")],

@@ -16,7 +16,7 @@ from .units import Quantity, ureg
 class AutoNormInterpolator:
     def __init__(
         self,
-        array: Quantity | jnp.array,
+        array: Quantity | jnp.ndarray,
         k: Quantity,
         *free_variables,
         grid_length: int = 1000,
