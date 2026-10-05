@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Plot See0 using the RPA approximation &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -129,75 +128,77 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-gen-examples-free-free-plot-see0-rpa-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plot-see0-using-the-rpa-approximation">
 <span id="sphx-glr-gen-examples-free-free-plot-see0-rpa-py"></span><h1>Plot See0 using the RPA approximation<a class="headerlink" href="#plot-see0-using-the-rpa-approximation" title="Link to this heading"></a></h1>
 <p>This script reprocudes <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../bibliography.html#id45" title="G. Gregori, S. H. Glenzer, W. Rozmus, R. W. Lee, and O. L. Landen. Theoretical model of x-ray scattering as a dense matter probe. Physical Review E, 2 2003. doi:10.1103/physreve.67.026412.">Gregori et al., 2003</a>]</span>, Fig. 1c. showing the calculation
 of <span class="math notranslate nohighlight">\(S_\text{ee}^{0, \text{RPA}}\)</span>.</p>
-<img src="../../_images/sphx_glr_plot_See0_RPA_001.svg" srcset="../../_images/sphx_glr_plot_See0_RPA_001.svg" alt="plot See0 RPA" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">onp</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts.free_free</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">free_free</span>
-
-<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ureg</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
-
-<span class="n">lambda_0</span> <span class="o">=</span> <span class="mf">0.26</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">nanometer</span>
-<span class="n">theta</span> <span class="o">=</span> <span class="mi">60</span>
-<span class="n">n_e</span> <span class="o">=</span> <span class="mf">1e23</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span>
-
-<span class="n">E</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span>
-
-<span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">lambda_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
-
-<span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-    <span class="p">[</span>
-        <span class="mf">0.8</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span>
-        <span class="mf">3.0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span>
-        <span class="mf">13.0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span>
-    <span class="p">]</span>
-<span class="p">):</span>
-    <span class="n">mu</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.plasma_physics.chem_pot_interpolationIchimaru.html#jaxrts.plasma_physics.chem_pot_interpolationIchimaru" title="jaxrts.plasma_physics.chem_pot_interpolationIchimaru" class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">chem_pot_interpolationIchimaru</span></a><span class="p">(</span>
-        <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">),</span> <span class="n">n_e</span>
-    <span class="p">)</span>
-
-    <span class="n">vals</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.free_free.S0_ee_RPA_no_damping.html#jaxrts.free_free.S0_ee_RPA_no_damping" title="jaxrts.free_free.S0_ee_RPA_no_damping" class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function"><span class="n">free_free</span><span class="o">.</span><span class="n">S0_ee_RPA_no_damping</span></a><span class="p">(</span>
-        <span class="n">k</span><span class="p">,</span>
-        <span class="n">T_e</span><span class="o">=</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">),</span>
-        <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span>
-        <span class="n">E</span><span class="o">=</span><span class="n">E</span><span class="p">,</span>
-        <span class="n">chem_pot</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">onp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-        <span class="p">(</span><span class="n">vals</span> <span class="o">/</span> <span class="n">norm</span><span class="p">),</span>
-        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;T = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; eV&quot;</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\omega$ [eV]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$S^0_{\text</span><span class="si">{ee}</span><span class="s2">}$ [arb. units]&quot;</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.785 seconds)</p>
+<img src="../../_images/sphx_glr_plot_See0_RPA_001.svg" srcset="../../_images/sphx_glr_plot_See0_RPA_001.svg" alt="plot See0 RPA" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">onp</span><span class="w">
+</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span><span class="nn">.</span><span class="nn">free_free</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">free_free</span><span class="w">
+</span><span class="w">
+</span><span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ureg</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">science</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">lambda_0</span> <span class="o">=</span> <span class="mf">0.26</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">nanometer</span><span class="w">
+</span><span class="n">theta</span> <span class="o">=</span> <span class="mi">60</span><span class="w">
+</span><span class="n">n_e</span> <span class="o">=</span> <span class="mf">1e23</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">*</span><span class="o">*</span><span class="mi">3</span><span class="w">
+</span><span class="w">
+</span><span class="n">E</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="w">
+</span><span class="w">
+</span><span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">lambda_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="w">
+</span>    <span class="p">[</span><span class="w">
+</span>        <span class="mf">0.8</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span><span class="w">
+</span>        <span class="mf">3.0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span><span class="w">
+</span>        <span class="mf">13.0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span><span class="w">
+</span>    <span class="p">]</span><span class="w">
+</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>    <span class="n">mu</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.plasma_physics.chem_pot_interpolationIchimaru.html#jaxrts.plasma_physics.chem_pot_interpolationIchimaru" title="jaxrts.plasma_physics.chem_pot_interpolationIchimaru"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">chem_pot_interpolationIchimaru</span></a><span class="p">(</span><span class="w">
+</span>        <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="p">,</span> <span class="n">n_e</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="n">vals</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.free_free.S0_ee_RPA_no_damping.html#jaxrts.free_free.S0_ee_RPA_no_damping" title="jaxrts.free_free.S0_ee_RPA_no_damping"><span class="n">free_free</span><span class="o">.</span><span class="n">S0_ee_RPA_no_damping</span></a><span class="p">(</span><span class="w">
+</span>        <span class="n">k</span><span class="p">,</span><span class="w">
+</span>        <span class="n">T_e</span><span class="o">=</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span><span class="w">
+</span>        <span class="n">E</span><span class="o">=</span><span class="n">E</span><span class="p">,</span><span class="w">
+</span>        <span class="n">chem_pot</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span><span class="w">
+</span>        <span class="n">norm</span> <span class="o">=</span> <span class="n">onp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="p">(</span><span class="n">vals</span> <span class="o">/</span> <span class="n">norm</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">T = </span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="s2"> eV</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">C</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;</span><span class="s2">$</span><span class="s2">\</span><span class="s2">omega$ [eV]</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;</span><span class="s2">$S^0_</span><span class="s2">{</span><span class="s2">\</span><span class="s2">text</span><span class="si">{ee}</span><span class="s2">}$ [arb. units]</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.500 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-free-free-plot-see0-rpa-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/0bf67ede4cb2d7cf45aba6ea0774dd69/plot_See0_RPA.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_See0_RPA.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/affe13c531d7c9b430d14c6415e1fa05/plot_See0_RPA.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_See0_RPA.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/d4090930dfdc88756f93ce6a80d9fd0c/plot_See0_RPA.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_See0_RPA.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

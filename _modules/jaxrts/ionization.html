@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,23 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.ionization &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -86,7 +85,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for jaxrts.ionization</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Module to model the ionization state of a plasma.</span>
 <span class="sd">It contains functions to solve the</span>
 <span class="sd">`Saha-equation &lt;https://en.wikipedia.org/wiki/Saha_ionization_equation&gt;`_,</span>
@@ -94,12 +93,12 @@
 
 <span class="sd">The central solver is :py:func:`solve_ionization`, which accepts a</span>
 <span class="sd">:py:class:`~.BalanceTerm` -- an object that supplies per-transition</span>
-<span class="sd">coefficients and the corresponding &quot;still-bound&quot; mask.</span>
+<span class="sd">coefficients and the corresponding "still-bound" mask.</span>
 
 <span class="sd">:py:class:`~.BalanceTerm` s can be created with the factories provided, e.g.</span>
 <span class="sd">:py:func:`~.saha_balance_term`, :py:func:`~.gen_balance_term`, or</span>
 <span class="sd">:py:func:`bu_balance_term`.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
@@ -133,7 +132,7 @@
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Planck-Larkin partition sum with a cutoff for negative energies.</span>
 
 <span class="sd">    .. math::</span>
@@ -157,7 +156,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    jnp.ndarray</span>
 <span class="sd">        Scalar partition-sum value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ratio</span> <span class="o">=</span> <span class="p">(</span><span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="n">T</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
         <span class="n">g</span> <span class="o">*</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">ratio</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">ratio</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">heaviside</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">eV</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
@@ -177,7 +176,7 @@
     <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">energy_diff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Classic (non-degenerate) Saha balance relation.</span>
 
 <span class="sd">    Returns :math:`n_{i+1} n_e / n_i`:</span>
@@ -197,7 +196,7 @@
 <span class="sd">        Electron temperature.</span>
 <span class="sd">    energy_diff : Quantity</span>
 <span class="sd">        Ionization energy :math:`\\Delta E`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="p">(</span><span class="n">gj</span> <span class="o">/</span> <span class="n">gi</span><span class="p">)</span>
         <span class="o">*</span> <span class="mi">2</span>
@@ -218,7 +217,7 @@
     <span class="n">energy_diff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generic Saha equation, using</span>
 <span class="sd">    :py:func:`jaxrts.plasma_physics.chem_pot_sommerfeld_fermi_interpolation`</span>
 <span class="sd">    calculate the chemical potential which is plugged into the equation</span>
@@ -254,7 +253,7 @@
 <span class="sd">    n_j / n_i * n_e : Quantity</span>
 <span class="sd">        The ratio of the population of the two states, multiplied with the</span>
 <span class="sd">        free-electron density.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">return</span> <span class="p">(</span>
         <span class="p">(</span><span class="n">gj</span> <span class="o">/</span> <span class="n">gi</span><span class="p">)</span>
@@ -275,7 +274,7 @@
     <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generic balance relation expressed in terms of partition functions.</span>
 
 <span class="sd">    The energy dependence is already folded into ``part_i`` and ``part_j``</span>
@@ -303,7 +302,7 @@
 <span class="sd">    n_j / n_i * n_e : Quantity</span>
 <span class="sd">        The ratio of the population of the two states, multiplied with the</span>
 <span class="sd">        free-electron density.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">part_j</span> <span class="o">/</span> <span class="n">part_i</span><span class="p">)</span> <span class="o">*</span> <span class="n">n_e</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">chem_pot</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">k_B</span> <span class="o">*</span> <span class="n">T_e</span><span class="p">))</span></div>
 
 
@@ -311,7 +310,7 @@
 <div class="viewcode-block" id="BalanceTerm">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ionization.BalanceTerm.html#jaxrts.ionization.BalanceTerm">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BalanceTerm</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Per-element data produced by a balance-term factory.</span>
 
 <span class="sd">    Attributes</span>
@@ -323,7 +322,7 @@
 <span class="sd">        1.0 where state i is still bound, 0.0 where pressure-ionised (length</span>
 <span class="sd">        ``element.Z``).  Used both to set the diagonal sign and to gate the</span>
 <span class="sd">        :math:`n_e` sub-diagonal.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">coeff</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span>  <span class="c1"># shape (Z,)  units: 1/volume</span>
     <span class="n">mask</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span>  <span class="c1"># shape (Z,)  values in {0.0, 1.0}</span></div>
@@ -337,14 +336,14 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ionization.saha_balance_term.html#jaxrts.ionization.saha_balance_term">[docs]</a>
 <span class="nd">@partial</span><span class="p">(</span>
     <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span>
-    <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;element&quot;</span><span class="p">],</span>
+    <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">"element"</span><span class="p">],</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">saha_balance_term</span><span class="p">(</span>
     <span class="n">element</span><span class="p">:</span> <span class="n">Element</span><span class="p">,</span>
     <span class="n">ipd</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BalanceTerm</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Classic (non-degenerate) Saha balance term.</span>
 
 <span class="sd">    Parameters</span>
@@ -358,7 +357,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    BalanceTerm</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">g</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">ionization</span><span class="o">.</span><span class="n">statistical_weights</span>
     <span class="n">Eb</span> <span class="o">=</span> <span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ionization</span><span class="o">.</span><span class="n">energies</span><span class="p">)</span> <span class="o">+</span> <span class="n">ipd</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
         <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
@@ -378,7 +377,7 @@
     <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BalanceTerm</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generalised (degenerate) Saha balance term.</span>
 
 <span class="sd">    Parameters</span>
@@ -397,7 +396,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    BalanceTerm</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">g</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">ionization</span><span class="o">.</span><span class="n">statistical_weights</span>
     <span class="n">Eb</span> <span class="o">=</span> <span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ionization</span><span class="o">.</span><span class="n">energies</span><span class="p">)</span> <span class="o">+</span> <span class="n">ipd</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
         <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
@@ -419,7 +418,7 @@
     <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BalanceTerm</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Bethe-Uhlenbeck balance term using Planck-Larkin partition sums.</span>
 
 <span class="sd">    Instead of ground-states, only the partition sums</span>
@@ -435,7 +434,7 @@
 
 <span class="sd">    .. note::</span>
 
-<span class="sd">       The ``ipd`` energy is added to the element&#39;s ionization energy, i.e., it</span>
+<span class="sd">       The ``ipd`` energy is added to the element's ionization energy, i.e., it</span>
 <span class="sd">       is a flat reduction, for all excited energies considered (continuum</span>
 <span class="sd">       lowering).</span>
 
@@ -457,12 +456,12 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    BalanceTerm</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Ebs</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ionization</span><span class="o">.</span><span class="n">energies</span><span class="p">)</span> <span class="o">+</span> <span class="n">ipd</span>
 
     <span class="n">pls</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">charge</span><span class="p">,</span> <span class="n">Eb</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span><span class="p">),</span> <span class="n">Ebs</span><span class="p">):</span>
-        <span class="n">g</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="n">read_nist_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="si">}{</span><span class="n">charge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">g</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="n">read_nist_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="si">}{</span><span class="n">charge</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">pls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">planck_larkin_partition_sum</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">Eb</span> <span class="o">-</span> <span class="n">E</span><span class="p">,</span> <span class="n">T_e</span><span class="p">))</span>
     <span class="n">pls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  <span class="c1"># fully-stripped ion has partition function 1</span>
     <span class="n">part_func</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pls</span><span class="p">)</span>
@@ -483,11 +482,11 @@
     <span class="n">mask</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">log_ne</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    mask[k] = 1 means charge state k exists as a bound state.</span>
 <span class="sd">    mask[k] = 0 means charge state k is pressure-ionized (does not exist).</span>
 <span class="sd">    State Z (fully stripped) always exists.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Zero out pressure-ionized states in log_ratios so cumsum is unaffected by</span>
     <span class="c1"># them. They will be masked to -inf afterwards anyway (in the log!).</span>
     <span class="n">log_ratios</span> <span class="o">=</span> <span class="n">log_coeffs</span> <span class="o">-</span> <span class="n">log_ne</span>  <span class="c1"># shape (Z,)</span>
@@ -508,11 +507,11 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_zbar_and_weights</span><span class="p">(</span><span class="n">log_P</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Stable mean charge and fractional populations from log partition products.</span>
 <span class="sd">    Handles -inf entries (states pushed to the continuum) and large positive</span>
 <span class="sd">    entries.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># log_P has length Z + 1 -&gt; Charges from 0 to Z</span>
     <span class="n">charges</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">log_P</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
@@ -526,7 +525,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ionization.solve_ionization.html#jaxrts.ionization.solve_ionization">[docs]</a>
 <span class="nd">@partial</span><span class="p">(</span>
     <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span>
-    <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;element_list&quot;</span><span class="p">],</span>
+    <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">"element_list"</span><span class="p">],</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">solve_ionization</span><span class="p">(</span>
     <span class="n">element_list</span><span class="p">,</span>
@@ -534,7 +533,7 @@
     <span class="n">ion_number_densities</span><span class="p">,</span>
     <span class="n">balance_terms</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Solve for the ionization state of a plasma given pre-computed balance</span>
 <span class="sd">    terms.</span>
 
@@ -565,7 +564,7 @@
 <span class="sd">        Self-consistent free-electron density.</span>
 <span class="sd">    Z_mean : Quantity</span>
 <span class="sd">        Mean ionization of each species.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Z</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">Z</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">element_list</span><span class="p">]</span>
     <span class="n">N_i_arr</span> <span class="o">=</span> <span class="n">ion_number_densities</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
         <span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">m</span><span class="o">**</span><span class="mi">3</span>
@@ -630,7 +629,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ionization.solve_saha.html#jaxrts.ionization.solve_saha">[docs]</a>
 <span class="nd">@partial</span><span class="p">(</span>
     <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span>
-    <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;element_list&quot;</span><span class="p">,</span> <span class="s2">&quot;exclude_non_negative_energies&quot;</span><span class="p">],</span>
+    <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">"element_list"</span><span class="p">,</span> <span class="s2">"exclude_non_negative_energies"</span><span class="p">],</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">solve_saha</span><span class="p">(</span>
     <span class="n">element_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Element</span><span class="p">],</span>
@@ -639,7 +638,7 @@
     <span class="n">continuum_lowering</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Quantity</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exclude_non_negative_energies</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Solve the classic (non-degenerate) Saha equation.</span>
 
 <span class="sd">    Thin wrapper around :py:func:`solve_ionization` using</span>
@@ -665,7 +664,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    ionised_number_densities, n_e, Z_mean</span>
 <span class="sd">        See :py:func:`solve_ionization`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">continuum_lowering</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">continuum_lowering</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ion</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="k">for</span> <span class="n">ion</span> <span class="ow">in</span> <span class="n">element_list</span>
@@ -689,7 +688,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ionization.solve_gen_saha.html#jaxrts.ionization.solve_gen_saha">[docs]</a>
 <span class="nd">@partial</span><span class="p">(</span>
     <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span>
-    <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;element_list&quot;</span><span class="p">,</span> <span class="s2">&quot;exclude_non_negative_energies&quot;</span><span class="p">],</span>
+    <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">"element_list"</span><span class="p">,</span> <span class="s2">"exclude_non_negative_energies"</span><span class="p">],</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">solve_gen_saha</span><span class="p">(</span>
     <span class="n">element_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Element</span><span class="p">],</span>
@@ -700,7 +699,7 @@
     <span class="n">chem_pot_ideal</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">,</span>
     <span class="n">exclude_non_negative_energies</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Solve the generalised (degenerate) Saha equation.</span>
 
 <span class="sd">    Thin wrapper around :py:func:`solve_ionization` using</span>
@@ -725,7 +724,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    ionised_number_densities, n_e, Z_mean</span>
 <span class="sd">        See :py:func:`solve_ionization`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">continuum_lowering</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">continuum_lowering</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ion</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="k">for</span> <span class="n">ion</span> <span class="ow">in</span> <span class="n">element_list</span>
@@ -755,7 +754,7 @@
     <span class="n">continuum_lowering</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Quantity</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">chem_pot_ideal</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Solve the Bethe-Uhlenbeck equation using Planck-Larkin partition sums.</span>
 
 <span class="sd">    Thin wrapper around :py:func:`solve_ionization` using</span>
@@ -784,7 +783,7 @@
 <span class="sd">    --------</span>
 <span class="sd">    jaxrts.ionization.planck_larkin_partition_sum</span>
 <span class="sd">    jaxrts.ionization.gen_balance_equation</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">continuum_lowering</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">continuum_lowering</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ion</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="k">for</span> <span class="n">ion</span> <span class="ow">in</span> <span class="n">element_list</span>
@@ -805,7 +804,7 @@
 <div class="viewcode-block" id="calculate_charge_state_distribution">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ionization.calculate_charge_state_distribution.html#jaxrts.ionization.calculate_charge_state_distribution">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_charge_state_distribution</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the charge state distribution in fractions using the</span>
 <span class="sd">    Saha-Boltzmann equation assuming thermal equilibrium.</span>
 
@@ -818,9 +817,9 @@
 <span class="sd">    -------</span>
 <span class="sd">    jnp.ndarray</span>
 <span class="sd">        The charge state distribution in fractions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">cl</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">all_element_states</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span>
+    <span class="n">cl</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">"ipd"</span><span class="p">]</span><span class="o">.</span><span class="n">all_element_states</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span>
 
     <span class="n">sol</span><span class="p">,</span> <span class="n">ne</span><span class="p">,</span> <span class="n">Z_mean</span> <span class="o">=</span> <span class="n">solve_saha</span><span class="p">(</span>
         <span class="nb">tuple</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">),</span>
@@ -842,7 +841,7 @@
     <span class="n">use_distribution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_non_negative_energies</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Mean ionization charge per species via Saha-Boltzmann.</span>
 
 <span class="sd">    Iterates up to 6 times for self-consistency between the ionization state</span>
@@ -873,7 +872,7 @@
 <span class="sd">    --------</span>
 <span class="sd">    jaxrts.ionization.solve_saha</span>
 <span class="sd">        Function used to solve the saha equation</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
         <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">Z</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">]))</span>
@@ -888,7 +887,7 @@
 
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">use_ipd</span><span class="p">:</span>
-                <span class="n">cl</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">all_element_states</span><span class="p">(</span>
+                <span class="n">cl</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">"ipd"</span><span class="p">]</span><span class="o">.</span><span class="n">all_element_states</span><span class="p">(</span>
                     <span class="n">plasma_state</span><span class="p">,</span>
                     <span class="n">charge_distribution</span> <span class="k">if</span> <span class="n">use_distribution</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -916,11 +915,11 @@
         <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
-            <span class="n">chem_pot_ideal</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;chemical potential&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+            <span class="n">chem_pot_ideal</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">"chemical potential"</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
                 <span class="n">plasma_state</span><span class="p">,</span> <span class="kc">None</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">use_ipd</span><span class="p">:</span>
-                <span class="n">cl</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">all_element_states</span><span class="p">(</span>
+                <span class="n">cl</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">"ipd"</span><span class="p">]</span><span class="o">.</span><span class="n">all_element_states</span><span class="p">(</span>
                     <span class="n">plasma_state</span><span class="p">,</span>
                     <span class="n">charge_distribution</span> <span class="k">if</span> <span class="n">use_distribution</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -952,7 +951,7 @@
     <span class="n">use_ipd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_distribution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Mean ionization charge per species via the Bethe-Uhlenbeck equation.</span>
 
 <span class="sd">    Parameters</span>
@@ -971,7 +970,7 @@
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
 <span class="sd">    jaxrts.ionization.solve_BU</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">_ions</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">)</span>
     <span class="n">_n_ions</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">mass_density</span> <span class="o">/</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">atomic_masses</span>
 
@@ -981,7 +980,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_cl</span><span class="p">(</span><span class="n">charge_distribution</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">use_ipd</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;ipd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">all_element_states</span><span class="p">(</span>
+            <span class="k">return</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">"ipd"</span><span class="p">]</span><span class="o">.</span><span class="n">all_element_states</span><span class="p">(</span>
                 <span class="n">plasma_state</span><span class="p">,</span>
                 <span class="n">charge_distribution</span> <span class="k">if</span> <span class="n">use_distribution</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
@@ -989,7 +988,7 @@
             <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ion</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="k">for</span> <span class="n">ion</span> <span class="ow">in</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span>
         <span class="p">]</span>
 
-    <span class="n">chem_pot</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;chemical potential&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">chem_pot</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">"chemical potential"</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">cl</span> <span class="o">=</span> <span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ion</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="k">for</span> <span class="n">ion</span> <span class="ow">in</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">ions</span><span class="p">]</span>
 
     <span class="n">charge_distribution</span><span class="p">,</span> <span class="n">_ne</span><span class="p">,</span> <span class="n">Z_mean</span> <span class="o">=</span> <span class="n">solve_BU</span><span class="p">(</span>
@@ -1002,7 +1001,7 @@
     <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
-        <span class="n">chem_pot</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">&quot;chemical potential&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+        <span class="n">chem_pot</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="p">[</span><span class="s2">"chemical potential"</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
             <span class="n">plasma_state</span><span class="p">,</span> <span class="kc">None</span>
         <span class="p">)</span>
         <span class="n">cl</span> <span class="o">=</span> <span class="n">_get_cl</span><span class="p">(</span><span class="n">charge_distribution</span><span class="p">)</span>
@@ -1046,7 +1045,7 @@
 
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_mean_free_charge_more_single_species</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 
 <span class="sd">    Deprecated: Use `calculate_mean_free_charge_more` instead.</span>
 
@@ -1067,10 +1066,10 @@
 <span class="sd">    Z_f : Quantity</span>
 <span class="sd">        The mean free charge of the ions in the OCP</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-        <span class="s2">&quot;&#39;_calculate_mean_free_charge_more_single_species&#39; is deprecated, please use &#39;calculate_mean_free_charge_more&#39; instead.&quot;</span>  <span class="c1"># noqa: E501</span>
+        <span class="s2">"'_calculate_mean_free_charge_more_single_species' is deprecated, please use 'calculate_mean_free_charge_more' instead."</span>  <span class="c1"># noqa: E501</span>
     <span class="p">)</span>
 
     <span class="n">rho</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">mass_density</span>
@@ -1078,7 +1077,7 @@
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">m_A</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s2">&quot;Multiple ion species detected. &#39;_calculate_mean_free_charge_more_single_species&#39; supports only one species and evaluates ionization per ion independently.&quot;</span>  <span class="c1"># noqa: E501</span>
+            <span class="s2">"Multiple ion species detected. '_calculate_mean_free_charge_more_single_species' supports only one species and evaluates ionization per ion independently."</span>  <span class="c1"># noqa: E501</span>
         <span class="p">)</span>
 
     <span class="n">Z_A</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_A</span>
@@ -1091,7 +1090,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ionization.calculate_mean_free_charge_more.html#jaxrts.ionization.calculate_mean_free_charge_more">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_mean_free_charge_more</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 
 <span class="sd">    Uses the finite Temperature Thomas Fermi Charge State fits provided by</span>
 <span class="sd">    :cite:`More.1985` p. 332 (Table IV) using an Average-Atom model to</span>
@@ -1113,7 +1112,7 @@
 <span class="sd">    Z_f : Quantity</span>
 <span class="sd">        The mean free charge of each ion in the plasma</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Convert to number densities</span>
     <span class="n">rho_i</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">mass_density</span>

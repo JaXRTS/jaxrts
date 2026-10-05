@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_gen_examples_free_free_plot_BM_ChapmanInterp.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -50,16 +50,16 @@ to be higher for comparable quality of the result, when using ``KKT``.
 
  .. code-block:: none
 
-    Full BMA: 2.957937002182007s
-    2 interp points: 0.12834548950195312s       Mean deviation from full RPA:  -1.5000691310844727e-19 Max deviation from full RPA:  7.777071612105063e-18
-    4 interp points: 0.13844037055969238s       Mean deviation from full RPA:  1.365556509050914e-19 Max deviation from full RPA:  2.6445985089119933e-18
-    20 interp points: 0.20161914825439453s       Mean deviation from full RPA:  -6.614496195286538e-20 Max deviation from full RPA:  9.881216098903113e-20
-    100 interp points: 0.3693728446960449s       Mean deviation from full RPA:  -7.659887137426025e-20 Max deviation from full RPA:  5.0066158035578026e-20
-    2 interp points: 0.1437392234802246s       Mean deviation from full RPA:  5.143830909969541e-19 Max deviation from full RPA:  6.968157303475623e-18
-    4 interp points: 0.14773082733154297s       Mean deviation from full RPA:  2.768649748287681e-19 Max deviation from full RPA:  2.4097280532091077e-18
-    20 interp points: 0.20653843879699707s       Mean deviation from full RPA:  5.326170877592745e-20 Max deviation from full RPA:  2.9712188653024657e-18
-    100 interp points: 0.38548827171325684s       Mean deviation from full RPA:  4.8314640957254566e-20 Max deviation from full RPA:  3.001092293221228e-18
-    RPA: 0.07038211822509766s
+    Full BMA: 7.653336524963379s
+    2 interp points: 0.3213319778442383s       Mean deviation from full RPA:  -1.4351313579323623e-19 Max deviation from full RPA:  8.319787759235588e-18
+    4 interp points: 0.34596920013427734s       Mean deviation from full RPA:  1.432086737341146e-19 Max deviation from full RPA:  3.195834972902572e-18
+    20 interp points: 0.5202808380126953s       Mean deviation from full RPA:  -5.753141295085147e-20 Max deviation from full RPA:  6.357993605171434e-19
+    100 interp points: 1.493440866470337s       Mean deviation from full RPA:  -6.033247204606144e-20 Max deviation from full RPA:  5.837565928545203e-19
+    2 interp points: 0.33641648292541504s       Mean deviation from full RPA:  5.208732018780646e-19 Max deviation from full RPA:  6.963561111762209e-18
+    4 interp points: 0.3505277633666992s       Mean deviation from full RPA:  2.833559605600997e-19 Max deviation from full RPA:  2.2438648213878466e-18
+    20 interp points: 0.49697422981262207s       Mean deviation from full RPA:  5.97516639494137e-20 Max deviation from full RPA:  2.846200878731335e-18
+    100 interp points: 1.4859282970428467s       Mean deviation from full RPA:  5.480457942430497e-20 Max deviation from full RPA:  2.864033775932594e-18
+    RPA: 0.15778350830078125s
 
 
 
@@ -180,7 +180,7 @@ to be higher for comparable quality of the result, when using ``KKT``.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 17.209 seconds)
+   **Total running time of the script:** (2 minutes 47.832 seconds)
 
 
 .. _sphx_glr_download_gen_examples_free_free_plot_BM_ChapmanInterp.py:
@@ -196,6 +196,10 @@ to be higher for comparable quality of the result, when using ``KKT``.
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_BM_ChapmanInterp.py <plot_BM_ChapmanInterp.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_BM_ChapmanInterp.zip <plot_BM_ChapmanInterp.zip>`
 
 
 .. only:: html

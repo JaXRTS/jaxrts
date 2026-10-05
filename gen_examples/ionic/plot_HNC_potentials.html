@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -6,23 +8,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HNC: Potentials &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -136,106 +135,108 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-gen-examples-ionic-plot-hnc-potentials-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="hnc-potentials">
 <span id="sphx-glr-gen-examples-ionic-plot-hnc-potentials-py"></span><h1>HNC: Potentials<a class="headerlink" href="#hnc-potentials" title="Link to this heading"></a></h1>
-<img src="../../_images/sphx_glr_plot_HNC_potentials_001.svg" srcset="../../_images/sphx_glr_plot_HNC_potentials_001.svg" alt="plot HNC potentials" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1407: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
+<img src="../../_images/sphx_glr_plot_HNC_potentials_001.svg" srcset="../../_images/sphx_glr_plot_HNC_potentials_001.svg" alt="plot HNC potentials" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/.cache/pypoetry/virtualenvs/jaxrts-YOcK0dq_-py3.12/lib/python3.12/site-packages/matplotlib/cbook.py:1408: UserWarning: The unit of a Quantity is stripped when downcasted to an array.
   return np.asanyarray(x, float)
 </pre></div>
 </div>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jaxrts</span><span class="w"> </span><span class="kn">import</span> <span class="n">ureg</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
-
-<span class="n">r</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.001</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span>
-
-<span class="n">dr</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">dk</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
-<span class="n">k</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">r</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="o">*</span> <span class="n">dk</span>
-
-<span class="n">T</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span>
-
-<span class="n">Gamma</span> <span class="o">=</span> <span class="mi">30</span>
-<span class="n">di</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span>
-    <span class="n">Gamma</span>
-    <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span>
-    <span class="o">*</span> <span class="n">T</span>
-    <span class="o">*</span> <span class="mi">4</span>
-    <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span>
-    <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span>
-    <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">**</span><span class="mi">2</span>
-<span class="p">)</span>
-
-<span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">di</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
-
-<span class="n">state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">(</span>
-    <span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">)],</span>
-    <span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-    <span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">atomic_mass</span><span class="p">],</span>
-    <span class="p">[</span><span class="n">T</span><span class="p">],</span>
-    <span class="p">[</span><span class="n">T</span><span class="p">],</span>
-<span class="p">)</span>
-
-<a href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.html#jaxrts.hnc_potentials.CoulombPotential" title="jaxrts.hnc_potentials.CoulombPotential" class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">V</span></a> <span class="o">=</span> <a href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.html#jaxrts.hnc_potentials.CoulombPotential" title="jaxrts.hnc_potentials.CoulombPotential" class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">hnc_potentials</span><span class="o">.</span><span class="n">CoulombPotential</span></a><span class="p">()</span>
-
-<span class="n">V_l</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.long_r.html#jaxrts.hnc_potentials.CoulombPotential.long_r" title="jaxrts.hnc_potentials.CoulombPotential.long_r" class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-method"><span class="n">V</span><span class="o">.</span><span class="n">long_r</span></a><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
-<span class="n">V_s</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.short_r.html#jaxrts.hnc_potentials.CoulombPotential.short_r" title="jaxrts.hnc_potentials.CoulombPotential.short_r" class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-method"><span class="n">V</span><span class="o">.</span><span class="n">short_r</span></a><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
-
-<span class="n">V_l_k_analytical</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.long_k.html#jaxrts.hnc_potentials.CoulombPotential.long_k" title="jaxrts.hnc_potentials.CoulombPotential.long_k" class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-method"><span class="n">V</span><span class="o">.</span><span class="n">long_k</span></a><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-<span class="n">V_l_k_transformed</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.hnc_potentials.transformPotential.html#jaxrts.hnc_potentials.transformPotential" title="jaxrts.hnc_potentials.transformPotential" class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">hnc_potentials</span><span class="o">.</span><span class="n">transformPotential</span></a><span class="p">(</span><span class="n">V_l</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
-
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">r</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
-    <span class="n">V_s</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:],</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$V_s^C$&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">r</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
-    <span class="n">V_l</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:],</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$V_l^C$&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-
-<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
-    <span class="n">V_l_k_analytical</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:],</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$V_l^C$ (analytic)&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
-    <span class="n">V_l_k_transformed</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:],</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$V_l^C$ (transformed)&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
-<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.151</span><span class="p">)</span>
-<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">25.1</span><span class="p">)</span>
-<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;$r$ [$</span><span class="se">\\</span><span class="s2">AA$]&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;$k$ [1/$</span><span class="se">\\</span><span class="s2">AA$]&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.445 seconds)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jpu</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">jaxrts</span><span class="w"> </span><span class="kn">import</span> <span class="n">ureg</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">science</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">r</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.001</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="o">*</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">dr</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w">
+</span><span class="n">dk</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span><span class="w">
+</span><span class="n">k</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">r</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="p">)</span> <span class="o">*</span> <span class="n">dk</span><span class="w">
+</span><span class="w">
+</span><span class="n">T</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="w">
+</span><span class="w">
+</span><span class="n">Gamma</span> <span class="o">=</span> <span class="mi">30</span><span class="w">
+</span><span class="n">di</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="w">
+</span>    <span class="n">Gamma</span><span class="w">
+</span>    <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="w">
+</span>    <span class="o">*</span> <span class="n">T</span><span class="w">
+</span>    <span class="o">*</span> <span class="mi">4</span><span class="w">
+</span>    <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="w">
+</span>    <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span><span class="w">
+</span>    <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span><span class="o">*</span><span class="o">*</span><span class="mi">2</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">di</span><span class="o">*</span><span class="o">*</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span><span class="p">)</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="o">*</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">state</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span></a><span class="p">(</span><span class="w">
+</span>    <span class="p">[</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.elements.Element.html#jaxrts.elements.Element" title="jaxrts.Element"><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">H</span><span class="s2">&quot;</span><span class="p">)</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="p">[</span><span class="n">n</span> <span class="o">*</span> <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.elements.Element.html#jaxrts.elements.Element" title="jaxrts.Element"><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">H</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">atomic_mass</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="p">[</span><span class="n">T</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="p">[</span><span class="n">T</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><a class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.html#jaxrts.hnc_potentials.CoulombPotential" title="jaxrts.hnc_potentials.CoulombPotential"><span class="n">V</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.html#jaxrts.hnc_potentials.CoulombPotential" title="jaxrts.hnc_potentials.CoulombPotential"><span class="n">jaxrts</span><span class="o">.</span><span class="n">hnc_potentials</span><span class="o">.</span><span class="n">CoulombPotential</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">V_l</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-method reference internal" href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.long_r.html#jaxrts.hnc_potentials.CoulombPotential.long_r" title="jaxrts.hnc_potentials.CoulombPotential.long_r"><span class="n">V</span><span class="o">.</span><span class="n">long_r</span></a><span class="p">(</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">state</span></a><span class="p">,</span> <span class="n">r</span><span class="p">)</span><span class="w">
+</span><span class="n">V_s</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-method reference internal" href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.short_r.html#jaxrts.hnc_potentials.CoulombPotential.short_r" title="jaxrts.hnc_potentials.CoulombPotential.short_r"><span class="n">V</span><span class="o">.</span><span class="n">short_r</span></a><span class="p">(</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">state</span></a><span class="p">,</span> <span class="n">r</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">V_l_k_analytical</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-method reference internal" href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.long_k.html#jaxrts.hnc_potentials.CoulombPotential.long_k" title="jaxrts.hnc_potentials.CoulombPotential.long_k"><span class="n">V</span><span class="o">.</span><span class="n">long_k</span></a><span class="p">(</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">state</span></a><span class="p">,</span> <span class="n">k</span><span class="p">)</span><span class="w">
+</span><span class="n">V_l_k_transformed</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-hnc_potentials sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.hnc_potentials.transformPotential.html#jaxrts.hnc_potentials.transformPotential" title="jaxrts.hnc_potentials.transformPotential"><span class="n">jaxrts</span><span class="o">.</span><span class="n">hnc_potentials</span><span class="o">.</span><span class="n">transformPotential</span></a><span class="p">(</span><span class="n">V_l</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">r</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">V_s</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">$V_s^C$</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">r</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">V_l</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">$V_l^C$</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">V_l_k_analytical</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">$V_l^C$ (analytic)</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">k</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">V_l_k_transformed</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">$V_l^C$ (transformed)</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.151</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">25.1</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$r$ [$</span><span class="se">\\</span><span class="s2">AA$]</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$k$ [1/$</span><span class="se">\\</span><span class="s2">AA$]</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.388 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-ionic-plot-hnc-potentials-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/4a1d6c3f435b2ef313e99d79c2bbe505/plot_HNC_potentials.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_HNC_potentials.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/eb01e3df80def108bfd6b924c66f7c32/plot_HNC_potentials.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_HNC_potentials.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/08ec607be13d541fe58d81bfe3e90bb6/plot_HNC_potentials.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_HNC_potentials.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

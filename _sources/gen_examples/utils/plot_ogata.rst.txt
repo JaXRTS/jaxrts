@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_gen_examples_utils_plot_ogata.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -39,16 +39,16 @@ Ogata Fourier transform
       f = lambda r: 1 / r * (np.exp(-r))  # noqa: E731
     /home/runner/work/jaxrts/jaxrts/doc/examples/utils/plot_ogata.py:84: RuntimeWarning: invalid value encountered in multiply
       r, fvals * np.sqrt(rvals), bounds_error=False, fill_value=(np.nan, 0.0)
-    t= 1.0822112560272217 s
-    t= 0.006898164749145508 s
-    t= 0.005897998809814453 s
-    t= 0.0053882598876953125 s
-    t= 0.0054743289947509766 s
-    t= 0.00523686408996582 s
-    t= 0.005577802658081055 s
-    t= 0.005486011505126953 s
-    t= 0.005785465240478516 s
-    t= 0.005853891372680664 s
+    t= 0.9723012447357178 s
+    t= 0.007378816604614258 s
+    t= 0.0062694549560546875 s
+    t= 0.0055162906646728516 s
+    t= 0.005601167678833008 s
+    t= 0.005433082580566406 s
+    t= 0.005560636520385742 s
+    t= 0.0054738521575927734 s
+    t= 0.00539851188659668 s
+    t= 0.00542902946472168 s
 
 
 
@@ -222,7 +222,7 @@ Ogata Fourier transform
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.822 seconds)
+   **Total running time of the script:** (0 minutes 1.736 seconds)
 
 
 .. _sphx_glr_download_gen_examples_utils_plot_ogata.py:
@@ -238,6 +238,10 @@ Ogata Fourier transform
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_ogata.py <plot_ogata.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_ogata.zip <plot_ogata.zip>`
 
 
 .. only:: html

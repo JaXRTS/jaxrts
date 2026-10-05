@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,23 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.elements &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -86,9 +85,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for jaxrts.elements</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">This submodule contains data for different chemical elements.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
@@ -103,80 +102,80 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ureg</span>
 
 <span class="n">_element_symbols</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>  <span class="c1"># Hydrogen</span>
-    <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;He&quot;</span><span class="p">,</span>  <span class="c1"># Helium</span>
-    <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;Li&quot;</span><span class="p">,</span>  <span class="c1"># Lithium</span>
-    <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;Be&quot;</span><span class="p">,</span>  <span class="c1"># Beryllium</span>
-    <span class="mi">5</span><span class="p">:</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span>  <span class="c1"># Boron</span>
-    <span class="mi">6</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>  <span class="c1"># Carbon</span>
-    <span class="mi">7</span><span class="p">:</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span>  <span class="c1"># Nitrogen</span>
-    <span class="mi">8</span><span class="p">:</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span>  <span class="c1"># Oxygen</span>
-    <span class="mi">9</span><span class="p">:</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span>  <span class="c1"># Fluorine</span>
-    <span class="mi">10</span><span class="p">:</span> <span class="s2">&quot;Ne&quot;</span><span class="p">,</span>  <span class="c1"># Neon</span>
-    <span class="mi">11</span><span class="p">:</span> <span class="s2">&quot;Na&quot;</span><span class="p">,</span>  <span class="c1"># Sodium</span>
-    <span class="mi">12</span><span class="p">:</span> <span class="s2">&quot;Mg&quot;</span><span class="p">,</span>  <span class="c1"># Magnesium</span>
-    <span class="mi">13</span><span class="p">:</span> <span class="s2">&quot;Al&quot;</span><span class="p">,</span>  <span class="c1"># Aluminum</span>
-    <span class="mi">14</span><span class="p">:</span> <span class="s2">&quot;Si&quot;</span><span class="p">,</span>  <span class="c1"># Silicon</span>
-    <span class="mi">15</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span>  <span class="c1"># Phosphorus</span>
-    <span class="mi">16</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span>  <span class="c1"># Sulfur</span>
-    <span class="mi">17</span><span class="p">:</span> <span class="s2">&quot;Cl&quot;</span><span class="p">,</span>  <span class="c1"># Chlorine</span>
-    <span class="mi">18</span><span class="p">:</span> <span class="s2">&quot;Ar&quot;</span><span class="p">,</span>  <span class="c1"># Argon</span>
-    <span class="mi">19</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>  <span class="c1"># Potassium</span>
-    <span class="mi">20</span><span class="p">:</span> <span class="s2">&quot;Ca&quot;</span><span class="p">,</span>  <span class="c1"># Calcium</span>
-    <span class="mi">21</span><span class="p">:</span> <span class="s2">&quot;Sc&quot;</span><span class="p">,</span>  <span class="c1"># Scandium</span>
-    <span class="mi">22</span><span class="p">:</span> <span class="s2">&quot;Ti&quot;</span><span class="p">,</span>  <span class="c1"># Titanium</span>
-    <span class="mi">23</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>  <span class="c1"># Vanadium</span>
-    <span class="mi">24</span><span class="p">:</span> <span class="s2">&quot;Cr&quot;</span><span class="p">,</span>  <span class="c1"># Chromium</span>
-    <span class="mi">25</span><span class="p">:</span> <span class="s2">&quot;Mn&quot;</span><span class="p">,</span>  <span class="c1"># Manganese</span>
-    <span class="mi">26</span><span class="p">:</span> <span class="s2">&quot;Fe&quot;</span><span class="p">,</span>  <span class="c1"># Iron</span>
-    <span class="mi">27</span><span class="p">:</span> <span class="s2">&quot;Co&quot;</span><span class="p">,</span>  <span class="c1"># Cobalt</span>
-    <span class="mi">28</span><span class="p">:</span> <span class="s2">&quot;Ni&quot;</span><span class="p">,</span>  <span class="c1"># Nickel</span>
-    <span class="mi">29</span><span class="p">:</span> <span class="s2">&quot;Cu&quot;</span><span class="p">,</span>  <span class="c1"># Copper</span>
-    <span class="mi">30</span><span class="p">:</span> <span class="s2">&quot;Zn&quot;</span><span class="p">,</span>  <span class="c1"># Zinc</span>
-    <span class="mi">31</span><span class="p">:</span> <span class="s2">&quot;Ga&quot;</span><span class="p">,</span>  <span class="c1"># Gallium</span>
-    <span class="mi">32</span><span class="p">:</span> <span class="s2">&quot;Ge&quot;</span><span class="p">,</span>  <span class="c1"># Germanium</span>
-    <span class="mi">33</span><span class="p">:</span> <span class="s2">&quot;As&quot;</span><span class="p">,</span>  <span class="c1"># Arsenic</span>
-    <span class="mi">34</span><span class="p">:</span> <span class="s2">&quot;Se&quot;</span><span class="p">,</span>  <span class="c1"># Selenium</span>
-    <span class="mi">35</span><span class="p">:</span> <span class="s2">&quot;Br&quot;</span><span class="p">,</span>  <span class="c1"># Bromine</span>
-    <span class="mi">36</span><span class="p">:</span> <span class="s2">&quot;Kr&quot;</span><span class="p">,</span>  <span class="c1"># Krypton</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s2">"H"</span><span class="p">,</span>  <span class="c1"># Hydrogen</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s2">"He"</span><span class="p">,</span>  <span class="c1"># Helium</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s2">"Li"</span><span class="p">,</span>  <span class="c1"># Lithium</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="s2">"Be"</span><span class="p">,</span>  <span class="c1"># Beryllium</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="s2">"B"</span><span class="p">,</span>  <span class="c1"># Boron</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="s2">"C"</span><span class="p">,</span>  <span class="c1"># Carbon</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="s2">"N"</span><span class="p">,</span>  <span class="c1"># Nitrogen</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="s2">"O"</span><span class="p">,</span>  <span class="c1"># Oxygen</span>
+    <span class="mi">9</span><span class="p">:</span> <span class="s2">"F"</span><span class="p">,</span>  <span class="c1"># Fluorine</span>
+    <span class="mi">10</span><span class="p">:</span> <span class="s2">"Ne"</span><span class="p">,</span>  <span class="c1"># Neon</span>
+    <span class="mi">11</span><span class="p">:</span> <span class="s2">"Na"</span><span class="p">,</span>  <span class="c1"># Sodium</span>
+    <span class="mi">12</span><span class="p">:</span> <span class="s2">"Mg"</span><span class="p">,</span>  <span class="c1"># Magnesium</span>
+    <span class="mi">13</span><span class="p">:</span> <span class="s2">"Al"</span><span class="p">,</span>  <span class="c1"># Aluminum</span>
+    <span class="mi">14</span><span class="p">:</span> <span class="s2">"Si"</span><span class="p">,</span>  <span class="c1"># Silicon</span>
+    <span class="mi">15</span><span class="p">:</span> <span class="s2">"P"</span><span class="p">,</span>  <span class="c1"># Phosphorus</span>
+    <span class="mi">16</span><span class="p">:</span> <span class="s2">"S"</span><span class="p">,</span>  <span class="c1"># Sulfur</span>
+    <span class="mi">17</span><span class="p">:</span> <span class="s2">"Cl"</span><span class="p">,</span>  <span class="c1"># Chlorine</span>
+    <span class="mi">18</span><span class="p">:</span> <span class="s2">"Ar"</span><span class="p">,</span>  <span class="c1"># Argon</span>
+    <span class="mi">19</span><span class="p">:</span> <span class="s2">"K"</span><span class="p">,</span>  <span class="c1"># Potassium</span>
+    <span class="mi">20</span><span class="p">:</span> <span class="s2">"Ca"</span><span class="p">,</span>  <span class="c1"># Calcium</span>
+    <span class="mi">21</span><span class="p">:</span> <span class="s2">"Sc"</span><span class="p">,</span>  <span class="c1"># Scandium</span>
+    <span class="mi">22</span><span class="p">:</span> <span class="s2">"Ti"</span><span class="p">,</span>  <span class="c1"># Titanium</span>
+    <span class="mi">23</span><span class="p">:</span> <span class="s2">"V"</span><span class="p">,</span>  <span class="c1"># Vanadium</span>
+    <span class="mi">24</span><span class="p">:</span> <span class="s2">"Cr"</span><span class="p">,</span>  <span class="c1"># Chromium</span>
+    <span class="mi">25</span><span class="p">:</span> <span class="s2">"Mn"</span><span class="p">,</span>  <span class="c1"># Manganese</span>
+    <span class="mi">26</span><span class="p">:</span> <span class="s2">"Fe"</span><span class="p">,</span>  <span class="c1"># Iron</span>
+    <span class="mi">27</span><span class="p">:</span> <span class="s2">"Co"</span><span class="p">,</span>  <span class="c1"># Cobalt</span>
+    <span class="mi">28</span><span class="p">:</span> <span class="s2">"Ni"</span><span class="p">,</span>  <span class="c1"># Nickel</span>
+    <span class="mi">29</span><span class="p">:</span> <span class="s2">"Cu"</span><span class="p">,</span>  <span class="c1"># Copper</span>
+    <span class="mi">30</span><span class="p">:</span> <span class="s2">"Zn"</span><span class="p">,</span>  <span class="c1"># Zinc</span>
+    <span class="mi">31</span><span class="p">:</span> <span class="s2">"Ga"</span><span class="p">,</span>  <span class="c1"># Gallium</span>
+    <span class="mi">32</span><span class="p">:</span> <span class="s2">"Ge"</span><span class="p">,</span>  <span class="c1"># Germanium</span>
+    <span class="mi">33</span><span class="p">:</span> <span class="s2">"As"</span><span class="p">,</span>  <span class="c1"># Arsenic</span>
+    <span class="mi">34</span><span class="p">:</span> <span class="s2">"Se"</span><span class="p">,</span>  <span class="c1"># Selenium</span>
+    <span class="mi">35</span><span class="p">:</span> <span class="s2">"Br"</span><span class="p">,</span>  <span class="c1"># Bromine</span>
+    <span class="mi">36</span><span class="p">:</span> <span class="s2">"Kr"</span><span class="p">,</span>  <span class="c1"># Krypton</span>
 <span class="p">}</span>
 <span class="n">_element_names</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Hydrogen&quot;</span><span class="p">,</span>
-    <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Helium&quot;</span><span class="p">,</span>
-    <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;Lithium&quot;</span><span class="p">,</span>
-    <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;Beryllium&quot;</span><span class="p">,</span>
-    <span class="mi">5</span><span class="p">:</span> <span class="s2">&quot;Boron&quot;</span><span class="p">,</span>
-    <span class="mi">6</span><span class="p">:</span> <span class="s2">&quot;Carbon&quot;</span><span class="p">,</span>
-    <span class="mi">7</span><span class="p">:</span> <span class="s2">&quot;Nitrogen&quot;</span><span class="p">,</span>
-    <span class="mi">8</span><span class="p">:</span> <span class="s2">&quot;Oxygen&quot;</span><span class="p">,</span>
-    <span class="mi">9</span><span class="p">:</span> <span class="s2">&quot;Fluorine&quot;</span><span class="p">,</span>
-    <span class="mi">10</span><span class="p">:</span> <span class="s2">&quot;Neon&quot;</span><span class="p">,</span>
-    <span class="mi">11</span><span class="p">:</span> <span class="s2">&quot;Sodium&quot;</span><span class="p">,</span>
-    <span class="mi">12</span><span class="p">:</span> <span class="s2">&quot;Magnesium&quot;</span><span class="p">,</span>
-    <span class="mi">13</span><span class="p">:</span> <span class="s2">&quot;Aluminum&quot;</span><span class="p">,</span>
-    <span class="mi">14</span><span class="p">:</span> <span class="s2">&quot;Silicon&quot;</span><span class="p">,</span>
-    <span class="mi">15</span><span class="p">:</span> <span class="s2">&quot;Phosphorus&quot;</span><span class="p">,</span>
-    <span class="mi">16</span><span class="p">:</span> <span class="s2">&quot;Sulfur&quot;</span><span class="p">,</span>
-    <span class="mi">17</span><span class="p">:</span> <span class="s2">&quot;Chlorine&quot;</span><span class="p">,</span>
-    <span class="mi">18</span><span class="p">:</span> <span class="s2">&quot;Argon&quot;</span><span class="p">,</span>
-    <span class="mi">19</span><span class="p">:</span> <span class="s2">&quot;Potassium&quot;</span><span class="p">,</span>
-    <span class="mi">20</span><span class="p">:</span> <span class="s2">&quot;Calcium&quot;</span><span class="p">,</span>
-    <span class="mi">21</span><span class="p">:</span> <span class="s2">&quot;Scandium&quot;</span><span class="p">,</span>
-    <span class="mi">22</span><span class="p">:</span> <span class="s2">&quot;Titanium&quot;</span><span class="p">,</span>
-    <span class="mi">23</span><span class="p">:</span> <span class="s2">&quot;Vanadium&quot;</span><span class="p">,</span>
-    <span class="mi">24</span><span class="p">:</span> <span class="s2">&quot;Chromium&quot;</span><span class="p">,</span>
-    <span class="mi">25</span><span class="p">:</span> <span class="s2">&quot;Manganese&quot;</span><span class="p">,</span>
-    <span class="mi">26</span><span class="p">:</span> <span class="s2">&quot;Iron&quot;</span><span class="p">,</span>
-    <span class="mi">27</span><span class="p">:</span> <span class="s2">&quot;Cobalt&quot;</span><span class="p">,</span>
-    <span class="mi">28</span><span class="p">:</span> <span class="s2">&quot;Nickel&quot;</span><span class="p">,</span>
-    <span class="mi">29</span><span class="p">:</span> <span class="s2">&quot;Copper&quot;</span><span class="p">,</span>
-    <span class="mi">30</span><span class="p">:</span> <span class="s2">&quot;Zinc&quot;</span><span class="p">,</span>
-    <span class="mi">31</span><span class="p">:</span> <span class="s2">&quot;Gallium&quot;</span><span class="p">,</span>
-    <span class="mi">32</span><span class="p">:</span> <span class="s2">&quot;Germanium&quot;</span><span class="p">,</span>
-    <span class="mi">33</span><span class="p">:</span> <span class="s2">&quot;Arsenic&quot;</span><span class="p">,</span>
-    <span class="mi">34</span><span class="p">:</span> <span class="s2">&quot;Selenium&quot;</span><span class="p">,</span>
-    <span class="mi">35</span><span class="p">:</span> <span class="s2">&quot;Bromine&quot;</span><span class="p">,</span>
-    <span class="mi">36</span><span class="p">:</span> <span class="s2">&quot;Krypton&quot;</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s2">"Hydrogen"</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s2">"Helium"</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s2">"Lithium"</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="s2">"Beryllium"</span><span class="p">,</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="s2">"Boron"</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="s2">"Carbon"</span><span class="p">,</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="s2">"Nitrogen"</span><span class="p">,</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="s2">"Oxygen"</span><span class="p">,</span>
+    <span class="mi">9</span><span class="p">:</span> <span class="s2">"Fluorine"</span><span class="p">,</span>
+    <span class="mi">10</span><span class="p">:</span> <span class="s2">"Neon"</span><span class="p">,</span>
+    <span class="mi">11</span><span class="p">:</span> <span class="s2">"Sodium"</span><span class="p">,</span>
+    <span class="mi">12</span><span class="p">:</span> <span class="s2">"Magnesium"</span><span class="p">,</span>
+    <span class="mi">13</span><span class="p">:</span> <span class="s2">"Aluminum"</span><span class="p">,</span>
+    <span class="mi">14</span><span class="p">:</span> <span class="s2">"Silicon"</span><span class="p">,</span>
+    <span class="mi">15</span><span class="p">:</span> <span class="s2">"Phosphorus"</span><span class="p">,</span>
+    <span class="mi">16</span><span class="p">:</span> <span class="s2">"Sulfur"</span><span class="p">,</span>
+    <span class="mi">17</span><span class="p">:</span> <span class="s2">"Chlorine"</span><span class="p">,</span>
+    <span class="mi">18</span><span class="p">:</span> <span class="s2">"Argon"</span><span class="p">,</span>
+    <span class="mi">19</span><span class="p">:</span> <span class="s2">"Potassium"</span><span class="p">,</span>
+    <span class="mi">20</span><span class="p">:</span> <span class="s2">"Calcium"</span><span class="p">,</span>
+    <span class="mi">21</span><span class="p">:</span> <span class="s2">"Scandium"</span><span class="p">,</span>
+    <span class="mi">22</span><span class="p">:</span> <span class="s2">"Titanium"</span><span class="p">,</span>
+    <span class="mi">23</span><span class="p">:</span> <span class="s2">"Vanadium"</span><span class="p">,</span>
+    <span class="mi">24</span><span class="p">:</span> <span class="s2">"Chromium"</span><span class="p">,</span>
+    <span class="mi">25</span><span class="p">:</span> <span class="s2">"Manganese"</span><span class="p">,</span>
+    <span class="mi">26</span><span class="p">:</span> <span class="s2">"Iron"</span><span class="p">,</span>
+    <span class="mi">27</span><span class="p">:</span> <span class="s2">"Cobalt"</span><span class="p">,</span>
+    <span class="mi">28</span><span class="p">:</span> <span class="s2">"Nickel"</span><span class="p">,</span>
+    <span class="mi">29</span><span class="p">:</span> <span class="s2">"Copper"</span><span class="p">,</span>
+    <span class="mi">30</span><span class="p">:</span> <span class="s2">"Zinc"</span><span class="p">,</span>
+    <span class="mi">31</span><span class="p">:</span> <span class="s2">"Gallium"</span><span class="p">,</span>
+    <span class="mi">32</span><span class="p">:</span> <span class="s2">"Germanium"</span><span class="p">,</span>
+    <span class="mi">33</span><span class="p">:</span> <span class="s2">"Arsenic"</span><span class="p">,</span>
+    <span class="mi">34</span><span class="p">:</span> <span class="s2">"Selenium"</span><span class="p">,</span>
+    <span class="mi">35</span><span class="p">:</span> <span class="s2">"Bromine"</span><span class="p">,</span>
+    <span class="mi">36</span><span class="p">:</span> <span class="s2">"Krypton"</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="n">_element_masses</span> <span class="o">=</span> <span class="p">{</span>
     <span class="mi">1</span><span class="p">:</span> <span class="mf">1.008</span><span class="p">,</span>
@@ -226,8 +225,8 @@
 <span class="c1"># http://scitation.aip.org/content/aip/journal/jcp/41/10/10.1063/1.1725697,</span>
 <span class="c1"># doi:10.1063/1.1725697.</span>
 <span class="c1"># For Z=36 krypton, where no empirical value is supplied, we use the calculated</span>
-<span class="c1"># value of E. Clementi; D.L.Raimondi; W.P. Reinhardt (1967). &quot;Atomic Screening</span>
-<span class="c1"># Constants from SCF Functions. II. Atoms with 37 to 86 Electrons&quot;. The Journal</span>
+<span class="c1"># value of E. Clementi; D.L.Raimondi; W.P. Reinhardt (1967). "Atomic Screening</span>
+<span class="c1"># Constants from SCF Functions. II. Atoms with 37 to 86 Electrons". The Journal</span>
 <span class="c1"># of Chemical Physics. 47 (4): 1300–1307.</span>
 <span class="c1"># See https://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_(data_page)</span>
 <span class="c1"># in pm</span>
@@ -269,8 +268,8 @@
     <span class="mi">35</span><span class="p">:</span> <span class="mf">115.0</span><span class="p">,</span>
     <span class="mi">36</span><span class="p">:</span> <span class="mf">88.0</span><span class="p">,</span>
 <span class="p">}</span>
-<span class="c1"># E. Clementi; D.L.Raimondi; W.P. Reinhardt (1967). &quot;Atomic Screening</span>
-<span class="c1"># Constants from SCF Functions. II. Atoms with 37 to 86 Electrons&quot;. The Journal</span>
+<span class="c1"># E. Clementi; D.L.Raimondi; W.P. Reinhardt (1967). "Atomic Screening</span>
+<span class="c1"># Constants from SCF Functions. II. Atoms with 37 to 86 Electrons". The Journal</span>
 <span class="c1"># of Chemical Physics. 47 (4): 1300–1307.</span>
 <span class="c1"># See https://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_(data_page)</span>
 <span class="c1"># in pm</span>
@@ -313,12 +312,12 @@
     <span class="mi">36</span><span class="p">:</span> <span class="mi">88</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1"># These Values are taken from Shannon, R. D., &quot;Revised effective ionic radii</span>
+<span class="c1"># These Values are taken from Shannon, R. D., "Revised effective ionic radii</span>
 <span class="c1"># and systematic studies of interatomic distances in halides and</span>
-<span class="c1"># chalcogenides&quot;, Acta Crystallographica Section A, vol. 32, no 5, 1976. as</span>
+<span class="c1"># chalcogenides", Acta Crystallographica Section A, vol. 32, no 5, 1976. as</span>
 <span class="c1"># they are presented by Baloch, Ahmer A. B. and Alqahtani, Saad M. and Mumtaz,</span>
 <span class="c1"># Faisal and Muqaibel, Ali H. and Rashkeev, Sergey N. and Alharbi, Fahhad H.,</span>
-<span class="c1"># &quot;Extending Shannon&#39;s ionic radii database using machine learning&quot;, Physical</span>
+<span class="c1"># "Extending Shannon's ionic radii database using machine learning", Physical</span>
 <span class="c1"># Review Materials, vol. 5, no 4, 2021. at https://cmd-ml.github.io/.</span>
 <span class="c1">#</span>
 <span class="c1"># The entries are formatted as follows: (Oxidation State, Coordination Number,</span>
@@ -609,10 +608,10 @@
 <span class="p">}</span>
 
 
-<span class="n">max_Z</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">_absorption_edges_ionized_atoms</span><span class="p">)</span>
+<span class="n">max_Z</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"Z"</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">_absorption_edges_ionized_atoms</span><span class="p">)</span>
 <span class="n">max_charge_state</span> <span class="o">=</span> <span class="p">(</span>
     <span class="nb">max</span><span class="p">(</span>
-        <span class="nb">max</span><span class="p">(</span><span class="n">ion_data</span><span class="p">[</span><span class="s2">&quot;ions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="nb">max</span><span class="p">(</span><span class="n">ion_data</span><span class="p">[</span><span class="s2">"ions"</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">for</span> <span class="n">ion_data</span> <span class="ow">in</span> <span class="n">_absorption_edges_ionized_atoms</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">_absorption_edges_ionized_atoms</span>
@@ -630,9 +629,9 @@
 
 <span class="c1"># Fill the _edge_position_table_ionization_states with ionization energies</span>
 <span class="k">for</span> <span class="n">element_data</span> <span class="ow">in</span> <span class="n">_absorption_edges_ionized_atoms</span><span class="p">:</span>
-    <span class="n">Z</span> <span class="o">=</span> <span class="n">element_data</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">charge</span><span class="p">,</span> <span class="n">ion_info</span> <span class="ow">in</span> <span class="n">element_data</span><span class="p">[</span><span class="s2">&quot;ions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">orbital</span><span class="p">,</span> <span class="n">energy</span> <span class="ow">in</span> <span class="n">ion_info</span><span class="p">[</span><span class="s2">&quot;ionization_energies_eV&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">element_data</span><span class="p">[</span><span class="s2">"Z"</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">charge</span><span class="p">,</span> <span class="n">ion_info</span> <span class="ow">in</span> <span class="n">element_data</span><span class="p">[</span><span class="s2">"ions"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">orbital</span><span class="p">,</span> <span class="n">energy</span> <span class="ow">in</span> <span class="n">ion_info</span><span class="p">[</span><span class="s2">"ionization_energies_eV"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">orbital</span> <span class="ow">in</span> <span class="n">orbital_map</span><span class="p">:</span>
                 <span class="n">orbital_idx</span> <span class="o">=</span> <span class="n">orbital_map</span><span class="p">[</span><span class="n">orbital</span><span class="p">]</span>
                 <span class="n">_edge_position_table_ionization_states</span> <span class="o">=</span> <span class="p">(</span>
@@ -1630,7 +1629,7 @@
 <div class="viewcode-block" id="electron_distribution">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.elements.electron_distribution.html#jaxrts.elements.electron_distribution">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">electron_distribution</span><span class="p">(</span><span class="n">atomic_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns number of electrons for each orbital (defined by the quantum</span>
 <span class="sd">    numbers n and l) for a neutral atom with the given ``atomic_number``.</span>
 
@@ -1646,7 +1645,7 @@
 <span class="sd">        ``1s``, up to ``4f``.</span>
 <span class="sd">        To find the corresponding indices for individual orbitals, one can use</span>
 <span class="sd">        :py:data:`~.helpers.orbital_map`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_ionization_econf</span><span class="p">[</span><span class="n">atomic_number</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
 
 
@@ -1655,7 +1654,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.elements.electron_distribution_ionized_state.html#jaxrts.elements.electron_distribution_ionized_state">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">electron_distribution_ionized_state</span><span class="p">(</span><span class="n">Z_core</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Interpolate between electron populations if the number of core electrons is</span>
 <span class="sd">    not an integer.</span>
 
@@ -1678,7 +1677,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    jnp.ndarray</span>
 <span class="sd">        An array of populations.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">S1s</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z_core</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
     <span class="n">S2s</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z_core</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
     <span class="n">S2p</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z_core</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">]),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">]))</span>
@@ -1710,9 +1709,9 @@
 <div class="viewcode-block" id="Ionization">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.elements.Ionization.html#jaxrts.elements.Ionization">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Ionization</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This class contains information of the ionization states of an atom.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="Ionization.__init__">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.elements.Ionization.__init__.html#jaxrts.elements.Ionization.__init__">[docs]</a>
@@ -1798,14 +1797,14 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Element</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Cannot compare </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2"> to an object of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># noqa: E501</span>
+                <span class="sa">f</span><span class="s2">"Cannot compare </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2"> to an object of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>  <span class="c1"># noqa: E501</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">MixElement</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">Z</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Element </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2">) Z=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Element </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2">) Z=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="si">}</span><span class="s2">"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span></div>
@@ -1815,23 +1814,23 @@
 <div class="viewcode-block" id="MixElement">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.elements.MixElement.html#jaxrts.elements.MixElement">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MixElement</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This helper class is used to define Average Atoms to perform calculations</span>
 <span class="sd">    on.</span>
 
 <span class="sd">    This class is not intended to be used everywhere, where a real</span>
 <span class="sd">    :py:class:`~.Element` can be used. Rather, we see it as a convenience tool.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="MixElement.__init__">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.elements.MixElement.__init__.html#jaxrts.elements.MixElement.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Zmix</span><span class="p">,</span> <span class="n">avgMass</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Zmix</span><span class="p">,</span> <span class="n">avgMass</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">""</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Zmix</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">electron_distribution</span> <span class="o">=</span> <span class="n">electron_distribution_ionized_state</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Z</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atomic_mass</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="n">avgMass</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="s2">&quot;MIX&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="s2">"MIX"</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
         <span class="c1"># These are entries that do not make semse for an Average Atom</span>

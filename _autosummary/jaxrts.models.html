@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.models &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -220,7 +219,7 @@ implemented.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ArkhipovIonFeat.html#jaxrts.models.ArkhipovIonFeat" title="jaxrts.models.ArkhipovIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ArkhipovIonFeat</span></code></a>()</p></td>
 <td><p>Model for the ion feature of the scattering, presented in <span class="bibtex-citation" id="id2">[<a class="reference internal" href="../bibliography.html#id4" title="Yu.V. Arkhipov and A.E. Davletov. Screened pseudopotential and static structure factors of semiclassical two-component plasmas. Physics Letters A, 247:339–342, 10 1998. doi:10.1016/s0375-9601(98)00613-6.">Arkhipov and Davletov, 1998</a>]</span> and <span class="bibtex-citation" id="id3">[<a class="reference internal" href="../bibliography.html#id5" title="Yu. V. Arkhipov, F. B. Baimbetov, and A. E. Davletov. Thermodynamics of dense high-temperature plasmas: semiclassical approach. The European Physical Journal D, 8:299–304, 1 2000. doi:10.1007/s10053-000-8809-x.">Arkhipov et al., 2000</a>]</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.html#jaxrts.models.AverageAtom_Sii" title="jaxrts.models.AverageAtom_Sii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AverageAtom_Sii</span></code></a>(rmin, rmax, pot, mix, tmult)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.AverageAtom_Sii.html#jaxrts.models.AverageAtom_Sii" title="jaxrts.models.AverageAtom_Sii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AverageAtom_Sii</span></code></a>([rmin, rmax, pot, mix, tmult])</p></td>
 <td><p>This model performs a HNC calculation, assuming one average atom with a given, average charge state.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.BM_V_eiSModel.html#jaxrts.models.BM_V_eiSModel" title="jaxrts.models.BM_V_eiSModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BM_V_eiSModel</span></code></a>()</p></td>
@@ -229,13 +228,13 @@ implemented.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.BohmStaver.html#jaxrts.models.BohmStaver" title="jaxrts.models.BohmStaver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BohmStaver</span></code></a>()</p></td>
 <td><p>The Bohm-Staver relation for the Debye temperature, valid for 'simple metals', as it is presented in Eqn (3) of <span class="bibtex-citation" id="id4">[<a class="reference internal" href="../bibliography.html#id47" title="G. Gregori, S. H. Glenzer, and O. L. Landen. Generalized x-ray scattering cross section from nonequilibrium plasmas. Physical Review E, 8 2006. doi:10.1103/physreve.74.026402.">Gregori et al., 2006a</a>]</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.BornMermin.html#jaxrts.models.BornMermin" title="jaxrts.models.BornMermin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin</span></code></a>(no_of_freq, RPA_rewrite, KKT, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.BornMermin.html#jaxrts.models.BornMermin" title="jaxrts.models.BornMermin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin</span></code></a>([no_of_freq, RPA_rewrite, KKT, ...])</p></td>
 <td><p>Model for the free-free scattering, based on the Born Mermin Approximation (<span class="bibtex-citation" id="id5">[<a class="reference internal" href="../bibliography.html#id76" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.BornMermin_Fit.html#jaxrts.models.BornMermin_Fit" title="jaxrts.models.BornMermin_Fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin_Fit</span></code></a>(no_of_freq, RPA_rewrite, KKT, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.BornMermin_Fit.html#jaxrts.models.BornMermin_Fit" title="jaxrts.models.BornMermin_Fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin_Fit</span></code></a>([no_of_freq, RPA_rewrite, ...])</p></td>
 <td><p>Model for the free-free scattering, based on the Born Mermin Approximation (<span class="bibtex-citation" id="id6">[<a class="reference internal" href="../bibliography.html#id76" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.BornMermin_Fortmann.html#jaxrts.models.BornMermin_Fortmann" title="jaxrts.models.BornMermin_Fortmann"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin_Fortmann</span></code></a>(no_of_freq, RPA_rewrite, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.BornMermin_Fortmann.html#jaxrts.models.BornMermin_Fortmann" title="jaxrts.models.BornMermin_Fortmann"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin_Fortmann</span></code></a>([no_of_freq, ...])</p></td>
 <td><p>Model for the free-free scattering, based on the Born Mermin Approximation (<span class="bibtex-citation" id="id7">[<a class="reference internal" href="../bibliography.html#id76" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.BornMermin_Full.html#jaxrts.models.BornMermin_Full" title="jaxrts.models.BornMermin_Full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BornMermin_Full</span></code></a>([RPA_rewrite, KKT])</p></td>
@@ -367,7 +366,7 @@ implemented.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.NonNegative.html#jaxrts.models.NonNegative" title="jaxrts.models.NonNegative"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NonNegative</span></code></a>()</p></td>
 <td><p>Cuts at <a class="reference internal" href="jaxrts.setup.Setup.measured_energy.html#jaxrts.setup.Setup.measured_energy" title="jaxrts.setup.Setup.measured_energy"><code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.setup.Setup.measured_energy</span></code></a> <code class="docutils literal notranslate"><span class="pre">=</span> <span class="pre">0</span> <span class="pre">eV</span></code>, independently of the <code class="docutils literal notranslate"><span class="pre">edge_energy</span></code> given, so that only energy transfer to the electrons (down-shifted photon energies) are permitted.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.OnePotentialHNCIonFeat.html#jaxrts.models.OnePotentialHNCIonFeat" title="jaxrts.models.OnePotentialHNCIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OnePotentialHNCIonFeat</span></code></a>(rmin, rmax, pot, SVT, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.OnePotentialHNCIonFeat.html#jaxrts.models.OnePotentialHNCIonFeat" title="jaxrts.models.OnePotentialHNCIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OnePotentialHNCIonFeat</span></code></a>([rmin, rmax, pot, ...])</p></td>
 <td><p>Calculates <span class="math notranslate nohighlight">\(S_{ab}\)</span> in the Hypernetted Chain approximation.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.PauliBlockingIPD.html#jaxrts.models.PauliBlockingIPD" title="jaxrts.models.PauliBlockingIPD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PauliBlockingIPD</span></code></a>()</p></td>
@@ -427,7 +426,7 @@ implemented.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.models.Sum_Sii.html#jaxrts.models.Sum_Sii" title="jaxrts.models.Sum_Sii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sum_Sii</span></code></a>()</p></td>
 <td><p>This model sums up all <span class="math notranslate nohighlight">\(S_{ab}\)</span> from the HNC and multiplies it with <span class="math notranslate nohighlight">\(\sqrt{x_{a}\cdot x_{b}}\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.html#jaxrts.models.ThreePotentialHNCIonFeat" title="jaxrts.models.ThreePotentialHNCIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ThreePotentialHNCIonFeat</span></code></a>(rmin, rmax, pot, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.html#jaxrts.models.ThreePotentialHNCIonFeat" title="jaxrts.models.ThreePotentialHNCIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ThreePotentialHNCIonFeat</span></code></a>([rmin, rmax, pot, ...])</p></td>
 <td><p>Calculates <span class="math notranslate nohighlight">\(S_{ab}\)</span> including electron-ion and electron-electron static structure factors using the Hypernetted Chain approximation.</p></td>
 </tr>
 </tbody>

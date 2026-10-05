@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -6,23 +8,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>All available instrument function models. &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -126,69 +125,71 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-gen-examples-utils-plot-instrument-function-models-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="all-available-instrument-function-models">
 <span id="sphx-glr-gen-examples-utils-plot-instrument-function-models-py"></span><h1>All available instrument function models.<a class="headerlink" href="#all-available-instrument-function-models" title="Link to this heading"></a></h1>
 <p>To include an instrument function in a <code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.Setup</span></code>, we require it
 to be Callable that takes only one argument, the shift in frequency space. The
 function has to be normalized to unify from -infinity to +infinity.</p>
-<img src="../../_images/sphx_glr_plot_instrument_function_models_001.svg" srcset="../../_images/sphx_glr_plot_instrument_function_models_001.svg" alt="plot instrument function models" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts.instrument_function</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ifs</span>
-
-<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ureg</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
-
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-
-<span class="n">E</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span>
-<span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
-
-
-<span class="n">width</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <a href="../../_autosummary/jaxrts.instrument_function.Gaussian.html#jaxrts.instrument_function.Gaussian" title="jaxrts.instrument_function.Gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">ifs</span><span class="o">.</span><span class="n">Gaussian</span></a><span class="p">(</span><span class="n">width</span><span class="p">)(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Gaussian Model&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <a href="../../_autosummary/jaxrts.instrument_function.SuperGaussian.html#jaxrts.instrument_function.SuperGaussian" title="jaxrts.instrument_function.SuperGaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">ifs</span><span class="o">.</span><span class="n">SuperGaussian</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">width</span><span class="p">)(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Super-Gaussian Model (p=2)&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <a href="../../_autosummary/jaxrts.instrument_function.TwinGaussian.html#jaxrts.instrument_function.TwinGaussian" title="jaxrts.instrument_function.TwinGaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">ifs</span><span class="o">.</span><span class="n">TwinGaussian</span></a><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">width</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
-        <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
-    <span class="p">),</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;TwinGaussian (w1 = w/2, w2 = 2w)&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <a href="../../_autosummary/jaxrts.instrument_function.Lorentzian.html#jaxrts.instrument_function.Lorentzian" title="jaxrts.instrument_function.Lorentzian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">ifs</span><span class="o">.</span><span class="n">Lorentzian</span></a><span class="p">(</span><span class="n">width</span><span class="p">)(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Lorentzian Model&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;E [eV]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Intensity [hbar / eV]&quot;</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.645 seconds)</p>
+<img src="../../_images/sphx_glr_plot_instrument_function_models_001.svg" srcset="../../_images/sphx_glr_plot_instrument_function_models_001.svg" alt="plot instrument function models" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span><span class="nn">.</span><span class="nn">instrument_function</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ifs</span><span class="w">
+</span><span class="w">
+</span><span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ureg</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">science</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">E</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="w">
+</span><span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="n">width</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.instrument_function.Gaussian.html#jaxrts.instrument_function.Gaussian" title="jaxrts.instrument_function.Gaussian"><span class="n">ifs</span><span class="o">.</span><span class="n">Gaussian</span></a><span class="p">(</span><span class="n">width</span><span class="p">)</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Gaussian Model</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.instrument_function.SuperGaussian.html#jaxrts.instrument_function.SuperGaussian" title="jaxrts.instrument_function.SuperGaussian"><span class="n">ifs</span><span class="o">.</span><span class="n">SuperGaussian</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Super-Gaussian Model (p=2)</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.instrument_function.TwinGaussian.html#jaxrts.instrument_function.TwinGaussian" title="jaxrts.instrument_function.TwinGaussian"><span class="n">ifs</span><span class="o">.</span><span class="n">TwinGaussian</span></a><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">width</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="w">
+</span>        <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="w">
+</span>    <span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">TwinGaussian (w1 = w/2, w2 = 2w)</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">E</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.instrument_function.Lorentzian.html#jaxrts.instrument_function.Lorentzian" title="jaxrts.instrument_function.Lorentzian"><span class="n">ifs</span><span class="o">.</span><span class="n">Lorentzian</span></a><span class="p">(</span><span class="n">width</span><span class="p">)</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Lorentzian Model</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">E [eV]</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Intensity [hbar / eV]</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">upper left</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.630 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-utils-plot-instrument-function-models-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/dcfe643dc76f75fe7002c290840f9d24/plot_instrument_function_models.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_instrument_function_models.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/1bcecfc0d9ce6af4bad2f67c9825e480/plot_instrument_function_models.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_instrument_function_models.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/8053a1faa2270bca2e5de651c4cd239c/plot_instrument_function_models.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_instrument_function_models.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

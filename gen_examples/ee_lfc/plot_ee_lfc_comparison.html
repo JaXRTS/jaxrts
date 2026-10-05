@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LFC comparison &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -124,7 +123,7 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-gen-examples-ee-lfc-plot-ee-lfc-comparison-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="lfc-comparison">
 <span id="sphx-glr-gen-examples-ee-lfc-plot-ee-lfc-comparison-py"></span><h1>LFC comparison<a class="headerlink" href="#lfc-comparison" title="Link to this heading"></a></h1>
@@ -149,114 +148,116 @@ theta = 6.9e+01
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">scienceplots</span>  <span class="c1"># noqa: F401</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
-
-<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">ureg</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
-
-
-<span class="n">temp</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">1000</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span>
-<span class="p">)</span>
-
-<span class="n">n_e</span> <span class="o">=</span> <span class="mf">2.5e23</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span>
-<span class="n">kf</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.plasma_physics.fermi_wavenumber.html#jaxrts.plasma_physics.fermi_wavenumber" title="jaxrts.plasma_physics.fermi_wavenumber" class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">fermi_wavenumber</span></a><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
-<span class="n">k</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">kf</span><span class="p">,</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">kf</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
-
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
-
-
-<span class="k">for</span> <span class="n">T</span><span class="p">,</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
-    <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">/</span> <a href="../../_autosummary/jaxrts.plasma_physics.fermi_temperature.html#jaxrts.plasma_physics.fermi_temperature" title="jaxrts.plasma_physics.fermi_temperature" class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">fermi_temperature</span></a><span class="p">(</span><span class="n">n_e</span><span class="p">))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
-        <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
-    <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;theta = </span><span class="si">{</span><span class="n">theta</span><span class="si">:</span><span class="s2">.2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-        <span class="n">G_dornheim</span> <span class="o">=</span> <span class="p">[</span>
-            <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_dornheim2021.html#jaxrts.ee_localfieldcorrections.eelfc_dornheim2021" title="jaxrts.ee_localfieldcorrections.eelfc_dornheim2021" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_dornheim2021</span></a><span class="p">(</span>
-                <span class="n">_k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">_k</span> <span class="ow">in</span> <span class="n">k</span>
-        <span class="p">]</span>
-        <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-            <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-            <span class="n">G_dornheim</span><span class="p">,</span>
-            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Dornheim.2021 (QSA)&quot;</span><span class="p">,</span>
-            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">axis</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;outside Dornheim.2021 validity&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">)</span>
-    <span class="n">G_hubbard</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_hubbard.html#jaxrts.ee_localfieldcorrections.eelfc_hubbard" title="jaxrts.ee_localfieldcorrections.eelfc_hubbard" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_hubbard</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
-    <span class="n">G_geldart</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_geldartvosko.html#jaxrts.ee_localfieldcorrections.eelfc_geldartvosko" title="jaxrts.ee_localfieldcorrections.eelfc_geldartvosko" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_geldartvosko</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
-    <span class="n">G_gregori</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007.html#jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007" title="jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_interp_gregori2007</span></a><span class="p">(</span>
-        <span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span>
-    <span class="p">)</span>
-    <span class="n">G_farid</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_farid.html#jaxrts.ee_localfieldcorrections.eelfc_farid" title="jaxrts.ee_localfieldcorrections.eelfc_farid" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_farid</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
-    <span class="n">G_utsumi</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru.html#jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru" title="jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_utsumiichimaru</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
-    <span class="n">G_fortmann</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010.html#jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010" title="jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010" class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_interp_fortmann2010</span></a><span class="p">(</span>
-        <span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span>
-    <span class="p">)</span>
-    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">G_gregori</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Interp. Gregori.2007&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">G_fortmann</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Interp. Fortmann.2010&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">G_hubbard</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Hubbard.1957&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">G_utsumi</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Utsumi </span><span class="se">\\</span><span class="s2">&amp; Ichimaru (zero T)&quot;</span><span class="p">,</span>
-        <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">G_farid</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Farid (zero T)&quot;</span><span class="p">,</span>
-        <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">G_geldart</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span>
-        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Geldart </span><span class="se">\\</span><span class="s2">&amp; Vosko (high T)&quot;</span><span class="p">,</span>
-        <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">axis</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;$k_BT=$</span><span class="si">{</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="si">:</span><span class="s2">.0e</span><span class="si">}</span><span class="s2"> eV&quot;</span>  <span class="c1"># noqa:E501</span>
-    <span class="p">)</span>
-    <span class="n">axis</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$G$&quot;</span><span class="p">)</span>
-
-<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;$k / k_f$&quot;</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 11.933 seconds)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jpu</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">scienceplots</span>  <span class="c1"># noqa: F401</span><span class="w">
+</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span><span class="w">
+</span><span class="w">
+</span><span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">ureg</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">science</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="n">temp</span> <span class="o">=</span> <span class="p">(</span><span class="w">
+</span>    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">n_e</span> <span class="o">=</span> <span class="mf">2.5e23</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">*</span><span class="o">*</span><span class="mi">3</span><span class="w">
+</span><span class="n">kf</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.plasma_physics.fermi_wavenumber.html#jaxrts.plasma_physics.fermi_wavenumber" title="jaxrts.plasma_physics.fermi_wavenumber"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">fermi_wavenumber</span></a><span class="p">(</span><span class="n">n_e</span><span class="p">)</span><span class="w">
+</span><span class="n">k</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">kf</span><span class="p">,</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">kf</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="k">for</span> <span class="n">T</span><span class="p">,</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>    <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">/</span> <a class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.plasma_physics.fermi_temperature.html#jaxrts.plasma_physics.fermi_temperature" title="jaxrts.plasma_physics.fermi_temperature"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">fermi_temperature</span></a><span class="p">(</span><span class="n">n_e</span><span class="p">)</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="w">
+</span>        <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">theta = </span><span class="si">{</span><span class="n">theta</span><span class="si">:</span><span class="s2">.2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="k">if</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span><span class="w">
+</span>        <span class="n">G_dornheim</span> <span class="o">=</span> <span class="p">[</span><span class="w">
+</span>            <a class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_dornheim2021.html#jaxrts.ee_localfieldcorrections.eelfc_dornheim2021" title="jaxrts.ee_localfieldcorrections.eelfc_dornheim2021"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_dornheim2021</span></a><span class="p">(</span><span class="w">
+</span>                <span class="n">_k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="w">
+</span>            <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="w">
+</span>            <span class="k">for</span> <span class="n">_k</span> <span class="ow">in</span> <span class="n">k</span><span class="w">
+</span>        <span class="p">]</span><span class="w">
+</span>        <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>            <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="n">G_dornheim</span><span class="p">,</span><span class="w">
+</span>            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Dornheim.2021 (QSA)</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">C3</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="p">)</span><span class="w">
+</span>    <span class="k">else</span><span class="p">:</span><span class="w">
+</span>        <span class="n">axis</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">outside Dornheim.2021 validity</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">C3</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="n">G_hubbard</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_hubbard.html#jaxrts.ee_localfieldcorrections.eelfc_hubbard" title="jaxrts.ee_localfieldcorrections.eelfc_hubbard"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_hubbard</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span><span class="w">
+</span>    <span class="n">G_geldart</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_geldartvosko.html#jaxrts.ee_localfieldcorrections.eelfc_geldartvosko" title="jaxrts.ee_localfieldcorrections.eelfc_geldartvosko"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_geldartvosko</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span><span class="w">
+</span>    <span class="n">G_gregori</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007.html#jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007" title="jaxrts.ee_localfieldcorrections.eelfc_interp_gregori2007"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_interp_gregori2007</span></a><span class="p">(</span><span class="w">
+</span>        <span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">G_farid</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_farid.html#jaxrts.ee_localfieldcorrections.eelfc_farid" title="jaxrts.ee_localfieldcorrections.eelfc_farid"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_farid</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span><span class="w">
+</span>    <span class="n">G_utsumi</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru.html#jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru" title="jaxrts.ee_localfieldcorrections.eelfc_utsumiichimaru"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_utsumiichimaru</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span><span class="w">
+</span>    <span class="n">G_fortmann</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-ee_localfieldcorrections sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010.html#jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010" title="jaxrts.ee_localfieldcorrections.eelfc_interp_fortmann2010"><span class="n">jaxrts</span><span class="o">.</span><span class="n">ee_localfieldcorrections</span><span class="o">.</span><span class="n">eelfc_interp_fortmann2010</span></a><span class="p">(</span><span class="w">
+</span>        <span class="n">k</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">G_gregori</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Interp. Gregori.2007</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">G_fortmann</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Interp. Fortmann.2010</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">G_hubbard</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Hubbard.1957</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">G_utsumi</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Utsumi </span><span class="se">\\</span><span class="s2">&amp; Ichimaru (zero T)</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">dotted</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">gray</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">G_farid</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Farid (zero T)</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">dotted</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">black</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">G_geldart</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Geldart </span><span class="se">\\</span><span class="s2">&amp; Vosko (high T)</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">dashed</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">black</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">axis</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="w">
+</span>        <span class="sa">f</span><span class="s2">&quot;</span><span class="s2">$k_BT=$</span><span class="si">{</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="si">:</span><span class="s2">.0e</span><span class="si">}</span><span class="s2"> eV</span><span class="s2">&quot;</span>  <span class="c1"># noqa:E501</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">axis</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$G$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$k / k_f$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 12.143 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-ee-lfc-plot-ee-lfc-comparison-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/4f1033d388470197e8aaf51102f43812/plot_ee_lfc_comparison.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_ee_lfc_comparison.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/8a07d9d744a99a93e39a639b1b0a8359/plot_ee_lfc_comparison.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_ee_lfc_comparison.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/4cd8f25ed1d38cd161f3b0824fff2aa4/plot_ee_lfc_comparison.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_ee_lfc_comparison.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

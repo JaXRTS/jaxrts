@@ -6,22 +6,27 @@ bound-free scattering examples
 ------------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows different IPD models implemented in the code for Carbon at 100 eV and for va...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows different IPD models implemented in the code for Carbon at 100 eV and for varying densities.">
 
 .. only:: html
 
   .. image:: /gen_examples/bound_free/images/thumb/sphx_glr_plot_ipd_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_bound_free_plot_ipd.py`
+  :doc:`/gen_examples/bound_free/plot_ipd`
 
 .. raw:: html
 
@@ -31,14 +36,14 @@ bound-free scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases different edge-models that can be used in the bound free scattering feat...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases different edge-models that can be used in the bound free scattering features.">
 
 .. only:: html
 
   .. image:: /gen_examples/bound_free/images/thumb/sphx_glr_plot_edge_models_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_bound_free_plot_edge_models.py`
+  :doc:`/gen_examples/bound_free/plot_edge_models`
 
 .. raw:: html
 
@@ -48,20 +53,22 @@ bound-free scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This script is used to test the bound-free edges using ionization energies from FAC code calcul...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This script is used to test the bound-free edges using ionization energies from FAC code calculated by the FAC code: https://github.com/flexible-atomic-code/fac and compares them to a bound-free model using only the cold edges.">
 
 .. only:: html
 
   .. image:: /gen_examples/bound_free/images/thumb/sphx_glr_plot_moving_edges_vs_cold_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_bound_free_plot_moving_edges_vs_cold.py`
+  :doc:`/gen_examples/bound_free/plot_moving_edges_vs_cold`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Moving edges vs cold ionoization edges</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

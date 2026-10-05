@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Models implemented &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -267,7 +266,7 @@ the elastic scattering in the Hypernetted Chain approach.</p>
 <p>To set a specific model, add it to a
 <a class="reference internal" href="_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.plasmastate.PlasmaState</span></code></a>,
 e.g.,</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">RPA_DandreaFit</span><span class="p">()</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="p">[</span><span class="s2">"free-free scattering"</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">RPA_DandreaFit</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>For more details on an individual model, we refer to the literature,
@@ -331,13 +330,13 @@ You can easily obtain the bibliographic information by using the
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.Neglect.html#jaxrts.models.Neglect" title="jaxrts.models.Neglect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.Neglect</span></code></a>()</p></td>
 <td><p>Universal model to neglect a contribution and set it to zero.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.OnePotentialHNCIonFeat.html#jaxrts.models.OnePotentialHNCIonFeat" title="jaxrts.models.OnePotentialHNCIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.OnePotentialHNCIonFeat</span></code></a>(rmin, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.OnePotentialHNCIonFeat.html#jaxrts.models.OnePotentialHNCIonFeat" title="jaxrts.models.OnePotentialHNCIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.OnePotentialHNCIonFeat</span></code></a>([rmin, ...])</p></td>
 <td><p>Calculates <span class="math notranslate nohighlight">\(S_{ab}\)</span> in the Hypernetted Chain approximation.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.PeakCollection.html#jaxrts.models.PeakCollection" title="jaxrts.models.PeakCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.PeakCollection</span></code></a>(k_pos, ...)</p></td>
 <td><p>A model for approximating <span class="math notranslate nohighlight">\(S_\text{ii}\)</span> as a sum of peaks.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.ThreePotentialHNCIonFeat.html#jaxrts.models.ThreePotentialHNCIonFeat" title="jaxrts.models.ThreePotentialHNCIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.ThreePotentialHNCIonFeat</span></code></a>(rmin, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.ThreePotentialHNCIonFeat.html#jaxrts.models.ThreePotentialHNCIonFeat" title="jaxrts.models.ThreePotentialHNCIonFeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.ThreePotentialHNCIonFeat</span></code></a>([...])</p></td>
 <td><p>Calculates <span class="math notranslate nohighlight">\(S_{ab}\)</span> including electron-ion and electron-electron static structure factors using the Hypernetted Chain approximation.</p></td>
 </tr>
 </tbody>
@@ -348,7 +347,7 @@ You can easily obtain the bibliographic information by using the
 <p>When calculating the the Born collision frequencies in <a class="reference internal" href="_autosummary/jaxrts.models.BornMermin.html#jaxrts.models.BornMermin" title="jaxrts.models.BornMermin"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.BornMermin</span></code></a> and derived free-free scattering models, one needs a notion of the static ionic structure factor. For a single species, <a class="reference internal" href="_autosummary/jaxrts.models.Sum_Sii.html#jaxrts.models.Sum_Sii" title="jaxrts.models.Sum_Sii"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.Sum_Sii</span></code></a> is identical to the model used for the <code class="docutils literal notranslate"><span class="pre">ionic</span> <span class="pre">scattering</span></code> key. However, it is not clear if the sum calculated there also holds true for a multi-species plasma, where we would run an HNC calculation, which cannot be directly used. In this case, <a class="reference internal" href="_autosummary/jaxrts.models.AverageAtom_Sii.html#jaxrts.models.AverageAtom_Sii" title="jaxrts.models.AverageAtom_Sii"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.AverageAtom_Sii</span></code></a> might be a reasonable alternative, as it calculates S_ii in an HNC step for an average atom.</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.AverageAtom_Sii.html#jaxrts.models.AverageAtom_Sii" title="jaxrts.models.AverageAtom_Sii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.AverageAtom_Sii</span></code></a>(rmin, rmax, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.AverageAtom_Sii.html#jaxrts.models.AverageAtom_Sii" title="jaxrts.models.AverageAtom_Sii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.AverageAtom_Sii</span></code></a>([rmin, rmax, ...])</p></td>
 <td><p>This model performs a HNC calculation, assuming one average atom with a given, average charge state.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.Sum_Sii.html#jaxrts.models.Sum_Sii" title="jaxrts.models.Sum_Sii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.Sum_Sii</span></code></a>()</p></td>
@@ -376,13 +375,13 @@ You can easily obtain the bibliographic information by using the
 <p>The free–free scattering component, <span class="math notranslate nohighlight">\(S_{ee}^{\text{ff}}(k, \omega)\)</span>, describes inelastic scattering from unbound (free) electrons. In the <strong>RPA</strong> (Random Phase Approximation), electrons are treated as a weakly coupled gas with collective screening effects, while the <strong>Born–Mermin</strong> approach extends this by including electron–ion collisions and finite damping, providing a more accurate description in partially or strongly coupled plasmas.</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.BornMermin.html#jaxrts.models.BornMermin" title="jaxrts.models.BornMermin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.BornMermin</span></code></a>(no_of_freq, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.BornMermin.html#jaxrts.models.BornMermin" title="jaxrts.models.BornMermin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.BornMermin</span></code></a>([no_of_freq, ...])</p></td>
 <td><p>Model for the free-free scattering, based on the Born Mermin Approximation (<span class="bibtex-citation" id="id9">[<a class="reference internal" href="bibliography.html#id76" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.BornMermin_Fit.html#jaxrts.models.BornMermin_Fit" title="jaxrts.models.BornMermin_Fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.BornMermin_Fit</span></code></a>(no_of_freq, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.BornMermin_Fit.html#jaxrts.models.BornMermin_Fit" title="jaxrts.models.BornMermin_Fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.BornMermin_Fit</span></code></a>([no_of_freq, ...])</p></td>
 <td><p>Model for the free-free scattering, based on the Born Mermin Approximation (<span class="bibtex-citation" id="id10">[<a class="reference internal" href="bibliography.html#id76" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.BornMermin_Fortmann.html#jaxrts.models.BornMermin_Fortmann" title="jaxrts.models.BornMermin_Fortmann"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.BornMermin_Fortmann</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.BornMermin_Fortmann.html#jaxrts.models.BornMermin_Fortmann" title="jaxrts.models.BornMermin_Fortmann"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.BornMermin_Fortmann</span></code></a>([...])</p></td>
 <td><p>Model for the free-free scattering, based on the Born Mermin Approximation (<span class="bibtex-citation" id="id11">[<a class="reference internal" href="bibliography.html#id76" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.models.BornMermin_Full.html#jaxrts.models.BornMermin_Full" title="jaxrts.models.BornMermin_Full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.models.BornMermin_Full</span></code></a>([RPA_rewrite, KKT])</p></td>
@@ -643,7 +642,7 @@ full linear susceptibility can be written as</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.SpinSeparatedEEExchange.html#jaxrts.hnc_potentials.SpinSeparatedEEExchange" title="jaxrts.hnc_potentials.SpinSeparatedEEExchange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.SpinSeparatedEEExchange</span></code></a>()</p></td>
 <td><p>See <span class="bibtex-citation" id="id40">[<a class="reference internal" href="bibliography.html#id104" title="K. Wünsch, P. Hilse, M. Schlanges, and D. O. Gericke. Structure of strongly coupled multicomponent plasmas. Physical Review E, 5 2008. doi:10.1103/physreve.77.056404.">Wünsch et al., 2008</a>]</span>, Eqn (17), Citing <span class="bibtex-citation" id="id41">[<a class="reference internal" href="bibliography.html#id52" title="Kerson Huang. Statistical Mechanics. John Wiley &amp; Sons, Nashville, TN, 2 edition, April 1987.">Huang, 1987</a>]</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion" title="jaxrts.hnc_potentials.YukawaShortRangeRepulsion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.YukawaShortRangeRepulsion</span></code></a>(sigma)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion" title="jaxrts.hnc_potentials.YukawaShortRangeRepulsion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.YukawaShortRangeRepulsion</span></code></a>([sigma])</p></td>
 <td><p>Yukawa Potential with a short-range repulsion as used in <span class="bibtex-citation" id="id42">[<a class="reference internal" href="bibliography.html#id37" title="L. B. Fletcher, H. J. Lee, T. Döppner, E. Galtier, B. Nagler, P. Heimann, C. Fortmann, S. LePape, T. Ma, M. Millot, A. Pak, D. Turnbull, D. A. Chapman, D. O. Gericke, J. Vorberger, T. White, G. Gregori, M. Wei, B. Barbrel, R. W. Falcone, C.-C. Kao, H. Nuhn, J. Welch, U. Zastrau, P. Neumayer, J. B. Hastings, and S. H. Glenzer. Ultrabright x-ray laser scattering for dynamic warm dense matter physics. Nature Photonics, 9:274–279, 4 2015. doi:10.1038/nphoton.2015.41.">Fletcher et al., 2015</a>]</span>.</p></td>
 </tr>
 </tbody>
@@ -690,7 +689,7 @@ full linear susceptibility can be written as</p>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.SpinSeparatedEEExchange.html#jaxrts.hnc_potentials.SpinSeparatedEEExchange" title="jaxrts.hnc_potentials.SpinSeparatedEEExchange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.SpinSeparatedEEExchange</span></code></a>()</p></td>
 <td><p>See <span class="bibtex-citation" id="id45">[<a class="reference internal" href="bibliography.html#id104" title="K. Wünsch, P. Hilse, M. Schlanges, and D. O. Gericke. Structure of strongly coupled multicomponent plasmas. Physical Review E, 5 2008. doi:10.1103/physreve.77.056404.">Wünsch et al., 2008</a>]</span>, Eqn (17), Citing <span class="bibtex-citation" id="id46">[<a class="reference internal" href="bibliography.html#id52" title="Kerson Huang. Statistical Mechanics. John Wiley &amp; Sons, Nashville, TN, 2 edition, April 1987.">Huang, 1987</a>]</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion" title="jaxrts.hnc_potentials.YukawaShortRangeRepulsion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.YukawaShortRangeRepulsion</span></code></a>(sigma)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion" title="jaxrts.hnc_potentials.YukawaShortRangeRepulsion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.YukawaShortRangeRepulsion</span></code></a>([sigma])</p></td>
 <td><p>Yukawa Potential with a short-range repulsion as used in <span class="bibtex-citation" id="id47">[<a class="reference internal" href="bibliography.html#id37" title="L. B. Fletcher, H. J. Lee, T. Döppner, E. Galtier, B. Nagler, P. Heimann, C. Fortmann, S. LePape, T. Ma, M. Millot, A. Pak, D. Turnbull, D. A. Chapman, D. O. Gericke, J. Vorberger, T. White, G. Gregori, M. Wei, B. Barbrel, R. W. Falcone, C.-C. Kao, H. Nuhn, J. Welch, U. Zastrau, P. Neumayer, J. B. Hastings, and S. H. Glenzer. Ultrabright x-ray laser scattering for dynamic warm dense matter physics. Nature Photonics, 9:274–279, 4 2015. doi:10.1038/nphoton.2015.41.">Fletcher et al., 2015</a>]</span>.</p></td>
 </tr>
 </tbody>
@@ -728,7 +727,7 @@ full linear susceptibility can be written as</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.SpinSeparatedEEExchange.html#jaxrts.hnc_potentials.SpinSeparatedEEExchange" title="jaxrts.hnc_potentials.SpinSeparatedEEExchange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.SpinSeparatedEEExchange</span></code></a>()</p></td>
 <td><p>See <span class="bibtex-citation" id="id50">[<a class="reference internal" href="bibliography.html#id104" title="K. Wünsch, P. Hilse, M. Schlanges, and D. O. Gericke. Structure of strongly coupled multicomponent plasmas. Physical Review E, 5 2008. doi:10.1103/physreve.77.056404.">Wünsch et al., 2008</a>]</span>, Eqn (17), Citing <span class="bibtex-citation" id="id51">[<a class="reference internal" href="bibliography.html#id52" title="Kerson Huang. Statistical Mechanics. John Wiley &amp; Sons, Nashville, TN, 2 edition, April 1987.">Huang, 1987</a>]</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion" title="jaxrts.hnc_potentials.YukawaShortRangeRepulsion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.YukawaShortRangeRepulsion</span></code></a>(sigma)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion" title="jaxrts.hnc_potentials.YukawaShortRangeRepulsion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jaxrts.hnc_potentials.YukawaShortRangeRepulsion</span></code></a>([sigma])</p></td>
 <td><p>Yukawa Potential with a short-range repulsion as used in <span class="bibtex-citation" id="id52">[<a class="reference internal" href="bibliography.html#id37" title="L. B. Fletcher, H. J. Lee, T. Döppner, E. Galtier, B. Nagler, P. Heimann, C. Fortmann, S. LePape, T. Ma, M. Millot, A. Pak, D. Turnbull, D. A. Chapman, D. O. Gericke, J. Vorberger, T. White, G. Gregori, M. Wei, B. Barbrel, R. W. Falcone, C.-C. Kao, H. Nuhn, J. Welch, U. Zastrau, P. Neumayer, J. B. Hastings, and S. H. Glenzer. Ultrabright x-ray laser scattering for dynamic warm dense matter physics. Nature Photonics, 9:274–279, 4 2015. doi:10.1038/nphoton.2015.41.">Fletcher et al., 2015</a>]</span>.</p></td>
 </tr>
 </tbody>

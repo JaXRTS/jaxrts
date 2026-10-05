@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,23 +8,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.helpers.mass_density_from_electron_density &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -149,8 +148,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>density</strong><strong>)</strong> (<em>n_e</em><em> (</em><em>electron</em>) – electron density of mixture</p></li>
-<li><p><strong>(</strong><strong>charge</strong><strong>)</strong> (<em>Z</em>) – The charge of each chemical element in the plasma.</p></li>
+<li><p><strong>density</strong><strong>)</strong> (<a class="reference internal" href="jaxrts.plasmastate.PlasmaState.n_e.html#jaxrts.plasmastate.PlasmaState.n_e" title="jaxrts.plasmastate.PlasmaState.n_e"><em>n_e</em></a><em> (</em><em>electron</em>) – electron density of mixture</p></li>
+<li><p><strong>(</strong><strong>charge</strong><strong>)</strong> (<a class="reference internal" href="jaxrts.elements.Element.Z.html#jaxrts.elements.Element.Z" title="jaxrts.elements.Element.Z"><em>Z</em></a>) – The charge of each chemical element in the plasma.</p></li>
 <li><p><strong>number_fractions</strong> (<em>array_like</em>) – The number fractions of each chemical element.</p></li>
 <li><p><strong>elements</strong> (<em>list</em>) – The masses of the respective chemical elements.</p></li>
 <li><p><strong>partial</strong> (<em>boolean</em>) – default false = density of mixture, if true: density vector splitted
@@ -170,16 +169,16 @@ multiply with <a class="reference internal" href="jaxrts.helpers.mass_from_numbe
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">n_e</span> <span class="o">=</span> <span class="mf">0.8e24</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">cm</span><span class="o">**</span><span class="mi">3</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">number_fractions</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">),</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">"C"</span><span class="p">),</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">"H"</span><span class="p">)]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Z_free</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mass_density_from_electron_density</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">n_e</span><span class="p">,</span> <span class="n">Z_free</span><span class="p">,</span> <span class="n">number_fractions</span><span class="p">,</span> <span class="n">elements</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
-<span class="go">&lt;Quantity(3.4589693021231165, &#39;gram / centimeter ** 3&#39;)&gt;</span>
+<span class="go">&lt;Quantity(3.4589693021231165, 'gram / centimeter ** 3')&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mass_density_from_electron_density</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">n_e</span><span class="p">,</span> <span class="n">Z_free</span><span class="p">,</span> <span class="n">number_fractions</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">partial</span><span class="o">=</span><span class="kc">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
-<span class="go">&lt;Quantity([3.19115756 0.26781174], &#39;gram / centimeter ** 3&#39;)&gt;</span>
+<span class="go">&lt;Quantity([3.19115756 0.26781174], 'gram / centimeter ** 3')&gt;</span>
 </pre></div>
 </div>
 </dd></dl>

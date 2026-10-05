@@ -6,22 +6,27 @@ Utility tool examples
 ---------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The following code displays the quality of the inversion of the Fermi-Dirac integral for the Fu...">
+    <div class="sphx-glr-thumbcontainer" tooltip="The following code displays the quality of the inversion of the Fermi-Dirac integral for the Functions presented in Antia.1993 and the improments published in Fukushima.2015.">
 
 .. only:: html
 
   .. image:: /gen_examples/utils/images/thumb/sphx_glr_plot_fermi_integral_inversion_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_utils_plot_fermi_integral_inversion.py`
+  :doc:`/gen_examples/utils/plot_fermi_integral_inversion`
 
 .. raw:: html
 
@@ -31,14 +36,14 @@ Utility tool examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="To include an instrument function in a :pyjaxrts.Setup, we require it to be Callable that takes...">
+    <div class="sphx-glr-thumbcontainer" tooltip="To include an instrument function in a jaxrts.Setup, we require it to be Callable that takes only one argument, the shift in frequency space. The function has to be normalized to unify from -infinity to +infinity.">
 
 .. only:: html
 
   .. image:: /gen_examples/utils/images/thumb/sphx_glr_plot_instrument_function_models_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_utils_plot_instrument_function_models.py`
+  :doc:`/gen_examples/utils/plot_instrument_function_models`
 
 .. raw:: html
 
@@ -48,14 +53,14 @@ Utility tool examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example compares the two implemented methods to perform the Fourier transform of a radiall...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example compares the two implemented methods to perform the Fourier transform of a radially symmetric function, namely the sine and the hankel transform.">
 
 .. only:: html
 
   .. image:: /gen_examples/utils/images/thumb/sphx_glr_plot_3D_fourier_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_utils_plot_3D_fourier.py`
+  :doc:`/gen_examples/utils/plot_3D_fourier`
 
 .. raw:: html
 
@@ -72,13 +77,15 @@ Utility tool examples
   .. image:: /gen_examples/utils/images/thumb/sphx_glr_plot_ogata_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_utils_plot_ogata.py`
+  :doc:`/gen_examples/utils/plot_ogata`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Ogata Fourier transform</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

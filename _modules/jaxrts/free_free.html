@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,23 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.free_free &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -86,10 +85,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for jaxrts.free_free</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">This submodule is dedicated to the calculation of the free electron dynamic</span>
 <span class="sd">structure.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
@@ -118,7 +117,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">"jax_enable_x64"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
 
 <span class="nd">@jit</span>
@@ -147,7 +146,7 @@
     <span class="n">I_interp</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">E_interp</span><span class="p">,</span> <span class="n">E_vals</span><span class="p">,</span> <span class="n">I_vals</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
         <span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">second</span>
     <span class="p">)</span>
-    <span class="c1"># The &quot;-1&quot; factor comes from the definition of energy transfer</span>
+    <span class="c1"># The "-1" factor comes from the definition of energy transfer</span>
     <span class="n">I_KK</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span><span class="n">_KKT_single_point</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))(</span>
         <span class="n">E_interp</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
         <span class="n">E_interp</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
@@ -160,7 +159,7 @@
 
 <span class="nd">@jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_W_salpeter</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Convenience function for the electron dielectric response function as</span>
 <span class="sd">    defined in :cite:`Gregori.2003`.</span>
 
@@ -173,7 +172,7 @@
 <span class="sd">    W:  jnp.ndarray</span>
 <span class="sd">        The value of the convenience function.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">integrand</span><span class="p">(</span><span class="n">_x</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">_x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
@@ -205,7 +204,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">dielectric_function_salpeter</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Implementation of the quantum corrected Salpeter approximation of the</span>
 <span class="sd">    electron dielectric response function.</span>
 
@@ -227,7 +226,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    eps: jnp.ndarray</span>
 <span class="sd">         The electron dielectric response function.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">omega</span> <span class="o">=</span> <span class="p">(</span><span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">planck_constant</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)))</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
 
@@ -269,7 +268,7 @@
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">dielectric_function</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Links the dielectric function to S0_ee via the fluctuation dissipation</span>
 <span class="sd">    theorem, see, e.g., eqn (9) in :cite:`Gregori.2004`.</span>
 
@@ -303,7 +302,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    S0_ee: jnp.ndarray</span>
 <span class="sd">         The free electron dynamic structure.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span>
         <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
@@ -329,7 +328,7 @@
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">susceptibility</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Links the dielectric function to S0_ee via the fluctuation dissipation</span>
 <span class="sd">    theorem, see, e.g., :cite:`Fortmann.2010`, Eqn (2).</span>
 
@@ -363,7 +362,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    S0_ee: jnp.ndarray</span>
 <span class="sd">         The free electron dynamic structure.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Vee</span> <span class="o">=</span> <span class="n">coulomb_potential_fourier</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">res</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span>
         <span class="p">((</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">n_e</span> <span class="o">*</span> <span class="n">Vee</span><span class="p">))</span>
@@ -385,7 +384,7 @@
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">lfc</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the free electron dynamics structure using the quantum corrected</span>
 <span class="sd">    Salpeter approximation of the electron dielectric response function.</span>
 
@@ -407,7 +406,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    S0_ee: jnp.ndarray</span>
 <span class="sd">           The free electron dynamic structure.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Perform the sign flip</span>
     <span class="n">E</span> <span class="o">=</span> <span class="o">-</span><span class="n">E</span>
     <span class="n">eps</span> <span class="o">=</span> <span class="n">dielectric_function_salpeter</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">n_e</span><span class="p">,</span> <span class="n">E</span><span class="p">)</span>
@@ -420,9 +419,9 @@
 
 <span class="nd">@jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_gFortmann</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Fortmann.2010`, Eqn 6.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
 
@@ -432,13 +431,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">noninteracting_susceptibility_0K</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the non-interacting susceptilibily for the limiting case of 0</span>
 <span class="sd">    Kelivn.</span>
 <span class="sd">    The purpose of this rather educational, but can also be used for testing</span>
 
 <span class="sd">    See, e.g., :cite:`Fortmann.2010`, eqn 5.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Vee</span> <span class="o">=</span> <span class="n">coulomb_potential_fourier</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
 
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
@@ -457,13 +456,13 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.dielectric_function_RPA_0K.html#jaxrts.free_free.dielectric_function_RPA_0K">[docs]</a>
 <span class="nd">@jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">dielectric_function_RPA_0K</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the Dielektric function for the limiting case of 0</span>
 <span class="sd">    Kelivn.</span>
 <span class="sd">    The purpose of this rather educational, but can also be used for testing</span>
 
 <span class="sd">    See, e.g., :cite:`Fortmann.2010`, eqn 4.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Vee</span> <span class="o">=</span> <span class="n">coulomb_potential_fourier</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">chi0</span> <span class="o">=</span> <span class="n">noninteracting_susceptibility_0K</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
 
@@ -475,10 +474,10 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_imag_diel_func_RPA_no_damping</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The imaginary part of the dielectric function without damping (i.e., in the</span>
-<span class="sd">    limit nu → 0) from Bonitz&#39;s &#39;dielectric theory&#39; script, Eqn 1.122,</span>
-<span class="sd">    assuming a Fermi function for the particles&#39; velocity distribution.</span>
+<span class="sd">    limit nu → 0) from Bonitz's 'dielectric theory' script, Eqn 1.122,</span>
+<span class="sd">    assuming a Fermi function for the particles' velocity distribution.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -497,7 +496,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The imaginary part of the dielectric function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Calculate the frequency shift</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
     <span class="n">kappa</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">m_e</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">*</span> <span class="n">k</span><span class="p">)</span>
@@ -515,7 +514,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_imag_diel_func_RPA</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The imaginary part of the dielectric function in Random Phase</span>
 <span class="sd">    Approximation.</span>
 <span class="sd">    See :cite:`Schorner.2023`, eqn (A8).</span>
@@ -538,7 +537,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The imaginary part of the dielectric function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
 
     <span class="n">kappa</span> <span class="o">=</span> <span class="p">(</span>
@@ -596,7 +595,7 @@
     <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The real part of the dielectric function in Random Phase</span>
 <span class="sd">    Approximation.</span>
 <span class="sd">    See (2.103) and (2.104) of :cite:`Chapman.2015`.</span>
@@ -618,7 +617,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The real part of the dielectric function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Calculate the frequency shift</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
     <span class="n">v_e</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">)</span>
@@ -673,7 +672,7 @@
     <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The real part of the dielectric function in Random Phase</span>
 <span class="sd">    Approximation.</span>
 <span class="sd">    See (2.103) and (2.104) of :cite:`Chapman.2015`.</span>
@@ -695,7 +694,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The real part of the dielectric function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Calculate the frequency shift</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
     <span class="n">v_e</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">)</span>
@@ -753,7 +752,7 @@
     <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The real part of the dielectric function in Random Phase</span>
 <span class="sd">    Approximation.</span>
 <span class="sd">    See :cite:`Schorner.2023`, eqn (A7).</span>
@@ -775,7 +774,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The real part of the dielectric function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Calculate the frequency shift</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
 
@@ -821,7 +820,7 @@
     <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">prefactor</span> <span class="o">*</span> <span class="n">integral</span><span class="p">)</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
 
 
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;unsave&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"unsave"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_real_diel_func_RPA_no_damping</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -829,10 +828,10 @@
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">unsave</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The real part of the dielectric function without damping (i.e., in the</span>
-<span class="sd">    limit nu → 0) from Bonitz&#39;s &#39;dielectric theory&#39; script, Eqn 1.120,</span>
-<span class="sd">    assuming a Fermi function for the particles&#39; velocity distribution.</span>
+<span class="sd">    limit nu → 0) from Bonitz's 'dielectric theory' script, Eqn 1.120,</span>
+<span class="sd">    assuming a Fermi function for the particles' velocity distribution.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -851,7 +850,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The real part of the dielectric function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Calculate the frequency shift</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
 
@@ -1048,12 +1047,12 @@
     <span class="n">eta0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Eqn 4.6 of :cite:`Dandrea.1986`.</span>
 
 <span class="sd">    The name of this function might be misleading, the 1/V factor is applied in</span>
 <span class="sd">    :py:func:`~.susceptibility_RPA_Dandrea1986`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">x_plu</span> <span class="o">=</span> <span class="n">z</span> <span class="o">/</span> <span class="n">Q</span> <span class="o">+</span> <span class="n">Q</span>
     <span class="n">x_min</span> <span class="o">=</span> <span class="n">z</span> <span class="o">/</span> <span class="n">Q</span> <span class="o">-</span> <span class="n">Q</span>
@@ -1077,12 +1076,12 @@
     <span class="n">eta0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Eqn 4.5 of :cite:`Dandrea.1986`.</span>
 
 <span class="sd">    The name of this function might be misleading, the 1/V factor is applied in</span>
 <span class="sd">    :py:func:`~.susceptibility_RPA_Dandrea1986`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">x_plu</span> <span class="o">=</span> <span class="n">z</span> <span class="o">/</span> <span class="n">Q</span> <span class="o">+</span> <span class="n">Q</span>
     <span class="n">x_min</span> <span class="o">=</span> <span class="n">z</span> <span class="o">/</span> <span class="n">Q</span> <span class="o">-</span> <span class="n">Q</span>
 
@@ -1133,7 +1132,7 @@
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the dielectric function in random phase approximation by using</span>
 <span class="sd">    the fitts given by :cite:`Dandrea.1986`, which should give a notable</span>
 <span class="sd">    increase in the calculation time over solving the integrals, numerically.</span>
@@ -1163,7 +1162,7 @@
 <span class="sd">    --------</span>
 <span class="sd">    jaxrts.free_free.susceptibility_RPA_Dandrea1986</span>
 <span class="sd">        The function used to calculate xi0, the noninteracting susceptibility</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">xi0</span> <span class="o">=</span> <span class="n">noninteracting_susceptibility_Dandrea1986</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span>
     <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">coulomb_potential_fourier</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">xi0</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
         <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
@@ -1173,7 +1172,7 @@
 
 <div class="viewcode-block" id="dielectric_function_RPA_no_damping">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.dielectric_function_RPA_no_damping.html#jaxrts.free_free.dielectric_function_RPA_no_damping">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;unsave&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"unsave"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">dielectric_function_RPA_no_damping</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -1181,10 +1180,10 @@
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">unsave</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The the dielectric function without damping (i.e., in the limit nu → 0)</span>
-<span class="sd">    from Bonitz&#39;s &#39;dielectric theory&#39; script, Eqn 1.120 and Eqn 1.122,</span>
-<span class="sd">    assuming a Fermi function for the particles&#39; velocity distribution.</span>
+<span class="sd">    from Bonitz's 'dielectric theory' script, Eqn 1.120 and Eqn 1.122,</span>
+<span class="sd">    assuming a Fermi function for the particles' velocity distribution.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1203,7 +1202,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The full dielectric function (complex number)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">real</span> <span class="o">=</span> <span class="n">_real_diel_func_RPA_no_damping</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">unsave</span><span class="p">)</span>
     <span class="n">imag</span> <span class="o">=</span> <span class="n">_imag_diel_func_RPA_no_damping</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">real</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">imag</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
@@ -1216,7 +1215,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">dielectric_function_RPA</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The the dielectric function including potentially a complex argument for E.</span>
 <span class="sd">    See, e.g., :cite:`Schorner.2023`, eqn (A7) and (A8).</span>
 
@@ -1242,7 +1241,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The full dielectric function (complex number)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">real</span> <span class="o">=</span> <span class="n">_real_diel_func_RPA</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
     <span class="n">imag</span> <span class="o">=</span> <span class="n">_imag_diel_func_RPA</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">real</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">imag</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
@@ -1255,7 +1254,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">dielectric_function_RPA_rewrite</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The the dielectric function extended to incorporate a ei collisions.</span>
 <span class="sd">    See (2.103) and (2.104) of :cite:`Chapman.2015`.</span>
 
@@ -1276,7 +1275,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The full dielectric function (complex number)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">real</span> <span class="o">=</span> <span class="n">_real_diel_func_RPA_rewrite</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
     <span class="n">imag</span> <span class="o">=</span> <span class="n">_imag_diel_func_RPA_rewrite</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">real</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">imag</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span></div>
@@ -1285,7 +1284,7 @@
 
 <div class="viewcode-block" id="S0_ee_RPA_no_damping">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.S0_ee_RPA_no_damping.html#jaxrts.free_free.S0_ee_RPA_no_damping">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;unsave&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"unsave"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">S0_ee_RPA_no_damping</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -1295,7 +1294,7 @@
     <span class="n">lfc</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">unsave</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the free electron dynamics structure using the quantum corrected</span>
 <span class="sd">    Salpeter approximation of the electron dielectric response function.</span>
 
@@ -1319,7 +1318,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    S0_ee: jnp.ndarray</span>
 <span class="sd">           The free electron dynamic structure.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">E</span> <span class="o">=</span> <span class="o">-</span><span class="n">E</span>
     <span class="n">eps</span> <span class="o">=</span> <span class="n">dielectric_function_RPA_no_damping</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">,</span> <span class="n">T_e</span><span class="p">,</span> <span class="n">unsave</span><span class="p">)</span>
     <span class="n">xi0</span> <span class="o">=</span> <span class="n">noninteracting_susceptibility_from_eps_RPA</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
@@ -1331,7 +1330,7 @@
 
 <div class="viewcode-block" id="S0_ee_RPA">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.S0_ee_RPA.html#jaxrts.free_free.S0_ee_RPA">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;rpa_rewrite&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"rpa_rewrite"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">S0_ee_RPA</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -1341,7 +1340,7 @@
     <span class="n">lfc</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">rpa_rewrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the free electron dynamics structure using the quantum corrected</span>
 <span class="sd">    Salpeter approximation of the electron dielectric response function.</span>
 
@@ -1368,7 +1367,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    S0_ee: jnp.ndarray</span>
 <span class="sd">           The free electron dynamic structure.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">E</span> <span class="o">=</span> <span class="o">-</span><span class="n">E</span>
     <span class="k">if</span> <span class="n">rpa_rewrite</span><span class="p">:</span>
         <span class="n">eps</span> <span class="o">=</span> <span class="n">dielectric_function_RPA_rewrite</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">chem_pot</span><span class="p">,</span> <span class="n">T_e</span><span class="p">)</span>
@@ -1440,7 +1439,7 @@
 
 <div class="viewcode-block" id="collision_frequency_BA_full">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.collision_frequency_BA_full.html#jaxrts.free_free.collision_frequency_BA_full">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">collision_frequency_BA_full</span><span class="p">(</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -1451,10 +1450,10 @@
     <span class="n">Zf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">KKT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the Born electron-ion collision frequency. See</span>
 <span class="sd">    :cite:`Schorner.2023`, eqn (B1).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
 
@@ -1501,7 +1500,7 @@
 
 <div class="viewcode-block" id="collision_frequency_BA_0K">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.collision_frequency_BA_0K.html#jaxrts.free_free.collision_frequency_BA_0K">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">collision_frequency_BA_0K</span><span class="p">(</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">S_ii</span><span class="p">:</span> <span class="nb">callable</span><span class="p">,</span>
@@ -1510,11 +1509,11 @@
     <span class="n">Zf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">KKT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the Born electron-ion collision frequency at 0 K. See</span>
 <span class="sd">    :cite:`Schorner.2023`, eqn (B1) and :cite:`Fortmann.2010` for the 0K</span>
 <span class="sd">    dielectric function.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
 
@@ -1556,7 +1555,7 @@
 
 <div class="viewcode-block" id="collision_frequency_BA_fullFit">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.collision_frequency_BA_fullFit.html#jaxrts.free_free.collision_frequency_BA_fullFit">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">collision_frequency_BA_fullFit</span><span class="p">(</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -1566,12 +1565,12 @@
     <span class="n">Zf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">KKT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the Born electron-ion collision frequency. See</span>
 <span class="sd">    :cite:`Schorner.2023`, eqn (B1).</span>
 
 <span class="sd">    Uses the :cite:`Dandrea.1986` interpolation for the RPA.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
 
@@ -1615,7 +1614,7 @@
 
 <div class="viewcode-block" id="collision_frequency_BA_Chapman_interp">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.collision_frequency_BA_Chapman_interp.html#jaxrts.free_free.collision_frequency_BA_Chapman_interp">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;no_of_points&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"no_of_points"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">collision_frequency_BA_Chapman_interp</span><span class="p">(</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -1629,14 +1628,14 @@
     <span class="n">no_of_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
     <span class="n">KKT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the electron-ion collision frequency for the Born approximation,</span>
 <span class="sd">    at it is done in :py:func:`~collision_frequency_BA`, but instead of using a</span>
 <span class="sd">    quadrature, we evaluate only at a `no_of_point` points between the</span>
 <span class="sd">    frequencies :math:`10^-8 \\omega_{pe}` and :math:`1.1</span>
 <span class="sd">    \\max(\\mid \\omega \\mid)`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">interp_E</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
         <span class="n">E_cutoff_min</span><span class="p">,</span>
@@ -1743,7 +1742,7 @@
 
 <div class="viewcode-block" id="collision_frequency_BA_Chapman_interpFit">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.collision_frequency_BA_Chapman_interpFit.html#jaxrts.free_free.collision_frequency_BA_Chapman_interpFit">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;no_of_points&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"no_of_points"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">collision_frequency_BA_Chapman_interpFit</span><span class="p">(</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -1756,7 +1755,7 @@
     <span class="n">no_of_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
     <span class="n">KKT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the electron-ion collision frequency for the Born approximation,</span>
 <span class="sd">    at it is done in :py:func:`~collision_frequency_BA`, but instead of using a</span>
 <span class="sd">    quadrature, we evaluate only at a `no_of_point` points between the</span>
@@ -1764,7 +1763,7 @@
 <span class="sd">    \\max(\\mid \\omega \\mid)`.</span>
 
 <span class="sd">    Uses the :cite:`Dandrea.1986` interpolation for the RPA.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">interp_E</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
         <span class="n">E_cutoff_min</span><span class="p">,</span>
@@ -1862,7 +1861,7 @@
 
 <div class="viewcode-block" id="dielectric_function_BMA_full">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.dielectric_function_BMA_full.html#jaxrts.free_free.dielectric_function_BMA_full">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;rpa_rewrite&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"rpa_rewrite"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">dielectric_function_BMA_full</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
@@ -1875,12 +1874,12 @@
     <span class="n">rpa_rewrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">KKT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the Born-Mermin Approximation for the dielectric function, which</span>
 <span class="sd">    takes collisions into account.</span>
 
 <span class="sd">    See, e.g., :cite:`Redmer.2005`, eqn (20) and :cite:`Mermin.1970`, (eqn 8).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
     <span class="n">coll_freq</span> <span class="o">=</span> <span class="n">collision_frequency_BA_full</span><span class="p">(</span>
         <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="mi">1000</span><span class="p">),</span>
@@ -1940,7 +1939,7 @@
 
 <div class="viewcode-block" id="S0_ee_BMA">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.S0_ee_BMA.html#jaxrts.free_free.S0_ee_BMA">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;rpa_rewrite&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"rpa_rewrite"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">S0_ee_BMA</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -1970,7 +1969,7 @@
 
 <div class="viewcode-block" id="dielectric_function_BMA_chapman_interpFit">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.dielectric_function_BMA_chapman_interpFit.html#jaxrts.free_free.dielectric_function_BMA_chapman_interpFit">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;no_of_points&quot;</span><span class="p">,</span> <span class="s2">&quot;rpa_rewrite&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"no_of_points"</span><span class="p">,</span> <span class="s2">"rpa_rewrite"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">dielectric_function_BMA_chapman_interpFit</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
@@ -1986,11 +1985,11 @@
     <span class="n">rpa_rewrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">KKT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the Born-Mermin Approximation for the dielectric function, which</span>
 <span class="sd">    takes collisions into account.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
 
     <span class="n">coll_freq</span> <span class="o">=</span> <span class="n">collision_frequency_BA_Chapman_interpFit</span><span class="p">(</span>
@@ -2035,7 +2034,7 @@
 
 <div class="viewcode-block" id="dielectric_function_BMA_Fortmann">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.dielectric_function_BMA_Fortmann.html#jaxrts.free_free.dielectric_function_BMA_Fortmann">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;no_of_points&quot;</span><span class="p">,</span> <span class="s2">&quot;rpa_rewrite&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"no_of_points"</span><span class="p">,</span> <span class="s2">"rpa_rewrite"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">dielectric_function_BMA_Fortmann</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
@@ -2075,7 +2074,7 @@
 
 <div class="viewcode-block" id="susceptibility_BMA_Fortmann">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.susceptibility_BMA_Fortmann.html#jaxrts.free_free.susceptibility_BMA_Fortmann">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;no_of_points&quot;</span><span class="p">,</span> <span class="s2">&quot;rpa_rewrite&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"no_of_points"</span><span class="p">,</span> <span class="s2">"rpa_rewrite"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">susceptibility_BMA_Fortmann</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
@@ -2092,7 +2091,7 @@
     <span class="n">rpa_rewrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">KKT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the Born-Mermin Approximation for the dielectric function, which</span>
 <span class="sd">    takes collisions into account. The collision frequency is evaluated at</span>
 <span class="sd">    ``no_of_points`` frequencies, and interpolated to save computation time.</span>
@@ -2101,8 +2100,8 @@
 <span class="sd">    Local field corrections (``lfc``) are included as described by</span>
 <span class="sd">    :cite:`Fortmann.2010`, i.e., by modifying the susceptibilities before the</span>
 <span class="sd">    Mermin approach is calculated (See eqn. (7) and (8), therein).</span>
-<span class="sd">    The collision frequency, however, is not using the LFC corrected xi&#39;s</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    The collision frequency, however, is not using the LFC corrected xi's</span>
+<span class="sd">    """</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
 
     <span class="n">coll_freq</span> <span class="o">=</span> <span class="n">collision_frequency_BA_Chapman_interpFit</span><span class="p">(</span>
@@ -2149,7 +2148,7 @@
 
 <div class="viewcode-block" id="dielectric_function_BMA_chapman_interp">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.dielectric_function_BMA_chapman_interp.html#jaxrts.free_free.dielectric_function_BMA_chapman_interp">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;no_of_points&quot;</span><span class="p">,</span> <span class="s2">&quot;rpa_rewrite&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"no_of_points"</span><span class="p">,</span> <span class="s2">"rpa_rewrite"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">dielectric_function_BMA_chapman_interp</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">E</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
@@ -2165,10 +2164,10 @@
     <span class="n">rpa_rewrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">KKT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the Born-Mermin Approximation for the dielectric function, which</span>
 <span class="sd">    takes collisions into account.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="p">)</span>
 
     <span class="n">coll_freq</span> <span class="o">=</span> <span class="n">collision_frequency_BA_Chapman_interp</span><span class="p">(</span>
@@ -2215,7 +2214,7 @@
 
 <div class="viewcode-block" id="S0_ee_BMA_chapman_interp">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.S0_ee_BMA_chapman_interp.html#jaxrts.free_free.S0_ee_BMA_chapman_interp">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;no_of_points&quot;</span><span class="p">,</span> <span class="s2">&quot;rpa_rewrite&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"no_of_points"</span><span class="p">,</span> <span class="s2">"rpa_rewrite"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">S0_ee_BMA_chapman_interp</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -2261,7 +2260,7 @@
 
 <div class="viewcode-block" id="S0_ee_BMA_chapman_interpFit">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.S0_ee_BMA_chapman_interpFit.html#jaxrts.free_free.S0_ee_BMA_chapman_interpFit">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;no_of_points&quot;</span><span class="p">,</span> <span class="s2">&quot;rpa_rewrite&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"no_of_points"</span><span class="p">,</span> <span class="s2">"rpa_rewrite"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">S0_ee_BMA_chapman_interpFit</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -2307,7 +2306,7 @@
 
 <div class="viewcode-block" id="S0_ee_BMA_Fortmann">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.free_free.S0_ee_BMA_Fortmann.html#jaxrts.free_free.S0_ee_BMA_Fortmann">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;no_of_points&quot;</span><span class="p">,</span> <span class="s2">&quot;rpa_rewrite&quot;</span><span class="p">,</span> <span class="s2">&quot;KKT&quot;</span><span class="p">))</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">(</span><span class="s2">"no_of_points"</span><span class="p">,</span> <span class="s2">"rpa_rewrite"</span><span class="p">,</span> <span class="s2">"KKT"</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">S0_ee_BMA_Fortmann</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -2365,7 +2364,7 @@
     <span class="n">E_cutoff_max</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">E_cutoff_max</span><span class="p">)</span>
 
     <span class="c1"># When not using the Kramers Kronig Transform, we can get away with a</span>
-    <span class="c1"># shorter range, as we don&#39;t need the real part to drop off to 0.</span>
+    <span class="c1"># shorter range, as we don't need the real part to drop off to 0.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">KKT</span><span class="p">:</span>
         <span class="n">E_cutoff_max</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">to_array</span><span class="p">((</span><span class="n">E_cutoff_max</span><span class="p">,</span> <span class="n">E_max</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">E_cutoff_max</span></div>

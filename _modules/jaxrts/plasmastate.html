@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,23 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.plasmastate &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -86,10 +85,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for jaxrts.plasmastate</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Definition of the :py:class:`~.PlasmaState` class, is describing the</span>
-<span class="sd">experiment&#39;s target.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">experiment's target.</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABCMeta</span>
@@ -119,7 +118,7 @@
 <div class="viewcode-block" id="PlasmaState">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PlasmaState</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Define a plasma. The :py:class:`~.PlasmaState` is defined by the set of</span>
 <span class="sd">    state parameters, which are attributes of this object and have to be set</span>
 <span class="sd">    during initialization:</span>
@@ -143,9 +142,9 @@
 <span class="sd">    instance to a :py:class:`~.PlasmaState`, assign it to a key that is valid</span>
 <span class="sd">    for the specific :py:class:`jaxrts.models.Model`, e.g.,</span>
 
-<span class="sd">    &gt;&gt;&gt; state[&quot;free-free scattering&quot;] = jaxrts.models.RPA()</span>
+<span class="sd">    &gt;&gt;&gt; state["free-free scattering"] = jaxrts.models.RPA()</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="PlasmaState.__init__">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.__init__.html#jaxrts.plasmastate.PlasmaState.__init__">[docs]</a>
@@ -160,10 +159,10 @@
 
         <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">Z_free</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="n">ions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">mass_density</span><span class="p">)</span>
-        <span class="p">),</span> <span class="s2">&quot;WARNING: Input parameters should be the same shape as &lt;ions&gt;!&quot;</span>
+        <span class="p">),</span> <span class="s2">"WARNING: Input parameters should be the same shape as &lt;ions&gt;!"</span>
         <span class="k">if</span> <span class="n">T_i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">ions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">T_i</span><span class="p">),</span> <span class="p">(</span>
-                <span class="s2">&quot;WARNING: Input parameters should be the same shape as &lt;ions&gt;!&quot;</span>
+                <span class="s2">"WARNING: Input parameters should be the same shape as &lt;ions&gt;!"</span>
             <span class="p">)</span>
 
         <span class="c1">#: A list of :py:class:`jaxrts.elements.Element` objects that define</span>
@@ -199,14 +198,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">T_i</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">(</span><span class="n">T_i</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">JittableDict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_overwritten</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;ion_core_radius&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span>
+            <span class="s2">"ion_core_radius"</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span>
             <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Z_free</span><span class="p">)</span>
             <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="c1"># Set a default screening length, LFC and free-bound scattering</span>
-        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;screening length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DebyeHueckelScreeningLength</span><span class="p">()</span>
-        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;ee-lfc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">LFCConstant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;free-bound scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Neglect</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">"screening length"</span><span class="p">]</span> <span class="o">=</span> <span class="n">DebyeHueckelScreeningLength</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">"ee-lfc"</span><span class="p">]</span> <span class="o">=</span> <span class="n">LFCConstant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">"free-bound scattering"</span><span class="p">]</span> <span class="o">=</span> <span class="n">Neglect</span><span class="p">()</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -217,73 +216,73 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">allowed_keys</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model </span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2"> not allowed for key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Model </span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2"> not allowed for key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="n">ion_string</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="si">:</span><span class="s2">&gt;7</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="p">]</span>
+        <span class="n">ion_string</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="si">:</span><span class="s2">&gt;7</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="p">]</span>
         <span class="p">)</span>
-        <span class="n">rho_string</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">rho_string</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rho</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="si">:</span><span class="s2">7.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">rho</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="si">:</span><span class="s2">7.2f</span><span class="si">}</span><span class="s2">"</span>
                 <span class="k">for</span> <span class="n">rho</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_density</span>
             <span class="p">]</span>
         <span class="p">)</span>
-        <span class="n">Z_string</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Z</span><span class="si">:</span><span class="s2">7.2f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">Z</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z_free</span><span class="p">])</span>
-        <span class="n">T_i_string</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">Z_string</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Z</span><span class="si">:</span><span class="s2">7.2f</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">Z</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z_free</span><span class="p">])</span>
+        <span class="n">T_i_string</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="si">:</span><span class="s2">7.1f</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="si">:</span><span class="s2">7.1f</span><span class="si">}</span><span class="s2">"</span>
                 <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">T_i</span>
             <span class="p">]</span>
         <span class="p">)</span>
-        <span class="n">T_e_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">T_e</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="si">:</span><span class="s2">7.1f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">T_e_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">T_e</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="si">:</span><span class="s2">7.1f</span><span class="si">}</span><span class="s2">"</span>
 
-        <span class="n">model_string</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="n">model_string</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
         <span class="p">)</span>
 
-        <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="s2">&quot;ions&quot;</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">ion_string</span><span class="si">}</span>
-<span class="si">{</span><span class="s2">&quot;mass densities (g/cc)&quot;</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">rho_string</span><span class="si">}</span>
-<span class="si">{</span><span class="s2">&quot;ionization&quot;</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">Z_string</span><span class="si">}</span>
-<span class="si">{</span><span class="s2">&quot;ion temperatures (eV)&quot;</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">T_i_string</span><span class="si">}</span>
-<span class="si">{</span><span class="s2">&quot;e- temperature (eV)&quot;</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">T_e_string</span><span class="si">}</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""</span><span class="si">{</span><span class="s2">"ions"</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">ion_string</span><span class="si">}</span>
+<span class="si">{</span><span class="s2">"mass densities (g/cc)"</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">rho_string</span><span class="si">}</span>
+<span class="si">{</span><span class="s2">"ionization"</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">Z_string</span><span class="si">}</span>
+<span class="si">{</span><span class="s2">"ion temperatures (eV)"</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">T_i_string</span><span class="si">}</span>
+<span class="si">{</span><span class="s2">"e- temperature (eV)"</span><span class="si">:</span><span class="s2">&lt;25</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">T_e_string</span><span class="si">}</span>
 
 <span class="s2">Models attached</span>
 <span class="s2">===============</span>
 <span class="si">{</span><span class="n">model_string</span><span class="si">}</span>
-<span class="s2">        &quot;&quot;&quot;</span>
+<span class="s2">        """</span>
         <span class="k">return</span> <span class="n">out</span>
 
 <div class="viewcode-block" id="PlasmaState.keys">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.keys.html#jaxrts.plasmastate.PlasmaState.keys">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return a list of keys under which :py:class:`jaxrts.models.Model` s are</span>
 <span class="sd">        attached to the PlasmaState.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="PlasmaState.citation">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.citation.html#jaxrts.plasmastate.PlasmaState.citation">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">citation</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span> <span class="s2">&quot;cite&quot;</span><span class="p">,</span> <span class="s2">&quot;bibtex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;plain&quot;</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"plain"</span><span class="p">,</span> <span class="s2">"cite"</span><span class="p">,</span> <span class="s2">"bibtex"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"plain"</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return bibliographic information for all the</span>
 <span class="sd">        :py:class`jaxrts.models.Model` attached to this PlasmaState.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        style: &quot;plain&quot;, &quot;cite&quot;, or &quot;bibtex&quot;</span>
-<span class="sd">            When ``&quot;plain&quot;``, the literature references are formatted in a</span>
-<span class="sd">            human-readable format. If ``&quot;bibtex&quot;``, the citations are given as</span>
+<span class="sd">        style: "plain", "cite", or "bibtex"</span>
+<span class="sd">            When ``"plain"``, the literature references are formatted in a</span>
+<span class="sd">            human-readable format. If ``"bibtex"``, the citations are given as</span>
 <span class="sd">            bibtex entries, which can then be copied into a literature</span>
-<span class="sd">            collection. If ``&quot;cite&quot;``, the citation keys are not evaluated, but</span>
+<span class="sd">            collection. If ``"cite"``, the citation keys are not evaluated, but</span>
 <span class="sd">            just retuned, wrapped in a tex ``\\cite{...}`` command.</span>
 
 <span class="sd">        Returns</span>
@@ -291,36 +290,36 @@
 <span class="sd">        str</span>
 <span class="sd">            The information about the models which were set for this plasma</span>
 <span class="sd">            state</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">out_strings</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># Force a human-readable format.</span>
-            <span class="k">if</span> <span class="n">style</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span> <span class="s2">&quot;cite&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">style</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"plain"</span><span class="p">,</span> <span class="s2">"cite"</span><span class="p">]:</span>
                 <span class="n">model_str</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">citation</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">model_str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                    <span class="n">out_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># Will be a newline</span>
+                <span class="k">if</span> <span class="n">model_str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">:</span>
+                    <span class="n">out_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>  <span class="c1"># Will be a newline</span>
                     <span class="n">out_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                     <span class="n">out_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_str</span><span class="p">)</span>
             <span class="c1"># Squish the citation key in the `note` key of the bibtex entry.</span>
-            <span class="k">elif</span> <span class="n">style</span> <span class="o">==</span> <span class="s2">&quot;bibtex&quot;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">style</span> <span class="o">==</span> <span class="s2">"bibtex"</span><span class="p">:</span>
                 <span class="n">model_str</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">citation</span><span class="p">(</span><span class="n">style</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">model_str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">model_str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">:</span>
                     <span class="n">out_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_str</span><span class="p">)</span>
         <span class="c1"># Remove the leading empty line for plain style</span>
-        <span class="k">if</span> <span class="n">style</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span> <span class="s2">&quot;cite&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_strings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">style</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"plain"</span><span class="p">,</span> <span class="s2">"cite"</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_strings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">out_strings</span> <span class="o">=</span> <span class="n">out_strings</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out_strings</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out_strings</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PlasmaState.expand_integer_ionization_states">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.expand_integer_ionization_states.html#jaxrts.plasmastate.PlasmaState.expand_integer_ionization_states">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">expand_integer_ionization_states</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">expand_integer_ionization_states</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"PlasmaState"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Creates a new PlasmaState with twice the amount of ion species, where</span>
 <span class="sd">        each of the ions has an integer charge state and the number of ions is</span>
 <span class="sd">        adjusted so that the mean charge is the (potentially fractional) charge</span>
 <span class="sd">        of self.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">doub_ion_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
         <span class="n">doub_Ti</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T_i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">doub_Z</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Z_free</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -349,7 +348,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">update_default_model</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_class</span><span class="p">:</span> <span class="n">ABCMeta</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Add a model to the ``PlasmaState``, if it does not exist, already.</span>
 <span class="sd">        If a new Model is appended to this state, issue a warning.</span>
 
@@ -375,80 +374,80 @@
 <span class="sd">        Warns</span>
 <span class="sd">        -----</span>
 <span class="sd">        Warning</span>
-<span class="sd">            If a default was set to inform a user about the &quot;default choice&quot;.</span>
+<span class="sd">            If a default was set to inform a user about the "default choice".</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt; s.update_default_model(&quot;form-factors&quot;, PaulingFormFactors)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt; s.update_default_model("form-factors", PaulingFormFactors)</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Setting default &#39;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&#39; model to &#39;</span><span class="si">{</span><span class="n">model_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>  <span class="c1"># noqa: E501</span>
-                <span class="o">+</span> <span class="s2">&quot; You can suppress this warning by setting the model manually.&quot;</span>  <span class="c1"># noqa: E501</span>
+                <span class="sa">f</span><span class="s2">"Setting default '</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">' model to '</span><span class="si">{</span><span class="n">model_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">'."</span>  <span class="c1"># noqa: E501</span>
+                <span class="o">+</span> <span class="s2">" You can suppress this warning by setting the model manually."</span>  <span class="c1"># noqa: E501</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="p">[</span><span class="n">model_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_class</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">Z_A</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The atomic number of the atom-species.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">Z</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="p">])</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">nions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The number of species in the plasma.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">mean_Z_A</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The mean atomic number.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Z_A</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_fraction</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">Z_core</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The number of electrons still bound to the ion.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z_A</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z_free</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">atomic_masses</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The atomic weight of the atoms.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">atomic_mass</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">atomic_mass_constant</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="p">]</span>
         <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">atomic_mass_constant</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">T_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Ratio of ion- to electron temperature</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">T_i</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T_i</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">n_i</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ion number density.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""The ion number density."""</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass_density</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_masses</span><span class="p">)</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">n_e</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The free electron number density.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""The free electron number density."""</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z_free</span><span class="p">))</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">Teff_e</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return the effective electron temperature. Quantum temperature as used</span>
 <span class="sd">        by :cite:`Gregori.2003`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">rs</span> <span class="o">=</span> <span class="n">wiegner_seitz_radius</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a_0</span>
         <span class="c1"># This is another definition of Tq, not from Gregori et al.</span>
         <span class="c1"># Tq = (</span>
@@ -467,10 +466,10 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">T_F</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return the fermi temperature of the free electron system, determined</span>
 <span class="sd">        by the electron density.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">return</span> <span class="n">fermi_temperature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_e</span><span class="p">)</span>
 
@@ -492,9 +491,9 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">degeneracy_param</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return the degree of degeneracy of the electrons.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">return</span> <span class="n">degeneracy_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_e</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">T_e</span><span class="p">)</span>
 
@@ -505,8 +504,8 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ion_core_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_overwritten</span><span class="p">[</span><span class="s2">&quot;ion_core_radius&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_overwritten</span><span class="p">[</span><span class="s2">&quot;ion_core_radius&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_overwritten</span><span class="p">[</span><span class="s2">"ion_core_radius"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_overwritten</span><span class="p">[</span><span class="s2">"ion_core_radius"</span><span class="p">],</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_ion_core_radius</span><span class="p">(),</span>
         <span class="p">)</span>
 
@@ -514,25 +513,25 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">ion_core_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="n">calc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_ion_core_radius</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s2">&quot;The value ion_core_radius was overwritten by a user. &quot;</span>
-            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;The calculated value was </span><span class="si">{</span><span class="n">calc</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="si">}</span><span class="s2">, &quot;</span>
-            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;the new value is </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="s2">"The value ion_core_radius was overwritten by a user. "</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">"The calculated value was </span><span class="si">{</span><span class="n">calc</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="si">}</span><span class="s2">, "</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">"the new value is </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_overwritten</span><span class="p">[</span><span class="s2">&quot;ion_core_radius&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_overwritten</span><span class="p">[</span><span class="s2">"ion_core_radius"</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">screening_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        This is a shortcut to just get the screening length, which is used,</span>
 <span class="sd">        e.g., by the :py:class:`jaxrts.hnc_potentials.DebyeHueckelPotential`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;screening length&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">"screening length"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">number_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return the number fraction of the elements.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_i</span> <span class="o">/</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_i</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
 
@@ -545,10 +544,10 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="p">[</span><span class="n">kind</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">kind</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="p">(</span><span class="n">par</span> <span class="o">==</span> <span class="s2">&quot;e-&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="p">),</span> <span class="p">(</span>
-                <span class="s2">&quot;Kind must be one of the ion species or an electron (e-)!&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">par</span> <span class="o">==</span> <span class="s2">"e-"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="p">),</span> <span class="p">(</span>
+                <span class="s2">"Kind must be one of the ion species or an electron (e-)!"</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">par</span> <span class="o">==</span> <span class="s2">&quot;e-&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">par</span> <span class="o">==</span> <span class="s2">"e-"</span><span class="p">:</span>
                 <span class="n">wavelengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">(</span>
                         <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">planck_constant</span><span class="p">)</span>
@@ -586,7 +585,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.probe.html#jaxrts.plasmastate.PlasmaState.probe">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">probe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Function to generate a spectrum by combining the</span>
 <span class="sd">        :py:class:~.PlasmaState` (and the connected Models therein) with a</span>
 <span class="sd">        :py:class:`jaxrts.setup.Setup`.</span>
@@ -598,11 +597,11 @@
 <span class="sd">        ----------</span>
 <span class="sd">        setup: Setup</span>
 <span class="sd">            Contains the information about the geometry of the experiment.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ionic</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;ionic scattering&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
-        <span class="n">free_free</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
-        <span class="n">bound_free</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;bound-free scattering&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
-        <span class="n">free_bound</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;free-bound scattering&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">ionic</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">"ionic scattering"</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+        <span class="n">free_free</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">"free-free scattering"</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+        <span class="n">bound_free</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">"bound-free scattering"</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+        <span class="n">free_bound</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">"free-bound scattering"</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ionic</span> <span class="o">+</span> <span class="n">free_free</span> <span class="o">+</span> <span class="n">bound_free</span> <span class="o">+</span> <span class="n">free_bound</span></div>
 
@@ -610,7 +609,7 @@
 <div class="viewcode-block" id="PlasmaState.evaluate">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.evaluate.html#jaxrts.plasmastate.PlasmaState.evaluate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Evaluate an individual :py:class:~`jaxrts.models.Model`, attached to</span>
 <span class="sd">        this :py:class`~.PlasmaState` with the modelkey ``key``.</span>
 
@@ -620,20 +619,20 @@
 <span class="sd">            key under which the model is registered in the PlasmaState.</span>
 <span class="sd">        setup: Setup</span>
 <span class="sd">            Geometry under which the model should be evaluated.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
     <span class="c1"># Set labels for a save state that is better readable by humans</span>
     <span class="n">_children_labels</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;Z_free&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;mass_density&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;T_e&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;T_i&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ion_core_radius&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;models&quot;</span><span class="p">,</span>
+        <span class="s2">"Z_free"</span><span class="p">,</span>
+        <span class="s2">"mass_density"</span><span class="p">,</span>
+        <span class="s2">"T_e"</span><span class="p">,</span>
+        <span class="s2">"T_i"</span><span class="p">,</span>
+        <span class="s2">"ion_core_radius"</span><span class="p">,</span>
+        <span class="s2">"models"</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">_aux_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ions&quot;</span><span class="p">,)</span>
+    <span class="n">_aux_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"ions"</span><span class="p">,)</span>
 
     <span class="c1"># The following is required to jit a state</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -642,7 +641,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mass_density</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">T_e</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">T_i</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_overwritten</span><span class="p">[</span><span class="s2">&quot;ion_core_radius&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_overwritten</span><span class="p">[</span><span class="s2">"ion_core_radius"</span><span class="p">],</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">aux_data</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="p">,)</span>  <span class="c1"># static values</span>
@@ -661,7 +660,7 @@
             <span class="n">obj</span><span class="o">.</span><span class="n">models</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">=</span> <span class="n">children</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_overwritten</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;ion_core_radius&quot;</span><span class="p">:</span> <span class="n">ion_core_radius</span><span class="p">,</span>
+            <span class="s2">"ion_core_radius"</span><span class="p">:</span> <span class="n">ion_core_radius</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">obj</span>
 

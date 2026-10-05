@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,23 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.ee_localfieldcorrections &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -86,10 +85,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for jaxrts.ee_localfieldcorrections</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">This submodule is dedicated to the calculation of static and dynamic local</span>
 <span class="sd">field corrections. structure.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
@@ -117,10 +116,10 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">xi_lfc_corrected</span><span class="p">(</span>
     <span class="n">xi</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">lfc</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This function corrects the susceptibility according to the local field</span>
 <span class="sd">    correction formalism.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">xi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">v</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">lfc</span><span class="p">)</span> <span class="o">*</span> <span class="n">xi</span><span class="p">)</span></div>
 
 
@@ -134,7 +133,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_hubbard.html#jaxrts.ee_localfieldcorrections.eelfc_hubbard">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">eelfc_hubbard</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Static local field correction introduced and based on :cite:`Hubbard.1957`.</span>
 
 <span class="sd">    ..math::</span>
@@ -143,7 +142,7 @@
 
 <span class="sd">    While improving on RPA results for degenerate systems, neither long- nor</span>
 <span class="sd">    short wavelength limits are correct.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">k_F</span> <span class="o">=</span> <span class="n">fermi_wavenumber</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k_F</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span></div>
@@ -154,10 +153,10 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_geldartvosko.html#jaxrts.ee_localfieldcorrections.eelfc_geldartvosko">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">eelfc_geldartvosko</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Static local field correction introduced and based on :cite:`Geldart.1966`.</span>
 <span class="sd">    Yields reasonable results at high temperatures.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">k_F</span> <span class="o">=</span> <span class="n">fermi_wavenumber</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
     <span class="n">T_F</span> <span class="o">=</span> <span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span>
@@ -176,7 +175,7 @@
         <span class="o">-</span> <span class="mf">0.0479236</span> <span class="o">/</span> <span class="p">(</span><span class="n">Gamma_ee</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
     <span class="p">)</span>
 
-    <span class="c1"># Fitting formula for H_0, see &#39;Gregori &amp; Ravasio et al:2007&#39;</span>
+    <span class="c1"># Fitting formula for H_0, see 'Gregori &amp; Ravasio et al:2007'</span>
     <span class="n">C_sc</span> <span class="o">=</span> <span class="mf">1.0754</span>
     <span class="n">H_0</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_sc</span> <span class="o">*</span> <span class="n">Gamma_ee</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span>
         <span class="p">(</span><span class="n">C_sc</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">Gamma_ee</span><span class="o">**</span><span class="mi">4</span>
@@ -218,12 +217,12 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">eelfc_utsumiichimaru</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Static local field correction introduced and based on</span>
 <span class="sd">    :cite:`UtsumiIchimaru.1982`. This is a result for zero temperature.</span>
 <span class="sd">    The argument `T_e` is only included to have signatures comparable with</span>
 <span class="sd">    other static LFC models.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">rs</span> <span class="o">=</span> <span class="n">interparticle_spacing</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span><span class="p">)</span>
 
@@ -268,12 +267,12 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_farid.html#jaxrts.ee_localfieldcorrections.eelfc_farid">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">eelfc_farid</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Improved version of Utsumi and Ichimaru (:py:func:`~.eelfc_utsumiichimaru`,</span>
 <span class="sd">    based on QMC results (:cite:`Farid.1993`). This is a result for zero</span>
 <span class="sd">    temperature. The argument `T_e` is only included to have signatures</span>
 <span class="sd">    comparable with other static LFC models.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">rs</span> <span class="o">=</span> <span class="p">(</span><span class="n">interparticle_spacing</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span><span class="p">))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
         <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
     <span class="p">)</span>
@@ -377,12 +376,12 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">eelfc_interp_gregori2007</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Interpolation function between the UtsumiIchimaru result</span>
 <span class="sd">    :py:func:`~.eelfc_utsumiichimaru` (zero T) for the local field correction</span>
 <span class="sd">    and the GeldartVosko result :py:func:`eelfc_geldartvosko` (high T).</span>
 <span class="sd">    :cite:`Gregori.2007`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">Theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">T_e</span> <span class="o">/</span> <span class="p">(</span><span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
         <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
@@ -401,11 +400,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">eelfc_interp_fortmann2010</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Interpolation function between the Farid result :py:func:`~.eelfc_farid`</span>
 <span class="sd">    (zero T) for the local field correction and the GeldartVosko result</span>
 <span class="sd">    :py:func:`eelfc_geldartvosko` (high T). :cite:`Fortmann.2010`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">Theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">T_e</span> <span class="o">/</span> <span class="p">(</span><span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
         <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>
@@ -421,13 +420,13 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ee_localfieldcorrections.eelfc_dornheim2021.html#jaxrts.ee_localfieldcorrections.eelfc_dornheim2021">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">eelfc_dornheim2021</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Use the analytical interpolation of the effective static approximation for</span>
 <span class="sd">    the LFC given by :cite:`Dornheim.2021`. Interpolating path-integral Monte</span>
 <span class="sd">    Carlo simulations while preserving correct limits.</span>
 
 <span class="sd">    Valid for 0.7 &lt;= r_s &lt;= 20, and theta &lt;=4.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">Theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">T_e</span> <span class="o">/</span> <span class="p">(</span><span class="n">fermi_energy</span><span class="p">(</span><span class="n">n_e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span>
         <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span>

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,23 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.form_factors &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -86,9 +85,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for jaxrts.form_factors</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">This submodule is dedicated to form factors.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
@@ -106,9 +105,9 @@
 <div class="viewcode-block" id="pauling_size_screening_constants">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.pauling_size_screening_constants.html#jaxrts.form_factors.pauling_size_screening_constants">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">pauling_size_screening_constants</span><span class="p">(</span><span class="n">Z</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See Table I in :cite:`Pauling.1932`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">S1s</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.19</span><span class="p">]))</span>
     <span class="n">S2s</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.25</span><span class="p">,</span> <span class="mf">3.10</span><span class="p">]))</span>
     <span class="n">S2p</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">]),</span> <span class="n">onp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.50</span><span class="p">,</span> <span class="mf">4.57</span><span class="p">]))</span>
@@ -286,7 +285,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">pauling_atomic_ff</span><span class="p">(</span>
     <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">|</span> <span class="nb">float</span>  <span class="c1"># noqa: E741</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Atomic formfactor of a hydrogen-like atom taken from :cite:`Pauling.1932`.</span>
 
 <span class="sd">    .. note::</span>
@@ -312,9 +311,9 @@
 <span class="sd">    f: Quantity</span>
 <span class="sd">        Contribution of one electron in the given state to the atomic form</span>
 <span class="sd">        factor.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Find the correct _fxx function and execute it</span>
-    <span class="n">form_factor</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;pauling_f</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">1d</span><span class="si">}{</span><span class="n">l</span><span class="si">:</span><span class="s2">1d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">](</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="n">form_factor</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">"pauling_f</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">1d</span><span class="si">}{</span><span class="n">l</span><span class="si">:</span><span class="s2">1d</span><span class="si">}</span><span class="s2">"</span><span class="p">](</span><span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">form_factor</span></div>
 
 
@@ -342,13 +341,13 @@
 
 <div class="viewcode-block" id="form_factor_lowering_Zeff_10">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.form_factor_lowering_Zeff_10.html#jaxrts.form_factors.form_factor_lowering_Zeff_10">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Z_squared_correction&quot;</span><span class="p">])</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">"Z_squared_correction"</span><span class="p">])</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">form_factor_lowering_Zeff_10</span><span class="p">(</span>
     <span class="n">binding_E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">Z_A</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">Z_squared_correction</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the form factor lowering for the 1s orbital. See</span>
 <span class="sd">    :cite:`Doppner.2023`.</span>
 
@@ -382,7 +381,7 @@
 <span class="sd">    Z_squared_correction: bool</span>
 <span class="sd">        If ``True``, the quadratic correction term discussed above is added to</span>
 <span class="sd">        better match the zero IPD limit.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">En_H</span> <span class="o">=</span> <span class="mf">13.605693122994</span>
     <span class="n">En_He</span> <span class="o">=</span> <span class="n">En_H</span> <span class="o">-</span> <span class="mf">12.1318355</span> <span class="o">/</span> <span class="n">Z_A</span>
@@ -399,7 +398,7 @@
 
 <div class="viewcode-block" id="form_factor_lowering_10">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.form_factors.form_factor_lowering_10.html#jaxrts.form_factors.form_factor_lowering_10">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Z_squared_correction&quot;</span><span class="p">])</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">"Z_squared_correction"</span><span class="p">])</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">form_factor_lowering_10</span><span class="p">(</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">binding_E</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -407,7 +406,7 @@
     <span class="n">Z_A</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">Z_squared_correction</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the form factor lowering for the 1s orbital. See</span>
 <span class="sd">    :cite:`Doppner.2023`. Calculates the effective charge from the binding</span>
 <span class="sd">    energies (incl. IPD) from :py:func:`~form_factor_lowering_Zeff_10`. Then,</span>
@@ -428,7 +427,7 @@
 <span class="sd">    Z_squared_correction: bool</span>
 <span class="sd">        If ``True``, the quadratic correction term discussed above is added to</span>
 <span class="sd">        better match the zero IPD limit.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Z_eff</span> <span class="o">=</span> <span class="n">form_factor_lowering_Zeff_10</span><span class="p">(</span><span class="n">binding_E</span><span class="p">,</span> <span class="n">Z_A</span><span class="p">,</span> <span class="n">Z_squared_correction</span><span class="p">)</span>
 
     <span class="c1"># calculate the form factors for H and He like ions</span>

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,24 +8,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.models.BornMermin &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -132,7 +130,7 @@
 <h1>jaxrts.models.BornMermin<a class="headerlink" href="#jaxrts-models-bornmermin" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="jaxrts.models.BornMermin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jaxrts.models.</span></span><span class="sig-name descname"><span class="pre">BornMermin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">no_of_freq:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RPA_rewrite:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KKT:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_cutoff_min:</span> <span class="pre">~pint.registry.Quantity</span> <span class="pre">=</span> <span class="pre">&lt;Quantity(-1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'electron_volt')&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_cutoff_max:</span> <span class="pre">~pint.registry.Quantity</span> <span class="pre">=</span> <span class="pre">&lt;Quantity(-1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'electron_volt')&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/models.html#BornMermin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.BornMermin" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">jaxrts.models.</span></span><span class="sig-name descname"><span class="pre">BornMermin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">no_of_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RPA_rewrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KKT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_cutoff_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Quantity(-1.0,</span> <span class="pre">'electron_volt')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_cutoff_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Quantity(-1.0,</span> <span class="pre">'electron_volt')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/models.html#BornMermin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.BornMermin" title="Link to this definition"></a></dt>
 <dd><p>Model for the free-free scattering, based on the Born Mermin Approximation
 (<span class="bibtex-citation" id="id1">[<a class="reference internal" href="../bibliography.html#id76" title="N. D. Mermin. Lindhard dielectric function in the relaxation-time approximation. Physical Review B, 1:2362–2363, 3 1970. doi:10.1103/physrevb.1.2362.">Mermin, 1970</a>]</span>).
 Uses the Chapman interpolation which allows for a faster computation of the
@@ -142,8 +140,8 @@ between them, after.</p>
 <p>The number of frequencies defaults to 20 if <code class="docutils literal notranslate"><span class="pre">KKT</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>, and to
 100 otherwise. To change it, just change the attribute of this model after
 initializing it. i.e.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">BornMermin</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">no_of_freq</span> <span class="o">=</span> <span class="mi">10</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="p">[</span><span class="s2">"free-free scattering"</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">BornMermin</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="p">[</span><span class="s2">"free-free scattering"</span><span class="p">]</span><span class="o">.</span><span class="n">no_of_freq</span> <span class="o">=</span> <span class="mi">10</span>
 </pre></div>
 </div>
 <p>The boundaries for this interpolation can be given as arguments
@@ -152,7 +150,7 @@ for most use cases; however, it is recommended to revisit this setting
 carefully. As a minimal good practice, the defaults should be adjusted to
 the setup used. This can be done with the
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">/set_guessed_E_cutoffs()</span></code> method:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_guessed_E_cutoffs</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="p">[</span><span class="s2">"free-free scattering"</span><span class="p">]</span><span class="o">.</span><span class="n">set_guessed_E_cutoffs</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Has the optional argument <code class="docutils literal notranslate"><span class="pre">RPA_rewrite</span></code>, which defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>. If
@@ -227,8 +225,8 @@ Requires a ‘BM V_eiS’ model (defaults to
 </table>
 <section id="examples-using-jaxrts-models-bornmermin">
 <span id="sphx-glr-backref-jaxrts-models-bornmermin"></span><h2>Examples using <code class="docutils literal notranslate"><span class="pre">jaxrts.models.BornMermin</span></code><a class="headerlink" href="#examples-using-jaxrts-models-bornmermin" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="The Chapman Interpolation of the Born Mermin approximation saves computation time by evaluating..."><img alt="" src="../_images/sphx_glr_plot_BM_ChapmanInterp_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/free_free/plot_BM_ChapmanInterp.html#sphx-glr-gen-examples-free-free-plot-bm-chapmaninterp-py"><span class="std std-ref">Number of interpolation in the Born Mermin Chapman Interpolation</span></a></p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="The Chapman Interpolation of the Born Mermin approximation saves computation time by evaluating the Structure factor not on all frequencies, but only on a given number of points, and interpolates after. This example is investigating the required number of points for the interpolation."><img alt="" src="../_images/sphx_glr_plot_BM_ChapmanInterp_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/free_free/plot_BM_ChapmanInterp.html"><span class="doc">Number of interpolation in the Born Mermin Chapman Interpolation</span></a></p>
   <div class="sphx-glr-thumbnail-title">Number of interpolation in the Born Mermin Chapman Interpolation</div>
 </div></div></section>
 </dd></dl>

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,23 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.ipd &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -86,12 +85,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for jaxrts.ipd</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Module to account for Ionization Potential Depression (IPD)</span>
 
-<span class="sd">All these implementations and formulas are taken from &#39;Modifications of Bound</span>
-<span class="sd">States in Dense Plasma Environments&#39; by Rory A. Baggott. :cite:`Baggott.2017`</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">All these implementations and formulas are taken from 'Modifications of Bound</span>
+<span class="sd">States in Dense Plasma Environments' by Rory A. Baggott. :cite:`Baggott.2017`</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
@@ -114,7 +113,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.inverse_screening_length_e.html#jaxrts.ipd.inverse_screening_length_e">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">inverse_screening_length_e</span><span class="p">(</span><span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Te</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Inverse screening length for arbitrary degeneracy for the electron</span>
 <span class="sd">    as needed for WDM applications. (Taken from :cite:`Baggott.2017`)</span>
 
@@ -123,7 +122,7 @@
 <span class="sd">       This result reproduces eqn. 19 in :cite:`Ropke.2019`, up to a factor of</span>
 <span class="sd">       :math:`4 \\pi`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">q</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">elementary_charge</span>
 
     <span class="c1"># This should take the chemical potential of the plasma state instead.</span>
@@ -153,7 +152,7 @@
 
 <div class="viewcode-block" id="ipd_debye_hueckel">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.ipd_debye_hueckel.html#jaxrts.ipd.ipd_debye_hueckel">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;arb_deg&quot;</span><span class="p">])</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">"arb_deg"</span><span class="p">])</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipd_debye_hueckel</span><span class="p">(</span>
     <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -163,7 +162,7 @@
     <span class="n">Zbar</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">arb_deg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The correction to the ionization potential for the m-th ionization stage in</span>
 <span class="sd">    Debye-Hueckel approximation.</span>
 
@@ -195,7 +194,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity.</span>
 <span class="sd">        The ipd shift in units of electronvolt.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">Zbar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Zbar</span> <span class="o">=</span> <span class="n">Zi</span>
 
@@ -230,7 +229,7 @@
     <span class="n">C</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">Zbar</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The correction to the ionization potential for the m-th ionization stage in</span>
 <span class="sd">    the ion-sphere model. The ion-sphere model considers the ions to be</span>
 <span class="sd">    strongly correlated. (see also :cite:`Zimmermann.1980`)</span>
@@ -258,7 +257,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The ipd shift in units of electronvolt.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Zi</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Zi</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
     <span class="n">Zbar</span> <span class="o">=</span> <span class="n">Zi</span> <span class="k">if</span> <span class="n">Zbar</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Zbar</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
 
@@ -280,7 +279,7 @@
 
 <div class="viewcode-block" id="ipd_stewart_pyatt">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.ipd_stewart_pyatt.html#jaxrts.ipd.ipd_stewart_pyatt">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;arb_deg&quot;</span><span class="p">])</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">"arb_deg"</span><span class="p">])</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipd_stewart_pyatt</span><span class="p">(</span>
     <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -290,7 +289,7 @@
     <span class="n">Zbar</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">arb_deg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Stewart-Pyatt IPD model, using the formulation which can be found, e.g., in</span>
 <span class="sd">    :cite:`Calisti.2015` or :cite:`Ropke.2019`.</span>
 
@@ -324,7 +323,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The ipd shift in units of electronvolt.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Zi</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Zi</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
     <span class="n">Zbar</span> <span class="o">=</span> <span class="n">Zi</span> <span class="k">if</span> <span class="n">Zbar</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Zbar</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
 
@@ -356,7 +355,7 @@
 
 <div class="viewcode-block" id="ipd_stewart_pyatt_preston">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.ipd_stewart_pyatt_preston.html#jaxrts.ipd.ipd_stewart_pyatt_preston">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;arb_deg&quot;</span><span class="p">,</span> <span class="s2">&quot;crowley_correction&quot;</span><span class="p">])</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">"arb_deg"</span><span class="p">,</span> <span class="s2">"crowley_correction"</span><span class="p">])</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipd_stewart_pyatt_preston</span><span class="p">(</span>
     <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -367,7 +366,7 @@
     <span class="n">arb_deg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">crowley_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The Stewart Pyatt IPD, as presented by :cite:`Preston.2013`, which closely</span>
 <span class="sd">    resembles the seminal work of :cite:`Stewart.1966`.</span>
 
@@ -411,7 +410,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The ipd shift in units of electronvolt.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">ion_population</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Zp</span> <span class="o">=</span> <span class="n">ne</span> <span class="o">/</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ni</span><span class="p">)</span>
@@ -463,7 +462,7 @@
 
 <div class="viewcode-block" id="ipd_ecker_kroell">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.ipd.ipd_ecker_kroell.html#jaxrts.ipd.ipd_ecker_kroell">[docs]</a>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;arb_deg&quot;</span><span class="p">])</span>
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnames</span><span class="o">=</span><span class="p">[</span><span class="s2">"arb_deg"</span><span class="p">])</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipd_ecker_kroell</span><span class="p">(</span>
     <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
@@ -475,7 +474,7 @@
     <span class="n">arb_deg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">C</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The ionization potential for an atom with charge Zi in the Ecker-Kroell</span>
 <span class="sd">    model.</span>
 <span class="sd">    Defines a critical density under which the IPD is identical to</span>
@@ -516,7 +515,7 @@
 <span class="sd">    Quantity</span>
 <span class="sd">        The ipd shift in units of electronvolt.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">Zbar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Zbar</span> <span class="o">=</span> <span class="n">Zi</span>
     <span class="c1"># The critical density in the model of Ecker-Kroell</span>
@@ -600,7 +599,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ipd_pauli_blocking</span><span class="p">(</span>
     <span class="n">Zi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ne</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">ni</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Te</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Ti</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The correction to the ionization potential due to Pauli blocking, as</span>
 <span class="sd">    described in :cite:`Ropke.2019`.</span>
 
@@ -622,7 +621,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Quantity</span>
 <span class="sd">        The ipd shift in units of electronvolt.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># This function is not well-defined for Zi==0:</span>
     <span class="n">Zi</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Zi</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
 

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -6,23 +8,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Zero IPD limit for effective charge when using form factor lowering &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -127,7 +126,7 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-gen-examples-form-factors-plot-ffl-zero-ipd-limit-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="zero-ipd-limit-for-effective-charge-when-using-form-factor-lowering">
 <span id="sphx-glr-gen-examples-form-factors-plot-ffl-zero-ipd-limit-py"></span><h1>Zero IPD limit for effective charge when using form factor lowering<a class="headerlink" href="#zero-ipd-limit-for-effective-charge-when-using-form-factor-lowering" title="Link to this heading"></a></h1>
@@ -136,113 +135,115 @@ to download the full example code</p>
 IPD to the form factors by <span class="bibtex-citation" id="id2">[<a class="reference internal" href="../../bibliography.html#id80" title="Linus Pauling and Jack Sherman. Screening constants for Many-electron Atoms. The calculation and interpretation of X-ray Term values, and the Calculation of Atomic Scattering Factors. Akademische Verlagsgesllschaft M.B.H, Leipzig, 1932.">Pauling and Sherman, 1932</a>]</span>.</p>
 <p>Since the form of the 1s form factor is identical, and the only change is the
 effective change, this value is plotted.</p>
-<img src="../../_images/sphx_glr_plot_ffl_zero_IPD_limit_001.svg" srcset="../../_images/sphx_glr_plot_ffl_zero_IPD_limit_001.svg" alt="blue: H-like, green: He-like" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">scienceplots</span>  <span class="c1"># noqa:F401</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
-
-<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">ureg</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
-
-<span class="n">Z_A</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">36</span><span class="p">)</span>
-
-
-<span class="c1"># Pauling</span>
-<span class="c1"># =======</span>
-
-<span class="n">Zeff_pauling_H_like</span> <span class="o">=</span> <span class="n">Z_A</span>
-<span class="n">Zeff_pauling_He_like</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">Z_A</span> <span class="o">-</span> <a href="../../_autosummary/jaxrts.form_factors.pauling_size_screening_constants.html#jaxrts.form_factors.pauling_size_screening_constants" title="jaxrts.form_factors.pauling_size_screening_constants" class="sphx-glr-backref-module-jaxrts-form_factors sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">form_factors</span><span class="o">.</span><span class="n">pauling_size_screening_constants</span></a><span class="p">(</span><span class="n">Z_A</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-<span class="p">)</span>
-
-<span class="c1"># Form Factor lowering</span>
-<span class="c1"># ====================</span>
-
-<span class="n">Zeff_ffl_H_like</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">Zeff_ffl_He_like</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="n">Zeff_ffl_H_like_corr</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">Zeff_ffl_He_like_corr</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">Zs</span> <span class="ow">in</span> <span class="n">Z_A</span><span class="p">:</span>
-    <span class="n">binding_E</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">Zs</span><span class="p">)</span><span class="o">.</span><span class="n">ionization</span><span class="o">.</span><span class="n">energies</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">H_like</span><span class="p">,</span> <span class="n">He_like</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.form_factors.form_factor_lowering_Zeff_10.html#jaxrts.form_factors.form_factor_lowering_Zeff_10" title="jaxrts.form_factors.form_factor_lowering_Zeff_10" class="sphx-glr-backref-module-jaxrts-form_factors sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">form_factors</span><span class="o">.</span><span class="n">form_factor_lowering_Zeff_10</span></a><span class="p">(</span>
-        <span class="n">binding_E</span><span class="p">,</span> <span class="n">Zs</span><span class="p">,</span> <span class="n">Z_squared_correction</span><span class="o">=</span><span class="kc">False</span>
-    <span class="p">)</span>
-    <span class="n">Zeff_ffl_H_like</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H_like</span><span class="p">)</span>
-    <span class="n">Zeff_ffl_He_like</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">He_like</span><span class="p">)</span>
-
-    <span class="n">H_like</span><span class="p">,</span> <span class="n">He_like</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.form_factors.form_factor_lowering_Zeff_10.html#jaxrts.form_factors.form_factor_lowering_Zeff_10" title="jaxrts.form_factors.form_factor_lowering_Zeff_10" class="sphx-glr-backref-module-jaxrts-form_factors sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">form_factors</span><span class="o">.</span><span class="n">form_factor_lowering_Zeff_10</span></a><span class="p">(</span>
-        <span class="n">binding_E</span><span class="p">,</span> <span class="n">Zs</span><span class="p">,</span> <span class="n">Z_squared_correction</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    <span class="n">Zeff_ffl_H_like_corr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H_like</span><span class="p">)</span>
-    <span class="n">Zeff_ffl_He_like_corr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">He_like</span><span class="p">)</span>
-
-<span class="n">Zeff_ffl_H_like</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Zeff_ffl_H_like</span><span class="p">)</span>
-<span class="n">Zeff_ffl_He_like</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Zeff_ffl_He_like</span><span class="p">)</span>
-
-<span class="n">Zeff_ffl_H_like_corr</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Zeff_ffl_H_like_corr</span><span class="p">)</span>
-<span class="n">Zeff_ffl_He_like_corr</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Zeff_ffl_He_like_corr</span><span class="p">)</span>
-
-
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-
-
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">Z_A</span><span class="p">,</span>
-    <span class="n">Zeff_ffl_H_like</span> <span class="o">-</span> <span class="n">Zeff_pauling_H_like</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span>
-    <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
-    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ff lowering - Pauling&quot;</span><span class="p">,</span>
-    <span class="n">markerfacecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
-    <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">Z_A</span><span class="p">,</span>
-    <span class="n">Zeff_ffl_H_like_corr</span> <span class="o">-</span> <span class="n">Zeff_pauling_H_like</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span>
-    <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
-    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ff lowering (corr.) - Pauling&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">Z_A</span><span class="p">,</span>
-    <span class="n">Zeff_ffl_He_like</span> <span class="o">-</span> <span class="n">Zeff_pauling_He_like</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span>
-    <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
-    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
-    <span class="n">markerfacecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
-    <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">Z_A</span><span class="p">,</span>
-    <span class="n">Zeff_ffl_He_like_corr</span> <span class="o">-</span> <span class="n">Zeff_pauling_He_like</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span>
-    <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
-    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Z_A</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">Z_A</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">)</span>
-
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">Delta Z_</span><span class="si">{eff}</span><span class="s2">$&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;$Z$&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;blue: H-like, green: He-like&quot;</span><span class="p">)</span>
-
-<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.359 seconds)</p>
+<img src="../../_images/sphx_glr_plot_ffl_zero_IPD_limit_001.svg" srcset="../../_images/sphx_glr_plot_ffl_zero_IPD_limit_001.svg" alt="blue: H-like, green: He-like" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jpu</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">scienceplots</span>  <span class="c1"># noqa:F401</span><span class="w">
+</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span><span class="w">
+</span><span class="w">
+</span><span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">ureg</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">science</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">Z_A</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">36</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Pauling</span><span class="w">
+</span><span class="c1"># =======</span><span class="w">
+</span><span class="w">
+</span><span class="n">Zeff_pauling_H_like</span> <span class="o">=</span> <span class="n">Z_A</span><span class="w">
+</span><span class="n">Zeff_pauling_He_like</span> <span class="o">=</span> <span class="p">(</span><span class="w">
+</span>    <span class="n">Z_A</span> <span class="o">-</span> <a class="sphx-glr-backref-module-jaxrts-form_factors sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.form_factors.pauling_size_screening_constants.html#jaxrts.form_factors.pauling_size_screening_constants" title="jaxrts.form_factors.pauling_size_screening_constants"><span class="n">jaxrts</span><span class="o">.</span><span class="n">form_factors</span><span class="o">.</span><span class="n">pauling_size_screening_constants</span></a><span class="p">(</span><span class="n">Z_A</span><span class="p">)</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Form Factor lowering</span><span class="w">
+</span><span class="c1"># ====================</span><span class="w">
+</span><span class="w">
+</span><span class="n">Zeff_ffl_H_like</span> <span class="o">=</span> <span class="p">[</span><span class="p">]</span><span class="w">
+</span><span class="n">Zeff_ffl_He_like</span> <span class="o">=</span> <span class="p">[</span><span class="p">]</span><span class="w">
+</span><span class="w">
+</span><span class="n">Zeff_ffl_H_like_corr</span> <span class="o">=</span> <span class="p">[</span><span class="p">]</span><span class="w">
+</span><span class="n">Zeff_ffl_He_like_corr</span> <span class="o">=</span> <span class="p">[</span><span class="p">]</span><span class="w">
+</span><span class="k">for</span> <span class="n">Zs</span> <span class="ow">in</span> <span class="n">Z_A</span><span class="p">:</span><span class="w">
+</span>    <span class="n">binding_E</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.elements.Element.html#jaxrts.elements.Element" title="jaxrts.Element"><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span></a><span class="p">(</span><span class="n">Zs</span><span class="p">)</span><span class="o">.</span><span class="n">ionization</span><span class="o">.</span><span class="n">energies</span><span class="p">)</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span><span class="p">]</span><span class="p">[</span><span class="p">:</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w">
+</span>    <span class="n">H_like</span><span class="p">,</span> <span class="n">He_like</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-form_factors sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.form_factors.form_factor_lowering_Zeff_10.html#jaxrts.form_factors.form_factor_lowering_Zeff_10" title="jaxrts.form_factors.form_factor_lowering_Zeff_10"><span class="n">jaxrts</span><span class="o">.</span><span class="n">form_factors</span><span class="o">.</span><span class="n">form_factor_lowering_Zeff_10</span></a><span class="p">(</span><span class="w">
+</span>        <span class="n">binding_E</span><span class="p">,</span> <span class="n">Zs</span><span class="p">,</span> <span class="n">Z_squared_correction</span><span class="o">=</span><span class="kc">False</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">Zeff_ffl_H_like</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H_like</span><span class="p">)</span><span class="w">
+</span>    <span class="n">Zeff_ffl_He_like</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">He_like</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="n">H_like</span><span class="p">,</span> <span class="n">He_like</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-form_factors sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.form_factors.form_factor_lowering_Zeff_10.html#jaxrts.form_factors.form_factor_lowering_Zeff_10" title="jaxrts.form_factors.form_factor_lowering_Zeff_10"><span class="n">jaxrts</span><span class="o">.</span><span class="n">form_factors</span><span class="o">.</span><span class="n">form_factor_lowering_Zeff_10</span></a><span class="p">(</span><span class="w">
+</span>        <span class="n">binding_E</span><span class="p">,</span> <span class="n">Zs</span><span class="p">,</span> <span class="n">Z_squared_correction</span><span class="o">=</span><span class="kc">True</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">Zeff_ffl_H_like_corr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H_like</span><span class="p">)</span><span class="w">
+</span>    <span class="n">Zeff_ffl_He_like_corr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">He_like</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">Zeff_ffl_H_like</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Zeff_ffl_H_like</span><span class="p">)</span><span class="w">
+</span><span class="n">Zeff_ffl_He_like</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Zeff_ffl_He_like</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">Zeff_ffl_H_like_corr</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Zeff_ffl_H_like_corr</span><span class="p">)</span><span class="w">
+</span><span class="n">Zeff_ffl_He_like_corr</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Zeff_ffl_He_like_corr</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">Z_A</span><span class="p">,</span><span class="w">
+</span>    <span class="n">Zeff_ffl_H_like</span> <span class="o">-</span> <span class="n">Zeff_pauling_H_like</span><span class="p">,</span><span class="w">
+</span>    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">C0</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">none</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">o</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">ff lowering - Pauling</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">markerfacecolor</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">none</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">Z_A</span><span class="p">,</span><span class="w">
+</span>    <span class="n">Zeff_ffl_H_like_corr</span> <span class="o">-</span> <span class="n">Zeff_pauling_H_like</span><span class="p">,</span><span class="w">
+</span>    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">C0</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">none</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">s</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">ff lowering (corr.) - Pauling</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">Z_A</span><span class="p">,</span><span class="w">
+</span>    <span class="n">Zeff_ffl_He_like</span> <span class="o">-</span> <span class="n">Zeff_pauling_He_like</span><span class="p">,</span><span class="w">
+</span>    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">C1</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">none</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">o</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">markerfacecolor</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">none</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <span class="n">Z_A</span><span class="p">,</span><span class="w">
+</span>    <span class="n">Zeff_ffl_He_like_corr</span> <span class="o">-</span> <span class="n">Zeff_pauling_He_like</span><span class="p">,</span><span class="w">
+</span>    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">C1</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">none</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">s</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Z_A</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">Z_A</span><span class="p">)</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">black</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">dashed</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$</span><span class="se">\\</span><span class="s2">Delta Z_</span><span class="si">{eff}</span><span class="s2">$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$Z$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">blue: H-like, green: He-like</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.002 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-form-factors-plot-ffl-zero-ipd-limit-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/fcc83a81ad665837182bb783a76f0c7f/plot_ffl_zero_IPD_limit.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_ffl_zero_IPD_limit.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/983550ed3370dbc6d3c9c8ab2c0a6ec6/plot_ffl_zero_IPD_limit.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_ffl_zero_IPD_limit.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/5eae90a3fd43dd0f472749452969a24c/plot_ffl_zero_IPD_limit.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_ffl_zero_IPD_limit.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

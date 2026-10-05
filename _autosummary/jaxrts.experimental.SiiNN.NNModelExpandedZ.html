@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.experimental.SiiNN.NNModelExpandedZ &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -133,7 +132,7 @@
 <h1>jaxrts.experimental.SiiNN.NNModelExpandedZ<a class="headerlink" href="#jaxrts-experimental-siinn-nnmodelexpandedz" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="jaxrts.experimental.SiiNN.NNModelExpandedZ">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jaxrts.experimental.SiiNN.</span></span><span class="sig-name descname"><span class="pre">NNModelExpandedZ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/experimental/SiiNN.html#NNModelExpandedZ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.experimental.SiiNN.NNModelExpandedZ" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">jaxrts.experimental.SiiNN.</span></span><span class="sig-name descname"><span class="pre">NNModelExpandedZ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/experimental/SiiNN.html#NNModelExpandedZ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.experimental.SiiNN.NNModelExpandedZ" title="Link to this definition"></a></dt>
 <dd><p>Extension of <a class="reference internal" href="jaxrts.experimental.SiiNN.NNModel.html#jaxrts.experimental.SiiNN.NNModel" title="jaxrts.experimental.SiiNN.NNModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NNModel</span></code></a> that augments the input representation of
 the ionization state in order to better capture discontinuities occurring
 at integer ionization values.</p>
@@ -163,7 +162,8 @@ two components:</p>
 <p>The behaviour of S_ab(k) for an expanded and non-expanded
 carbon dataset is shown below, highlighting the dicontinuity
 at integer ionization values.</p>
-<a class="reference internal image-reference" href="../_images/NN_comparison_expanded_vs_non_expanded_dataset.svg"><img alt="../_images/NN_comparison_expanded_vs_non_expanded_dataset.svg" src="../_images/NN_comparison_expanded_vs_non_expanded_dataset.svg" style="width: 600px;" /></a>
+<a class="reference internal image-reference" href="../_images/NN_comparison_expanded_vs_non_expanded_dataset.svg"><img alt="../_images/NN_comparison_expanded_vs_non_expanded_dataset.svg" src="../_images/NN_comparison_expanded_vs_non_expanded_dataset.svg" width="600" />
+</a>
 <p>Construct an expanded neural network model.</p>
 <p>The dimensionality of the first layer is increased because each
 ionization variable <code class="docutils literal notranslate"><span class="pre">Z_i</span></code> is replaced by two features: its
@@ -199,7 +199,7 @@ quantity is inferred from <code class="docutils literal notranslate"><span class
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.iter_modules.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.iter_modules" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.iter_modules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iter_modules</span></code></a>()</p></td>
 <td><p>Warning: this method is method is deprecated; use <a class="reference internal" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.iter_modules.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.iter_modules" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.iter_modules"><code class="xref py py-func docutils literal notranslate"><span class="pre">iter_modules()</span></code></a> instead.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.perturb.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.perturb" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.perturb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">perturb</span></code></a>(name, value[, variable_type])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.perturb.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.perturb" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.perturb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">perturb</span></code></a>(name, value, variable_type)</p></td>
 <td><p>Extract gradients of intermediate values during training.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.set_attributes.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.set_attributes" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.set_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_attributes</span></code></a>(*filters[, ...])</p></td>
@@ -208,7 +208,7 @@ quantity is inferred from <code class="docutils literal notranslate"><span class
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.set_norms.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.set_norms" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.set_norms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_norms</span></code></a>(T, rho, Z, k)</p></td>
 <td><p>Set the normalization of the input layers.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.sow.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.sow" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.sow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sow</span></code></a>(variable_type, name, value[, reduce_fn, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.sow.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.sow" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.sow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sow</span></code></a>(variable_type, name, value, reduce_fn, ...)</p></td>
 <td><p>Store intermediate values during module execution for later extraction.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.experimental.SiiNN.NNModelExpandedZ.train.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.train" title="jaxrts.experimental.SiiNN.NNModelExpandedZ.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(**attributes)</p></td>

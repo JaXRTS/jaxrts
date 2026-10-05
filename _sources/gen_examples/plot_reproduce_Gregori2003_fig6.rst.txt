@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_gen_examples_plot_reproduce_Gregori2003_fig6.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -179,7 +179,7 @@ with :py:meth:`jaxrts.plasma_state.PlasmaState.probe`.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 30.297 seconds)
+   **Total running time of the script:** (0 minutes 41.447 seconds)
 
 
 .. _sphx_glr_download_gen_examples_plot_reproduce_Gregori2003_fig6.py:
@@ -195,6 +195,10 @@ with :py:meth:`jaxrts.plasma_state.PlasmaState.probe`.
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_reproduce_Gregori2003_fig6.py <plot_reproduce_Gregori2003_fig6.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_reproduce_Gregori2003_fig6.zip <plot_reproduce_Gregori2003_fig6.zip>`
 
 
 .. only:: html

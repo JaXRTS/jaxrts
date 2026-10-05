@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Generating a first spectrum &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -143,7 +142,7 @@ plasma at <span class="math notranslate nohighlight">\(\rho=1\text{g/cc}\)</span
 <p>If no ion temperature is given explicitly, we assume equilibrium of ion and
 electron temperatures as a default.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">(</span>
-    <span class="n">ions</span><span class="o">=</span><span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;Be&quot;</span><span class="p">)],</span>
+    <span class="n">ions</span><span class="o">=</span><span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">"Be"</span><span class="p">)],</span>
     <span class="n">Z_free</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">]),</span>
     <span class="n">mass_density</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
     <span class="n">T_e</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">,</span>  <span class="c1"># T_e is the electron temperature.</span>
@@ -172,11 +171,11 @@ some default models.</p>
 <p>Next, we also have to define a <a class="reference internal" href="_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.setup.Setup"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.setup.Setup</span></code></a>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">jpu</span></code>
 also allows converting string to quantities with units, as you can see below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">setup</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span>
-    <span class="n">scattering_angle</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;60°&quot;</span><span class="p">),</span>
-    <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;4700 eV&quot;</span><span class="p">),</span>
-    <span class="n">measured_energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;4700 eV&quot;</span><span class="p">)</span>
+    <span class="n">scattering_angle</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">"60°"</span><span class="p">),</span>
+    <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">"4700 eV"</span><span class="p">),</span>
+    <span class="n">measured_energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">"4700 eV"</span><span class="p">)</span>
     <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">,</span>
-    <span class="n">instrument</span><span class="o">=</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">fwhm</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;5.0eV&quot;</span><span class="p">)),</span>
+    <span class="n">instrument</span><span class="o">=</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">fwhm</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">"5.0eV"</span><span class="p">)),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -186,10 +185,10 @@ appropriate key. The four keys you see below are mandatory to be set. However,
 depending on the models implemented, you might have to specify different
 additional models, e.g., <code class="docutils literal notranslate"><span class="pre">ipd</span></code>. See <a class="reference internal" href="models.html"><span class="doc">Models implemented</span></a> for a comprehensive list of
 models available in jaxrts.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;ionic scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">OnePotentialHNCIonFeat</span><span class="p">()</span>
-<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">RPA_DandreaFit</span><span class="p">()</span>
-<span class="n">state</span><span class="p">[</span><span class="s2">&quot;bound-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SchumacherImpulse</span><span class="p">()</span>
-<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-bound scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DetailedBalance</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span><span class="p">[</span><span class="s2">"ionic scattering"</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">OnePotentialHNCIonFeat</span><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">"free-free scattering"</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">RPA_DandreaFit</span><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">"bound-free scattering"</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SchumacherImpulse</span><span class="p">()</span>
+<span class="n">state</span><span class="p">[</span><span class="s2">"free-bound scattering"</span><span class="p">]</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DetailedBalance</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Finally, we call <a class="reference internal" href="_autosummary/jaxrts.plasmastate.PlasmaState.probe.html#jaxrts.plasmastate.PlasmaState.probe" title="jaxrts.plasmastate.PlasmaState.probe"><code class="xref py py-meth docutils literal notranslate"><span class="pre">jaxrts.plasmastate.PlasmaState.probe()</span></code></a>, to evaluate
@@ -202,14 +201,15 @@ the scattering on the plasma state with the geometry defined.</p>
     <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
     <span class="n">See_tot</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
 <span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Probed Energy [eV]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$S_</span><span class="si">{ee}</span><span class="s2">^</span><span class="si">{tot}</span><span class="s2">$ [s]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Be plasma at 2eV and 1g/cc with Z=2&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Probed Energy [eV]"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"$S_</span><span class="si">{ee}</span><span class="s2">^</span><span class="si">{tot}</span><span class="s2">$ [s]"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Be plasma at 2eV and 1g/cc with Z=2"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Above code produces the following plot:</p>
-<a class="reference internal image-reference" href="_images/sphx_glr_plot_getting_started_001.svg"><img alt="_images/sphx_glr_plot_getting_started_001.svg" src="_images/sphx_glr_plot_getting_started_001.svg" style="width: 600px;" /></a>
+<a class="reference internal image-reference" href="_images/sphx_glr_plot_getting_started_001.svg"><img alt="_images/sphx_glr_plot_getting_started_001.svg" src="_images/sphx_glr_plot_getting_started_001.svg" width="600" />
+</a>
 <p>Since we did not set <a class="reference internal" href="_autosummary/jaxrts.setup.Setup.frc_exponent.html#jaxrts.setup.Setup.frc_exponent" title="jaxrts.setup.Setup.frc_exponent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">jaxrts.setup.Setup.frc_exponent</span></code></a>, above, it defaults
 to zero, i.e., the output of jaxrts is proportional to the dynamic structure
 factor, convolved with the source instrument function. See

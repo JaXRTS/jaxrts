@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -6,23 +8,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Showcase the DetailedBalace free-bound scattering Model &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -125,7 +124,7 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-gen-examples-free-bound-plot-free-bound-scattering-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="showcase-the-detailedbalace-free-bound-scattering-model">
 <span id="sphx-glr-gen-examples-free-bound-plot-free-bound-scattering-py"></span><h1>Showcase the DetailedBalace free-bound scattering Model<a class="headerlink" href="#showcase-the-detailedbalace-free-bound-scattering-model" title="Link to this heading"></a></h1>
@@ -133,72 +132,74 @@ to download the full example code</p>
 example is one of the dataset revisited by cite:<cite>Bohme.2023</cite>.
 However, we used simpler for the relevant scattering processes, just to show
 the usage of <code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.models.DetailedBalace</span></code>.</p>
-<img src="../../_images/sphx_glr_plot_free_bound_scattering_001.svg" srcset="../../_images/sphx_glr_plot_free_bound_scattering_001.svg" alt="plot free bound scattering" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
-
-<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ureg</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
-
-<span class="n">setup</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span>
-    <span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;120°&quot;</span><span class="p">),</span>
-    <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;9keV&quot;</span><span class="p">),</span>
-    <span class="n">measured_energy</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mf">9.5</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kiloelectron_volt</span><span class="p">,</span>
-    <span class="n">instrument</span><span class="o">=</span><a href="../../_autosummary/jaxrts.instrument_function.Gaussian.html#jaxrts.instrument_function.Gaussian" title="jaxrts.instrument_function.Gaussian" class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">Gaussian</span></a><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;30.0eV&quot;</span><span class="p">)),</span>
-<span class="p">)</span>
-<span class="n">state</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span><span class="p">(</span>
-    <span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;Be&quot;</span><span class="p">)],</span>
-    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.0</span><span class="p">]),</span>
-    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">9.3</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
-    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">119</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">,</span>
-    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">119</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">,</span>
-<span class="p">)</span>
-
-
-<span class="n">state</span><span class="p">[</span><span class="s2">&quot;ionic scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.Gregori2003IonFeat.html#jaxrts.models.Gregori2003IonFeat" title="jaxrts.models.Gregori2003IonFeat" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Gregori2003IonFeat</span></a><span class="p">()</span>
-<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.RPA.html#jaxrts.models.RPA" title="jaxrts.models.RPA" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">RPA</span></a><span class="p">()</span>
-<span class="n">state</span><span class="p">[</span><span class="s2">&quot;bound-free scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.SchumacherImpulse.html#jaxrts.models.SchumacherImpulse" title="jaxrts.models.SchumacherImpulse" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SchumacherImpulse</span></a><span class="p">()</span>
-<span class="n">state</span><span class="p">[</span><span class="s2">&quot;free-bound scattering&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.models.DetailedBalance.html#jaxrts.models.DetailedBalance" title="jaxrts.models.DetailedBalance" class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DetailedBalance</span></a><span class="p">()</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;free-free scattering&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;free-free&quot;</span><span class="p">,</span>
-    <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;bound-free scattering&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;bound-free&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;free-bound scattering&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;free-bound&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">setup</span><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">),</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">probe</span><span class="p">(</span><span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">),</span>
-    <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Energy [eV]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Scattering intensity&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 20.796 seconds)</p>
+<img src="../../_images/sphx_glr_plot_free_bound_scattering_001.svg" srcset="../../_images/sphx_glr_plot_free_bound_scattering_001.svg" alt="plot free bound scattering" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span><span class="w">
+</span><span class="w">
+</span><span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ureg</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">science</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.Setup"><span class="n">setup</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.Setup"><span class="n">jaxrts</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">Setup</span></a><span class="p">(</span><span class="w">
+</span>    <span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">120°</span><span class="s2">&quot;</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">energy</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">9keV</span><span class="s2">&quot;</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">measured_energy</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mf">9.5</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kiloelectron_volt</span><span class="p">,</span><span class="w">
+</span>    <span class="n">instrument</span><span class="o">=</span><a class="sphx-glr-backref-module-jaxrts-instrument_function sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.instrument_function.Gaussian.html#jaxrts.instrument_function.Gaussian" title="jaxrts.instrument_function.Gaussian"><span class="n">jaxrts</span><span class="o">.</span><span class="n">instrument_function</span><span class="o">.</span><span class="n">Gaussian</span></a><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="n">ureg</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">30.0eV</span><span class="s2">&quot;</span><span class="p">)</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">state</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">jaxrts</span><span class="o">.</span><span class="n">PlasmaState</span></a><span class="p">(</span><span class="w">
+</span>    <span class="p">[</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.elements.Element.html#jaxrts.elements.Element" title="jaxrts.Element"><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Be</span><span class="s2">&quot;</span><span class="p">)</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="p">[</span><span class="mf">3.0</span><span class="p">]</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="p">[</span><span class="mf">9.3</span><span class="p">]</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">*</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span><span class="w">
+</span>    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="p">[</span><span class="mi">119</span><span class="p">]</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">,</span><span class="w">
+</span>    <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="p">[</span><span class="mi">119</span><span class="p">]</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">state</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">ionic scattering</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.models.Gregori2003IonFeat.html#jaxrts.models.Gregori2003IonFeat" title="jaxrts.models.Gregori2003IonFeat"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Gregori2003IonFeat</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">state</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">free-free scattering</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.models.RPA.html#jaxrts.models.RPA" title="jaxrts.models.RPA"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">RPA</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">state</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">bound-free scattering</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.models.SchumacherImpulse.html#jaxrts.models.SchumacherImpulse" title="jaxrts.models.SchumacherImpulse"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SchumacherImpulse</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.PlasmaState"><span class="n">state</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">free-bound scattering</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-models sphx-glr-backref-type-py-class reference internal" href="../../_autosummary/jaxrts.models.DetailedBalance.html#jaxrts.models.DetailedBalance" title="jaxrts.models.DetailedBalance"><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DetailedBalance</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.Setup"><span class="n">setup</span></a><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-method reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.evaluate.html#jaxrts.plasmastate.PlasmaState.evaluate" title="jaxrts.PlasmaState.evaluate"><span class="n">state</span><span class="o">.</span><span class="n">evaluate</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">free-free scattering</span><span class="s2">&quot;</span><span class="p">,</span> <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.Setup"><span class="n">setup</span></a><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">free-free</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">dashed</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.Setup"><span class="n">setup</span></a><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-method reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.evaluate.html#jaxrts.plasmastate.PlasmaState.evaluate" title="jaxrts.PlasmaState.evaluate"><span class="n">state</span><span class="o">.</span><span class="n">evaluate</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">bound-free scattering</span><span class="s2">&quot;</span><span class="p">,</span> <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.Setup"><span class="n">setup</span></a><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">bound-free</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.Setup"><span class="n">setup</span></a><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-method reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.evaluate.html#jaxrts.plasmastate.PlasmaState.evaluate" title="jaxrts.PlasmaState.evaluate"><span class="n">state</span><span class="o">.</span><span class="n">evaluate</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">free-bound scattering</span><span class="s2">&quot;</span><span class="p">,</span> <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.Setup"><span class="n">setup</span></a><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">free-bound</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.Setup"><span class="n">setup</span></a><span class="o">.</span><span class="n">measured_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-method reference internal" href="../../_autosummary/jaxrts.plasmastate.PlasmaState.probe.html#jaxrts.plasmastate.PlasmaState.probe" title="jaxrts.PlasmaState.probe"><span class="n">state</span><span class="o">.</span><span class="n">probe</span></a><span class="p">(</span><a class="sphx-glr-backref-module-jaxrts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../_autosummary/jaxrts.setup.Setup.html#jaxrts.setup.Setup" title="jaxrts.Setup"><span class="n">setup</span></a><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">second</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="w">
+</span>    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">black</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">full</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Energy [eV]</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Scattering intensity</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 26.207 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-free-bound-plot-free-bound-scattering-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/7ac54a2c41d54db5804cc347f799caee/plot_free_bound_scattering.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_free_bound_scattering.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/2c6adf9d7d1bc541dc872478d8a950aa/plot_free_bound_scattering.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_free_bound_scattering.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/2e3ed088c9933460606e7060e49728b8/plot_free_bound_scattering.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_free_bound_scattering.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

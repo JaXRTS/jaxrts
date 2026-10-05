@@ -8,28 +8,35 @@ Setup Examples
 Examples related to the :py:class:`jaxrts.Setup` class.
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how the frequency redistribution correction (:pyjaxrts.Setup.frc_exponent) i...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how the frequency redistribution correction (jaxrts.Setup.frc_exponent) influences the outcome of jaxrts.PlasmaState.probe.">
 
 .. only:: html
 
   .. image:: /gen_examples/setup/images/thumb/sphx_glr_plot_frequency_redistibution_correction_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_setup_plot_frequency_redistibution_correction.py`
+  :doc:`/gen_examples/setup/plot_frequency_redistibution_correction`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Frequency redistribution correction</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

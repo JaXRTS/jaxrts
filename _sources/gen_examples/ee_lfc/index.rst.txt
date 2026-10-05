@@ -6,28 +6,35 @@ Electronic local field correction examples
 ------------------------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example compares different static (and quasi-static) local field corrections that are avai...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example compares different static (and quasi-static) local field corrections that are available in jaxrts.">
 
 .. only:: html
 
   .. image:: /gen_examples/ee_lfc/images/thumb/sphx_glr_plot_ee_lfc_comparison_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ee_lfc_plot_ee_lfc_comparison.py`
+  :doc:`/gen_examples/ee_lfc/plot_ee_lfc_comparison`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">LFC comparison</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

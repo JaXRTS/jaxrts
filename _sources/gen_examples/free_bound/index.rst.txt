@@ -6,22 +6,27 @@ free-bound scattering examples
 ------------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This plot is comparable to the target analzed by Doppner.2023, is this example is one of the da...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This plot is comparable to the target analzed by Doppner.2023, is this example is one of the dataset revisited by cite:`Bohme.2023`. However, we used simpler for the relevant scattering processes, just to show the usage of jaxrts.models.DetailedBalace.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_bound/images/thumb/sphx_glr_plot_free_bound_scattering_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_bound_plot_free_bound_scattering.py`
+  :doc:`/gen_examples/free_bound/plot_free_bound_scattering`
 
 .. raw:: html
 
@@ -31,14 +36,14 @@ free-bound scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="It was suggested by Bohme.2023 that the evaluation of some experiments need to consider free-bo...">
+    <div class="sphx-glr-thumbcontainer" tooltip="It was suggested by Bohme.2023 that the evaluation of some experiments need to consider free-bound conditions to fully understand the scattering spectrum. One of the seminal examples of the aforementioned paper is fitting the LCLS data from Kraus.2018.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_bound/images/thumb/sphx_glr_plot_bohme_kraus_relevance_of_bound_free_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_bound_plot_bohme_kraus_relevance_of_bound_free.py`
+  :doc:`/gen_examples/free_bound/plot_bohme_kraus_relevance_of_bound_free`
 
 .. raw:: html
 
@@ -48,20 +53,22 @@ free-bound scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The free-bound and bound-free contributions only fulfill the detailed balance relation in the (...">
+    <div class="sphx-glr-thumbcontainer" tooltip="The free-bound and bound-free contributions only fulfill the detailed balance relation in the (theoretical) case where the same k is probed at every energy-bin on an detector. We can model such a spectrum by setting jaxrts.setup.Setup.correct_k_dispersion to False.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_bound/images/thumb/sphx_glr_plot_k_dispersion_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_bound_plot_k_dispersion.py`
+  :doc:`/gen_examples/free_bound/plot_k_dispersion`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">k dispersion and free-bound scattering</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Showing the relevance of the Born Mermin Approximation &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -129,7 +128,7 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-gen-examples-free-free-plot-see0-rpa-bm-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="showing-the-relevance-of-the-born-mermin-approximation">
 <span id="sphx-glr-gen-examples-free-free-plot-see0-rpa-bm-py"></span><h1>Showing the relevance of the Born Mermin Approximation<a class="headerlink" href="#showing-the-relevance-of-the-born-mermin-approximation" title="Link to this heading"></a></h1>
@@ -145,203 +144,205 @@ identical results if the argument <code class="docutils literal notranslate"><sp
 Approximation, one introduces a damping term, resulting in an imaginary
 contribution in <code class="docutils literal notranslate"><span class="pre">E</span></code>). Therefore, the “full” RPA is required as part of the
 module.</p>
-<img src="../../_images/sphx_glr_plot_See0_RPA_BM_001.svg" srcset="../../_images/sphx_glr_plot_See0_RPA_BM_001.svg" alt="plot See0 RPA BM" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>RPA: 1.3166401386260986
-BMA: 6.4333107471466064
-BMA Chapman Interp: 9.486579418182373
-RPA With damping: 1.6714091300964355
-RPA: 0.0004975795745849609
-BMA: 5.873622179031372
-BMA Chapman Interp: 7.391477108001709
-RPA With damping: 0.0004570484161376953
-RPA: 0.0004374980926513672
-BMA: 6.012609481811523
-BMA Chapman Interp: 7.404366970062256
-RPA With damping: 0.0006835460662841797
+<img src="../../_images/sphx_glr_plot_See0_RPA_BM_001.svg" srcset="../../_images/sphx_glr_plot_See0_RPA_BM_001.svg" alt="plot See0 RPA BM" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>RPA: 2.769382953643799
+BMA: 14.44306492805481
+BMA Chapman Interp: 23.296082019805908
+RPA With damping: 3.661397695541382
+RPA: 0.0005786418914794922
+BMA: 12.936134576797485
+BMA Chapman Interp: 16.799830675125122
+RPA With damping: 0.0010085105895996094
+RPA: 0.0006380081176757812
+BMA: 13.302964448928833
+BMA Chapman Interp: 17.053608179092407
+RPA With damping: 0.0011098384857177734
 </pre></div>
 </div>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jpu.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts.free_free</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">free_free</span>
-
-<span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ureg</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;science&quot;</span><span class="p">)</span>
-
-<span class="n">lambda_0</span> <span class="o">=</span> <span class="mf">4.13</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">nanometer</span>
-<span class="n">theta</span> <span class="o">=</span> <span class="mi">60</span>
-<span class="n">n_e</span> <span class="o">=</span> <span class="mf">1e21</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">**</span><span class="mi">3</span>
-
-
-<span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">lambda_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
-<span class="n">w_pl</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.plasma_physics.plasma_frequency.html#jaxrts.plasma_physics.plasma_frequency" title="jaxrts.plasma_physics.plasma_frequency" class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">plasma_frequency</span></a><span class="p">(</span><span class="n">n_e</span><span class="p">)</span>
-<span class="n">omega</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="n">w_pl</span>
-<span class="n">E</span> <span class="o">=</span> <span class="n">omega</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
-
-<span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-    <span class="p">[</span>
-        <span class="mf">0.5</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span>
-        <span class="mf">2.0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span>
-        <span class="mf">8.0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span>
-    <span class="p">]</span>
-<span class="p">):</span>
-    <span class="n">mu</span> <span class="o">=</span> <a href="../../_autosummary/jaxrts.plasma_physics.chem_pot_interpolationIchimaru.html#jaxrts.plasma_physics.chem_pot_interpolationIchimaru" title="jaxrts.plasma_physics.chem_pot_interpolationIchimaru" class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">chem_pot_interpolationIchimaru</span></a><span class="p">(</span>
-        <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">),</span> <span class="n">n_e</span>
-    <span class="p">)</span>
-
-    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">vals1</span> <span class="o">=</span> <span class="p">(</span>
-        <a href="../../_autosummary/jaxrts.free_free.S0_ee_RPA_no_damping.html#jaxrts.free_free.S0_ee_RPA_no_damping" title="jaxrts.free_free.S0_ee_RPA_no_damping" class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function"><span class="n">free_free</span><span class="o">.</span><span class="n">S0_ee_RPA_no_damping</span></a><span class="p">(</span>
-            <span class="n">k</span><span class="p">,</span>
-            <span class="n">T_e</span><span class="o">=</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">),</span>
-            <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span>
-            <span class="n">E</span><span class="o">=</span><span class="n">E</span><span class="p">,</span>
-            <span class="n">chem_pot</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">rydberg</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RPA: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="nd">@jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">Partial</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">S_ii</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
-        <span class="k">return</span> <a href="../../_autosummary/jaxrts.static_structure_factors.S_ii_AD.html#jaxrts.static_structure_factors.S_ii_AD" title="jaxrts.static_structure_factors.S_ii_AD" class="sphx-glr-backref-module-jaxrts-static_structure_factors sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">static_structure_factors</span><span class="o">.</span><span class="n">S_ii_AD</span></a><span class="p">(</span>
-            <span class="n">q</span><span class="p">,</span>
-            <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">),</span>
-            <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">),</span>
-            <span class="n">n_e</span><span class="p">,</span>
-            <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">proton_mass</span><span class="p">,</span>
-            <span class="n">Z_f</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="p">)</span>
-
-    <span class="n">kappa</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <a href="../../_autosummary/jaxrts.plasma_physics.Debye_Hueckel_screening_length.html#jaxrts.plasma_physics.Debye_Hueckel_screening_length" title="jaxrts.plasma_physics.Debye_Hueckel_screening_length" class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">Debye_Hueckel_screening_length</span></a><span class="p">(</span>
-        <span class="n">n_e</span><span class="p">,</span> <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span>
-    <span class="p">)</span>
-
-    <span class="nd">@jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">Partial</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">V_eiS</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
-        <span class="k">return</span> <a href="../../_autosummary/jaxrts.free_free.statically_screened_ie_debye_potential.html#jaxrts.free_free.statically_screened_ie_debye_potential" title="jaxrts.free_free.statically_screened_ie_debye_potential" class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function"><span class="n">jaxrts</span><span class="o">.</span><span class="n">free_free</span><span class="o">.</span><span class="n">statically_screened_ie_debye_potential</span></a><span class="p">(</span>
-            <span class="n">q</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">Zf</span><span class="o">=</span><span class="mf">1.0</span>
-        <span class="p">)</span>
-
-    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span>
-        <a href="../../_autosummary/jaxrts.free_free.S0_ee_BMA.html#jaxrts.free_free.S0_ee_BMA" title="jaxrts.free_free.S0_ee_BMA" class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function"><span class="n">free_free</span><span class="o">.</span><span class="n">S0_ee_BMA</span></a><span class="p">(</span>
-            <span class="n">k</span><span class="p">,</span>
-            <span class="n">T</span><span class="o">=</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">),</span>
-            <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span>
-            <span class="n">E</span><span class="o">=</span><span class="n">E</span><span class="p">,</span>
-            <span class="n">chem_pot</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span>
-            <span class="n">S_ii</span><span class="o">=</span><span class="n">S_ii</span><span class="p">,</span>
-            <span class="n">V_eiS</span><span class="o">=</span><span class="n">V_eiS</span><span class="p">,</span>
-            <span class="n">Zf</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">rydberg</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;BMA: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">vals3</span> <span class="o">=</span> <span class="p">(</span>
-        <a href="../../_autosummary/jaxrts.free_free.S0_ee_BMA_chapman_interp.html#jaxrts.free_free.S0_ee_BMA_chapman_interp" title="jaxrts.free_free.S0_ee_BMA_chapman_interp" class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function"><span class="n">free_free</span><span class="o">.</span><span class="n">S0_ee_BMA_chapman_interp</span></a><span class="p">(</span>
-            <span class="n">k</span><span class="p">,</span>
-            <span class="n">T</span><span class="o">=</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">),</span>
-            <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span>
-            <span class="n">E</span><span class="o">=</span><span class="n">E</span><span class="p">,</span>
-            <span class="n">chem_pot</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span>
-            <span class="n">S_ii</span><span class="o">=</span><span class="n">S_ii</span><span class="p">,</span>
-            <span class="n">V_eiS</span><span class="o">=</span><span class="n">V_eiS</span><span class="p">,</span>
-            <span class="n">Zf</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-            <span class="n">E_cutoff_min</span><span class="o">=</span><span class="n">jnpu</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">E</span><span class="p">)),</span>
-            <span class="n">E_cutoff_max</span><span class="o">=</span><span class="n">jnpu</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">E</span><span class="p">)),</span>
-            <span class="n">no_of_points</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">rydberg</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;BMA Chapman Interp: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">vals2</span> <span class="o">=</span> <span class="p">(</span>
-        <a href="../../_autosummary/jaxrts.free_free.S0_ee_RPA.html#jaxrts.free_free.S0_ee_RPA" title="jaxrts.free_free.S0_ee_RPA" class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function"><span class="n">free_free</span><span class="o">.</span><span class="n">S0_ee_RPA</span></a><span class="p">(</span>
-            <span class="n">k</span><span class="p">,</span>
-            <span class="n">T_e</span><span class="o">=</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">),</span>
-            <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span>
-            <span class="n">E</span><span class="o">=</span><span class="n">E</span><span class="p">,</span>
-            <span class="n">chem_pot</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">rydberg</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RPA With damping: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">E</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">w_pl</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">x</span><span class="p">,</span>
-        <span class="n">vals</span><span class="p">,</span>
-        <span class="n">label</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;T = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; eV, BM&quot;</span>
-            <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span>
-            <span class="k">else</span> <span class="s2">&quot;T = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; eV&quot;</span>
-        <span class="p">),</span>
-        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">x</span><span class="p">,</span>
-        <span class="n">vals3</span><span class="p">,</span>
-        <span class="n">label</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;T = &quot;</span>
-            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">))</span>
-            <span class="o">+</span> <span class="s2">&quot; eV, BMA, Chapman Interp&quot;</span>
-            <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span>
-            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-        <span class="p">),</span>
-        <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">x</span><span class="p">,</span>
-        <span class="n">vals1</span><span class="p">,</span>
-        <span class="n">label</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;T = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; eV, RPA&quot;</span>
-            <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span>
-            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-        <span class="p">),</span>
-        <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">x</span><span class="p">,</span>
-        <span class="n">vals2</span><span class="p">,</span>
-        <span class="n">label</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;T = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; eV, RPA, with damping&quot;</span>
-            <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span>
-            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-        <span class="p">),</span>
-        <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-
-
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\omega/\omega_</span><span class="si">{pl}</span><span class="s2">$&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$S^0_{\text</span><span class="si">{ee}</span><span class="s2">}$ [Ryd$^{-1}$]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">1.05</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 48.682 seconds)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">time</span><span class="w">
+</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jpu</span><span class="nn">.</span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnpu</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">jaxrts</span><span class="nn">.</span><span class="nn">free_free</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">free_free</span><span class="w">
+</span><span class="w">
+</span><span class="n">ureg</span> <span class="o">=</span> <span class="n">jaxrts</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ureg</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">science</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">lambda_0</span> <span class="o">=</span> <span class="mf">4.13</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">nanometer</span><span class="w">
+</span><span class="n">theta</span> <span class="o">=</span> <span class="mi">60</span><span class="w">
+</span><span class="n">n_e</span> <span class="o">=</span> <span class="mf">1e21</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">centimeter</span><span class="o">*</span><span class="o">*</span><span class="mi">3</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">lambda_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="w">
+</span><span class="n">w_pl</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.plasma_physics.plasma_frequency.html#jaxrts.plasma_physics.plasma_frequency" title="jaxrts.plasma_physics.plasma_frequency"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">plasma_frequency</span></a><span class="p">(</span><span class="n">n_e</span><span class="p">)</span><span class="w">
+</span><span class="n">omega</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="n">w_pl</span><span class="w">
+</span><span class="n">E</span> <span class="o">=</span> <span class="n">omega</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="w">
+</span><span class="w">
+</span><span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="w">
+</span>    <span class="p">[</span><span class="w">
+</span>        <span class="mf">0.5</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span><span class="w">
+</span>        <span class="mf">2.0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span><span class="w">
+</span>        <span class="mf">8.0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volts</span><span class="p">,</span><span class="w">
+</span>    <span class="p">]</span><span class="w">
+</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>    <span class="n">mu</span> <span class="o">=</span> <a class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.plasma_physics.chem_pot_interpolationIchimaru.html#jaxrts.plasma_physics.chem_pot_interpolationIchimaru" title="jaxrts.plasma_physics.chem_pot_interpolationIchimaru"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">chem_pot_interpolationIchimaru</span></a><span class="p">(</span><span class="w">
+</span>        <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="p">,</span> <span class="n">n_e</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span>    <span class="n">vals1</span> <span class="o">=</span> <span class="p">(</span><span class="w">
+</span>        <a class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.free_free.S0_ee_RPA_no_damping.html#jaxrts.free_free.S0_ee_RPA_no_damping" title="jaxrts.free_free.S0_ee_RPA_no_damping"><span class="n">free_free</span><span class="o">.</span><span class="n">S0_ee_RPA_no_damping</span></a><span class="p">(</span><span class="w">
+</span>            <span class="n">k</span><span class="p">,</span><span class="w">
+</span>            <span class="n">T_e</span><span class="o">=</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span><span class="w">
+</span>            <span class="n">E</span><span class="o">=</span><span class="n">E</span><span class="p">,</span><span class="w">
+</span>            <span class="n">chem_pot</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span><span class="w">
+</span>        <span class="p">)</span><span class="w">
+</span>        <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="w">
+</span>    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">rydberg</span><span class="p">)</span><span class="w">
+</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">RPA: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="nd">&#64;jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">Partial</span><span class="w">
+</span>    <span class="k">def</span><span class="w"> </span><span class="nf">S_ii</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>        <span class="k">return</span> <a class="sphx-glr-backref-module-jaxrts-static_structure_factors sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.static_structure_factors.S_ii_AD.html#jaxrts.static_structure_factors.S_ii_AD" title="jaxrts.static_structure_factors.S_ii_AD"><span class="n">jaxrts</span><span class="o">.</span><span class="n">static_structure_factors</span><span class="o">.</span><span class="n">S_ii_AD</span></a><span class="p">(</span><span class="w">
+</span>            <span class="n">q</span><span class="p">,</span><span class="w">
+</span>            <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="n">n_e</span><span class="p">,</span><span class="w">
+</span>            <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">proton_mass</span><span class="p">,</span><span class="w">
+</span>            <span class="n">Z_f</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="w">
+</span>        <span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="n">kappa</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <a class="sphx-glr-backref-module-jaxrts-plasma_physics sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.plasma_physics.Debye_Hueckel_screening_length.html#jaxrts.plasma_physics.Debye_Hueckel_screening_length" title="jaxrts.plasma_physics.Debye_Hueckel_screening_length"><span class="n">jaxrts</span><span class="o">.</span><span class="n">plasma_physics</span><span class="o">.</span><span class="n">Debye_Hueckel_screening_length</span></a><span class="p">(</span><span class="w">
+</span>        <span class="n">n_e</span><span class="p">,</span> <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="nd">&#64;jax</span><span class="o">.</span><span class="n">tree_util</span><span class="o">.</span><span class="n">Partial</span><span class="w">
+</span>    <span class="k">def</span><span class="w"> </span><span class="nf">V_eiS</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>        <span class="k">return</span> <a class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.free_free.statically_screened_ie_debye_potential.html#jaxrts.free_free.statically_screened_ie_debye_potential" title="jaxrts.free_free.statically_screened_ie_debye_potential"><span class="n">jaxrts</span><span class="o">.</span><span class="n">free_free</span><span class="o">.</span><span class="n">statically_screened_ie_debye_potential</span></a><span class="p">(</span><span class="w">
+</span>            <span class="n">q</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">Zf</span><span class="o">=</span><span class="mf">1.0</span><span class="w">
+</span>        <span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span>    <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="w">
+</span>        <a class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.free_free.S0_ee_BMA.html#jaxrts.free_free.S0_ee_BMA" title="jaxrts.free_free.S0_ee_BMA"><span class="n">free_free</span><span class="o">.</span><span class="n">S0_ee_BMA</span></a><span class="p">(</span><span class="w">
+</span>            <span class="n">k</span><span class="p">,</span><span class="w">
+</span>            <span class="n">T</span><span class="o">=</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span><span class="w">
+</span>            <span class="n">E</span><span class="o">=</span><span class="n">E</span><span class="p">,</span><span class="w">
+</span>            <span class="n">chem_pot</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span><span class="w">
+</span>            <span class="n">S_ii</span><span class="o">=</span><span class="n">S_ii</span><span class="p">,</span><span class="w">
+</span>            <span class="n">V_eiS</span><span class="o">=</span><span class="n">V_eiS</span><span class="p">,</span><span class="w">
+</span>            <span class="n">Zf</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="w">
+</span>        <span class="p">)</span><span class="w">
+</span>        <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="w">
+</span>    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">rydberg</span><span class="p">)</span><span class="w">
+</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">BMA: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span>    <span class="n">vals3</span> <span class="o">=</span> <span class="p">(</span><span class="w">
+</span>        <a class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.free_free.S0_ee_BMA_chapman_interp.html#jaxrts.free_free.S0_ee_BMA_chapman_interp" title="jaxrts.free_free.S0_ee_BMA_chapman_interp"><span class="n">free_free</span><span class="o">.</span><span class="n">S0_ee_BMA_chapman_interp</span></a><span class="p">(</span><span class="w">
+</span>            <span class="n">k</span><span class="p">,</span><span class="w">
+</span>            <span class="n">T</span><span class="o">=</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span><span class="w">
+</span>            <span class="n">E</span><span class="o">=</span><span class="n">E</span><span class="p">,</span><span class="w">
+</span>            <span class="n">chem_pot</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span><span class="w">
+</span>            <span class="n">S_ii</span><span class="o">=</span><span class="n">S_ii</span><span class="p">,</span><span class="w">
+</span>            <span class="n">V_eiS</span><span class="o">=</span><span class="n">V_eiS</span><span class="p">,</span><span class="w">
+</span>            <span class="n">Zf</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="w">
+</span>            <span class="n">E_cutoff_min</span><span class="o">=</span><span class="n">jnpu</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">E</span><span class="p">)</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="n">E_cutoff_max</span><span class="o">=</span><span class="n">jnpu</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">jnpu</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">E</span><span class="p">)</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="n">no_of_points</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="w">
+</span>        <span class="p">)</span><span class="w">
+</span>        <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="w">
+</span>    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">rydberg</span><span class="p">)</span><span class="w">
+</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">BMA Chapman Interp: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span>    <span class="n">vals2</span> <span class="o">=</span> <span class="p">(</span><span class="w">
+</span>        <a class="sphx-glr-backref-module-jaxrts-free_free sphx-glr-backref-type-py-function reference internal" href="../../_autosummary/jaxrts.free_free.S0_ee_RPA.html#jaxrts.free_free.S0_ee_RPA" title="jaxrts.free_free.S0_ee_RPA"><span class="n">free_free</span><span class="o">.</span><span class="n">S0_ee_RPA</span></a><span class="p">(</span><span class="w">
+</span>            <span class="n">k</span><span class="p">,</span><span class="w">
+</span>            <span class="n">T_e</span><span class="o">=</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">boltzmann_constant</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="n">n_e</span><span class="o">=</span><span class="n">n_e</span><span class="p">,</span><span class="w">
+</span>            <span class="n">E</span><span class="o">=</span><span class="n">E</span><span class="p">,</span><span class="w">
+</span>            <span class="n">chem_pot</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span><span class="w">
+</span>        <span class="p">)</span><span class="w">
+</span>        <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span><span class="w">
+</span>    <span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">rydberg</span><span class="p">)</span><span class="w">
+</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">RPA With damping: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span>    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">E</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">hbar</span> <span class="o">/</span> <span class="n">w_pl</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">)</span><span class="w">
+</span>    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="n">x</span><span class="p">,</span><span class="w">
+</span>        <span class="n">vals</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="w">
+</span>            <span class="s2">&quot;</span><span class="s2">T = </span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="s2"> eV, BM</span><span class="s2">&quot;</span><span class="w">
+</span>            <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="w">
+</span>            <span class="k">else</span> <span class="s2">&quot;</span><span class="s2">T = </span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="s2"> eV</span><span class="s2">&quot;</span><span class="w">
+</span>        <span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">C</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="n">x</span><span class="p">,</span><span class="w">
+</span>        <span class="n">vals3</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="w">
+</span>            <span class="s2">&quot;</span><span class="s2">T = </span><span class="s2">&quot;</span><span class="w">
+</span>            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span>            <span class="o">+</span> <span class="s2">&quot;</span><span class="s2"> eV, BMA, Chapman Interp</span><span class="s2">&quot;</span><span class="w">
+</span>            <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="w">
+</span>            <span class="k">else</span> <span class="s2">&quot;</span><span class="s2">&quot;</span><span class="w">
+</span>        <span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">dotted</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">C</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="n">x</span><span class="p">,</span><span class="w">
+</span>        <span class="n">vals1</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="w">
+</span>            <span class="s2">&quot;</span><span class="s2">T = </span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="s2"> eV, RPA</span><span class="s2">&quot;</span><span class="w">
+</span>            <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="w">
+</span>            <span class="k">else</span> <span class="s2">&quot;</span><span class="s2">&quot;</span><span class="w">
+</span>        <span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">dashed</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">C</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="w">
+</span>        <span class="n">x</span><span class="p">,</span><span class="w">
+</span>        <span class="n">vals2</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="w">
+</span>            <span class="s2">&quot;</span><span class="s2">T = </span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span><span class="p">)</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="s2"> eV, RPA, with damping</span><span class="s2">&quot;</span><span class="w">
+</span>            <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="w">
+</span>            <span class="k">else</span> <span class="s2">&quot;</span><span class="s2">&quot;</span><span class="w">
+</span>        <span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">dotted</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">black</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;</span><span class="s2">$</span><span class="s2">\</span><span class="s2">omega/</span><span class="s2">\</span><span class="s2">omega_</span><span class="si">{pl}</span><span class="s2">$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;</span><span class="s2">$S^0_</span><span class="s2">{</span><span class="s2">\</span><span class="s2">text</span><span class="si">{ee}</span><span class="s2">}$ [Ryd$^</span><span class="s2">{</span><span class="s2">-1}$]</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">upper left</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">1.05</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 47.594 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gen-examples-free-free-plot-see0-rpa-bm-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/d6a065c8358ef9a723467c180884b9a7/plot_See0_RPA_BM.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_See0_RPA_BM.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/116cae1dea3b3c75240fe15cd28d0902/plot_See0_RPA_BM.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_See0_RPA_BM.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/cbc07da32292a4108c0a36d3d5d309ce/plot_See0_RPA_BM.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_See0_RPA_BM.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

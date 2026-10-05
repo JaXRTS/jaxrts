@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.analysis &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -139,7 +138,7 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.analysis.ITCFT.html#jaxrts.analysis.ITCFT" title="jaxrts.analysis.ITCFT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITCFT</span></code></a>(S_ee_conv, tau_max, setup, E_cut[, raw])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.analysis.ITCFT.html#jaxrts.analysis.ITCFT" title="jaxrts.analysis.ITCFT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITCFT</span></code></a>(S_ee_conv, tau_max, setup, E_cut, raw)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.analysis.ITCFT_grid.html#jaxrts.analysis.ITCFT_grid" title="jaxrts.analysis.ITCFT_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITCFT_grid</span></code></a>(S_ee_conv, tau, setup, E_cut)</p></td>
@@ -148,10 +147,10 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.analysis.ITCF_from_setup.html#jaxrts.analysis.ITCF_from_setup" title="jaxrts.analysis.ITCF_from_setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITCF_from_setup</span></code></a>(S_ee_conv, setup, E_cut[, raw])</p></td>
 <td><p>Returns a <code class="xref py py-class docutils literal notranslate"><span class="pre">Setup</span></code> instance and a dynamic structure factor.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.analysis.ITCF_fsum.html#jaxrts.analysis.ITCF_fsum" title="jaxrts.analysis.ITCF_fsum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITCF_fsum</span></code></a>(S_ee_conv, setup, E_cut[, raw])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="jaxrts.analysis.ITCF_fsum.html#jaxrts.analysis.ITCF_fsum" title="jaxrts.analysis.ITCF_fsum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITCF_fsum</span></code></a>(S_ee_conv, setup, E_cut, raw)</p></td>
 <td><p>Calculate the f-sum rule by evaluating the first derivative of the Laplace transform at 0/eV.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.analysis.ITCF_ssf.html#jaxrts.analysis.ITCF_ssf" title="jaxrts.analysis.ITCF_ssf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITCF_ssf</span></code></a>(S_ee_conv, setup, E_cut[, raw])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="jaxrts.analysis.ITCF_ssf.html#jaxrts.analysis.ITCF_ssf" title="jaxrts.analysis.ITCF_ssf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITCF_ssf</span></code></a>(S_ee_conv, setup, E_cut, raw)</p></td>
 <td><p>Calculate the Static structure Factor by evaluating the Laplace transform at 0/eV.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="jaxrts.analysis.twoSidedLaplace.html#jaxrts.analysis.twoSidedLaplace" title="jaxrts.analysis.twoSidedLaplace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">twoSidedLaplace</span></code></a>(intensity, tau, E_shift[, ...])</p></td>

@@ -6,22 +6,27 @@ Ionic scattering examples
 -------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This scripts plots S_{ee}, S_{ei}, and S_{ii} for Carbon with an ionization of 4.5 at T = 13\te...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This scripts plots S_{ee}, S_{ei}, and S_{ii} for Carbon with an ionization of 4.5 at T = 13\text{eV} and n_e = 1\times 10^{22} 1 / \text{cm}^3, in the approach presented by Arkhipov.1998.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_static_structure_factors_Arkhipov_Devletov_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Arkhipov_Devletov.py`
+  :doc:`/gen_examples/ionic/plot_static_structure_factors_Arkhipov_Devletov`
 
 .. raw:: html
 
@@ -38,7 +43,7 @@ Ionic scattering examples
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_potentials_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_potentials.py`
+  :doc:`/gen_examples/ionic/plot_HNC_potentials`
 
 .. raw:: html
 
@@ -48,14 +53,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Figure 4.6 in Wunsch.2011, showing the different potentials implemented...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Figure 4.6 in Wunsch.2011, showing the different potentials implemented to treat the electron-ion interaction.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_electron_ion_potential_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_electron_ion_potential.py`
+  :doc:`/gen_examples/ionic/plot_HNC_electron_ion_potential`
 
 .. raw:: html
 
@@ -65,14 +70,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Figure 4.4 in Wunsch.2011, showing the the pair distribution function o...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Figure 4.4 in Wunsch.2011, showing the the pair distribution function oscillating more with increasing \Gamma (e.g, increasing density when temperature stays constant).">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_pair_correlation_functions_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_pair_correlation_functions.py`
+  :doc:`/gen_examples/ionic/plot_HNC_pair_correlation_functions`
 
 .. raw:: html
 
@@ -82,14 +87,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This scripts plots S_{ee}, S_{ei}, S_{ii} and q for Beryllium with an ionization of 2 at T_e = ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This scripts plots S_{ee}, S_{ei}, S_{ii} and q for Beryllium with an ionization of 2 at T_e = 20\text{eV} and n_e = 2.5\times 10^{23} 1 / \text{cm}^3. This script reproduces Fig.1 in Gregori.2006, showing the impact of differences between the ion- and electron temperature on the static structure factors as well as on the screening charge q.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_static_structure_factors_Gregori2006_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Gregori2006.py`
+  :doc:`/gen_examples/ionic/plot_static_structure_factors_Gregori2006`
 
 .. raw:: html
 
@@ -99,14 +104,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plot electron-ion potentials which are used to calculate the screening cloud from the results o...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot electron-ion potentials which are used to calculate the screening cloud from the results of linear response. The examples here reproduce the findings by Gericke.2010.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_electron_ion_potentials_II_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_electron_ion_potentials_II.py`
+  :doc:`/gen_examples/ionic/plot_HNC_electron_ion_potentials_II`
 
 .. raw:: html
 
@@ -116,14 +121,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This figure is reproducing Fig. 2 in Schwarz.2007, showing the notable difference of the two ap...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This figure is reproducing Fig. 2 in Schwarz.2007, showing the notable difference of the two approaches to the static structure factor S_{ii}.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_Gregori_Comparison_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_Gregori_Comparison.py`
+  :doc:`/gen_examples/ionic/plot_HNC_Gregori_Comparison`
 
 .. raw:: html
 
@@ -133,14 +138,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This plot reproduces Fig. 3. of Gregori.2007, introducing the charged hard sphere (CHS) approxi...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This plot reproduces Fig. 3. of Gregori.2007, introducing the charged hard sphere (CHS) approximation. Compare to plot_static_structure_factors_Gregori2006 which shows results of Arkhipov-based models at similar conditions.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_static_structure_factors_Gregori2007_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Gregori2007.py`
+  :doc:`/gen_examples/ionic/plot_static_structure_factors_Gregori2007`
 
 .. raw:: html
 
@@ -150,14 +155,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="More expensive calculation methods like DFT-MD or Average Atom can yield more accurate calculat...">
+    <div class="sphx-glr-thumbcontainer" tooltip="More expensive calculation methods like DFT-MD or Average Atom can yield more accurate calculations for the static structure factors than the simpler models shipped with jaxrts. However, such simulations are normally only available on a grid. Hence, we provide a jaxrts.models.GridInterpolationSii class, interpolating with over such a grid. Centerpiece is the jaxrts.weissker_interpolator.SiiInterpolator, which implements the interpolation scheme proposed by Weissker.2009, lineraly interpolating the SSF&#x27;s integral over k, rather than the function ifself. However, as no sum rule exists for the SSFs, we interpolate the function&#x27;s norm, rather than putting it to a known value.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_Sii_grid_interpolation_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_Sii_grid_interpolation.py`
+  :doc:`/gen_examples/ionic/plot_Sii_grid_interpolation`
 
 .. raw:: html
 
@@ -167,14 +172,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Fig. 4.12 from Wunsch.2011, and shows how to use the HNC approximation ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Fig. 4.12 from Wunsch.2011, and shows how to use the HNC approximation with different ion species.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_multicomponent_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_multicomponent.py`
+  :doc:`/gen_examples/ionic/plot_HNC_multicomponent`
 
 .. raw:: html
 
@@ -184,14 +189,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases the increased diffuse scattering in heated crystals by the Debye Waller ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases the increased diffuse scattering in heated crystals by the Debye Waller Effect, as implemented by the jaxrts.models.DebyeWallerSolid model.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_LatticeDebyeModel_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_LatticeDebyeModel.py`
+  :doc:`/gen_examples/ionic/plot_LatticeDebyeModel`
 
 .. raw:: html
 
@@ -201,14 +206,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This shows the calculation of pair-distribution functions and static structure factors of a rel...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This shows the calculation of pair-distribution functions and static structure factors of a relatively cold electron-ion system, as suggested by Wunsch.2008. See fig. 3. of this publication. The work presented shows to usage of quantum pseudopotentials for the electron-ion and electron-electron interaction.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_ThreePotential_Wuensch_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_ThreePotential_Wuensch.py`
+  :doc:`/gen_examples/ionic/plot_HNC_ThreePotential_Wuensch`
 
 .. raw:: html
 
@@ -225,7 +230,7 @@ Ionic scattering examples
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_SVT_HNC_multicomponent_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_SVT_HNC_multicomponent.py`
+  :doc:`/gen_examples/ionic/plot_SVT_HNC_multicomponent`
 
 .. raw:: html
 
@@ -235,20 +240,22 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows the usage of the :pyjaxrts.hnc_potentials.SpinAveragedEEExchange potential, ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows the usage of the jaxrts.hnc_potentials.SpinAveragedEEExchange potential, reproducing Fig. 6 from Wunsch.2008.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_exchange_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_exchange.py`
+  :doc:`/gen_examples/ionic/plot_HNC_exchange`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">HNC calculations with Quantum exchange potentials</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

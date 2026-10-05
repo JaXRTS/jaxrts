@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
@@ -5,23 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.experimental.SiiNN &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -86,7 +85,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for jaxrts.experimental.SiiNN</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Interpolate the Static structure factors by a neural network. In this file, we</span>
 <span class="sd">define the NN layout, and also create a :py:class:`jaxrts.Model` which allows</span>
 <span class="sd">for easily using a trained NN with jaxrts.</span>
@@ -95,7 +94,7 @@
 <span class="sd">are provided in the `tools/SiiInterpolation/` directory of the jaxrts</span>
 <span class="sd">repository. The trained network is saved as an :py:mod:`orbax` checkpoint (with</span>
 <span class="sd">slight additions to save properties of the net architecture).</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -113,10 +112,10 @@
 <div class="viewcode-block" id="NNModel">
 <a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.NNModel.html#jaxrts.experimental.SiiNN.NNModel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NNModel</span><span class="p">(</span><span class="n">nnx</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A class inheriting from :py:class:`nnx.Module`, adding quality of life</span>
 <span class="sd">    features and defining normalization features for the input of the NN.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="NNModel.__init__">
 <a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.NNModel.__init__.html#jaxrts.experimental.SiiNN.NNModel.__init__">[docs]</a>
@@ -128,7 +127,7 @@
         <span class="n">rngs</span><span class="p">:</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Rngs</span><span class="p">,</span>
         <span class="n">no_of_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Creates the network as a set of fully connected</span>
 <span class="sd">        :py:class:`flax.nnx.Linear` layers.</span>
 
@@ -147,7 +146,7 @@
 <span class="sd">        no_of_atoms: int or None, defaults to None</span>
 <span class="sd">            Number of species in the plasma. If this value is not given,</span>
 <span class="sd">            explicitly, it is calculated from :py:attr:`din` as ``din - 3``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">no_of_atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">no_of_atoms</span> <span class="o">=</span> <span class="n">din</span> <span class="o">-</span> <span class="mi">3</span>
 
@@ -188,9 +187,9 @@
 <div class="viewcode-block" id="NNModel.set_norms">
 <a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.NNModel.set_norms.html#jaxrts.experimental.SiiNN.NNModel.set_norms">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_norms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Z</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Set the normalization of the input layers.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_T</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_rho</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_Z</span> <span class="o">=</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
@@ -199,42 +198,42 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">norms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Variable</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Get the input layer normalizations as a dictionary.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;T&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_T</span><span class="p">,</span>
-            <span class="s2">&quot;rho&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_rho</span><span class="p">,</span>
-            <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_Z</span><span class="p">,</span>
-            <span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_k</span><span class="p">,</span>
+            <span class="s2">"T"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_T</span><span class="p">,</span>
+            <span class="s2">"rho"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_rho</span><span class="p">,</span>
+            <span class="s2">"Z"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_Z</span><span class="p">,</span>
+            <span class="s2">"k"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_k</span><span class="p">,</span>
         <span class="p">}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">din</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Shape of the input layer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">linears</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">in_features</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dhid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Shape of the hidden layers.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">layer</span><span class="o">.</span><span class="n">in_features</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">linears</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Shape of the output layer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">linears</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">out_features</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Shape of the full model (input, hidden, and output layers).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">din</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dhid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dout</span></div>
 
 
@@ -242,7 +241,7 @@
 <div class="viewcode-block" id="NNModelExpandedZ">
 <a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.NNModelExpandedZ.html#jaxrts.experimental.SiiNN.NNModelExpandedZ">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NNModelExpandedZ</span><span class="p">(</span><span class="n">NNModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Extension of :py:class:`NNModel` that augments the input representation of</span>
 <span class="sd">    the ionization state in order to better capture discontinuities occurring</span>
 <span class="sd">    at integer ionization values.</span>
@@ -282,12 +281,12 @@
 
 <span class="sd">    .. image:: ../images/NN_comparison_expanded_vs_non_expanded_dataset.svg</span>
 <span class="sd">       :width: 600</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="NNModelExpandedZ.__init__">
 <a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.NNModelExpandedZ.__init__.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">din</span><span class="p">,</span> <span class="n">dhid</span><span class="p">,</span> <span class="n">dout</span><span class="p">,</span> <span class="n">rngs</span><span class="p">,</span> <span class="n">no_of_atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Construct an expanded neural network model.</span>
 
 <span class="sd">        The dimensionality of the first layer is increased because each</span>
@@ -308,7 +307,7 @@
 <span class="sd">        no_of_atoms : int or None, optional</span>
 <span class="sd">            Number of ion species in the plasma. If not given, this</span>
 <span class="sd">            quantity is inferred from ``din`` as ``din - 3``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">din</span><span class="p">,</span> <span class="n">dhid</span><span class="p">,</span> <span class="n">dout</span><span class="p">,</span> <span class="n">rngs</span><span class="p">,</span> <span class="n">no_of_atoms</span><span class="p">)</span>
 
         <span class="c1"># The first layer is inflated, because we split Z into two components,</span>
@@ -320,7 +319,7 @@
 <div class="viewcode-block" id="NNModelExpandedZ.expand_Z_features">
 <a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.NNModelExpandedZ.expand_Z_features.html#jaxrts.experimental.SiiNN.NNModelExpandedZ.expand_Z_features">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand_Z_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Expand the ionization features of the input tensor.</span>
 
 <span class="sd">        Each normalized ionization value ``Z_i`` is transformed into two</span>
@@ -357,7 +356,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        jax.Array</span>
 <span class="sd">            Transformed input tensor with expanded ionization features.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="c1"># split input</span>
         <span class="n">smooth_left</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
@@ -388,7 +387,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">din</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Effective input dimensionality of the original model.</span>
 
 <span class="sd">        Because the expanded representation replaces each ionization</span>
@@ -401,13 +400,13 @@
 <span class="sd">        -------</span>
 <span class="sd">        int</span>
 <span class="sd">            Number of logical input features before ionization expansion.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">linears</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">in_features</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_of_atoms</span></div>
 
 
 
 <span class="n">sharding</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">sharding</span><span class="o">.</span><span class="n">NamedSharding</span><span class="p">(</span>
-    <span class="n">jax</span><span class="o">.</span><span class="n">sharding</span><span class="o">.</span><span class="n">Mesh</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">(),</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,)),</span>
+    <span class="n">jax</span><span class="o">.</span><span class="n">sharding</span><span class="o">.</span><span class="n">Mesh</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">(),</span> <span class="p">(</span><span class="s2">"x"</span><span class="p">,)),</span>
     <span class="n">jax</span><span class="o">.</span><span class="n">sharding</span><span class="o">.</span><span class="n">PartitionSpec</span><span class="p">(),</span>
 <span class="p">)</span>
 
@@ -423,31 +422,31 @@
 <div class="viewcode-block" id="NNSiiModel">
 <a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.NNSiiModel.html#jaxrts.experimental.SiiNN.NNSiiModel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NNSiiModel</span><span class="p">(</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">IonFeatModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A :py:class:`jaxrts.model.IonFeatModel` to use a neural network to obtain</span>
 <span class="sd">    ion-ion static structure factors.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="NNSiiModel.__init__">
 <a class="viewcode-back" href="../../../_autosummary/jaxrts.experimental.SiiNN.NNSiiModel.__init__.html#jaxrts.experimental.SiiNN.NNSiiModel.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkpoint_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Initialize the NNSiiModel.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        checkpoint_dir : Path</span>
 <span class="sd">            The Path to the checkpoint directory.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># This requires that the network shape was saved in the checkpoint</span>
         <span class="c1"># directory. This is done in a slightly hacky way, see the train.py</span>
         <span class="c1"># file.</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">checkpoint_dir</span> <span class="o">/</span> <span class="s2">&quot;SHAPE&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">checkpoint_dir</span> <span class="o">/</span> <span class="s2">"SHAPE"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">shape</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="n">shape</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;rngs&quot;</span><span class="p">:</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Rngs</span><span class="p">(</span><span class="mi">0</span><span class="p">)})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_elements</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;elements&quot;</span><span class="p">)</span>
+        <span class="n">shape</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"rngs"</span><span class="p">:</span> <span class="n">nnx</span><span class="o">.</span><span class="n">Rngs</span><span class="p">(</span><span class="mi">0</span><span class="p">)})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_elements</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"elements"</span><span class="p">)</span>
 
-        <span class="n">expanded</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;expanded&quot;</span><span class="p">)</span>
+        <span class="n">expanded</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"expanded"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">expanded</span><span class="p">:</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">NNModelExpandedZ</span><span class="p">(</span><span class="o">**</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -493,7 +492,7 @@
         <span class="c1"># Get the elements of the model and catch expanded ionization state</span>
         <span class="c1"># with unique elements:</span>
 
-        <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_elements</span><span class="p">]</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"+"</span><span class="p">))</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_elements</span><span class="p">]</span>
         <span class="n">unique_elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">elements</span><span class="p">))</span>
 
         <span class="c1"># assign idices to later match order of elements in plasma state</span>
@@ -559,8 +558,8 @@
         <span class="c1"># Apply the permutation to S_base to capture wronge order of plasma</span>
         <span class="c1"># state elements</span>
         <span class="c1"># compared to order of elements used to train the NN,</span>
-        <span class="c1"># e.g. Plasma_state element list = [&quot;C&quot;,&quot;H&quot;] but NN element list</span>
-        <span class="c1"># =[&quot;H&quot;,&quot;C&quot;]</span>
+        <span class="c1"># e.g. Plasma_state element list = ["C","H"] but NN element list</span>
+        <span class="c1"># =["H","C"]</span>
         <span class="c1"># would result in wrong Sii values set for the elements</span>
         <span class="n">S_out</span> <span class="o">=</span> <span class="n">S_base</span><span class="p">[</span><span class="n">perm</span><span class="p">][:,</span> <span class="n">perm</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">S_out</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">dimensionless</span></div>

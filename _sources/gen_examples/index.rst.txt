@@ -6,11 +6,16 @@ Example gallery
 Below is a gallery of examples
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -21,7 +26,7 @@ Below is a gallery of examples
   .. image:: /gen_examples/images/thumb/sphx_glr_plot_getting_started_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_plot_getting_started.py`
+  :doc:`/gen_examples/plot_getting_started`
 
 .. raw:: html
 
@@ -38,7 +43,7 @@ Below is a gallery of examples
   .. image:: /gen_examples/images/thumb/sphx_glr_plot_multi_component_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_plot_multi_component.py`
+  :doc:`/gen_examples/plot_multi_component`
 
 .. raw:: html
 
@@ -48,20 +53,22 @@ Below is a gallery of examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This code reproduces Fig. 6 of Gregori.2003, showing the impact of changing temperature, ioniza...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This code reproduces Fig. 6 of Gregori.2003, showing the impact of changing temperature, ionization and electron density on the scattering spectra.">
 
 .. only:: html
 
   .. image:: /gen_examples/images/thumb/sphx_glr_plot_reproduce_Gregori2003_fig6_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_plot_reproduce_Gregori2003_fig6.py`
+  :doc:`/gen_examples/plot_reproduce_Gregori2003_fig6`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Calculate the full structure factors for various plasma conditions</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -79,22 +86,27 @@ Analysis module examples
 ------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows the computation of the f-sum rule for an example spectrum as suggested by Do...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows the computation of the f-sum rule for an example spectrum as suggested by Dornheim.2024. If fully ionized, we see excellent agreement for the RPA, and also the Born-Mermin approximation for the free-free scattering yields in reasonable results. The implemented bound-free Model, however, does violate the f-sum rule. One could leverage this to fix a value for jaxrts.models.SchumacherImpulse.r_k, so that the f-sum rule would be fulfilled.">
 
 .. only:: html
 
   .. image:: /gen_examples/analysis/images/thumb/sphx_glr_plot_f-sum-rule_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_analysis_plot_f-sum-rule.py`
+  :doc:`/gen_examples/analysis/plot_f-sum-rule`
 
 .. raw:: html
 
@@ -104,14 +116,14 @@ Analysis module examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we apply the ITCFT to increasingly noisy data with different scattering angles...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we apply the ITCFT to increasingly noisy data with different scattering angles.">
 
 .. only:: html
 
   .. image:: /gen_examples/analysis/images/thumb/sphx_glr_plot_ITCFT_noise_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT_noise.py`
+  :doc:`/gen_examples/analysis/plot_ITCFT_noise`
 
 .. raw:: html
 
@@ -121,20 +133,22 @@ Analysis module examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases how apply the analysis functions to get temperatures from the Laplace tr...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases how apply the analysis functions to get temperatures from the Laplace transform of the structure, as proposed by Dornheim.2022.">
 
 .. only:: html
 
   .. image:: /gen_examples/analysis/images/thumb/sphx_glr_plot_ITCFT_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT.py`
+  :doc:`/gen_examples/analysis/plot_ITCFT`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Imaginary time correlation function thermometry</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -144,22 +158,27 @@ bound-free scattering examples
 ------------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows different IPD models implemented in the code for Carbon at 100 eV and for va...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows different IPD models implemented in the code for Carbon at 100 eV and for varying densities.">
 
 .. only:: html
 
   .. image:: /gen_examples/bound_free/images/thumb/sphx_glr_plot_ipd_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_bound_free_plot_ipd.py`
+  :doc:`/gen_examples/bound_free/plot_ipd`
 
 .. raw:: html
 
@@ -169,14 +188,14 @@ bound-free scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases different edge-models that can be used in the bound free scattering feat...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases different edge-models that can be used in the bound free scattering features.">
 
 .. only:: html
 
   .. image:: /gen_examples/bound_free/images/thumb/sphx_glr_plot_edge_models_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_bound_free_plot_edge_models.py`
+  :doc:`/gen_examples/bound_free/plot_edge_models`
 
 .. raw:: html
 
@@ -186,20 +205,22 @@ bound-free scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This script is used to test the bound-free edges using ionization energies from FAC code calcul...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This script is used to test the bound-free edges using ionization energies from FAC code calculated by the FAC code: https://github.com/flexible-atomic-code/fac and compares them to a bound-free model using only the cold edges.">
 
 .. only:: html
 
   .. image:: /gen_examples/bound_free/images/thumb/sphx_glr_plot_moving_edges_vs_cold_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_bound_free_plot_moving_edges_vs_cold.py`
+  :doc:`/gen_examples/bound_free/plot_moving_edges_vs_cold`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Moving edges vs cold ionoization edges</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -209,28 +230,35 @@ Electronic local field correction examples
 ------------------------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example compares different static (and quasi-static) local field corrections that are avai...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example compares different static (and quasi-static) local field corrections that are available in jaxrts.">
 
 .. only:: html
 
   .. image:: /gen_examples/ee_lfc/images/thumb/sphx_glr_plot_ee_lfc_comparison_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ee_lfc_plot_ee_lfc_comparison.py`
+  :doc:`/gen_examples/ee_lfc/plot_ee_lfc_comparison`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">LFC comparison</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -240,11 +268,16 @@ form-factor examples
 --------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -255,7 +288,7 @@ form-factor examples
   .. image:: /gen_examples/form_factors/images/thumb/sphx_glr_plot_pauling_full_scattering_factors_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_form_factors_plot_pauling_full_scattering_factors.py`
+  :doc:`/gen_examples/form_factors/plot_pauling_full_scattering_factors`
 
 .. raw:: html
 
@@ -272,7 +305,7 @@ form-factor examples
   .. image:: /gen_examples/form_factors/images/thumb/sphx_glr_plot_ffl_beryllium_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_beryllium.py`
+  :doc:`/gen_examples/form_factors/plot_ffl_beryllium`
 
 .. raw:: html
 
@@ -282,14 +315,14 @@ form-factor examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Calculate the atomic form factors of carbon using a hydrogen-like atom, as presented in Pauling...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Calculate the atomic form factors of carbon using a hydrogen-like atom, as presented in Pauling.1932.">
 
 .. only:: html
 
   .. image:: /gen_examples/form_factors/images/thumb/sphx_glr_plot_atomic_form_factors_carbon_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_form_factors_plot_atomic_form_factors_carbon.py`
+  :doc:`/gen_examples/form_factors/plot_atomic_form_factors_carbon`
 
 .. raw:: html
 
@@ -299,14 +332,14 @@ form-factor examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This examples compares the limits of the Form Factor lowering reported by Doppner.2023 (:pyjaxr...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This examples compares the limits of the Form Factor lowering reported by Doppner.2023 (jaxrts.models.FormFactorLowering) for zero IPD to the form factors by Pauling.1932.">
 
 .. only:: html
 
   .. image:: /gen_examples/form_factors/images/thumb/sphx_glr_plot_ffl_H_He-like_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_H_He-like.py`
+  :doc:`/gen_examples/form_factors/plot_ffl_H_He-like`
 
 .. raw:: html
 
@@ -316,20 +349,22 @@ form-factor examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This examples compares the limits of the Form Factor lowering reported by Doppner.2023 (:pyjaxr...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This examples compares the limits of the Form Factor lowering reported by Doppner.2023 (jaxrts.models.FormFactorLowering) for zero IPD to the form factors by Pauling.1932.">
 
 .. only:: html
 
   .. image:: /gen_examples/form_factors/images/thumb/sphx_glr_plot_ffl_zero_IPD_limit_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_form_factors_plot_ffl_zero_IPD_limit.py`
+  :doc:`/gen_examples/form_factors/plot_ffl_zero_IPD_limit`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Zero IPD limit for effective charge when using form factor lowering</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -339,22 +374,27 @@ free-bound scattering examples
 ------------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This plot is comparable to the target analzed by Doppner.2023, is this example is one of the da...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This plot is comparable to the target analzed by Doppner.2023, is this example is one of the dataset revisited by cite:`Bohme.2023`. However, we used simpler for the relevant scattering processes, just to show the usage of jaxrts.models.DetailedBalace.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_bound/images/thumb/sphx_glr_plot_free_bound_scattering_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_bound_plot_free_bound_scattering.py`
+  :doc:`/gen_examples/free_bound/plot_free_bound_scattering`
 
 .. raw:: html
 
@@ -364,14 +404,14 @@ free-bound scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="It was suggested by Bohme.2023 that the evaluation of some experiments need to consider free-bo...">
+    <div class="sphx-glr-thumbcontainer" tooltip="It was suggested by Bohme.2023 that the evaluation of some experiments need to consider free-bound conditions to fully understand the scattering spectrum. One of the seminal examples of the aforementioned paper is fitting the LCLS data from Kraus.2018.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_bound/images/thumb/sphx_glr_plot_bohme_kraus_relevance_of_bound_free_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_bound_plot_bohme_kraus_relevance_of_bound_free.py`
+  :doc:`/gen_examples/free_bound/plot_bohme_kraus_relevance_of_bound_free`
 
 .. raw:: html
 
@@ -381,20 +421,22 @@ free-bound scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The free-bound and bound-free contributions only fulfill the detailed balance relation in the (...">
+    <div class="sphx-glr-thumbcontainer" tooltip="The free-bound and bound-free contributions only fulfill the detailed balance relation in the (theoretical) case where the same k is probed at every energy-bin on an detector. We can model such a spectrum by setting jaxrts.setup.Setup.correct_k_dispersion to False.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_bound/images/thumb/sphx_glr_plot_k_dispersion_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_bound_plot_k_dispersion.py`
+  :doc:`/gen_examples/free_bound/plot_k_dispersion`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">k dispersion and free-bound scattering</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -404,11 +446,16 @@ free-free scattering examples
 -----------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -419,7 +466,7 @@ free-free scattering examples
   .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_See0_QCSA_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_free_plot_See0_QCSA.py`
+  :doc:`/gen_examples/free_free/plot_See0_QCSA`
 
 .. raw:: html
 
@@ -429,14 +476,14 @@ free-free scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This script reprocudes Gregori.2003, Fig. 1c. showing the calculation of S_\text{ee}^{0, \text{...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This script reprocudes Gregori.2003, Fig. 1c. showing the calculation of S_\text{ee}^{0, \text{RPA}}.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_See0_RPA_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_free_plot_See0_RPA.py`
+  :doc:`/gen_examples/free_free/plot_See0_RPA`
 
 .. raw:: html
 
@@ -446,14 +493,14 @@ free-free scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Calculate the Born Collision Frequency and compare it to the published data shown in Fortmann.2...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Calculate the Born Collision Frequency and compare it to the published data shown in Fortmann.2010. While the shape seems to be similar, overall, there is a difference that we currently don&#x27;t understand.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_BornCollision_Frequency_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_free_plot_BornCollision_Frequency.py`
+  :doc:`/gen_examples/free_free/plot_BornCollision_Frequency`
 
 .. raw:: html
 
@@ -463,14 +510,14 @@ free-free scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This examples shows how local field corrections can be very relevant and might change the resul...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This examples shows how local field corrections can be very relevant and might change the results also for Born Mermin calculations with include the electron-ion collision frequency.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_Fortmann_BMA_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_free_plot_Fortmann_BMA.py`
+  :doc:`/gen_examples/free_free/plot_Fortmann_BMA`
 
 .. raw:: html
 
@@ -480,14 +527,14 @@ free-free scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The Chapman Interpolation of the Born Mermin approximation saves computation time by evaluating...">
+    <div class="sphx-glr-thumbcontainer" tooltip="The Chapman Interpolation of the Born Mermin approximation saves computation time by evaluating the Structure factor not on all frequencies, but only on a given number of points, and interpolates after. This example is investigating the required number of points for the interpolation.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_BM_ChapmanInterp_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_free_plot_BM_ChapmanInterp.py`
+  :doc:`/gen_examples/free_free/plot_BM_ChapmanInterp`
 
 .. raw:: html
 
@@ -497,20 +544,22 @@ free-free scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This script reprocudes Glenzer.2009, Fig. 9b. showing the calculation of S_\text{ee}^{0, \text{...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This script reprocudes Glenzer.2009, Fig. 9b. showing the calculation of S_\text{ee}^{0, \text{RPA}}.">
 
 .. only:: html
 
   .. image:: /gen_examples/free_free/images/thumb/sphx_glr_plot_See0_RPA_BM_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_free_free_plot_See0_RPA_BM.py`
+  :doc:`/gen_examples/free_free/plot_See0_RPA_BM`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Showing the relevance of the Born Mermin Approximation</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -520,22 +569,27 @@ Ionic scattering examples
 -------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This scripts plots S_{ee}, S_{ei}, and S_{ii} for Carbon with an ionization of 4.5 at T = 13\te...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This scripts plots S_{ee}, S_{ei}, and S_{ii} for Carbon with an ionization of 4.5 at T = 13\text{eV} and n_e = 1\times 10^{22} 1 / \text{cm}^3, in the approach presented by Arkhipov.1998.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_static_structure_factors_Arkhipov_Devletov_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Arkhipov_Devletov.py`
+  :doc:`/gen_examples/ionic/plot_static_structure_factors_Arkhipov_Devletov`
 
 .. raw:: html
 
@@ -552,7 +606,7 @@ Ionic scattering examples
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_potentials_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_potentials.py`
+  :doc:`/gen_examples/ionic/plot_HNC_potentials`
 
 .. raw:: html
 
@@ -562,14 +616,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Figure 4.6 in Wunsch.2011, showing the different potentials implemented...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Figure 4.6 in Wunsch.2011, showing the different potentials implemented to treat the electron-ion interaction.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_electron_ion_potential_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_electron_ion_potential.py`
+  :doc:`/gen_examples/ionic/plot_HNC_electron_ion_potential`
 
 .. raw:: html
 
@@ -579,14 +633,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Figure 4.4 in Wunsch.2011, showing the the pair distribution function o...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Figure 4.4 in Wunsch.2011, showing the the pair distribution function oscillating more with increasing \Gamma (e.g, increasing density when temperature stays constant).">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_pair_correlation_functions_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_pair_correlation_functions.py`
+  :doc:`/gen_examples/ionic/plot_HNC_pair_correlation_functions`
 
 .. raw:: html
 
@@ -596,14 +650,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This scripts plots S_{ee}, S_{ei}, S_{ii} and q for Beryllium with an ionization of 2 at T_e = ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This scripts plots S_{ee}, S_{ei}, S_{ii} and q for Beryllium with an ionization of 2 at T_e = 20\text{eV} and n_e = 2.5\times 10^{23} 1 / \text{cm}^3. This script reproduces Fig.1 in Gregori.2006, showing the impact of differences between the ion- and electron temperature on the static structure factors as well as on the screening charge q.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_static_structure_factors_Gregori2006_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Gregori2006.py`
+  :doc:`/gen_examples/ionic/plot_static_structure_factors_Gregori2006`
 
 .. raw:: html
 
@@ -613,14 +667,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plot electron-ion potentials which are used to calculate the screening cloud from the results o...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot electron-ion potentials which are used to calculate the screening cloud from the results of linear response. The examples here reproduce the findings by Gericke.2010.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_electron_ion_potentials_II_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_electron_ion_potentials_II.py`
+  :doc:`/gen_examples/ionic/plot_HNC_electron_ion_potentials_II`
 
 .. raw:: html
 
@@ -630,14 +684,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This figure is reproducing Fig. 2 in Schwarz.2007, showing the notable difference of the two ap...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This figure is reproducing Fig. 2 in Schwarz.2007, showing the notable difference of the two approaches to the static structure factor S_{ii}.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_Gregori_Comparison_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_Gregori_Comparison.py`
+  :doc:`/gen_examples/ionic/plot_HNC_Gregori_Comparison`
 
 .. raw:: html
 
@@ -647,14 +701,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This plot reproduces Fig. 3. of Gregori.2007, introducing the charged hard sphere (CHS) approxi...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This plot reproduces Fig. 3. of Gregori.2007, introducing the charged hard sphere (CHS) approximation. Compare to plot_static_structure_factors_Gregori2006 which shows results of Arkhipov-based models at similar conditions.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_static_structure_factors_Gregori2007_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_static_structure_factors_Gregori2007.py`
+  :doc:`/gen_examples/ionic/plot_static_structure_factors_Gregori2007`
 
 .. raw:: html
 
@@ -664,14 +718,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="More expensive calculation methods like DFT-MD or Average Atom can yield more accurate calculat...">
+    <div class="sphx-glr-thumbcontainer" tooltip="More expensive calculation methods like DFT-MD or Average Atom can yield more accurate calculations for the static structure factors than the simpler models shipped with jaxrts. However, such simulations are normally only available on a grid. Hence, we provide a jaxrts.models.GridInterpolationSii class, interpolating with over such a grid. Centerpiece is the jaxrts.weissker_interpolator.SiiInterpolator, which implements the interpolation scheme proposed by Weissker.2009, lineraly interpolating the SSF&#x27;s integral over k, rather than the function ifself. However, as no sum rule exists for the SSFs, we interpolate the function&#x27;s norm, rather than putting it to a known value.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_Sii_grid_interpolation_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_Sii_grid_interpolation.py`
+  :doc:`/gen_examples/ionic/plot_Sii_grid_interpolation`
 
 .. raw:: html
 
@@ -681,14 +735,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Fig. 4.12 from Wunsch.2011, and shows how to use the HNC approximation ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example reproduces Fig. 4.12 from Wunsch.2011, and shows how to use the HNC approximation with different ion species.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_multicomponent_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_multicomponent.py`
+  :doc:`/gen_examples/ionic/plot_HNC_multicomponent`
 
 .. raw:: html
 
@@ -698,14 +752,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases the increased diffuse scattering in heated crystals by the Debye Waller ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases the increased diffuse scattering in heated crystals by the Debye Waller Effect, as implemented by the jaxrts.models.DebyeWallerSolid model.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_LatticeDebyeModel_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_LatticeDebyeModel.py`
+  :doc:`/gen_examples/ionic/plot_LatticeDebyeModel`
 
 .. raw:: html
 
@@ -715,14 +769,14 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This shows the calculation of pair-distribution functions and static structure factors of a rel...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This shows the calculation of pair-distribution functions and static structure factors of a relatively cold electron-ion system, as suggested by Wunsch.2008. See fig. 3. of this publication. The work presented shows to usage of quantum pseudopotentials for the electron-ion and electron-electron interaction.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_ThreePotential_Wuensch_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_ThreePotential_Wuensch.py`
+  :doc:`/gen_examples/ionic/plot_HNC_ThreePotential_Wuensch`
 
 .. raw:: html
 
@@ -739,7 +793,7 @@ Ionic scattering examples
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_SVT_HNC_multicomponent_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_SVT_HNC_multicomponent.py`
+  :doc:`/gen_examples/ionic/plot_SVT_HNC_multicomponent`
 
 .. raw:: html
 
@@ -749,20 +803,22 @@ Ionic scattering examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows the usage of the :pyjaxrts.hnc_potentials.SpinAveragedEEExchange potential, ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows the usage of the jaxrts.hnc_potentials.SpinAveragedEEExchange potential, reproducing Fig. 6 from Wunsch.2008.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionic/images/thumb/sphx_glr_plot_HNC_exchange_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionic_plot_HNC_exchange.py`
+  :doc:`/gen_examples/ionic/plot_HNC_exchange`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">HNC calculations with Quantum exchange potentials</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -772,22 +828,27 @@ Ionization examples
 -------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example compares the Rayleigh weights for a carbon plasma when a fractional ionization sta...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example compares the Rayleigh weights for a carbon plasma when a fractional ionization state is treated on a One-Component HNC calculation, and compares it to the two-component calculation when jaxrts.plasmastate.PlasmaState.expand_integer_ionization_states is called which creates a plasma state with two ion species of the same element, but different ionization numbers. The latter calculation will be more costly.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionization/images/thumb/sphx_glr_plot_WR_expanded_ionization_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionization_plot_WR_expanded_ionization.py`
+  :doc:`/gen_examples/ionization/plot_WR_expanded_ionization`
 
 .. raw:: html
 
@@ -797,14 +858,14 @@ Ionization examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases the use of the saha equation solver. This example consideres abundances ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases the use of the saha equation solver. This example consideres abundances as reported by Lodders.2010, and reproduces a plot generated with M. Schöttler&#x27;s MALGS programm -- which is discussed, e.g. in Kumar.2021.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionization/images/thumb/sphx_glr_plot_saha_hot_jupiter_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionization_plot_saha_hot_jupiter.py`
+  :doc:`/gen_examples/ionization/plot_saha_hot_jupiter`
 
 .. raw:: html
 
@@ -814,20 +875,22 @@ Ionization examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example plots the ionization state of a CH plasma as a two-dimensional quantity over tempe...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example plots the ionization state of a CH plasma as a two-dimensional quantity over temperature and density. Different selections for the IPD model (here, jaxrts.models.StewartPyattIPD) can be used for the calculation, moving the ionization considerably.">
 
 .. only:: html
 
   .. image:: /gen_examples/ionization/images/thumb/sphx_glr_plot_saha_ionization_map_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_ionization_plot_saha_ionization_map.py`
+  :doc:`/gen_examples/ionization/plot_saha_ionization_map`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Saha Ionization Map</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -839,28 +902,35 @@ Setup Examples
 Examples related to the :py:class:`jaxrts.Setup` class.
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how the frequency redistribution correction (:pyjaxrts.Setup.frc_exponent) i...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how the frequency redistribution correction (jaxrts.Setup.frc_exponent) influences the outcome of jaxrts.PlasmaState.probe.">
 
 .. only:: html
 
   .. image:: /gen_examples/setup/images/thumb/sphx_glr_plot_frequency_redistibution_correction_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_setup_plot_frequency_redistibution_correction.py`
+  :doc:`/gen_examples/setup/plot_frequency_redistibution_correction`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Frequency redistribution correction</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -870,22 +940,27 @@ Utility tool examples
 ---------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The following code displays the quality of the inversion of the Fermi-Dirac integral for the Fu...">
+    <div class="sphx-glr-thumbcontainer" tooltip="The following code displays the quality of the inversion of the Fermi-Dirac integral for the Functions presented in Antia.1993 and the improments published in Fukushima.2015.">
 
 .. only:: html
 
   .. image:: /gen_examples/utils/images/thumb/sphx_glr_plot_fermi_integral_inversion_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_utils_plot_fermi_integral_inversion.py`
+  :doc:`/gen_examples/utils/plot_fermi_integral_inversion`
 
 .. raw:: html
 
@@ -895,14 +970,14 @@ Utility tool examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="To include an instrument function in a :pyjaxrts.Setup, we require it to be Callable that takes...">
+    <div class="sphx-glr-thumbcontainer" tooltip="To include an instrument function in a jaxrts.Setup, we require it to be Callable that takes only one argument, the shift in frequency space. The function has to be normalized to unify from -infinity to +infinity.">
 
 .. only:: html
 
   .. image:: /gen_examples/utils/images/thumb/sphx_glr_plot_instrument_function_models_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_utils_plot_instrument_function_models.py`
+  :doc:`/gen_examples/utils/plot_instrument_function_models`
 
 .. raw:: html
 
@@ -912,14 +987,14 @@ Utility tool examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example compares the two implemented methods to perform the Fourier transform of a radiall...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example compares the two implemented methods to perform the Fourier transform of a radially symmetric function, namely the sine and the hankel transform.">
 
 .. only:: html
 
   .. image:: /gen_examples/utils/images/thumb/sphx_glr_plot_3D_fourier_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_utils_plot_3D_fourier.py`
+  :doc:`/gen_examples/utils/plot_3D_fourier`
 
 .. raw:: html
 
@@ -936,13 +1011,15 @@ Utility tool examples
   .. image:: /gen_examples/utils/images/thumb/sphx_glr_plot_ogata_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_utils_plot_ogata.py`
+  :doc:`/gen_examples/utils/plot_ogata`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Ogata Fourier transform</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

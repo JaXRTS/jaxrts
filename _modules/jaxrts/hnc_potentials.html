@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,23 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.hnc_potentials &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -86,14 +85,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for jaxrts.hnc_potentials</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">HNC Potentials</span>
 <span class="sd">==============</span>
 
 <span class="sd">This module contains a set of Parameters to be used when performing HNC</span>
 <span class="sd">calculations. This includes that the potential is split into a long-range and a</span>
 <span class="sd">short-range part and is also Fourier-transformed to k-space.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
@@ -127,13 +126,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">pauli_potential_from_classical_map_SpinAveraged</span><span class="p">(</span>
     <span class="n">r1</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">r2</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This method utilizes the exact non-interacting solution for the pair</span>
 <span class="sd">    distribution function (PDF) as input (see :cite:`Bredow.2017`). The</span>
 <span class="sd">    effective potential is then derived iteratively to reproduce the input PDF</span>
 <span class="sd">    using the HNC algorithm. This approach effectively inverts the HNC</span>
 <span class="sd">    framework to determine the interaction potential from a known PDF.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">SMALL</span> <span class="o">=</span> <span class="mf">1e-14</span>
 
@@ -226,13 +225,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">pauli_potential_from_classical_map_SpinSeparated</span><span class="p">(</span>
     <span class="n">r1</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">r2</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">n_e</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">Quantity</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This method utilizes the exact non-interacting solution for the pair</span>
 <span class="sd">    distribution function (PDF) as input. The effective potential is then</span>
 <span class="sd">    derived iteratively to reproduce the input PDF using the HNC algorithm.</span>
 <span class="sd">    This approach effectively inverts the HNC framework to determine the</span>
 <span class="sd">    interaction potential from a known PDF.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">n</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">([</span><span class="n">n_e</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n_e</span> <span class="o">/</span> <span class="mi">2</span><span class="p">])</span>
 
@@ -249,7 +248,7 @@
     <span class="n">dk2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr2</span><span class="p">)</span>
     <span class="n">k2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">r2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r2</span><span class="p">))</span> <span class="o">*</span> <span class="n">dk2</span>
 
-    <span class="c1"># Don&#39;t use Maxwellian distribution (see Bredow 2017), use this instead</span>
+    <span class="c1"># Don't use Maxwellian distribution (see Bredow 2017), use this instead</span>
     <span class="n">chem_pot</span> <span class="o">=</span> <span class="n">chem_pot_sommerfeld_fermi_interpolation</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 
     <span class="c1"># Calculate Fermi distribution</span>
@@ -302,9 +301,9 @@
     <span class="n">cs_k</span> <span class="o">=</span> <span class="n">h0_T_k</span> <span class="o">-</span> <span class="n">N_k</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">ozr_inverted</span><span class="p">(</span><span class="n">input_vec</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Inverted Ornstein-Zernicke Relation</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span>
             <span class="n">input_vec</span><span class="p">,</span>
             <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span>
@@ -369,23 +368,23 @@
 <div class="viewcode-block" id="HNCPotential">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.html#jaxrts.hnc_potentials.HNCPotential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HNCPotential</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Potentials, intended to be used in the HNC scheme. By default, the results</span>
 <span class="sd">    of methods evaluating this Potential (in k or r space), return a</span>
 <span class="sd">    :math:`(n\\times n\\times m)` matrix, where ``n`` is the number of ion</span>
 <span class="sd">    species and ``m`` is the number of r or k points.</span>
-<span class="sd">    However, if :py:attr:`~.include_electrons` is ``&quot;SpinAveraged&quot;`` or</span>
-<span class="sd">    ``&quot;SpinSeparated&quot;``, electrons are added as another ion species, and so one</span>
+<span class="sd">    However, if :py:attr:`~.include_electrons` is ``"SpinAveraged"`` or</span>
+<span class="sd">    ``"SpinSeparated"``, electrons are added as another ion species, and so one</span>
 <span class="sd">    the first two dimensions get one or two additional entries, respectively.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">#: A list of keys where this Potential is adequate for. Valid keys are</span>
-    <span class="c1">#: &quot;ion-ion Potential&quot;, &quot;electron-ion Potential&quot;, and</span>
-    <span class="c1">#: &quot;electron-electron Potential&quot;.</span>
+    <span class="c1">#: "ion-ion Potential", "electron-ion Potential", and</span>
+    <span class="c1">#: "electron-electron Potential".</span>
     <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;ion-ion Potential&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;electron-electron Potential&quot;</span><span class="p">,</span>
+        <span class="s2">"ion-ion Potential"</span><span class="p">,</span>
+        <span class="s2">"electron-ion Potential"</span><span class="p">,</span>
+        <span class="s2">"electron-electron Potential"</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="c1">#: A list of bibtex keys. Can be in the format ``[key1, key2]``, for</span>
     <span class="c1">#: general keys, ``[(key1, comment1), (key2, comment2)]``, if comments are</span>
@@ -400,20 +399,20 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">include_electrons</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
-            <span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="s2">&quot;SpinAveraged&quot;</span><span class="p">,</span> <span class="s2">&quot;SpinSeparated&quot;</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;off&quot;</span><span class="p">,</span>
+            <span class="s2">"off"</span><span class="p">,</span> <span class="s2">"SpinAveraged"</span><span class="p">,</span> <span class="s2">"SpinSeparated"</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="s2">"off"</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_transform_r</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e4</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">21</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a_0</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="s2">""</span>
 
-        <span class="c1">#: If `&quot;SpinAveraged&quot;`, the electrons are added as the n+1th ion</span>
+        <span class="c1">#: If `"SpinAveraged"`, the electrons are added as the n+1th ion</span>
         <span class="c1">#: species to the potential. The relevant entries are the last row and</span>
         <span class="c1">#: column, respectively (i.e., the colored lines in the image above).</span>
-        <span class="c1">#: If `&quot;SpinSeparated&quot;`, two species of electrons (with half the</span>
+        <span class="c1">#: If `"SpinSeparated"`, two species of electrons (with half the</span>
         <span class="c1">#: electron number density, each) are added as the n+1th and n+2th ion.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
-            <span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="s2">&quot;SpinAveraged&quot;</span><span class="p">,</span> <span class="s2">&quot;SpinSeparated&quot;</span>
+            <span class="s2">"off"</span><span class="p">,</span> <span class="s2">"SpinAveraged"</span><span class="p">,</span> <span class="s2">"SpinSeparated"</span>
         <span class="p">]</span> <span class="o">=</span> <span class="n">include_electrons</span></div>
 
 
@@ -421,19 +420,19 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.citation.html#jaxrts.hnc_potentials.HNCPotential.citation">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">citation</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">style</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span> <span class="s2">&quot;bibtex&quot;</span><span class="p">,</span> <span class="s2">&quot;cite&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;plain&quot;</span><span class="p">,</span>
+        <span class="n">style</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"plain"</span><span class="p">,</span> <span class="s2">"bibtex"</span><span class="p">,</span> <span class="s2">"cite"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"plain"</span><span class="p">,</span>
         <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return bibliographic information for the Model used.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        style: &quot;plain&quot;, &quot;cite&quot;, or &quot;bibtex&quot;</span>
-<span class="sd">            When ``&quot;plain&quot;``, the literature references are formatted in a</span>
-<span class="sd">            human-readable format. If ``&quot;bibtex&quot;``, the citations are given as</span>
+<span class="sd">        style: "plain", "cite", or "bibtex"</span>
+<span class="sd">            When ``"plain"``, the literature references are formatted in a</span>
+<span class="sd">            human-readable format. If ``"bibtex"``, the citations are given as</span>
 <span class="sd">            bibtex entries, which can then be copied into a literature</span>
-<span class="sd">            collection. If ``&quot;cite&quot;``, the citation keys are not evaluated, but</span>
+<span class="sd">            collection. If ``"cite"``, the citation keys are not evaluated, but</span>
 <span class="sd">            just retuned, wrapped in a tex ``\\cite{...}`` command.</span>
 <span class="sd">        comment: str or None, default None</span>
 <span class="sd">            (Additional) comment to give to the citation entry.</span>
@@ -442,10 +441,10 @@
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            The information about the model used</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s2">&quot;plain&quot;</span><span class="p">:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s2">"plain"</span><span class="p">:</span>
             <span class="n">citation_function</span> <span class="o">=</span> <span class="n">literature</span><span class="o">.</span><span class="n">get_formatted_ref_string</span>
-        <span class="k">elif</span> <span class="n">style</span> <span class="o">==</span> <span class="s2">&quot;cite&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">style</span> <span class="o">==</span> <span class="s2">"cite"</span><span class="p">:</span>
             <span class="n">citation_function</span> <span class="o">=</span> <span class="n">literature</span><span class="o">.</span><span class="n">get_cite_ref_string</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">citation_function</span> <span class="o">=</span> <span class="n">literature</span><span class="o">.</span><span class="n">get_bibtex_ref_string</span>
@@ -456,19 +455,19 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">key</span><span class="p">,</span> <span class="n">key_comment</span> <span class="o">=</span> <span class="n">entry</span>
                 <span class="k">if</span> <span class="n">comment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">key_comment</span> <span class="o">=</span> <span class="n">comment</span> <span class="o">+</span> <span class="s2">&quot;. &quot;</span> <span class="o">+</span> <span class="n">key_comment</span>
+                    <span class="n">key_comment</span> <span class="o">=</span> <span class="n">comment</span> <span class="o">+</span> <span class="s2">". "</span> <span class="o">+</span> <span class="n">key_comment</span>
                 <span class="n">citations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">citation_function</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key_comment</span><span class="p">))</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">citations</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">citations</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HNCPotential.check">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.check.html#jaxrts.hnc_potentials.HNCPotential.check">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: B027</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Test if the HNCPotential is applicable to the PlasmaState. Might raise</span>
 <span class="sd">        logged messages and errors. Is automatically called after</span>
 <span class="sd">        :py:meth:`~.__init__`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">pass</span></div>
 
 
@@ -488,14 +487,14 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.short_r.html#jaxrts.hnc_potentials.HNCPotential.short_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">short_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        This is the short-range part of :py:meth:`full_r`:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            V(r) \\cdot \\exp(-\\alpha r)</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_r</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
             <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">*</span> <span class="n">_r</span>
@@ -506,14 +505,14 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.long_r.html#jaxrts.hnc_potentials.HNCPotential.long_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">long_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        This is the long-range part of :py:meth:`full_r`:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            V(r) * (1 - \\exp(-\\alpha r))</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_r</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
             <span class="mi">1</span> <span class="o">-</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">*</span> <span class="n">_r</span><span class="p">)</span>
@@ -524,9 +523,9 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.short_k.html#jaxrts.hnc_potentials.HNCPotential.short_k">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">short_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The Fourier transform of :py:meth:`~short_r`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">V_k</span><span class="p">,</span> <span class="n">_k</span> <span class="o">=</span> <span class="n">transformPotential</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">short_r</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_r</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_r</span>
         <span class="p">)</span>
@@ -537,9 +536,9 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.long_k.html#jaxrts.hnc_potentials.HNCPotential.long_k">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">long_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The Foutier transform of :py:meth:`~short_k`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">V_k</span><span class="p">,</span> <span class="n">_k</span> <span class="o">=</span> <span class="n">transformPotential</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">long_r</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_r</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_r</span>
         <span class="p">)</span>
@@ -556,12 +555,12 @@
 <div class="viewcode-block" id="HNCPotential.q2">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.q2.html#jaxrts.hnc_potentials.HNCPotential.q2">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">q2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        This is :math:`q^2`!</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinAveraged&quot;</span><span class="p">:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinAveraged"</span><span class="p">:</span>
             <span class="n">Z</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">([</span><span class="o">*</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinSeparated&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinSeparated"</span><span class="p">:</span>
             <span class="n">Z</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">([</span><span class="o">*</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">Z</span> <span class="o">=</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span>
@@ -572,9 +571,9 @@
 <div class="viewcode-block" id="HNCPotential.alpha">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.alpha.html#jaxrts.hnc_potentials.HNCPotential.alpha">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinAveraged&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinAveraged"</span><span class="p">:</span>
             <span class="n">n</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">([</span><span class="o">*</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">n_i</span><span class="p">,</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinSeparated&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinSeparated"</span><span class="p">:</span>
             <span class="n">n</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">(</span>
                 <span class="p">[</span><span class="o">*</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">n_i</span><span class="p">,</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span>
             <span class="p">)</span>
@@ -587,12 +586,12 @@
 <div class="viewcode-block" id="HNCPotential.mu">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.mu.html#jaxrts.hnc_potentials.HNCPotential.mu">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">mu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The geometric mean of two masses (or reciprocal sum)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinAveraged&quot;</span><span class="p">:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinAveraged"</span><span class="p">:</span>
             <span class="n">m</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">([</span><span class="o">*</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">atomic_masses</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinSeparated&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinSeparated"</span><span class="p">:</span>
             <span class="n">m</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="o">*</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">atomic_masses</span><span class="p">,</span>
@@ -609,7 +608,7 @@
 <div class="viewcode-block" id="HNCPotential.T">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.T.html#jaxrts.hnc_potentials.HNCPotential.T">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">T</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The mass_weighted temperature average of a pair, according to</span>
 <span class="sd">        :cite:`Schwarz.2007`.</span>
 
@@ -617,11 +616,11 @@
 
 <span class="sd">           \\bar{T}_{ab} = \\frac{T_a m_b + T_b m_a}{m_a + m_b}</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinAveraged&quot;</span><span class="p">:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinAveraged"</span><span class="p">:</span>
             <span class="n">m</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">([</span><span class="o">*</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">atomic_masses</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">])</span>
             <span class="n">T</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">([</span><span class="o">*</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">T_i</span><span class="p">,</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">T_e</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinSeparated&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinSeparated"</span><span class="p">:</span>
             <span class="n">m</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="o">*</span><span class="n">plasma_state</span><span class="o">.</span><span class="n">atomic_masses</span><span class="p">,</span>
@@ -641,15 +640,15 @@
 <div class="viewcode-block" id="HNCPotential.r_cut">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.HNCPotential.r_cut.html#jaxrts.hnc_potentials.HNCPotential.r_cut">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">r_cut</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        This casts :attr:`jaxrts.PlasmaState.ion_core_radius` in the form</span>
 <span class="sd">        required to be used with an :py:class:~.HNCPotential`. However, this</span>
 <span class="sd">        quantity is only relevant if we consider electron-ion interactions.</span>
 <span class="sd">        Hence, the returned array will be 0 for all ion-ion pairs and the</span>
 <span class="sd">        electron-electron pair(s).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q2</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinAveraged&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinAveraged"</span><span class="p">:</span>
             <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">at</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
                 <span class="n">plasma_state</span><span class="o">.</span><span class="n">ion_core_radius</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)[</span>
                     <span class="p">:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span>
@@ -660,7 +659,7 @@
                     <span class="p">:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span>
                 <span class="p">]</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinSeparated&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinSeparated"</span><span class="p">:</span>
             <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">at</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
                 <span class="n">plasma_state</span><span class="o">.</span><span class="n">ion_core_radius</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)[</span>
                     <span class="p">:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span>
@@ -694,11 +693,11 @@
         <span class="k">return</span> <span class="n">l_ab</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PotentialSum&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"PotentialSum"</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">HNCPotential</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;You can only add other HNCPotentials to an HNCPotential.&quot;</span>
-                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Other is type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="s2">"You can only add other HNCPotentials to an HNCPotential."</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">"Other is type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">PotentialSum</span><span class="p">):</span>
             <span class="n">list_of_potentials</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">potentials</span>
@@ -710,11 +709,11 @@
             <span class="n">list_of_potentials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">PotentialSum</span><span class="p">(</span><span class="n">list_of_potentials</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ScaledPotential&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"ScaledPotential"</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;You can only add scale an HNCPotentials with a float.&quot;</span>
-                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Other is type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="s2">"You can only add scale an HNCPotentials with a float."</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">"Other is type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">ScaledPotential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="n">other</span><span class="p">)</span>
 
@@ -722,8 +721,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform_r</span><span class="p">,)</span>
         <span class="n">aux_data</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;include_electrons&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span><span class="p">,</span>
-            <span class="s2">&quot;model_key&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
+            <span class="s2">"include_electrons"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span><span class="p">,</span>
+            <span class="s2">"model_key"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
         <span class="p">}</span>  <span class="c1"># static values</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
 
@@ -731,13 +730,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_transform_r</span><span class="p">,)</span> <span class="o">=</span> <span class="n">children</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;model_key&quot;</span><span class="p">]</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;include_electrons&quot;</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"model_key"</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"include_electrons"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">obj</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tree_flatten</span><span class="p">()</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="se">\n</span><span class="s2">children: </span><span class="si">{</span><span class="n">children</span><span class="si">}</span><span class="se">\n</span><span class="s2">static: </span><span class="si">{</span><span class="n">aux_data</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="se">\n</span><span class="s2">children: </span><span class="si">{</span><span class="n">children</span><span class="si">}</span><span class="se">\n</span><span class="s2">static: </span><span class="si">{</span><span class="n">aux_data</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">return</span> <span class="n">out</span></div>
 
 
@@ -745,12 +744,12 @@
 <div class="viewcode-block" id="PotentialSum">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.PotentialSum.html#jaxrts.hnc_potentials.PotentialSum">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PotentialSum</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A sum of several :py:class:`HNCPotential` s. Can be used e.g., if</span>
 <span class="sd">    higher-order corrections should be added to a model.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;PotentialSum&quot;</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"PotentialSum"</span>
 
 <div class="viewcode-block" id="PotentialSum.__init__">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.PotentialSum.__init__.html#jaxrts.hnc_potentials.PotentialSum.__init__">[docs]</a>
@@ -758,21 +757,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">potentials</span> <span class="o">=</span> <span class="n">list_of_potentials</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="n">pot</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinSeparated&quot;</span>
+                <span class="n">pot</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinSeparated"</span>
                 <span class="k">for</span> <span class="n">pot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">potentials</span>
             <span class="p">]</span>
         <span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinSeparated&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">"SpinSeparated"</span>
         <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="n">pot</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinAveraged&quot;</span>
+                <span class="n">pot</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinAveraged"</span>
                 <span class="k">for</span> <span class="n">pot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">potentials</span>
             <span class="p">]</span>
         <span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinAveraged&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">"SpinAveraged"</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;off&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">"off"</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="s2">""</span></div>
 
 
     <span class="nd">@property</span>
@@ -781,7 +780,7 @@
 
     <span class="nd">@include_electrons</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">include_electrons</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="s2">&quot;SpinSeparated&quot;</span><span class="p">,</span> <span class="s2">&quot;SpinAveraged&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"off"</span><span class="p">,</span> <span class="s2">"SpinSeparated"</span><span class="p">,</span> <span class="s2">"SpinAveraged"</span><span class="p">]</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_include_electrons</span> <span class="o">=</span> <span class="n">value</span>
         <span class="c1"># Pass the setting if electrons should be included down to all the</span>
@@ -791,7 +790,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Sum of </span><span class="si">{</span><span class="p">[</span><span class="n">pot</span><span class="o">.</span><span class="vm">__name__</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">pot</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">potentials</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Sum of </span><span class="si">{</span><span class="p">[</span><span class="n">pot</span><span class="o">.</span><span class="vm">__name__</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">pot</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">potentials</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
 
 <div class="viewcode-block" id="PotentialSum.full_r">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.PotentialSum.full_r.html#jaxrts.hnc_potentials.PotentialSum.full_r">[docs]</a>
@@ -869,8 +868,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">potentials</span><span class="p">,)</span>
         <span class="n">aux_data</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;include_electrons&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_include_electrons</span><span class="p">,</span>
-            <span class="s2">&quot;model_key&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
+            <span class="s2">"include_electrons"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_include_electrons</span><span class="p">,</span>
+            <span class="s2">"model_key"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
         <span class="p">}</span>  <span class="c1"># static values</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
 
@@ -878,8 +877,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">potentials</span><span class="p">,)</span> <span class="o">=</span> <span class="n">children</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;model_key&quot;</span><span class="p">]</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">_include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;include_electrons&quot;</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"model_key"</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"include_electrons"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">obj</span></div>
 
 
@@ -887,11 +886,11 @@
 <div class="viewcode-block" id="ScaledPotential">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.ScaledPotential.html#jaxrts.hnc_potentials.ScaledPotential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ScaledPotential</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A :py:class:`HNCPotential`, scaled with a constant factor.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;ScaledPotential&quot;</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"ScaledPotential"</span>
 
 <div class="viewcode-block" id="ScaledPotential.__init__">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.ScaledPotential.__init__.html#jaxrts.hnc_potentials.ScaledPotential.__init__">[docs]</a>
@@ -899,7 +898,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">potential</span> <span class="o">=</span> <span class="n">potential</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="o">=</span> <span class="n">factor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">potential</span><span class="o">.</span><span class="n">include_electrons</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="s2">""</span></div>
 
 
     <span class="nd">@property</span>
@@ -908,7 +907,7 @@
 
     <span class="nd">@include_electrons</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">include_electrons</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="s2">&quot;SpinAveraged&quot;</span><span class="p">,</span> <span class="s2">&quot;SpinSeparated&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"off"</span><span class="p">,</span> <span class="s2">"SpinAveraged"</span><span class="p">,</span> <span class="s2">"SpinSeparated"</span><span class="p">]</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_include_electrons</span> <span class="o">=</span> <span class="n">value</span>
         <span class="c1"># Pass the setting if electrons should be included down to all the</span>
@@ -917,7 +916,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">potential</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">, scaled with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">factor</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">potential</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">, scaled with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">factor</span><span class="si">}</span><span class="s2">"</span>
 
 <div class="viewcode-block" id="ScaledPotential.full_r">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.ScaledPotential.full_r.html#jaxrts.hnc_potentials.ScaledPotential.full_r">[docs]</a>
@@ -961,11 +960,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">potential</span><span class="o">.</span><span class="n">short_k</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ScaledPotential&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"ScaledPotential"</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;You can only scale an HNCPotentials with a float. &quot;</span>
-                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Other is type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="s2">"You can only scale an HNCPotentials with a float. "</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">"Other is type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">ScaledPotential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">potential</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="n">other</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span><span class="p">)</span>
 
@@ -973,8 +972,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">potential</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span><span class="p">)</span>
         <span class="n">aux_data</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;include_electrons&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_include_electrons</span><span class="p">,</span>
-            <span class="s2">&quot;model_key&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
+            <span class="s2">"include_electrons"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_include_electrons</span><span class="p">,</span>
+            <span class="s2">"model_key"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
         <span class="p">}</span>  <span class="c1"># static values</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
 
@@ -982,8 +981,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">potential</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">factor</span><span class="p">)</span> <span class="o">=</span> <span class="n">children</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;model_key&quot;</span><span class="p">]</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">_include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;include_electrons&quot;</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"model_key"</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"include_electrons"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">obj</span></div>
 
 
@@ -991,22 +990,22 @@
 <div class="viewcode-block" id="CoulombPotential">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.html#jaxrts.hnc_potentials.CoulombPotential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CoulombPotential</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A full Coulomb Potential.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;CoulombPotential&quot;</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"CoulombPotential"</span>
 
 <div class="viewcode-block" id="CoulombPotential.full_r">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.full_r.html#jaxrts.hnc_potentials.CoulombPotential.full_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">full_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        .. math::</span>
 
 <span class="sd">           q^2 / (4 jnp.pi \\varepsilon_0 * r)</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">q2</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">_r</span><span class="p">)</span></div>
 
@@ -1023,12 +1022,12 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.CoulombPotential.long_k.html#jaxrts.hnc_potentials.CoulombPotential.long_k">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">long_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        .. math::</span>
 
 <span class="sd">            q^2 / (k^2 \\varepsilon_0) \\cdot (\\alpha^2 / (k^2 + \\alpha^2))</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
 
         <span class="k">return</span> <span class="p">(</span>
@@ -1044,21 +1043,21 @@
 <div class="viewcode-block" id="DebyeHueckelPotential">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.DebyeHueckelPotential.html#jaxrts.hnc_potentials.DebyeHueckelPotential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DebyeHueckelPotential</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The Debye-Hückel screening potential as defined, e.g., in</span>
 <span class="sd">    :cite:`Wunsch.2008`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;DebyeHueckelPotential&quot;</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"DebyeHueckelPotential"</span>
 
-    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Wunsch.2008&quot;</span><span class="p">]</span>
+    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Wunsch.2008"</span><span class="p">]</span>
 
 <div class="viewcode-block" id="DebyeHueckelPotential.check">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.DebyeHueckelPotential.check.html#jaxrts.hnc_potentials.DebyeHueckelPotential.check">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="s2">&quot;screening_length&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">,</span> <span class="s2">"screening_length"</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The PlasmaState </span><span class="si">{</span><span class="n">plasma_state</span><span class="si">}</span><span class="s2"> has no attribute &#39;screening_length, which is required for DebyeHueckelPotential.&quot;</span>  <span class="c1"># noqa: E501</span>
+                <span class="sa">f</span><span class="s2">"The PlasmaState </span><span class="si">{</span><span class="n">plasma_state</span><span class="si">}</span><span class="s2"> has no attribute 'screening_length, which is required for DebyeHueckelPotential."</span>  <span class="c1"># noqa: E501</span>
             <span class="p">)</span></div>
 
 
@@ -1079,12 +1078,12 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.DebyeHueckelPotential.full_r.html#jaxrts.hnc_potentials.DebyeHueckelPotential.full_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">full_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        .. math::</span>
 
 <span class="sd">            \\frac{q^2}{(4 \\pi \\epsilon_0 r)} \\exp(-\\kappa r)</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
 
@@ -1099,9 +1098,9 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.DebyeHueckelPotential.long_k.html#jaxrts.hnc_potentials.DebyeHueckelPotential.long_k">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">long_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        See :cite:`Chapman.2015`, (Eqn 3.58)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">_k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
 
@@ -1120,9 +1119,9 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.DebyeHueckelPotential.full_k.html#jaxrts.hnc_potentials.DebyeHueckelPotential.full_k">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">full_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        See :cite:`Chapman.2015`, (Eqn 3.49)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">V_C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q2</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">vacuum_permittivity</span> <span class="o">/</span> <span class="n">_k</span><span class="o">**</span><span class="mi">2</span>
         <span class="k">return</span> <span class="n">V_C</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kappa</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">/</span> <span class="n">_k</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
@@ -1133,7 +1132,7 @@
 <div class="viewcode-block" id="KelbgPotential">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.KelbgPotential.html#jaxrts.hnc_potentials.KelbgPotential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KelbgPotential</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Quantum diffraction potential suggested by Kelbg.</span>
 <span class="sd">    See :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Kelbg.1963`, and</span>
 <span class="sd">    :cite:`Schwarz.2007`, Eqn 14. We use the definition of</span>
@@ -1143,20 +1142,20 @@
 
 <span class="sd">        Only applicable for weakly coupled systems with :math:`\\Gamma &lt; 1`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;KelbgPotential&quot;</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"KelbgPotential"</span>
     <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;Kelbg.1963&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Wunsch.2011&quot;</span><span class="p">,</span>
-        <span class="p">(</span><span class="s2">&quot;Schwarz.2007&quot;</span><span class="p">,</span> <span class="s2">&quot;Definition of lambda_ab&quot;</span><span class="p">),</span>
+        <span class="s2">"Kelbg.1963"</span><span class="p">,</span>
+        <span class="s2">"Wunsch.2011"</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">"Schwarz.2007"</span><span class="p">,</span> <span class="s2">"Definition of lambda_ab"</span><span class="p">),</span>
     <span class="p">]</span>
 
 <div class="viewcode-block" id="KelbgPotential.full_r">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.KelbgPotential.full_r.html#jaxrts.hnc_potentials.KelbgPotential.full_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">full_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        .. math::</span>
 
@@ -1174,7 +1173,7 @@
 
 <span class="sd">        For :math:`r\\rightarrow 0: V_{a b} \\rightarrow</span>
 <span class="sd">        \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
 
@@ -1208,7 +1207,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.KelbgPotential.long_r.html#jaxrts.hnc_potentials.KelbgPotential.long_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">long_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The long-range behavior of the Deutsch-Potentials should be the</span>
 <span class="sd">        identical to the Coulomb-Potential. Therefore, define a long-range term</span>
 <span class="sd">        with is the Coulomb-Potential, which also has the known Fourier</span>
@@ -1218,7 +1217,7 @@
 
 <span class="sd">           q^2 / (4 jnp.pi \\varepsilon_0 r) \\cdot (1 - \\exp(-\\alpha r))</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">c_full_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q2</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">_r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">c_full_r</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">*</span> <span class="n">_r</span><span class="p">))</span></div>
@@ -1228,14 +1227,14 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.KelbgPotential.long_k.html#jaxrts.hnc_potentials.KelbgPotential.long_k">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">long_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The known Fourier transform of the Coulomb&#39;s potential long-range part.</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        The known Fourier transform of the Coulomb's potential long-range part.</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            q^2 / (k^2 \\varepsilon_0) \\cdot (\\alpha^2 / (k^2 + \\alpha^2))</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
 
         <span class="k">return</span> <span class="p">(</span>
@@ -1254,7 +1253,7 @@
     <span class="c1"># Coulomb-Potential should be the same (see above).</span>
     <span class="c1"># ===</span>
     <span class="c1"># def short_r(self, plasma_state, r: Quantity) -&gt; Quantity:</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     """</span>
 
     <span class="c1">#     .. math::</span>
 
@@ -1273,7 +1272,7 @@
     <span class="c1">#     For :math:`r\\rightarrow 0: V_{a b} \\rightarrow</span>
     <span class="c1">#     \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`</span>
     <span class="c1">#     .</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     """</span>
 
     <span class="c1">#     _r = r[jnp.newaxis, jnp.newaxis, :]</span>
 
@@ -1294,7 +1293,7 @@
     <span class="c1">#     )</span>
 
     <span class="c1"># def long_r(self, plasma_state, r: Quantity) -&gt; Quantity:</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     """</span>
 
     <span class="c1">#     .. math::</span>
 
@@ -1309,7 +1308,7 @@
     <span class="c1">#     For :math:`r\\rightarrow 0: V_{a b} \\rightarrow</span>
     <span class="c1">#     \\frac{q_{a}q_{b}\\sqrt{\\pi}}{4 \\pi \\varepsilon_0 \\lambda_{a b}}`</span>
     <span class="c1">#     .</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     """</span>
 
     <span class="c1">#     _r = r[jnp.newaxis, jnp.newaxis, :]</span>
 
@@ -1323,7 +1322,7 @@
 <div class="viewcode-block" id="KlimontovichKraeftPotential">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.KlimontovichKraeftPotential.html#jaxrts.hnc_potentials.KlimontovichKraeftPotential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KlimontovichKraeftPotential</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Quantum diffraction potential suggested by Klimontovich and Kraeft.</span>
 <span class="sd">    See :cite:`Schwarz.2007` Eqn (15) and :cite:`Wunsch.2011` Eqn. (4.43).</span>
 
@@ -1334,23 +1333,23 @@
 <span class="sd">        it for all inputs. The most sensible treatment is to only use the</span>
 <span class="sd">        off-diagonal entries for the `ei` potential.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
+        <span class="s2">"electron-ion Potential"</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;KlimontovichKraeftPotential&quot;</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"KlimontovichKraeftPotential"</span>
     <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;Klimontovich.1974&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Wunsch.2011&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Schwarz.2007&quot;</span><span class="p">,</span>
+        <span class="s2">"Klimontovich.1974"</span><span class="p">,</span>
+        <span class="s2">"Wunsch.2011"</span><span class="p">,</span>
+        <span class="s2">"Schwarz.2007"</span><span class="p">,</span>
     <span class="p">]</span>
 
 <div class="viewcode-block" id="KlimontovichKraeftPotential.full_r">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.KlimontovichKraeftPotential.full_r.html#jaxrts.hnc_potentials.KlimontovichKraeftPotential.full_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">full_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        .. math::</span>
 
 <span class="sd">            V_{e i}^{\\mathrm{KK}}(r)=-\\frac{k_{B}T\\xi_{e i}^{2}}{16}</span>
@@ -1363,7 +1362,7 @@
 <span class="sd">        i} 4 \\pi \\varepsilon_0)`.</span>
 
 <span class="sd">        :math:`Z e^{2} = q^2`, and :math:`\\beta = 1/(k_B T)` (see note above)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
 
         <span class="n">beta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">k_B</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">))</span>
@@ -1387,7 +1386,7 @@
 <div class="viewcode-block" id="DeutschPotential">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.DeutschPotential.html#jaxrts.hnc_potentials.DeutschPotential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DeutschPotential</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Quantum diffraction potential suggested by C. Deutsch. See</span>
 <span class="sd">    :cite:`Wunsch.2011` Eqn. 4.43, who cites :cite:`Deutsch.1977`.</span>
 
@@ -1397,13 +1396,13 @@
 <span class="sd">        \\frac{q_{a}q_{b}}{4 \\pi \\varepsilon_0 r}</span>
 <span class="sd">        \\left[1-\\exp\\left(-\\frac{r}{\\lambda_{a b}}\\right)\\right]</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;DeutschPotential&quot;</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"DeutschPotential"</span>
     <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;Kelbg.1963&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Wunsch.2011&quot;</span><span class="p">,</span>
-        <span class="p">(</span><span class="s2">&quot;Schwarz.2007&quot;</span><span class="p">,</span> <span class="s2">&quot;Definition of lambda_ab&quot;</span><span class="p">),</span>
+        <span class="s2">"Kelbg.1963"</span><span class="p">,</span>
+        <span class="s2">"Wunsch.2011"</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">"Schwarz.2007"</span><span class="p">,</span> <span class="s2">"Definition of lambda_ab"</span><span class="p">),</span>
     <span class="p">]</span>
 
 <div class="viewcode-block" id="DeutschPotential.full_r">
@@ -1427,13 +1426,13 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.DeutschPotential.full_k.html#jaxrts.hnc_potentials.DeutschPotential.full_k">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">full_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        .. math::</span>
 
 <span class="sd">            q^2 / (k^2 * \\varepsilon_0) *</span>
 <span class="sd">            ((1/\\lambda{a b})**2 / (k^2 + (1/\\lambda{a b})^2))</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
 
         <span class="k">return</span> <span class="p">(</span>
@@ -1458,7 +1457,7 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.DeutschPotential.long_r.html#jaxrts.hnc_potentials.DeutschPotential.long_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">long_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The long-range behavior of the Deutsch-Potentials should be the</span>
 <span class="sd">        identical to the Coulomb-Potential. Therefore, define a long-range term</span>
 <span class="sd">        with is the Coulomb-Potential, which also has the known Fourier</span>
@@ -1468,7 +1467,7 @@
 
 <span class="sd">           q^2 / (4 jnp.pi \\varepsilon_0 r) \\cdot (1 - \\exp(-\\alpha r))</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">c_full_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q2</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">epsilon_0</span> <span class="o">*</span> <span class="n">_r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">c_full_r</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span> <span class="o">*</span> <span class="n">_r</span><span class="p">))</span></div>
@@ -1478,14 +1477,14 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.DeutschPotential.long_k.html#jaxrts.hnc_potentials.DeutschPotential.long_k">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">long_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The known Fourier transform of the Coulomb&#39;s potential long-range part.</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        The known Fourier transform of the Coulomb's potential long-range part.</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            q^2 / (k^2 \\varepsilon_0) \\cdot (\\alpha^2 / (k^2 + \\alpha^2))</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
 
         <span class="k">return</span> <span class="p">(</span>
@@ -1501,7 +1500,7 @@
 <div class="viewcode-block" id="EmptyCorePotential">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.EmptyCorePotential.html#jaxrts.hnc_potentials.EmptyCorePotential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EmptyCorePotential</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The Empty core potential, which is essentially a</span>
 <span class="sd">    :py:class:`~.CoulombPotential` for all radii bigger</span>
 <span class="sd">    than :math:`r_\\text{cut}`. For all radii smaller</span>
@@ -1513,17 +1512,17 @@
 
 <span class="sd">       This potential is only defined for the electron-ion interaction. Hence,</span>
 <span class="sd">       it will always and automatically set ~:py:math:`include_electrons` to</span>
-<span class="sd">       ``&quot;SpinAveraged&quot;``. For the rest, we return a Coulomb-potential -- but</span>
+<span class="sd">       ``"SpinAveraged"``. For the rest, we return a Coulomb-potential -- but</span>
 <span class="sd">       this is really just to be compatible with the other potentials defined</span>
 <span class="sd">       here.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
+        <span class="s2">"electron-ion Potential"</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;EmptyCorePotential&quot;</span>
-    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Gericke.2010&quot;</span><span class="p">]</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"EmptyCorePotential"</span>
+    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Gericke.2010"</span><span class="p">]</span>
 
 <div class="viewcode-block" id="EmptyCorePotential.__init__">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.EmptyCorePotential.__init__.html#jaxrts.hnc_potentials.EmptyCorePotential.__init__">[docs]</a>
@@ -1531,14 +1530,14 @@
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinAveraged&quot;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">"SpinAveraged"</span></div>
 
 
 <div class="viewcode-block" id="EmptyCorePotential.full_r">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.EmptyCorePotential.full_r.html#jaxrts.hnc_potentials.EmptyCorePotential.full_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">full_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        .. math::</span>
 
 <span class="sd">           \\begin{cases}</span>
@@ -1546,7 +1545,7 @@
 <span class="sd">           0 \\text{else}</span>
 <span class="sd">           \\end{cases}</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
         <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">heaviside</span><span class="p">(</span>
             <span class="p">(</span><span class="n">_r</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_cut</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">))</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">),</span>
@@ -1607,13 +1606,13 @@
 <div class="viewcode-block" id="YukawaShortRangeRepulsion">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.YukawaShortRangeRepulsion.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">YukawaShortRangeRepulsion</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Yukawa Potential with a short-range repulsion as used in</span>
 <span class="sd">    :cite:`Fletcher.2015`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;YukawaShortRangeRepulsion&quot;</span>
-    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Wunsch.2009&quot;</span><span class="p">,</span> <span class="s2">&quot;Fletcher.2015&quot;</span><span class="p">]</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"YukawaShortRangeRepulsion"</span>
+    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Wunsch.2009"</span><span class="p">,</span> <span class="s2">"Fletcher.2015"</span><span class="p">]</span>
 
 <div class="viewcode-block" id="YukawaShortRangeRepulsion.__init__">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.YukawaShortRangeRepulsion.__init__.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion.__init__">[docs]</a>
@@ -1643,13 +1642,13 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.YukawaShortRangeRepulsion.full_r.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion.full_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">full_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        .. math::</span>
 
 <span class="sd">           q^2 / (4 jnp.pi \\varepsilon_0 * r) \\exp(-\\kappa r) +</span>
 <span class="sd">           \\frac{\\sigma^4}{r^4}</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">q2</span><span class="p">(</span><span class="n">plasma_state</span><span class="p">)</span>
@@ -1662,12 +1661,12 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.YukawaShortRangeRepulsion.long_r.html#jaxrts.hnc_potentials.YukawaShortRangeRepulsion.long_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">long_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        .. math::</span>
 
 <span class="sd">            \\frac{q^2}{(4 \\pi \\epsilon_0 r)} \\exp(-\\kappa r)</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
 
@@ -1699,8 +1698,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform_r</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
         <span class="n">aux_data</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;include_electrons&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span><span class="p">,</span>
-            <span class="s2">&quot;model_key&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
+            <span class="s2">"include_electrons"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span><span class="p">,</span>
+            <span class="s2">"model_key"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
         <span class="p">}</span>  <span class="c1"># static values</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
 
@@ -1708,8 +1707,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_transform_r</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">children</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;model_key&quot;</span><span class="p">]</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;include_electrons&quot;</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"model_key"</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"include_electrons"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">obj</span></div>
 
 
@@ -1717,9 +1716,9 @@
 <div class="viewcode-block" id="SoftCorePotential">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.SoftCorePotential.html#jaxrts.hnc_potentials.SoftCorePotential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SoftCorePotential</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Comparable to :py:class:`EmptyCorePotential`, but to circumvent the hard</span>
-<span class="sd">    cutoff, rather introduce a soft, exponential cutoff. It&#39;s strength is given</span>
+<span class="sd">    cutoff, rather introduce a soft, exponential cutoff. It's strength is given</span>
 <span class="sd">    by the attribute :py:attr:`~.beta`. See :cite:`Gericke.2010`.</span>
 
 <span class="sd">    We define `r_cut` in the :py:class:`jaxrts.PlasmaState`.</span>
@@ -1728,17 +1727,17 @@
 
 <span class="sd">       This potential is only defined for the electron-ion interaction. Hence,</span>
 <span class="sd">       it will always and automatically set ~:py:meth:`include_electrons` to</span>
-<span class="sd">       ``&quot;SpinAveraged&quot;``. For the rest, we return a Coulomb-potential -- but</span>
+<span class="sd">       ``"SpinAveraged"``. For the rest, we return a Coulomb-potential -- but</span>
 <span class="sd">       this is really just to be compatible with the other potentials defined</span>
 <span class="sd">       here.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;electron-ion Potential&quot;</span><span class="p">,</span>
+        <span class="s2">"electron-ion Potential"</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;SoftCorePotential&quot;</span>
-    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Gericke.2010&quot;</span><span class="p">]</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"SoftCorePotential"</span>
+    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Gericke.2010"</span><span class="p">]</span>
 
 <div class="viewcode-block" id="SoftCorePotential.__init__">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.SoftCorePotential.__init__.html#jaxrts.hnc_potentials.SoftCorePotential.__init__">[docs]</a>
@@ -1746,25 +1745,25 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="c1">#: This is the exponent which gives the steepness of the soft-core&#39;s</span>
+        <span class="c1">#: This is the exponent which gives the steepness of the soft-core's</span>
         <span class="c1">#: edge</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinAveraged&quot;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">"SpinAveraged"</span></div>
 
 
 <div class="viewcode-block" id="SoftCorePotential.full_r">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.SoftCorePotential.full_r.html#jaxrts.hnc_potentials.SoftCorePotential.full_r">[docs]</a>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">full_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        .. math::</span>
 
 <span class="sd">           q^2 / (4 jnp.pi \\varepsilon_0 * r)</span>
 <span class="sd">           \\left[1 -</span>
 <span class="sd">           \\exp\\left(-\\frac{r^\\beta}{r_{cut}^\\beta}\\right)\\right]</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">exp_part</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
             <span class="o">-</span><span class="p">(</span>
@@ -1851,8 +1850,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform_r</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
         <span class="n">aux_data</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;include_electrons&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span><span class="p">,</span>
-            <span class="s2">&quot;model_key&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
+            <span class="s2">"include_electrons"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span><span class="p">,</span>
+            <span class="s2">"model_key"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
         <span class="p">}</span>  <span class="c1"># static values</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
 
@@ -1860,8 +1859,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_transform_r</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">children</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;model_key&quot;</span><span class="p">]</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;include_electrons&quot;</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"model_key"</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"include_electrons"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">obj</span></div>
 
 
@@ -1869,27 +1868,27 @@
 <div class="viewcode-block" id="PauliClassicalMap">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.PauliClassicalMap.html#jaxrts.hnc_potentials.PauliClassicalMap">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PauliClassicalMap</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the Pauli potential from the exact non-interacting</span>
 <span class="sd">    UEG pair distribution function by inverting the</span>
 <span class="sd">    Hyper-Netted-Chain calculations:cite:`DharmaWardana.2012`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;PauliClassicalMap&quot;</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"PauliClassicalMap"</span>
 
-    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Bredow.2015&quot;</span><span class="p">,</span> <span class="s2">&quot;DharmaWardana.2000&quot;</span><span class="p">,</span> <span class="s2">&quot;DharmaWardana.2012&quot;</span><span class="p">]</span>
+    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Bredow.2015"</span><span class="p">,</span> <span class="s2">"DharmaWardana.2000"</span><span class="p">,</span> <span class="s2">"DharmaWardana.2012"</span><span class="p">]</span>
 
 <div class="viewcode-block" id="PauliClassicalMap.__init__">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.PauliClassicalMap.__init__.html#jaxrts.hnc_potentials.PauliClassicalMap.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Sets :py:attr:`~PauliClassicalMap.include_electrons` to</span>
-<span class="sd">        ``&quot;SpinSeparated&quot;``, automatically.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        ``"SpinSeparated"``, automatically.</span>
+<span class="sd">        """</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinSeparated&quot;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">"SpinSeparated"</span></div>
 
 
 <div class="viewcode-block" id="PauliClassicalMap.full_k">
@@ -1904,7 +1903,7 @@
         <span class="n">pot</span> <span class="o">=</span> <span class="mi">21</span>
         <span class="n">r_calc</span> <span class="o">=</span> <span class="n">jnpu</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-3</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span><span class="p">,</span> <span class="mf">1e4</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">a0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="n">pot</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinSeparated&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinSeparated"</span><span class="p">:</span>
 
             <span class="n">k_</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">pauli_potential_from_classical_map_SpinSeparated</span><span class="p">(</span>
                 <span class="n">r_calc</span><span class="p">,</span> <span class="n">_r</span><span class="p">,</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span><span class="p">,</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">T_e</span>
@@ -1927,7 +1926,7 @@
                 <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">electron_volt</span>
                 <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="o">**</span><span class="mi">3</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">&quot;SpinAveraged&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">==</span> <span class="s2">"SpinAveraged"</span><span class="p">:</span>
             <span class="n">k_</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">g0_T_r</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">pauli_potential_from_classical_map_SpinAveraged</span><span class="p">(</span>
                     <span class="n">r_calc</span><span class="p">,</span> <span class="n">_r</span><span class="p">,</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span><span class="p">,</span> <span class="n">plasma_state</span><span class="o">.</span><span class="n">T_e</span>
@@ -1972,8 +1971,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform_r</span><span class="p">,)</span>
         <span class="n">aux_data</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;include_electrons&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span><span class="p">,</span>
-            <span class="s2">&quot;model_key&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
+            <span class="s2">"include_electrons"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span><span class="p">,</span>
+            <span class="s2">"model_key"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">,</span>
         <span class="p">}</span>  <span class="c1"># static values</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
 
@@ -1981,8 +1980,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_tree_unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_transform_r</span><span class="p">,)</span> <span class="o">=</span> <span class="n">children</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;model_key&quot;</span><span class="p">]</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;include_electrons&quot;</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">model_key</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"model_key"</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="n">aux_data</span><span class="p">[</span><span class="s2">"include_electrons"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">obj</span></div>
 
 
@@ -1990,7 +1989,7 @@
 <div class="viewcode-block" id="SpinSeparatedEEExchange">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.SpinSeparatedEEExchange.html#jaxrts.hnc_potentials.SpinSeparatedEEExchange">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SpinSeparatedEEExchange</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Wunsch.2008`, Eqn (17), Citing :cite:`Huang.1987`. Eqn. (9.57),</span>
 <span class="sd">    however, there is a factor of :math:`\\sqrt{\\pi}` difference in the</span>
 <span class="sd">    definition of lambda. (one is from :cite:`Deutsch.1982` presenting a</span>
@@ -2000,22 +1999,22 @@
 <span class="sd">    Figure 6. in :cite:`Wunsch.2008` and results in a higher repulsion</span>
 <span class="sd">    than the :py:class:`~.SpinAveragedEEExchange`,</span>
 <span class="sd">    which should be expected.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;SpinSeparatedEEExchange&quot;</span>
-    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Wunsch.2008&quot;</span><span class="p">,</span> <span class="s2">&quot;Huang.1987&quot;</span><span class="p">,</span> <span class="s2">&quot;Deutsch.1982&quot;</span><span class="p">]</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"SpinSeparatedEEExchange"</span>
+    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Wunsch.2008"</span><span class="p">,</span> <span class="s2">"Huang.1987"</span><span class="p">,</span> <span class="s2">"Deutsch.1982"</span><span class="p">]</span>
 
 <div class="viewcode-block" id="SpinSeparatedEEExchange.__init__">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.SpinSeparatedEEExchange.__init__.html#jaxrts.hnc_potentials.SpinSeparatedEEExchange.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Sets :py:attr:`~SpinSeparatedEEExchange.include_electrons` to</span>
-<span class="sd">        ``&quot;SpinSeparated&quot;``, automatically.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        ``"SpinSeparated"``, automatically.</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">&quot;SpinSeparated&quot;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_electrons</span> <span class="o">=</span> <span class="s2">"SpinSeparated"</span></div>
 
 
 <div class="viewcode-block" id="SpinSeparatedEEExchange.full_r">
@@ -2049,12 +2048,12 @@
 <div class="viewcode-block" id="SpinAveragedEEExchange">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.SpinAveragedEEExchange.html#jaxrts.hnc_potentials.SpinAveragedEEExchange">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SpinAveragedEEExchange</span><span class="p">(</span><span class="n">HNCPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Wunsch.2008`, Eqn (18).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;SpinAveragedEEExchange&quot;</span>
-    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Wunsch.2008&quot;</span><span class="p">]</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"SpinAveragedEEExchange"</span>
+    <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Wunsch.2008"</span><span class="p">]</span>
 
 <div class="viewcode-block" id="SpinAveragedEEExchange.full_r">
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.SpinAveragedEEExchange.full_r.html#jaxrts.hnc_potentials.SpinAveragedEEExchange.full_r">[docs]</a>
@@ -2107,9 +2106,9 @@
 <a class="viewcode-back" href="../../_autosummary/jaxrts.hnc_potentials.transformPotential.html#jaxrts.hnc_potentials.transformPotential">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">transformPotential</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    ToDo: Test this, potentially, there is something wrong, here.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">dr</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">dk</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
     <span class="n">k</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">r</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="o">*</span> <span class="n">dk</span>

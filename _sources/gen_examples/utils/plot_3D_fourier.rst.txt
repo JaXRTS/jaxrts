@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_gen_examples_utils_plot_3D_fourier.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -40,11 +40,11 @@ transform.
  .. code-block:: none
 
     Time for sine: 0.0032s.
-    Time for ogata: 0.0061s. (1.9x sinetime).
-    Time for sine: 0.0018s.
-    Time for ogata: 0.0028s. (1.6x sinetime).
-    Time for sine: 0.1599s.
-    Time for ogata: 0.2929s. (1.8x sinetime).
+    Time for ogata: 0.0071s. (2.3x sinetime).
+    Time for sine: 0.0017s.
+    Time for ogata: 0.0029s. (1.7x sinetime).
+    Time for sine: 0.1465s.
+    Time for ogata: 0.2898s. (2.0x sinetime).
 
 
 
@@ -183,7 +183,7 @@ transform.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 6.202 seconds)
+   **Total running time of the script:** (0 minutes 6.082 seconds)
 
 
 .. _sphx_glr_download_gen_examples_utils_plot_3D_fourier.py:
@@ -199,6 +199,10 @@ transform.
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_3D_fourier.py <plot_3D_fourier.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_3D_fourier.zip <plot_3D_fourier.zip>`
 
 
 .. only:: html

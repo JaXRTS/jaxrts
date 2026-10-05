@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Creating your own model &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -133,23 +132,23 @@ type as a reference for structure and style.</p>
 <span class="o">...</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">PiLFC</span><span class="p">(</span><span class="n">jaxrts</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-<span class="w">   </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">   </span><span class="sd">"""</span>
 <span class="sd">   Hypothetical LFC Model, in which the LFC is always pi.</span>
-<span class="sd">   &quot;&quot;&quot;</span>
+<span class="sd">   """</span>
 
    <span class="c1"># The allowed model keys for a plasma state.</span>
-   <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ee-lfc&quot;</span><span class="p">]</span>
-   <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;PiLFC&quot;</span>
+   <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ee-lfc"</span><span class="p">]</span>
+   <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">"PiLFC"</span>
 
    <span class="c1"># Citations keys for reference</span>
-   <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;JohnDoe.2025&quot;</span><span class="p">]</span>
+   <span class="n">cite_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"JohnDoe.2025"</span><span class="p">]</span>
 
    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
    <span class="c1"># This function is required by every model.</span>
    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
-   <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">&quot;PlasmaState&quot;</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
+   <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plasma_state</span><span class="p">:</span> <span class="s2">"PlasmaState"</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">Setup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">lfc_pi</span><span class="p">(</span>
             <span class="n">plasma_state</span><span class="o">.</span><span class="n">Z_free</span><span class="p">,</span>
             <span class="n">plasma_state</span><span class="o">.</span><span class="n">n_e</span><span class="p">,</span>
@@ -160,8 +159,8 @@ type as a reference for structure and style.</p>
       <span class="p">)</span>
 
    <span class="c1"># The following is required to jit a Model</span>
-   <span class="c1"># Here, &#39;children&#39; are attributes of the class that can be traced</span>
-   <span class="c1"># using jax, e.g. plasma_state&#39;s, floats etc., while aux_data are static arguments.</span>
+   <span class="c1"># Here, 'children' are attributes of the class that can be traced</span>
+   <span class="c1"># using jax, e.g. plasma_state's, floats etc., while aux_data are static arguments.</span>
    <span class="k">def</span><span class="w"> </span><span class="nf">_tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="n">children</span> <span class="o">=</span> <span class="p">()</span>
       <span class="n">aux_data</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_key</span><span class="p">)</span>  <span class="c1"># static values</span>
@@ -183,7 +182,7 @@ type as a reference for structure and style.</p>
 </pre></div>
 </div>
 <p>Congratulations – you’ve successfully created your own model! You can add it to a <a class="reference internal" href="_autosummary/jaxrts.plasmastate.PlasmaState.html#jaxrts.plasmastate.PlasmaState" title="jaxrts.plasmastate.PlasmaState"><code class="xref py py-class docutils literal notranslate"><span class="pre">jaxrts.plasmastate.PlasmaState</span></code></a> by assigning it to the <code class="docutils literal notranslate"><span class="pre">&quot;ee-lfc&quot;</span></code> key:</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;ee-lfc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PiLFC</span><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span><span class="p">[</span><span class="s2">"ee-lfc"</span><span class="p">]</span> <span class="o">=</span> <span class="n">PiLFC</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="admonition note">

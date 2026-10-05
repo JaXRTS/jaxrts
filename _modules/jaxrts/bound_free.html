@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,23 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.bound_free &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -86,10 +85,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for jaxrts.bound_free</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">This submodule is dedicated to calculate the contribution of tightly bound</span>
 <span class="sd">electrons to the dynamic structure factor.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
@@ -110,24 +109,24 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_y</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This is the argument to the phi in Eqn (28) of :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">_xi</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J10_BM</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Bloch.1975`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">xi</span> <span class="o">=</span> <span class="n">_xi</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="k">return</span> <span class="mi">8</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">Zeff</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">xi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J20_BM</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Bloch.1975`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">xi</span> <span class="o">=</span> <span class="n">_xi</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="mi">64</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">Zeff</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
         <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">xi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">))</span>
@@ -137,9 +136,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J21_BM</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Bloch.1975`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">xi</span> <span class="o">=</span> <span class="n">_xi</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="mi">64</span> <span class="o">/</span> <span class="p">(</span><span class="mi">15</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">Zeff</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
         <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">xi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">xi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">5</span>
@@ -147,9 +146,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_pref_Schumacher_1975</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This is the prefactor in Eqn (28) of :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">l</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
         <span class="o">*</span> <span class="p">(</span><span class="n">factorial</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">factorial</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">l</span><span class="p">))</span>
@@ -158,30 +157,30 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi10_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">y</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi20_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">y</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">y</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">/</span> <span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">y</span><span class="o">**</span><span class="mi">5</span><span class="p">))</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi21_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">y</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">y</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi30_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">3</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
         <span class="o">-</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
@@ -192,9 +191,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi31_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">16</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
         <span class="o">-</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
@@ -204,16 +203,16 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi32_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">7</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">7</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi40_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">16</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
         <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
@@ -226,9 +225,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi41_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">25</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
         <span class="o">-</span> <span class="mi">53</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
@@ -240,9 +239,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi42_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">36</span> <span class="o">*</span> <span class="p">(</span><span class="mi">15</span> <span class="o">/</span> <span class="mi">7</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
         <span class="o">-</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">)</span>
@@ -253,9 +252,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi43_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="p">(</span><span class="mi">6</span> <span class="o">/</span> <span class="mi">7</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">)</span>
         <span class="o">-</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">7</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">7</span><span class="p">)</span>
@@ -265,9 +264,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi50_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">25</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
         <span class="o">-</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
@@ -282,9 +281,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi51_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">100</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
         <span class="o">-</span> <span class="mi">1424</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
@@ -298,9 +297,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_phi52_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">9</span> <span class="o">*</span> <span class="p">(</span><span class="mi">49</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
         <span class="o">-</span> <span class="mi">91</span> <span class="o">*</span> <span class="n">y</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">)</span>
@@ -313,9 +312,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J10_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="c1"># Note: Schumacher goes with y**2!</span>
@@ -324,9 +323,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J20_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi20_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -334,9 +333,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J21_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi21_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -344,9 +343,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J30_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi30_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -354,9 +353,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J31_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi31_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -364,9 +363,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J32_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi32_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -374,9 +373,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J40_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi40_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -384,9 +383,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J41_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi41_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -394,9 +393,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J42_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi42_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -404,9 +403,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J43_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi43_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -414,9 +413,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J50_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi50_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -424,9 +423,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J51_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi51_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -434,9 +433,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J52_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    See :cite:`Schumacher.1975`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">_y</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">pref</span> <span class="o">=</span> <span class="n">_pref_Schumacher_1975</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">_phi52_Schum75</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -444,9 +443,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J10_HR</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    :cite:`Gregori.2004`, eqn (16)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">xi</span> <span class="o">=</span> <span class="n">_xi</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">J10Schum75</span> <span class="o">=</span> <span class="n">_J10_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span>
@@ -457,9 +456,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J20_HR</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    :cite:`Gregori.2004`, eqn (17)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">xi</span> <span class="o">=</span> <span class="n">_xi</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">J20Schum75</span> <span class="o">=</span> <span class="n">_J20_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span>
@@ -473,9 +472,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_J21_HR</span><span class="p">(</span><span class="n">omega</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    :cite:`Gregori.2004`, eqn (18)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">xi</span> <span class="o">=</span> <span class="n">_xi</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">J21Schum75</span> <span class="o">=</span> <span class="n">_J21_Schum75</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span>
@@ -498,7 +497,7 @@
     <span class="n">Zeff</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span>
     <span class="n">HR_Correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Quantity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This set of hydrogenic wave functions for bound electrons taken from</span>
 <span class="sd">    :cite:`Gregori.2004`.</span>
 
@@ -525,11 +524,11 @@
 <span class="sd">        Contribution of one electron in the given state to the dynamic</span>
 <span class="sd">        bound-free structure factor (without the correction for elastic</span>
 <span class="sd">        scattering which reduces the contribution [James.1962]).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Find the correct _Jxx_BM function and execute it</span>
-    <span class="n">Jxx0</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;_J</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">1d</span><span class="si">}{</span><span class="n">l</span><span class="si">:</span><span class="s2">1d</span><span class="si">}</span><span class="s2">_BM&quot;</span><span class="p">](</span><span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+    <span class="n">Jxx0</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">"_J</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">1d</span><span class="si">}{</span><span class="n">l</span><span class="si">:</span><span class="s2">1d</span><span class="si">}</span><span class="s2">_BM"</span><span class="p">](</span><span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">HR_Correction</span><span class="p">:</span>
-        <span class="n">Jxx1</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;_J</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">1d</span><span class="si">}{</span><span class="n">l</span><span class="si">:</span><span class="s2">1d</span><span class="si">}</span><span class="s2">_HR&quot;</span><span class="p">](</span><span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
+        <span class="n">Jxx1</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">"_J</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">1d</span><span class="si">}{</span><span class="n">l</span><span class="si">:</span><span class="s2">1d</span><span class="si">}</span><span class="s2">_HR"</span><span class="p">](</span><span class="n">omega</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Zeff</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Jxx0</span> <span class="o">+</span> <span class="n">Jxx1</span>
     <span class="k">return</span> <span class="n">Jxx0</span></div>
 

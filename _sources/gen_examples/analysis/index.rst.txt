@@ -6,22 +6,27 @@ Analysis module examples
 ------------------------
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows the computation of the f-sum rule for an example spectrum as suggested by Do...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows the computation of the f-sum rule for an example spectrum as suggested by Dornheim.2024. If fully ionized, we see excellent agreement for the RPA, and also the Born-Mermin approximation for the free-free scattering yields in reasonable results. The implemented bound-free Model, however, does violate the f-sum rule. One could leverage this to fix a value for jaxrts.models.SchumacherImpulse.r_k, so that the f-sum rule would be fulfilled.">
 
 .. only:: html
 
   .. image:: /gen_examples/analysis/images/thumb/sphx_glr_plot_f-sum-rule_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_analysis_plot_f-sum-rule.py`
+  :doc:`/gen_examples/analysis/plot_f-sum-rule`
 
 .. raw:: html
 
@@ -31,14 +36,14 @@ Analysis module examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we apply the ITCFT to increasingly noisy data with different scattering angles...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we apply the ITCFT to increasingly noisy data with different scattering angles.">
 
 .. only:: html
 
   .. image:: /gen_examples/analysis/images/thumb/sphx_glr_plot_ITCFT_noise_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT_noise.py`
+  :doc:`/gen_examples/analysis/plot_ITCFT_noise`
 
 .. raw:: html
 
@@ -48,20 +53,22 @@ Analysis module examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases how apply the analysis functions to get temperatures from the Laplace tr...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example showcases how apply the analysis functions to get temperatures from the Laplace transform of the structure, as proposed by Dornheim.2022.">
 
 .. only:: html
 
   .. image:: /gen_examples/analysis/images/thumb/sphx_glr_plot_ITCFT_thumb.svg
     :alt:
 
-  :ref:`sphx_glr_gen_examples_analysis_plot_ITCFT.py`
+  :doc:`/gen_examples/analysis/plot_ITCFT`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Imaginary time correlation function thermometry</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.models.OnePotentialHNCIonFeat &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -135,7 +134,7 @@
 <h1>jaxrts.models.OnePotentialHNCIonFeat<a class="headerlink" href="#jaxrts-models-onepotentialhncionfeat" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="jaxrts.models.OnePotentialHNCIonFeat">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jaxrts.models.</span></span><span class="sig-name descname"><span class="pre">OnePotentialHNCIonFeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rmin:</span> <span class="pre">~pint.registry.Quantity</span> <span class="pre">=</span> <span class="pre">&lt;Quantity(0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'bohr')&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmax:</span> <span class="pre">~pint.registry.Quantity</span> <span class="pre">=</span> <span class="pre">&lt;Quantity(100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'bohr')&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pot:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SVT:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mix:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmult:</span> <span class="pre">list[float]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cramer_solve_max_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/models.html#OnePotentialHNCIonFeat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.OnePotentialHNCIonFeat" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">jaxrts.models.</span></span><span class="sig-name descname"><span class="pre">OnePotentialHNCIonFeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Quantity(0.001,</span> <span class="pre">'bohr')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Quantity(100,</span> <span class="pre">'bohr')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SVT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmult</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cramer_solve_max_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/models.html#OnePotentialHNCIonFeat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.OnePotentialHNCIonFeat" title="Link to this definition"></a></dt>
 <dd><p>Calculates <span class="math notranslate nohighlight">\(S_{ab}\)</span> in the Hypernetted Chain approximation.</p>
 <p>In contrast to <a class="reference internal" href="jaxrts.models.ThreePotentialHNCIonFeat.html#jaxrts.models.ThreePotentialHNCIonFeat" title="jaxrts.models.ThreePotentialHNCIonFeat"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreePotentialHNCIonFeat</span></code></a>, this models
 calculates only the ion-ion structure factors, and is neglecting the
@@ -220,35 +219,35 @@ electrons are not included in the HNC scheme. See, e.g.,
 </table>
 <section id="examples-using-jaxrts-models-onepotentialhncionfeat">
 <span id="sphx-glr-backref-jaxrts-models-onepotentialhncionfeat"></span><h2>Examples using <code class="docutils literal notranslate"><span class="pre">jaxrts.models.OnePotentialHNCIonFeat</span></code><a class="headerlink" href="#examples-using-jaxrts-models-onepotentialhncionfeat" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This example showcases a simple, one-component plasma, and might be a good starting point."><img alt="" src="../_images/sphx_glr_plot_getting_started_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/plot_getting_started.html#sphx-glr-gen-examples-plot-getting-started-py"><span class="std std-ref">Getting Started</span></a></p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This example showcases how apply the analysis functions to get temperatures from the Laplace transform of the structure, as proposed by Dornheim.2022."><img alt="" src="../_images/sphx_glr_plot_ITCFT_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/analysis/plot_ITCFT.html"><span class="doc">Imaginary time correlation function thermometry</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Imaginary time correlation function thermometry</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In this example, we apply the ITCFT to increasingly noisy data with different scattering angles."><img alt="" src="../_images/sphx_glr_plot_ITCFT_noise_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/analysis/plot_ITCFT_noise.html"><span class="doc">ITCFT Impact of noise</span></a></p>
+  <div class="sphx-glr-thumbnail-title">ITCFT Impact of noise</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example shows the computation of the f-sum rule for an example spectrum as suggested by Dornheim.2024. If fully ionized, we see excellent agreement for the RPA, and also the Born-Mermin approximation for the free-free scattering yields in reasonable results. The implemented bound-free Model, however, does violate the f-sum rule. One could leverage this to fix a value for jaxrts.models.SchumacherImpulse.r_k, so that the f-sum rule would be fulfilled."><img alt="" src="../_images/sphx_glr_plot_f-sum-rule_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/analysis/plot_f-sum-rule.html"><span class="doc">f-sum rule for the dynamic stucture factor</span></a></p>
+  <div class="sphx-glr-thumbnail-title">f-sum rule for the dynamic stucture factor</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="It was suggested by Bohme.2023 that the evaluation of some experiments need to consider free-bound conditions to fully understand the scattering spectrum. One of the seminal examples of the aforementioned paper is fitting the LCLS data from Kraus.2018."><img alt="" src="../_images/sphx_glr_plot_bohme_kraus_relevance_of_bound_free_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/free_bound/plot_bohme_kraus_relevance_of_bound_free.html"><span class="doc">Showcase of the relavance of including free-bound scattering</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Showcase of the relavance of including free-bound scattering</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="The free-bound and bound-free contributions only fulfill the detailed balance relation in the (theoretical) case where the same k is probed at every energy-bin on an detector. We can model such a spectrum by setting jaxrts.setup.Setup.correct_k_dispersion to False."><img alt="" src="../_images/sphx_glr_plot_k_dispersion_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/free_bound/plot_k_dispersion.html"><span class="doc">k dispersion and free-bound scattering</span></a></p>
+  <div class="sphx-glr-thumbnail-title">k dispersion and free-bound scattering</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="More expensive calculation methods like DFT-MD or Average Atom can yield more accurate calculations for the static structure factors than the simpler models shipped with jaxrts. However, such simulations are normally only available on a grid. Hence, we provide a jaxrts.models.GridInterpolationSii class, interpolating with over such a grid. Centerpiece is the jaxrts.weissker_interpolator.SiiInterpolator, which implements the interpolation scheme proposed by Weissker.2009, lineraly interpolating the SSF&#x27;s integral over k, rather than the function ifself. However, as no sum rule exists for the SSFs, we interpolate the function&#x27;s norm, rather than putting it to a known value."><img alt="" src="../_images/sphx_glr_plot_Sii_grid_interpolation_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/ionic/plot_Sii_grid_interpolation.html"><span class="doc">S_ii grid interpolation</span></a></p>
+  <div class="sphx-glr-thumbnail-title">S_ii grid interpolation</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example compares the Rayleigh weights for a carbon plasma when a fractional ionization state is treated on a One-Component HNC calculation, and compares it to the two-component calculation when jaxrts.plasmastate.PlasmaState.expand_integer_ionization_states is called which creates a plasma state with two ion species of the same element, but different ionization numbers. The latter calculation will be more costly."><img alt="" src="../_images/sphx_glr_plot_WR_expanded_ionization_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/ionization/plot_WR_expanded_ionization.html"><span class="doc">Rayleigh weights for integer expanded ionization states</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Rayleigh weights for integer expanded ionization states</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example showcases a simple, one-component plasma, and might be a good starting point."><img alt="" src="../_images/sphx_glr_plot_getting_started_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/plot_getting_started.html"><span class="doc">Getting Started</span></a></p>
   <div class="sphx-glr-thumbnail-title">Getting Started</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example calculates a synthetic spectrum of a CHO plasma."><img alt="" src="../_images/sphx_glr_plot_multi_component_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/plot_multi_component.html#sphx-glr-gen-examples-plot-multi-component-py"><span class="std std-ref">Multi-Species Plasmas</span></a></p>
+<p><a class="reference internal" href="../gen_examples/plot_multi_component.html"><span class="doc">Multi-Species Plasmas</span></a></p>
   <div class="sphx-glr-thumbnail-title">Multi-Species Plasmas</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="This example shows the computation of the f-sum rule for an example spectrum as suggested by Do..."><img alt="" src="../_images/sphx_glr_plot_f-sum-rule_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/analysis/plot_f-sum-rule.html#sphx-glr-gen-examples-analysis-plot-f-sum-rule-py"><span class="std std-ref">f-sum rule for the dynamic stucture factor</span></a></p>
-  <div class="sphx-glr-thumbnail-title">f-sum rule for the dynamic stucture factor</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="In this example, we apply the ITCFT to increasingly noisy data with different scattering angles..."><img alt="" src="../_images/sphx_glr_plot_ITCFT_noise_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/analysis/plot_ITCFT_noise.html#sphx-glr-gen-examples-analysis-plot-itcft-noise-py"><span class="std std-ref">ITCFT Impact of noise</span></a></p>
-  <div class="sphx-glr-thumbnail-title">ITCFT Impact of noise</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="This example showcases how apply the analysis functions to get temperatures from the Laplace tr..."><img alt="" src="../_images/sphx_glr_plot_ITCFT_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/analysis/plot_ITCFT.html#sphx-glr-gen-examples-analysis-plot-itcft-py"><span class="std std-ref">Imaginary time correlation function thermometry</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Imaginary time correlation function thermometry</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="It was suggested by Bohme.2023 that the evaluation of some experiments need to consider free-bo..."><img alt="" src="../_images/sphx_glr_plot_bohme_kraus_relevance_of_bound_free_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/free_bound/plot_bohme_kraus_relevance_of_bound_free.html#sphx-glr-gen-examples-free-bound-plot-bohme-kraus-relevance-of-bound-free-py"><span class="std std-ref">Showcase of the relavance of including free-bound scattering</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Showcase of the relavance of including free-bound scattering</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="The free-bound and bound-free contributions only fulfill the detailed balance relation in the (..."><img alt="" src="../_images/sphx_glr_plot_k_dispersion_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/free_bound/plot_k_dispersion.html#sphx-glr-gen-examples-free-bound-plot-k-dispersion-py"><span class="std std-ref">k dispersion and free-bound scattering</span></a></p>
-  <div class="sphx-glr-thumbnail-title">k dispersion and free-bound scattering</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="More expensive calculation methods like DFT-MD or Average Atom can yield more accurate calculat..."><img alt="" src="../_images/sphx_glr_plot_Sii_grid_interpolation_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/ionic/plot_Sii_grid_interpolation.html#sphx-glr-gen-examples-ionic-plot-sii-grid-interpolation-py"><span class="std std-ref">S_ii grid interpolation</span></a></p>
-  <div class="sphx-glr-thumbnail-title">S_ii grid interpolation</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="This example compares the Rayleigh weights for a carbon plasma when a fractional ionization sta..."><img alt="" src="../_images/sphx_glr_plot_WR_expanded_ionization_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/ionization/plot_WR_expanded_ionization.html#sphx-glr-gen-examples-ionization-plot-wr-expanded-ionization-py"><span class="std std-ref">Rayleigh weights for integer expanded ionization states</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Rayleigh weights for integer expanded ionization states</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="This example shows how the frequency redistribution correction (:pyjaxrts.Setup.frc_exponent) i..."><img alt="" src="../_images/sphx_glr_plot_frequency_redistibution_correction_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/setup/plot_frequency_redistibution_correction.html#sphx-glr-gen-examples-setup-plot-frequency-redistibution-correction-py"><span class="std std-ref">Frequency redistribution correction</span></a></p>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example shows how the frequency redistribution correction (jaxrts.Setup.frc_exponent) influences the outcome of jaxrts.PlasmaState.probe."><img alt="" src="../_images/sphx_glr_plot_frequency_redistibution_correction_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/setup/plot_frequency_redistibution_correction.html"><span class="doc">Frequency redistribution correction</span></a></p>
   <div class="sphx-glr-thumbnail-title">Frequency redistribution correction</div>
 </div></div></section>
 </dd></dl>

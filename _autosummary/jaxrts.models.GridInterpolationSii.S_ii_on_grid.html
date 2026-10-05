@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,23 +8,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.models.GridInterpolationSii.S_ii_on_grid &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -135,13 +134,13 @@
 <h1>jaxrts.models.GridInterpolationSii.S_ii_on_grid<a class="headerlink" href="#jaxrts-models-gridinterpolationsii-s-ii-on-grid" title="Link to this heading"></a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="jaxrts.models.GridInterpolationSii.S_ii_on_grid">
-<span class="sig-prename descclassname"><span class="pre">GridInterpolationSii.</span></span><span class="sig-name descname"><span class="pre">S_ii_on_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plasma_state:</span> <span class="pre">PlasmaState)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'jax.Array'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'jax.Array'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/models.html#GridInterpolationSii.S_ii_on_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.GridInterpolationSii.S_ii_on_grid" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">GridInterpolationSii.</span></span><span class="sig-name descname"><span class="pre">S_ii_on_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plasma_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PlasmaState)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'jax.Array'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'jax.Array'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jaxrts/models.html#GridInterpolationSii.S_ii_on_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.GridInterpolationSii.S_ii_on_grid" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <section id="examples-using-jaxrts-models-gridinterpolationsii-s-ii-on-grid">
 <span id="sphx-glr-backref-jaxrts-models-gridinterpolationsii-s-ii-on-grid"></span><h2>Examples using <code class="docutils literal notranslate"><span class="pre">jaxrts.models.GridInterpolationSii.S_ii_on_grid</span></code><a class="headerlink" href="#examples-using-jaxrts-models-gridinterpolationsii-s-ii-on-grid" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="More expensive calculation methods like DFT-MD or Average Atom can yield more accurate calculat..."><img alt="" src="../_images/sphx_glr_plot_Sii_grid_interpolation_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/ionic/plot_Sii_grid_interpolation.html#sphx-glr-gen-examples-ionic-plot-sii-grid-interpolation-py"><span class="std std-ref">S_ii grid interpolation</span></a></p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="More expensive calculation methods like DFT-MD or Average Atom can yield more accurate calculations for the static structure factors than the simpler models shipped with jaxrts. However, such simulations are normally only available on a grid. Hence, we provide a jaxrts.models.GridInterpolationSii class, interpolating with over such a grid. Centerpiece is the jaxrts.weissker_interpolator.SiiInterpolator, which implements the interpolation scheme proposed by Weissker.2009, lineraly interpolating the SSF&#x27;s integral over k, rather than the function ifself. However, as no sum rule exists for the SSFs, we interpolate the function&#x27;s norm, rather than putting it to a known value."><img alt="" src="../_images/sphx_glr_plot_Sii_grid_interpolation_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/ionic/plot_Sii_grid_interpolation.html"><span class="doc">S_ii grid interpolation</span></a></p>
   <div class="sphx-glr-thumbnail-title">S_ii grid interpolation</div>
 </div></div></section>
 </section>

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,24 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jaxrts.models.Sum_Sii &mdash; jaxrts  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cf11be94" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -126,7 +125,7 @@
 <h1>jaxrts.models.Sum_Sii<a class="headerlink" href="#jaxrts-models-sum-sii" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="jaxrts.models.Sum_Sii">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jaxrts.models.</span></span><span class="sig-name descname"><span class="pre">Sum_Sii</span></span><a class="reference internal" href="../_modules/jaxrts/models.html#Sum_Sii"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.Sum_Sii" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">jaxrts.models.</span></span><span class="sig-name descname"><span class="pre">Sum_Sii</span></span><a class="reference internal" href="../_modules/jaxrts/models.html#Sum_Sii"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jaxrts.models.Sum_Sii" title="Link to this definition"></a></dt>
 <dd><p>This model sums up all <span class="math notranslate nohighlight">\(S_{ab}\)</span> from the HNC and multiplies it with
 <span class="math notranslate nohighlight">\(\sqrt{x_{a}\cdot x_{b}}\)</span>. While it is obviously appropriate for a
 single-species plasma, multiple species might not be treated correctly.</p>
@@ -169,11 +168,11 @@ single-species plasma, multiple species might not be treated correctly.</p>
 </table>
 <section id="examples-using-jaxrts-models-sum-sii">
 <span id="sphx-glr-backref-jaxrts-models-sum-sii"></span><h2>Examples using <code class="docutils literal notranslate"><span class="pre">jaxrts.models.Sum_Sii</span></code><a class="headerlink" href="#examples-using-jaxrts-models-sum-sii" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This example shows the computation of the f-sum rule for an example spectrum as suggested by Do..."><img alt="" src="../_images/sphx_glr_plot_f-sum-rule_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/analysis/plot_f-sum-rule.html#sphx-glr-gen-examples-analysis-plot-f-sum-rule-py"><span class="std std-ref">f-sum rule for the dynamic stucture factor</span></a></p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This example shows the computation of the f-sum rule for an example spectrum as suggested by Dornheim.2024. If fully ionized, we see excellent agreement for the RPA, and also the Born-Mermin approximation for the free-free scattering yields in reasonable results. The implemented bound-free Model, however, does violate the f-sum rule. One could leverage this to fix a value for jaxrts.models.SchumacherImpulse.r_k, so that the f-sum rule would be fulfilled."><img alt="" src="../_images/sphx_glr_plot_f-sum-rule_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/analysis/plot_f-sum-rule.html"><span class="doc">f-sum rule for the dynamic stucture factor</span></a></p>
   <div class="sphx-glr-thumbnail-title">f-sum rule for the dynamic stucture factor</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="The Chapman Interpolation of the Born Mermin approximation saves computation time by evaluating..."><img alt="" src="../_images/sphx_glr_plot_BM_ChapmanInterp_thumb.svg" />
-<p><a class="reference internal" href="../gen_examples/free_free/plot_BM_ChapmanInterp.html#sphx-glr-gen-examples-free-free-plot-bm-chapmaninterp-py"><span class="std std-ref">Number of interpolation in the Born Mermin Chapman Interpolation</span></a></p>
+</div><div class="sphx-glr-thumbcontainer" tooltip="The Chapman Interpolation of the Born Mermin approximation saves computation time by evaluating the Structure factor not on all frequencies, but only on a given number of points, and interpolates after. This example is investigating the required number of points for the interpolation."><img alt="" src="../_images/sphx_glr_plot_BM_ChapmanInterp_thumb.svg" />
+<p><a class="reference internal" href="../gen_examples/free_free/plot_BM_ChapmanInterp.html"><span class="doc">Number of interpolation in the Born Mermin Chapman Interpolation</span></a></p>
   <div class="sphx-glr-thumbnail-title">Number of interpolation in the Born Mermin Chapman Interpolation</div>
 </div></div></section>
 </dd></dl>
