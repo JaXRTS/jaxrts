@@ -19,6 +19,7 @@ from . import (
     form_factors,
     free_bound,
     free_free,
+    hnc_bridges,
     hnc_potentials,
     hypernetted_chain,
     ion_feature,
@@ -1085,6 +1086,97 @@ class OnePotentialHNCIonFeat(IonFeatModel):
         obj.model_key, obj.pot, obj.SVT, obj.cramer_solve_max_size = aux_data
         obj.r_min, obj.r_max, obj.mix, obj.tmult = children
 
+        return obj
+
+
+class OnePotentialVMHNCIonFeat(OnePotentialHNCIonFeat):
+    """Calculates ion-ion structure factors in the VMHNC approximation.
+
+    Uses a variational Percus--Yevick hard-sphere bridge for a single ion
+    species :cite:`Faussurier.2004`. Potential and screening requirements
+    are those of :py:class:`~.OnePotentialHNCIonFeat`.
+    """
+
+    __name__ = "OnePotentialVMHNCIonFeat"
+    cite_keys = [
+        ("Otter.2026", "VMHNC implementation"),
+        ("Faussurier.2004", "VMHNC variational condition"),
+        ("Rosenfeld.1979", "Hard-sphere bridge universality"),
+        ("Wertheim.1963", "Percus--Yevick hard-sphere reference"),
+        ("Wunsch.2011", "HNC solver"),
+    ]
+
+    def __init__(
+        self,
+        rmin: Quantity = 0.001 * ureg.a_0,
+        rmax: Quantity = 100 * ureg.a_0,
+        pot: int = 14,
+        mix: float = 0.5,
+        tmult: list[float] = None,
+        points_per_diameter: int = 256,
+        eta_bounds: tuple[float, float] = (0.0, 0.49),
+        eta_tol: float = 1e-4,
+        bridge_tol: float = 1e-7,
+    ) -> None:
+        if not isinstance(pot, int) or pot < 2:
+            raise ValueError("pot must be an integer >= 2.")
+        if not 0 < rmin.m_as(ureg.a_0) < rmax.m_as(ureg.a_0) < float("inf"):
+            raise ValueError(
+                "rmin and rmax must be finite with 0 < rmin < rmax."
+            )
+        self.points_per_diameter = points_per_diameter
+        self.eta_bounds = tuple(eta_bounds)
+        self.eta_tol = eta_tol
+        self.bridge_tol = bridge_tol
+        super().__init__(
+            rmin,
+            rmax,
+            pot,
+            mix=mix,
+            tmult=[10.0, 3.0] if tmult is None else tmult,
+        )
+
+    def check(self, plasma_state: "PlasmaState") -> None:
+        if len(plasma_state) != 1:
+            raise ValueError("VMHNC currently supports one ion species only.")
+
+    @jax.jit
+    def pair_distribution_function(self, plasma_state: "PlasmaState"):
+        """Return :py:class:`jaxrts.hnc_bridges.VMHNCResult`."""
+        self.check(plasma_state)
+        potential = plasma_state["ion-ion Potential"]
+        return hnc_bridges.solve_vmhnc(
+            potential.short_r(plasma_state, self.r),
+            potential.long_k(plasma_state, self.k),
+            self.r,
+            potential.T(plasma_state),
+            plasma_state.n_i,
+            mix=self.mix,
+            tmult=self.tmult,
+            points_per_diameter=self.points_per_diameter,
+            eta_bounds=self.eta_bounds,
+            eta_tol=self.eta_tol,
+            bridge_tol=self.bridge_tol,
+        )
+
+    @jax.jit
+    def S_ii_on_grid(self, plasma_state: "PlasmaState"):
+        result = self.pair_distribution_function(plasma_state)
+        return self.k, result.s_k * ureg.dimensionless
+
+    def _tree_flatten(self):
+        children, aux_data = super()._tree_flatten()
+        return (
+            (*children, self.eta_tol, self.bridge_tol),
+            (*aux_data, self.points_per_diameter, self.eta_bounds),
+        )
+
+    @classmethod
+    def _tree_unflatten(cls, aux_data, children):
+        obj = super()._tree_unflatten(aux_data[:-2], children[:-2])
+        obj.points_per_diameter, obj.eta_bounds = aux_data[-2:]
+        obj.eta_bounds = tuple(obj.eta_bounds)
+        obj.eta_tol, obj.bridge_tol = children[-2:]
         return obj
 
 
